@@ -4,7 +4,7 @@
   <groupId>org.delia-lang</groupId>
   <artifactId>delia</artifactId>
   <packaging>jar</packaging>
-  <version>0.2.2-SNAPSHOT</version>
+  <version>0.2.3-SNAPSHOT</version>
 
   <name>delia</name>
   <url>http://delia-lang.org</url>
@@ -36,7 +36,7 @@
    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
   </snapshotRepository>
   <repository>
-   <id>ossrh</id>
+   <id>ossrh-release</id>
    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
   </repository>
  </distributionManagement>
