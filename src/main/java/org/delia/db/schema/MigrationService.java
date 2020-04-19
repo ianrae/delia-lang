@@ -22,6 +22,7 @@ public class MigrationService extends ServiceBase {
 	 * perform schema migration if needed.
 	 * @param registry - type registry
 	 * @param varEvaluator - for evaluating delia var references
+	 * @return success flag
 	 */
 	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator) {
 		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);
@@ -64,6 +65,10 @@ public class MigrationService extends ServiceBase {
 	
 	/**
 	 * ignore policy and do the migration.
+	 * @param registry type registry
+	 * @param plan migration plan
+	 * @param varEvaluator variable evaluator
+	 * @return plan
 	 */
 	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator) {
 		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);

@@ -4,7 +4,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.runner.FilterEvaluator;
 
 /**
- * Parsed query, such as Customer[id > 100].orderBy('createDate')
+ * Parsed query, such as Customer[id != 100].orderBy('createDate')
  * 
  * @author Ian Rae
  *

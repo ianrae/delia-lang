@@ -11,7 +11,7 @@ public class StrCreator {
 	/**
 	 * can't use o() if args contains % chars, so use this method
 	 * @param s string to output
-	 * @return
+	 * @return the input string s
 	 */
 	public String addStr(String s) {
 		str += s;

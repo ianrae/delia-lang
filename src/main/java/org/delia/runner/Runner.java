@@ -23,7 +23,7 @@ public interface Runner extends VarEvaluator {
 	/**
 	 * Get a generator which can be used to
 	 * render DValues into xml,json,etc
-	 * @return
+	 * @return a generator
 	 */
 	DeliaGeneratePhase createGenerator();
 
@@ -32,7 +32,7 @@ public interface Runner extends VarEvaluator {
 	 * compiler passes to verify and link
 	 * the delia code.
 	 * 
-	 * @return
+	 * @return the internal compile state
 	 */
 	InternalCompileState getCompileState();
 
@@ -41,7 +41,7 @@ public interface Runner extends VarEvaluator {
 	 * you want to execute again with the
 	 * same types (i.e. same registry).
 	 * 
-	 * @return
+	 * @return the execution state
 	 */
 	ExecutionState getExecutionState();
 
@@ -54,7 +54,7 @@ public interface Runner extends VarEvaluator {
 	 * be created. 
 	 * 
 	 * @param execState - if null then runner will create a new execution state.
-	 * @return
+	 * @return success flag
 	 */
 	boolean init(ExecutionState execState);
 
@@ -67,7 +67,7 @@ public interface Runner extends VarEvaluator {
 
 	/**
 	 * Execute a single statement.
-	 * @param exp AST object to execute
+	 * @param expL AST object to execute
 	 * @return result value
 	 */
 	ResultValue executeProgram(List<Exp> expL);
