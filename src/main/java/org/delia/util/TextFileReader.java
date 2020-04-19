@@ -22,7 +22,8 @@ public class TextFileReader {
 
 	/**
 	 * Read file and return contents as single string 
-	 * @param file to be read
+	 * @param path to be read
+	 * @return string that is entire contents of file
 	 */
 	public String readFileAsSingleString(String path) {
 		List<String> lines = readFile(path);

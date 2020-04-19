@@ -65,6 +65,10 @@ public class MigrationService extends ServiceBase {
 	
 	/**
 	 * ignore policy and do the migration.
+	 * @param registry type registry
+	 * @param plan migration plan
+	 * @param varEvaluator variable evaluator
+	 * @return plan
 	 */
 	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator) {
 		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);

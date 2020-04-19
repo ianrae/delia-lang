@@ -126,8 +126,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	 * On a One-to-many relation our query returns multiple rows in order to get all
 	 * the 'many' ids. Merge into a single row.
 	 * @param rawList list of dvalues to merge
-	 * @param type of values
-	 * @param details
+	 * @param dtype of values
+	 * @param details query details
+	 * @return merged rows
 	 */
 	protected List<DValue> mergeRows(List<DValue> rawList, DStructType dtype, QueryDetails details) {
 		List<DValue> list = new ArrayList<>();

@@ -75,6 +75,9 @@ public class PreparedStatementGenerator extends ServiceBase {
 	
 	/**
 	 * must copy queryspec since we modify it.
+	 * @param sc output writer
+	 * @param spec query
+	 * @param typeName type being queried
 	 * @return adjusted query spec
 	 */
 	protected QuerySpec doSelectLast(StrCreator sc, QuerySpec spec, String typeName) {
