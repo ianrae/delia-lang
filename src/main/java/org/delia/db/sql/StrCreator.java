@@ -10,7 +10,7 @@ public class StrCreator {
 	}
 	/**
 	 * can't use o() if args contains % chars, so use this method
-	 * @param s
+	 * @param s string to output
 	 * @return
 	 */
 	public String addStr(String s) {

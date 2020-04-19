@@ -115,8 +115,8 @@ public class MaxFunction extends QueryResponseFunctionBase {
 
 	/**
 	 * may be all null
-	 * @param ctx
-	 * @return
+	 * @param ctx query-fn context
+	 * @return shape or null
 	 */
 	private Shape detectShape(QueryFuncContext ctx) {
 		List<DValue> dvalList = ctx.getDValList();

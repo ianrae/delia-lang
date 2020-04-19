@@ -132,8 +132,8 @@ public class DValueHelper {
 	
 	/**
 	 * Return a new DValue that combines dvalPartial into existingDVal
-	 * @param dvalPartial
-	 * @param existingDVal
+	 * @param dvalPartial  value contains some of the type's fields
+	 * @param existingDVal DValue that we are merging into
 	 * @return new value
 	 */
 	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal) {

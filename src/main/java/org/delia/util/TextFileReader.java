@@ -38,7 +38,7 @@ public class TextFileReader {
 	
     /**
      *
-     * @param path
+     * @param path file to be read
      * @return list of all the lines of text in the file
      */
     @SuppressWarnings("PMD.AvoidPrintStackTrace")
@@ -59,7 +59,7 @@ public class TextFileReader {
     
     /**
      *
-     * @param path
+     * @param path file to be read
      * @return list of all the lines of text in the file
      * @throws IOException
      * @throws Exception

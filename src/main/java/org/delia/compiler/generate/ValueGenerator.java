@@ -16,23 +16,23 @@ public interface ValueGenerator {
 	/**
 	 * 
 	 * @param fieldName never-null
-	 * @param dval
-	 * @param genctx
-	 * @param index
+	 * @param dval value to be rendered
+	 * @param genctx context
+	 * @param index for internal use
 	 */
 	void structMemberValue(String fieldName, DValue dval, GeneratorContext genctx, int index);
 	
 	/**
 	 * 
 	 * @param varName   never-null
-	 * @param dval
-	 * @param genctx
+	 * @param dval value to be rendered
+	 * @param genctx context
 	 */
 	void scalarValue(String varName, DValue dval, GeneratorContext genctx);
 	
 	/**
 	 * 
-	 * @param genctx
+	 * @param genctx context
 	 */
 	void endSubValue(GeneratorContext genctx);
 	

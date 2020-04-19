@@ -20,7 +20,8 @@ public class MigrationService extends ServiceBase {
 	/**
 	 * Now that we know the types, compare against db schema and
 	 * perform schema migration if needed.
-	 * @param runner
+	 * @param registry - type registry
+	 * @param varEvaluator - for evaluating delia var references
 	 */
 	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator) {
 		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);

@@ -46,8 +46,8 @@ public class SqlDateGenerator extends ServiceBase {
 
 	/**
 	 * TODO: this probably needs to become db-specific
-	 * @param wdt
-	 * @return
+	 * @param dt date
+	 * @return string representing date in sql format
 	 */
 	private String convertDateToSQLTimestamp(Date dt) {
 		//TIMESTAMP '1999-01-31 10:00:00'

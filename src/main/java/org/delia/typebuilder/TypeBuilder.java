@@ -69,8 +69,8 @@ public class TypeBuilder extends ServiceBase {
 	/**
 	 * Due to forward-ref re-execute, a struct type may already exist.
 	 * We want each type to only have one DStructType instance.
-	 * @param typeName
-	 * @return
+	 * @param typeName type name
+	 * @return DType 
 	 */
 	private DStructType findOrCreateType(String typeName, DType baseType, OrderedMap omap) {
 	    DType possibleStruct = registry.getType(typeName);

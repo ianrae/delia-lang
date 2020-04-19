@@ -60,15 +60,15 @@ public interface Runner extends VarEvaluator {
 
 	/**
 	 * Execute a single statement. For advance use only.
-	 * @param exp
-	 * @return
+	 * @param exp AST object to execute
+	 * @return result value
 	 */
 	ResultValue executeOneStatement(Exp exp);
 
 	/**
 	 * Execute a single statement.
-	 * @param exp
-	 * @return
+	 * @param exp AST object to execute
+	 * @return result value
 	 */
 	ResultValue executeProgram(List<Exp> expL);
 
@@ -77,14 +77,14 @@ public interface Runner extends VarEvaluator {
 	 * example: let x = Customer[true]
 	 * would create a variable 'x'.
 	 * 
-	 * @param varName
-	 * @return
+	 * @param varName variable name
+	 * @return true if exists
 	 */
 	boolean exists(String varName);
 	/**
 	 * Gets a variable's value
 	 * 
-	 * @param varName
+	 * @param varName variable name
 	 * @return null if not found
 	 */
 	ResultValue getVar(String varName);

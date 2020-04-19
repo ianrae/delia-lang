@@ -129,8 +129,8 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	/**
 	 * Ugly. we need a serial provider per registry (really per runner i thinkg)
 	 * TODO fix later
-	 * @param ctx
-	 * @return
+	 * @param ctx db context
+	 * @return stuff
 	 */
 	private Stuff findOrCreateStuff(DBAccessContext ctx) {
 		if (stuff == null) {
@@ -284,7 +284,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	/**
 	 * for unit tests we want to explicitly create tables during test startup.
 	 * But at other times we want to create tables as needed.
-	 * @param typeName
+	 * @param typeName a registered type
 	 */
 	private MemDBTable handleUnknownTable(String typeName, DBAccessContext dbctx) {
 		if (createTablesAsNeededFlag) {

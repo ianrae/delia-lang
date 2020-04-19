@@ -24,7 +24,10 @@ Delia lets you fully manage your data:
  * Simpler object-based approach to data access. 
  * Manage schema, CRUD, and queries in one place.
  * the Delia compiler catches many SQL errors at compile time.
- * Delia code is just text, and can be modified dynamically in your application.
+ * Unlike an ORM, Delia code is just text, and can be modified dynamically in your application.
 
 Tutorial and documentation: https://delia-lang.org
+
+#### Version History
+v0.2.0 Apr 19,2020. First alpha release. An experimental version. Not for production use.
 
