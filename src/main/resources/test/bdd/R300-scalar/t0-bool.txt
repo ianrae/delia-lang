@@ -1,0 +1,23 @@
+# scalar tests
+
+FEATURE: scalar-bool
+background:
+thenType: boolean
+
+---
+let x boolean = false;false
+---
+let x boolean = true;true
+---
+let x boolean = null;null
+---
+given:
+ let z boolean = true
+when:
+ let x boolean = z;true
+---
+given:
+ let z boolean = null
+when:
+ let x boolean = z;null
+

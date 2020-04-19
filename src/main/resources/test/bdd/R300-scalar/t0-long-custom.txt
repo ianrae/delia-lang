@@ -1,0 +1,35 @@
+# scalar tests
+
+FEATURE: scalar-long-custom
+background:
+thenType: long
+
+type Grade long end
+
+---
+let x Grade = 5;5
+---
+let x Grade = 0;0
+---
+let x Grade = -1;-1
+---
+let x Grade = 9223372036854775807;9223372036854775807
+---
+let x Grade = -9223372036854775808;-9223372036854775808
+---
+let x Grade = 9223372036854775808;ERROR: parse-error: long value is not an long - 2147483648
+---
+let x Grade = -9223372036854775809;ERROR: parse-error: long value is not an long
+---
+let x Grade = null;null
+---
+given:
+ let z long = 5
+when:
+ let x Grade = z;5
+---
+given:
+ let z Grade = 5
+when:
+ let x Grade = z;5
+ 

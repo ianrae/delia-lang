@@ -1,0 +1,6 @@
+# struct tests
+
+FEATURE: relation fk('addr') -- TODO implement this
+background:
+thenType: struct
+

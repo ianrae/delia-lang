@@ -1,0 +1,31 @@
+# rule tests
+# this is only test of scalar types. we assume all scalar type have rules run in same way
+# we cover all types in other tests.
+
+FEATURE: rules
+background:
+ type Grade int end
+thenType: int
+
+---
+title: pass
+given:
+  type Grade2 Grade < 10 end
+when:
+  let x Grade2 = 5;5
+
+---
+title: fail
+given:
+  type Grade2 Grade < 10 end
+when:
+  let x Grade2 = 11;ERROR: rule-compare
+
+
+---
+title: optional
+given:
+  type Grade2 Grade < 10 end
+when:
+  let x Grade2 = null;null
+

@@ -1,0 +1,128 @@
+# let query filter tests
+
+FEATURE: filter-expr op int
+background:
+ configure loadFKs = true
+ type Customer struct {id int unique, relation addr Address optional parent one }  end
+ type Address struct {id int unique, relation cust Customer optional one } end
+ insert Customer {id: 55 }
+thenType: struct
+
+---
+title: < 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr < 111]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+---
+title: < none
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr < 100]
+then:
+null
+
+---
+title: <= 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr <= 100]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+---
+title: <= none
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr <= 99]
+then:
+null
+
+---
+title: > 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr > 99]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+---
+title: > fail
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr > 100]
+then:
+null
+
+---
+title: >= 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr >= 99]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+---
+title: >= fail
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr >= 199]
+then:
+null
+
+---
+title: == 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr == 100]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+---
+title: == fail
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr == 101]
+then:
+null
+
+---
+title: != 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr != 101]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+---
+title: != fail
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[addr != 100]
+then:
+null
+
+---
+title: reverse args. 
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[100 == addr]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}

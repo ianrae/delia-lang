@@ -1,0 +1,71 @@
+# struct tests
+
+FEATURE: struct
+background:
+thenType: struct
+
+
+---
+title: int-primary-key
+given:
+  type Flight struct {field1 int unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+
+---
+SKIP:fix let statement where type (Flight) is specified
+given:
+  type Flight struct {field1 int unique } end
+  insert Flight {field1: 55 }
+when:
+  let x Flight = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+
+---
+title: empty-struct
+given:
+  type Flight struct { } end
+  insert Flight { }
+when:
+  let x = Flight[55];ERROR: cant-insert-empty-type
+
+# INTEGER,LONG,NUMBER,BOOLEAN,STRING,DATE,STRUCT,RELATION;
+
+---
+title: all-types-1
+given:
+  type Flight struct {field1 int unique, sfield string, lfield long, nfield number } end
+  insert Flight {field1: 55, sfield: 'abc', lfield: 444, nfield: -56.3 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vsfield:'abc'
+ vlfield:444
+ vnfield:-56.3
+}
+---
+title: all-types-2
+given:
+  type Flight struct {field1 int unique, bfield boolean, dtfield date } end
+  insert Flight {field1: 55, bfield: true, dtfield: '1990' }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vbfield:true
+ vdtfield:1990-01-01T00:00:00.000+0000
+}
+
+
+  

@@ -1,0 +1,33 @@
+# struct tests
+
+FEATURE: relation
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: int-relation-not-allowed
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one } end
+ type Address struct {id int unique, relation cust int optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+ERROR: relation-wrong-type
+
+---
+title: struct-must-be-relation
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one } end
+ type Address struct {id int unique, cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+ERROR: missing-relation-decl
+

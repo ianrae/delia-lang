@@ -1,0 +1,44 @@
+# migration tests
+
+FEATURE: migration 13 - alter field add optional +O
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration13
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int, height int } end
+
+when:
+  insert Customer { wid:33, height:44}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vheight:44
+}
+
+---
+title: migration13.1 - alter field 
+given:
+ type Customer struct {id int unique serial, wid int, height int optional } end
+
+when:
+  insert Customer { wid:34, height:45}
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vheight:44
+}
+value:a:Customer {
+ vid:2
+ vwid:34
+ vheight:45
+}
+

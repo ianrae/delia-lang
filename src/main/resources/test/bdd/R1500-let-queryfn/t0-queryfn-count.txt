@@ -1,0 +1,27 @@
+# queryfn tests
+
+FEATURE: queryfn-count
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+#value:a:int:2
+---
+title: count
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].count()
+then:
+value:a:long:2
+
+---
+title: empty
+#note. count returns 0 when query is empty. TODO: is this what we want to do?
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[id=100].count()
+then:
+value:a:long:0

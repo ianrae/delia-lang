@@ -1,0 +1,134 @@
+# rule tests
+# detailed tests are in CompareRuleDateTests
+
+FEATURE: rules
+background:
+  type Flight struct {id int unique, wid date optional }  end
+thenType: struct
+
+---
+title: year
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.year() == 2020]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-31T09:59:51.000+0000
+}
+
+---
+title: year none
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.year() == 31]
+then:
+null
+
+
+---
+title: month
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.month() == 1]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-31T09:59:51.000+0000
+}
+
+---
+title: month none
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.month() == 333]
+then:
+null
+
+---
+title: date
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.day() == 31]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-31T09:59:51.000+0000
+}
+
+---
+title: date none
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.day() == 333]
+then:
+null
+
+---
+title: hour
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.hour() == 9]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-31T09:59:51.000+0000
+}
+
+---
+title: hour none
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.hour() == 333]
+then:
+null
+
+---
+title: minute
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.minute() == 59]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-31T09:59:51.000+0000
+}
+
+---
+title: minute none
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.minute() == 333]
+then:
+null
+
+---
+title: second
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.second() == 51]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-31T09:59:51.000+0000
+}
+
+---
+title: minute none
+given:
+  insert Flight {id: 55, wid: '2020-01-31T09:59:51' }
+when:
+  let x = Flight[wid.second() == 333]
+then:
+null

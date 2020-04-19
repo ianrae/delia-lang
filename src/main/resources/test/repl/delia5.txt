@@ -1,0 +1,1 @@
+  type Customer struct {field1 int unique } end

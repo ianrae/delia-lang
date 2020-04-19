@@ -1,0 +1,138 @@
+# let query filter tests
+
+FEATURE: filter-expr op date
+background:
+  type Flight struct {id int unique, wid date optional }  end
+thenType: struct
+
+---
+title: < 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid < '2021']
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+---
+title: < none
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid < '2020']
+then:
+null
+
+---
+title: <= 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid <= '2020']
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+---
+title: <= none
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid <= '2019-01-31T09:59:51']
+then:
+null
+
+---
+title: > 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid > '2019']
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+---
+title: > fail
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid > '2020']
+then:
+null
+
+---
+title: >= 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid >= '2020']
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+---
+title: >= fail
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid >= '2021']
+then:
+null
+
+---
+title: == 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid == '2020']
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+---
+title: == fail
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid == '2019']
+then:
+null
+
+---
+title: != 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid != '2019']
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+---
+title: != fail
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight[wid != '2020']
+then:
+null
+
+---
+title: reverse args. 
+given:
+  insert Flight {id: 55, wid: '2020' }
+when:
+  let x = Flight['2019' != wid]
+then:
+value:a:Flight {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}

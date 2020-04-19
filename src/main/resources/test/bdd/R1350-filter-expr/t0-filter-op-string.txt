@@ -1,0 +1,138 @@
+# let query filter tests
+
+FEATURE: filter-expr op string
+background:
+  type Flight struct {id int unique, wid string optional }  end
+thenType: struct
+
+---
+title: < 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid < 'but']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}
+---
+title: < none
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid < 'bet']
+then:
+null
+
+---
+title: <= 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid <= 'bet']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}
+---
+title: <= none
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid <= 'bat']
+then:
+null
+
+---
+title: > 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid > 'bat']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}
+---
+title: > fail
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid > 'bet']
+then:
+null
+
+---
+title: >= 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid >= 'bet']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}
+---
+title: >= fail
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid >= 'but']
+then:
+null
+
+---
+title: == 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid == 'bet']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}
+---
+title: == fail
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid == 'bat']
+then:
+null
+
+---
+title: != 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid != 'bat']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}
+---
+title: != fail
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight[wid != 'bet']
+then:
+null
+
+---
+title: reverse args. 
+given:
+  insert Flight {id: 55, wid: 'bet' }
+when:
+  let x = Flight['bet' == wid]
+then:
+value:a:Flight {
+ vid:55
+ vwid:'bet'
+}

@@ -1,0 +1,40 @@
+# migration tests
+
+FEATURE: migration 4 (add optional field)
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration4
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:33}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+}
+
+---
+#this works because we add an optional field and then query a previous record
+#that doesn't have the field. get null
+title: migration4.1 - add field
+given:
+ type Customer struct {id int unique serial, wid int, height int optional } end
+
+when:
+  insert Customer { wid:34, height: 150}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vheight:null
+}
+

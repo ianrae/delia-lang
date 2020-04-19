@@ -1,0 +1,53 @@
+# struct tests
+
+FEATURE: struct-field-optional
+background:
+thenType: struct
+
+---
+title: mandatory
+given:
+  type Flight struct {field1 int unique, field2 int  } end
+  insert Flight {field1: 55, field2: 57 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:57
+}
+
+---
+title: mandatory-missing
+given:
+  type Flight struct {field1 int unique, field2 int  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55];ERROR: MISSINGFIELD
+
+---
+title: optional-supplied
+given:
+  type Flight struct {field1 int unique, field2 int optional } end
+  insert Flight {field1: 55, field2: 57 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:57
+}
+
+---
+title: optional
+given:
+  type Flight struct {field1 int unique, field2 int optional } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:null
+}
+

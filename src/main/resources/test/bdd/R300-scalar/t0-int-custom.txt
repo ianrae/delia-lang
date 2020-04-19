@@ -1,0 +1,35 @@
+# scalar tests
+
+FEATURE: scalar-int-custom
+background:
+thenType: int
+
+type Grade int end
+
+---
+let x Grade = 5;5
+---
+let x Grade = 0;0
+---
+let x Grade = -1;-1
+---
+let x Grade = 2147483647;2147483647
+---
+let x Grade = -2147483648;-2147483648
+---
+let x Grade = 2147483648;ERROR: wrong-type: int value is not an int - 2147483648
+---
+let x Grade = -2147483649;ERROR: wrong-type: int value is not an int
+---
+let x Grade = null;null
+---
+given:
+ let z int = 5
+when:
+ let x Grade = z;5
+---
+given:
+ let z Grade = 5
+when:
+ let x Grade = z;5
+ 

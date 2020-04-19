@@ -1,0 +1,17 @@
+# CRUD upsert tests
+
+FEATURE: CRUD upsert
+background:
+  type Flight struct {id int unique, wid int optional }  end
+  type Flight2 struct {id int unique, wid int }  end
+thenType: struct
+
+---
+SKIP: implement the upsert feature!
+thenType: int
+expectDVal:false
+when:
+  upsert Flight[55] {wid: 22}
+then:
+1
+

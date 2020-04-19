@@ -1,0 +1,84 @@
+# queryfn tests
+
+FEATURE: queryfn-orderBy. TODO fix. currently we sort in memory which works but better to let db sort
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+title: asc implicit
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].orderBy('wid')
+then:
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+value:a:Flight {
+ vid:55
+ vwid:4
+}
+
+---
+title: asc
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].orderBy('wid', asc)
+then:
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+value:a:Flight {
+ vid:55
+ vwid:4
+}
+
+---
+title: desc
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].orderBy('wid', desc)
+then:
+value:a:Flight {
+ vid:55
+ vwid:4
+}
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+
+---
+SKIP: add null value tests for asc and desc
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].orderBy('wid', desc)
+then:
+value:a:Flight {
+ vid:55
+ vwid:4
+}
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+
+---
+title: wrong fieldname
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].orderBy('zzz')
+then:
+ERROR: unknown-field

@@ -1,0 +1,164 @@
+# struct tests
+
+FEATURE: relation-one-to-one
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: dependency cycle error - missing parent
+given:
+ type Customer struct {id int unique, relation addr Address optional one  } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+ERROR: type-dependency-cycle
+
+
+# --- Optional ---
+---
+title: normal
+given:
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+---
+title: optional-missing
+given:
+ //note forward-ref
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+---
+title: bad-ref
+given:
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 44 }
+  let x = Customer[55];
+then:
+ERROR: rule-relationOne
+}
+
+# --- Child Mandatory ---
+---
+SKIP: detect OM and infer parent automatically TODO - implement this
+given:
+ type Customer struct {id int unique, relation addr Address optional one  } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+
+---
+title: mandatory-normal
+given:
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+---
+title: normal parent implicit
+given:
+ type Customer struct {id int unique, relation addr Address optional one  } end
+ type Address struct {id int unique, relation cust Customer  one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+
+---
+title: mandatory-optional-missing
+given:
+ //note forward-ref
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100 }
+  let x = Customer[55]
+then:
+ERROR: rule-relationOne
+
+---
+title: bad-ref
+given:
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 44 }
+  let x = Customer[55];
+then:
+ERROR: rule-relationOne
+}
+
+---
+title: mandatory-normal-other-way
+given:
+ type Customer struct {id int unique, relation addr Address one } end
+ type Address struct {id int unique, relation cust Customer optional one  parent } end
+
+  insert Address {id: 100 }
+when:
+  insert Customer {id: 55, addr: 100 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+

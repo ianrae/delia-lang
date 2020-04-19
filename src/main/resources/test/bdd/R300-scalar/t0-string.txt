@@ -1,0 +1,43 @@
+# scalar tests
+
+FEATURE: scalar-string
+background:
+thenType: string
+
+---
+let x string = null;null
+---
+let x string = "";""
+---
+let x string = '';""
+---
+let x string = "abc";"abc"
+---
+let x string = "a'b";"a'b"
+---
+let x string = 'a"b';"a"b"
+---
+title:funnyChars
+let x string = '©';"©"
+---
+let x string = 'a€b';'a€b'
+---
+let x string = "a\nb";"a\nb"
+---
+title:semi-colon
+allowSemiColons:true
+when:
+let x string = 'this;that'
+then:
+this;that
+
+---
+given:
+ let z string = 'cd'
+when:
+ let x string = z;'cd'
+---
+given:
+ let z string = null
+when:
+ let x string = z;null

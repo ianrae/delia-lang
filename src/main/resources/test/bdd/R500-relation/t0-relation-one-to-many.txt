@@ -1,0 +1,156 @@
+# struct tests
+
+FEATURE: relation-one-to-many
+background:
+ configure loadFKs = true
+thenType: struct
+
+
+# --- Optional ---
+---
+title: normal
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+---
+title: normal2
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  insert Address {id: 101, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{[100,101]}
+}
+
+---
+title: normal3
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  insert Address {id: 101, cust: 55 }
+  insert Address {id: 102, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{[100,101,102]}
+}
+
+---
+title: optional-missing
+given:
+ //note forward-ref
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+---
+title: bad-ref
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 44 }
+  let x = Customer[55];
+then:
+ERROR: rule-relationOne
+}
+
+# --- Child Mandatory ---
+---
+title: child-mandatory-normal
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  insert Address {id: 101, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{[100,101]}
+}
+
+---
+title: child-mandatory-optional-missing
+given:
+ //note forward-ref
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100 }
+  let x = Customer[55]
+then:
+ERROR: rule-relationOne
+
+---
+title: bad-ref
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 44 }
+  let x = Customer[55];
+then:
+ERROR: rule-relationOne
+}
+
+---
+title: mandatory-normal-other-way
+given:
+ type Customer struct {id int unique, relation addr Address one } end
+ type Address struct {id int unique, relation cust Customer optional many } end
+
+  insert Address {id: 100 }
+when:
+  insert Customer {id: 55, addr: 100 }
+  insert Customer {id: 56, addr: 100 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+//Note. we don't support one-side relations with 1:N
+

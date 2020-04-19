@@ -1,0 +1,27 @@
+# let scalar tests
+# note. we've already tested all scalar types in R300 
+
+FEATURE: let scalar-int
+background:
+thenType: int
+
+---
+let x int = 5;5
+---
+let x = 10;10
+---
+let x = 10
+let z int = x;10
+---
+let x int = null;null
+---
+given:
+ let z int = 5
+when:
+ let x int = z;5
+---
+given:
+ let z int = null
+when:
+ let x int = z;null
+

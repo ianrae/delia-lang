@@ -1,0 +1,37 @@
+# rule tests
+# ensure that rule validation done during all CRUD statements
+# note. R (read) already tested on other tests
+
+FEATURE: rules CRUD
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+title: insert
+given:
+  type Flight2 Flight {} wid < 10 end
+when:
+  insert Flight2 {id: 55, wid: 20 }
+then:
+ERROR: rule-compare
+
+---
+title: update
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55, wid: 2 }
+when:
+  update Flight2[55] { wid: 20 }
+then:
+ERROR: rule-compare
+
+---
+title: delete does NOT run validation
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55, wid: 2 }
+when:
+  delete Flight2[55] 
+then:
+null

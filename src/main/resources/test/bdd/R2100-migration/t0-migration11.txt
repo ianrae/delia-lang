@@ -1,0 +1,26 @@
+# migration tests
+
+FEATURE: migration 10 (rename relation field) -todo. need to manage the constraint as well 
+background:
+ configure loadFKs = true
+thenType: struct
+
+# MigrationAction
+#  AddTable
+#  DeleteTable
+#  RenameTable
+#  AddField
+#  DeleteField
+#  RenameField
+#  AlterField
+#
+#-need to test relation fields separately because of constraints
+# -manytomany has assoc table so need to test that
+#-if change a class that is a base class to other classes, they will change as well
+#-alter field
+#  name -covered by rename field
+#  type -alter column change type. hard
+#  optional -adding optional easy. removing it is hard
+#  unique -removing is easy. adding is hard.
+#  primarykey -adding/removing not supported
+#  serial -removing is easy. adding may be hard.

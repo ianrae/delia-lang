@@ -1,0 +1,38 @@
+# rule tests
+# detailed tests are in CompareRuleDateTests
+
+FEATURE: rules
+background:
+ configure loadFKs = true
+thenType: struct
+
+
+---
+title: pass
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one }  end
+ type Address struct {id int unique, relation cust Customer optional one } cust < 100 end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+---
+title: fail
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one }  end
+ type Address struct {id int unique, relation cust Customer optional one } cust < 100 end
+
+  insert Customer {id: 155 }
+when:
+  insert Address {id: 100, cust: 155 }
+  let x = Customer[155]
+then:
+ERROR: rule-compare
+

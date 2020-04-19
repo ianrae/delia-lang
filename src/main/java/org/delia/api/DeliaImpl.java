@@ -1,0 +1,286 @@
+package org.delia.api;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.delia.compiler.DeliaCompiler;
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.core.FactoryService;
+import org.delia.db.DBInterface;
+import org.delia.db.schema.MigrationPlan;
+import org.delia.db.schema.MigrationService;
+import org.delia.error.DeliaError;
+import org.delia.error.ErrorTracker;
+import org.delia.error.SimpleErrorTracker;
+import org.delia.log.Log;
+import org.delia.runner.DeliaException;
+import org.delia.runner.InternalCompileState;
+import org.delia.runner.ResultValue;
+import org.delia.runner.Runner;
+import org.delia.runner.RunnerImpl;
+import org.delia.runner.TypeRunner;
+import org.delia.runner.TypeSpec;
+import org.delia.typebuilder.FutureDeclError;
+import org.delia.util.DeliaExceptionHelper;
+
+public class DeliaImpl implements Delia {
+	private Log log;
+	private DBInterface dbInterface;
+	private FactoryService factorySvc;
+	private DeliaOptions deliaOptions = new DeliaOptions();
+	private MigrationService migrationSvc;
+
+	public DeliaImpl(DBInterface dbInterface, Log log, FactoryService factorySvc) {
+		this.log = log;
+		this.dbInterface = dbInterface;
+		this.factorySvc = factorySvc;
+		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
+	}
+
+	@Override
+	public ResultValue execute(String src) {
+		DeliaCompiler compiler = createCompiler();
+		List<Exp> expL = compiler.parse(src);
+
+		Runner runner = createRunner(null);
+		execTypes(runner, expL);
+		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null);
+		if (migrationPlanRes != null) {
+			return migrationPlanRes;
+		}
+
+		return doExecute(runner, expL);
+	}
+
+	private ResultValue doExecute(Runner runner, List<Exp> expL) {
+		ResultValue res = null;
+		if (!deliaOptions.enableExecution) {
+			res = new ResultValue();
+			res.ok = true;
+			return res;
+		}
+
+		res = runner.executeProgram(expL);
+		if (res != null && ! res.ok) {
+			throw new DeliaException(res.errors);
+		}
+		return res;
+	}
+
+	@Override
+	public DeliaCompiler createCompiler()  {
+		return doCreateCompiler(null);
+	}
+	private DeliaCompiler doCreateCompiler(InternalCompileState execCtx)  {
+		DeliaCompiler compiler = new DeliaCompiler(factorySvc, execCtx);
+		return compiler;
+	}
+
+
+	protected Runner createRunner(DeliaSession dbsess) {
+		ErrorTracker et = new SimpleErrorTracker(log);
+		Runner runner = new RunnerImpl(factorySvc, dbInterface);
+
+		boolean b; 
+		if (dbsess == null) {
+			b = runner.init(null); 
+		} else {
+			b = runner.init(dbsess.getExecutionContext());
+		}
+
+		if (! b) {
+			DeliaError err = et.add("runner-init-failed", "runner init failed");
+			throw new DeliaException(err);
+		}
+		dbInterface.init(factorySvc);
+		return runner;
+	}
+
+	@Override
+	public DeliaSession beginSession(String src) {
+		return doBeginExecution(src, null);
+	}
+	private DeliaSession doBeginExecution(String src, MigrationPlan plan) {
+		DeliaCompiler compiler = createCompiler();
+		compiler.setDoPass3Flag(false);
+		List<Exp> expL = compiler.parse(src);
+
+		//1st pass
+		Runner mainRunner = createRunner(null);
+		execTypes(mainRunner, expL);
+		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan);
+		if (migrationPlanRes != null) {
+			DeliaSessionImpl session = new DeliaSessionImpl();
+			session.execCtx = mainRunner.getExecutionState();
+			session.ok = true;
+			session.res = migrationPlanRes;
+			session.expL = expL;
+			return session;
+		}
+
+		ResultValue res = doExecute(mainRunner, expL);
+
+		DeliaSessionImpl session = new DeliaSessionImpl();
+		session.execCtx = mainRunner.getExecutionState();
+		session.ok = true;
+		session.res = res;
+		session.expL = expL;
+		return session;
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(String src, MigrationPlan plan) {
+		return doBeginExecution(src, plan);
+	}
+
+	protected void execTypes(Runner mainRunner, List<Exp> extL) {
+		List<DeliaError> allErrors = new ArrayList<>();
+
+		//1st pass
+		TypeRunner typeRunner = mainRunner.createTypeRunner();
+		typeRunner.executeStatements(extL, allErrors);
+
+		if (allErrors.isEmpty()) {
+			return;
+		} else if (numFutureDeclErrors(allErrors) != allErrors.size()) {
+			//something else went wrong
+			throw new DeliaException(getNonFutureDeclErrors(allErrors));
+		}
+		log.log("%d forward decls found - re-executing.", numFutureDeclErrors(allErrors));
+
+		//2nd pass - for future decls
+		allErrors.clear();
+		typeRunner.executeStatements(extL, allErrors);
+		//TODO: are 2 passes enough?
+
+		if (allErrors.isEmpty()) {
+			return;
+		} else {
+			//something else went wrong
+			throw new DeliaException(allErrors);
+		}
+	}
+
+	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan) {
+		InternalCompileState execCtx = mainRunner.getCompileState();
+		for(Exp exp: extL) {
+			if (exp instanceof TypeStatementExp) {
+				TypeStatementExp typeExp = (TypeStatementExp) exp;
+				TypeSpec tt = execCtx.compiledTypeMap.get(typeExp.typeName);
+				if (tt != null) {
+					tt.typeExp = typeExp;
+				}
+			}
+		}
+
+		DeliaCompiler compiler = doCreateCompiler(execCtx);
+		compiler.executePass3(src, extL);
+
+		//and do pass4
+		compiler.executePass4(src, extL, mainRunner.getRegistry());
+
+		//now that we know the types, do a flyway-style schema migration
+		//if the db supports it.
+		if (dbInterface.getCapabilities().requiresSchemaMigration()) {
+			migrationSvc.initPolicy(deliaOptions.useSafeMigrationPolicy, deliaOptions.enableAutomaticMigrations);
+			
+			switch(deliaOptions.migrationAction) {
+			case MIGRATE:
+			{
+				boolean b;
+				if (deliaOptions.disableSQLLoggingDuringSchemaMigration) {
+					boolean prev = dbInterface.isSQLLoggingEnabled();
+					dbInterface.enableSQLLogging(false);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
+					dbInterface.enableSQLLogging(prev);
+				} else {
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
+				}
+				
+				if (!b) {
+					DeliaExceptionHelper.throwError("migration-failed-due-to-policy", "migration needed but not run - can't start");
+				}
+			}
+			break;
+			case GENERATE_MIGRATION_PLAN:
+			{
+				ResultValue res = new ResultValue();
+				res.ok = true;
+				res.val = migrationSvc.createMigrationPlan(mainRunner.getRegistry(), mainRunner);
+				return res;
+			}
+			case RUN_MIGRATION_PLAN:
+			{
+				ResultValue res = new ResultValue();
+				res.ok = true;
+				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner);
+				return res;
+			}
+			case DO_NOTHING:
+			default:
+				break;
+			}
+		}
+		return null;
+	}
+
+
+	public int numFutureDeclErrors(List<DeliaError> errL) {
+		int count = 0;
+		for(DeliaError err: errL) {
+			if (err instanceof FutureDeclError) {
+				count++;
+			}
+		}
+		return count;
+	}
+	public List<DeliaError> getNonFutureDeclErrors(List<DeliaError> errL) {
+		List<DeliaError> filteredL = new ArrayList<>();
+		for(DeliaError err: errL) {
+			if (err instanceof FutureDeclError) {
+			} else {
+				filteredL.add(err);
+			}
+		}
+		return filteredL;
+	}
+
+	@Override
+	public ResultValue continueExecution(String src, DeliaSession dbsess) {
+		DeliaCompiler compiler = createCompiler();
+		List<Exp> extL = compiler.parse(src);
+		for(Exp exp: extL) {
+			if (exp instanceof TypeStatementExp) {
+				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
+				DeliaError err = new DeliaError("type-statement-not-allowed", msg, null);
+				throw new DeliaException(err);
+			}
+		}
+
+		Runner runner = createRunner(dbsess);
+		ResultValue res = doExecute(runner, extL);
+
+		return res;
+	}
+
+	@Override
+	public Log getLog() {
+		return log;
+	}
+
+	@Override
+	public FactoryService getFactoryService() {
+		return factorySvc;
+	}
+
+	@Override
+	public DeliaOptions getOptions() {
+		return deliaOptions;
+	}
+
+	@Override
+	public DBInterface getDBInterface() {
+		return dbInterface;
+	}
+}

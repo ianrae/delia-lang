@@ -1,0 +1,51 @@
+# scalar tests
+
+FEATURE: scalar-date-timezone
+background:
+thenType: date
+
+---
+title: explicit UTC
+#yyyy-MM-dd'T'HH:mm:ss.SSSZ
+let x date = "2020-01-31T09:59:51.000-0000";date(2020-01-31T09:59:51.000-0000)
+
+---
+title: implicit UTC
+#yyyy-MM-dd'T'HH:mm:ss.SSSZ
+let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0000)
+
+---
+title: US/Pacific
+let x date = "2020-01-31T09:59:51.000-0800";date(2020-01-31T09:59:51.000-0800)
+
+---
+title: EDT
+let x date = "2020-01-31T09:59:51-0500";date(2020-01-31T09:59:51.000-0500)
+
+---
+title: default-timezone GMT-5
+given:
+configure timezone="GMT-0500"
+when:
+let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0500)
+
+---
+title: default-timezone GMT-5 explicit-EDT
+given:
+configure timezone="GMT-0500"
+when:
+let x date = "2020-01-31T09:59:51-0500";date(2020-01-31T09:59:51.000-0500)
+
+---
+title: default-timezone GMT-5 explicit-other
+given:
+configure timezone="GMT-0500"
+when:
+let x date = "2020-01-31T09:59:51-0800";date(2020-01-31T09:59:51.000-0800)
+
+---
+SKIP: default-timezone daylight-savings. EDT not same as -0500. fix!!
+given:
+configure timezone="US/Eastern"
+when:
+let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0500)

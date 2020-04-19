@@ -1,0 +1,8 @@
+# rule tests
+# detailed tests are in CompareRuleStringTests
+
+FEATURE: rule .len() TODO write this test
+background:
+  type Flight struct {id int unique, wid string optional }  end
+thenType: struct
+

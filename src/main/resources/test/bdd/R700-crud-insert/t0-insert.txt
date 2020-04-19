@@ -1,0 +1,87 @@
+# CRUD insert tests
+# note. t0-struct.txt tests insert of each data type
+
+FEATURE: CRUD insert
+background:
+  type Flight struct {id int unique, wid int optional }  end
+  type Flight2 struct {id int unique, wid int }  end
+thenType: struct
+
+---
+title: insert returns null
+when:
+  insert Flight {id: 55, wid: 20 }
+then:
+null
+
+---
+title: insert
+when:
+  insert Flight {id: 55, wid: 20 }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+
+---
+title: insert-optional
+when:
+  insert Flight {id: 55 }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:null
+}
+
+---
+title: insert-mandatory-missing
+when:
+  insert Flight2 {id: 55 }
+then:
+ERROR: MISSINGFIELD
+
+---
+title: insert-unknown-class
+when:
+  insert NoSuchName {id: 55 }
+then:
+ERROR: type.not.found
+
+---
+title: insert-using-var
+when:
+  let y int = 20
+  insert Flight {id: 55, wid: y }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+
+---
+SKIP: insert-no-field-names -TODO: implement this
+when:
+  let y int = 20
+  insert Flight {55, 20 }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+
+---
+SKIP: insert-muliple -TODO: implement this
+when:
+  let y int = 20
+  insert Flight [{id: 55, wid: y }, {id: 56, wid: y }]
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}

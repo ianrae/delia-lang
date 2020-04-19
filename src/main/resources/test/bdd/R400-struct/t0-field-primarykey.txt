@@ -1,0 +1,65 @@
+# struct tests
+
+FEATURE: struct-field-primarykey
+background:
+thenType: struct
+
+
+---
+given:
+  type Flight struct {field1 int primaryKey } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+---
+title: null-key
+given:
+  type Flight struct {field1 int primaryKey } end
+  insert Flight {field1: null }
+when:
+  let x = Flight[55];ERROR: NODATA
+---
+title: null-key-let
+given:
+  type Flight struct {field1 int primaryKey } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[null];ERROR: null-filter-not-allowed
+  
+---
+title: optional
+given:
+  type Flight struct {field1 int primaryKey optional } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55];ERROR: optional-primarykey-not-allowed
+ 
+---
+title: unique
+given:
+  type Flight struct {field1 int primaryKey unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55];ERROR: unique-primarykey-not-allowed
+
+---
+title: optional-dup
+given:
+  type Flight struct {field1 int primaryKey } end
+  insert Flight {field1: 55 }
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55];ERROR: duplicate-unique-value
+  
+---
+SKIP: multiple-keys
+given:
+  type Flight struct {field1 int primaryKey, field2 int primaryKey } end
+  insert Flight {field1: 55, field2: 57 }
+when:
+  let x = Flight[{55,57}];
+  

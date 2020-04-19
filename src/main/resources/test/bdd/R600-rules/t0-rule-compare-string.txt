@@ -1,0 +1,31 @@
+# rule tests
+# detailed tests are in CompareRuleStringTests
+
+FEATURE: rules
+background:
+  type Flight struct {id int unique, wid string optional }  end
+thenType: struct
+
+---
+title: pass
+given:
+  type Flight2 Flight {} wid < 'bet' end
+  insert Flight2 {id: 55, wid: 'bat' }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vwid:'bat'
+}
+
+---
+title: fail
+given:
+  type Flight2 Flight {} wid < 'bet' end
+  insert Flight2 {id: 55, wid: 'bet' }
+when:
+  let x = Flight2[55];ERROR: rule-compare
+
+
+#we assume nulls are handle the same as int

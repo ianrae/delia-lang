@@ -1,0 +1,82 @@
+# let query filter like tests
+
+FEATURE: filter- like expression
+background:
+  type Flight struct {id int unique, wid string optional }  end
+thenType: struct
+
+---
+title: like full
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[wid like '%at%']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'battle'
+}
+
+---
+title: like case-sensitive
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[wid like '%AT%']
+then:
+null
+
+---
+title: like start
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[wid like '%le']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'battle'
+}
+
+---
+title: like end
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[wid like 'ba%']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'battle'
+}
+
+---
+title: like contains
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[wid like 'battle']
+then:
+value:a:Flight {
+ vid:55
+ vwid:'battle'
+}
+
+---
+title: like missing
+given:
+  insert Flight {id: 55 }
+when:
+  let x = Flight[wid like '%at%']
+then:
+null
+
+---
+SKIP: like % middle -fix later
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[wid like 'b%t']
+then:
+null
+

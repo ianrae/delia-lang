@@ -1,0 +1,57 @@
+# rule tests
+# detailed tests are in CompareRuleIntTests
+
+FEATURE: rules
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+title: pass
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55, wid: 1 }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vwid:1
+}
+
+---
+title: fail
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55, wid: 10 }
+when:
+  let x = Flight2[55];ERROR: rule-compare
+
+
+---
+title: optional-null
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55 }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vwid:null
+}
+---
+title: Flight-null2
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55, wid: null }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vwid:null
+}
+
+
+  

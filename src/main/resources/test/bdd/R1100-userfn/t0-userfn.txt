@@ -1,0 +1,30 @@
+# CRUD userfn tests
+# tests
+# unknown fn
+# recursion should fail
+# 0 args, 1 arg, 2 args
+# int,long,number,boolean,string,date args
+# can args be anything else?
+#   -struct or rel
+#   -raw value like int returned by update?
+# ensure some statements not allowed in userfn: package, etc
+
+FEATURE: user-fns
+background:
+  type Flight struct {id int unique, wid int optional }  end
+  type Flight2 struct {id int unique, wid int }  end
+thenType: struct
+
+
+---
+title: simple
+when:
+ function foo(){let x = Flight[55]}
+ insert Flight {id: 55, wid: 20 }
+ let x = foo()
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+

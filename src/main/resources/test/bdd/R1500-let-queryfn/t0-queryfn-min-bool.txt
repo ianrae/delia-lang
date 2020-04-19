@@ -1,0 +1,47 @@
+# queryfn tests
+
+FEATURE: queryfn-min-boolean TODO: implement this!
+background:
+  type Flight struct {id int unique, wid boolean optional }  end
+thenType: struct
+
+---
+SKIP: min
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].wid.min()
+then:
+value:a:boolean:3.0
+
+---
+SKIP: min empty
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[id=100].wid.min()
+then:
+null
+
+---
+SKIP: null
+#we ignore null values
+given:
+  insert Flight {id: 55 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].wid.min()
+then:
+value:a:boolean:3.0
+
+---
+SKIP: bad field name
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].zzz.min()
+then:
+ERROR: unknown-field

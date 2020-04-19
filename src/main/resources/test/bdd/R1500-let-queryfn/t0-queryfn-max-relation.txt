@@ -1,0 +1,7 @@
+# queryfn tests
+
+FEATURE: queryfn-max-relation TODO: implement this!
+background:
+  type Flight struct {id int unique, wid relation optional }  end
+thenType: struct
+

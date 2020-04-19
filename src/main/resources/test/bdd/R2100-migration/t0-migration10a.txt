@@ -1,0 +1,36 @@
+# migration tests
+
+FEATURE: migration 10 (delete + add mandatory field) safe-migration halts
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration10a
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:33}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+}
+
+---
+title: migration10a.1 - rename field. migration checks and halt when this occurs
+#this fails because we added mandatory field wid2 but didn't update previous records
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid2 long } end
+
+when:
+  insert Customer { wid2:34}
+  let x = Customer[1]
+then:
+ERROR: migration-failed-due-to-policy
+

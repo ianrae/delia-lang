@@ -1,0 +1,37 @@
+# security tests
+
+FEATURE: sql-injection TODO: use prepared statements
+background:
+  type Flight struct {id string unique, wid string optional , z int optional}  end
+thenType: struct
+
+---
+title: inject1 - can use ';'
+allowSemiColons:true
+given:
+  insert Flight {id: '55', wid: 'abc' }
+when:
+  let x = Flight[';drop table USERS']
+then:
+null
+
+---
+title: string args are always quoted in SQL
+allowSemiColons:true
+given:
+  insert Flight {id: '55', wid: 'abc' }
+when:
+  let x = Flight["a';drop table USERS"]
+then:
+null
+
+---
+title: can't use unicode escape sequences
+allowSemiColons:true
+given:
+  insert Flight {id: '55', wid: 'abc' }
+when:
+  let x = Flight["a'\u00A5drop table USERS"]
+then:
+null
+

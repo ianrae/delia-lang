@@ -1,0 +1,85 @@
+# struct tests
+
+FEATURE: struct-inheritance
+background:
+thenType: struct
+
+---
+title: empty-base-class
+given:
+  type Base struct { } end
+  type Flight Base {field1 int unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+
+---
+title: empty-derived-class
+given:
+  type Base struct {field1 int unique } end
+  type Flight Base { } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+
+---
+title: duplicate-field
+given:
+  type Base struct {field1 int unique } end
+  type Flight Base {field1 int  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55];ERROR: type-field-already-defined-in-base-type
+
+---
+title: normal-derived-class
+given:
+  type Base struct {field1 int unique } end
+  type Flight Base {field2 int } end
+  insert Flight {field1: 55, field2: 101 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:101
+}
+
+---
+title: empty-middle-derived
+given:
+  type Base struct {field1 int unique } end
+  type Base2 Base {} end
+  type Flight Base2 {field2 int } end
+  insert Flight {field1: 55, field2: 101 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:101
+}
+
+---
+title: normal-middle-derived
+given:
+  type Base struct {field1 int unique } end
+  type Base2 Base {field2 int} end
+  type Flight Base2 {field3 int } end
+  insert Flight {field1: 55, field2: 101, field3: -1 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:101
+ vfield3:-1
+}

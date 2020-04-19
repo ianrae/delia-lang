@@ -1,0 +1,67 @@
+# let query filter tests
+
+FEATURE: filter-expr op boolean
+background:
+  type Flight struct {id int unique, wid boolean optional }  end
+thenType: struct
+
+---
+title: < not supported
+given:
+  insert Flight {id: 55, wid: true }
+when:
+  let x = Flight[wid < true]
+then:
+null
+
+---
+title: == 
+given:
+  insert Flight {id: 55, wid: true }
+when:
+  let x = Flight[wid == true]
+then:
+value:a:Flight {
+ vid:55
+ vwid:true
+}
+---
+title: == fail
+given:
+  insert Flight {id: 55, wid: true }
+when:
+  let x = Flight[wid == false]
+then:
+null
+
+---
+title: != 
+given:
+  insert Flight {id: 55, wid: true }
+when:
+  let x = Flight[wid != false]
+then:
+value:a:Flight {
+ vid:55
+ vwid:true
+}
+---
+title: != fail
+given:
+  insert Flight {id: 55, wid: true }
+when:
+  let x = Flight[wid != true]
+then:
+null
+
+---
+title: reverse args. 
+given:
+  insert Flight {id: 55, wid: true }
+when:
+  let x = Flight[true == wid]
+then:
+value:a:Flight {
+ vid:55
+ vwid:true
+}

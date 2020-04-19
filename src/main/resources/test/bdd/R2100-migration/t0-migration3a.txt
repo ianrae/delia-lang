@@ -1,0 +1,35 @@
+# migration tests
+
+FEATURE: migration 3a (add mandatory field)
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration3a
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:33}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+}
+
+---
+#this fails because we add a mandatory field and then query a previous record
+title: migration3a.1 - add field
+given:
+ type Customer struct {id int unique serial, wid int, height int } end
+
+when:
+  insert Customer { wid:34, height: 150}
+  let x = Customer[1]
+then:
+ERROR: migration-failed-due-to-policy
+

@@ -1,0 +1,16 @@
+type Category struct {
+categoryID int primaryKey,
+categoryName string,
+description string,
+picture string
+}
+end
+
+
+
+let projectName string = 'Northwind'
+
+
+
+
+ 

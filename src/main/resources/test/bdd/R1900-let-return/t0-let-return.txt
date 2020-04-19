@@ -1,0 +1,6 @@
+# let return tests
+
+FEATURE: let return TODO - implement this
+background:
+thenType: struct
+

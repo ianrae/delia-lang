@@ -1,0 +1,43 @@
+# CRUD delete tests
+
+FEATURE: CRUD delete
+background:
+  type Flight struct {id int unique, wid int optional }  end
+  type Flight2 struct {id int unique, wid int }  end
+thenType: struct
+
+---
+title: delete returns null
+when:
+  insert Flight {id: 55, wid: 20 }
+  delete Flight[55]
+then:
+null
+
+---
+title: delete
+when:
+  insert Flight {id: 55, wid: 20 }
+  delete Flight[55]
+  let x = Flight[55]
+then:
+null
+
+---
+title: delete-unknown-class
+when:
+  insert Flight {id: 55, wid: 20 }
+  delete NoSuchName[55]
+then:
+ERROR: type.not.found
+
+---
+title: delete-multiple
+when:
+  insert Flight {id: 55, wid: 20 }
+  insert Flight {id: 56, wid: 20 }
+  #deletes all flight records
+  delete Flight[true]
+  let x = Flight[55]
+then:
+null

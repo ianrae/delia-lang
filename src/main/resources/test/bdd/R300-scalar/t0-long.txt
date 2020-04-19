@@ -1,0 +1,33 @@
+# scalar tests
+
+FEATURE: scalar-long
+background:
+thenType: long
+
+---
+let x long = 5;5
+---
+let x long = 0;0
+---
+let x long = -1;-1
+---
+let x long = 9223372036854775807;9223372036854775807
+---
+let x long = -9223372036854775808;-9223372036854775808
+---
+let x long = 9223372036854775808;ERROR: parse-error: long value is not an long - 2147483648
+---
+let x long = -9223372036854775809;ERROR: parse-error: long value is not an long
+---
+let x long = null;null
+---
+given:
+ let z long = 5
+when:
+ let x long = z;5
+---
+given:
+ let z long = null
+when:
+ let x long = z;null
+

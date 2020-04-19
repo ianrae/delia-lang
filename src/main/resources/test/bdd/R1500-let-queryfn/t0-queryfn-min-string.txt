@@ -1,0 +1,47 @@
+# queryfn tests
+
+FEATURE: queryfn-min-string
+background:
+  type Flight struct {id int unique, wid string optional }  end
+thenType: struct
+
+---
+title: min
+given:
+  insert Flight {id: 55, wid: 'bet' }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[true].wid.min()
+then:
+value:a:string:'bat'
+
+---
+title: min empty
+given:
+  insert Flight {id: 55, wid: 'bet' }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[id=100].wid.min()
+then:
+null
+
+---
+title: null
+#we ignore null values
+given:
+  insert Flight {id: 55 }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[true].wid.min()
+then:
+value:a:string:'bat'
+
+---
+title: bad field name
+given:
+  insert Flight {id: 55, wid: 'bet' }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[true].zzz.min()
+then:
+ERROR: unknown-field

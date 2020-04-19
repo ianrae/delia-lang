@@ -1,0 +1,15 @@
+# rule tests
+
+FEATURE: rules
+background:
+type Grade string maxlen(4) end
+thenType: string
+
+---
+title: pass
+let x Grade = 'ab';'ab'
+
+---
+title: fail
+let x Grade = 'bobby';ERROR: rule-maxlen
+

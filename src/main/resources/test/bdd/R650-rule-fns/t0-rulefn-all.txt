@@ -1,0 +1,20 @@
+# rule-fns tests
+
+FEATURE: rule-fns
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+SKIP: pass - write tests for each of the rule fns
+given:
+  type Flight2 Flight {} wid < 10 end
+  insert Flight2 {id: 55, wid: 1 }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vwid:1
+}
+

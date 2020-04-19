@@ -1,0 +1,64 @@
+# struct tests
+# tests to do
+#  normal
+#  bad field name
+#  null addr values
+# new scope fetch("addr").id  should get Address id
+# double fetch allowed  fetch('addr')...fetch('cust') -- will be messy!
+
+FEATURE: fetch
+background:
+ configure loadFKs = true
+thenType: struct
+
+
+---
+title: normal single
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55].fetch('addr')
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100:
+  {
+  vid:100
+  vcust:{55}
+  }
+ }
+}
+
+---
+title: normal missing
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100 }
+  let x = Customer[55].fetch('addr')
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+---
+title: bad ref
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100 }
+  let x = Customer[55].fetch('zzz')
+then:
+ERROR: unknown-field
+

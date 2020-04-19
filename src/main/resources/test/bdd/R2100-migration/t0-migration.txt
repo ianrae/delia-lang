@@ -1,0 +1,37 @@
+# migration tests
+
+FEATURE: migration 
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration1
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:33}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+}
+
+---
+title: migration1.1 - same types
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:34}
+  let x = Customer[2]
+then:
+value:a:Customer {
+ vid:2
+ vwid:34
+}
+

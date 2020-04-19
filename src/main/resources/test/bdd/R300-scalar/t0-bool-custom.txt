@@ -1,0 +1,25 @@
+# scalar tests
+
+FEATURE: scalar-boolean-custom
+background:
+thenType: boolean
+
+type Grade boolean end
+
+---
+let x Grade = false;false
+---
+let x Grade = true;true
+---
+let x Grade = null;null
+---
+given:
+ let z boolean = true
+when:
+ let x Grade = z;true
+---
+given:
+ let z Grade = true
+when:
+ let x Grade = z;true
+ 

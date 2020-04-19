@@ -1,0 +1,33 @@
+# scalar tests
+
+FEATURE: scalar-int
+background:
+thenType: int
+
+---
+let x int = 5;5
+---
+let x int = 0;0
+---
+let x int = -1;-1
+---
+let x int = 2147483647;2147483647
+---
+let x int = -2147483648;-2147483648
+---
+let x int = 2147483648;ERROR: wrong-type: int value is not an int - 2147483648
+---
+let x int = -2147483649;ERROR: wrong-type: int value is not an int
+---
+let x int = null;null
+---
+given:
+ let z int = 5
+when:
+ let x int = z;5
+---
+given:
+ let z int = null
+when:
+ let x int = z;null
+

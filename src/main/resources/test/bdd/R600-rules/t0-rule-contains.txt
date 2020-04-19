@@ -1,0 +1,73 @@
+# rule tests
+
+FEATURE: rules
+background:
+ type Flight struct {id int unique, name string } name.contains('bb') end
+ type Flight2 struct {id int unique, name string optional } name.contains('bb') end
+thenType: struct
+
+# -- Mandatory --
+---
+title: pass
+given:
+  insert Flight {id: 55, name: 'bobby' }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vname:'bobby'
+}
+
+---
+title: fail
+given:
+  insert Flight {id: 55, name: 'barney' }
+when:
+  let x = Flight[55];ERROR: rule-contains
+
+# -- Optional --
+---
+title: optional-pass
+given:
+  insert Flight2 {id: 55, name: 'bobby' }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vname:'bobby'
+}
+
+---
+title: optional-fail
+given:
+  insert Flight2 {id: 55, name: 'barney' }
+when:
+  let x = Flight2[55];ERROR: rule-contains
+
+---
+title: optional-null
+given:
+  insert Flight2 {id: 55 }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vname:null
+}
+---
+title: optional-null2
+given:
+  insert Flight2 {id: 55, name: null }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vname:null
+}
+
+
+  

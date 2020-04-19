@@ -1,0 +1,42 @@
+# scalar tests
+
+FEATURE: scalar-number
+background:
+thenType: number
+
+---
+let x number = 5;5
+---
+let x number = 5.234;5.234
+---
+let x number = -5.234;-5.234
+---
+let x number = 0;0.0
+---
+let x number = 0.0;0.0
+---
+let x number = -1;-1
+---
+SKIP:later use Terminals.ScientificNumberLiteral
+let x number = 1.2e3;1200.0
+---
+let x number = 9223372036854775807;9223372036854775807
+---
+let x number = -9223372036854775808;-9223372036854775808
+---
+let x number = 922337203685.4775808;9.223372036854775E11
+---
+let x number = -922337203685.4775808;-9.223372036854775E11
+---
+let x number = null;null
+---
+given:
+ let z number = 5
+when:
+ let x number = z;5.0
+---
+given:
+ let z number = null
+when:
+ let x number = z;null
+

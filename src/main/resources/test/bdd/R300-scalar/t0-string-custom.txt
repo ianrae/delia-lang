@@ -1,0 +1,25 @@
+# scalar tests
+
+FEATURE: scalar-string-custom
+background:
+thenType: string
+
+type Grade string end
+
+---
+let x Grade = 'ab';'ab'
+---
+let x Grade = "Joe's";"Joe's"
+---
+let x Grade = null;null
+---
+given:
+ let z string = 'cd'
+when:
+ let x Grade = z;'cd'
+---
+given:
+ let z Grade = 'cd'
+when:
+ let x Grade = z;'cd'
+ 

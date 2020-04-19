@@ -1,0 +1,101 @@
+# struct tests
+
+FEATURE: struct
+background:
+thenType: struct
+
+
+---
+title: int-primary-key
+given:
+  type Flight struct {field1 int unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+
+---
+title: empty struct
+given:
+  type Flight struct { } end
+  insert Flight { }
+when:
+  let x = Flight[55];ERROR: cant-insert-empty-type
+---
+title: no-primary-key
+given:
+  type Flight struct { field1 int } end
+  insert Flight { field1: 55 }
+when:
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vfield1:55
+}
+ 
+---  
+title: string-primary-key
+given:
+  type Flight struct {field1 string unique } end
+  insert Flight {field1: '55' }
+when:
+  let x = Flight['55']
+then:
+value:a:Flight {
+ vfield1:'55'
+}
+---
+title: long-primary-key
+given:
+  type Flight struct {field1 long unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+---
+title: number-primary-key
+given:
+  type Flight struct {field1 number unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55];ERROR: primary-key-type-not-allowed
+---
+title: boolean-primary-key
+given:
+  type Flight struct {field1 boolean unique } end
+  insert Flight {field1: true }
+when:
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vfield1:true
+}
+---
+title: date-primary-key
+given:
+  type Flight struct {field1 date unique } end
+  insert Flight {field1: '2019' }
+when:
+  let x = Flight['2019']
+then:
+value:a:Flight {
+ vfield1:2019-01-01T00:00:00.000+0000
+}
+---
+title: struct-primary-key
+given:
+  type Flight struct {field1 struct unique } end
+  insert Flight {field1: '2019' }
+when:
+  let x = Flight['2019'];ERROR: parse-error
+#IDENTIFIER expected, struct encountered.
+
+#don't test RELATION. too strange
+
+

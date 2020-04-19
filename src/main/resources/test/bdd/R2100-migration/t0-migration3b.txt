@@ -1,0 +1,42 @@
+# migration tests
+
+FEATURE: migration 3b (add mandatory field)
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration3b
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:33}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+}
+
+---
+#this works because we force migration and then update the previous previous record to add the new
+#mandatory field.
+title: migration3b.1 - add field
+useSafeMigrationPolicy:false
+given:
+ type Customer struct {id int unique serial, wid int, height int } end
+
+when:
+  insert Customer { wid:34, height: 150}
+  update Customer[1] { height: 151}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vheight:151
+}
+

@@ -1,0 +1,26 @@
+# scalar tests
+
+FEATURE: scalar-date
+background:
+thenType: date
+
+---
+let x date = null;null
+---
+let x date = "2020";date(2020-01-01T00:00:00.000-0000)
+---
+let x date = "2020-01-31";date(2020-01-31T00:00:00.000-0000)
+---
+#yyyy-MM-dd'T'HH:mm:ss.SSSZ
+let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0000)
+
+---
+given:
+ let z date = '2020'
+when:
+ let x date = z;date(2020-01-01T00:00:00.000-0000)
+---
+given:
+ let z date = null
+when:
+ let x date = z;null

@@ -1,0 +1,47 @@
+# queryfn tests
+
+FEATURE: queryfn-max-boolean TODO: implement this!
+background:
+  type Flight struct {id int unique, wid boolean optional }  end
+thenType: struct
+
+---
+SKIP: max
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].wid.max()
+then:
+value:a:boolean:3.0
+
+---
+SKIP: max empty
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[id=100].wid.max()
+then:
+null
+
+---
+SKIP: null
+#we ignore null values
+given:
+  insert Flight {id: 55 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].wid.max()
+then:
+value:a:boolean:3.0
+
+---
+SKIP: bad field name
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].zzz.max()
+then:
+ERROR: unknown-field

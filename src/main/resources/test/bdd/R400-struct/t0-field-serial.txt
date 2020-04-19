@@ -1,0 +1,110 @@
+# struct tests
+
+FEATURE: struct-field-serial 
+background:
+thenType: struct
+
+# ------------ int --------------------
+---
+title: serial and primaryKey
+given:
+  type Flight struct {field1 int primaryKey serial, field2 int  } end
+  insert Flight {field2: 57 }
+when:
+  let x = Flight[1]
+then:
+value:a:Flight {
+ vfield1:1
+ vfield2:57
+}
+
+---
+title: serial two
+given:
+  type Flight struct {field1 int primaryKey serial, field2 int  } end
+  insert Flight {field2: 57 }
+  insert Flight {field2: 58 }
+when:
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vfield1:1
+ vfield2:57
+}
+value:a:Flight {
+ vfield1:2
+ vfield2:58
+}  
+
+---
+title: serial and unique
+given:
+  type Flight struct {field1 int unique serial, field2 int  } end
+  insert Flight {field2: 57 }
+when:
+  let x = Flight[1]
+then:
+value:a:Flight {
+ vfield1:1
+ vfield2:57
+}
+
+---
+title: serial but insert value
+given:
+  type Flight struct {field1 int unique serial, field2 int  } end
+when:
+  insert Flight {field1: 22, field2: 57 }
+then:
+ERROR: serial-value-cannot-be-provided
+
+# ------------ long --------------------
+---
+title: serial long
+given:
+  type Flight struct {field1 long primaryKey serial, field2 int  } end
+  insert Flight {field2: 57 }
+when:
+  let x = Flight[1]
+then:
+value:a:Flight {
+ vfield1:1
+ vfield2:57
+}
+  
+# ------------ string --------------------
+---
+SKIP: serial string - postgres and most databases only support serial of integers
+given:
+  type Flight struct {field1 string primaryKey serial, field2 int  } end
+  insert Flight {field2: 57 }
+when:
+  let x = Flight[1]
+then:
+value:a:Flight {
+ vfield1:'1'
+ vfield2:57
+}
+  
+# ------------ number --------------------
+---
+title: serial number
+given:
+  type Flight struct {field1 number primaryKey serial, field2 int  } end
+  insert Flight {field2: 57 }
+when:
+  let x = Flight[1]
+then:
+ERROR: primary-key-type-not-allowed
+
+# ------------ boolean --------------------
+---
+title: serial boolean
+given:
+  type Flight struct {field1 boolean primaryKey serial, field2 int  } end
+  insert Flight {field2: 57 }
+when:
+  let x = Flight[1]
+then:
+ERROR: primary-key-type-not-allowed
+  

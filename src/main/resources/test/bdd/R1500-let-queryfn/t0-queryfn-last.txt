@@ -1,0 +1,30 @@
+# queryfn tests
+
+FEATURE: queryfn-last
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+title: last
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].last()
+then:
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+
+---
+title: last empty
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[id=100].last()
+then:
+null
+

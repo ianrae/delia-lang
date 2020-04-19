@@ -1,0 +1,46 @@
+# scalar tests
+
+FEATURE: scalar-number-custom
+background:
+thenType: number
+
+type Grade number end
+
+---
+let x Grade = 5;5
+---
+let x Grade = 5.234;5.234
+---
+let x Grade = -5.234;-5.234
+---
+let x Grade = 0;0.0
+---
+let x Grade = 0.0;0.0
+---
+let x Grade = -1;-1
+---
+SKIP:later use Terminals.ScientificNumberLiteral
+let x Grade = 1.2e3;1200.0
+---
+let x Grade = 9223372036854775807;9223372036854775807
+---
+let x Grade = -9223372036854775808;-9223372036854775808
+---
+let x Grade = 922337203685.4775808;9.223372036854775E11
+---
+let x Grade = -922337203685.4775808;-9.223372036854775E11
+---
+let x Grade = null;null
+---
+given:
+ let z number = 5
+when:
+ let x Grade = z;5.0
+---
+given:
+ let z Grade = null
+when:
+ let x Grade = z;null
+
+ 
+

@@ -1,0 +1,74 @@
+# sprig tests
+
+FEATURE: sprig 
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: using-sprig int
+given:
+ type Customer struct {id int primaryKey serial, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+ configure Customer.synthetic_id='sid'
+
+  insert Customer { sid:33}
+when:
+  insert Address {id: 100, cust: 33 }
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vaddr:{100}
+}
+
+---
+title: using-sprig long
+given:
+ type Customer struct {id long unique serial, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+ configure Customer.synthetic_id='sid'
+
+  insert Customer { sid:33}
+when:
+  insert Address {id: 100, cust: 33 }
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vaddr:{100}
+}
+
+---
+SKIP: using-sprig string //string serial not supported
+given:
+ type Customer struct {id string unique serial, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+ configure Customer.synthetic_id='sid'
+
+  insert Customer { sid:33}
+when:
+  insert Address {id: 100, cust: 33 }
+  let x = Customer['1']
+then:
+value:a:Customer {
+ vid:'1'
+ vaddr:{100}
+}
+
+---
+title: not-using-sprig
+given:
+ type Customer struct {id int unique serial, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer { }
+when:
+  insert Address {id: 100, cust: 1 }
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vaddr:{100}
+}
+

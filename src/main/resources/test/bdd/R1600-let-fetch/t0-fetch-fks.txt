@@ -1,0 +1,72 @@
+# struct tests
+
+FEATURE: relation fks
+background:
+thenType: struct
+
+---
+title: not loading parent fks
+given:
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+---
+title: loading parent fks
+given:
+ type Customer struct {id int unique, relation addr Address optional one parent } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100}
+}
+
+---
+title: one-to-many
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  insert Address {id: 101, cust: 55 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+---
+title: one-to-many
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  insert Address {id: 101, cust: 55 }
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{[100,101]}
+}
+

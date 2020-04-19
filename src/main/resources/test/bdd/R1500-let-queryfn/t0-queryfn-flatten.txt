@@ -1,0 +1,24 @@
+# queryfn tests
+
+FEATURE: queryfn-flatten TODO: implement this!
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+SKIP: asc implicit
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+when:
+  let x = Flight[true].orderBy('wid')
+then:
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+value:a:Flight {
+ vid:55
+ vwid:4
+}
+

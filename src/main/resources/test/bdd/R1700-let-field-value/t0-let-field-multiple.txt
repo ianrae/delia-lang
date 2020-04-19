@@ -1,0 +1,48 @@
+# let field value tests
+
+FEATURE: let field value 
+background:
+ configure loadFKs = true
+thenType: struct
+
+# --- Multiple ---
+---
+title: multiple
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].id
+then:
+value:a:int:55
+value:a:int:56
+
+---
+title: multiple missing
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[id=99].id
+then:
+null
+
+---
+title: multiple bad ref
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].zzz
+then:
+ERROR: unknown-field
+

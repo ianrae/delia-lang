@@ -1,0 +1,64 @@
+type Category struct {
+categoryID int unique,
+categoryName string,
+description string,
+picture string
+}
+end
+
+type Customer struct {
+customerID string unique,
+companyName string,
+contactName string,
+contactTitle string,
+address string,
+city string,
+region string,
+postalCode string optional,
+country string,
+phone string,
+fax string
+}
+end
+
+type Employee struct {
+employeeID int unique,
+lastName string,
+firstName string,
+title string,
+titleOfCourtesy string,
+birthDate string,
+hireDate string,
+address string,
+city string,
+region string,
+postalCode string optional,
+country string,
+homePhone string,
+extension int,
+photo string,
+notes string,
+reportsTo string optional,
+photoPath string
+}
+end
+
+type Order struct {
+orderID int unique,
+relation customer Customer one optional, //customerID string,
+relation employee Employee one optional, //employeeID int,
+orderDate string,
+requiredDate string,
+shippedDate string,
+shipVia int,
+freight string,
+shipName string,
+shipAddress string,
+shipCity string,
+shipRegion string,
+shipPostalCode string optional,
+shipCountry string
+}
+end
+
+ 

@@ -1,0 +1,31 @@
+# rule tests
+# detailed tests are in CompareRuleDateTests
+
+FEATURE: rules
+background:
+  type Flight struct {id int unique, wid date optional }  end
+thenType: struct
+
+---
+title: pass
+given:
+  type Flight2 Flight {} wid < '2020-01-31T09:59:51' end
+  insert Flight2 {id: 55, wid: '2020' }
+when:
+  let x = Flight2[55]
+then:
+value:a:Flight2 {
+ vid:55
+ vwid:2020-01-01T00:00:00.000+0000
+}
+
+---
+title: fail
+given:
+  type Flight2 Flight {} wid < '2020-01-31T09:59:51' end
+  insert Flight2 {id: 55, wid: '2021' }
+when:
+  let x = Flight2[55];ERROR: rule-compare
+
+
+#we assume nulls are handle the same as int

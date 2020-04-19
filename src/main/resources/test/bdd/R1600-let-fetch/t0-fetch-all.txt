@@ -1,0 +1,7 @@
+# struct tests
+
+FEATURE: fetch-all TODO implement
+background:
+ configure loadFKs = true
+thenType: struct
+

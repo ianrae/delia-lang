@@ -1,0 +1,15 @@
+# rule tests
+
+FEATURE: rules
+background:
+type Grade string contains('bb') end
+thenType: string
+
+---
+title: pass
+let x Grade = 'abby';'abby'
+
+---
+title: fail
+let x Grade = 'barney';ERROR: rule-contains
+

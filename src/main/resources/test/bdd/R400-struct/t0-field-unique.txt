@@ -1,0 +1,65 @@
+# struct tests
+
+FEATURE: struct-field-unique
+background:
+thenType: struct
+
+
+---
+given:
+  type Flight struct {field1 int unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+}
+---
+given:
+  type Flight struct {field1 int unique } end
+  insert Flight {field1: null }
+when:
+  let x = Flight[55];ERROR: NODATA
+---
+given:
+  type Flight struct {field1 int unique } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[null];ERROR: null-filter-not-allowed
+  
+---
+title: optional
+given:
+  type Flight struct {field1 int unique, field2 int optional } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:null
+}
+ 
+---
+title: optional-2
+given:
+  type Flight struct {field1 int unique, field2 int optional } end
+  insert Flight {field1: 55, field2: 10 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:10
+}
+
+---
+title: optional-dup
+given:
+  type Flight struct {field1 int unique, field2 int optional unique } end
+  insert Flight {field1: 55, field2: 10 }
+  insert Flight {field1: 56, field2: 10 }
+when:
+  let x = Flight[55];ERROR: duplicate-unique-value
+  

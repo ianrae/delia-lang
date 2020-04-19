@@ -1,0 +1,39 @@
+# migration tests
+
+FEATURE: migration 10 (rename field)
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration10
+chainNextTest:true
+useSafeMigrationPolicy:false
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+  insert Customer { wid:33}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+}
+
+---
+title: migration10.1 - rename field
+useSafeMigrationPolicy:false
+given:
+ type Customer struct {id int unique serial, wid2 int } end
+
+when:
+  insert Customer { wid2:34}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid2:33
+}
+

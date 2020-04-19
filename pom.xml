@@ -1,0 +1,161 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.delia-lang</groupId>
+  <artifactId>delia</artifactId>
+  <packaging>jar</packaging>
+  <version>0.2.0</version>
+
+  <name>delia</name>
+  <url>http://delia-lang.org</url>
+ <description>Delia is a data language for creating, managing, and querying SQL databases.</description>
+ <licenses>
+<license>
+         <name>MIT License</name>
+          <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license> 
+ </licenses>
+ <developers>
+  <developer>
+   <name>Ian Rae</name>
+   <email>ian@dnal-lang.org</email>
+   <organization>dnal </organization>
+   <organizationUrl>http://dnal-lang.org</organizationUrl>
+  </developer>
+ </developers>
+ <scm>
+  <connection>scm:git:git:github.com/ianrae/delia-lang.git</connection>
+  <developerConnection>scm:git:ssh://github.com:ianrae/delia-lang.git</developerConnection>
+  <url>https://github.com/ianrae/delia-lang</url>
+ </scm>
+
+ <distributionManagement>
+  <snapshotRepository>
+   <id>ossrh</id>
+   <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+  </snapshotRepository>
+  <repository>
+   <id>ossrh</id>
+   <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+  </repository>
+ </distributionManagement>
+
+ <properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+   <maven.compiler.source>1.8</maven.compiler.source>
+   <maven.compiler.target>1.8</maven.compiler.target>	 
+ </properties>
+
+
+ <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+		<version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+	<dependency>
+		<groupId>org.hamcrest</groupId>
+		<artifactId>hamcrest-library</artifactId>
+		<version>1.3</version>
+		<scope>test</scope>
+	</dependency>	
+	<dependency>
+		<groupId>org.jparsec</groupId>
+		<artifactId>jparsec</artifactId>
+		<version>2.3</version>
+    </dependency>	
+	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-lang3</artifactId>
+	    <version>3.7</version>
+	</dependency>
+	<dependency>
+        <groupId>commons-io</groupId>
+    	<artifactId>commons-io</artifactId>
+    	<version>2.5</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+	<dependency>
+       <groupId>commons-collections</groupId>
+       <artifactId>commons-collections</artifactId>
+       <version>3.2.2</version>
+    </dependency>
+	<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+	<dependency>
+    	<groupId>ch.qos.logback</groupId>
+    	<artifactId>logback-classic</artifactId>
+    	<version>1.1.7</version>
+	</dependency>	
+	 <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-databind</artifactId>
+ 		<version>[2.7.9.1,)</version>
+ 	</dependency>
+    <dependency>
+       <groupId>com.h2database</groupId>
+       <artifactId>h2</artifactId>
+       <version>1.4.200</version>
+    </dependency>
+  <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <version>42.2.12</version>
+</dependency>
+  
+ </dependencies>
+
+<profiles>
+  <profile> 
+    <id>release</id>
+    <build>
+  <plugins>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-source-plugin</artifactId>
+    <version>2.2.1</version>
+    <executions>
+     <execution>
+      <id>attach-sources</id>
+      <goals>
+       <goal>jar-no-fork</goal>
+      </goals>
+     </execution>
+    </executions>
+   </plugin>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-javadoc-plugin</artifactId>
+    <version>2.9.1</version>
+    <executions>
+     <execution>
+      <id>attach-javadocs</id>
+      <goals>
+       <goal>jar</goal>
+      </goals>
+     </execution>
+    </executions>
+   </plugin>
+   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-gpg-plugin</artifactId>
+    <version>1.5</version>
+    <executions>
+     <execution>
+      <id>sign-artifacts</id>
+      <phase>verify</phase>
+      <goals>
+       <goal>sign</goal>
+      </goals>
+     </execution>
+    </executions>
+   </plugin>
+  </plugins>
+    </build>
+  </profile>
+</profiles>
+
+
+</project>

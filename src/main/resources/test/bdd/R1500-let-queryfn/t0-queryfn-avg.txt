@@ -1,0 +1,8 @@
+# queryfn tests
+# handles finding avg value: Flight[true].wid.avg('wid')
+
+FEATURE: queryfn-avg  TODO implement this!
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
