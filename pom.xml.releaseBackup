@@ -4,7 +4,7 @@
   <groupId>org.delia-lang</groupId>
   <artifactId>delia</artifactId>
   <packaging>jar</packaging>
-  <version>0.2.0</version>
+  <version>0.2.0-SNAPSHOT</version>
 
   <name>delia</name>
   <url>http://delia-lang.org</url>
@@ -27,8 +27,7 @@
   <connection>scm:git:git:github.com/ianrae/delia-lang.git</connection>
   <developerConnection>scm:git:ssh://github.com:ianrae/delia-lang.git</developerConnection>
   <url>https://github.com/ianrae/delia-lang</url>
-   <tag>delia-0.2.0</tag>
-  </scm>
+ </scm>
 
  <distributionManagement>
   <snapshotRepository>
