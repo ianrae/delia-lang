@@ -1,7 +1,6 @@
 package org.delia.db;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.h2.SqlHelperFactory;
 import org.delia.db.sql.ConnectionFactory;
-import org.delia.db.sql.ConnectionString;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -127,6 +125,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	/**
 	 * On a One-to-many relation our query returns multiple rows in order to get all
 	 * the 'many' ids. Merge into a single row.
+	 * @param rawList list of dvalues to merge
+	 * @param type of values
+	 * @param details
 	 */
 	protected List<DValue> mergeRows(List<DValue> rawList, DStructType dtype, QueryDetails details) {
 		List<DValue> list = new ArrayList<>();

@@ -75,6 +75,7 @@ public class SchemaMigrator extends ServiceBase {
 	}
 	/**
 	 * dbNeedsMigration MUST have been called before this.
+	 * @param doLowRiskChecks whether to do additional pre-migration checks
 	 * @return true if successful
 	 */
 	public boolean performMigrations(boolean doLowRiskChecks) {
@@ -107,6 +108,7 @@ public class SchemaMigrator extends ServiceBase {
 	}
 	/**
 	 * dbNeedsMigration MUST have been called before this.
+	 * @param plan migration plan
 	 * @return migration plan
 	 */
 	public MigrationPlan runMigrationPlan(MigrationPlan plan) {

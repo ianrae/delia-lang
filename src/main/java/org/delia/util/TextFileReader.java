@@ -22,7 +22,7 @@ public class TextFileReader {
 
 	/**
 	 * Read file and return contents as single string 
-	 * 
+	 * @param file to be read
 	 */
 	public String readFileAsSingleString(String path) {
 		List<String> lines = readFile(path);
@@ -59,7 +59,7 @@ public class TextFileReader {
     
     /**
      *
-     * @param path file to be read
+     * @param inReader file to be read
      * @return list of all the lines of text in the file
      * @throws IOException
      * @throws Exception

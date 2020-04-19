@@ -78,7 +78,7 @@ public class DType {
 	/**
 	 * Can type2 be used where this is expected.
 	 * @param type2  derived class
-	 * @return
+	 * @return true if type2 is assignment compatible to this object
 	 */
 	public boolean isAssignmentCompatible(DType type2) {
 		if (this == type2) {

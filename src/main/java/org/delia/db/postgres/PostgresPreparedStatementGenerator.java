@@ -50,7 +50,10 @@ public class PostgresPreparedStatementGenerator extends PreparedStatementGenerat
 	
 	/**
 	 * must copy queryspec since we modify it.
-	 * @return
+	 * @return adjusted query spec
+	 * @param sc output writer
+	 * @param spec query spec
+	 * @param typeName type
 	 */
 	protected QuerySpec doSelectFirst(StrCreator sc, QuerySpec spec, String typeName) {
 		sc.o("SELECT * FROM %s", typeName);
@@ -60,7 +63,11 @@ public class PostgresPreparedStatementGenerator extends PreparedStatementGenerat
 	
 	/**
 	 * must copy queryspec since we modify it.
-	 * @return
+	 * @return adjusted query spec
+	 * @param sc output writer
+	 * @param spec query spec
+	 * @param typeName type
+	 * @return adjusted query spec
 	 */
 	protected QuerySpec doSelectLast(StrCreator sc, QuerySpec spec, String typeName) {
 		sc.o("SELECT * FROM %s", typeName);

@@ -38,7 +38,7 @@ public class DTypeRegistry {
 	
 	/**
 	 * Create lazily. must be thread-safe
-	 * @return
+	 * @return type heirarchy
 	 */
 	public synchronized DTypeHierarchy getHierarchy() {
 	    if (th == null) {
