@@ -32,6 +32,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
 
 /**
@@ -273,6 +274,10 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 
 		selector.setTbl(tbl);
 		DStructType dtype = findType(typeName, dbctx); 
+		if (dtype == null) {
+			DeliaExceptionHelper.throwError("struct-unknown-type-in-query", "unknown struct type '%s'", typeName);
+		}
+		
 		selector.init(et, spec, dtype, dbctx.registry); 
 		if (selector.wasError()) {
 			DeliaError err = et.add("row-selector-error", String.format("row selector failed for type '%s'", typeName));

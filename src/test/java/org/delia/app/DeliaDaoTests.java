@@ -163,6 +163,27 @@ public class DeliaDaoTests extends NewBDDBase {
 		}
 		assertEquals("Type 'Flight' doesn't have field 'zzz'", failMsg);
 	}
+	@Test
+	public void testErr3() {
+		String src = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+
+		//then a controller method
+		String type = "Flight";
+		
+		//query
+		String failMsg = null;
+		try {
+			dao.queryByFilter("bb", "zzz > 0");
+		} catch (Exception e) {
+			log.log(e.getMessage());
+			failMsg = e.getMessage();
+		}
+		assertEquals("unknown struct type 'bb'", failMsg);
+	}
+	
 	
 	@Test
 	public void testStandardLog() {
