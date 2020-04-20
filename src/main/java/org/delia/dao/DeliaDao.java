@@ -37,6 +37,12 @@ public class DeliaDao  {
 		this.factorySvc = delia.getFactoryService();
 		this.delia = delia;
 	}
+	public DeliaDao(Delia delia, DeliaSession session) {
+		this.dbInterface = delia.getDBInterface();
+		this.factorySvc = delia.getFactoryService();
+		this.delia = delia;
+		this.mostRecentSess = session;
+	}
 
 	public DeliaDao(ConnectionString connString, DBType dbType, Log log) {
 		ErrorTracker et = new SimpleErrorTracker(log);

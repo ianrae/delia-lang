@@ -1,6 +1,7 @@
 package org.delia.type;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,6 +92,17 @@ public class DTypeRegistry {
 			return schemaVersionType;
 		}
 		return (DStructType) getType(typeName);
+	}
+	
+	public Set<String> getAllCustomTypes() {
+		Set<String> list = new HashSet<>();
+		for(String typeName: map.keySet()) {
+			String s = BuiltInTypes.convertDTypeNameToDeliaName(typeName);
+			if (s.equals(typeName)) {
+				list.add(typeName);
+			}
+		}
+		return list;
 	}
 
 	@Override
