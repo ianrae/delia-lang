@@ -138,6 +138,9 @@ public class DeliaDaoTests extends NewBDDBase {
 		ResultValue res = dao.queryByStatement(type, "[field1 > 0].fks()");
 		assertEquals(true, res.ok);
 		assertEquals(2, res.getAsDValueList().size());
+		
+		long n = dao.count(type);
+		assertEquals(2, n);
 	}
 
 	@Test

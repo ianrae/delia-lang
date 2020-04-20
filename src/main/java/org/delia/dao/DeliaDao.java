@@ -78,6 +78,16 @@ public class DeliaDao  {
 		String src = String.format("let $$ = %s%s", type, filterEx);
 		return execute(src);
 	}
+	public long count(String type) {
+		String src = String.format("let $$ = %s[true].count()", type);
+		ResultValue res = execute(src);
+		if (res.ok) {
+			Long n = res.getAsDValue().asLong();
+			return n;
+		} else {
+			return 0;
+		}
+	}
 
 	public ResultValue insertOne(String type, String fields) {
 		String src;
