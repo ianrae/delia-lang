@@ -31,3 +31,15 @@ when:
 then:
 ERROR: missing-relation-decl
 
+---
+SKIP: multiple relations - test multiple relations. TODO implement
+given:
+ type Customer struct {id int unique, relation addr Address optional parent one } end
+ type Address struct {id int unique, cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  let x = Customer[55]
+then:
+ERROR: missing-relation-decl

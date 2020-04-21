@@ -9,9 +9,13 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DRuleHelper;
 
 public class MigrationOptimizer extends ServiceBase {
 
@@ -28,12 +32,39 @@ public class MigrationOptimizer extends ServiceBase {
 	}
 	
 	public List<SchemaType> optimizeDiffs(List<SchemaType> diffL) {
+		diffL = removeParentRelations(diffL);
 		diffL = detectTableRename(diffL);
 		diffL = detectFieldRename(diffL);
 		
 		return diffL;
 	}
 	
+	/**
+	 * In 1-to-1 and 1-to-many the parent side of a relation doesn't exist in the
+	 * db, so remove steps for them.
+	 * 
+	 * @param diffL
+	 * @return
+	 */
+	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
+		List<SchemaType> newlist = new ArrayList<>();
+		for(SchemaType st: diffL) {
+			if (st.isFieldInsert()) {
+				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, registry);
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, registry);
+				if (ruleOne != null && ruleOne.isParent()) {
+					//don't add
+				} else 	if (ruleMany != null) {
+					//don't add (many side is always a parent)
+				} else {
+					newlist.add(st);
+				}
+			} else {
+				newlist.add(st);
+			}
+		}
+		return newlist;
+	}
 	
 	private List<SchemaType> detectTableRename(List<SchemaType> diffL) {
 		List<SchemaType> newlist = new ArrayList<>();

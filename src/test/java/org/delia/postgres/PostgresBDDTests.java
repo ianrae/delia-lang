@@ -224,27 +224,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableSQLLogging = true;
 
-//		runR2100File("t0-migration.txt", 2);
-//		runR2100File("t0-migration2.txt", 2);
-//		runR2100File("t0-migration3.txt", 2);
-//		runR2100File("t0-migration3a.txt", 2);
-//		runR2100File("t0-migration3b.txt", 2);
-//		runR2100File("t0-migration4.txt", 2);
-//		runR2100File("t0-migration10.txt", 2);
-//		runR2100File("t0-migration10a.txt", 2);
-//		runR2100File("t0-migration10b.txt", 3);
-//		runR2100File("t0-migration11.txt", 0);
-//		runR2100File("t0-migration5.txt", 2);
-//		runR2100File("t0-migration7.txt", 2);
-//		runR2100File("t0-migration12.txt", 2);
-//		runR2100File("t0-migration13.txt", 2);
-//		runR2100File("t0-migration13a.txt", 2);
-//		runR2100File("t0-migration14.txt", 2);
-//		runR2100File("t0-migration14a.txt", 2);
-//		runR2100File("t0-migration15.txt", 2);
-		runR2100File("t0-migration15a.txt", 2);
-		runR2100File("t0-migration16.txt", 2);
-		runR2100File("t0-migration16a.txt", 2);
+		runR2150File("t0-migrate-one-to-one1.txt", 2);
 	}
 	
 	//---
