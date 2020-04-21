@@ -9,10 +9,12 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DRuleHelper;
@@ -35,6 +37,7 @@ public class MigrationOptimizer extends ServiceBase {
 		diffL = detectTableRename(diffL);
 		diffL = detectFieldRename(diffL);
 		diffL = removeParentRelations(diffL);
+		diffL = detectOneToManyFieldChange(diffL);
 		
 		return diffL;
 	}
@@ -63,6 +66,37 @@ public class MigrationOptimizer extends ServiceBase {
 				newlist.add(st);
 			}
 		}
+		return newlist;
+	}
+	
+	private List<SchemaType> detectOneToManyFieldChange(List<SchemaType> diffL) {
+		List<SchemaType> newlist = new ArrayList<>();
+		List<SchemaType> doomedL = new ArrayList<>();
+		for(SchemaType st: diffL) {
+			if (st.isFieldAlter()) {
+				if (st.newName.equals("-a,+c")) { //changing parent from one to many?
+					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
+					DType farType = ruleMany.relInfo.farType;
+					DStructType nearType = ruleMany.relInfo.nearType;
+					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+
+					st.action = "A";
+					st.field = otherSide.fieldName;
+					st.typeName = otherSide.nearType.getName();
+					st.newName = "-U"; //remove UNIQUE
+					
+					log.log("migrate: one to many on '%s.%s'", st.typeName, st.field);
+				}
+				newlist.add(st);
+			} else {
+				newlist.add(st);
+			}
+		}
+		
+		for(SchemaType doomed: doomedL) {
+			newlist.remove(doomed);
+		}
+		
 		return newlist;
 	}
 	
