@@ -58,20 +58,25 @@ public class DRuleHelper {
 		return null;
 	}
 
-	public static RelationOneRule findOneRule(String typeName, DTypeRegistry registry) {
+	public static RelationOneRule findOneRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);
 		for(DRule rule: dtype.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
-				return (RelationOneRule) rule;
+				if (rule.getSubject().equals(fieldName)) {
+					return (RelationOneRule) rule;
+				}
 			}
 		}
 		return null;
 	}
-	public static RelationManyRule findManyRule(String typeName, DTypeRegistry registry) {
+	public static RelationManyRule findManyRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);
 		for(DRule rule: dtype.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
-				return (RelationManyRule) rule;
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (rule.getSubject().equals(fieldName)) {
+					return (RelationManyRule) rule;
+				}
 			}
 		}
 		return null;

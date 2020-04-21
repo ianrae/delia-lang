@@ -50,8 +50,8 @@ public class MigrationOptimizer extends ServiceBase {
 		List<SchemaType> newlist = new ArrayList<>();
 		for(SchemaType st: diffL) {
 			if (st.isFieldInsert() || st.isFieldRename()) {
-				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, registry);
-				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, registry);
+				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
 				if (ruleOne != null && ruleOne.isParent()) {
 					//don't add
 				} else 	if (ruleMany != null) {

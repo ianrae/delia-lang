@@ -76,9 +76,9 @@ public class DeliaTypeSorter {
 		return DRuleHelper.findMatchingPair(structType, fieldName);
 	}
 
-	protected RelationOneRule findOneRule(String typeName, DTypeRegistry registry) {
-		return DRuleHelper.findOneRule(typeName, registry);
-	}
+//	protected RelationOneRule findOneRule(String typeName, DTypeRegistry registry) {
+//		return DRuleHelper.findOneRule(typeName, registry);
+//	}
 
 
 	private List<DStructType> getStructs(DTypeRegistry ds) {

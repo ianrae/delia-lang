@@ -1,5 +1,6 @@
 package org.delia.db.sql.prepared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -30,6 +31,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 public class FKSqlGenerator extends ServiceBase {
 
@@ -74,9 +76,14 @@ public class FKSqlGenerator extends ServiceBase {
 		QueryExp exp = spec.queryExp;
 		SqlStatement statement = new SqlStatement();
 		
-		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
+		List<RelationOneRule> oneL = findAllOneRules(exp.getTypeName());
+		List<RelationManyRule> manyL = findAllManyRules(exp.getTypeName());
+		
+//		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
+		RelationOneRule rule = oneL.isEmpty() ? null : oneL.get(0);
 		if (rule == null) {
-			RelationManyRule manyRule = DRuleHelper.findManyRule(exp.getTypeName(), registry);
+//			RelationManyRule manyRule = DRuleHelper.findManyRule(exp.getTypeName(), registry);
+			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
 				statement.sql = generateFKsQueryMany(spec, exp, manyRule, details, statement);
 				return statement;
@@ -98,7 +105,9 @@ public class FKSqlGenerator extends ServiceBase {
 		String fields = genFields(exp.typeName, tbl, tbl2, rule.relInfo.fieldName, nearField);
 		sc.o("SELECT %s FROM %s", fields, tbl.name);
 
-		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
+		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
+//		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
+		RelationOneRule farRule = farL.isEmpty() ? null : farL.get(0);
 		String onstr = String.format("%s.%s=%s.%s", tbl2.alias, farRule.relInfo.fieldName, tbl.alias, nearField.name);
 
 		//			TypePair farField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.farType);
@@ -134,15 +143,56 @@ public class FKSqlGenerator extends ServiceBase {
 		return statement;
 	}
 
+	//TOOD: fix this limitation!!!
+	private List<RelationOneRule> findAllOneRules(String typeName) {
+		List<RelationOneRule> rulesL = new ArrayList<>();
+		DStructType structType = (DStructType) registry.getType(typeName);
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				RelationOneRule rule = DRuleHelper.findOneRule(typeName, pair.name, registry);
+				if (rule != null) {
+					rulesL.add(rule);
+				}
+			}
+		}
+		
+		if (rulesL.size() > 1) {
+			DeliaExceptionHelper.throwError("too-many-rules", "only one relation per type in current Delia version. found %d one rules", rulesL.size());
+		}
+		
+		return rulesL;
+	}
+	private List<RelationManyRule> findAllManyRules(String typeName) {
+		List<RelationManyRule> rulesL = new ArrayList<>();
+		DStructType structType = (DStructType) registry.getType(typeName);
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				RelationManyRule rule = DRuleHelper.findManyRule(typeName, pair.name, registry);
+				if (rule != null) {
+					rulesL.add(rule);
+				}
+			}
+		}
+		
+		if (rulesL.size() > 1) {
+			DeliaExceptionHelper.throwError("too-many-rules", "only one relation per type in current Delia version. found %d many rules", rulesL.size());
+		}
+		return rulesL;
+	}
+
 	private String generateFKsQueryMany(QuerySpec spec, QueryExp exp, RelationManyRule rule, QueryDetails details, SqlStatement statement) {
 		StrCreator sc = new StrCreator();
 
 		Table tbl = genTable(exp.getTypeName());
 		Table tbl2 = genTable(rule.relInfo.farType.getName());
 
-		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
+		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
+//		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
+		RelationOneRule farRule = farL.isEmpty() ? null : farL.get(0);
 		if (farRule == null) {
-			RelationManyRule xfarRule = DRuleHelper.findManyRule(rule.relInfo.farType.getName(), registry);
+			List<RelationManyRule> xfarL = findAllManyRules(rule.relInfo.farType.getName());
+//			RelationManyRule xfarRule = DRuleHelper.findManyRule(rule.relInfo.farType.getName(), registry);
+			RelationManyRule xfarRule = xfarL.isEmpty() ? null : xfarL.get(0);
 			return doManyToMany(sc, spec, exp, xfarRule, tbl, tbl2, rule, details, statement);
 		} else {
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
