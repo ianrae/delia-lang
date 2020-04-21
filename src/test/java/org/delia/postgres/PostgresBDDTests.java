@@ -240,7 +240,8 @@ public class PostgresBDDTests extends NewBDDBase {
 //		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 //		runR2150File("t0-migrate-one-to-one3.txt", 2);
 //		runR2150File("t0-migrate-one-to-one4.txt", 2);
-		runR2150File("t0-migrate-one-to-one5.txt", 2);
+//		runR2150File("t0-migrate-one-to-one5.txt", 2);
+		runR2150File("t0-migrate-one-to-one6.txt", 2);
 	}
 	
 	//---

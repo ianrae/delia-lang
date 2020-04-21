@@ -1,13 +1,13 @@
 # migration-relation tests
 
-FEATURE: migration - one-to-one relation field change parent
+FEATURE: migration - one-to-one relation field change one to many
 background:
  configure loadFKs = true
 thenType: struct
 
 # -- start chain ---
 ---
-title: 1to1-1
+title: 1to1
 chainNextTest:true
 given:
  type Customer struct {id int primaryKey, wid int, relation addr Address optional parent one  } end
@@ -24,11 +24,11 @@ value:a:Customer {
 }
 
 ---
-SKIP: 1to1-1 - rename child side. FIX THIS! tricky to move the fk from one type to another 
+title: 1to1-1 - parent one to many.   '-a,+c'
 chainNextTest:true
 given:
- type Customer struct {id int primaryKey, wid int, relation addr Address optional  one  } end
- type Address struct  {id int primaryKey,          relation cust Customer optional parent one } end
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end
+ type Address struct  {id int primaryKey,          relation cust Customer optional  one } end
 
   insert Customer {id: 2, wid: 34 }
 when:
