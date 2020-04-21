@@ -214,8 +214,14 @@ public class NewBDDH2Tests extends NewBDDBase {
 	}
 	@Test
 	public void testR2150() {
-		runR2150File("t0-migrate-one-to-one1.txt.txt", 2);
-	}	
+		runR500File("t0-relation-one-to-one.txt", 9);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one2.txt", 2);
+		runR2150File("t0-migrate-one-to-one2a.txt", 2);
+		runR2150File("t0-migrate-one-to-one3.txt", 2);
+		runR2150File("t0-migrate-one-to-one4.txt", 2);
+		runR2150File("t0-migrate-one-to-one5.txt", 1);
+	}
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
@@ -223,12 +229,14 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-		runR2150File("t0-migrate-one-to-one1.txt", 2);
+//		runR2150File("t0-migrate-one-to-one1.txt", 2);
+//		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR500File("t0-relation-one-to-one.txt", 9);
 	}
 	
 	//---

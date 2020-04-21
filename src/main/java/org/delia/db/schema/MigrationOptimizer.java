@@ -52,9 +52,19 @@ public class MigrationOptimizer extends ServiceBase {
 	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
 		List<SchemaType> newlist = new ArrayList<>();
 		for(SchemaType st: diffL) {
-			if (st.isFieldInsert() || st.isFieldRename()) {
+			if (st.isFieldInsert()) {
 				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
+				if (ruleOne != null && ruleOne.isParent()) {
+					//don't add
+				} else 	if (ruleMany != null) {
+					//don't add (many side is always a parent)
+				} else {
+					newlist.add(st);
+				}
+			} else if (st.isFieldRename()) {
+				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.newName, registry);
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.newName, registry);
 				if (ruleOne != null && ruleOne.isParent()) {
 					//don't add
 				} else 	if (ruleMany != null) {

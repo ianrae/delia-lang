@@ -210,6 +210,16 @@ public class AllBDDTests extends NewBDDBase {
 //		runR2100File("t0-migration16.txt", 2);
 //		runR2100File("t0-migration16a.txt", 2);
 	}
+	@Test
+	public void testR2150() {
+		runR500File("t0-relation-one-to-one.txt", 9);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one2.txt", 2);
+		runR2150File("t0-migrate-one-to-one2a.txt", 2);
+		runR2150File("t0-migrate-one-to-one3.txt", 2);
+		runR2150File("t0-migrate-one-to-one4.txt", 2);
+		runR2150File("t0-migrate-one-to-one5.txt", 1);
+	}
 	
 	@Test
 	public void testR2200() {
