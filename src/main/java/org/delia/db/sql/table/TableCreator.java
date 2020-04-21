@@ -57,14 +57,25 @@ public class TableCreator extends ServiceBase {
 		}
 		
 		//add constraints
+		List<ConstraintGen> constraints = new ArrayList<>();
 		for(TypePair pair: dtype.getAllFields()) {
 			if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
 				ConstraintGen constraint = generateFKConstraint(sc, pair, dtype);
 				if (constraint != null) {
 					fieldL.add(constraint);
+					constraints.add(constraint);
 				}
 			}
 		}
+		
+		//have field see all its contraints
+		for(SqlElement el: fieldL) {
+			if (el instanceof FieldGen) {
+				FieldGen field = (FieldGen) el;
+				field.visitConstraints(constraints); //wire them up
+			}
+		}
+		
 		
 		index = 0;
 		for(SqlElement field: fieldL) {

@@ -23,7 +23,7 @@ public class PostgresFieldGen extends FieldGen {
 		String suffix1a = "";
 		if (dtype.fieldIsSerial(name)) {
 			suffix1a = " PRIMARY KEY GENERATED ALWAYS AS IDENTITY"; //only works for ints. need different syntax for string sequence
-		} else if (b) {
+		} else if (b || makeFieldUnique) {
 			suffix1 = " UNIQUE";
 		}
 		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";

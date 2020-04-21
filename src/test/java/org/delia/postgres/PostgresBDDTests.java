@@ -42,7 +42,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR400File("t0-field-serial.txt",7);
 	}
 	@Test
-	public void testR500() { //here
+	public void testR500() { 
 		runR500File("t0-relation-one-to-one.txt", 9);
 		runR500File("t0-relation-one-to-one-oneway.txt", 8);
 		runR500File("t0-relation-one-to-many.txt", 9);
@@ -241,7 +241,10 @@ public class PostgresBDDTests extends NewBDDBase {
 //		runR2150File("t0-migrate-one-to-one3.txt", 2);
 //		runR2150File("t0-migrate-one-to-one4.txt", 2);
 //		runR2150File("t0-migrate-one-to-one5.txt", 2);
-		runR2150File("t0-migrate-one-to-one6.txt", 2);
+//		runR2150File("t0-migrate-one-to-one6.txt", 2);
+		
+		
+		runR500File("t0-relation-one-to-one.txt", 9);
 	}
 	
 	//---

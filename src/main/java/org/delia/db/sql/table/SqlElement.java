@@ -1,5 +1,7 @@
 package org.delia.db.sql.table;
 
+import java.util.List;
+
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.sql.StrCreator;
@@ -20,4 +22,5 @@ public abstract class SqlElement extends ServiceBase {
 	}
 	
 	public abstract void generateField(StrCreator sc);
+
 }

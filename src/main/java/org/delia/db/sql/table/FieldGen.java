@@ -1,5 +1,7 @@
 package org.delia.db.sql.table;
 
+import java.util.List;
+
 import org.delia.core.FactoryService;
 import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
@@ -8,6 +10,8 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
 public class FieldGen extends SqlElement {
+
+	public boolean makeFieldUnique;
 
 	public FieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype) {
 		super(factorySvc, registry, pair, dtype);
@@ -22,7 +26,7 @@ public class FieldGen extends SqlElement {
 		String suffix1a = "";
 		if (dtype.fieldIsSerial(name)) {
 			suffix1a = " IDENTITY";
-		} else if (b) {
+		} else if (b || makeFieldUnique) {
 			suffix1 = " UNIQUE";
 		}
 		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";
@@ -52,4 +56,15 @@ public class FieldGen extends SqlElement {
 			return null;
 		}
 	}
+	
+	public void visitConstraints(List<ConstraintGen> constraints) {
+		for(ConstraintGen constraint: constraints) {
+			if ( constraint.pair.name.equals(this.pair.name)) {
+				if (constraint.makeFieldUnique) {
+					this.makeFieldUnique = true;
+				}
+			}
+		}
+	}
+	
 }
