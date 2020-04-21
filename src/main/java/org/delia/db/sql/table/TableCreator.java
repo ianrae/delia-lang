@@ -68,13 +68,7 @@ public class TableCreator extends ServiceBase {
 			}
 		}
 		
-		//have field see all its contraints
-		for(SqlElement el: fieldL) {
-			if (el instanceof FieldGen) {
-				FieldGen field = (FieldGen) el;
-				field.visitConstraints(constraints); //wire them up
-			}
-		}
+		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
 		
 		
 		index = 0;
@@ -101,6 +95,16 @@ public class TableCreator extends ServiceBase {
 		return sc.str;
 	}
 	
+
+	protected void haveFieldsVisitTheirConstrainsts(List<SqlElement> fieldL, List<ConstraintGen> constraints) {
+		//have field see all its contraints
+		for(SqlElement el: fieldL) {
+			if (el instanceof FieldGen) {
+				FieldGen field = (FieldGen) el;
+				field.visitConstraints(constraints); //wire them up
+			}
+		}
+	}
 
 	protected boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
 		//key goes in child only
@@ -220,12 +224,16 @@ public class TableCreator extends ServiceBase {
 		}
 		
 		//add constraints
+		List<ConstraintGen> constraints = new ArrayList<>();
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
 			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype);
 			if (constraint != null) {
 				fieldL.add(constraint);
+				constraints.add(constraint);
 			}
 		}
+		
+		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
 		
 		int index = 0;
 		for(SqlElement ff: fieldL) {

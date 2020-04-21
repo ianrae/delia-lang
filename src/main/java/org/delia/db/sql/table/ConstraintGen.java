@@ -2,6 +2,7 @@ package org.delia.db.sql.table;
 
 import org.delia.core.FactoryService;
 import org.delia.db.sql.StrCreator;
+import org.delia.relation.RelationCardinality;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -17,7 +18,7 @@ public class ConstraintGen extends SqlElement {
 		super(factorySvc, registry, pair, dtype);
 		
 		RelationOneRule oneRule = DRuleHelper.findOneRule(dtype.getName(), pair.name, registry);
-		if (oneRule != null) {
+		if (oneRule != null && oneRule.relInfo.cardinality.equals(RelationCardinality.ONE_TO_ONE)) {
 			makeFieldUnique = true;
 		}
 	}
