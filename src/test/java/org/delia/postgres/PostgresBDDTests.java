@@ -225,6 +225,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		enableSQLLogging = true;
 
 		runR2150File("t0-migrate-one-to-one1.txt", 2);
+//		runR500File("t0-relation-one-to-one.txt", 9);
 	}
 	
 	//---

@@ -10,11 +10,11 @@ thenType: struct
 title: 1to1-1
 chainNextTest:true
 given:
- type Customer struct {id int primaryKey serial, wid int } end
- type Address struct {id int primaryKey serial } end
+ type Customer struct {id int primaryKey, wid int } end
+ type Address struct {id int primaryKey } end
 
 when:
-  insert Customer { wid:33 }
+  insert Customer { id: 1, wid:33 }
   let x = Customer[1]
 then:
 value:a:Customer {
@@ -24,16 +24,35 @@ value:a:Customer {
 
 ---
 title: 1to1-1 - add rel
+chainNextTest:true
 given:
- type Customer struct {id int primaryKey serial, wid int, relation addr Address optional parent one  } end
- type Address struct {id int primaryKey serial, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional parent one  } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 2, wid: 34 }
+when:
+  insert Address {id: 100, cust: 1 }
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vaddr:{100}
+}
+
+---
+title: 1to1-1 - add cust 2
+given:
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional parent one  } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
 when:
-  insert Customer { wid:34}
+  insert Address {id: 101, cust: 2 }
   let x = Customer[2]
 then:
 value:a:Customer {
  vid:2
  vwid:34
+ vaddr:{101}
 }
 
