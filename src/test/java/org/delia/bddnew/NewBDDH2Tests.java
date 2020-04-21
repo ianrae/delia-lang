@@ -213,6 +213,10 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR2100File("t0-migration16a.txt", 2);
 	}
 	@Test
+	public void testR2150() {
+		runR2150File("t0-migrate-one-to-one1.txt.txt", 2);
+	}	
+	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
 	}
@@ -224,8 +228,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-//		runR2100File("t0-migration16a.txt", 2);
-		runR2100File("t0-migration14.txt", 2);
+		runR2150File("t0-migrate-one-to-one1.txt", 2);
 	}
 	
 	//---

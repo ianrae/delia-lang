@@ -14,7 +14,6 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.runner.ResultValue;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -39,6 +39,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R1900_let_return,
 		R2000_sprig,
 		R2100_migration,
+		R2150_migration_relations,
 		R2200_security
 	}
 	public static class FileHelper {
@@ -125,6 +126,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runR2100File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2100_migration, filename, numTests);
+	}
+	protected int runR2150File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2150_migration_relations, filename, numTests);
 	}
 	protected int runR2200File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2200_security, filename, numTests);
