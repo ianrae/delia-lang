@@ -32,9 +32,9 @@ public class MigrationOptimizer extends ServiceBase {
 	}
 	
 	public List<SchemaType> optimizeDiffs(List<SchemaType> diffL) {
-		diffL = removeParentRelations(diffL);
 		diffL = detectTableRename(diffL);
 		diffL = detectFieldRename(diffL);
+		diffL = removeParentRelations(diffL);
 		
 		return diffL;
 	}
@@ -49,7 +49,7 @@ public class MigrationOptimizer extends ServiceBase {
 	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
 		List<SchemaType> newlist = new ArrayList<>();
 		for(SchemaType st: diffL) {
-			if (st.isFieldInsert()) {
+			if (st.isFieldInsert() || st.isFieldRename()) {
 				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, registry);
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, registry);
 				if (ruleOne != null && ruleOne.isParent()) {

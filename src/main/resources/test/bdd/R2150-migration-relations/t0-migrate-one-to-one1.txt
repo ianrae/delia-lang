@@ -1,6 +1,6 @@
 # migration-relation tests
 
-FEATURE: migration 
+FEATURE: migration - one-to-one add relation field
 background:
  configure loadFKs = true
 thenType: struct

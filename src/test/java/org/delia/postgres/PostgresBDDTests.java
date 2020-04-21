@@ -224,8 +224,10 @@ public class PostgresBDDTests extends NewBDDBase {
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableSQLLogging = true;
 
-		runR2150File("t0-migrate-one-to-one1.txt", 2);
 //		runR500File("t0-relation-one-to-one.txt", 9);
+//		runR2150File("t0-migrate-one-to-one1.txt", 2);
+//		runR2150File("t0-migrate-one-to-one2.txt", 2);
+		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 	}
 	
 	//---
