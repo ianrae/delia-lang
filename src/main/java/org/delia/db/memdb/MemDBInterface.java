@@ -29,8 +29,11 @@ import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.DValueImpl;
 import org.delia.type.TypePair;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
@@ -72,6 +75,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	public MemDBInterface() {
 		super();
 		this.capabilities = new DBCapabilties(false, false, false, false);
+		this.capabilities.setRequiresTypeReplacementProcessing(true);
 	}
 
 	@Override
@@ -530,5 +534,22 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	@Override
 	public void enumerateAllConstraints(Log logToUse) {
 		//not supported
+	}
+
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		for (String typeName: tableMap.keySet()) {
+			MemDBTable tbl = tableMap.get(typeName);
+			for(DValue dval: tbl.rowL) {
+				DType dtype = dval.getType();
+				if (spec.needsReplacement(dtype)) {
+					DValueImpl impl = (DValueImpl) dval;
+					impl.forceType(spec.newType);
+				} else {
+					dtype.performTypeReplacement(spec);
+				}
+			}
+		}
+		
 	}
 }

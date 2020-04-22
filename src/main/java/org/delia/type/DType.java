@@ -23,6 +23,7 @@ public class DType {
 	private DType baseType; //can be null
 	private List<DRule> rules = new ArrayList<>();
 	private int bitIndex;
+	public boolean invalidFlag; //used to verify type-replacement worked.
 
 	public DType(Shape shape, String name, DType baseType) {
 		this.shape = shape;

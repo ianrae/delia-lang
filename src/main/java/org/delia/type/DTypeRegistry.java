@@ -25,12 +25,16 @@ public class DTypeRegistry {
 	
 	public static final int NUM_BUILTIN_TYPES = 7;
 	
-	public synchronized void add(String name, DType type) {
-        if (type == null || name == null || name.isEmpty()) {
+	public synchronized void add(String typeName, DType dtype) {
+        if (dtype == null || typeName == null || typeName.isEmpty()) {
             throw new IllegalArgumentException("name or type were null");
         }
 		
-	    type.setBitIndex(nextBitIndex++);
+	    dtype.setBitIndex(nextBitIndex++);
+	    
+	    if (map.containsKey(typeName)) {
+	    	System.out.println("REDEF " + typeName);
+	    }
 //	    //remove any existing one with same name.
 //	    //because we re-execute typerunner we may have duplicates. remove earlier version
 //	    //TODO: not sure this works.
@@ -40,8 +44,8 @@ public class DTypeRegistry {
 //	    		break;
 //	    	}
 //	    }
-	    orderedList.add(type);
-		map.put(name, type);
+	    orderedList.add(dtype);
+		map.put(typeName, dtype);
 		
 		th = null; //clear
 	}

@@ -28,6 +28,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
 
 
@@ -289,6 +290,9 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		exec.close();
 	}
 
-
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		//nothing to do
+	}
 
 }

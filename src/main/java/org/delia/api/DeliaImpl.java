@@ -22,6 +22,7 @@ import org.delia.runner.RunnerImpl;
 import org.delia.runner.TypeRunner;
 import org.delia.runner.TypeSpec;
 import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.util.DeliaExceptionHelper;
@@ -154,23 +155,42 @@ public class DeliaImpl implements Delia {
 		//2nd pass - for future decls
 		allErrors.clear();
 		List<Exp> newExtL = typeRunner.getNeedReexecuteL(); //only re-exec the failed types
-		
+		DTypeRegistry registry = typeRunner.getRegistry();
 		List<DType> oldTypeL = new ArrayList<>();
 		for(Exp exp: newExtL) {
 			TypeStatementExp texp = (TypeStatementExp) exp;
-			DType dtype = typeRunner.getRegistry().getType(texp.typeName);
+			DType dtype = registry.getType(texp.typeName);
 			oldTypeL.add(dtype);
 		}
-		typeRunner.executeStatements(newExtL, allErrors);
 		
-		//now update all types
+		//prepare the type replacer
+		List<TypeReplaceSpec> replacerL = new ArrayList<>();
 		for(DType oldtype: oldTypeL) {
 			TypeReplaceSpec spec = new TypeReplaceSpec();
 			spec.oldType = oldtype;
-			spec.newType = typeRunner.getRegistry().getType(oldtype.getName());
-			typeRunner.getRegistry().performTypeReplacement(spec);
+			replacerL.add(spec);
 		}
 		
+		typeRunner.executeStatements(newExtL, allErrors);
+		
+		//now update all types
+		for(TypeReplaceSpec spec: replacerL) {
+			spec.newType = registry.getType(spec.oldType.getName());
+			registry.performTypeReplacement(spec);
+			log.log("type-replacement '%s' %d", spec.newType.getName(), spec.counter);
+			
+			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
+				dbInterface.performTypeReplacement(spec);
+			}
+		}
+		
+		//and check that we did all replacement
+		for(String typeName: typeRunner.getRegistry().getAll()) {
+			DType dtype = registry.getType(typeName);
+			if (dtype.invalidFlag) {
+				log.logError("ERROR1: type %s invalid", dtype.getName());
+			}
+		}
 		
 		//TODO: are 2 passes enough?
 		if (allErrors.isEmpty()) {

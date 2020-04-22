@@ -3,6 +3,7 @@ package org.delia.db;
 import org.delia.core.FactoryService;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
+import org.delia.type.TypeReplaceSpec;
 
 /**
  * The main interface to the database.
@@ -36,4 +37,5 @@ public interface DBInterface {
 	void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx);
 	void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx);
 	void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx);
+	void performTypeReplacement(TypeReplaceSpec spec);
 }
