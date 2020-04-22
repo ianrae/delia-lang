@@ -238,14 +238,15 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 6;
+		testIndexToRun = 8;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 //		runR1600File("t0-fetch.txt", 3);
 //		runR2200File("t0-security-sql-injection.txt", 3);
 //		runR1600File("t0-fetch-field.txt", 6);
 //		runR2150File("t0-migrate-one-to-one1.txt", 3);
-		runR500File("t0-relation-one-to-one.txt", 9);
+//		runR500File("t0-relation-one-to-one.txt", 9);
+		runR500File("t0-relation-one-to-many.txt", 9);
 	}
 	
 	//---

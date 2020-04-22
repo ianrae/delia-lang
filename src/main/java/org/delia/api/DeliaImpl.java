@@ -202,11 +202,6 @@ public class DeliaImpl implements Delia {
 			}
 		}
 		
-//		//and update rule relinfo
-//		if (allErrors.isEmpty()) {
-//			typeRunner.zz(allErrors);
-//		}
-		
 		//TODO: are 2 passes enough?
 		if (allErrors.isEmpty()) {
 			return;
