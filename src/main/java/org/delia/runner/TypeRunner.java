@@ -28,7 +28,7 @@ public class TypeRunner extends ServiceBase {
 	}
 
 
-	public void executeStatements(List<Exp> extL, List<DeliaError> allErrors) {
+	public void executeStatements(List<Exp> extL, List<DeliaError> allErrors, boolean runRulePostProcessor) {
 		for(Exp exp: extL) {
 			ResultValue res = executeStatement(exp);
 			if (! res.ok) {
@@ -36,6 +36,12 @@ public class TypeRunner extends ServiceBase {
 			}
 		}
 		
+		if (allErrors.isEmpty() && runRulePostProcessor) {
+			executeRulePostProcessor(allErrors);
+		}
+	}
+	
+	public void executeRulePostProcessor(List<DeliaError> allErrors) {
 		if (allErrors.isEmpty()) {
 			RulePostProcessor postProcessor = new RulePostProcessor(factorySvc);
 			postProcessor.process(registry, allErrors);

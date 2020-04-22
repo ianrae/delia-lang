@@ -63,7 +63,7 @@ public class OrderedMap {
 		for(String field: map.keySet()) {
 			DType dtype = map.get(field);
 			if (spec.needsReplacement(dtype)) {
-				map.put(field, dtype);
+				map.put(field, spec.newType);
 			}
 		}
 	}

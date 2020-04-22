@@ -142,12 +142,8 @@ public class DeliaImpl implements Delia {
 
 		//1st pass
 		TypeRunner typeRunner = mainRunner.createTypeRunner();
-		typeRunner.executeStatements(extL, allErrors);
+		typeRunner.executeStatements(extL, allErrors, true);
 		
-//		if (allErrors.isEmpty()) {
-//			typeRunner.zz(allErrors);
-//		}
-
 		if (allErrors.isEmpty()) {
 			return;
 		} else if (numFutureDeclErrors(allErrors) != allErrors.size()) {
@@ -181,7 +177,7 @@ public class DeliaImpl implements Delia {
 			replacerL.add(spec);
 		}
 		
-		typeRunner.executeStatements(newExtL, allErrors);
+		typeRunner.executeStatements(newExtL, allErrors, false);
 		
 		//now update all types
 		for(TypeReplaceSpec spec: replacerL) {
@@ -201,6 +197,8 @@ public class DeliaImpl implements Delia {
 				log.logError("ERROR1: type %s invalid", dtype.getName());
 			}
 		}
+		
+		typeRunner.executeRulePostProcessor(allErrors);
 		
 		//TODO: are 2 passes enough?
 		if (allErrors.isEmpty()) {

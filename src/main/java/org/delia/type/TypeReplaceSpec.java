@@ -11,9 +11,9 @@ public class TypeReplaceSpec {
 	
 	public boolean needsReplacement(DType dtype) {
 		//handle the case of circular references
-		if (recursionProtectionMap.containsKey(dtype)) {
-			return false;
-		}
+//		if (recursionProtectionMap.containsKey(dtype)) {
+//			return false;
+//		}
 		
 		boolean b = dtype == oldType;
 		if (b) {

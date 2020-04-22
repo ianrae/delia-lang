@@ -214,6 +214,9 @@ public class RelationOneRule extends DRuleBase {
 		if (spec.needsReplacement(owningType)) {
 			owningType = (DStructType) spec.newType;
 		}
-		relInfo.performTypeReplacement(spec);
+		
+		if (relInfo != null) {
+			relInfo.performTypeReplacement(spec);
+		}
 	}
 }
