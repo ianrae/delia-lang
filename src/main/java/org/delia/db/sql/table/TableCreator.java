@@ -126,6 +126,23 @@ public class TableCreator extends ServiceBase {
 		return fieldgenFactory.generateFKConstraint(registry, pair, dtype, isAlter);
 	}
 	
+	protected void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype) {
+		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
+		String tbl1 = info.nearType.getName();
+		String tbl2 = info.farType.getName();
+		
+		if (! haveCreatedTable(tbl1)) {
+			TableInfo tblinfo = new TableInfo(tbl1, null);
+			this.alreadyCreatedL.add(tblinfo);
+		}
+		if (! haveCreatedTable(tbl2)) {
+			TableInfo tblinfo = new TableInfo(tbl2, null);
+			this.alreadyCreatedL.add(tblinfo);
+		}
+		
+		generateAssocTable(sc, pair, dtype);
+	}
+	
 	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 		String tbl1 = info.nearType.getName();
@@ -254,9 +271,13 @@ public class TableCreator extends ServiceBase {
 		
 		sc.nl();
 		if (manyToManyFieldCount > 0) {
-			sc.nl();
+			if (fieldL.isEmpty()) {
+				sc = new StrCreator(); //reset
+			} else {
+				sc.nl();
+			}
 			if (isManyToManyRelation(pair, dtype)) {
-				generateAssocTable(sc, pair, dtype);
+				alterGenerateAssocTable(sc, pair, dtype);
 			}
 		}
 		return sc.str;

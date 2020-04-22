@@ -11,6 +11,8 @@ import org.delia.db.sql.table.FieldGen;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.SqlElement;
 import org.delia.db.sql.table.TableCreator;
+import org.delia.db.sql.table.TableInfo;
+import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
@@ -95,13 +97,19 @@ public class PostgresTableCreator extends TableCreator {
 		
 		sc.nl();
 		if (manyToManyFieldCount > 0) {
+			if (fieldL.isEmpty()) {
+				sc = new StrCreator(); //reset
+			} else {
+				sc.nl();
+			}
 			sc.nl();
+			
 			if (isManyToManyRelation(pair, dtype)) {
-				generateAssocTable(sc, pair, dtype);
+				alterGenerateAssocTable(sc, pair, dtype);
 			}
 		}
 		return sc.str;
 	}
-	
+
 	
 }

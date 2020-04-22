@@ -9,6 +9,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -57,7 +58,7 @@ public class MigrationOptimizer extends ServiceBase {
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
 				if (ruleOne != null && ruleOne.isParent()) {
 					//don't add
-				} else 	if (ruleMany != null) {
+				} else 	if (ruleMany != null && !ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
 					//don't add (many side is always a parent)
 				} else {
 					newlist.add(st);
