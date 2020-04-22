@@ -146,7 +146,7 @@ public class DStructType extends DType {
 		orderedMap.performTypeReplacement(spec);
 		
 		for(TypePair pair: allFields) {
-			if (spec.needsReplacement(pair.type)) {
+			if (spec.needsReplacement(this, pair.type)) {
 				pair.type = spec.newType;
 			}
 		}

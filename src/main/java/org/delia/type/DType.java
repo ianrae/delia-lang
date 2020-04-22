@@ -145,7 +145,7 @@ public class DType {
 	}
 
 	public void performTypeReplacement(TypeReplaceSpec spec) {
-		if (baseType != null && spec.needsReplacement(baseType)) {
+		if (baseType != null && spec.needsReplacement(this, baseType)) {
 			baseType = spec.newType;
 		}
 		

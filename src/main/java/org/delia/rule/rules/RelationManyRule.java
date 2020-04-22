@@ -199,7 +199,7 @@ public class RelationManyRule extends DRuleBase {
 	}
 	@Override
 	public void performTypeReplacement(TypeReplaceSpec spec) {
-		if (spec.needsReplacement(owningType)) {
+		if (spec.needsReplacement(this, owningType)) {
 			owningType = (DStructType) spec.newType;
 		}
 		

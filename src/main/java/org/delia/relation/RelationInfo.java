@@ -13,10 +13,10 @@ public class RelationInfo {
 	
 	
 	public void performTypeReplacement(TypeReplaceSpec spec) {
-		if (spec.needsReplacement(nearType)) {
+		if (spec.needsReplacement(this, nearType)) {
 			nearType = (DStructType) spec.newType;
 		}
-		if (spec.needsReplacement(farType)) {
+		if (spec.needsReplacement(this, farType)) {
 			farType = (DStructType) spec.newType;
 		}
 	}

@@ -526,7 +526,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 				//so also check by name
 				boolean shouldReplace = dtype.getName().equals(spec.newType.getName());
 				
-				if (shouldReplace || spec.needsReplacement(dtype)) {
+				if (shouldReplace || spec.needsReplacement(this, dtype)) {
 					DValueImpl impl = (DValueImpl) dval;
 					impl.forceType(spec.newType);
 				} else {
