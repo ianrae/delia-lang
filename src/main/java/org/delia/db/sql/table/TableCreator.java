@@ -224,21 +224,34 @@ public class TableCreator extends ServiceBase {
 		}
 		
 		//add constraints
-		List<ConstraintGen> constraints = new ArrayList<>();
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
 			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, true);
 			if (constraint != null) {
 				fieldL.add(constraint);
-				constraints.add(constraint);
 			}
 		}
 		
+		List<ConstraintGen> constraints = getConstraintsOnly(fieldL);
 		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
 		
 		int index = 0;
-		for(SqlElement ff: fieldL) {
+		List<FieldGen> fields = getFieldsOnly(fieldL);
+		for(FieldGen ff: fields) {
 			ff.generateField(sc);
-			if (index + 1 < fieldL.size()) {
+			if (index + 1 < fields.size()) {
+				sc.o(",");
+				sc.nl();
+			}
+			index++;
+		}
+		
+		sc.o(";");
+		sc.nl();
+		index = 0;
+		for(ConstraintGen con: constraints) {
+			sc.o("ALTER TABLE %s ADD  ", typeName);
+			con.generateField(sc);
+			if (index + 1 < constraints.size()) {
 				sc.o(",");
 				sc.nl();
 			}
@@ -253,6 +266,25 @@ public class TableCreator extends ServiceBase {
 			}
 		}
 		return sc.str;
+	}
+
+	private List<FieldGen> getFieldsOnly(List<SqlElement> fieldL) {
+		List<FieldGen> list = new ArrayList<>();
+		for(SqlElement el: fieldL) {
+			if (el instanceof FieldGen) {
+				list.add((FieldGen) el);
+			}
+		}
+		return list;
+	}
+	private List<ConstraintGen> getConstraintsOnly(List<SqlElement> fieldL) {
+		List<ConstraintGen> list = new ArrayList<>();
+		for(SqlElement el: fieldL) {
+			if (el instanceof ConstraintGen) {
+				list.add((ConstraintGen) el);
+			}
+		}
+		return list;
 	}
 
 	public String generateRenameField(String tableName, String fieldName, String newName) {
