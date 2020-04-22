@@ -42,6 +42,13 @@ public class TypeRunner extends ServiceBase {
 		}
 	}
 	
+//	public void zz(List<DeliaError> allErrors) {
+//		if (allErrors.isEmpty()) {
+//			RulePostProcessor postProcessor = new RulePostProcessor(factorySvc);
+//			postProcessor.process(registry, allErrors);
+//		}
+//	}
+	
 	private ResultValue executeStatement(Exp exp) {
 		ResultValue res = new ResultValue();
 		if (exp instanceof TypeStatementExp) {

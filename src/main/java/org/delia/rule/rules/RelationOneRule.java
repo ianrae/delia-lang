@@ -20,7 +20,6 @@ import org.delia.type.TypePair;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
 public class RelationOneRule extends DRuleBase {

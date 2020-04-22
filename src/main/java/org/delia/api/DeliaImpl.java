@@ -143,6 +143,10 @@ public class DeliaImpl implements Delia {
 		//1st pass
 		TypeRunner typeRunner = mainRunner.createTypeRunner();
 		typeRunner.executeStatements(extL, allErrors);
+		
+//		if (allErrors.isEmpty()) {
+//			typeRunner.zz(allErrors);
+//		}
 
 		if (allErrors.isEmpty()) {
 			return;
@@ -197,6 +201,11 @@ public class DeliaImpl implements Delia {
 				log.logError("ERROR1: type %s invalid", dtype.getName());
 			}
 		}
+		
+//		//and update rule relinfo
+//		if (allErrors.isEmpty()) {
+//			typeRunner.zz(allErrors);
+//		}
 		
 		//TODO: are 2 passes enough?
 		if (allErrors.isEmpty()) {
