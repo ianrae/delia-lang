@@ -195,6 +195,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR2100File("t0-migration3.txt", 2);
 		runR2100File("t0-migration3a.txt", 2);
 		runR2100File("t0-migration3b.txt", 2);
+		runR2100File("t0-migration3c.txt", 2);
 		runR2100File("t0-migration4.txt", 2);
 		runR2100File("t0-migration10.txt", 2);
 		runR2100File("t0-migration10a.txt", 2);
@@ -229,14 +230,14 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-//		runR2150File("t0-migrate-one-to-one1.txt", 2);
-//		runR2150File("t0-migrate-one-to-one1.txt", 3);
-		runR500File("t0-relation-one-to-one.txt", 9);
+//		runR500File("t0-relation-one-to-one.txt", 9);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
+//		runR2100File("t0-migration3c.txt", 2);
 	}
 	
 	//---

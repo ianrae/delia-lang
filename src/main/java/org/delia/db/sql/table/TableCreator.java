@@ -210,7 +210,7 @@ public class TableCreator extends ServiceBase {
 		}
 		
 		StrCreator sc = new StrCreator();
-		sc.o("ALTER TABLE %s ADD  ", typeName);
+		sc.o("ALTER TABLE %s ADD COLUMN ", typeName);
 		sc.nl();
 		List<SqlElement> fieldL = new ArrayList<>();
 		int manyToManyFieldCount = 0;

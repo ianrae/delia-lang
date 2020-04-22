@@ -196,6 +196,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR2100File("t0-migration3.txt", 2);
 		runR2100File("t0-migration3a.txt", 2);
 		runR2100File("t0-migration3b.txt", 2);
+		runR2100File("t0-migration3c.txt", 2);
 		runR2100File("t0-migration4.txt", 2);
 		runR2100File("t0-migration10.txt", 2);
 		runR2100File("t0-migration10a.txt", 2);
