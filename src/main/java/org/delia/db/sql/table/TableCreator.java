@@ -234,28 +234,22 @@ public class TableCreator extends ServiceBase {
 		List<ConstraintGen> constraints = getConstraintsOnly(fieldL);
 		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
 		
-		int index = 0;
-		List<FieldGen> fields = getFieldsOnly(fieldL);
-		for(FieldGen ff: fields) {
+		
+		ListWalker<FieldGen> walker1 = new ListWalker<>(getFieldsOnly(fieldL));
+		while(walker1.hasNext()) {
+			FieldGen ff = walker1.next();
 			ff.generateField(sc);
-			if (index + 1 < fields.size()) {
-				sc.o(",");
-				sc.nl();
-			}
-			index++;
+			walker1.addIfNotLast(sc, ",", nl());
 		}
 		
 		sc.o(";");
 		sc.nl();
-		index = 0;
-		for(ConstraintGen con: constraints) {
+		ListWalker<ConstraintGen> walker = new ListWalker<>(constraints);
+		while(walker.hasNext()) {
+			ConstraintGen con = walker.next();
 			sc.o("ALTER TABLE %s ADD  ", typeName);
 			con.generateField(sc);
-			if (index + 1 < constraints.size()) {
-				sc.o(",");
-				sc.nl();
-			}
-			index++;
+			walker.addIfNotLast(sc, ",", nl());
 		}
 		
 		sc.nl();
@@ -266,6 +260,10 @@ public class TableCreator extends ServiceBase {
 			}
 		}
 		return sc.str;
+	}
+
+	private String nl() {
+		return "\n";
 	}
 
 	private List<FieldGen> getFieldsOnly(List<SqlElement> fieldL) {
