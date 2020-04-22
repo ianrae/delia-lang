@@ -21,6 +21,8 @@ import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.TypeRunner;
 import org.delia.runner.TypeSpec;
+import org.delia.type.DType;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -148,12 +150,29 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(getNonFutureDeclErrors(allErrors));
 		}
 		log.log("%d forward decls found - re-executing.", numFutureDeclErrors(allErrors));
-
+		
 		//2nd pass - for future decls
 		allErrors.clear();
-		typeRunner.executeStatements(extL, allErrors);
+		List<Exp> newExtL = typeRunner.getNeedReexecuteL(); //only re-exec the failed types
+		
+		List<DType> oldTypeL = new ArrayList<>();
+		for(Exp exp: newExtL) {
+			TypeStatementExp texp = (TypeStatementExp) exp;
+			DType dtype = typeRunner.getRegistry().getType(texp.typeName);
+			oldTypeL.add(dtype);
+		}
+		typeRunner.executeStatements(newExtL, allErrors);
+		
+		//now update all types
+		for(DType oldtype: oldTypeL) {
+			TypeReplaceSpec spec = new TypeReplaceSpec();
+			spec.oldType = oldtype;
+			spec.newType = typeRunner.getRegistry().getType(oldtype.getName());
+			typeRunner.getRegistry().performTypeReplacement(spec);
+		}
+		
+		
 		//TODO: are 2 passes enough?
-
 		if (allErrors.isEmpty()) {
 			return;
 		} else {

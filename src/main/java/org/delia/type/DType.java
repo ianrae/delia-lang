@@ -142,5 +142,15 @@ public class DType {
 	public void internalAdjustType(DType baseType) {
 		this.baseType = baseType;
 	}
+
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		if (baseType != null && spec.needsReplacement(baseType)) {
+			baseType = spec.newType;
+		}
+		
+		for(DRule rule: this.rules) {
+			rule.performTypeReplacement(spec);
+		}
+	}
 }
 

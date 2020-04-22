@@ -470,16 +470,16 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 			tbl = handleUnknownTable(typeName, dbctx);
 		}
 		
-		DStructType structType = (DStructType) dbctx.registry.getType(typeName);
-		if (true || structType.fieldIsOptional(field)) {
-			//add a value
-			for(DValue dval: tbl.rowL) {
-				if (dval.asStruct().getField(field) == null) {
-					Map<String, DValue> map = dval.asMap();
-					map.put(field, null);
-				}
-			}
-		}
+//		DStructType structType = (DStructType) dbctx.registry.getType(typeName);
+//		if (true || structType.fieldIsOptional(field)) {
+//			//add a value
+//			for(DValue dval: tbl.rowL) {
+//				if (dval.asStruct().getField(field) == null) {
+//					Map<String, DValue> map = dval.asMap();
+//					map.put(field, null);
+//				}
+//			}
+//		}
 	}
 
 	@Override

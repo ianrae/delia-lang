@@ -24,13 +24,22 @@ public class DTypeRegistry {
 	private DStructType schemaVersionType;
 	
 	public static final int NUM_BUILTIN_TYPES = 7;
-
+	
 	public synchronized void add(String name, DType type) {
         if (type == null || name == null || name.isEmpty()) {
             throw new IllegalArgumentException("name or type were null");
         }
 		
 	    type.setBitIndex(nextBitIndex++);
+//	    //remove any existing one with same name.
+//	    //because we re-execute typerunner we may have duplicates. remove earlier version
+//	    //TODO: not sure this works.
+//	    for(DType inner: orderedList) {
+//	    	if (inner.getName().equals(name)) {
+//	    		orderedList.remove(inner);
+//	    		break;
+//	    	}
+//	    }
 	    orderedList.add(type);
 		map.put(name, type);
 		
@@ -113,6 +122,13 @@ public class DTypeRegistry {
 			joiner.add(type.getName());
 		}
 		return joiner.toString();
+	}
+
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		for(String typeName: this.getAll()) {
+			DType currentType = getType(typeName);
+			currentType.performTypeReplacement(spec);
+		}
 	}
     
 }

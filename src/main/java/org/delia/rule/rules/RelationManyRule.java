@@ -20,8 +20,10 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
 public class RelationManyRule extends DRuleBase {
@@ -194,5 +196,12 @@ public class RelationManyRule extends DRuleBase {
 			Map<String,DValue> map = dval.asMap();
 			map.put(relInfo.fieldName, builder.getDValue());
 		}
+	}
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		if (spec.needsReplacement(owningType)) {
+			owningType = (DStructType) spec.newType;
+		}
+		relInfo.performTypeReplacement(spec);
 	}
 }

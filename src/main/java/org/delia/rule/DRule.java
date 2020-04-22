@@ -1,6 +1,7 @@
 package org.delia.rule;
 
 import org.delia.type.DValue;
+import org.delia.type.TypeReplaceSpec;
 
 /**
  * A validation rule.
@@ -15,4 +16,5 @@ public interface DRule {
 	String getSubject(); //for error messages
 	void setPolarity(boolean polarity);
 	boolean executeGuard(DValue dval);
+	void performTypeReplacement(TypeReplaceSpec spec);
 }
