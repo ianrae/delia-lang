@@ -236,17 +236,13 @@ public class PostgresBDDTests extends NewBDDBase {
 		enableSQLLogging = true;
 
 //		runR500File("t0-relation-one-to-one.txt", 9);
-//		runR2150File("t0-migrate-one-to-one1.txt", 2);
-		runR2150File("t0-migrate-one-to-one2.txt", 2);
-//		runR2150File("t0-migrate-one-to-one2a.txt", 2);
-//		runR2150File("t0-migrate-one-to-one3.txt", 2);
-//		runR2150File("t0-migrate-one-to-one4.txt", 2);
-//		runR2150File("t0-migrate-one-to-one5.txt", 2);
-//		runR2150File("t0-migrate-one-to-one6.txt", 2);
 		
-		
-//		runR500File("t0-relation-one-to-one.txt", 9);
-//		runR500File("t0-relation-one-to-many.txt", 9);
+//		runR2150File("t0-migrate-one-to-many1.txt", 3);
+//		runR2150File("t0-migrate-one-to-many2.txt", 2);
+//		runR2150File("t0-migrate-one-to-many2a.txt", 2);
+//		runR2150File("t0-migrate-one-to-many3.txt", 2);
+//		runR2150File("t0-migrate-one-to-many4.txt", 2);
+		runR2150File("t0-migrate-one-to-many6.txt", 2);
 	}
 	
 	//---
