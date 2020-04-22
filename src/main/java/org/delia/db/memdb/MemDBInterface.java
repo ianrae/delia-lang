@@ -465,7 +465,21 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 
 	@Override
 	public void createField(String typeName, String field, DBAccessContext dbctx) {
-		//nothing to do
+		MemDBTable tbl = tableMap.get(typeName);
+		if (tbl == null) {
+			tbl = handleUnknownTable(typeName, dbctx);
+		}
+		
+		DStructType structType = (DStructType) dbctx.registry.getType(typeName);
+		if (true || structType.fieldIsOptional(field)) {
+			//add a value
+			for(DValue dval: tbl.rowL) {
+				if (dval.asStruct().getField(field) == null) {
+					Map<String, DValue> map = dval.asMap();
+					map.put(field, null);
+				}
+			}
+		}
 	}
 
 	@Override

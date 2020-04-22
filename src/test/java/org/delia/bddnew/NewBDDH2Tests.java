@@ -250,7 +250,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 //		runR2150File("t0-migrate-one-to-many4.txt", 2);
 //		//is no test 5 for many-to-one
 //		runR2150File("t0-migrate-one-to-many6.txt", 2);
-		runR2150File("t0-migrate-one-to-one6.txt", 1);
+//		runR2150File("t0-migrate-one-to-one6.txt", 1);
 	}
 	
 	//---

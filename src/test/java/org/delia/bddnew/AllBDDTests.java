@@ -1,5 +1,6 @@
 package org.delia.bddnew;
 
+import org.delia.bddnew.core.BDDTester2;
 import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
 import org.junit.Before;
@@ -237,14 +238,17 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		runBDDFile(BDDGroup.R1350_filter_expr, "t0-filter-and-or.txt", 1, 4);
-//		runR1600File("t0-fetch.txt", 3);
 //		testIndexToRun = 2;
+		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		enableMigration = true;
+//		runR1600File("t0-fetch.txt", 3);
 //		runR2200File("t0-security-sql-injection.txt", 3);
-		runR1600File("t0-fetch-field.txt", 6);
+//		runR1600File("t0-fetch-field.txt", 6);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
 	}
 	
 	//---
+	private boolean enableMigration;
 
 	@Before
 	public void init() {
@@ -252,7 +256,11 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Override
 	public DBInterface createForTest() {
-		return new MemDBInterface();
+		MemDBInterface db = new MemDBInterface();
+		if (enableMigration) {
+			db.getCapabilities().setRequiresSchemaMigration(true);
+		}
+		return db;
 	}
 
 }

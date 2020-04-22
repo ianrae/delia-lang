@@ -7,6 +7,7 @@ import org.delia.core.FactoryServiceImpl;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
+import org.delia.log.LogFactory;
 import org.delia.log.SimpleLog;
 
 /**
@@ -19,6 +20,7 @@ public class DeliaBuilder {
 	private static DeliaBuilder theSingleton;
 	private ConnectionInfo info;
 	private Log log;
+	private LogFactory logFactory;
 	
 	public static DeliaBuilder withConnection(ConnectionInfo info) {
 		theSingleton = new DeliaBuilder();
@@ -29,10 +31,18 @@ public class DeliaBuilder {
 		this.log = log;
 		return this;
 	}
+	public DeliaBuilder log(LogFactory logFactory) {
+		this.logFactory = logFactory;
+		return this;
+	}
 	
 	public Delia build() {
 		if (log == null) {
-			log = new SimpleLog();
+			if (logFactory != null) {
+				log = logFactory.create("delia-logger"); //a single logger for Delia
+			} else {
+				log = new SimpleLog();
+			}
 		}
 		ErrorTracker et = new SimpleErrorTracker(log);
 		FactoryService factorySvc = new FactoryServiceImpl(log, et);
