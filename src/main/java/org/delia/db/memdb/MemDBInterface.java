@@ -345,28 +345,6 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		return qresp;
 	}
 
-	//		@Override
-	//		public void setRegistry(DTypeRegistry registry) {
-	////			this.registry = registry;
-	//			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
-	//			if (serialProvider == null) {
-	//				this.serialProvider = new SerialProvider(factorySvc, registry);
-	//			} else {
-	//				//we want to keep the serial providers so don't generate ids already used
-	//				this.serialProvider.setRegistry(registry);
-	//			}
-	//			
-	//		}
-
-	//		@Override
-	//		public void setVarEvaluator(VarEvaluator varEvaluator) {
-	////			this.varEvaluator = varEvaluator;
-	//		}
-	//		@Override
-	//		public VarEvaluator getVarEvaluator() {
-	//			return null; //varEvaluator;
-	//		}
-
 	@Override
 	public boolean doesTableExist(String tableName, DBAccessContext dbctx) {
 		return this.tableMap.containsKey(tableName);
@@ -542,7 +520,13 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 			MemDBTable tbl = tableMap.get(typeName);
 			for(DValue dval: tbl.rowL) {
 				DType dtype = dval.getType();
-				if (spec.needsReplacement(dtype)) {
+				
+				//in addition the DValues stored here may be from a previous entire run
+				//of Runner (and its registry).
+				//so also check by name
+				boolean shouldReplace = dtype.getName().equals(spec.newType.getName());
+				
+				if (shouldReplace || spec.needsReplacement(dtype)) {
 					DValueImpl impl = (DValueImpl) dval;
 					impl.forceType(spec.newType);
 				} else {

@@ -163,6 +163,12 @@ public class DeliaImpl implements Delia {
 			oldTypeL.add(dtype);
 		}
 		
+		//Type Replacement - because of the after-you-after-you problem with relations, 
+		//newExtL will contain types that could fully be built because of forward declarations
+		//Our solution is to run the typerunner again on just the broken types, and then
+		//use a visitor pattern to get all parts of the registry, types, rules, etc to update
+		//themselves with the new (correct) version of the type.
+		
 		//prepare the type replacer
 		List<TypeReplaceSpec> replacerL = new ArrayList<>();
 		for(DType oldtype: oldTypeL) {
