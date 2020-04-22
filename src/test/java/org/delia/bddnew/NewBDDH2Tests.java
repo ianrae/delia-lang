@@ -222,6 +222,14 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
 		runR2150File("t0-migrate-one-to-one4.txt", 2);
 		runR2150File("t0-migrate-one-to-one5.txt", 1);
+		runR2150File("t0-migrate-one-to-one6.txt", 1);
+		runR2150File("t0-migrate-one-to-many1.txt", 3);
+		runR2150File("t0-migrate-one-to-many2.txt", 2);
+		runR2150File("t0-migrate-one-to-many2a.txt", 2);
+		runR2150File("t0-migrate-one-to-many3.txt", 2);
+		runR2150File("t0-migrate-one-to-many4.txt", 2);
+		//is no test 5 for many-to-one
+		runR2150File("t0-migrate-one-to-many6.txt", 2);
 	}
 	@Test
 	public void testR2200() {

@@ -96,6 +96,18 @@ public class MigrationOptimizer extends ServiceBase {
 					st.newName = "-U"; //remove UNIQUE
 					
 					log.log("migrate: one to many on '%s.%s'", st.typeName, st.field);
+				} else if (st.newName.equals("-c,+a")) { //changing parent from many to one?
+					RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
+					DType farType = ruleOne.relInfo.farType;
+					DStructType nearType = ruleOne.relInfo.nearType;
+					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+
+					st.action = "A";
+					st.field = otherSide.fieldName;
+					st.typeName = otherSide.nearType.getName();
+					st.newName = "+U"; //remove UNIQUE
+					
+					log.log("migrate: one to many on '%s.%s'", st.typeName, st.field);
 				}
 				newlist.add(st);
 			} else {
