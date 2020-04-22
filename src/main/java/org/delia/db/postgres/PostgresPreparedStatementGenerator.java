@@ -3,6 +3,7 @@ package org.delia.db.postgres;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
 import org.delia.db.h2.SqlHelperFactory;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -12,8 +13,9 @@ import org.delia.type.DTypeRegistry;
 
 public class PostgresPreparedStatementGenerator extends PreparedStatementGenerator {
 
-	public PostgresPreparedStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator) {
-		super(factorySvc, registry, sqlHelperFactory, varEvaluator);
+	public PostgresPreparedStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlHelperFactory sqlHelperFactory, 
+			VarEvaluator varEvaluator, TableExistenceService existSvc) {
+		super(factorySvc, registry, sqlHelperFactory, varEvaluator, existSvc);
 	}
 
 	public SqlStatement generateQuery(QuerySpec spec) {

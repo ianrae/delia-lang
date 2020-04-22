@@ -64,6 +64,9 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
+		//TODO: we shouldn't keep tableCreator.alreadyCreatedL around. it becomes out of date 
+		//after schema migrations. should only use it during initial table creation.
+		
 		SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
 		logSql(statement);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;

@@ -9,6 +9,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.SqlHelperFactory;
 import org.delia.db.sql.SqlNameFormatter;
@@ -28,12 +29,15 @@ public class PreparedStatementGenerator extends ServiceBase {
 	protected SelectFuncHelper selectFnHelper;
 	protected SqlHelperFactory sqlHelperFactory;
 	private VarEvaluator varEvaluator;
+	private TableExistenceService existSvc;
 
-	public PreparedStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator) {
+	public PreparedStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlHelperFactory sqlHelperFactory, 
+				VarEvaluator varEvaluator, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.sqlHelperFactory = sqlHelperFactory;
 		this.varEvaluator = varEvaluator;
+		this.existSvc = existSvc;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		this.nameFormatter = sqlHelperFactory.createNameFormatter(dbctx);
@@ -140,7 +144,8 @@ public class PreparedStatementGenerator extends ServiceBase {
 		StrCreator sc = new StrCreator();
 		sc.o("UPDATE %s SET ", tblName(dtype));
 		
-		InsertStatementGenerator insgen = new InsertStatementGenerator(factorySvc, registry, nameFormatter);
+		InsertStatementGenerator insgen = new InsertStatementGenerator(factorySvc, registry, nameFormatter, existSvc);
+//		InsertStatementGenerator insgen = sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
 		String s = insgen.generateUpdateBody(sc, dval, map, statement);
 		return s;
 	}

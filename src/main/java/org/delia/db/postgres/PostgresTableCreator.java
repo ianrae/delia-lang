@@ -16,6 +16,7 @@ import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 public class PostgresTableCreator extends TableCreator {

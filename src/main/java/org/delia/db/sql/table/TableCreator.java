@@ -143,6 +143,11 @@ public class TableCreator extends ServiceBase {
 		generateAssocTable(sc, pair, dtype);
 	}
 	
+	public static String createAssocTableName(String tbl1, String tbl2) {
+		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
+		return assocTableName;
+	}
+	
 	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 		String tbl1 = info.nearType.getName();
@@ -151,7 +156,7 @@ public class TableCreator extends ServiceBase {
 			return;
 		}
 
-		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
+		String assocTableName = createAssocTableName(tbl1, tbl2);
 		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
 		tblinfo.assocTblName = assocTableName;
 		tblinfo.tbl1 = tbl1;

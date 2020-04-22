@@ -3,6 +3,7 @@ package org.delia.db.postgres;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
+import org.delia.db.TableExistenceService;
 import org.delia.db.h2.SqlHelperFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
@@ -34,17 +35,17 @@ public class PostgresSqlHelperFactory extends SqlHelperFactory {
 	public WhereClauseGenerator createPWhereGen(DBAccessContext dbctx) {
 		return new PostgresWhereClauseGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 	}
-	public PreparedStatementGenerator createPrepSqlGen(DBAccessContext dbctx) {
-		PreparedStatementGenerator sqlgen = new PostgresPreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator);
+	public PreparedStatementGenerator createPrepSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
+		PreparedStatementGenerator sqlgen = new PostgresPreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator, existSvc);
 		return sqlgen;
 	}
 	public SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx) {
 		SelectFuncHelper sfhelper = new PostgresSelectFuncHelper(factorySvc, dbctx.registry);
 		return sfhelper;
 	}
-	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
+	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
-		InsertStatementGenerator sqlgen = new PostgresInsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter);
+		InsertStatementGenerator sqlgen = new PostgresInsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter, existSvc);
 		return sqlgen;
 	}
 	public TableCreator createTableCreator(DBAccessContext dbctx) {

@@ -6,15 +6,17 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.ValueHelper;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.FKSqlGenerator;
-import org.delia.db.sql.prepared.WhereClauseGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
+import org.delia.db.sql.prepared.WhereClauseGenerator;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.db.sql.table.TableInfo;
@@ -35,13 +37,13 @@ public class SqlHelperFactory extends ServiceBase {
 	public DBErrorConverter createErrorConverter() {
 		return new H2ErrorConverter();
 	}
-	public PreparedStatementGenerator createPrepSqlGen(DBAccessContext dbctx) {
-		PreparedStatementGenerator sqlgen = new PreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator);
+	public PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx) {
+		PreparedStatementGenerator sqlgen = new PreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator, existSvc);
 		return sqlgen;
 	}
-	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
+	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
-		InsertStatementGenerator sqlgen = new InsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter);
+		InsertStatementGenerator sqlgen = new InsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter, existSvc);
 		return sqlgen;
 	}
 	
@@ -50,8 +52,8 @@ public class SqlHelperFactory extends ServiceBase {
 		return nameFormatter;
 	}
 	
-	public FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx) {
-		FKSqlGenerator sqlgen = new FKSqlGenerator(factorySvc, dbctx.registry, tblinfoL, this, dbctx.varEvaluator);
+	public FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc) {
+		FKSqlGenerator sqlgen = new FKSqlGenerator(factorySvc, dbctx.registry, tblinfoL, this, dbctx.varEvaluator, existSvc);
 		return sqlgen;
 	}
 	

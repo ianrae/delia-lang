@@ -11,6 +11,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
 import org.delia.db.h2.SqlHelperFactory;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
@@ -46,7 +47,7 @@ public class FKSqlGenerator extends ServiceBase {
 	private SqlHelperFactory sqlHelperFactory;
 
 	public FKSqlGenerator(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
-			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator) {
+			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.tblinfoL = tblinfoL;
@@ -57,7 +58,7 @@ public class FKSqlGenerator extends ServiceBase {
 		this.queryDetectorSvc = sqlHelperFactory.createQueryTypeDetector(dbctx);
 		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc);
 		this.pwheregen = sqlHelperFactory.createPWhereGen(dbctx); 
-		this.sqlgen = sqlHelperFactory.createPrepSqlGen(dbctx);
+		this.sqlgen = sqlHelperFactory.createPrepSqlGen(existSvc, dbctx);
 	}
 
 	private Table genTable(String typeName) {

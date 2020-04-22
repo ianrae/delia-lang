@@ -6,8 +6,10 @@ import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.table.TableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DRelation;
@@ -24,11 +26,14 @@ public class InsertStatementGenerator extends ServiceBase {
 	private DTypeRegistry registry;
 	private SqlNameFormatter nameFormatter;
 	protected boolean specialHandlingForEmptyInsertFlag = false; //insert into Participant values (default);
+	private TableExistenceService existSvc;
 
-	public InsertStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlNameFormatter nameFormatter) {
+	public InsertStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlNameFormatter nameFormatter, 
+				TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.nameFormatter = nameFormatter;
+		this.existSvc = existSvc;
 	}
 
 	private String tblName(String typeName) {
@@ -125,12 +130,37 @@ public class InsertStatementGenerator extends ServiceBase {
 		for(TypePair pair: dtype.getAllFields()) {
 			RelationInfo info = DRuleHelper.findManyToManyRelation(pair, dtype);
 			if (info != null) {
+				fillTableInfoIfNeeded(tblInfoL, info);
 				TableInfo tblinfo = TableInfoHelper.findTableInfo(tblInfoL, pair, info);
 				sql += genAssocInsert(dval, pair, tblinfo, map, statement);
 			}
 		}
 		return sql;
 	}
+	private void fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
+		String tbl1 = info.nearType.getName();
+		String tbl2 = info.farType.getName();
+		
+		//try tbl1 tbl2 Assoc
+		String assocTblName = TableCreator.createAssocTableName(tbl1, tbl2);
+		if (existSvc.doesTableExist(assocTblName)) {
+			TableInfo tblinfo = new TableInfo(tbl1, assocTblName);
+			tblinfo.tbl1 = tbl1;
+			tblinfo.tbl2 = tbl2;
+			tblInfoL.add(tblinfo);
+			return;
+		}
+		
+		//try other way around
+		assocTblName = TableCreator.createAssocTableName(tbl2, tbl1);
+		if (existSvc.doesTableExist(assocTblName)) {
+			TableInfo tblinfo = new TableInfo(tbl2, assocTblName);
+			tblinfo.tbl1 = tbl2;
+			tblinfo.tbl2 = tbl1;
+			tblInfoL.add(tblinfo);
+		}
+	}
+
 	private String genAssocInsert(DValue dval, TypePair pair, TableInfo tblinfo, Map<String, DRelation> map, SqlStatement statement) {
 		DStructType dtype = (DStructType) dval.getType();
 		StrCreator sc = new StrCreator();

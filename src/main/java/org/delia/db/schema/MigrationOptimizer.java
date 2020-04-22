@@ -52,14 +52,22 @@ public class MigrationOptimizer extends ServiceBase {
 	 */
 	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
 		List<SchemaType> newlist = new ArrayList<>();
+		List<SchemaType> manyToManyList = new ArrayList<>();
 		for(SchemaType st: diffL) {
 			if (st.isFieldInsert()) {
 				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
 				if (ruleOne != null && ruleOne.isParent()) {
 					//don't add
-				} else 	if (ruleMany != null && !ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
-					//don't add (many side is always a parent)
+				} else 	if (ruleMany != null) {
+					if (ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+						if (! findOtherSideOfRelation(manyToManyList, st)) {
+							newlist.add(st);
+							manyToManyList.add(st);
+						}
+					} else {
+						//don't add (many side is always a parent)
+					}
 				} else {
 					newlist.add(st);
 				}
@@ -80,6 +88,18 @@ public class MigrationOptimizer extends ServiceBase {
 		return newlist;
 	}
 	
+	private boolean findOtherSideOfRelation(List<SchemaType> manyToManyList, SchemaType target) {
+		for(SchemaType st: manyToManyList) {
+			RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
+			if (ruleMany != null) {
+				if (ruleMany.relInfo.farType.getName().equals(target.typeName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private List<SchemaType> detectOneToManyFieldChange(List<SchemaType> diffL) {
 		List<SchemaType> newlist = new ArrayList<>();
 		List<SchemaType> doomedL = new ArrayList<>();
