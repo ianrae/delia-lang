@@ -10,8 +10,8 @@ import org.delia.util.DValueHelper;
 
 public class PostgresFieldGen extends FieldGen {
 
-	public PostgresFieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype) {
-		super(factorySvc, registry, pair, dtype);
+	public PostgresFieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
+		super(factorySvc, registry, pair, dtype, isAlter);
 	}
 	
 	public void generateField(StrCreator sc) {

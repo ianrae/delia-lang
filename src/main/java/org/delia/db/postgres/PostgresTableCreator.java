@@ -57,7 +57,7 @@ public class PostgresTableCreator extends TableCreator {
 		if (isManyToManyRelation(pair, dtype)) {
 			manyToManyFieldCount++;
 		} else {
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
 			fieldL.add(field);
 		}
 		
@@ -65,7 +65,7 @@ public class PostgresTableCreator extends TableCreator {
 		ConstraintGen constraint = null;
 		List<ConstraintGen> constraints = new ArrayList<>();
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
-			constraint = generateFKConstraint(sc, pair, dtype);
+			constraint = generateFKConstraint(sc, pair, dtype, true);
 			constraints.add(constraint);
 //			if (constraint != null) {
 //				fieldL.add(constraint);

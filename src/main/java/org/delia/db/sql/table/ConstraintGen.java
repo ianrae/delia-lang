@@ -14,8 +14,8 @@ public class ConstraintGen extends SqlElement {
 
 	public boolean makeFieldUnique = false;
 
-	public ConstraintGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype) {
-		super(factorySvc, registry, pair, dtype);
+	public ConstraintGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
+		super(factorySvc, registry, pair, dtype, isAlter);
 		
 		RelationOneRule oneRule = DRuleHelper.findOneRule(dtype.getName(), pair.name, registry);
 		if (oneRule != null && oneRule.relInfo.cardinality.equals(RelationCardinality.ONE_TO_ONE)) {

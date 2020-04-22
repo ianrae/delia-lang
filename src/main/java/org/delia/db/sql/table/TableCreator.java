@@ -51,7 +51,7 @@ public class TableCreator extends ServiceBase {
 				continue;
 			}
 			
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, false);
 			fieldL.add(field);
 			index++;
 		}
@@ -60,7 +60,7 @@ public class TableCreator extends ServiceBase {
 		List<ConstraintGen> constraints = new ArrayList<>();
 		for(TypePair pair: dtype.getAllFields()) {
 			if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
-				ConstraintGen constraint = generateFKConstraint(sc, pair, dtype);
+				ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, false);
 				if (constraint != null) {
 					fieldL.add(constraint);
 					constraints.add(constraint);
@@ -118,12 +118,12 @@ public class TableCreator extends ServiceBase {
 		return DRuleHelper.isManyToManyRelation(pair, dtype);
 	}
 
-	protected ConstraintGen generateFKConstraint(StrCreator sc, TypePair pair, DStructType dtype) {
+	protected ConstraintGen generateFKConstraint(StrCreator sc, TypePair pair, DStructType dtype, boolean isAlter) {
 		//key goes in child only
 		if (!shouldGenerateFKConstraint(pair, dtype)) {
 			return null;
 		}
-		return fieldgenFactory.generateFKConstraint(registry, pair, dtype);
+		return fieldgenFactory.generateFKConstraint(registry, pair, dtype, isAlter);
 	}
 	
 	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
@@ -150,13 +150,13 @@ public class TableCreator extends ServiceBase {
 			if (isManyToManyRelation(pair, dtype)) {
 				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
 				TypePair copy = new TypePair("leftv", pair.type);
-				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype);
+				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype, false);
 				fieldL.add(field);
 
 				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 				copy = new TypePair("rightv", xx.type);
 				//TODO: should probably be optional (NULL). todo fix!1
-				field = fieldgenFactory.createFieldGen(registry, copy, info.farType);
+				field = fieldgenFactory.createFieldGen(registry, copy, info.farType, false);
 				fieldL.add(field);
 
 				index++;
@@ -166,13 +166,13 @@ public class TableCreator extends ServiceBase {
 		for(TypePair pair: dtype.getAllFields()) {
 			if (isManyToManyRelation(pair, dtype)) {
 				TypePair copy = new TypePair("leftv", info.nearType); //address
-				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.nearType);
+				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.nearType, false);
 				if (constraint != null) {
 					fieldL.add(constraint);
 				}
 				
 				copy = new TypePair("rightv", info.farType);
-				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.farType);
+				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.farType, false);
 				if (constraint != null) {
 					fieldL.add(constraint);
 				}
@@ -219,14 +219,14 @@ public class TableCreator extends ServiceBase {
 		if (isManyToManyRelation(pair, dtype)) {
 			manyToManyFieldCount++;
 		} else {
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
 			fieldL.add(field);
 		}
 		
 		//add constraints
 		List<ConstraintGen> constraints = new ArrayList<>();
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
-			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype);
+			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, true);
 			if (constraint != null) {
 				fieldL.add(constraint);
 				constraints.add(constraint);
@@ -273,7 +273,7 @@ public class TableCreator extends ServiceBase {
 		DStructType dtype = (DStructType) registry.getType(tableName);
 		TypePair pair = DValueHelper.findField(dtype, fieldName);
 		
-		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype);
+		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
 		String sqlType = fieldGen.deliaToSql(pair);
 		
 		sc.o(" SET DATA TYPE %s", sqlType); 

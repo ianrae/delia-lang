@@ -14,8 +14,8 @@ public class PostgresFieldgenFactory extends FieldGenFactory {
 	}
 
 	@Override
-	public FieldGen createFieldGen(DTypeRegistry registry, TypePair pair, DStructType dtype) {
-		return new PostgresFieldGen(factorySvc, registry, pair, dtype);
+	public FieldGen createFieldGen(DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
+		return new PostgresFieldGen(factorySvc, registry, pair, dtype, isAlter);
 	}
 
 }

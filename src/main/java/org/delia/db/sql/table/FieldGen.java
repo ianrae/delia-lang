@@ -13,8 +13,8 @@ public class FieldGen extends SqlElement {
 
 	public boolean makeFieldUnique;
 
-	public FieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype) {
-		super(factorySvc, registry, pair, dtype);
+	public FieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
+		super(factorySvc, registry, pair, dtype, isAlter);
 	}
 	
 	public void generateField(StrCreator sc) {
