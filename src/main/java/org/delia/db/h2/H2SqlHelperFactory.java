@@ -6,8 +6,10 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
+import org.delia.db.DBInterface;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.ValueHelper;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SimpleSqlNameFormatter;
@@ -24,8 +26,15 @@ import org.delia.db.sql.where.SqlWhereConverter;
 
 public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory {
 
+	protected DBInterface dbInterface;
+
 	public H2SqlHelperFactory(FactoryService factorySvc) {
 		super(factorySvc);
+	}
+	
+	@Override
+	public void init(DBInterface dbInterface) {
+		this.dbInterface = dbInterface;
 	}
 	
 	@Override
@@ -74,7 +83,8 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	@Override
 	public TableCreator createTableCreator(DBAccessContext dbctx) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
-		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter);
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc);
 	}
 	
 	@Override

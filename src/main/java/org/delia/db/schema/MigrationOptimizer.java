@@ -77,7 +77,15 @@ public class MigrationOptimizer extends ServiceBase {
 				if (ruleOne != null && ruleOne.isParent()) {
 					//don't add
 				} else 	if (ruleMany != null) {
-					//don't add (many side is always a parent)
+					if (ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+						if (! findOtherSideOfRelation(manyToManyList, st)) {
+							newlist.add(st);
+							manyToManyList.add(st);
+						}
+					} else {
+						//don't add (many side is always a parent)
+					}
+					
 				} else {
 					newlist.add(st);
 				}

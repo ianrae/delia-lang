@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
 import org.delia.relation.RelationInfo;
@@ -20,12 +21,15 @@ public class TableCreator extends ServiceBase {
 	public List<TableInfo> alreadyCreatedL = new ArrayList<>();
 	protected FieldGenFactory fieldgenFactory;
 	protected SqlNameFormatter nameFormatter;
+	private TableExistenceService existSvc;
 	
-	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, SqlNameFormatter nameFormatter) {
+	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
+				SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
+		this.existSvc = existSvc;
 	}
 
 	public String generateCreateTable(String typeName, DStructType dtype) {

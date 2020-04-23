@@ -15,6 +15,8 @@ import org.delia.db.DBInterface;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.h2.H2DBInterface;
 import org.delia.db.h2.H2ErrorConverter;
@@ -210,7 +212,8 @@ public class H2DBInterfaceTests {
 		factorySvc = new FactoryServiceImpl(log, et);
 		Runner runner = helper.create(factorySvc, dbInterface);
 
-		this.tableCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter());
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(runner));
+		this.tableCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc);
 		return runner;
 	}
 	

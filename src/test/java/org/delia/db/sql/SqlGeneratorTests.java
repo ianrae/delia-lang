@@ -254,9 +254,9 @@ public class SqlGeneratorTests {
 		runner = helper.create(factorySvc, dbInterface);
 
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter());
-		H2SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(runner));
+		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc);
+		H2SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		this.prepGen = 	new PreparedStatementGenerator(factorySvc, runner.getRegistry(), sqlHelperFactory, new DoNothingVarEvaluator(), existSvc);
 		this.insertGen = new InsertStatementGenerator(factorySvc, runner.getRegistry(), nameFormatter, existSvc);
 

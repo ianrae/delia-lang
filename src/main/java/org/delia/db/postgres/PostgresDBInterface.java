@@ -43,6 +43,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	public PostgresDBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.POSTGRES, factorySvc, connFactory, new PostgresSqlHelperFactory(factorySvc));
+		this.sqlHelperFactory.init(this);
 		this.errorConverter = this.sqlHelperFactory.createErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
 	}

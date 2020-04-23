@@ -16,6 +16,7 @@ import org.delia.db.sql.where.SqlWhereConverter;
 
 public interface SqlHelperFactory {
 
+	void init(DBInterface dbInterface);
 	ValueHelper createValueHelper();
 	FieldGenFactory createFieldGenFactory();
 	DBErrorConverter createErrorConverter();

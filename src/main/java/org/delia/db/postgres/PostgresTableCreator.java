@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.core.FactoryService;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ConstraintGen;
@@ -11,18 +12,16 @@ import org.delia.db.sql.table.FieldGen;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.SqlElement;
 import org.delia.db.sql.table.TableCreator;
-import org.delia.db.sql.table.TableInfo;
-import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 public class PostgresTableCreator extends TableCreator {
 	
-	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, SqlNameFormatter nameFormatter) {
-		super(factorySvc, registry, fieldgenFactory, nameFormatter);
+	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
+			SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
+		super(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc);
 	}
 
 	public String generateRenameField(String tableName, String fieldName, String newName) {

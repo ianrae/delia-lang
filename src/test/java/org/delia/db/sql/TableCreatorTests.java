@@ -7,6 +7,9 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
+import org.delia.db.DBAccessContext;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
@@ -84,7 +87,8 @@ public class TableCreatorTests {
 		FactoryService factorySvc = new FactoryServiceImpl(log, et);
 		Runner runner = helper.create(factorySvc, dbInterface);
 
-		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter());
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(runner));
+		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc);
 		return runner;
 	}
 	

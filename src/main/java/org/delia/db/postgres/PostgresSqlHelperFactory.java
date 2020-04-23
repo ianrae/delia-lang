@@ -3,7 +3,9 @@ package org.delia.db.postgres;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
+import org.delia.db.DBInterface;
 import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
@@ -58,7 +60,8 @@ public class PostgresSqlHelperFactory extends H2SqlHelperFactory {
 	@Override
 	public TableCreator createTableCreator(DBAccessContext dbctx) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
-		return new PostgresTableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter);
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		return new PostgresTableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc);
 	}
 
 }
