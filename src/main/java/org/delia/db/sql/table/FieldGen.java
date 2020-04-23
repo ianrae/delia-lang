@@ -41,17 +41,15 @@ public class FieldGen extends SqlElement {
 			suffix1 = " UNIQUE";
 		}
 		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";
-		sc.o("  %s %s%s%s", name, type, suffix1, suffix1a, suffix2);
+		sc.o("  %s %s%s%s%s", name, type, suffix1, suffix1a, suffix2);
 	}
 
 	protected void generateAssocField(StrCreator sc) {
 		String name = pair.name;
 		String type = deliaToSql(pair);
 		//	Department		Char(35)		NOT NULL,
-		String suffix1 =  "";
-		String suffix1a = "";
 		String suffix2 = this.isAssocTblFieldOptional ? " NULL" : "";
-		sc.o("  %s %s%s%s", name, type, suffix1, suffix1a, suffix2);
+		sc.o("  %s %s%s", name, type, suffix2);
 	}
 
 	public String deliaToSql(TypePair pair) {

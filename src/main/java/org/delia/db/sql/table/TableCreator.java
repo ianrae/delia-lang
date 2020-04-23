@@ -177,13 +177,14 @@ public class TableCreator extends ServiceBase {
 				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
 				TypePair copy = new TypePair("leftv", pair.type);
 				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype, false);
-				field.setIsAssocTblField(dtype.fieldIsOptional(pair.name));
+				RelationInfo otherSide = DRuleHelper.findOtherSideMany(info.farType, dtype);
+				field.setIsAssocTblField(info.farType.fieldIsOptional(otherSide.fieldName));
 				fieldL.add(field);
 
 				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 				copy = new TypePair("rightv", xx.type);
-				//TODO: should probably be optional (NULL). todo fix!1
 				field = fieldgenFactory.createFieldGen(registry, copy, info.farType, false);
+				field.setIsAssocTblField(dtype.fieldIsOptional(pair.name));
 				fieldL.add(field);
 
 				index++;
