@@ -1,0 +1,45 @@
+# let field value tests
+
+FEATURE: let field value with relation
+background:
+ configure loadFKs = true
+thenType: struct
+
+# --- Multiple ---
+---
+title: multiple
+given:
+ type Customer struct {id int unique, wid int, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].orderBy('id').wid
+then:
+value:a:int:33
+value:a:int:34
+
+---
+title: orderBy with relations (that will be null since no fk())
+given:
+ type Customer struct {id int unique, wid int, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Address {id: 100}
+  insert Customer {id: 55, wid:33, addr: 100}
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+vid:55
+vwid:33
+vaddr:null
+}
+value:a:Customer {
+vid:56
+vwid:34
+vaddr:null
+}
+

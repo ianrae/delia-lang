@@ -171,6 +171,9 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
+		runR1700File("t0-let-field-func.txt", 3);
+		runR1700File("t0-let-field-multiple.txt", 5);
+		runR1700File("t0-let-field-relation.txt", 2);
 	}
 	
 	@Test

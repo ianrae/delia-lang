@@ -170,6 +170,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 			}
 			assertEquals(n, tests.size());
 		}
+		if (numTests != passes) {
+			enableAllFileCheck = false;
+		}
 		assertEquals(numTests, passes);
 		return passes;
 	}

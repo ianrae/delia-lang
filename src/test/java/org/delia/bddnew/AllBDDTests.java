@@ -172,7 +172,8 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
 		runR1700File("t0-let-field-func.txt", 3);
-		runR1700File("t0-let-field-multiple.txt", 3);
+		runR1700File("t0-let-field-multiple.txt", 5); //fix. addr should be null since no .fk
+		runR1700File("t0-let-field-relation.txt", 2);
 	}
 	
 	@Test
