@@ -3,6 +3,7 @@ package org.delia.bddnew;
 import org.delia.bddnew.core.BDDTester2;
 import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -214,6 +215,7 @@ public class AllBDDTests extends NewBDDBase {
 	}
 	@Test
 	public void testR2150() {
+		enableAllFileCheck = false;
 		runR500File("t0-relation-one-to-one.txt", 9);
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
@@ -252,7 +254,10 @@ public class AllBDDTests extends NewBDDBase {
 	@Before
 	public void init() {
 	}
-	
+	@After
+	public void shutdown() {
+		chkAllFiles();
+	}
 	@Override
 	public DBInterface createForTest() {
 		MemDBInterface db = new MemDBInterface();

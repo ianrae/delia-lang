@@ -2,9 +2,18 @@ package org.delia.bddnew;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.delia.base.UnitTestLog;
+import org.delia.bddnew.NewBDDBase.BDDGroup;
+import org.delia.bddnew.NewBDDBase.FileHelper;
 import org.delia.bddnew.core.BDDParser;
 import org.delia.bddnew.core.BDDTest;
 import org.delia.bddnew.core.BDDTestRunner;
@@ -57,6 +66,10 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
 	protected DBInterface dbInterfaceToUse;
+	
+	protected List<String> filesExecutedL = new ArrayList<>();
+	private BDDGroup currentGroup;
+	protected boolean enableAllFileCheck = true;
 
 	protected String testFile(BDDGroup group, String filename) {
 		String s = fileHelper.getDir(group);
@@ -135,6 +148,8 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("FILE: %s", filename);
+		currentGroup = group;
+		filesExecutedL.add(filename);
 		String path = testFile(group, filename);
 		TextFileReader reader = new TextFileReader();
 		List<String> lines = reader.readFile(path);
@@ -153,6 +168,25 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		}
 		assertEquals(numTests, passes);
 		return passes;
+	}
+	
+	protected void chkAllFiles() {
+		FileHelper fileHelper = new FileHelper();
+		//we assume each test method only does files in one group
+		String dir = fileHelper.getDir(currentGroup);
+		File file = new File(dir);       
+		Collection<File> files = FileUtils.listFiles(file, null, false);     
+		for(File file2 : files){
+			String filename = FilenameUtils.getName(file2.getAbsolutePath());
+			if (filesExecutedL.contains(filename)) {
+				filesExecutedL.remove(filename);
+			}
+		}		
+		
+		for(String filename: filesExecutedL) {
+			log.log("NOT-EXECUTED: %s", filename);
+		}
+		assertEquals(0, filesExecutedL.size());
 	}
 
 	public abstract DBInterface createForTest();
