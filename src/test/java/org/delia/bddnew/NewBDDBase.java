@@ -42,6 +42,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R1350_filter_expr,
 		R1400_let_filterfn,
 		R1500_let_queryfn,
+		R1550_let_queryfn_relation,
 		R1600_let_fetch,
 		R1700_let_field_value,
 		R1800_let_dollardollar,
@@ -121,6 +122,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runR1500File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R1500_let_queryfn, filename, numTests);
+	}
+	protected int runR1550File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R1550_let_queryfn_relation, filename, numTests);
 	}
 	protected int runR1600File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R1600_let_fetch, filename, numTests);

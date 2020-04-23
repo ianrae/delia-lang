@@ -160,6 +160,10 @@ public class AllBDDTests extends NewBDDBase {
 	}
 	
 	@Test
+	public void testR1550() {
+		runR1550File("t0-queryfn-oneone-parent.txt", 4);
+	}	
+	@Test
 	public void testR1600() {
 		runR1600File("t0-fetch.txt", 3);
 		runR1600File("t0-fetch-field.txt", 6);
