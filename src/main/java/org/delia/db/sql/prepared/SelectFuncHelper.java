@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
@@ -78,6 +79,9 @@ public class SelectFuncHelper extends ServiceBase {
 				isDesc = exp.strValue().equals("desc");
 			} else {
 				String fieldName = exp.strValue();
+				if (fieldName.contains(".")) {
+					fieldName = StringUtils.substringAfter(fieldName, ".");
+				}
 				if (! DValueHelper.fieldExists(structType, fieldName)) {
 					DeliaExceptionHelper.throwError("unknown-field", "type '%s' does not have field '%s'. Invalid orderBy parameter", typeName, fieldName);
 				}
@@ -113,8 +117,8 @@ public class SelectFuncHelper extends ServiceBase {
 		String s = String.format(" LIMIT %d", n);
 		sc.o(s);
 	}
-	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName) {
-		QuerySpec spec = doLastFixup(specOriginal, typeName);
+	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName, String alias) {
+		QuerySpec spec = doLastFixup(specOriginal, typeName, alias);
 		QueryFuncExp limitFn = this.findFn(spec, "limit");
 		if (limitFn != null) {
 			spec.queryExp.qfelist.remove(limitFn);
@@ -126,7 +130,7 @@ public class SelectFuncHelper extends ServiceBase {
 		spec.queryExp.qfelist.add(qfexp1);
 		return spec;
 	}
-	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName) {
+	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias) {
 		DType dtype = registry.findTypeOrSchemaVersionType(typeName);
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
 		if (pair == null) { 
@@ -135,7 +139,8 @@ public class SelectFuncHelper extends ServiceBase {
 		} else {
 			QuerySpec spec = makeCopy(specOriginal);
 			QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("orderBy"), null, false);
-			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(pair.name));
+			String s = alias == null ? pair.name : String.format("%s.%s", alias, pair.name);
+			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(s));
 			IdentExp exp1 = new IdentExp("desc");
 			qfexp1.argL.add(qfe);
 			qfexp1.argL.add(exp1);

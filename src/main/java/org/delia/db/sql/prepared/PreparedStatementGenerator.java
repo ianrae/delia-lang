@@ -90,7 +90,7 @@ public class PreparedStatementGenerator extends ServiceBase {
 			return spec;
 		}
 
-		return selectFnHelper.doLastFixup(spec, typeName);
+		return selectFnHelper.doLastFixup(spec, typeName, null);
 	}
 
 	public void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {

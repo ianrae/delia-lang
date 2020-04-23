@@ -59,7 +59,7 @@ public class PostgresPreparedStatementGenerator extends PreparedStatementGenerat
 	 */
 	protected QuerySpec doSelectFirst(StrCreator sc, QuerySpec spec, String typeName) {
 		sc.o("SELECT * FROM %s", typeName);
-		return selectFnHelper.doFirstFixup(spec, typeName);
+		return selectFnHelper.doFirstFixup(spec, typeName, null);
 	}
 
 	
@@ -77,7 +77,7 @@ public class PostgresPreparedStatementGenerator extends PreparedStatementGenerat
 			return spec;
 		}
 
-		return selectFnHelper.doLastFixup(spec, typeName);
+		return selectFnHelper.doLastFixup(spec, typeName, null);
 	}
 
 

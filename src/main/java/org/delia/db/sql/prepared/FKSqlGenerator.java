@@ -79,9 +79,13 @@ public class FKSqlGenerator extends ServiceBase {
 		QueryExp exp = spec.queryExp;
 		SqlStatement statement = new SqlStatement();
 		
+		Table tbl = genTable(exp.getTypeName());
 		List<RelationOneRule> oneL = findAllOneRules(exp.getTypeName());
 		List<RelationManyRule> manyL = findAllManyRules(exp.getTypeName());
 		QueryAdjustment adjustment = addOtherPartsOfQuery(spec, exp.typeName);
+		if (adjustment != null && adjustment.isFirst) {
+			spec = this.selectFnHelper.doFirstFixup(spec, exp.typeName, tbl.alias);
+		}
 		
 //		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
 		RelationOneRule rule = oneL.isEmpty() ? null : oneL.get(0);
@@ -100,7 +104,6 @@ public class FKSqlGenerator extends ServiceBase {
 			return sqlgen.generateQuery(spec); 
 		}
 
-		Table tbl = genTable(exp.getTypeName());
 		if (!rule.isParent()) {
 			sc.o("SELECT * FROM %s", tbl.name);
 			this.pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), null, statement);
@@ -121,6 +124,7 @@ public class FKSqlGenerator extends ServiceBase {
 
 		//			TypePair farField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.farType);
 		sc.o(" as %s LEFT JOIN %s ON %s", tbl.alias, tbl2.fmtAsStr(), onstr);
+		sqlgen.generateQueryFns(sc, spec, exp.typeName);
 		
 		//Customer[addr = 100]. can't do this because customer is parent and doesn't have fk
 		//must transform into Customer[b.cust
@@ -156,6 +160,7 @@ public class FKSqlGenerator extends ServiceBase {
 		public String fieldName;
 		public String fmt;
 		public boolean isCount;
+		public boolean isFirst;
 		
 		public QueryAdjustment(String fieldName, String fmt) {
 			this.fieldName = fieldName;
@@ -164,7 +169,6 @@ public class FKSqlGenerator extends ServiceBase {
 	}
 	private QueryAdjustment addOtherPartsOfQuery(QuerySpec spec, String typeName) {
 		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
-//			sc.o("SELECT COUNT(*) FROM %s", typeName);
 			QueryAdjustment adjustment = new QueryAdjustment(null, "COUNT(%s)");
 			adjustment.isCount = true;
 			return adjustment;
@@ -172,13 +176,14 @@ public class FKSqlGenerator extends ServiceBase {
 			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
 			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MIN(%s)");
 			return adjustment;
-//			sc.o("SELECT MIN(%s) FROM %s", fieldName, typeName);
 		} else if (selectFnHelper.isMaxPresent(spec)) {
 			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
 			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MAX(%s)");
 			return adjustment;
-//			sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
 		} else if (selectFnHelper.isFirstPresent(spec)) {
+			QueryAdjustment adjustment = new QueryAdjustment(null, "LIMIT 1");
+			adjustment.isFirst = true;
+			return adjustment;
 //			sc.o("SELECT TOP 1 * FROM %s", typeName);
 		} else if (selectFnHelper.isLastPresent(spec)) {
 //			spec = null; //TODO FIX doSelectLast(sc, spec, typeName);
@@ -312,6 +317,7 @@ public class FKSqlGenerator extends ServiceBase {
 						s = String.format(adjustment.fmt, ss);
 						haveDoneCount = true;
 					}
+				} else if (adjustment.isFirst) {
 				} else if (adjustment.fieldName.equals(pair.name)) {
 					s = String.format(adjustment.fmt, s);
 				}

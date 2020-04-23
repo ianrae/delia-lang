@@ -30,6 +30,17 @@ then:
 value:a:int:55
 
 ---
+title: exist
+given:
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].id.exist()
+then:
+value:a:boolean:true
+
+---
 title: count
 given:
 
@@ -38,4 +49,15 @@ given:
 when:
   let x = Customer[true].id.count()
 then:
-value:a:int:2
+value:a:long:2
+
+---
+title: first
+given:
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].id.first()
+then:
+value:a:long:2
