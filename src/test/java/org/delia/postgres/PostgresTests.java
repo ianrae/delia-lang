@@ -154,7 +154,7 @@ public class PostgresTests {
 		PostgresSqlHelperFactory hh = new PostgresSqlHelperFactory(factorySvc);
 		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
 		
-		PreparedStatementGenerator psg = hh.createPrepSqlGen(dbctx, existSvc);
+		PreparedStatementGenerator psg = hh.createPrepSqlGen(existSvc, dbctx);
 		boolean exists = conn.execFieldDetect("cars", "name", psg, false);
 		assertEquals(true, exists);
 		exists = conn.execFieldDetect("cars", "zzzzzname", psg, false);

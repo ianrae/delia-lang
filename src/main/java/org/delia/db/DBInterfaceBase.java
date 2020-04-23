@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.h2.SqlHelperFactory;
+import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;

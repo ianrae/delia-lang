@@ -40,7 +40,7 @@ import org.delia.util.DeliaExceptionHelper;
 public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInternal {
 
 	public H2DBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
-		super(DBType.H2, factorySvc, connFactory, new SqlHelperFactory(factorySvc));
+		super(DBType.H2, factorySvc, connFactory, new H2SqlHelperFactory(factorySvc));
 		this.errorConverter = new H2ErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
 	}
