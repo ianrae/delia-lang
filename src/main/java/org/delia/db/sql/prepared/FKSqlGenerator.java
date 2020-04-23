@@ -99,7 +99,7 @@ public class FKSqlGenerator extends ServiceBase {
 			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
 				sc = new StrCreator();
-				String sql = generateFKsQueryMany(spec, exp, manyRule, details, statement, adjustment);
+				String sql = generateFKsQueryMany(spec, exp, tbl, manyRule, details, statement, adjustment);
 				sc.o(sql);
 				sqlgen.generateQueryFns(sc, spec, exp.typeName);
 				sc.o(";");
@@ -110,7 +110,10 @@ public class FKSqlGenerator extends ServiceBase {
 		}
 
 		if (!rule.isParent()) {
-			sc.o("SELECT * FROM %s", tbl.name);
+			TypePair tmp = new TypePair(rule.relInfo.fieldName, null);
+			String fields = genFields(exp.typeName, tbl, null, rule.relInfo.fieldName, tmp, adjustment);
+			sc.o("SELECT %s FROM %s as %s", fields, tbl.name, tbl.alias);
+			sqlgen.generateQueryFns(sc, spec, exp.typeName);
 			this.pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), null, statement);
 			sc.o(";");
 			statement.sql = sc.str;
@@ -187,8 +190,10 @@ public class FKSqlGenerator extends ServiceBase {
 	}
 	private QueryAdjustment doAddOtherPartsOfQuery(QuerySpec spec, String typeName) {
 		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
-			QueryAdjustment adjustment = new QueryAdjustment(null, "COUNT(%s)");
-			adjustment.isCount = true;
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "COUNT(%s)");
+			adjustment.joinNotNeeded = true;
+//			adjustment.isCount = true;
 			return adjustment;
 		} else if (selectFnHelper.isMinPresent(spec)) {
 			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
@@ -250,10 +255,9 @@ public class FKSqlGenerator extends ServiceBase {
 		return rulesL;
 	}
 
-	private String generateFKsQueryMany(QuerySpec spec, QueryExp exp, RelationManyRule rule, QueryDetails details, SqlStatement statement, QueryAdjustment adjustment) {
+	private String generateFKsQueryMany(QuerySpec spec, QueryExp exp, Table tbl, RelationManyRule rule, QueryDetails details, SqlStatement statement, QueryAdjustment adjustment) {
 		StrCreator sc = new StrCreator();
 
-		Table tbl = genTable(exp.getTypeName());
 		Table tbl2 = genTable(rule.relInfo.farType.getName());
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
@@ -324,7 +328,11 @@ public class FKSqlGenerator extends ServiceBase {
 		for(TypePair pair: structType.getAllFields()) {
 			String s;
 			if (pair.type.isStructShape()) {
-				s = String.format("%s.%s as %s", tbl2.alias, nearField.name, fieldName);
+				if (tbl2 == null) {
+					s = String.format("%s as %s", nearField.name, fieldName);
+				} else {
+					s = String.format("%s.%s as %s", tbl2.alias, nearField.name, fieldName);
+				}
 			} else {
 				s = String.format("%s.%s", tbl.alias, pair.name);
 			}
@@ -336,10 +344,12 @@ public class FKSqlGenerator extends ServiceBase {
 						String ss = String.format("%s.%s", tbl.alias, keypair.name);
 						s = String.format(adjustment.fmt, ss);
 						haveDoneCount = true;
+						return s; //return only the adjustment
 					}
 				} else if (adjustment.isFirst || adjustment.isLast) {
 				} else if (adjustment.fieldName.equals(pair.name)) {
 					s = String.format(adjustment.fmt, s);
+					return s; //return only the adjustment
 				}
 			}
 			joiner.add(s);

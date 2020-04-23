@@ -1,0 +1,65 @@
+# let queryfn when relations
+# count, exist, min, max, first, last
+FEATURE: one-to-one child TODO Fix - .addr.id not yet supported
+background:
+ configure loadFKs = true
+ type Customer struct {id int unique, relation addr Address one optional parent } end
+ type Address struct {id int unique, relation cust Customer  one } end
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+ 
+thenType: struct
+
+---
+title: max
+given:
+ insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].addr.id.max()
+then:
+value:a:int:56
+
+---
+title: min
+given:
+  insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].addr.id.min()
+then:
+value:a:int:55
+
+---
+title: exist
+given:
+  insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].addr.id.exist()
+then:
+value:a:boolean:true
+
+---
+title: count
+given:
+  insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].addr.id.count()
+then:
+value:a:long:2
+
+---
+title: first
+given:
+ insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].addr.id.first()
+then:
+value:a:int:55
+
+---
+title: last
+given:
+ insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].addr.id.last()
+then:
+value:a:int:56
