@@ -9,6 +9,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DRelation;
@@ -131,13 +132,14 @@ public class InsertStatementGenerator extends ServiceBase {
 			if (info != null) {
 				fillTableInfoIfNeeded(tblInfoL, info);
 				TableInfo tblinfo = TableInfoHelper.findTableInfo(tblInfoL, pair, info);
+				tblinfo.fieldName = pair.name;
 				sql += genAssocInsert(dval, pair, tblinfo, map, statement);
 			}
 		}
 		return sql;
 	}
-	private void fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
-		existSvc.fillTableInfoIfNeeded(tblInfoL, info);
+	private int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
+		return existSvc.fillTableInfoIfNeeded(tblInfoL, info);
 	}
 
 	private String genAssocInsert(DValue dval, TypePair pair, TableInfo tblinfo, Map<String, DRelation> map, SqlStatement statement) {
@@ -156,26 +158,42 @@ public class InsertStatementGenerator extends ServiceBase {
 
 		sc.o("VALUES (");
 
-		//assume normal order. TODO impl reverse order
-		TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		DRelation drel = map.get(tblinfo.fieldName); //cust
-		if (drel == null) {
-			RelationInfo info2 = DRuleHelper.findManyToManyRelation(pair, dtype);
-			xpair = DValueHelper.findPrimaryKeyFieldPair(info2.nearType);
-
-			DValue zz = dval.asStruct().getField(info2.fieldName);
-			DValue id = zz.asRelation().getForeignKey();
-
-			TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-			DValue mainId = dval.asStruct().getField(main.name);
-			DRelation drelMain = new DRelation(dval.getType().getName(), mainId);
-
-			genAssocValues(sc, dval, drelMain, info2, xpair, id, statement);
-		} else {
-			xpair = DValueHelper.findPrimaryKeyFieldPair(info.farType); //Customer
-			DValue id = dval.asStruct().getField(xpair.name);
-			genAssocValues(sc, dval, drel, info, xpair, id, statement);
+		//normal order
+		if (tblinfo.tbl1.equals(info.farType.getName())) {
+			//TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+			DRelation drel = map.get(tblinfo.fieldName); //cust
+			ListWalker<DValue> walker = new ListWalker<>(drel.getMultipleKeys());
+			while (walker.hasNext()) {
+				TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+				DValue left = dval.asStruct().getField(main.name);
+				DValue right = walker.next();
+				
+				statement.paramL.add(left);
+				sc.o("?");
+				sc.o(",");
+				statement.paramL.add(right);
+				sc.o("?");
+				walker.addIfNotLast(sc, "),(");
+			}
+		} else { //reverse order
+			//TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+			DRelation drel = map.get(tblinfo.fieldName); //cust
+			ListWalker<DValue> walker = new ListWalker<>(drel.getMultipleKeys());
+			while (walker.hasNext()) {
+				TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+				DValue left = dval.asStruct().getField(main.name);
+				DValue right = walker.next();
+				
+				statement.paramL.add(left);
+				sc.o("?");
+				sc.o(",");
+				statement.paramL.add(right);
+				sc.o("?");
+				walker.addIfNotLast(sc, "),(");
+			}
 		}
+		sc.o(")");
+			
 		return sc.str;
 	}
 

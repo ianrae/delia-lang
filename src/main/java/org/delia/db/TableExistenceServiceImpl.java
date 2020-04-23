@@ -22,9 +22,11 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 	}
 	
 	@Override
-	public void fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
+	public int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
 		String tbl1 = info.nearType.getName();
 		String tbl2 = info.farType.getName();
+		
+		int index = tblInfoL.size();
 		
 		//try tbl1 tbl2 Assoc
 		String assocTblName = TableCreator.createAssocTableName(tbl1, tbl2);
@@ -33,7 +35,7 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 			tblinfo.tbl1 = tbl1;
 			tblinfo.tbl2 = tbl2;
 			tblInfoL.add(tblinfo);
-			return;
+			return index;
 		}
 		
 		//try other way around
@@ -43,7 +45,9 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 			tblinfo.tbl1 = tbl2;
 			tblinfo.tbl2 = tbl1;
 			tblInfoL.add(tblinfo);
+			return index;
 		}
+		return -1;
 	}
 	
 
