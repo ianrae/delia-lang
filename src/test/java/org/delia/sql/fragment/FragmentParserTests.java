@@ -4,7 +4,9 @@ package org.delia.sql.fragment;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.api.Delia;
@@ -80,6 +82,7 @@ public class FragmentParserTests extends NewBDDBase {
 	public static class SelectStatementFragment implements SqlFragment {
 		public List<FieldFragment> fieldL = new ArrayList<>();
 		public TableFragment tblFrag;
+		public Map<String,TableFragment> aliasMap = new HashMap<>();
 		
 		
 		@Override
@@ -122,12 +125,15 @@ public class FragmentParserTests extends NewBDDBase {
 			QueryExp exp = spec.queryExp;
 			
 			SelectStatementFragment selectFrag = new SelectStatementFragment();
-			initFields(spec, selectFrag);
+			
+			//init tbl
 			TableFragment tblFrag = new TableFragment();
 			createAlias(tblFrag);
 			tblFrag.name = exp.typeName;
-			
+			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 			selectFrag.tblFrag = tblFrag;
+			
+			initFields(spec, selectFrag);
 			
 			return selectFrag;
 		}
@@ -146,7 +152,7 @@ public class FragmentParserTests extends NewBDDBase {
 			case PRIMARY_KEY:
 			default:
 				FieldFragment fieldF = new FieldFragment();
-				createAlias(fieldF);
+				fieldF.alias = findAlias(structType, selectFrag); //selectFrag.aliasMap.get(spec.queryExp.typeName).alias;
 				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
 				fieldF.fieldType = pair.type;
 				fieldF.name = pair.name;
@@ -157,6 +163,11 @@ public class FragmentParserTests extends NewBDDBase {
 //				addWhereClausePrimaryKey(sc, spec, spec.queryExp.filter, typeName, tbl, statement);
 				break;
 			}
+		}
+
+		private String findAlias(DStructType structType, SelectStatementFragment selectFrag) {
+			String s = selectFrag.aliasMap.get(structType.getName()).alias;
+			return s;
 		}
 
 		public String render(SelectStatementFragment selectFrag) {
@@ -170,34 +181,24 @@ public class FragmentParserTests extends NewBDDBase {
 	
 
 	@Test
-	public void test1() {
+	public void testPrimaryKey() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
-		boolean b = dao.initialize(src);
-		assertEquals(true, b);
+		FragmentParser parser = createFragmentParser(src); //new FragmentParser(factorySvc, registry);
 		
-		Delia delia = dao.getDelia();
-		FactoryService factorySvc = delia.getFactoryService();
-		DTypeRegistry registry = dao.getRegistry();
-		Runner runner = new RunnerImpl(factorySvc, dao.getDbInterface());
-		
-		FragmentParser parser = new FragmentParser(factorySvc, registry);
-		
-		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
-		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
-		DValue dval = builder.buildInt(1);
-		
-		QueryExp exp = queryBuilderSvc.createPrimaryKeyQuery("Flight", dval);
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		
+		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
 		SelectStatementFragment selectFrag = parser.parseSelect(spec);
 		
 		String sql = parser.render(selectFrag);
-		assertEquals("SELECT Flight as a", sql);
+		assertEquals("SELECT a.field1 FROM Flight as a", sql);
 	}
 	
 	//---
-
+	private Delia delia;
+	private FactoryService factorySvc;
+	private DTypeRegistry registry;
+	private Runner runner;
+	
+	
 	@Before
 	public void init() {
 	}
@@ -219,5 +220,30 @@ public class FragmentParserTests extends NewBDDBase {
 	public DBInterface createForTest() {
 		return new MemDBInterface();
 	}
+	
+	private QuerySpec buildPrimaryKeyQuery(String typeName, int id) {
+		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
+		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
+		DValue dval = builder.buildInt(id);
+		
+		QueryExp exp = queryBuilderSvc.createPrimaryKeyQuery(typeName, dval);
+		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
+		return spec;
+	}
+
+	private FragmentParser createFragmentParser(String src) {
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+		
+		this.delia = dao.getDelia();
+		this.factorySvc = delia.getFactoryService();
+		this.registry = dao.getRegistry();
+		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
+		
+		FragmentParser parser = new FragmentParser(factorySvc, registry);
+		return parser;
+	}
+
 
 }
