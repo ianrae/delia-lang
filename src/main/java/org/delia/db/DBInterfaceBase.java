@@ -108,7 +108,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		List<DValue> list = new ArrayList<>();
 		try {
 			DValue dval = valueHelper.readIndexedField(selectResultType, 1, rs, dbctx);
-			list.add(dval);
+			if (dval != null) {
+				list.add(dval);
+			}
 		} catch (ValueException e) {
 			//				e.printStackTrace();
 			DeliaError err = ((ValueException)e).errL.get(0);
