@@ -248,13 +248,14 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 0;
+		testIndexToRun = 2;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-		runR1700File("t0-let-field-func.txt", 3);
+//		runR1700File("t0-let-field-func.txt", 3);
+		runR1550File("t0-queryfn-oneone-parent.txt", 4);
 	}
 	
 	//---

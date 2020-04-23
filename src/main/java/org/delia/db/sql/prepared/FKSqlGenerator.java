@@ -155,6 +155,7 @@ public class FKSqlGenerator extends ServiceBase {
 	public static class QueryAdjustment {
 		public String fieldName;
 		public String fmt;
+		public boolean isCount;
 		
 		public QueryAdjustment(String fieldName, String fmt) {
 			this.fieldName = fieldName;
@@ -164,6 +165,9 @@ public class FKSqlGenerator extends ServiceBase {
 	private QueryAdjustment addOtherPartsOfQuery(QuerySpec spec, String typeName) {
 		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
 //			sc.o("SELECT COUNT(*) FROM %s", typeName);
+			QueryAdjustment adjustment = new QueryAdjustment(null, "COUNT(%s)");
+			adjustment.isCount = true;
+			return adjustment;
 		} else if (selectFnHelper.isMinPresent(spec)) {
 			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
 			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MIN(%s)");
@@ -291,6 +295,7 @@ public class FKSqlGenerator extends ServiceBase {
 		StringJoiner joiner = new StringJoiner(",");
 		DStructType structType = (DStructType) registry.getType(typeName);
 		
+		boolean haveDoneCount = false;
 		for(TypePair pair: structType.getAllFields()) {
 			String s;
 			if (pair.type.isStructShape()) {
@@ -299,8 +304,17 @@ public class FKSqlGenerator extends ServiceBase {
 				s = String.format("%s.%s", tbl.alias, pair.name);
 			}
 			
-			if (adjustment != null && adjustment.fieldName.equals(pair.name)) {
-				s = String.format(adjustment.fmt, s);
+			if (adjustment != null) {
+				if (adjustment.isCount) {
+					TypePair keypair = DValueHelper.findPrimaryKeyFieldPair(structType);
+					if (keypair != null && !haveDoneCount) {
+						String ss = String.format("%s.%s", tbl.alias, keypair.name);
+						s = String.format(adjustment.fmt, ss);
+						haveDoneCount = true;
+					}
+				} else if (adjustment.fieldName.equals(pair.name)) {
+					s = String.format(adjustment.fmt, s);
+				}
 			}
 			joiner.add(s);
 

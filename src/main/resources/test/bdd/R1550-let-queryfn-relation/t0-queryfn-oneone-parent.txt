@@ -1,17 +1,16 @@
 # let queryfn when relations
-
+# count, exist, min, max, first, last
 FEATURE: one-to-one parent
 background:
  configure loadFKs = true
+ type Customer struct {id int unique, relation addr Address one optional parent } end
+ type Address struct {id int unique, relation cust Customer  one } end
+ 
 thenType: struct
 
-# --- Multiple ---
 ---
-title: function
+title: max
 given:
- type Customer struct {id int unique, relation addr Address many parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
-
   insert Customer {id: 55 }
   insert Customer {id: 56 }
 when:
@@ -19,3 +18,24 @@ when:
 then:
 value:a:int:56
 
+---
+title: min
+given:
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].id.min()
+then:
+value:a:int:55
+
+---
+title: count
+given:
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].id.count()
+then:
+value:a:int:2
