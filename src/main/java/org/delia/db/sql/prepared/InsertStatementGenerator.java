@@ -147,7 +147,7 @@ public class InsertStatementGenerator extends ServiceBase {
 		StrCreator sc = new StrCreator();
 		sc.o("INSERT INTO %s (", tblName(tblinfo.assocTblName));
 
-		RelationInfo info = DRuleHelper.findOtherSideOneOrMany(pair.type, dtype);
+		RelationInfo otherSideInfo = DRuleHelper.findOtherSideOneOrMany(pair.type, dtype);
 
 		sc.o("leftv");
 		sc.o(",");
@@ -159,7 +159,7 @@ public class InsertStatementGenerator extends ServiceBase {
 		sc.o("VALUES (");
 
 		//normal order
-		if (tblinfo.tbl1.equals(info.farType.getName())) {
+		if (tblinfo.tbl1.equals(otherSideInfo.farType.getName())) {
 			//TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 			DRelation drel = map.get(tblinfo.fieldName); //cust
 			ListWalker<DValue> walker = new ListWalker<>(drel.getMultipleKeys());
@@ -181,8 +181,8 @@ public class InsertStatementGenerator extends ServiceBase {
 			ListWalker<DValue> walker = new ListWalker<>(drel.getMultipleKeys());
 			while (walker.hasNext()) {
 				TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-				DValue left = dval.asStruct().getField(main.name);
-				DValue right = walker.next();
+				DValue left = walker.next();
+				DValue right = dval.asStruct().getField(main.name);
 				
 				statement.paramL.add(left);
 				sc.o("?");
@@ -197,41 +197,41 @@ public class InsertStatementGenerator extends ServiceBase {
 		return sc.str;
 	}
 
-	private void genAssocValues(StrCreator sc, DValue dval, DRelation drel, RelationInfo info, TypePair xpair, DValue id, SqlStatement statement) {
-		if (drel.isMultipleKey()) {
-			int index = 0;
-			for(DValue keyVal: drel.getMultipleKeys()) {
-				
-//				String s = valueInSql(id.getType().getShape(), id.getObject());
-				statement.paramL.add(id);
-				sc.o("?");
-
-				sc.o(",");
-				if (keyVal == null) {
-					statement.paramL.add(null);
-					sc.o("?");
-				} else {
-					statement.paramL.add(keyVal);
-					sc.o("?");
-				}
-				if (index < drel.getMultipleKeys().size() - 1) {
-					sc.o("),(");
-				}
-				index++;
-			}
-		} else {
-//			String s = valueInSql(id.getType().getShape(), id.getObject());
-			statement.paramL.add(id);
-			sc.o("?");
-
-			sc.o(",");
-			genRelationValue(sc, drel, 0, statement);
-		}
-
-		sc.o(");");
-		sc.nl();
-
-	}
+//	private void genAssocValues(StrCreator sc, DValue dval, DRelation drel, RelationInfo info, TypePair xpair, DValue id, SqlStatement statement) {
+//		if (drel.isMultipleKey()) {
+//			int index = 0;
+//			for(DValue keyVal: drel.getMultipleKeys()) {
+//				
+////				String s = valueInSql(id.getType().getShape(), id.getObject());
+//				statement.paramL.add(id);
+//				sc.o("?");
+//
+//				sc.o(",");
+//				if (keyVal == null) {
+//					statement.paramL.add(null);
+//					sc.o("?");
+//				} else {
+//					statement.paramL.add(keyVal);
+//					sc.o("?");
+//				}
+//				if (index < drel.getMultipleKeys().size() - 1) {
+//					sc.o("),(");
+//				}
+//				index++;
+//			}
+//		} else {
+////			String s = valueInSql(id.getType().getShape(), id.getObject());
+//			statement.paramL.add(id);
+//			sc.o("?");
+//
+//			sc.o(",");
+//			genRelationValue(sc, drel, 0, statement);
+//		}
+//
+//		sc.o(");");
+//		sc.nl();
+//
+//	}
 
 
 	private boolean generateInsertField(StrCreator sc, DValue dval, TypePair pair, DStructType dtype, int index, SqlStatement statement) {

@@ -1,6 +1,7 @@
 # migration-relation tests
+# Note. many-to-many cannot alter type because can't change primary key field (eg from int to long).
 
-FEATURE: migration - many-to-many relation to one-to-many 
+FEATURE: migration - many-to-many relation to one-to-many (other way around)
 background:
  configure loadFKs = true
 thenType: struct
@@ -27,8 +28,8 @@ value:a:Customer {
 title: MtoN-1 - O-
 chainNextTest:true
 given:
- type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end
- type Address struct {id int primaryKey, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional one  } end
+ type Address struct {id int primaryKey, relation cust Customer optional many } end
 
   insert Customer {id: 2, wid: 34 }
 when:
