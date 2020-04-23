@@ -267,7 +267,7 @@ public class FKSqlGenerator extends ServiceBase {
 			List<RelationManyRule> xfarL = findAllManyRules(rule.relInfo.farType.getName());
 //			RelationManyRule xfarRule = DRuleHelper.findManyRule(rule.relInfo.farType.getName(), registry);
 			RelationManyRule xfarRule = xfarL.isEmpty() ? null : xfarL.get(0);
-			return doManyToMany(sc, spec, exp, xfarRule, tbl, tbl2, rule, details, statement);
+			return doManyToMany(sc, spec, exp, xfarRule, tbl, tbl2, rule, details, statement, adjustment);
 		} else {
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 			String fields = genFields(exp.typeName, tbl, tbl2, rule.relInfo.fieldName, nearField, adjustment);
@@ -286,7 +286,7 @@ public class FKSqlGenerator extends ServiceBase {
 	}
 
 	private String doManyToMany(StrCreator sc, QuerySpec spec, QueryExp exp, RelationManyRule farRule, Table tbl, Table tbl2, RelationManyRule otherRule, 
-					QueryDetails details, SqlStatement statement) {
+					QueryDetails details, SqlStatement statement, QueryAdjustment adjustment) {
 		RelationInfo info = farRule.relInfo;
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 
@@ -294,19 +294,19 @@ public class FKSqlGenerator extends ServiceBase {
 //		String actualTblName2 = this.tblName(tblinfo.tbl2);
 		String assocField = actualTblName1.equals(tbl.name) ? "rightv" : "leftv";
 		String assocField2 = actualTblName1.equals(tbl.name) ? "leftv" : "rightv";
-		genJoin(sc, spec, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, statement);
+		genJoin(sc, spec, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, statement, adjustment);
 		details.mergeRows = true;
 		details.mergeOnField = otherRule.relInfo.fieldName;
 		return sc.str;
 	}
 
 	private void genJoin(StrCreator sc, QuerySpec spec, RelationInfo info, TableInfo tblinfo, Table tbl, RelationManyRule otherRule, String assocField, 
-					String assocField2, QueryExp exp, SqlStatement statement) {
+					String assocField2, QueryExp exp, SqlStatement statement, QueryAdjustment adjustment) {
 		Table tblAssoc = genTable(tblinfo.assocTblName);
 		String typeName = info.farType.getName();
 		TypePair copy = new TypePair(assocField, null);
 		//TODO: fix adjustment
-		String fields = genFields(typeName, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, null);
+		String fields = genFields(typeName, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, adjustment);
 		sc.o("SELECT %s FROM %s", fields, tbl.name);
 
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
@@ -314,7 +314,6 @@ public class FKSqlGenerator extends ServiceBase {
 		sc.o(" as %s LEFT JOIN %s as %s ON %s", tbl.alias, tblAssoc.name, tblAssoc.alias, onstr);
 
 		pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, typeName, tbl, statement);
-		sc.o(";");
 	}
 	
 
