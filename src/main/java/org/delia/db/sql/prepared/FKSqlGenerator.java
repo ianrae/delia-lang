@@ -45,6 +45,7 @@ public class FKSqlGenerator extends ServiceBase {
 	private PreparedStatementGenerator sqlgen;
 	private WhereClauseGenerator pwheregen;
 	private SqlHelperFactory sqlHelperFactory;
+	private SelectFuncHelper selectFnHelper;
 
 	public FKSqlGenerator(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
 			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc) {
@@ -59,6 +60,7 @@ public class FKSqlGenerator extends ServiceBase {
 		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc);
 		this.pwheregen = sqlHelperFactory.createPWhereGen(dbctx); 
 		this.sqlgen = sqlHelperFactory.createPrepSqlGen(existSvc, dbctx);
+		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
 	}
 
 	private Table genTable(String typeName) {
@@ -79,6 +81,7 @@ public class FKSqlGenerator extends ServiceBase {
 		
 		List<RelationOneRule> oneL = findAllOneRules(exp.getTypeName());
 		List<RelationManyRule> manyL = findAllManyRules(exp.getTypeName());
+		QueryAdjustment adjustment = addOtherPartsOfQuery(spec, exp.typeName);
 		
 //		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
 		RelationOneRule rule = oneL.isEmpty() ? null : oneL.get(0);
@@ -87,7 +90,7 @@ public class FKSqlGenerator extends ServiceBase {
 			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
 				sc = new StrCreator();
-				String sql = generateFKsQueryMany(spec, exp, manyRule, details, statement);
+				String sql = generateFKsQueryMany(spec, exp, manyRule, details, statement, adjustment);
 				sc.o(sql);
 				sqlgen.generateQueryFns(sc, spec, exp.typeName);
 				sc.o(";");
@@ -108,7 +111,7 @@ public class FKSqlGenerator extends ServiceBase {
 		Table tbl2 = genTable(rule.relInfo.farType.getName());
 
 		TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
-		String fields = genFields(exp.typeName, tbl, tbl2, rule.relInfo.fieldName, nearField);
+		String fields = genFields(exp.typeName, tbl, tbl2, rule.relInfo.fieldName, nearField, adjustment);
 		sc.o("SELECT %s FROM %s", fields, tbl.name);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
@@ -149,6 +152,38 @@ public class FKSqlGenerator extends ServiceBase {
 		return statement;
 	}
 
+	public static class QueryAdjustment {
+		public String fieldName;
+		public String fmt;
+		
+		public QueryAdjustment(String fieldName, String fmt) {
+			this.fieldName = fieldName;
+			this.fmt = fmt;
+		}
+	}
+	private QueryAdjustment addOtherPartsOfQuery(QuerySpec spec, String typeName) {
+		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
+//			sc.o("SELECT COUNT(*) FROM %s", typeName);
+		} else if (selectFnHelper.isMinPresent(spec)) {
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
+			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MIN(%s)");
+			return adjustment;
+//			sc.o("SELECT MIN(%s) FROM %s", fieldName, typeName);
+		} else if (selectFnHelper.isMaxPresent(spec)) {
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
+			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MAX(%s)");
+			return adjustment;
+//			sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
+		} else if (selectFnHelper.isFirstPresent(spec)) {
+//			sc.o("SELECT TOP 1 * FROM %s", typeName);
+		} else if (selectFnHelper.isLastPresent(spec)) {
+//			spec = null; //TODO FIX doSelectLast(sc, spec, typeName);
+		} else {
+//			sc.o("SELECT * FROM %s", typeName);
+		}
+		return null;
+	}
+
 	//TOOD: fix this limitation!!!
 	private List<RelationOneRule> findAllOneRules(String typeName) {
 		List<RelationOneRule> rulesL = new ArrayList<>();
@@ -186,7 +221,7 @@ public class FKSqlGenerator extends ServiceBase {
 		return rulesL;
 	}
 
-	private String generateFKsQueryMany(QuerySpec spec, QueryExp exp, RelationManyRule rule, QueryDetails details, SqlStatement statement) {
+	private String generateFKsQueryMany(QuerySpec spec, QueryExp exp, RelationManyRule rule, QueryDetails details, SqlStatement statement, QueryAdjustment adjustment) {
 		StrCreator sc = new StrCreator();
 
 		Table tbl = genTable(exp.getTypeName());
@@ -202,7 +237,7 @@ public class FKSqlGenerator extends ServiceBase {
 			return doManyToMany(sc, spec, exp, xfarRule, tbl, tbl2, rule, details, statement);
 		} else {
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
-			String fields = genFields(exp.typeName, tbl, tbl2, rule.relInfo.fieldName, nearField);
+			String fields = genFields(exp.typeName, tbl, tbl2, rule.relInfo.fieldName, nearField, adjustment);
 			sc.o("SELECT %s FROM %s", fields, tbl.name);
 			String onstr = String.format("%s.%s=%s.%s", tbl2.alias, farRule.relInfo.fieldName, tbl.alias, nearField.name);
 
@@ -237,7 +272,8 @@ public class FKSqlGenerator extends ServiceBase {
 		Table tblAssoc = genTable(tblinfo.assocTblName);
 		String typeName = info.farType.getName();
 		TypePair copy = new TypePair(assocField, null);
-		String fields = genFields(typeName, tbl, tblAssoc, otherRule.relInfo.fieldName, copy);
+		//TODO: fix adjustment
+		String fields = genFields(typeName, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, null);
 		sc.o("SELECT %s FROM %s", fields, tbl.name);
 
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
@@ -250,18 +286,23 @@ public class FKSqlGenerator extends ServiceBase {
 	
 
 
-	private String genFields(String typeName, Table tbl, Table tbl2, String fieldName, TypePair nearField) {
+	private String genFields(String typeName, Table tbl, Table tbl2, String fieldName, TypePair nearField, QueryAdjustment adjustment) {
 		//			sql = "SELECT c.id,a.id as addr FROM Customer as c JOIN Address as a ON a.cust=c.id WHERE c.id=55";
 		StringJoiner joiner = new StringJoiner(",");
 		DStructType structType = (DStructType) registry.getType(typeName);
+		
 		for(TypePair pair: structType.getAllFields()) {
+			String s;
 			if (pair.type.isStructShape()) {
-				String s = String.format("%s.%s as %s", tbl2.alias, nearField.name, fieldName);
-				joiner.add(s);
+				s = String.format("%s.%s as %s", tbl2.alias, nearField.name, fieldName);
 			} else {
-				String s = String.format("%s.%s", tbl.alias, pair.name);
-				joiner.add(s);
+				s = String.format("%s.%s", tbl.alias, pair.name);
 			}
+			
+			if (adjustment != null && adjustment.fieldName.equals(pair.name)) {
+				s = String.format(adjustment.fmt, s);
+			}
+			joiner.add(s);
 
 		}
 		return joiner.toString();

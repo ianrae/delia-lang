@@ -36,7 +36,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR400File("t0-field-unique.txt", 6);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
-		runR400File("t0-field-unique.txt", 6);
+		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-field-primarykey.txt", 6);
 		runR400File("t0-field-serial.txt", 7);
 	}
@@ -151,6 +151,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR1500File("t0-queryfn-max.txt", 0);
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
+		runR1500File("t0-queryfn-max-number.txt", 4);
 		runR1500File("t0-queryfn-max-bool.txt", 0);
 		runR1500File("t0-queryfn-max-relation.txt", 0);
 		runR1500File("t0-queryfn-max-string.txt", 4);
@@ -171,7 +172,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
-		runR1700File("t0-let-field-func.txt", 3);
+		runR1700File("t0-let-field-func.txt", 2);
 		runR1700File("t0-let-field-multiple.txt", 5);
 		runR1700File("t0-let-field-relation.txt", 2);
 	}
@@ -226,6 +227,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-one4.txt", 2);
 		runR2150File("t0-migrate-one-to-one5.txt", 1);
 		runR2150File("t0-migrate-one-to-one6.txt", 2);
+		
 		runR2150File("t0-migrate-one-to-many1.txt", 3);
 		runR2150File("t0-migrate-one-to-many2.txt", 2);
 		runR2150File("t0-migrate-one-to-many2a.txt", 2);
@@ -241,20 +243,13 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 0;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-//		runR2150File("t0-migrate-one-to-many1.txt", 3);
-//		runR2150File("t0-migrate-one-to-many2.txt", 2);
-//		runR2150File("t0-migrate-one-to-many2a.txt", 2);
-//		runR2150File("t0-migrate-one-to-many3.txt", 2);
-//		runR2150File("t0-migrate-one-to-many4.txt", 2);
-//		//is no test 5 for many-to-one
-//		runR2150File("t0-migrate-one-to-many6.txt", 2);
-//		runR2150File("t0-migrate-one-to-one6.txt", 1);
+		runR1700File("t0-let-field-func.txt", 3);
 	}
 	
 	//---
