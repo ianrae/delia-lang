@@ -42,6 +42,8 @@ public class SelectFuncHelper extends ServiceBase {
 			return determineFieldTypeForFn(spec, "min");
 		} else if (isMaxPresent(spec)) {
 			return determineFieldTypeForFn(spec, "max");
+		} else if (isFirstPresent(spec) && findFieldUsingFn(spec, "first") != null) {
+			return determineFieldTypeForFn(spec, "first");
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
@@ -118,7 +120,7 @@ public class SelectFuncHelper extends ServiceBase {
 		sc.o(s);
 	}
 	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName, String alias) {
-		QuerySpec spec = doLastFixup(specOriginal, typeName, alias);
+		QuerySpec spec = doLastFixup(specOriginal, typeName, alias, true);
 		QueryFuncExp limitFn = this.findFn(spec, "limit");
 		if (limitFn != null) {
 			spec.queryExp.qfelist.remove(limitFn);
@@ -131,6 +133,9 @@ public class SelectFuncHelper extends ServiceBase {
 		return spec;
 	}
 	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias) {
+		return doLastFixup(specOriginal, typeName, alias, false);
+	}
+	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias, boolean asc) {
 		DType dtype = registry.findTypeOrSchemaVersionType(typeName);
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
 		if (pair == null) { 
@@ -141,9 +146,11 @@ public class SelectFuncHelper extends ServiceBase {
 			QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("orderBy"), null, false);
 			String s = alias == null ? pair.name : String.format("%s.%s", alias, pair.name);
 			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(s));
-			IdentExp exp1 = new IdentExp("desc");
 			qfexp1.argL.add(qfe);
-			qfexp1.argL.add(exp1);
+			if (! asc) {
+				IdentExp exp1 = new IdentExp("desc");
+				qfexp1.argL.add(exp1);
+			}
 			
 			QueryFuncExp qfexpAlreadyInList = findFn(spec, "last");
 			int index = 0;

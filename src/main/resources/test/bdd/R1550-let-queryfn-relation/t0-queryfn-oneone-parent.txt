@@ -60,4 +60,4 @@ given:
 when:
   let x = Customer[true].id.first()
 then:
-value:a:long:2
+value:a:int:55
