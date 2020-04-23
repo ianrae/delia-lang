@@ -247,6 +247,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	public void test8Debug() {
 //		testIndexToRun = 2;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
 //		runR500File("t0-relation-one-to-one.txt", 9);
@@ -262,7 +263,8 @@ public class PostgresBDDTests extends NewBDDBase {
 	public void init() {
 	}
 	@After
-	public void cleanup() {
+	public void shutdown() {
+		chkAllFiles();
 	}
 
 	@Override

@@ -35,7 +35,6 @@ public class AllBDDTests extends NewBDDBase {
 		runR400File("t0-field-unique.txt", 6);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
-		runR400File("t0-field-unique.txt", 6);
 		runR400File("t0-field-primarykey.txt", 6);
 		runR400File("t0-field-serial.txt", 7);
 	}
@@ -189,6 +188,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void testR2100() {
+		enableAllFileCheck = false;
 		runR2100File("t0-migration.txt", 2);
 		runR2100File("t0-migration2.txt", 2);
 		runR2100File("t0-migration3.txt", 2);
@@ -215,8 +215,6 @@ public class AllBDDTests extends NewBDDBase {
 	}
 	@Test
 	public void testR2150() {
-		enableAllFileCheck = false;
-		runR500File("t0-relation-one-to-one.txt", 9);
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
@@ -241,6 +239,7 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void test8Debug() {
 		testIndexToRun = 8;
+		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 //		runR2150File("t0-migrate-one-to-one1.txt", 3);

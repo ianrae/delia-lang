@@ -240,6 +240,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	public void test8Debug() {
 //		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
@@ -262,7 +263,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 	public void init() {
 	}
 	@After
-	public void cleanup() {
+	public void shutdown() {
+		chkAllFiles();
 	}
 
 	@Override

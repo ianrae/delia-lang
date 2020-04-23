@@ -171,20 +171,30 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	
 	protected void chkAllFiles() {
+		if (!enableAllFileCheck) {
+			return;
+		}
 		FileHelper fileHelper = new FileHelper();
 		//we assume each test method only does files in one group
 		String dir = fileHelper.getDir(currentGroup);
 		File file = new File(dir);       
 		Collection<File> files = FileUtils.listFiles(file, null, false);     
+		List<String> missedL = new ArrayList<>();
 		for(File file2 : files){
 			String filename = FilenameUtils.getName(file2.getAbsolutePath());
+			//log.log("..seen: %s", filename);
 			if (filesExecutedL.contains(filename)) {
 				filesExecutedL.remove(filename);
+			} else {
+				missedL.add(filename);
 			}
 		}		
 		
-		for(String filename: filesExecutedL) {
+		for(String filename: missedL) {
 			log.log("NOT-EXECUTED: %s", filename);
+		}
+		for(String filename: filesExecutedL) {
+			log.log("DOUBLE-EXECUTED: %s", filename);
 		}
 		assertEquals(0, filesExecutedL.size());
 	}
