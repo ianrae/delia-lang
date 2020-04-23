@@ -75,6 +75,9 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		@Override
 		public String render() {
+			if (isStar) {
+				return "*";
+			}
 			return super.render();
 		}
 	}
@@ -144,25 +147,35 @@ public class FragmentParserTests extends NewBDDBase {
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {
 			case ALL_ROWS:
+			{
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+				selectFrag.fieldL.add(fieldF);
 //				addWhereExist(sc, spec);
+			}
 				break;
 			case OP:
 //				addWhereClauseOp(sc, spec, typeName, tbl, statement);
 				break;
 			case PRIMARY_KEY:
 			default:
-				FieldFragment fieldF = new FieldFragment();
-				fieldF.alias = findAlias(structType, selectFrag); //selectFrag.aliasMap.get(spec.queryExp.typeName).alias;
-				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
-				fieldF.fieldType = pair.type;
-				fieldF.name = pair.name;
-				fieldF.isStar = true;
-				fieldF.structType = structType;
+			{
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
 				selectFrag.fieldL.add(fieldF);
-				
 //				addWhereClausePrimaryKey(sc, spec, spec.queryExp.filter, typeName, tbl, statement);
+			}
 				break;
 			}
+		}
+
+		private FieldFragment buildStarFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
+			FieldFragment fieldF = new FieldFragment();
+			fieldF.alias = findAlias(structType, selectFrag); //selectFrag.aliasMap.get(spec.queryExp.typeName).alias;
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
+			fieldF.fieldType = pair.type;
+			fieldF.name = pair.name;
+			fieldF.isStar = true;
+			fieldF.structType = structType;
+			return fieldF;
 		}
 
 		private String findAlias(DStructType structType, SelectStatementFragment selectFrag) {
@@ -174,9 +187,6 @@ public class FragmentParserTests extends NewBDDBase {
 			
 			return selectFrag.render();
 		}
-		
-		
-		
 	}
 	
 
@@ -189,7 +199,19 @@ public class FragmentParserTests extends NewBDDBase {
 		SelectStatementFragment selectFrag = parser.parseSelect(spec);
 		
 		String sql = parser.render(selectFrag);
-		assertEquals("SELECT a.field1 FROM Flight as a", sql);
+		assertEquals("SELECT * FROM Flight as a", sql);
+	}
+	
+	@Test
+	public void testAllRows() {
+		String src = buildSrc();
+		FragmentParser parser = createFragmentParser(src); //new FragmentParser(factorySvc, registry);
+		
+		QuerySpec spec= buildAllRowsQuery("Flight");
+		SelectStatementFragment selectFrag = parser.parseSelect(spec);
+		
+		String sql = parser.render(selectFrag);
+		assertEquals("SELECT * FROM Flight as a", sql);
 	}
 	
 	//---
@@ -197,7 +219,9 @@ public class FragmentParserTests extends NewBDDBase {
 	private FactoryService factorySvc;
 	private DTypeRegistry registry;
 	private Runner runner;
-	
+	private QueryBuilderService queryBuilderSvc;
+	private ScalarValueBuilder builder;
+
 	
 	@Before
 	public void init() {
@@ -222,11 +246,13 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 	
 	private QuerySpec buildPrimaryKeyQuery(String typeName, int id) {
-		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
-		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue dval = builder.buildInt(id);
-		
 		QueryExp exp = queryBuilderSvc.createPrimaryKeyQuery(typeName, dval);
+		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
+		return spec;
+	}
+	private QuerySpec buildAllRowsQuery(String typeName) {
+		QueryExp exp = queryBuilderSvc.createAllRowsQuery(typeName);
 		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
 		return spec;
 	}
@@ -242,6 +268,10 @@ public class FragmentParserTests extends NewBDDBase {
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
 		FragmentParser parser = new FragmentParser(factorySvc, registry);
+		
+		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
+		this.builder = factorySvc.createScalarValueBuilder(registry);
+		
 		return parser;
 	}
 

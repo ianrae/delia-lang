@@ -140,4 +140,11 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return spec;
 	}
 
+	@Override
+	public QueryExp createAllRowsQuery(String typeName) {
+		FilterExp filter = new FilterExp(99, new BooleanExp(true));
+		QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
+		return exp;
+	}
+
 }

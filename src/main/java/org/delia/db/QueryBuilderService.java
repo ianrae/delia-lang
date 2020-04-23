@@ -12,6 +12,7 @@ public interface QueryBuilderService {
 	QueryExp createPrimaryKeyQuery(String typeName, DValue keyValue);
 	QueryExp createInQuery(String typeName, List<DValue> list, DType relType);
 	QueryExp createCountQuery(String typeName);
+	QueryExp createAllRowsQuery(String typeName);
 	
 	QuerySpec buildSpec(QueryExp exp, VarEvaluator varEvaluator);
 }
