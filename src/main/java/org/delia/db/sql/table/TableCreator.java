@@ -22,6 +22,7 @@ public class TableCreator extends ServiceBase {
 	protected FieldGenFactory fieldgenFactory;
 	protected SqlNameFormatter nameFormatter;
 	protected TableExistenceService existSvc;
+	private AssocTableCreator assocTblCreator;
 	
 	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
 				SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
@@ -30,6 +31,7 @@ public class TableCreator extends ServiceBase {
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		this.existSvc = existSvc;
+		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL);
 	}
 
 	public String generateCreateTable(String typeName, DStructType dtype) {
@@ -131,105 +133,11 @@ public class TableCreator extends ServiceBase {
 	}
 	
 	protected void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype) {
-		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
-		String tbl1 = info.nearType.getName();
-		String tbl2 = info.farType.getName();
-		
-		if (! haveCreatedTable(tbl1)) {
-			TableInfo tblinfo = new TableInfo(tbl1, null);
-			this.alreadyCreatedL.add(tblinfo);
-		}
-		if (! haveCreatedTable(tbl2)) {
-			TableInfo tblinfo = new TableInfo(tbl2, null);
-			this.alreadyCreatedL.add(tblinfo);
-		}
-		
-		generateAssocTable(sc, pair, dtype);
-	}
-	
-	public static String createAssocTableName(String tbl1, String tbl2) {
-		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
-		return assocTableName;
+		assocTblCreator.alterGenerateAssocTable(sc, pair, dtype);
 	}
 	
 	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
-		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
-		String tbl1 = info.nearType.getName();
-		String tbl2 = info.farType.getName();
-		if (!(haveCreatedTable(tbl1) && haveCreatedTable(tbl2))) {
-			return;
-		}
-
-		String assocTableName = createAssocTableName(tbl1, tbl2);
-		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
-		tblinfo.assocTblName = assocTableName;
-		tblinfo.tbl1 = tbl1;
-		tblinfo.tbl2 = tbl2;
-		tblinfo.fieldName = xpair.name;
-		
-		sc.o("CREATE TABLE %s (", assocTableName);
-		sc.nl();
-		int index = 0;
-		List<SqlElement> fieldL = new ArrayList<>();
-		int n = dtype.getAllFields().size();
-		for(TypePair pair: dtype.getAllFields()) {
-			if (isManyToManyRelation(pair, dtype)) {
-				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
-				TypePair copy = new TypePair("leftv", pair.type);
-				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype, false);
-				RelationInfo otherSide = DRuleHelper.findOtherSideMany(info.farType, dtype);
-				field.setIsAssocTblField(info.farType.fieldIsOptional(otherSide.fieldName));
-				fieldL.add(field);
-
-				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-				copy = new TypePair("rightv", xx.type);
-				field = fieldgenFactory.createFieldGen(registry, copy, info.farType, false);
-				field.setIsAssocTblField(dtype.fieldIsOptional(pair.name));
-				fieldL.add(field);
-
-				index++;
-			}
-		}
-		
-		for(TypePair pair: dtype.getAllFields()) {
-			if (isManyToManyRelation(pair, dtype)) {
-				TypePair copy = new TypePair("leftv", info.nearType); //address
-				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.nearType, false);
-				if (constraint != null) {
-					fieldL.add(constraint);
-				}
-				
-				copy = new TypePair("rightv", info.farType);
-				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.farType, false);
-				if (constraint != null) {
-					fieldL.add(constraint);
-				}
-				index++;
-			}
-		}
-		
-		index = 0;
-		for(SqlElement field: fieldL) {
-			field.generateField(sc);
-			if (index + 1 < fieldL.size()) {
-				sc.o(",");
-				sc.nl();
-			}
-			index++;
-		}
-		
-		sc.o(");");
-		sc.nl();
-		
-	}
-
-	protected boolean haveCreatedTable(String tbl1) {
-		for(TableInfo info: alreadyCreatedL) {
-			if (info.tblName.equals(tbl1)) {
-				return true;
-			}
-		}
-		return false;
+		assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
 	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {
@@ -346,15 +254,18 @@ public class TableCreator extends ServiceBase {
 		String[] ar = deltaFlags.split(",");
 		//  deltaFlags: +O,+U,+P,+S
 		
-		AssocInfo ainfo = createAssocInfoIfIsManyToMany(tableName, fieldName);
+		AssocInfo ainfo = assocTblCreator.createAssocInfoIfIsManyToMany(tableName, fieldName);
+		if (ainfo != null) {
+			return assocTblCreator.generateAlterField(tableName, fieldName, deltaFlags, constraintName, ainfo);
+		}
 		
 		for(String delta: ar) {
 			switch(delta) {
 			case "+O":
-				doAlterColumnOptional(sc, tableName, fieldName, true, ainfo);
+				doAlterColumnOptional(sc, tableName, fieldName, true);
 				break;
 			case "-O":
-				doAlterColumnOptional(sc, tableName, fieldName, false, ainfo);
+				doAlterColumnOptional(sc, tableName, fieldName, false);
 				break;
 			case "+U":
 				doAlterColumnUnique(sc, tableName, fieldName, true, constraintName);
@@ -375,19 +286,6 @@ public class TableCreator extends ServiceBase {
 		return sc.str;
 	}
 
-	private AssocInfo createAssocInfoIfIsManyToMany(String tableName, String fieldName) {
-		DStructType structType = (DStructType) registry.getType(tableName);
-		TypePair pair = DValueHelper.findField(structType, fieldName);
-		boolean isAssoc = this.isManyToManyRelation(pair, structType);
-		if (isAssoc) {
-			AssocInfo ainfo = new AssocInfo();
-			ainfo.structType = structType;
-			ainfo.pair = pair;
-			return ainfo;
-		}
-		return null;
-	}
-
 	protected void doAlterColumnUnique(StrCreator sc, String tableName, String fieldName, boolean b, String constraintName) {
 		doAlterTablePrefix(sc, tableName);
 		if (b) {
@@ -400,20 +298,8 @@ public class TableCreator extends ServiceBase {
 		sc.o(";\n");
 	}
 
-	protected void doAlterColumnOptional(StrCreator sc, String tableName, String fieldName, boolean b, AssocInfo ainfo) {
-		if (ainfo != null) {
-			List<TableInfo> tblInfoL = new ArrayList<>();
-			RelationInfo relinfo = DRuleHelper.findManyToManyRelation(ainfo.pair, ainfo.structType);
-			existSvc.fillTableInfoIfNeeded(tblInfoL, relinfo);
-			TableInfo tblinfo = tblInfoL.get(0);
-			if (tblinfo.tbl2.equals(tableName)) {
-				doAlterColumnPrefix(sc, tblinfo.assocTblName, "leftv");
-			} else {
-				doAlterColumnPrefix(sc, tblinfo.assocTblName, "rightv");
-			}
-		} else {
-			doAlterColumnPrefix(sc, tableName, fieldName);
-		}
+	protected void doAlterColumnOptional(StrCreator sc, String tableName, String fieldName, boolean b) {
+		doAlterColumnPrefix(sc, tableName, fieldName);
 		
 		
 		if (b) {

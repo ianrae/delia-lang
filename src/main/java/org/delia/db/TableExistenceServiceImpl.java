@@ -2,7 +2,7 @@ package org.delia.db;
 
 import java.util.List;
 
-import org.delia.db.sql.table.TableCreator;
+import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 
@@ -29,7 +29,7 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 		int index = tblInfoL.size();
 		
 		//try tbl1 tbl2 Assoc
-		String assocTblName = TableCreator.createAssocTableName(tbl1, tbl2);
+		String assocTblName = AssocTableCreator.createAssocTableName(tbl1, tbl2);
 		if (doesTableExist(assocTblName)) {
 			TableInfo tblinfo = new TableInfo(tbl1, assocTblName);
 			tblinfo.tbl1 = tbl1;
@@ -39,7 +39,7 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 		}
 		
 		//try other way around
-		assocTblName = TableCreator.createAssocTableName(tbl2, tbl1);
+		assocTblName = AssocTableCreator.createAssocTableName(tbl2, tbl1);
 		if (doesTableExist(assocTblName)) {
 			TableInfo tblinfo = new TableInfo(tbl2, assocTblName);
 			tblinfo.tbl1 = tbl2;
