@@ -37,7 +37,6 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR400File("t0-field-unique.txt", 6);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
-		runR400File("t0-field-unique.txt", 6);
 		runR400File("t0-field-primarykey.txt", 6);
 		runR400File("t0-field-serial.txt",7);
 	}

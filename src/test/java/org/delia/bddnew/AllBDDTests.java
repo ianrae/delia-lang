@@ -33,6 +33,7 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR400() {
 		runR400File("t0-struct-key.txt", 9);
 		runR400File("t0-field-unique.txt", 6);
+		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
 		runR400File("t0-field-primarykey.txt", 6);
@@ -149,6 +150,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-max.txt", 0);
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
+		runR1500File("t0-queryfn-max-number.txt", 4);
 		runR1500File("t0-queryfn-max-bool.txt", 0);
 		runR1500File("t0-queryfn-max-relation.txt", 0);
 		runR1500File("t0-queryfn-max-string.txt", 4);
@@ -169,6 +171,8 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
+		runR1700File("t0-let-field-func.txt", 3);
+		runR1700File("t0-let-field-multiple.txt", 3);
 	}
 	
 	@Test
@@ -221,6 +225,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
 		runR2150File("t0-migrate-one-to-one4.txt", 2);
 		runR2150File("t0-migrate-one-to-one5.txt", 1);
+		runR2150File("t0-migrate-one-to-one6.txt", 2);
 		runR2150File("t0-migrate-one-to-many1.txt", 3);
 		runR2150File("t0-migrate-one-to-many2.txt", 2);
 		runR2150File("t0-migrate-one-to-many2a.txt", 2);
@@ -228,6 +233,14 @@ public class AllBDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many4.txt", 2);
 		//is no test 5 for many-to-one
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
+		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many2.txt", 2);
+		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR2150File("t0-migrate-many-to-many4.txt", 2);
+		runR2150File("t0-migrate-many-to-many6.txt", 2);
+		runR2150File("t0-migrate-many-to-many6a.txt", 2);
+		runR2150File("t0-migrate-many-to-many7.txt", 2);
 	}
 	
 	@Test

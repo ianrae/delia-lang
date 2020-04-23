@@ -164,6 +164,10 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		
 		if (testIndexToRun < 0) {
 			int n = runner.numSkippedTests + numTests;
+			if (n != tests.size()) {
+				log.log("failed tests in: %s", filename);
+				enableAllFileCheck = false;
+			}
 			assertEquals(n, tests.size());
 		}
 		assertEquals(numTests, passes);
@@ -197,6 +201,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 			log.log("DOUBLE-EXECUTED: %s", filename);
 		}
 		assertEquals(0, filesExecutedL.size());
+		assertEquals(0, missedL.size());
 	}
 
 	public abstract DBInterface createForTest();
