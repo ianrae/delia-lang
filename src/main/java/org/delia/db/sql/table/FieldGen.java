@@ -12,12 +12,23 @@ import org.delia.util.DValueHelper;
 public class FieldGen extends SqlElement {
 
 	public boolean makeFieldUnique;
+	protected boolean isAssocTblField;
+	protected boolean isAssocTblFieldOptional;
 
 	public FieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
 		super(factorySvc, registry, pair, dtype, isAlter);
 	}
 	
+	public void setIsAssocTblField(boolean isOptional) {
+		this.isAssocTblField = true;
+		this.isAssocTblFieldOptional = isOptional;
+	}
+	
 	public void generateField(StrCreator sc) {
+		if (isAssocTblField) {
+			generateAssocField(sc);
+			return;
+		}
 		String name = pair.name;
 		String type = deliaToSql(pair);
 		//	Department		Char(35)		NOT NULL,
@@ -30,6 +41,16 @@ public class FieldGen extends SqlElement {
 			suffix1 = " UNIQUE";
 		}
 		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";
+		sc.o("  %s %s%s%s", name, type, suffix1, suffix1a, suffix2);
+	}
+
+	protected void generateAssocField(StrCreator sc) {
+		String name = pair.name;
+		String type = deliaToSql(pair);
+		//	Department		Char(35)		NOT NULL,
+		String suffix1 =  "";
+		String suffix1a = "";
+		String suffix2 = this.isAssocTblFieldOptional ? " NULL" : "";
 		sc.o("  %s %s%s%s", name, type, suffix1, suffix1a, suffix2);
 	}
 

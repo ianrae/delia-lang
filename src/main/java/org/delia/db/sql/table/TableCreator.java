@@ -177,6 +177,7 @@ public class TableCreator extends ServiceBase {
 				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
 				TypePair copy = new TypePair("leftv", pair.type);
 				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype, false);
+				field.setIsAssocTblField(dtype.fieldIsOptional(pair.name));
 				fieldL.add(field);
 
 				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(info.farType);

@@ -15,6 +15,11 @@ public class PostgresFieldGen extends FieldGen {
 	}
 	
 	public void generateField(StrCreator sc) {
+		if (isAssocTblField) {
+			generateAssocField(sc);
+			return;
+		}
+		
 		String name = pair.name;
 		String type = deliaToSql(pair);
 		//	Department		Char(35)		NOT NULL,
