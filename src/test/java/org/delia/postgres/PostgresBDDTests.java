@@ -174,7 +174,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
 		runR1700File("t0-let-field-func.txt", 3);
-		runR1700File("t0-let-field-multiple.txt", 3);
+		runR1700File("t0-let-field-multiple.txt", 5);
 	}
 	
 	@Test
@@ -251,16 +251,14 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 2;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR2150File("t0-migrate-many-to-many2.txt", 2);
-//		runR1700File("t0-let-field-single.txt", 3);
-		runR1700File("t0-let-field-func.txt", 3);
-//		runR1700File("t0-let-field-multiple.txt", 3);
+		runR1700File("t0-let-field-multiple.txt", 5);
 	}
 	
 	//---

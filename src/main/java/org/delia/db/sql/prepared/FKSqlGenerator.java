@@ -86,7 +86,12 @@ public class FKSqlGenerator extends ServiceBase {
 //			RelationManyRule manyRule = DRuleHelper.findManyRule(exp.getTypeName(), registry);
 			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
-				statement.sql = generateFKsQueryMany(spec, exp, manyRule, details, statement);
+				sc = new StrCreator();
+				String sql = generateFKsQueryMany(spec, exp, manyRule, details, statement);
+				sc.o(sql);
+				sqlgen.generateQueryFns(sc, spec, exp.typeName);
+				sc.o(";");
+				statement.sql = sc.str;
 				return statement;
 			}
 			return sqlgen.generateQuery(spec); 
@@ -204,7 +209,6 @@ public class FKSqlGenerator extends ServiceBase {
 			//				TypePair farField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.farType);
 			sc.o(" as %s LEFT JOIN %s ON %s", tbl.alias, tbl2.fmtAsStr(), onstr);
 			pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), tbl, statement);
-			sc.o(";");
 
 			details.mergeRows = true;
 			details.mergeOnField = rule.relInfo.fieldName;

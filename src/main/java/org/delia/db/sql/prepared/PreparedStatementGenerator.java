@@ -93,7 +93,7 @@ public class PreparedStatementGenerator extends ServiceBase {
 		return selectFnHelper.doLastFixup(spec, typeName);
 	}
 
-	protected void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
+	public void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
 		this.selectFnHelper.doOrderByIfPresent(sc, spec, typeName);
 		this.selectFnHelper.doLimitIfPresent(sc, spec, typeName);
 		this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);

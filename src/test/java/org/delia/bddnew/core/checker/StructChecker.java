@@ -58,6 +58,15 @@ public class StructChecker extends ValueCheckerBase {
 			if (!s.equals(actualLine)) {
 				String err = String.format("value-mismatch: (line %d) expected '%s' but got '%s'", index, s, actualLine);
 				log.logError(err);
+				boolean once = true;
+				for(String x: genL) {
+					if (once) {
+						log.log("actual: %s", x);
+						once = false;
+					} else {
+						log.log("%s", x);
+					}
+				}
 				return false;
 			}
 			index++;
