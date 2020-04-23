@@ -345,14 +345,16 @@ public class TableCreator extends ServiceBase {
 		StrCreator sc = new StrCreator();
 		String[] ar = deltaFlags.split(",");
 		//  deltaFlags: +O,+U,+P,+S
-
+		
+		AssocInfo ainfo = createAssocInfoIfIsManyToMany(tableName, fieldName);
+		
 		for(String delta: ar) {
 			switch(delta) {
 			case "+O":
-				doAlterColumnOptional(sc, tableName, fieldName, true);
+				doAlterColumnOptional(sc, tableName, fieldName, true, ainfo);
 				break;
 			case "-O":
-				doAlterColumnOptional(sc, tableName, fieldName, false);
+				doAlterColumnOptional(sc, tableName, fieldName, false, ainfo);
 				break;
 			case "+U":
 				doAlterColumnUnique(sc, tableName, fieldName, true, constraintName);
@@ -373,6 +375,19 @@ public class TableCreator extends ServiceBase {
 		return sc.str;
 	}
 
+	private AssocInfo createAssocInfoIfIsManyToMany(String tableName, String fieldName) {
+		DStructType structType = (DStructType) registry.getType(tableName);
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		boolean isAssoc = this.isManyToManyRelation(pair, structType);
+		if (isAssoc) {
+			AssocInfo ainfo = new AssocInfo();
+			ainfo.structType = structType;
+			ainfo.pair = pair;
+			return ainfo;
+		}
+		return null;
+	}
+
 	protected void doAlterColumnUnique(StrCreator sc, String tableName, String fieldName, boolean b, String constraintName) {
 		doAlterTablePrefix(sc, tableName);
 		if (b) {
@@ -385,8 +400,22 @@ public class TableCreator extends ServiceBase {
 		sc.o(";\n");
 	}
 
-	protected void doAlterColumnOptional(StrCreator sc, String tableName, String fieldName, boolean b) {
-		doAlterColumnPrefix(sc, tableName, fieldName);
+	protected void doAlterColumnOptional(StrCreator sc, String tableName, String fieldName, boolean b, AssocInfo ainfo) {
+		if (ainfo != null) {
+			List<TableInfo> tblInfoL = new ArrayList<>();
+			RelationInfo relinfo = DRuleHelper.findManyToManyRelation(ainfo.pair, ainfo.structType);
+			existSvc.fillTableInfoIfNeeded(tblInfoL, relinfo);
+			TableInfo tblinfo = tblInfoL.get(0);
+			if (tblinfo.tbl2.equals(tableName)) {
+				doAlterColumnPrefix(sc, tblinfo.assocTblName, "leftv");
+			} else {
+				doAlterColumnPrefix(sc, tblinfo.assocTblName, "rightv");
+			}
+		} else {
+			doAlterColumnPrefix(sc, tableName, fieldName);
+		}
+		
+		
 		if (b) {
 			sc.o(" DROP NOT NULL"); //set null 
 		} else {
