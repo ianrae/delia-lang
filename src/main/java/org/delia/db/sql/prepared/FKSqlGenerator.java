@@ -85,6 +85,8 @@ public class FKSqlGenerator extends ServiceBase {
 		QueryAdjustment adjustment = addOtherPartsOfQuery(spec, exp.typeName);
 		if (adjustment != null && adjustment.isFirst) {
 			spec = this.selectFnHelper.doFirstFixup(spec, exp.typeName, tbl.alias);
+		} else if (adjustment != null && adjustment.isLast) {
+			spec = this.selectFnHelper.doLastFixup(spec, exp.typeName, tbl.alias);
 		}
 		
 //		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
@@ -161,6 +163,7 @@ public class FKSqlGenerator extends ServiceBase {
 		public String fmt;
 		public boolean isCount;
 		public boolean isFirst;
+		public boolean isLast;
 		
 		public QueryAdjustment(String fieldName, String fmt) {
 			this.fieldName = fieldName;
@@ -181,14 +184,14 @@ public class FKSqlGenerator extends ServiceBase {
 			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MAX(%s)");
 			return adjustment;
 		} else if (selectFnHelper.isFirstPresent(spec)) {
-			QueryAdjustment adjustment = new QueryAdjustment(null, "LIMIT 1");
+			QueryAdjustment adjustment = new QueryAdjustment(null, "");
 			adjustment.isFirst = true;
 			return adjustment;
-//			sc.o("SELECT TOP 1 * FROM %s", typeName);
 		} else if (selectFnHelper.isLastPresent(spec)) {
-//			spec = null; //TODO FIX doSelectLast(sc, spec, typeName);
+			QueryAdjustment adjustment = new QueryAdjustment(null, "");
+			adjustment.isLast = true;
+			return adjustment;
 		} else {
-//			sc.o("SELECT * FROM %s", typeName);
 		}
 		return null;
 	}
@@ -317,7 +320,7 @@ public class FKSqlGenerator extends ServiceBase {
 						s = String.format(adjustment.fmt, ss);
 						haveDoneCount = true;
 					}
-				} else if (adjustment.isFirst) {
+				} else if (adjustment.isFirst || adjustment.isLast) {
 				} else if (adjustment.fieldName.equals(pair.name)) {
 					s = String.format(adjustment.fmt, s);
 				}

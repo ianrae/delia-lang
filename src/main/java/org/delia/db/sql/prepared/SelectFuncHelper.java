@@ -44,6 +44,8 @@ public class SelectFuncHelper extends ServiceBase {
 			return determineFieldTypeForFn(spec, "max");
 		} else if (isFirstPresent(spec) && findFieldUsingFn(spec, "first") != null) {
 			return determineFieldTypeForFn(spec, "first");
+		} else if (isLastPresent(spec) && findFieldUsingFn(spec, "last") != null) {
+			return determineFieldTypeForFn(spec, "last");
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
