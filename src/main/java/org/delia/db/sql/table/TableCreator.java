@@ -21,7 +21,7 @@ public class TableCreator extends ServiceBase {
 	public List<TableInfo> alreadyCreatedL = new ArrayList<>();
 	protected FieldGenFactory fieldgenFactory;
 	protected SqlNameFormatter nameFormatter;
-	private TableExistenceService existSvc;
+	protected TableExistenceService existSvc;
 	
 	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
 				SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
