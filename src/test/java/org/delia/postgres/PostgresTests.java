@@ -10,6 +10,8 @@ import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
 import org.delia.db.InstrumentedDBInterface;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.postgres.PostgresSqlHelperFactory;
@@ -150,7 +152,9 @@ public class PostgresTests {
 		log.log("and query..");
 		DBAccessContext dbctx = new DBAccessContext(null, null);
 		PostgresSqlHelperFactory hh = new PostgresSqlHelperFactory(factorySvc);
-		PreparedStatementGenerator psg = hh.createPrepSqlGen(dbctx);
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		
+		PreparedStatementGenerator psg = hh.createPrepSqlGen(existSvc, dbctx);
 		boolean exists = conn.execFieldDetect("cars", "name", psg, false);
 		assertEquals(true, exists);
 		exists = conn.execFieldDetect("cars", "zzzzzname", psg, false);

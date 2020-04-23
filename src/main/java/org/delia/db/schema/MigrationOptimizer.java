@@ -9,9 +9,16 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.relation.RelationCardinality;
+import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DRuleHelper;
 
 public class MigrationOptimizer extends ServiceBase {
 
@@ -30,10 +37,115 @@ public class MigrationOptimizer extends ServiceBase {
 	public List<SchemaType> optimizeDiffs(List<SchemaType> diffL) {
 		diffL = detectTableRename(diffL);
 		diffL = detectFieldRename(diffL);
+		diffL = removeParentRelations(diffL);
+		diffL = detectOneToManyFieldChange(diffL);
 		
 		return diffL;
 	}
 	
+	/**
+	 * In 1-to-1 and 1-to-many the parent side of a relation doesn't exist in the
+	 * db, so remove steps for them.
+	 * 
+	 * @param diffL
+	 * @return
+	 */
+	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
+		List<SchemaType> newlist = new ArrayList<>();
+		List<SchemaType> manyToManyList = new ArrayList<>();
+		for(SchemaType st: diffL) {
+			if (st.isFieldInsert()) {
+				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
+				if (ruleOne != null && ruleOne.isParent()) {
+					//don't add
+				} else 	if (ruleMany != null) {
+					if (ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+						if (! findOtherSideOfRelation(manyToManyList, st)) {
+							newlist.add(st);
+							manyToManyList.add(st);
+						}
+					} else {
+						//don't add (many side is always a parent)
+					}
+				} else {
+					newlist.add(st);
+				}
+			} else if (st.isFieldRename()) {
+				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.newName, registry);
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.newName, registry);
+				if (ruleOne != null && ruleOne.isParent()) {
+					//don't add
+				} else 	if (ruleMany != null) {
+					if (ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+						//do nothing - field names not in assoc table
+					} else {
+						//don't add (many side is always a parent)
+					}
+				} else {
+					newlist.add(st);
+				}
+			} else {
+				newlist.add(st);
+			}
+		}
+		return newlist;
+	}
+	
+	private boolean findOtherSideOfRelation(List<SchemaType> manyToManyList, SchemaType target) {
+		for(SchemaType st: manyToManyList) {
+			RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
+			if (ruleMany != null) {
+				if (ruleMany.relInfo.farType.getName().equals(target.typeName)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private List<SchemaType> detectOneToManyFieldChange(List<SchemaType> diffL) {
+		List<SchemaType> newlist = new ArrayList<>();
+		List<SchemaType> doomedL = new ArrayList<>();
+		for(SchemaType st: diffL) {
+			if (st.isFieldAlter()) {
+				if (st.newName.equals("-a,+c")) { //changing parent from one to many?
+					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
+					DType farType = ruleMany.relInfo.farType;
+					DStructType nearType = ruleMany.relInfo.nearType;
+					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+
+					st.action = "A";
+					st.field = otherSide.fieldName;
+					st.typeName = otherSide.nearType.getName();
+					st.newName = "-U"; //remove UNIQUE
+					
+					log.log("migrate: one to many on '%s.%s'", st.typeName, st.field);
+				} else if (st.newName.equals("-c,+a")) { //changing parent from many to one?
+					RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
+					DType farType = ruleOne.relInfo.farType;
+					DStructType nearType = ruleOne.relInfo.nearType;
+					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+
+					st.action = "A";
+					st.field = otherSide.fieldName;
+					st.typeName = otherSide.nearType.getName();
+					st.newName = "+U"; //remove UNIQUE
+					
+					log.log("migrate: one to many on '%s.%s'", st.typeName, st.field);
+				}
+				newlist.add(st);
+			} else {
+				newlist.add(st);
+			}
+		}
+		
+		for(SchemaType doomed: doomedL) {
+			newlist.remove(doomed);
+		}
+		
+		return newlist;
+	}
 	
 	private List<SchemaType> detectTableRename(List<SchemaType> diffL) {
 		List<SchemaType> newlist = new ArrayList<>();

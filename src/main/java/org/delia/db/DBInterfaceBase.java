@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.h2.SqlHelperFactory;
+import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
@@ -108,7 +108,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		List<DValue> list = new ArrayList<>();
 		try {
 			DValue dval = valueHelper.readIndexedField(selectResultType, 1, rs, dbctx);
-			list.add(dval);
+			if (dval != null) {
+				list.add(dval);
+			}
 		} catch (ValueException e) {
 			//				e.printStackTrace();
 			DeliaError err = ((ValueException)e).errL.get(0);
@@ -229,11 +231,17 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	}
 
 	protected PreparedStatementGenerator createPrepSqlGen(DBAccessContext dbctx) {
-		return sqlHelperFactory.createPrepSqlGen(dbctx);
+		return sqlHelperFactory.createPrepSqlGen(createExistService(dbctx), dbctx);
 	}
 	protected InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
-		return sqlHelperFactory.createPrepInsertSqlGen(dbctx);
+		TableExistenceService existSvc = createExistService(dbctx);
+		return sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
 	}
+	protected TableExistenceService createExistService(DBAccessContext dbctx) {
+		TableExistenceService existSvc = new TableExistenceServiceImpl(this, dbctx);
+		return existSvc;
+	}
+	
 	protected synchronized TableCreator createTableCreator(DBAccessContext dbctx) {
 		if (tableCreator == null) {
 			this.tableCreator = sqlHelperFactory.createTableCreator(dbctx);
@@ -241,7 +249,7 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		return tableCreator;
 	}
 	protected FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx) {
-		return sqlHelperFactory.createFKSqlGen(tblinfoL, dbctx);
+		return sqlHelperFactory.createFKSqlGen(tblinfoL, dbctx, createExistService(dbctx));
 	}
 	
 	@Override

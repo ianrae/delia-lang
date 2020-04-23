@@ -29,9 +29,13 @@ import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.DValueImpl;
 import org.delia.type.TypePair;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
 
 /**
@@ -71,6 +75,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	public MemDBInterface() {
 		super();
 		this.capabilities = new DBCapabilties(false, false, false, false);
+		this.capabilities.setRequiresTypeReplacementProcessing(true);
 	}
 
 	@Override
@@ -273,6 +278,10 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 
 		selector.setTbl(tbl);
 		DStructType dtype = findType(typeName, dbctx); 
+		if (dtype == null) {
+			DeliaExceptionHelper.throwError("struct-unknown-type-in-query", "unknown struct type '%s'", typeName);
+		}
+		
 		selector.init(et, spec, dtype, dbctx.registry); 
 		if (selector.wasError()) {
 			DeliaError err = et.add("row-selector-error", String.format("row selector failed for type '%s'", typeName));
@@ -335,28 +344,6 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		qresp.ok = true;
 		return qresp;
 	}
-
-	//		@Override
-	//		public void setRegistry(DTypeRegistry registry) {
-	////			this.registry = registry;
-	//			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
-	//			if (serialProvider == null) {
-	//				this.serialProvider = new SerialProvider(factorySvc, registry);
-	//			} else {
-	//				//we want to keep the serial providers so don't generate ids already used
-	//				this.serialProvider.setRegistry(registry);
-	//			}
-	//			
-	//		}
-
-	//		@Override
-	//		public void setVarEvaluator(VarEvaluator varEvaluator) {
-	////			this.varEvaluator = varEvaluator;
-	//		}
-	//		@Override
-	//		public VarEvaluator getVarEvaluator() {
-	//			return null; //varEvaluator;
-	//		}
 
 	@Override
 	public boolean doesTableExist(String tableName, DBAccessContext dbctx) {
@@ -460,7 +447,21 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 
 	@Override
 	public void createField(String typeName, String field, DBAccessContext dbctx) {
-		//nothing to do
+		MemDBTable tbl = tableMap.get(typeName);
+		if (tbl == null) {
+			tbl = handleUnknownTable(typeName, dbctx);
+		}
+		
+//		DStructType structType = (DStructType) dbctx.registry.getType(typeName);
+//		if (true || structType.fieldIsOptional(field)) {
+//			//add a value
+//			for(DValue dval: tbl.rowL) {
+//				if (dval.asStruct().getField(field) == null) {
+//					Map<String, DValue> map = dval.asMap();
+//					map.put(field, null);
+//				}
+//			}
+//		}
 	}
 
 	@Override
@@ -511,5 +512,28 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	@Override
 	public void enumerateAllConstraints(Log logToUse) {
 		//not supported
+	}
+
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		for (String typeName: tableMap.keySet()) {
+			MemDBTable tbl = tableMap.get(typeName);
+			for(DValue dval: tbl.rowL) {
+				DType dtype = dval.getType();
+				
+				//in addition the DValues stored here may be from a previous entire run
+				//of Runner (and its registry).
+				//so also check by name
+				boolean shouldReplace = dtype.getName().equals(spec.newType.getName());
+				
+				if (shouldReplace || spec.needsReplacement(this, dtype)) {
+					DValueImpl impl = (DValueImpl) dval;
+					impl.forceType(spec.newType);
+				} else {
+					dtype.performTypeReplacement(spec);
+				}
+			}
+		}
+		
 	}
 }

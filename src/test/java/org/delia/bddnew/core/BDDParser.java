@@ -147,27 +147,6 @@ public class BDDParser {
 		return lineType;
 	}
 
-//	public List<String> parseBackground(List<String> lines) {
-//		List<String> bglines = new ArrayList<>();
-//
-//		boolean inBackground = false;
-//		for(String line: lines) {
-//			line = line.trim();
-//			if (line.isEmpty() || line.startsWith("#")) {
-//				continue;
-//			}
-//			if (line.startsWith("background:")) {
-//				inBackground = true;
-//			} else if (line.startsWith("---")) {
-//				inBackground = false;
-//				break;
-//			} else if (inBackground) {
-//				bglines.add(line);
-//			}
-//		}
-//
-//		return bglines;
-//	}
 	private String parseArg(String line) {
 		String s = StringUtils.substringAfter(line, ":");
 		s = s.trim();

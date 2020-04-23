@@ -12,6 +12,8 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.log.Log;
+import org.delia.log.StandardLogFactory;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
@@ -64,12 +66,6 @@ public class DeliaDaoTests extends NewBDDBase {
 		assertEquals(true, res.ok);
 		dval = res.getAsDValue();
 		assertNull(dval);
-	}
-
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
 	}
 
 	@Test
@@ -142,6 +138,9 @@ public class DeliaDaoTests extends NewBDDBase {
 		ResultValue res = dao.queryByStatement(type, "[field1 > 0].fks()");
 		assertEquals(true, res.ok);
 		assertEquals(2, res.getAsDValueList().size());
+		
+		long n = dao.count(type);
+		assertEquals(2, n);
 	}
 
 	@Test
@@ -164,13 +163,63 @@ public class DeliaDaoTests extends NewBDDBase {
 		}
 		assertEquals("Type 'Flight' doesn't have field 'zzz'", failMsg);
 	}
+	@Test
+	public void testErr3() {
+		String src = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+
+		//then a controller method
+		String type = "Flight";
+		
+		//query
+		String failMsg = null;
+		try {
+			dao.queryByFilter("bb", "zzz > 0");
+		} catch (Exception e) {
+			log.log(e.getMessage());
+			failMsg = e.getMessage();
+		}
+		assertEquals("unknown struct type 'bb'", failMsg);
+	}
+	
+	
+	@Test
+	public void testStandardLog() {
+		String src = buildSrc();
+		
+		StandardLogFactory logFactory = new StandardLogFactory();
+		Log slog = logFactory.create(this.getClass());
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).log(slog).build();
+		DeliaDao dao = new DeliaDao(delia);
+		
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+
+		//then a controller method
+		String type = "Flight";
+		
+		//query
+//		ResultValue res = dao.queryByExpression(type, "field1 > 0");
+		ResultValue res = dao.queryByStatement(type, "[field1 > 0].fks()");
+		assertEquals(true, res.ok);
+		assertEquals(2, res.getAsDValueList().size());
+	}
 	
 	//---
 
 	@Before
 	public void init() {
 	}
-	
+
+	private DeliaDao createDao() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		return new DeliaDao(delia);
+	}
+
 	private String buildSrc() {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";

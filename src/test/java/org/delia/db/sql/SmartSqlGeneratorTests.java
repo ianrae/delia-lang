@@ -9,9 +9,12 @@ import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.db.DBAccessContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.h2.SqlHelperFactory;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.TableInfo;
@@ -48,8 +51,10 @@ public class SmartSqlGeneratorTests extends TopoTestBase {
 	private FKSqlGenerator createFKGen(List<TableInfo> tblinfoL) {
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
 //		SmartSqlGenerator gen = new SmartSqlGenerator(delia.getFactoryService(), this.sess.getExecutionContext().registry, tblinfoL, nameFormatter);
-		SqlHelperFactory sqlHelperFactory = new SqlHelperFactory(factorySvc);
-		FKSqlGenerator gen = new FKSqlGenerator(delia.getFactoryService(), this.sess.getExecutionContext().registry, tblinfoL, sqlHelperFactory, new DoNothingVarEvaluator());
+		H2SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(this.sess.getExecutionContext().registry, null));
+		FKSqlGenerator gen = new FKSqlGenerator(delia.getFactoryService(), this.sess.getExecutionContext().registry, tblinfoL, sqlHelperFactory, 
+					new DoNothingVarEvaluator(), existSvc);
 		return gen;
 	}
 

@@ -73,12 +73,13 @@ public class TypeBuilder extends ServiceBase {
 	 * @return DType 
 	 */
 	private DStructType findOrCreateType(String typeName, DType baseType, OrderedMap omap) {
-	    DType possibleStruct = registry.getType(typeName);
-	    if (possibleStruct != null && possibleStruct.isStructShape()) {
-	      DStructType dtype =  (DStructType) possibleStruct;
-	      dtype.internalAdjustType(baseType, omap);
-	      return dtype;
-	    }
+		//now using type replacer
+//	    DType possibleStruct = registry.getType(typeName);
+//	    if (possibleStruct != null && possibleStruct.isStructShape()) {
+//	      DStructType dtype =  (DStructType) possibleStruct;
+//	      dtype.internalAdjustType(baseType, omap);
+//	      return dtype;
+//	    }
 		
 		return new DStructType(Shape.STRUCT, typeName, baseType, omap);
 	}

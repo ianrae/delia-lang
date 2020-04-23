@@ -15,10 +15,52 @@ given:
   insert Customer {id: 55 }
   insert Customer {id: 56 }
 when:
-  let x = Customer[true].id
+  let x = Customer[true].orderBy('id').id
 then:
 value:a:int:55
 value:a:int:56
+
+---
+title: orderBy with relations (that will be null since no fk())
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Address {id: 100}
+  insert Customer {id: 55, addr: 100}
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+vid:55
+vaddr:null
+}
+value:a:Customer {
+vid:56
+vaddr:null
+}
+
+---
+title: limit with relations (that will be null since no fk())
+given:
+ type Customer struct {id int unique, relation addr Address optional many } end
+ type Address struct {id int unique, relation cust Customer optional one } end
+
+  insert Address {id: 100}
+  insert Customer {id: 55, addr: 100}
+  insert Customer {id: 56 }
+when:
+  let x = Customer[true].orderBy('id').limit(1)
+then:
+value:a:Customer {
+vid:55
+vaddr:null
+}
+value:a:Customer {
+vid:56
+vaddr:null
+}
 
 ---
 title: multiple missing

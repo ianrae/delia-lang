@@ -1,0 +1,43 @@
+# migration-relation tests
+
+FEATURE: migration - many-to-many relation field O-
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: MtoN-1
+chainNextTest:true
+given:
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end
+ type Address struct {id int primaryKey, relation cust Customer optional many } end
+
+when:
+  insert Customer { id: 1, wid:33 }
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vaddr:null
+}
+
+---
+title: MtoN-1 - O-
+chainNextTest:true
+given:
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end
+ type Address struct {id int primaryKey, relation cust Customer  many } end
+
+  insert Customer {id: 2, wid: 34 }
+when:
+  insert Address {id: 100, cust: 1 }
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vaddr:{100}
+}
+

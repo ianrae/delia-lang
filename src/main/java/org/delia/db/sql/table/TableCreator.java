@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
 import org.delia.relation.RelationInfo;
@@ -20,12 +21,17 @@ public class TableCreator extends ServiceBase {
 	public List<TableInfo> alreadyCreatedL = new ArrayList<>();
 	protected FieldGenFactory fieldgenFactory;
 	protected SqlNameFormatter nameFormatter;
+	protected TableExistenceService existSvc;
+	private AssocTableCreator assocTblCreator;
 	
-	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, SqlNameFormatter nameFormatter) {
+	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
+				SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
+		this.existSvc = existSvc;
+		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL);
 	}
 
 	public String generateCreateTable(String typeName, DStructType dtype) {
@@ -51,20 +57,25 @@ public class TableCreator extends ServiceBase {
 				continue;
 			}
 			
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, false);
 			fieldL.add(field);
 			index++;
 		}
 		
 		//add constraints
+		List<ConstraintGen> constraints = new ArrayList<>();
 		for(TypePair pair: dtype.getAllFields()) {
 			if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
-				ConstraintGen constraint = generateFKConstraint(sc, pair, dtype);
+				ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, false);
 				if (constraint != null) {
 					fieldL.add(constraint);
+					constraints.add(constraint);
 				}
 			}
 		}
+		
+		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
+		
 		
 		index = 0;
 		for(SqlElement field: fieldL) {
@@ -91,6 +102,16 @@ public class TableCreator extends ServiceBase {
 	}
 	
 
+	protected void haveFieldsVisitTheirConstrainsts(List<SqlElement> fieldL, List<ConstraintGen> constraints) {
+		//have field see all its contraints
+		for(SqlElement el: fieldL) {
+			if (el instanceof FieldGen) {
+				FieldGen field = (FieldGen) el;
+				field.visitConstraints(constraints); //wire them up
+			}
+		}
+	}
+
 	protected boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
 		//key goes in child only
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
@@ -103,90 +124,20 @@ public class TableCreator extends ServiceBase {
 		return DRuleHelper.isManyToManyRelation(pair, dtype);
 	}
 
-	protected ConstraintGen generateFKConstraint(StrCreator sc, TypePair pair, DStructType dtype) {
+	protected ConstraintGen generateFKConstraint(StrCreator sc, TypePair pair, DStructType dtype, boolean isAlter) {
 		//key goes in child only
 		if (!shouldGenerateFKConstraint(pair, dtype)) {
 			return null;
 		}
-		return fieldgenFactory.generateFKConstraint(registry, pair, dtype);
+		return fieldgenFactory.generateFKConstraint(registry, pair, dtype, isAlter);
+	}
+	
+	protected void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype) {
+		assocTblCreator.alterGenerateAssocTable(sc, pair, dtype);
 	}
 	
 	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
-		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
-		String tbl1 = info.nearType.getName();
-		String tbl2 = info.farType.getName();
-		if (!(haveCreatedTable(tbl1) && haveCreatedTable(tbl2))) {
-			return;
-		}
-
-		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
-		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
-		tblinfo.assocTblName = assocTableName;
-		tblinfo.tbl1 = tbl1;
-		tblinfo.tbl2 = tbl2;
-		tblinfo.fieldName = xpair.name;
-		
-		sc.o("CREATE TABLE %s (", assocTableName);
-		sc.nl();
-		int index = 0;
-		List<SqlElement> fieldL = new ArrayList<>();
-		int n = dtype.getAllFields().size();
-		for(TypePair pair: dtype.getAllFields()) {
-			if (isManyToManyRelation(pair, dtype)) {
-				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
-				TypePair copy = new TypePair("leftv", pair.type);
-				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype);
-				fieldL.add(field);
-
-				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-				copy = new TypePair("rightv", xx.type);
-				//TODO: should probably be optional (NULL). todo fix!1
-				field = fieldgenFactory.createFieldGen(registry, copy, info.farType);
-				fieldL.add(field);
-
-				index++;
-			}
-		}
-		
-		for(TypePair pair: dtype.getAllFields()) {
-			if (isManyToManyRelation(pair, dtype)) {
-				TypePair copy = new TypePair("leftv", info.nearType); //address
-				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.nearType);
-				if (constraint != null) {
-					fieldL.add(constraint);
-				}
-				
-				copy = new TypePair("rightv", info.farType);
-				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.farType);
-				if (constraint != null) {
-					fieldL.add(constraint);
-				}
-				index++;
-			}
-		}
-		
-		index = 0;
-		for(SqlElement field: fieldL) {
-			field.generateField(sc);
-			if (index + 1 < fieldL.size()) {
-				sc.o(",");
-				sc.nl();
-			}
-			index++;
-		}
-		
-		sc.o(");");
-		sc.nl();
-		
-	}
-
-	protected boolean haveCreatedTable(String tbl1) {
-		for(TableInfo info: alreadyCreatedL) {
-			if (info.tblName.equals(tbl1)) {
-				return true;
-			}
-		}
-		return false;
+		assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
 	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {
@@ -195,7 +146,7 @@ public class TableCreator extends ServiceBase {
 		}
 		
 		StrCreator sc = new StrCreator();
-		sc.o("ALTER TABLE %s ADD  ", typeName);
+		sc.o("ALTER TABLE %s ADD COLUMN ", typeName);
 		sc.nl();
 		List<SqlElement> fieldL = new ArrayList<>();
 		int manyToManyFieldCount = 0;
@@ -204,36 +155,74 @@ public class TableCreator extends ServiceBase {
 		if (isManyToManyRelation(pair, dtype)) {
 			manyToManyFieldCount++;
 		} else {
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
 			fieldL.add(field);
 		}
 		
 		//add constraints
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
-			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype);
+			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, true);
 			if (constraint != null) {
 				fieldL.add(constraint);
 			}
 		}
 		
-		int index = 0;
-		for(SqlElement ff: fieldL) {
+		List<ConstraintGen> constraints = getConstraintsOnly(fieldL);
+		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
+		
+		
+		ListWalker<FieldGen> walker1 = new ListWalker<>(getFieldsOnly(fieldL));
+		while(walker1.hasNext()) {
+			FieldGen ff = walker1.next();
 			ff.generateField(sc);
-			if (index + 1 < fieldL.size()) {
-				sc.o(",");
-				sc.nl();
-			}
-			index++;
+			walker1.addIfNotLast(sc, ",", nl());
+		}
+		
+		sc.o(";");
+		sc.nl();
+		ListWalker<ConstraintGen> walker = new ListWalker<>(constraints);
+		while(walker.hasNext()) {
+			ConstraintGen con = walker.next();
+			sc.o("ALTER TABLE %s ADD  ", typeName);
+			con.generateField(sc);
+			walker.addIfNotLast(sc, ",", nl());
 		}
 		
 		sc.nl();
 		if (manyToManyFieldCount > 0) {
-			sc.nl();
+			if (fieldL.isEmpty()) {
+				sc = new StrCreator(); //reset
+			} else {
+				sc.nl();
+			}
 			if (isManyToManyRelation(pair, dtype)) {
-				generateAssocTable(sc, pair, dtype);
+				alterGenerateAssocTable(sc, pair, dtype);
 			}
 		}
 		return sc.str;
+	}
+
+	private String nl() {
+		return "\n";
+	}
+
+	private List<FieldGen> getFieldsOnly(List<SqlElement> fieldL) {
+		List<FieldGen> list = new ArrayList<>();
+		for(SqlElement el: fieldL) {
+			if (el instanceof FieldGen) {
+				list.add((FieldGen) el);
+			}
+		}
+		return list;
+	}
+	private List<ConstraintGen> getConstraintsOnly(List<SqlElement> fieldL) {
+		List<ConstraintGen> list = new ArrayList<>();
+		for(SqlElement el: fieldL) {
+			if (el instanceof ConstraintGen) {
+				list.add((ConstraintGen) el);
+			}
+		}
+		return list;
 	}
 
 	public String generateRenameField(String tableName, String fieldName, String newName) {
@@ -254,7 +243,7 @@ public class TableCreator extends ServiceBase {
 		DStructType dtype = (DStructType) registry.getType(tableName);
 		TypePair pair = DValueHelper.findField(dtype, fieldName);
 		
-		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype);
+		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
 		String sqlType = fieldGen.deliaToSql(pair);
 		
 		sc.o(" SET DATA TYPE %s", sqlType); 
@@ -264,7 +253,12 @@ public class TableCreator extends ServiceBase {
 		StrCreator sc = new StrCreator();
 		String[] ar = deltaFlags.split(",");
 		//  deltaFlags: +O,+U,+P,+S
-
+		
+		AssocInfo ainfo = assocTblCreator.createAssocInfoIfIsManyToMany(tableName, fieldName);
+		if (ainfo != null) {
+			return assocTblCreator.generateAlterField(tableName, fieldName, deltaFlags, constraintName, ainfo);
+		}
+		
 		for(String delta: ar) {
 			switch(delta) {
 			case "+O":
@@ -306,6 +300,8 @@ public class TableCreator extends ServiceBase {
 
 	protected void doAlterColumnOptional(StrCreator sc, String tableName, String fieldName, boolean b) {
 		doAlterColumnPrefix(sc, tableName, fieldName);
+		
+		
 		if (b) {
 			sc.o(" DROP NOT NULL"); //set null 
 		} else {

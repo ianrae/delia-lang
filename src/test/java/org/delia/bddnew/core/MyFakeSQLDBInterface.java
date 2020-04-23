@@ -54,8 +54,8 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 		case POSTGRES:
 		{
 			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), log);
-			PostgresDBInterface h2db = new PostgresDBInterface(factorySvc, connFact);
-			actualInterface = h2db;
+			PostgresDBInterface pgdb = new PostgresDBInterface(factorySvc, connFact);
+			actualInterface = pgdb;
 
 			actualInterface.init(factorySvc);
 

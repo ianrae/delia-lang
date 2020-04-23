@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 public class DStructType extends DType {
-//	private Map<String,DType> fields;
     private OrderedMap orderedMap;
 	//!! add String naturalKeyField, for db query. eg. 'code'
     private List<TypePair> allFields; //lazy-created
@@ -138,6 +137,19 @@ public class DStructType extends DType {
 		allFields = null; //reset
 		internalAdjustType(baseType);
 		this.orderedMap = omap;
+	}
+
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		super.performTypeReplacement(spec);
+
+		orderedMap.performTypeReplacement(spec);
+		
+		for(TypePair pair: allFields) {
+			if (spec.needsReplacement(this, pair.type)) {
+				pair.type = spec.newType;
+			}
+		}
 	}
 
 }

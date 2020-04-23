@@ -23,6 +23,7 @@ public class DType {
 	private DType baseType; //can be null
 	private List<DRule> rules = new ArrayList<>();
 	private int bitIndex;
+	public boolean invalidFlag; //used to verify type-replacement worked.
 
 	public DType(Shape shape, String name, DType baseType) {
 		this.shape = shape;
@@ -141,6 +142,16 @@ public class DType {
 	//TODO: make this into an 'internal' api with DStructTypeInternal interface
 	public void internalAdjustType(DType baseType) {
 		this.baseType = baseType;
+	}
+
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		if (baseType != null && spec.needsReplacement(this, baseType)) {
+			baseType = spec.newType;
+		}
+		
+		for(DRule rule: this.rules) {
+			rule.performTypeReplacement(spec);
+		}
 	}
 }
 

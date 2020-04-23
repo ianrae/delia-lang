@@ -1,0 +1,74 @@
+# let queryfn when relations
+# count, exist, min, max, first, last
+FEATURE: one-to-one parent. test wid field (not id)
+background:
+ configure loadFKs = true
+ type Customer struct {id int unique, wid int, relation addr Address one optional parent } end
+ type Address struct {id int unique, relation cust Customer  one } end
+ 
+thenType: struct
+
+---
+title: max
+given:
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].wid.max()
+then:
+value:a:int:34
+
+---
+title: min
+given:
+
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].wid.min()
+then:
+value:a:int:33
+
+---
+title: exist
+given:
+
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].wid.exist()
+then:
+value:a:boolean:true
+
+---
+title: count
+given:
+
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].wid.count()
+then:
+value:a:long:2
+
+---
+title: first
+given:
+
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].wid.first()
+then:
+value:a:int:33
+
+---
+title: last
+given:
+
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
+when:
+  let x = Customer[true].wid.last()
+then:
+value:a:int:34

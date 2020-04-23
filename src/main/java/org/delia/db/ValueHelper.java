@@ -202,6 +202,10 @@ public class ValueHelper extends ServiceBase {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 
 		boolean b = rs.next(); //assume rsIndex always 1. TODO fix if needed
+		if (!b) {
+			return null;
+		}
+		
 		switch(type.getShape()) {
 		case INTEGER:
 		{

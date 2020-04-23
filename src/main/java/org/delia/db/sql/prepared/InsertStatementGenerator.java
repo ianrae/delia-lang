@@ -6,8 +6,10 @@ import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DRelation;
@@ -24,11 +26,14 @@ public class InsertStatementGenerator extends ServiceBase {
 	private DTypeRegistry registry;
 	private SqlNameFormatter nameFormatter;
 	protected boolean specialHandlingForEmptyInsertFlag = false; //insert into Participant values (default);
+	private TableExistenceService existSvc;
 
-	public InsertStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlNameFormatter nameFormatter) {
+	public InsertStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlNameFormatter nameFormatter, 
+				TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.nameFormatter = nameFormatter;
+		this.existSvc = existSvc;
 	}
 
 	private String tblName(String typeName) {
@@ -125,18 +130,24 @@ public class InsertStatementGenerator extends ServiceBase {
 		for(TypePair pair: dtype.getAllFields()) {
 			RelationInfo info = DRuleHelper.findManyToManyRelation(pair, dtype);
 			if (info != null) {
+				fillTableInfoIfNeeded(tblInfoL, info);
 				TableInfo tblinfo = TableInfoHelper.findTableInfo(tblInfoL, pair, info);
+				tblinfo.fieldName = pair.name;
 				sql += genAssocInsert(dval, pair, tblinfo, map, statement);
 			}
 		}
 		return sql;
 	}
+	private int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
+		return existSvc.fillTableInfoIfNeeded(tblInfoL, info);
+	}
+
 	private String genAssocInsert(DValue dval, TypePair pair, TableInfo tblinfo, Map<String, DRelation> map, SqlStatement statement) {
 		DStructType dtype = (DStructType) dval.getType();
 		StrCreator sc = new StrCreator();
 		sc.o("INSERT INTO %s (", tblName(tblinfo.assocTblName));
 
-		RelationInfo info = DRuleHelper.findOtherSideOneOrMany(pair.type, dtype);
+		RelationInfo otherSideInfo = DRuleHelper.findOtherSideOneOrMany(pair.type, dtype);
 
 		sc.o("leftv");
 		sc.o(",");
@@ -147,64 +158,80 @@ public class InsertStatementGenerator extends ServiceBase {
 
 		sc.o("VALUES (");
 
-		//assume normal order. TODO impl reverse order
-		TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		DRelation drel = map.get(tblinfo.fieldName); //cust
-		if (drel == null) {
-			RelationInfo info2 = DRuleHelper.findManyToManyRelation(pair, dtype);
-			xpair = DValueHelper.findPrimaryKeyFieldPair(info2.nearType);
-
-			DValue zz = dval.asStruct().getField(info2.fieldName);
-			DValue id = zz.asRelation().getForeignKey();
-
-			TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-			DValue mainId = dval.asStruct().getField(main.name);
-			DRelation drelMain = new DRelation(dval.getType().getName(), mainId);
-
-			genAssocValues(sc, dval, drelMain, info2, xpair, id, statement);
-		} else {
-			xpair = DValueHelper.findPrimaryKeyFieldPair(info.farType); //Customer
-			DValue id = dval.asStruct().getField(xpair.name);
-			genAssocValues(sc, dval, drel, info, xpair, id, statement);
+		//normal order
+		if (tblinfo.tbl1.equals(otherSideInfo.farType.getName())) {
+			//TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+			DRelation drel = map.get(tblinfo.fieldName); //cust
+			ListWalker<DValue> walker = new ListWalker<>(drel.getMultipleKeys());
+			while (walker.hasNext()) {
+				TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+				DValue left = dval.asStruct().getField(main.name);
+				DValue right = walker.next();
+				
+				statement.paramL.add(left);
+				sc.o("?");
+				sc.o(",");
+				statement.paramL.add(right);
+				sc.o("?");
+				walker.addIfNotLast(sc, "),(");
+			}
+		} else { //reverse order
+			//TypePair xpair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+			DRelation drel = map.get(tblinfo.fieldName); //cust
+			ListWalker<DValue> walker = new ListWalker<>(drel.getMultipleKeys());
+			while (walker.hasNext()) {
+				TypePair main = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+				DValue left = walker.next();
+				DValue right = dval.asStruct().getField(main.name);
+				
+				statement.paramL.add(left);
+				sc.o("?");
+				sc.o(",");
+				statement.paramL.add(right);
+				sc.o("?");
+				walker.addIfNotLast(sc, "),(");
+			}
 		}
+		sc.o(")");
+			
 		return sc.str;
 	}
 
-	private void genAssocValues(StrCreator sc, DValue dval, DRelation drel, RelationInfo info, TypePair xpair, DValue id, SqlStatement statement) {
-		if (drel.isMultipleKey()) {
-			int index = 0;
-			for(DValue keyVal: drel.getMultipleKeys()) {
-				
-//				String s = valueInSql(id.getType().getShape(), id.getObject());
-				statement.paramL.add(id);
-				sc.o("?");
-
-				sc.o(",");
-				if (keyVal == null) {
-					statement.paramL.add(null);
-					sc.o("?");
-				} else {
-					statement.paramL.add(keyVal);
-					sc.o("?");
-				}
-				if (index < drel.getMultipleKeys().size() - 1) {
-					sc.o("),(");
-				}
-				index++;
-			}
-		} else {
-//			String s = valueInSql(id.getType().getShape(), id.getObject());
-			statement.paramL.add(id);
-			sc.o("?");
-
-			sc.o(",");
-			genRelationValue(sc, drel, 0, statement);
-		}
-
-		sc.o(");");
-		sc.nl();
-
-	}
+//	private void genAssocValues(StrCreator sc, DValue dval, DRelation drel, RelationInfo info, TypePair xpair, DValue id, SqlStatement statement) {
+//		if (drel.isMultipleKey()) {
+//			int index = 0;
+//			for(DValue keyVal: drel.getMultipleKeys()) {
+//				
+////				String s = valueInSql(id.getType().getShape(), id.getObject());
+//				statement.paramL.add(id);
+//				sc.o("?");
+//
+//				sc.o(",");
+//				if (keyVal == null) {
+//					statement.paramL.add(null);
+//					sc.o("?");
+//				} else {
+//					statement.paramL.add(keyVal);
+//					sc.o("?");
+//				}
+//				if (index < drel.getMultipleKeys().size() - 1) {
+//					sc.o("),(");
+//				}
+//				index++;
+//			}
+//		} else {
+////			String s = valueInSql(id.getType().getShape(), id.getObject());
+//			statement.paramL.add(id);
+//			sc.o("?");
+//
+//			sc.o(",");
+//			genRelationValue(sc, drel, 0, statement);
+//		}
+//
+//		sc.o(");");
+//		sc.nl();
+//
+//	}
 
 
 	private boolean generateInsertField(StrCreator sc, DValue dval, TypePair pair, DStructType dtype, int index, SqlStatement statement) {

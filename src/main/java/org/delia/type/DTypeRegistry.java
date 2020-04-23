@@ -1,6 +1,7 @@
 package org.delia.type;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,15 +24,28 @@ public class DTypeRegistry {
 	private DStructType schemaVersionType;
 	
 	public static final int NUM_BUILTIN_TYPES = 7;
-
-	public synchronized void add(String name, DType type) {
-        if (type == null || name == null || name.isEmpty()) {
+	
+	public synchronized void add(String typeName, DType dtype) {
+        if (dtype == null || typeName == null || typeName.isEmpty()) {
             throw new IllegalArgumentException("name or type were null");
         }
 		
-	    type.setBitIndex(nextBitIndex++);
-	    orderedList.add(type);
-		map.put(name, type);
+	    dtype.setBitIndex(nextBitIndex++);
+	    
+	    if (map.containsKey(typeName)) {
+	    	System.out.println("REDEF " + typeName);
+	    }
+//	    //remove any existing one with same name.
+//	    //because we re-execute typerunner we may have duplicates. remove earlier version
+//	    //TODO: not sure this works.
+//	    for(DType inner: orderedList) {
+//	    	if (inner.getName().equals(name)) {
+//	    		orderedList.remove(inner);
+//	    		break;
+//	    	}
+//	    }
+	    orderedList.add(dtype);
+		map.put(typeName, dtype);
 		
 		th = null; //clear
 	}
@@ -92,6 +106,17 @@ public class DTypeRegistry {
 		}
 		return (DStructType) getType(typeName);
 	}
+	
+	public Set<String> getAllCustomTypes() {
+		Set<String> list = new HashSet<>();
+		for(String typeName: map.keySet()) {
+			String s = BuiltInTypes.convertDTypeNameToDeliaName(typeName);
+			if (s.equals(typeName)) {
+				list.add(typeName);
+			}
+		}
+		return list;
+	}
 
 	@Override
 	public String toString() {
@@ -101,6 +126,13 @@ public class DTypeRegistry {
 			joiner.add(type.getName());
 		}
 		return joiner.toString();
+	}
+
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		for(String typeName: this.getAll()) {
+			DType currentType = getType(typeName);
+			currentType.performTypeReplacement(spec);
+		}
 	}
     
 }

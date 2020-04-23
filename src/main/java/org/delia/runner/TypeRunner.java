@@ -1,5 +1,6 @@
 package org.delia.runner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.compiler.ast.Exp;
@@ -19,16 +20,15 @@ import org.delia.typebuilder.TypeBuilder;
  */
 public class TypeRunner extends ServiceBase {
 	private DTypeRegistry registry;
-	private TypeBuilder typeBuilder;
+	private List<Exp> needReexecuteL = new ArrayList<>();
 
 	public TypeRunner(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
-		this.typeBuilder = new TypeBuilder(factorySvc, registry);
 	}
 
 
-	public void executeStatements(List<Exp> extL, List<DeliaError> allErrors) {
+	public void executeStatements(List<Exp> extL, List<DeliaError> allErrors, boolean runRulePostProcessor) {
 		for(Exp exp: extL) {
 			ResultValue res = executeStatement(exp);
 			if (! res.ok) {
@@ -36,6 +36,12 @@ public class TypeRunner extends ServiceBase {
 			}
 		}
 		
+		if (allErrors.isEmpty() && runRulePostProcessor) {
+			executeRulePostProcessor(allErrors);
+		}
+	}
+	
+	public void executeRulePostProcessor(List<DeliaError> allErrors) {
 		if (allErrors.isEmpty()) {
 			RulePostProcessor postProcessor = new RulePostProcessor(factorySvc);
 			postProcessor.process(registry, allErrors);
@@ -53,19 +59,16 @@ public class TypeRunner extends ServiceBase {
 	}
 
 	private void executeTypeStatement(TypeStatementExp exp, ResultValue res) {
+		TypeBuilder typeBuilder = new TypeBuilder(factorySvc, registry);
+		
 		DType dtype = typeBuilder.createType(exp);
 		//TODO: if futureL not-empty then re-run to handle forward delcs
 		res.ok = dtype != null;
 		if (! res.ok) {
 			res.errors.addAll(typeBuilder.getErrorTracker().getErrors());
+			needReexecuteL.add(exp);
 		}
 	}
-
-//	private void addError(ResultValue res, String id, String msg) {
-//		DangError error = et.add(id, msg);
-//		res.errors.add(error);
-//		res.ok = false;
-//	}
 
 	public DTypeRegistry getRegistry() {
 		return registry;
@@ -78,6 +81,11 @@ public class TypeRunner extends ServiceBase {
 			}
 		}
 		return false;
+	}
+
+
+	public List<Exp> getNeedReexecuteL() {
+		return needReexecuteL;
 	}
 
 }

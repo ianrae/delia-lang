@@ -5,6 +5,7 @@ import org.delia.db.memdb.MemDBExecutor;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
+import org.delia.type.TypeReplaceSpec;
 
 public class InstrumentedDBInterface implements DBInterface {
 	public DBInterface actualInterface;
@@ -123,5 +124,10 @@ public class InstrumentedDBInterface implements DBInterface {
 	@Override
 	public void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx) {
 		actualInterface.alterField(typeName, fieldName, deltaFlags, dbctx);
+	}
+
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		actualInterface.performTypeReplacement(spec);
 	}
 }

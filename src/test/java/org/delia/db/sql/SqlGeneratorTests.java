@@ -20,7 +20,9 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.h2.SqlHelperFactory;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -252,10 +254,11 @@ public class SqlGeneratorTests {
 		runner = helper.create(factorySvc, dbInterface);
 
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter());
-		SqlHelperFactory sqlHelperFactory = new SqlHelperFactory(factorySvc);
-		this.prepGen = 	new PreparedStatementGenerator(factorySvc, runner.getRegistry(), sqlHelperFactory, new DoNothingVarEvaluator());
-		this.insertGen = new InsertStatementGenerator(factorySvc, runner.getRegistry(), nameFormatter);
+		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(runner));
+		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc);
+		H2SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		this.prepGen = 	new PreparedStatementGenerator(factorySvc, runner.getRegistry(), sqlHelperFactory, new DoNothingVarEvaluator(), existSvc);
+		this.insertGen = new InsertStatementGenerator(factorySvc, runner.getRegistry(), nameFormatter, existSvc);
 
 		return runner;
 	}

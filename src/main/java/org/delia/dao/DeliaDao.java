@@ -37,6 +37,12 @@ public class DeliaDao  {
 		this.factorySvc = delia.getFactoryService();
 		this.delia = delia;
 	}
+	public DeliaDao(Delia delia, DeliaSession session) {
+		this.dbInterface = delia.getDBInterface();
+		this.factorySvc = delia.getFactoryService();
+		this.delia = delia;
+		this.mostRecentSess = session;
+	}
 
 	public DeliaDao(ConnectionString connString, DBType dbType, Log log) {
 		ErrorTracker et = new SimpleErrorTracker(log);
@@ -77,6 +83,16 @@ public class DeliaDao  {
 	public ResultValue queryByStatement(String type, String filterEx) {
 		String src = String.format("let $$ = %s%s", type, filterEx);
 		return execute(src);
+	}
+	public long count(String type) {
+		String src = String.format("let $$ = %s[true].count()", type);
+		ResultValue res = execute(src);
+		if (res.ok) {
+			Long n = res.getAsDValue().asLong();
+			return n;
+		} else {
+			return 0;
+		}
 	}
 
 	public ResultValue insertOne(String type, String fields) {

@@ -10,11 +10,16 @@ import org.delia.util.DValueHelper;
 
 public class PostgresFieldGen extends FieldGen {
 
-	public PostgresFieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype) {
-		super(factorySvc, registry, pair, dtype);
+	public PostgresFieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
+		super(factorySvc, registry, pair, dtype, isAlter);
 	}
 	
 	public void generateField(StrCreator sc) {
+		if (isAssocTblField) {
+			generateAssocField(sc);
+			return;
+		}
+		
 		String name = pair.name;
 		String type = deliaToSql(pair);
 		//	Department		Char(35)		NOT NULL,
@@ -23,7 +28,7 @@ public class PostgresFieldGen extends FieldGen {
 		String suffix1a = "";
 		if (dtype.fieldIsSerial(name)) {
 			suffix1a = " PRIMARY KEY GENERATED ALWAYS AS IDENTITY"; //only works for ints. need different syntax for string sequence
-		} else if (b) {
+		} else if (b || makeFieldUnique) {
 			suffix1 = " UNIQUE";
 		}
 		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";

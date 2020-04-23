@@ -9,8 +9,9 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.SqlHelperFactory;
+import org.delia.db.TableExistenceService;
 import org.delia.db.h2.DBListingType;
-import org.delia.db.h2.SqlHelperFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.TableInfo;
@@ -28,12 +29,15 @@ public class PreparedStatementGenerator extends ServiceBase {
 	protected SelectFuncHelper selectFnHelper;
 	protected SqlHelperFactory sqlHelperFactory;
 	private VarEvaluator varEvaluator;
+	private TableExistenceService existSvc;
 
-	public PreparedStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator) {
+	public PreparedStatementGenerator(FactoryService factorySvc, DTypeRegistry registry, SqlHelperFactory sqlHelperFactory, 
+				VarEvaluator varEvaluator, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.sqlHelperFactory = sqlHelperFactory;
 		this.varEvaluator = varEvaluator;
+		this.existSvc = existSvc;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		this.nameFormatter = sqlHelperFactory.createNameFormatter(dbctx);
@@ -55,7 +59,12 @@ public class PreparedStatementGenerator extends ServiceBase {
 			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
 			sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
 		} else if (selectFnHelper.isFirstPresent(spec)) {
-			sc.o("SELECT TOP 1 * FROM %s", typeName);
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+			if (fieldName == null) {
+				sc.o("SELECT TOP 1 * FROM %s", typeName);
+			} else {
+				sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+			}
 		} else if (selectFnHelper.isLastPresent(spec)) {
 			spec = doSelectLast(sc, spec, typeName);
 		} else {
@@ -81,15 +90,21 @@ public class PreparedStatementGenerator extends ServiceBase {
 	 * @return adjusted query spec
 	 */
 	protected QuerySpec doSelectLast(StrCreator sc, QuerySpec spec, String typeName) {
-		sc.o("SELECT TOP 1 * FROM %s", typeName);
+		String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+		if (fieldName == null) {
+			sc.o("SELECT TOP 1 * FROM %s", typeName);
+		} else {
+			sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+		}
+		
 		if (selectFnHelper.isOrderByPresent(spec)) {
 			return spec;
 		}
 
-		return selectFnHelper.doLastFixup(spec, typeName);
+		return selectFnHelper.doLastFixup(spec, typeName, null);
 	}
 
-	protected void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
+	public void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
 		this.selectFnHelper.doOrderByIfPresent(sc, spec, typeName);
 		this.selectFnHelper.doLimitIfPresent(sc, spec, typeName);
 		this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);
@@ -140,7 +155,8 @@ public class PreparedStatementGenerator extends ServiceBase {
 		StrCreator sc = new StrCreator();
 		sc.o("UPDATE %s SET ", tblName(dtype));
 		
-		InsertStatementGenerator insgen = new InsertStatementGenerator(factorySvc, registry, nameFormatter);
+		InsertStatementGenerator insgen = new InsertStatementGenerator(factorySvc, registry, nameFormatter, existSvc);
+//		InsertStatementGenerator insgen = sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
 		String s = insgen.generateUpdateBody(sc, dval, map, statement);
 		return s;
 	}

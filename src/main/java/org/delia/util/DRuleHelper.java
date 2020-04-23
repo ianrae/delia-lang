@@ -26,11 +26,17 @@ public class DRuleHelper {
 	public static TypePair findMatchingRelByType(DStructType dtype, DType targetType) {
 		//TODO: later also use named relations
 		for(TypePair pair: dtype.getAllFields()) {
-			if (pair.type.getName().contentEquals(targetType.getName())) {
+			if (typesAreEqual(pair.type, targetType)) {
 				return pair;
 			}
 		}
 		return null;
+	}
+	
+	private static boolean typesAreEqual(DType type1, DType type2) {
+		String s1 = type1.getName();
+		String s2 = type2.getName();
+		return s1.equals(s2);
 	}
 	
 	public static boolean isParentRelation(DStructType structType, TypePair pair) {
@@ -58,20 +64,25 @@ public class DRuleHelper {
 		return null;
 	}
 
-	public static RelationOneRule findOneRule(String typeName, DTypeRegistry registry) {
+	public static RelationOneRule findOneRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);
 		for(DRule rule: dtype.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
-				return (RelationOneRule) rule;
+				if (rule.getSubject().equals(fieldName)) {
+					return (RelationOneRule) rule;
+				}
 			}
 		}
 		return null;
 	}
-	public static RelationManyRule findManyRule(String typeName, DTypeRegistry registry) {
+	public static RelationManyRule findManyRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);
 		for(DRule rule: dtype.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
-				return (RelationManyRule) rule;
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (rule.getSubject().equals(fieldName)) {
+					return (RelationManyRule) rule;
+				}
 			}
 		}
 		return null;
@@ -85,7 +96,7 @@ public class DRuleHelper {
 		for(DRule rule: otherSide.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
-				if (rr.relInfo.farType.equals(structType)) {
+				if (typesAreEqual(rr.relInfo.farType, structType)) {
 					return rr.relInfo;
 				}
 			}
@@ -96,7 +107,7 @@ public class DRuleHelper {
 		for(DRule rule: otherSide.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
-				if (rr.relInfo.farType.equals(structType)) {
+				if (typesAreEqual(rr.relInfo.farType, structType)) {
 					return rr.relInfo;
 				}
 			}
@@ -128,7 +139,7 @@ public class DRuleHelper {
 	}
 	public static boolean isOtherSideMany(DType otherSide, TypePair otherRelPair) {
 		for(DRule rule: otherSide.getRawRules()) {
-			if (otherRelPair.name.contentEquals(rule.getSubject())) {
+			if (otherRelPair.name.equals(rule.getSubject())) {
 				return rule instanceof RelationManyRule;
 			}
 		}

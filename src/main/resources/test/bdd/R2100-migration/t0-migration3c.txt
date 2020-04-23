@@ -1,0 +1,34 @@
+# migration tests
+
+FEATURE: migration 3c - add unique mandatory field with empty db
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration3c
+chainNextTest:true
+given:
+ type Customer struct {id int unique serial, wid int } end
+
+when:
+ let z = 55
+then:
+value:a:int:55
+
+---
+title: migration3.1 - add field
+given:
+ type Customer struct {id int unique serial, wid int, height int unique } end
+
+when:
+  insert Customer { wid:34, height: 150}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:34
+ vheight:150
+}
+

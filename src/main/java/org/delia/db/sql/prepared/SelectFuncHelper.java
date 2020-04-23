@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
@@ -41,6 +42,10 @@ public class SelectFuncHelper extends ServiceBase {
 			return determineFieldTypeForFn(spec, "min");
 		} else if (isMaxPresent(spec)) {
 			return determineFieldTypeForFn(spec, "max");
+		} else if (isFirstPresent(spec) && findFieldUsingFn(spec, "first") != null) {
+			return determineFieldTypeForFn(spec, "first");
+		} else if (isLastPresent(spec) && findFieldUsingFn(spec, "last") != null) {
+			return determineFieldTypeForFn(spec, "last");
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
@@ -78,6 +83,9 @@ public class SelectFuncHelper extends ServiceBase {
 				isDesc = exp.strValue().equals("desc");
 			} else {
 				String fieldName = exp.strValue();
+				if (fieldName.contains(".")) {
+					fieldName = StringUtils.substringAfter(fieldName, ".");
+				}
 				if (! DValueHelper.fieldExists(structType, fieldName)) {
 					DeliaExceptionHelper.throwError("unknown-field", "type '%s' does not have field '%s'. Invalid orderBy parameter", typeName, fieldName);
 				}
@@ -113,8 +121,8 @@ public class SelectFuncHelper extends ServiceBase {
 		String s = String.format(" LIMIT %d", n);
 		sc.o(s);
 	}
-	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName) {
-		QuerySpec spec = doLastFixup(specOriginal, typeName);
+	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName, String alias) {
+		QuerySpec spec = doLastFixup(specOriginal, typeName, alias, true);
 		QueryFuncExp limitFn = this.findFn(spec, "limit");
 		if (limitFn != null) {
 			spec.queryExp.qfelist.remove(limitFn);
@@ -126,19 +134,33 @@ public class SelectFuncHelper extends ServiceBase {
 		spec.queryExp.qfelist.add(qfexp1);
 		return spec;
 	}
-	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName) {
+	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias) {
+		return doLastFixup(specOriginal, typeName, alias, false);
+	}
+	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias, boolean asc) {
 		DType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+		QueryFieldExp possibleFieldExp = findFieldUsingFn(specOriginal, "last");
+		TypePair pair;
+		if (possibleFieldExp == null) {
+			pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+		} else {
+			pair = DValueHelper.findField(dtype, possibleFieldExp.funcName);
+		}
+		
+		
 		if (pair == null) { 
 			DeliaExceptionHelper.throwError("last-requires-sortable-field", "last() requires an orderBy() function or a primary key in type '%s'", typeName);
 			return null;
 		} else {
 			QuerySpec spec = makeCopy(specOriginal);
 			QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("orderBy"), null, false);
-			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(pair.name));
-			IdentExp exp1 = new IdentExp("desc");
+			String s = alias == null ? pair.name : String.format("%s.%s", alias, pair.name);
+			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(s));
 			qfexp1.argL.add(qfe);
-			qfexp1.argL.add(exp1);
+			if (! asc) {
+				IdentExp exp1 = new IdentExp("desc");
+				qfexp1.argL.add(exp1);
+			}
 			
 			QueryFuncExp qfexpAlreadyInList = findFn(spec, "last");
 			int index = 0;

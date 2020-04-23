@@ -4,15 +4,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 
 public class SchemaFingerprintGenerator {
 	
+	private DTypeRegistry registry;
+
 	public String createFingerprint(DTypeRegistry registry) {
+		this.registry = registry;
 		String s = "";
 		
 		//because of re-executing with forward decls some types are in registry.orderedList twice
@@ -65,6 +71,20 @@ public class SchemaFingerprintGenerator {
 		}
 		if (dtype.fieldIsSerial(pair.name)) {
 			flags += "S";
+		}
+		
+		//relation codes
+		// a - relation one parent
+		// b - relation one         (child)
+		// c = relation many parent
+		// d = relation many        (child) -can this occur?
+		RelationOneRule oneRule = DRuleHelper.findOneRule(dtype.getName(), pair.name, registry);
+		if (oneRule != null) {
+			flags += oneRule.relInfo.isParent ? "a" : "b"; 
+		}
+		RelationManyRule manyRule = DRuleHelper.findManyRule(dtype.getName(), pair.name, registry);
+		if (manyRule != null) {
+			flags += manyRule.relInfo.isParent ? "c" : "d"; 
 		}
 		
 		String fldName = getTypeAsString(pair);

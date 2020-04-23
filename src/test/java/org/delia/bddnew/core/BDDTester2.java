@@ -19,7 +19,6 @@ import org.delia.bddnew.core.checker.ValueChecker;
 import org.delia.bddnew.core.checker.ValueCheckerBase;
 import org.delia.client.ClientTests.DeliaClient;
 import org.delia.db.DBInterface;
-import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;

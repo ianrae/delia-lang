@@ -30,6 +30,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
 
 
@@ -42,6 +43,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	public PostgresDBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.POSTGRES, factorySvc, connFactory, new PostgresSqlHelperFactory(factorySvc));
+		this.sqlHelperFactory.init(this);
 		this.errorConverter = this.sqlHelperFactory.createErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
 	}
@@ -63,6 +65,9 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
+		//TODO: we shouldn't keep tableCreator.alreadyCreatedL around. it becomes out of date 
+		//after schema migrations. should only use it during initial table creation.
+		
 		SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
 		logSql(statement);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -280,6 +285,10 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_CONSTRAINTS);
 		exec.close();
 	}
-	
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		//nothing to do
+	}
+
 	
 }

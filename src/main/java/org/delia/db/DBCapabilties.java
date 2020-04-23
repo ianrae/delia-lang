@@ -10,6 +10,7 @@ public class DBCapabilties {
 	private boolean supportsReferentialIntegrity; //on FKs
 	private boolean supportsOrderBy;
 	private boolean supportsOffsetAndLimit;
+	private boolean requiresTypeReplacementProcessing;
 	
 	public DBCapabilties(boolean requiresSchemaMigration, boolean supportsReferentialIntegrity, 
 			boolean supportsOrderBy, boolean supportsOffsetAndLimit) {
@@ -37,5 +38,13 @@ public class DBCapabilties {
 
 	public boolean supportsOffsetAndLimit() {
 		return supportsOffsetAndLimit;
+	}
+
+	public boolean isRequiresTypeReplacementProcessing() {
+		return requiresTypeReplacementProcessing;
+	}
+
+	public void setRequiresTypeReplacementProcessing(boolean requiresTypeReplacementProcessing) {
+		this.requiresTypeReplacementProcessing = requiresTypeReplacementProcessing;
 	}
 }

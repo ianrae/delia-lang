@@ -17,6 +17,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
@@ -205,6 +206,17 @@ public class RelationOneRule extends DRuleBase {
 		} else {
 			Map<String,DValue> map = dval.asMap();
 			map.put(relInfo.fieldName, builder.getDValue());
+		}
+	}
+	
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		if (spec.needsReplacement(this, owningType)) {
+			owningType = (DStructType) spec.newType;
+		}
+		
+		if (relInfo != null) {
+			relInfo.performTypeReplacement(spec);
 		}
 	}
 }

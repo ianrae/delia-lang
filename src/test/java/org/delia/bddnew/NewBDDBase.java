@@ -2,9 +2,18 @@ package org.delia.bddnew;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.delia.base.UnitTestLog;
+import org.delia.bddnew.NewBDDBase.BDDGroup;
+import org.delia.bddnew.NewBDDBase.FileHelper;
 import org.delia.bddnew.core.BDDParser;
 import org.delia.bddnew.core.BDDTest;
 import org.delia.bddnew.core.BDDTestRunner;
@@ -33,12 +42,14 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R1350_filter_expr,
 		R1400_let_filterfn,
 		R1500_let_queryfn,
+		R1550_let_queryfn_relation,
 		R1600_let_fetch,
 		R1700_let_field_value,
 		R1800_let_dollardollar,
 		R1900_let_return,
 		R2000_sprig,
 		R2100_migration,
+		R2150_migration_relations,
 		R2200_security
 	}
 	public static class FileHelper {
@@ -56,6 +67,10 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
 	protected DBInterface dbInterfaceToUse;
+	
+	protected List<String> filesExecutedL = new ArrayList<>();
+	private BDDGroup currentGroup;
+	protected boolean enableAllFileCheck = true;
 
 	protected String testFile(BDDGroup group, String filename) {
 		String s = fileHelper.getDir(group);
@@ -108,6 +123,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected int runR1500File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R1500_let_queryfn, filename, numTests);
 	}
+	protected int runR1550File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R1550_let_queryfn_relation, filename, numTests);
+	}
 	protected int runR1600File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R1600_let_fetch, filename, numTests);
 	}
@@ -126,11 +144,16 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected int runR2100File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2100_migration, filename, numTests);
 	}
+	protected int runR2150File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2150_migration_relations, filename, numTests);
+	}
 	protected int runR2200File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2200_security, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("FILE: %s", filename);
+		currentGroup = group;
+		filesExecutedL.add(filename);
 		String path = testFile(group, filename);
 		TextFileReader reader = new TextFileReader();
 		List<String> lines = reader.readFile(path);
@@ -145,10 +168,47 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		
 		if (testIndexToRun < 0) {
 			int n = runner.numSkippedTests + numTests;
+			if (n != tests.size()) {
+				log.log("failed tests in: %s", filename);
+				enableAllFileCheck = false;
+			}
 			assertEquals(n, tests.size());
+		}
+		if (numTests != passes) {
+			enableAllFileCheck = false;
 		}
 		assertEquals(numTests, passes);
 		return passes;
+	}
+	
+	protected void chkAllFiles() {
+		if (!enableAllFileCheck) {
+			return;
+		}
+		FileHelper fileHelper = new FileHelper();
+		//we assume each test method only does files in one group
+		String dir = fileHelper.getDir(currentGroup);
+		File file = new File(dir);       
+		Collection<File> files = FileUtils.listFiles(file, null, false);     
+		List<String> missedL = new ArrayList<>();
+		for(File file2 : files){
+			String filename = FilenameUtils.getName(file2.getAbsolutePath());
+			//log.log("..seen: %s", filename);
+			if (filesExecutedL.contains(filename)) {
+				filesExecutedL.remove(filename);
+			} else {
+				missedL.add(filename);
+			}
+		}		
+		
+		for(String filename: missedL) {
+			log.log("NOT-EXECUTED: %s", filename);
+		}
+		for(String filename: filesExecutedL) {
+			log.log("DOUBLE-EXECUTED: %s", filename);
+		}
+		assertEquals(0, filesExecutedL.size());
+		assertEquals(0, missedL.size());
 	}
 
 	public abstract DBInterface createForTest();
