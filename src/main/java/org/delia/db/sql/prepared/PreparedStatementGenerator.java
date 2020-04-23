@@ -59,7 +59,12 @@ public class PreparedStatementGenerator extends ServiceBase {
 			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
 			sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
 		} else if (selectFnHelper.isFirstPresent(spec)) {
-			sc.o("SELECT TOP 1 * FROM %s", typeName);
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+			if (fieldName == null) {
+				sc.o("SELECT TOP 1 * FROM %s", typeName);
+			} else {
+				sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+			}
 		} else if (selectFnHelper.isLastPresent(spec)) {
 			spec = doSelectLast(sc, spec, typeName);
 		} else {
@@ -85,7 +90,13 @@ public class PreparedStatementGenerator extends ServiceBase {
 	 * @return adjusted query spec
 	 */
 	protected QuerySpec doSelectLast(StrCreator sc, QuerySpec spec, String typeName) {
-		sc.o("SELECT TOP 1 * FROM %s", typeName);
+		String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+		if (fieldName == null) {
+			sc.o("SELECT TOP 1 * FROM %s", typeName);
+		} else {
+			sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+		}
+		
 		if (selectFnHelper.isOrderByPresent(spec)) {
 			return spec;
 		}

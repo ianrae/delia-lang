@@ -83,6 +83,9 @@ public class FKSqlGenerator extends ServiceBase {
 		List<RelationOneRule> oneL = findAllOneRules(exp.getTypeName());
 		List<RelationManyRule> manyL = findAllManyRules(exp.getTypeName());
 		QueryAdjustment adjustment = addOtherPartsOfQuery(spec, exp.typeName);
+		if (adjustment != null && adjustment.joinNotNeeded) {
+			return sqlgen.generateQuery(spec); 
+		}
 		if (adjustment != null && adjustment.isFirst) {
 			spec = this.selectFnHelper.doFirstFixup(spec, exp.typeName, tbl.alias);
 		} else if (adjustment != null && adjustment.isLast) {
@@ -164,6 +167,7 @@ public class FKSqlGenerator extends ServiceBase {
 		public boolean isCount;
 		public boolean isFirst;
 		public boolean isLast;
+		public boolean joinNotNeeded;
 		
 		public QueryAdjustment(String fieldName, String fmt) {
 			this.fieldName = fieldName;
@@ -171,6 +175,17 @@ public class FKSqlGenerator extends ServiceBase {
 		}
 	}
 	private QueryAdjustment addOtherPartsOfQuery(QuerySpec spec, String typeName) {
+		QueryAdjustment adjustment = doAddOtherPartsOfQuery(spec, typeName);
+		if (adjustment != null && !adjustment.isCount) {
+			DStructType dtype = (DStructType) registry.getType(typeName);
+			TypePair keypair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+			if (keypair != null && !keypair.name.equals(adjustment.fieldName)) {
+				adjustment.joinNotNeeded = true;
+			}
+		}
+		return adjustment;
+	}
+	private QueryAdjustment doAddOtherPartsOfQuery(QuerySpec spec, String typeName) {
 		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
 			QueryAdjustment adjustment = new QueryAdjustment(null, "COUNT(%s)");
 			adjustment.isCount = true;
@@ -184,11 +199,13 @@ public class FKSqlGenerator extends ServiceBase {
 			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "MAX(%s)");
 			return adjustment;
 		} else if (selectFnHelper.isFirstPresent(spec)) {
-			QueryAdjustment adjustment = new QueryAdjustment(null, "");
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "");
 			adjustment.isFirst = true;
 			return adjustment;
 		} else if (selectFnHelper.isLastPresent(spec)) {
-			QueryAdjustment adjustment = new QueryAdjustment(null, "");
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+			QueryAdjustment adjustment = new QueryAdjustment(fieldName, "");
 			adjustment.isLast = true;
 			return adjustment;
 		} else {

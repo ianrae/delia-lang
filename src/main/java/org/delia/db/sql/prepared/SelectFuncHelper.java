@@ -139,7 +139,15 @@ public class SelectFuncHelper extends ServiceBase {
 	}
 	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias, boolean asc) {
 		DType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+		QueryFieldExp possibleFieldExp = findFieldUsingFn(specOriginal, "last");
+		TypePair pair;
+		if (possibleFieldExp == null) {
+			pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+		} else {
+			pair = DValueHelper.findField(dtype, possibleFieldExp.funcName);
+		}
+		
+		
 		if (pair == null) { 
 			DeliaExceptionHelper.throwError("last-requires-sortable-field", "last() requires an orderBy() function or a primary key in type '%s'", typeName);
 			return null;

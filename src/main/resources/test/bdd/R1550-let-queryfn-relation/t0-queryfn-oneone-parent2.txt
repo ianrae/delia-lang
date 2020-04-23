@@ -16,27 +16,27 @@ given:
 when:
   let x = Customer[true].wid.max()
 then:
-value:a:int:56
+value:a:int:34
 
 ---
 title: min
 given:
 
-  insert Customer {id: 55 }
-  insert Customer {id: 56 }
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
 when:
-  let x = Customer[true].id.min()
+  let x = Customer[true].wid.min()
 then:
-value:a:int:55
+value:a:int:33
 
 ---
 title: exist
 given:
 
-  insert Customer {id: 55 }
-  insert Customer {id: 56 }
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
 when:
-  let x = Customer[true].id.exist()
+  let x = Customer[true].wid.exist()
 then:
 value:a:boolean:true
 
@@ -44,10 +44,10 @@ value:a:boolean:true
 title: count
 given:
 
-  insert Customer {id: 55 }
-  insert Customer {id: 56 }
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
 when:
-  let x = Customer[true].id.count()
+  let x = Customer[true].wid.count()
 then:
 value:a:long:2
 
@@ -55,20 +55,20 @@ value:a:long:2
 title: first
 given:
 
-  insert Customer {id: 55 }
-  insert Customer {id: 56 }
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
 when:
-  let x = Customer[true].id.first()
+  let x = Customer[true].wid.first()
 then:
-value:a:int:55
+value:a:int:33
 
 ---
 title: last
 given:
 
-  insert Customer {id: 55 }
-  insert Customer {id: 56 }
+  insert Customer {id: 55, wid:33 }
+  insert Customer {id: 56, wid:34 }
 when:
-  let x = Customer[true].id.last()
+  let x = Customer[true].wid.last()
 then:
-value:a:int:56
+value:a:int:34
