@@ -92,7 +92,15 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
-		if (qtx.loadFKs) {
+		
+		if (useFragmentParser) {
+			log.log("FRAG PARSEr....................");
+			createTableCreator(dbctx);
+			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
+			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+			parser.render(selectFrag);
+			statement = selectFrag.statement;
+		} else if (qtx.loadFKs) {
 			createTableCreator(dbctx);
 			if (useFragmentParser) {
 				log.log("FRAG PARSEr....................");

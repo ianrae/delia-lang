@@ -163,10 +163,11 @@ public class WhereFragmentGenerator extends ServiceBase {
 			String alias = phrase.op1.alias == null ? tbl.alias : phrase.op1.alias; 
 //			Table tmp = new Table(alias, op1);
 			//sc.o("%s IN (%s)", tmp.toString(), joiner.toString());
+			String tmp = String.format("(%s)", joiner.toString());
 			
 			OpFragment opFrag = new OpFragment("IN");
 			opFrag.left = FragmentHelper.buildAliasedFrag(alias, op1);
-			opFrag.right = FragmentHelper.buildAliasedFrag(null, joiner.toString());
+			opFrag.right = FragmentHelper.buildAliasedFrag(null, tmp);
 			return opFrag;
 		}
 		
@@ -188,33 +189,49 @@ public class WhereFragmentGenerator extends ServiceBase {
 	protected OpFragment doWherePhrase(WherePhrase phrase, SqlStatement statement, SelectStatementFragment selectFrag) {
 		String op = opToSql(phrase.op);
 		adjustYearStuff(phrase.op1, phrase.op2);
+
+		TableFragment tbl = selectFrag.tblFrag;
+		setPhraseAliasIfNeeded(phrase.op1, tbl);
+		setPhraseAliasIfNeeded(phrase.op2, tbl);
 		String op1 = operandToSql(phrase.op1, statement);
 		String op2 = operandToSql(phrase.op2, statement);
 		
 		String snot = (phrase.notFlag) ? "NOT " : "";
-		TableFragment tbl = selectFrag.tblFrag;
 		if (tbl == null) {
 			return null; //String.format("%s%s %s %s", snot, op1, op, op2); //TODO; remove?
 		} else {
 			String alias;
 			if (!phrase.op1.isValue) {
 				alias = phrase.op1.alias == null ? tbl.alias : phrase.op1.alias; 
+				if (IsFn(phrase.op1)) {
+					alias = null;
+				}
 //				Table tmp = new Table(alias, op1);
 //				return String.format("%s%s %s %s", snot, tmp.toString(), op, op2);
 				
 				OpFragment opFrag = new OpFragment(op);
-				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
+				opFrag.left = FragmentHelper.buildAliasedFrag(null, snot + op1);
 				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
 				return opFrag;
 			} else {
 				alias = phrase.op2.alias == null ? tbl.alias : phrase.op2.alias; 
+				if (IsFn(phrase.op2)) {
+					alias = null;
+				}
 //				Table tmp = new Table(alias, op2);
 //				return String.format("%s%s %s %s", snot, op1, op, tmp.toString());
 				OpFragment opFrag = new OpFragment(op);
 				opFrag.left = FragmentHelper.buildAliasedFrag(null, snot + op1);
-				opFrag.right = FragmentHelper.buildAliasedFrag(alias, op2);
+				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
 				return opFrag;
 			}
+		}
+	}
+
+
+	private void setPhraseAliasIfNeeded(WhereOperand op1, TableFragment tbl) {
+		if (op1.alias == null) {
+			op1.alias = tbl.alias; 
 		}
 	}
 
@@ -228,6 +245,15 @@ public class WhereFragmentGenerator extends ServiceBase {
 		default:
 			return op;
 		}
+	}
+	
+	protected boolean IsFn(WhereOperand val) {
+		if (!val.isValue) {
+			if (val.fnName != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 	protected String operandToSql(WhereOperand val, SqlStatement statement) {
 		if (!val.isValue) {
@@ -268,37 +294,39 @@ public class WhereFragmentGenerator extends ServiceBase {
 		}
 	}
 	protected String doFn(WhereOperand val) {
+		String alias = val.alias == null ? "" : val.alias + ".";
+		
 		//("yyyy-MM-dd'T'HH:mm:ss");
 		switch(val.fnName) {
 		case "year":
 		{
 			String s = this.getColumnName(val.exp);
-			return String.format("FORMATDATETIME(%s, 'yyyy')", s);
+			return String.format("FORMATDATETIME(%s%s, 'yyyy')", alias, s);
 		}
 		case "month":
 		{
 			String s = this.getColumnName(val.exp);
-			return String.format("FORMATDATETIME(%s, 'MM')", s);
+			return String.format("FORMATDATETIME(%s%s, 'MM')", alias, s);
 		}
 		case "day":
 		{
 			String s = this.getColumnName(val.exp);
-			return String.format("FORMATDATETIME(%s, 'dd')", s);
+			return String.format("FORMATDATETIME(%s%s, 'dd')", alias, s);
 		}
 		case "hour":
 		{
 			String s = this.getColumnName(val.exp);
-			return String.format("FORMATDATETIME(%s, 'HH')", s);
+			return String.format("FORMATDATETIME(%s%s, 'HH')", alias, s);
 		}
 		case "minute":
 		{
 			String s = this.getColumnName(val.exp);
-			return String.format("FORMATDATETIME(%s, 'mm')", s);
+			return String.format("FORMATDATETIME(%s%s, 'mm')", alias, s);
 		}
 		case "second":
 		{
 			String s = this.getColumnName(val.exp);
-			return String.format("FORMATDATETIME(%s, 'ss')", s);
+			return String.format("FORMATDATETIME(%s%s, 'ss')", alias, s);
 		}
 		default:
 			//err!!

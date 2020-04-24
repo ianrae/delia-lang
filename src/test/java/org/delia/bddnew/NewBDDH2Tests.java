@@ -269,13 +269,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 		enableSQLLogging = true;
 		cleanTables = true;
 //		runR500File("t0-relation-one-to-one.txt", 9);
-//		runR500File("t0-relation-many-to-many.txt", 11);
-//		runR1350File("t0-filter-op-relation.txt", 13);
-//		runR1550File("t0-queryfn-oneone-parent.txt", 6);
-//		runR1700File("t0-let-field-single.txt", 3);
-//		runR1700File("t0-let-field-func.txt", 3);
-//		runR2100File("t0-migration15.txt", 2);
-		runR2150File("t0-migrate-many-to-many3.txt", 2);
+//		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR1350File("t0-filter-in.txt", 3);
 	}
 	
 	//---

@@ -40,6 +40,7 @@ import org.delia.util.DeliaExceptionHelper;
  *
  */
 public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceInternal {
+	public boolean useFragmentParser;
 
 	public PostgresDBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.POSTGRES, factorySvc, connFactory, new PostgresSqlHelperFactory(factorySvc));

@@ -170,7 +170,7 @@ private FragmentParser fragmentParser;
 	private QueryAdjustment addOtherPartsOfQuery(QuerySpec spec, String typeName) {
 		QueryAdjustment adjustment = doAddOtherPartsOfQuery(spec, typeName);
 		if (adjustment != null && !adjustment.isCount) {
-			DStructType dtype = (DStructType) registry.getType(typeName);
+			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
 			TypePair keypair = DValueHelper.findPrimaryKeyFieldPair(dtype);
 			if (keypair != null && !keypair.name.equals(adjustment.fieldName)) {
 				adjustment.joinNotNeeded = true;
@@ -211,7 +211,7 @@ private FragmentParser fragmentParser;
 	//TOOD: fix this limitation!!!
 	private List<RelationOneRule> findAllOneRules(String typeName) {
 		List<RelationOneRule> rulesL = new ArrayList<>();
-		DStructType structType = (DStructType) registry.getType(typeName);
+		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationOneRule rule = DRuleHelper.findOneRule(typeName, pair.name, registry);
@@ -229,7 +229,7 @@ private FragmentParser fragmentParser;
 	}
 	private List<RelationManyRule> findAllManyRules(String typeName) {
 		List<RelationManyRule> rulesL = new ArrayList<>();
-		DStructType structType = (DStructType) registry.getType(typeName);
+		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationManyRule rule = DRuleHelper.findManyRule(typeName, pair.name, registry);
