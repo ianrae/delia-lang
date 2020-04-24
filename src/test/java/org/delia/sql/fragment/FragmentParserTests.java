@@ -26,10 +26,16 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
+import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.SqlHelperFactory;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
@@ -37,6 +43,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.fragment.AliasedFragment;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
+import org.delia.db.sql.fragment.JoinFragment;
 import org.delia.db.sql.fragment.LimitFragment;
 import org.delia.db.sql.fragment.OffsetFragment;
 import org.delia.db.sql.fragment.OrderByFragment;
@@ -46,6 +53,7 @@ import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
+import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.VarEvaluator;
@@ -63,11 +71,13 @@ import org.junit.Test;
 public class FragmentParserTests extends NewBDDBase {
 	
 	public static class SelectStatementFragment implements SqlFragment {
+		public SqlStatement statement = new SqlStatement();
+		public Map<String,TableFragment> aliasMap = new HashMap<>();
+		
 		public List<SqlFragment> earlyL = new ArrayList<>();
 		public List<FieldFragment> fieldL = new ArrayList<>();
 		public TableFragment tblFrag;
-		public Map<String,TableFragment> aliasMap = new HashMap<>();
-		public SqlStatement statement = new SqlStatement();
+		public JoinFragment joinFrag; //TODO later a list
 		public List<SqlFragment> whereL = new ArrayList<>();
 		public OrderByFragment orderByFrag = null;
 		public LimitFragment limitFrag = null;
@@ -135,8 +145,10 @@ public class FragmentParserTests extends NewBDDBase {
 //		private VarEvaluator varEvaluator;
 		private WhereFragmentGenerator whereGen;
 		private SelectFuncHelper selectFnHelper;
+		private TableExistenceServiceImpl existSvc;
+		private FKHelper fkHelper;
 		
-		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
+		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory) {
 			super(factorySvc);
 			this.registry = registry;
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -149,6 +161,10 @@ public class FragmentParserTests extends NewBDDBase {
 			this.whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 //			this.selectFnHelper = new SelectFuncHelper(new DBAccessContext(registry, varEvaluator));
 			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
+			this.existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(registry, varEvaluator));
+			
+			List<TableInfo> tblinfoL = new ArrayList<>();
+			this.fkHelper = new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc);
 		}
 		
 		public void createAlias(AliasedFragment frag) {
@@ -156,20 +172,16 @@ public class FragmentParserTests extends NewBDDBase {
 			frag.alias = String.format("%c", ch);
 		}
 
-		public SelectStatementFragment parseSelect(QuerySpec spec) {
-			QueryExp exp = spec.queryExp;
+		public SelectStatementFragment parseSelect(QuerySpec spec, QueryDetails details) {
 			SelectStatementFragment selectFrag = new SelectStatementFragment();
 			
 			//init tbl
-			TableFragment tblFrag = new TableFragment();
-			createAlias(tblFrag);
-			tblFrag.name = exp.typeName;
-			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
+			DStructType structType = getMainType(spec); 
+			TableFragment tblFrag = createTable(structType, selectFrag);
 			selectFrag.tblFrag = tblFrag;
 			
-			DStructType structType = getMainType(spec); 
 			initFields(spec, structType, selectFrag);
-			
+			addJoins(spec, structType, selectFrag, details);
 			addFns(spec, structType, selectFrag);
 
 			generateQueryFns(spec, structType, selectFrag);
@@ -180,6 +192,27 @@ public class FragmentParserTests extends NewBDDBase {
 			}
 			
 			return selectFrag;
+		}
+		
+		private void addJoins(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
+			fkHelper.generateFKsQuery(spec, details, structType, selectFrag, this);
+		}
+
+		public TableFragment createTable(DStructType structType, SelectStatementFragment selectFrag) {
+			TableFragment tblFrag = new TableFragment();
+			tblFrag.structType = structType;
+			createAlias(tblFrag);
+			tblFrag.name = structType.getName();
+			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
+			return tblFrag;
+		}
+		public TableFragment createAssocTable(SelectStatementFragment selectFrag, String tableName) {
+			TableFragment tblFrag = new TableFragment();
+			tblFrag.structType = null;
+			createAlias(tblFrag);
+			tblFrag.name = tableName;
+			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
+			return tblFrag;
 		}
 		
 		public void generateQueryFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
@@ -375,7 +408,7 @@ public class FragmentParserTests extends NewBDDBase {
 		FragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
-		SelectStatementFragment selectFrag = parser.parseSelect(spec);
+		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 		
 		String sql = parser.render(selectFrag);
 		log.log(sql);
@@ -388,7 +421,7 @@ public class FragmentParserTests extends NewBDDBase {
 		FragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildAllRowsQuery("Flight");
-		SelectStatementFragment selectFrag = parser.parseSelect(spec);
+		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 		
 		String sql = parser.render(selectFrag);
 		assertEquals("SELECT * FROM Flight as a", sql);
@@ -400,7 +433,7 @@ public class FragmentParserTests extends NewBDDBase {
 		fragmentParser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
-		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
+		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec, details);
 		
 		runAndChk(selectFrag, "SELECT * FROM Flight as a WHERE a.field2 = ?");
 	}
@@ -507,7 +540,6 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2");
 	}
-	
 	@Test
 	public void testOrderByLimitOffset() {
 		String src = buildSrc();
@@ -517,6 +549,13 @@ public class FragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2 LIMIT 4 OFFSET 10");
 	}
 	
+	@Test
+	public void test11Relation() {
+		String src = buildSrcOneToOne();
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2 LIMIT 4 OFFSET 10");
+	}
 
 	//---
 	private Delia delia;
@@ -525,6 +564,7 @@ public class FragmentParserTests extends NewBDDBase {
 	private Runner runner;
 	private QueryBuilderService queryBuilderSvc;
 	private ScalarValueBuilder builder;
+	private QueryDetails details = new QueryDetails();
 
 	private FragmentParser fragmentParser;
 	
@@ -549,6 +589,14 @@ public class FragmentParserTests extends NewBDDBase {
 		String src = "type Flight struct {field1 int, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
+		return src;
+	}
+	private String buildSrcOneToOne() {
+		String src = " type Customer struct {id int unique, relation addr Address optional one parent } end";
+		src += "\n type Address struct {id int unique, relation cust Customer optional one } end";
+		src += "\n  insert Customer {id: 55 }";
+		src += "\n  insert Address {id: 100, cust: 55 }";
+		src += "\n  let x = Customer[55]";
 		return src;
 	}
 
@@ -589,7 +637,8 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner);
+		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, dao.getDbInterface(), sqlHelperFactory);
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
@@ -606,7 +655,8 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner);
+		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, dao.getDbInterface(), sqlHelperFactory);
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
@@ -622,7 +672,7 @@ public class FragmentParserTests extends NewBDDBase {
 	private SelectStatementFragment buildSelectFragment(String src) {
 		LetStatementExp letStatementExp = buildFromSrc(src);
 		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
-		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
+		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec, details);
 		return selectFrag;
 	}
 

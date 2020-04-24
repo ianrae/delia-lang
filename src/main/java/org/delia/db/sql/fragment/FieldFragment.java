@@ -8,18 +8,23 @@ public class FieldFragment extends AliasedFragment {
 	public DType fieldType;
 	public boolean isStar;		
 	public String fnName;
+	public String asName;
 
 	@Override
 	public String render() {
 		if (isStar) {
-			if (fnName != null) {
-				return String.format("%s(*)", fnName);
-			}
-			return "*";
-		} else if (fnName != null) {
-			return String.format("%s(%s)", fnName, super.render());
+			return renderField("*");
 		}
 		
-		return super.render();
+		return renderField(super.render());
 	}
+	
+	private String renderField(String arg) {
+		String suffix = asName == null ? "" : "as " + asName;
+		if (fnName != null) {
+			return String.format("%s(%s)%s", fnName, arg, suffix);
+		}
+		return arg;
+	}
+	
 }
