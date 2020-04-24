@@ -120,7 +120,7 @@ private FragmentParser fragmentParser;
 		JoinFragment joinFrag = new JoinFragment();
 		joinFrag.joinTblFrag = tbl2;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
-		joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, new TypePair(nearField.name, null));
+		joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tbl, selectFrag, new TypePair(nearField.name, null));
 		selectFrag.joinFrag = joinFrag;
 //		sqlgen.generateQueryFns(sc, spec, exp.typeName);
 		
@@ -269,7 +269,7 @@ private FragmentParser fragmentParser;
 			JoinFragment joinFrag = new JoinFragment();
 			joinFrag.joinTblFrag = tbl2;
 			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
-			joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, new TypePair(nearField.name, null));
+			joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tbl, selectFrag, new TypePair(nearField.name, null));
 			selectFrag.joinFrag = joinFrag;
 
 			details.mergeRows = true;
@@ -307,7 +307,7 @@ private FragmentParser fragmentParser;
 		joinFrag.joinTblFrag = tblAssoc;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, pair.name);
 		TypePair p2 = new TypePair(assocField2, null); //TODO: fill in type later
-		joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, p2);
+		joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tblAssoc, selectFrag, p2);
 		selectFrag.joinFrag = joinFrag;
 		
 		//pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, typeName, tbl, statement);
@@ -328,7 +328,7 @@ private FragmentParser fragmentParser;
 					ff.asName = fieldName;
 //					s = String.format("%s as %s", nearField.name, fieldName);
 				} else {
-					ff = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, new TypePair(nearField.name, null));
+					ff = FragmentHelper.buildFieldFragForTable(tbl2, selectFrag, new TypePair(nearField.name, null));
 					ff.asName = fieldName;
 //					s = String.format("%s.%s as %s", tbl2.alias, nearField.name, fieldName);
 				}
