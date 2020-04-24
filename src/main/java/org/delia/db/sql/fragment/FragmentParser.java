@@ -33,17 +33,17 @@ import org.delia.util.DeliaExceptionHelper;
 
 //single use!!!
 	public class FragmentParser extends ServiceBase {
-		private int nextAliasIndex = 0;
-		private QueryTypeDetector queryDetectorSvc;
-		private DTypeRegistry registry;
-//		private ScalarValueBuilder dvalBuilder;
-//		private ValueHelper valueHelper;
-//		private VarEvaluator varEvaluator;
-		private WhereFragmentGenerator whereGen;
-		private SelectFuncHelper selectFnHelper;
-		private TableExistenceServiceImpl existSvc;
-		private FKHelper fkHelper;
-		private JoinFragment savedJoinedFrag;
+		protected int nextAliasIndex = 0;
+		protected QueryTypeDetector queryDetectorSvc;
+		protected DTypeRegistry registry;
+//		protected ScalarValueBuilder dvalBuilder;
+//		protected ValueHelper valueHelper;
+//		protected VarEvaluator varEvaluator;
+		protected WhereFragmentGenerator whereGen;
+		protected SelectFuncHelper selectFnHelper;
+		protected TableExistenceServiceImpl existSvc;
+		protected FKHelper fkHelper;
+		protected JoinFragment savedJoinedFrag;
 		
 		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
@@ -102,7 +102,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return selectFrag;
 		}
 		
-		private boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
+		protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "fetch");
 			QueryFuncExp qfexp2 = selectFnHelper.findFn(spec, "fks");
 			//TODO: later add fk
@@ -169,7 +169,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return false;
 		}
 
-		private void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
+		protected void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
 //			public List<FieldFragment> fieldL = new ArsrayList<>();
 //			public OrderByFragment orderByFrag = null;
 
@@ -193,7 +193,7 @@ import org.delia.util.DeliaExceptionHelper;
 
 		//SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE  a.addr < ?  -- (111)
 		//a.addr is parent. change to b.id
-		private void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, SelectStatementFragment selectFrag) {
+		protected void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, SelectStatementFragment selectFrag) {
 			String fieldName = aliasFrag.name;
 			RelationOneRule oneRule = DRuleHelper.findOneRule(tblFrag.structType.getName(), fieldName, registry);
 			if (oneRule != null && oneRule.relInfo.isParent) {
@@ -210,7 +210,7 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 		}
 
-		private void changeToChild(AliasedFragment aliasFrag, RelationInfo relInfo, SelectStatementFragment selectFrag) {
+		protected void changeToChild(AliasedFragment aliasFrag, RelationInfo relInfo, SelectStatementFragment selectFrag) {
 			TableFragment otherSide = selectFrag.aliasMap.get(relInfo.farType.getName());
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relInfo.farType);
 			log.log("fixup %s.%s -> %s.%s", aliasFrag.alias, aliasFrag.name, otherSide.alias, pair.name);
@@ -218,7 +218,7 @@ import org.delia.util.DeliaExceptionHelper;
 			aliasFrag.name = pair.name;
 		}
 
-		private void addJoins(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
+		protected void addJoins(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			fkHelper.generateFKsQuery(spec, details, structType, selectFrag, this);
 		}
 
@@ -255,7 +255,7 @@ import org.delia.util.DeliaExceptionHelper;
 			this.doOffsetIfPresent(spec, structType, selectFrag);
 		}
 		
-		private void doOrderByIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void doOrderByIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "orderBy");
 			if (qfexp == null) {
 				return;
@@ -282,6 +282,9 @@ import org.delia.util.DeliaExceptionHelper;
 
 			String asc = isDesc ? "desc" : null;
 			OrderByFragment frag = FragmentHelper.buildRawOrderByFrag(structType, joiner.toString(), asc, selectFrag);
+			addToOrderBy(frag, selectFrag);
+		}
+		protected void addToOrderBy(OrderByFragment frag, SelectStatementFragment selectFrag) {
 			OrderByFragment orderByFrag = selectFrag.orderByFrag;
 			if (orderByFrag == null) {
 				selectFrag.orderByFrag = frag;
@@ -291,7 +294,7 @@ import org.delia.util.DeliaExceptionHelper;
 				selectFrag.orderByFrag.additionalL.add(tmp);
 			}
 		}
-		private void doLimitIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void doLimitIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "limit");
 			if (qfexp == null) {
 				return;
@@ -302,7 +305,7 @@ import org.delia.util.DeliaExceptionHelper;
 			LimitFragment frag = new LimitFragment(n);
 			selectFrag.limitFrag = frag;
 		}
-		private void doOffsetIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void doOffsetIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "offset");
 			if (qfexp == null) {
 				return;
@@ -315,68 +318,85 @@ import org.delia.util.DeliaExceptionHelper;
 		}
 
 
-		private void addFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void addFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			//TODO: for now we implement exist using count(*). improve later
 			if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
-				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "count");
-				selectFrag.clearFieldList();
-				if (fieldName == null) {
-					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-					fieldF.fnName = "COUNT";
-					selectFrag.fieldL.add(fieldF);
-				} else {
-					addFnField("COUNT", fieldName, structType, selectFrag);
-				}
+				genCount(spec, structType, selectFrag);
 			} else if (selectFnHelper.isMinPresent(spec)) {
-				selectFrag.clearFieldList();
-				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
-				addFnField("MIN", fieldName, structType, selectFrag);
+				genMin(spec, structType, selectFrag);
 			} else if (selectFnHelper.isMaxPresent(spec)) {
-				selectFrag.clearFieldList();
-				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
-				addFnField("MAX", fieldName, structType, selectFrag);
+				genMax(spec, structType, selectFrag);
 			} else if (selectFnHelper.isFirstPresent(spec)) {
-				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
-				AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
-				selectFrag.earlyL.add(top);
-				selectFrag.clearFieldList();
-				if (fieldName == null) {
-					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); 
-					selectFrag.fieldL.add(fieldF);
-				} else {
-					FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
-					selectFrag.fieldL.add(fieldF);
-				}
+				genFirst(spec, structType, selectFrag);
 			} else if (selectFnHelper.isLastPresent(spec)) {
-				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
-				AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
-				selectFrag.earlyL.add(top);
-				selectFrag.clearFieldList();
-				if (fieldName == null) {
-					forceAddOrderByPrimaryKey(structType, selectFrag, "desc");
-				} else {
-					FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
-					selectFrag.fieldL.add(fieldF);
-					forceAddOrderByField(structType, fieldName, "desc", selectFrag);
-				}
+				genLast(spec, structType, selectFrag);
 			} else {
 //				sc.o("SELECT * FROM %s", typeName);
 			}
 		}
 
-		private void forceAddOrderByPrimaryKey(DStructType structType, SelectStatementFragment selectFrag, String asc) {
+		protected void genCount(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "count");
+			selectFrag.clearFieldList();
+			if (fieldName == null) {
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+				fieldF.fnName = "COUNT";
+				selectFrag.fieldL.add(fieldF);
+			} else {
+				addFnField("COUNT", fieldName, structType, selectFrag);
+			}
+		}
+		protected void genMin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			selectFrag.clearFieldList();
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
+			addFnField("MIN", fieldName, structType, selectFrag);
+		}
+		protected void genMax(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			selectFrag.clearFieldList();
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
+			addFnField("MAX", fieldName, structType, selectFrag);
+		}
+		protected void genFirst(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+			AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
+			selectFrag.earlyL.add(top);
+			selectFrag.clearFieldList();
+			if (fieldName == null) {
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); 
+				selectFrag.fieldL.add(fieldF);
+			} else {
+				FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
+				selectFrag.fieldL.add(fieldF);
+			}
+		}
+		protected void genLast(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+			AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
+			selectFrag.earlyL.add(top);
+			selectFrag.clearFieldList();
+			if (fieldName == null) {
+				forceAddOrderByPrimaryKey(structType, selectFrag, "desc");
+			} else {
+				FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
+				selectFrag.fieldL.add(fieldF);
+				forceAddOrderByField(structType, fieldName, "desc", selectFrag);
+			}
+		}
+
+
+		protected void forceAddOrderByPrimaryKey(DStructType structType, SelectStatementFragment selectFrag, String asc) {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
 			if (pair == null) {
 				return; //no primary key
 			}
 			forceAddOrderByField(structType, pair.name, asc, selectFrag);
 		}
-		private void forceAddOrderByField(DStructType structType, String fieldName, String asc, SelectStatementFragment selectFrag) {
+		protected void forceAddOrderByField(DStructType structType, String fieldName, String asc, SelectStatementFragment selectFrag) {
 			OrderByFragment orderByFrag = FragmentHelper.buildOrderByFrag(structType, fieldName, asc, selectFrag);
 			selectFrag.orderByFrag = orderByFrag;
 		}
 
-		private void addFnField(String fnName, String fieldName, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void addFnField(String fnName, String fieldName, DStructType structType, SelectStatementFragment selectFrag) {
 			FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
 			if (fieldF == null) {
 				DeliaExceptionHelper.throwError("unknown-field", "Field %s.%s unknown in %s function", structType.getName(), fieldName, fnName);
@@ -385,13 +405,13 @@ import org.delia.util.DeliaExceptionHelper;
 			addOrReplace(selectFrag, fieldF);
 		}
 
-		private void addOrReplace(SelectStatementFragment selectFrag, FieldFragment fieldF) {
+		protected void addOrReplace(SelectStatementFragment selectFrag, FieldFragment fieldF) {
 			selectFrag.fieldL.add(fieldF);
 			// TODO Auto-generated method stub
 			
 		}
 
-		private void initFields(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void initFields(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {
@@ -414,12 +434,12 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 		}
 
-		private DStructType getMainType(QuerySpec spec) {
+		protected DStructType getMainType(QuerySpec spec) {
 			DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(spec.queryExp.typeName);
 			return structType;
 		}
 
-		private FieldFragment buildStarFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
+		protected FieldFragment buildStarFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
 			if (pair == null) {
 				FieldFragment fieldF = FragmentHelper.buildEmptyFieldFrag(structType, selectFrag);
@@ -431,7 +451,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return fieldF;
 		}
 		
-//		private FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, TypePair pair) {
+//		protected FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, TypePair pair) {
 //			return FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
 //		}
 

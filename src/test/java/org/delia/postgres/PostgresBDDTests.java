@@ -271,7 +271,7 @@ public class PostgresBDDTests extends NewBDDBase {
 
 //		runR2150File("t0-migrate-many-to-many2.txt", 2);
 //		runR1700File("t0-let-field-multiple.txt", 5);
-		runR1700File("t0-let-field-relation.txt", 2);
+		runR1500File("t0-queryfn-first.txt", 2);
 	}
 	
 	//---
