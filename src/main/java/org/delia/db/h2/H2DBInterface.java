@@ -95,7 +95,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			createTableCreator(dbctx);
 			if (useFragmentParser) {
 				log.log("FRAG PARSEr....................");
-				FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, this, sqlHelperFactory);
+				FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
 				SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 				parser.render(selectFrag);
 				statement = selectFrag.statement;

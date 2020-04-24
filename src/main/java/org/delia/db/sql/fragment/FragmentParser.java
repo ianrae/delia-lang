@@ -41,7 +41,7 @@ import org.delia.util.DeliaExceptionHelper;
 		private TableExistenceServiceImpl existSvc;
 		private FKHelper fkHelper;
 		
-		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory) {
+		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory) {
 			super(factorySvc);
 			this.registry = registry;
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -56,7 +56,6 @@ import org.delia.util.DeliaExceptionHelper;
 			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
 			this.existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(registry, varEvaluator));
 			
-			List<TableInfo> tblinfoL = new ArrayList<>();
 			this.fkHelper = new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc);
 		}
 		

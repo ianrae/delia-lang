@@ -3,6 +3,9 @@ package org.delia.sql.fragment;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
@@ -26,6 +29,7 @@ import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.FragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DTypeRegistry;
@@ -274,8 +278,7 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, dao.getDbInterface(), sqlHelperFactory);
+		FragmentParser parser = createParser(dao); 
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
@@ -292,14 +295,20 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, dao.getDbInterface(), sqlHelperFactory);
+		FragmentParser parser = createParser(dao); 
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
 		
 		return parser;
 	}
+	private FragmentParser createParser(DeliaDao dao) {
+		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		List<TableInfo> tblinfoL = new ArrayList<>();		
+		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory);
+		return parser;
+	}
+
 	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
 		String sql = fragmentParser.render(selectFrag);
 		log.log(sql);

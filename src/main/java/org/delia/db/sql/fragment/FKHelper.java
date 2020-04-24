@@ -120,7 +120,7 @@ private FragmentParser fragmentParser;
 		JoinFragment joinFrag = new JoinFragment();
 		joinFrag.joinTblFrag = tbl2;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
-		joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, nearField.name);
+		joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, new TypePair(nearField.name, null));
 		selectFrag.joinFrag = joinFrag;
 //		sqlgen.generateQueryFns(sc, spec, exp.typeName);
 		
@@ -269,7 +269,7 @@ private FragmentParser fragmentParser;
 			JoinFragment joinFrag = new JoinFragment();
 			joinFrag.joinTblFrag = tbl2;
 			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
-			joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, nearField.name);
+			joinFrag.arg2 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, new TypePair(nearField.name, null));
 			selectFrag.joinFrag = joinFrag;
 
 			details.mergeRows = true;
@@ -324,11 +324,11 @@ private FragmentParser fragmentParser;
 			FieldFragment ff = null;
 			if (pair.type.isStructShape()) {
 				if (tbl2 == null) {
-					ff = FragmentHelper.buildFieldFrag(structType, selectFrag, nearField.name);
+					ff = FragmentHelper.buildFieldFrag(structType, selectFrag, new TypePair(nearField.name, null));
 					ff.asName = fieldName;
 //					s = String.format("%s as %s", nearField.name, fieldName);
 				} else {
-					ff = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, nearField.name);
+					ff = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, new TypePair(nearField.name, null));
 					ff.asName = fieldName;
 //					s = String.format("%s.%s as %s", tbl2.alias, nearField.name, fieldName);
 				}
