@@ -19,6 +19,8 @@ import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.fragment.FragmentParser;
+import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -95,7 +97,14 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
-		if (qtx.loadFKs) {
+		if (useFragmentParser) {
+			log.log("FRAG PARSEr....................");
+			createTableCreator(dbctx);
+			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
+			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+			parser.render(selectFrag);
+			statement = selectFrag.statement;
+		} else if (qtx.loadFKs) {
 			createTableCreator(dbctx);
 			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
 			statement = smartgen.generateFKsQuery(spec, details);
