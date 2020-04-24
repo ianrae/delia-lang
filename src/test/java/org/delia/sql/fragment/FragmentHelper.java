@@ -2,6 +2,7 @@ package org.delia.sql.fragment;
 
 import org.delia.sql.fragment.FragmentParserTests.AliasedFragment;
 import org.delia.sql.fragment.FragmentParserTests.FieldFragment;
+import org.delia.sql.fragment.FragmentParserTests.OrderByFragment;
 import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
@@ -24,6 +25,15 @@ public class FragmentHelper {
 		fieldF.structType = structType;
 		return fieldF;
 	}
+	public static FieldFragment buildEmptyFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
+		FieldFragment fieldF = new FieldFragment();
+		fieldF.alias = findAlias(structType, selectFrag); //selectFrag.aliasMap.get(spec.queryExp.typeName).alias;
+		fieldF.fieldType = null;
+		fieldF.name = null;
+		fieldF.isStar = false;
+		fieldF.structType = structType;
+		return fieldF;
+	}
 	public static AliasedFragment buildParam(SelectStatementFragment selectFrag) {
 		AliasedFragment fieldF = new AliasedFragment();
 		fieldF.alias = null;
@@ -40,6 +50,13 @@ public class FragmentHelper {
 		AliasedFragment fieldF = new AliasedFragment();
 		fieldF.alias = alias;
 		fieldF.name = name;
+		return fieldF;
+	}
+	public static OrderByFragment buildOrderByFrag(DStructType structType, String fieldName, String asc, SelectStatementFragment selectFrag) {
+		OrderByFragment fieldF = new OrderByFragment();
+		fieldF.alias = findAlias(structType, selectFrag);
+		fieldF.name = fieldName;
+		fieldF.asc = asc;
 		return fieldF;
 	}
 

@@ -115,6 +115,17 @@ public class FragmentParserTests extends NewBDDBase {
 		}
 	}
 	
+	public static class OrderByFragment extends AliasedFragment {
+
+		public String asc;
+
+		@Override
+		public String render() {
+			String s = asc == null ? "" : " " + asc;
+			return String.format(" ORDER BY %s%s", super.render(), s);
+		}
+	}
+	
 	public static class SelectStatementFragment implements SqlFragment {
 		public List<SqlFragment> earlyL = new ArrayList<>();
 		public List<FieldFragment> fieldL = new ArrayList<>();
@@ -122,6 +133,7 @@ public class FragmentParserTests extends NewBDDBase {
 		public Map<String,TableFragment> aliasMap = new HashMap<>();
 		public SqlStatement statement = new SqlStatement();
 		public List<SqlFragment> whereL = new ArrayList<>();
+		public OrderByFragment orderByFrag = null;
 		
 		@Override
 		public String render() {
@@ -133,6 +145,10 @@ public class FragmentParserTests extends NewBDDBase {
 			if (! whereL.isEmpty()) {
 				sc.o(" WHERE ");
 				renderWhereL(sc);
+			}
+			
+			if (orderByFrag != null) {
+				sc.o(orderByFrag.render());
 			}
 			return sc.str;
 		}
@@ -251,7 +267,18 @@ public class FragmentParserTests extends NewBDDBase {
 //					sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
 				}
 			} else if (selectFnHelper.isLastPresent(spec)) {
-//				spec = doSelectLast(sc, spec, typeName);
+				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+				AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
+				selectFrag.earlyL.add(top);
+				if (fieldName == null) {
+					forceAddOrderByPrimaryKey(structType, selectFrag, "desc");
+//					sc.o("SELECT TOP 1 * FROM %s", typeName);
+				} else {
+					FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
+					selectFrag.fieldL.add(fieldF);
+					forceAddOrderByField(structType, fieldName, "desc", selectFrag);
+//					sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+				}
 			} else {
 //				sc.o("SELECT * FROM %s", typeName);
 			}
@@ -265,6 +292,18 @@ public class FragmentParserTests extends NewBDDBase {
 //			sc.o(";");
 //			statement.sql = sc.str;
 //			return statement;
+		}
+
+		private void forceAddOrderByPrimaryKey(DStructType structType, SelectStatementFragment selectFrag, String asc) {
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
+			if (pair == null) {
+				return; //no primary key
+			}
+			forceAddOrderByField(structType, pair.name, asc, selectFrag);
+		}
+		private void forceAddOrderByField(DStructType structType, String fieldName, String asc, SelectStatementFragment selectFrag) {
+			OrderByFragment orderByFrag = FragmentHelper.buildOrderByFrag(structType, fieldName, asc, selectFrag);
+			selectFrag.orderByFrag = orderByFrag;
 		}
 
 		private void addFnField(String fnName, String fieldName, DStructType structType, SelectStatementFragment selectFrag) {
@@ -312,6 +351,11 @@ public class FragmentParserTests extends NewBDDBase {
 
 		private FieldFragment buildStarFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
+			if (pair == null) {
+				FieldFragment fieldF = FragmentHelper.buildEmptyFieldFrag(structType, selectFrag);
+				fieldF.isStar = true;
+				return fieldF;
+			}
 			FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
 			fieldF.isStar = true;
 			return fieldF;
@@ -417,7 +461,41 @@ public class FragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a");
 	}
 	
+	@Test
+	public void testLast() {
+		String src = buildSrc();
+		src += " let x = Flight[true].last()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 * FROM Flight as a ORDER BY a.field1 desc");
+	}
+	@Test
+	public void testLastField() {
+		String src = buildSrc();
+		src += " let x = Flight[true].field1.last()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a ORDER BY a.field1 desc");
+	}
+	@Test
+	public void testLastNoPrimaryKey() {
+		String src = buildSrcNoPrimaryKey();
+		src += " let x = Flight[true].last()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 * FROM Flight as a");
+	}
+	@Test
+	public void testLastNoPrimaryKeyField() {
+		String src = buildSrcNoPrimaryKey();
+		src += " let x = Flight[true].field2.last()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 a.field2 FROM Flight as a ORDER BY a.field2. desc");
+	}
 	
+	
+
 	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
 		String sql = fragmentParser.render(selectFrag);
 		log.log(sql);
@@ -472,6 +550,12 @@ public class FragmentParserTests extends NewBDDBase {
 
 	private String buildSrc() {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
+		src += "\n insert Flight {field1: 1, field2: 10}";
+		src += "\n insert Flight {field1: 2, field2: 20}";
+		return src;
+	}
+	private String buildSrcNoPrimaryKey() {
+		String src = "type Flight struct {field1 int, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
