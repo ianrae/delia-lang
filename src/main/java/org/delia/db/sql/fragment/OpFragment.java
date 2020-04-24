@@ -11,7 +11,7 @@ public class OpFragment implements SqlFragment {
 	
 	@Override
 	public String render() {
-		String s = String.format("%s %s %s", left.render(), op, right.render());
+		String s = String.format(" %s %s %s", left.render(), op, right.render());
 		return s;
 	}
 }

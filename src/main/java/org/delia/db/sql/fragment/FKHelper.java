@@ -42,7 +42,7 @@ public class FKHelper extends ServiceBase {
 	private SqlWhereConverter whereConverter;
 	private SqlNameFormatter nameFormatter;
 //	private PreparedStatementGenerator sqlgen;
-	private WhereFragmentGenerator pwheregen;
+//	private WhereFragmentGenerator pwheregen;
 //	private SqlHelperFactory sqlHelperFactory;
 	private SelectFuncHelper selectFnHelper;
 private FragmentParser fragmentParser;
@@ -60,7 +60,7 @@ private FragmentParser fragmentParser;
 		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc);
 //		this.sqlgen = sqlHelperFactory.createPrepSqlGen(existSvc, dbctx);
 		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
-		this.pwheregen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+//		this.pwheregen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 	}
 
 	private String tblName(String typeName) {
@@ -145,7 +145,7 @@ private FragmentParser fragmentParser;
 				}
 			}
 			//this.queryDetectorSvc.addWhereClauseOpFromPhrase(sc, phrase, tbl);
-			pwheregen.addWhereClauseOpFromPhrase(spec, phrase, selectFrag.statement, selectFrag);
+//			pwheregen.addWhereClauseOpFromPhrase(spec, phrase, selectFrag.statement, selectFrag);
 		} else {
 //			this.pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), tbl, statement);
 		}
