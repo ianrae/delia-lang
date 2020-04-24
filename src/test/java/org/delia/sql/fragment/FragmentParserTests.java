@@ -182,20 +182,21 @@ public class FragmentParserTests extends NewBDDBase {
 			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 			selectFrag.tblFrag = tblFrag;
 			
-			initFields(spec, selectFrag);
+			DStructType structType = getMainType(spec); 
+			initFields(spec, structType, selectFrag);
+			
+			FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+			selectFrag.fieldL.add(fieldF);
 			
 			return selectFrag;
 		}
 
-		private void initFields(QuerySpec spec, SelectStatementFragment selectFrag) {
-			DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(spec.queryExp.typeName);
+		private void initFields(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {
 			case ALL_ROWS:
 			{
-				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-				selectFrag.fieldL.add(fieldF);
 //				addWhereExist(sc, spec);
 			}
 				break;
@@ -206,13 +207,16 @@ public class FragmentParserTests extends NewBDDBase {
 			case PRIMARY_KEY:
 			default:
 			{
-				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-				selectFrag.fieldL.add(fieldF);
 //				addWhereClausePrimaryKey(sc, spec, spec.queryExp.filter, typeName, tbl, statement);
 				whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
 			}
 				break;
 			}
+		}
+
+		private DStructType getMainType(QuerySpec spec) {
+			DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(spec.queryExp.typeName);
+			return structType;
 		}
 
 		private FieldFragment buildStarFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
@@ -270,7 +274,7 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		String sql = parser.render(selectFrag);
 		log.log(sql);
-		assertEquals("SELECT * FROM Flight as a WHERE a.field1 = ?", sql);
+		assertEquals("SELECT * FROM Flight as a WHERE a.field2 = ?", sql);
 	}
 	
 	
