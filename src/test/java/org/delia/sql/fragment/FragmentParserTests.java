@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.api.Delia;
@@ -17,8 +18,10 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
@@ -59,6 +62,13 @@ public class FragmentParserTests extends NewBDDBase {
 	public static class AliasedFragment implements SqlFragment {
 		public String alias;
 		public String name;
+		
+		public AliasedFragment() {
+		}
+		public AliasedFragment(String alias, String name) {
+			this.alias = alias;
+			this.name = name;
+		}
 		
 		@Override
 		public String render() {
@@ -116,13 +126,31 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 	
 	public static class OrderByFragment extends AliasedFragment {
-
 		public String asc;
+		public List<OrderByFragment> additionalL = new ArrayList<>();
 
 		@Override
 		public String render() {
+			StrCreator sc = new StrCreator();
 			String s = asc == null ? "" : " " + asc;
-			return String.format(" ORDER BY %s%s", super.render(), s);
+			sc.o(" ORDER BY %s%s", super.render(), s);
+			if (!additionalL.isEmpty()) {
+				sc.o(", ");
+				ListWalker<OrderByFragment> walker = new ListWalker<>(additionalL);
+				while(walker.hasNext()) {
+					OrderByFragment frag = walker.next();
+					sc.o(renderPhrase(frag));
+					walker.addIfNotLast(sc, ",");
+				}
+			}
+			
+			return sc.str;
+		}
+		
+		private String renderPhrase(OrderByFragment frag) {
+			String s = frag.asc == null ? "" : " " + frag.asc;
+			AliasedFragment afrag = new AliasedFragment(frag.alias, frag.name);
+			return String.format("%s%s", afrag.render(), s);
 		}
 	}
 	
@@ -226,6 +254,8 @@ public class FragmentParserTests extends NewBDDBase {
 			initFields(spec, structType, selectFrag);
 			
 			addFns(spec, structType, selectFrag);
+
+			generateQueryFns(spec, structType, selectFrag);
 			
 			if (selectFrag.fieldL.isEmpty()) {
 				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
@@ -235,6 +265,47 @@ public class FragmentParserTests extends NewBDDBase {
 			return selectFrag;
 		}
 		
+		public void generateQueryFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			this.doOrderByIfPresent(spec, structType, selectFrag);
+//			this.selectFnHelper.doLimitIfPresent(sc, spec, typeName);
+//			this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);
+		}
+		
+		private void doOrderByIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "orderBy");
+			if (qfexp == null) {
+				return;
+			}
+			
+			StringJoiner joiner = new StringJoiner(",");
+			boolean isDesc = false;
+			for(Exp exp : qfexp.argL) {
+				if (exp instanceof IdentExp) {
+					isDesc = exp.strValue().equals("desc");
+				} else {
+					String fieldName = exp.strValue();
+					if (fieldName.contains(".")) {
+						fieldName = StringUtils.substringAfter(fieldName, ".");
+					}
+					if (! DValueHelper.fieldExists(structType, fieldName)) {
+						DeliaExceptionHelper.throwError("unknown-field", "type '%s' does not have field '%s'. Invalid orderBy parameter", structType.getName(), fieldName);
+					}
+					
+					String alias = FragmentHelper.findAlias(structType, selectFrag);
+					joiner.add(String.format("%s.%s", alias, fieldName));
+				}
+			}
+
+			String asc = isDesc ? "desc" : null;
+			OrderByFragment frag = FragmentHelper.buildRawOrderByFrag(structType, joiner.toString(), asc, selectFrag);
+			OrderByFragment orderByFrag = selectFrag.orderByFrag;
+			if (orderByFrag == null) {
+				selectFrag.orderByFrag = frag;
+			} else {
+				selectFrag.orderByFrag.additionalL.add(frag);
+			}
+		}
+
 		private void addFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			QueryExp exp = spec.queryExp;
 			//TODO: for now we implement exist using count(*). improve later
@@ -260,11 +331,9 @@ public class FragmentParserTests extends NewBDDBase {
 				if (fieldName == null) {
 					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); 
 					selectFrag.fieldL.add(fieldF);
-//					sc.o("SELECT TOP 1 * FROM %s", typeName);
 				} else {
 					FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
 					selectFrag.fieldL.add(fieldF);
-//					sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
 				}
 			} else if (selectFnHelper.isLastPresent(spec)) {
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
@@ -272,20 +341,14 @@ public class FragmentParserTests extends NewBDDBase {
 				selectFrag.earlyL.add(top);
 				if (fieldName == null) {
 					forceAddOrderByPrimaryKey(structType, selectFrag, "desc");
-//					sc.o("SELECT TOP 1 * FROM %s", typeName);
 				} else {
 					FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
 					selectFrag.fieldL.add(fieldF);
 					forceAddOrderByField(structType, fieldName, "desc", selectFrag);
-//					sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
 				}
 			} else {
 //				sc.o("SELECT * FROM %s", typeName);
 			}
-//			SqlStatement statement = new SqlStatement();
-//
-//			statement = pwheregen.generateAWhere(spec);
-//			sc.o(statement.sql);
 //			
 //			generateQueryFns(sc, spec, typeName);
 //			
@@ -478,6 +541,16 @@ public class FragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a ORDER BY a.field1 desc");
 	}
 	@Test
+	public void testLastFieldOrderBy() {
+		String src = buildSrc();
+		src += " let x = Flight[true].orderBy('field2').field1.last()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a ORDER BY a.field2, a.field1 desc");
+	}
+	
+	
+	@Test
 	public void testLastNoPrimaryKey() {
 		String src = buildSrcNoPrimaryKey();
 		src += " let x = Flight[true].last()";
@@ -491,7 +564,16 @@ public class FragmentParserTests extends NewBDDBase {
 		src += " let x = Flight[true].field2.last()";
 		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 		
-		runAndChk(selectFrag, "SELECT TOP 1 a.field2 FROM Flight as a ORDER BY a.field2. desc");
+		runAndChk(selectFrag, "SELECT TOP 1 a.field2 FROM Flight as a ORDER BY a.field2 desc");
+	}
+	
+	@Test
+	public void testOrderBy() {
+		String src = buildSrc();
+		src += " let x = Flight[true].orderBy('field2')";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2");
 	}
 	
 	

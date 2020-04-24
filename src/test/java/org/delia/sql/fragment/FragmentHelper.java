@@ -59,5 +59,12 @@ public class FragmentHelper {
 		fieldF.asc = asc;
 		return fieldF;
 	}
+	public static OrderByFragment buildRawOrderByFrag(DStructType structType, String str, String asc, SelectStatementFragment selectFrag) {
+		OrderByFragment fieldF = new OrderByFragment();
+		fieldF.alias = null;
+		fieldF.name = str;
+		fieldF.asc = asc;
+		return fieldF;
+	}
 
 }
