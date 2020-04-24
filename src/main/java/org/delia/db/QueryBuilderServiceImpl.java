@@ -15,6 +15,8 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
+import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.runner.FilterEvaluator;
@@ -38,7 +40,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	public QueryExp createEqQuery(String typeName, String fieldName, DValue targetValue) {
 		
 		//Address[cust=value]
-		IdentExp op1 = new IdentExp(fieldName);
+		XNAFMultiExp op1 = buildXNAFExp(fieldName);
 		Exp op2 = createExpFor(targetValue);
 		FilterOpExp filterOp0 = new FilterOpExp(99, op1, new StringExp("=="), op2);
 		FilterOpFullExp filterOp = new FilterOpFullExp(99, filterOp0);
@@ -48,6 +50,13 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return exp;
 	}
 	
+	private XNAFMultiExp buildXNAFExp(String fieldName) {
+		XNAFMultiExp exp = new XNAFMultiExp(99, false, null);
+		XNAFNameExp nameExp = new XNAFNameExp(99, new IdentExp(fieldName));
+		exp.qfeL.add(nameExp);
+		return exp;
+	}
+
 	private Exp createExpFor(DValue inner) {
 		switch(inner.getType().getShape()) {
 		case INTEGER:
