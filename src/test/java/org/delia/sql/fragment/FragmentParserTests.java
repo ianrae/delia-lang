@@ -116,6 +116,7 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 	
 	public static class SelectStatementFragment implements SqlFragment {
+		public List<SqlFragment> earlyL = new ArrayList<>();
 		public List<FieldFragment> fieldL = new ArrayList<>();
 		public TableFragment tblFrag;
 		public Map<String,TableFragment> aliasMap = new HashMap<>();
@@ -126,6 +127,7 @@ public class FragmentParserTests extends NewBDDBase {
 		public String render() {
 			StrCreator sc = new StrCreator();
 			sc.o("SELECT ");
+			renderEarly(sc);
 			renderFields(sc);
 			sc.o(" FROM %s", tblFrag.render());
 			if (! whereL.isEmpty()) {
@@ -135,6 +137,13 @@ public class FragmentParserTests extends NewBDDBase {
 			return sc.str;
 		}
 
+
+		private void renderEarly(StrCreator sc) {
+			for(SqlFragment frag: earlyL) {
+				String s = frag.render();
+				sc.o(s);
+			}
+		}
 
 		private void renderWhereL(StrCreator sc) {
 			for(SqlFragment frag: whereL) {
@@ -200,7 +209,7 @@ public class FragmentParserTests extends NewBDDBase {
 			DStructType structType = getMainType(spec); 
 			initFields(spec, structType, selectFrag);
 			
-			xgenerateQuery(spec, structType, selectFrag);
+			addFns(spec, structType, selectFrag);
 			
 			if (selectFrag.fieldL.isEmpty()) {
 				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
@@ -210,7 +219,7 @@ public class FragmentParserTests extends NewBDDBase {
 			return selectFrag;
 		}
 		
-		private void xgenerateQuery(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		private void addFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			QueryExp exp = spec.queryExp;
 			//TODO: for now we implement exist using count(*). improve later
 			if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
@@ -229,12 +238,18 @@ public class FragmentParserTests extends NewBDDBase {
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
 				addFnField("MAX", fieldName, structType, selectFrag);
 			} else if (selectFnHelper.isFirstPresent(spec)) {
-//				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
-//				if (fieldName == null) {
+				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+				AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
+				selectFrag.earlyL.add(top);
+				if (fieldName == null) {
+					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); 
+					selectFrag.fieldL.add(fieldF);
 //					sc.o("SELECT TOP 1 * FROM %s", typeName);
-//				} else {
+				} else {
+					FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
+					selectFrag.fieldL.add(fieldF);
 //					sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
-//				}
+				}
 			} else if (selectFnHelper.isLastPresent(spec)) {
 //				spec = doSelectLast(sc, spec, typeName);
 			} else {
@@ -252,8 +267,7 @@ public class FragmentParserTests extends NewBDDBase {
 //			return statement;
 		}
 
-		private void addFnField(String fnName, String fieldName, DStructType structType,
-				SelectStatementFragment selectFrag) {
+		private void addFnField(String fnName, String fieldName, DStructType structType, SelectStatementFragment selectFrag) {
 			FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
 			if (fieldF == null) {
 				DeliaExceptionHelper.throwError("unknown-field", "Field %s.%s unknown in %s function", structType.getName(), fieldName, fnName);
@@ -376,6 +390,31 @@ public class FragmentParserTests extends NewBDDBase {
 		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT COUNT(*) FROM Flight as a");
+	}
+	@Test
+	public void testCountField() {
+		String src = buildSrc();
+		src += " let x = Flight[true].field1.count()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT COUNT(a.field1) FROM Flight as a");
+	}
+	
+	@Test
+	public void testFirst() {
+		String src = buildSrc();
+		src += " let x = Flight[true].first()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 * FROM Flight as a");
+	}
+	@Test
+	public void testFirstField() {
+		String src = buildSrc();
+		src += " let x = Flight[true].field1.first()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a");
 	}
 	
 	
