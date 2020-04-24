@@ -82,11 +82,6 @@ import org.delia.util.DeliaExceptionHelper;
 
 			generateQueryFns(spec, structType, selectFrag);
 			
-			if (selectFrag.fieldL.isEmpty()) {
-				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-				selectFrag.fieldL.add(fieldF);
-			}
-			
 			fixupForParentFields(structType, selectFrag);
 			if (needJoin(spec, structType, selectFrag, details)) {
 				//used saved join if we have one
@@ -96,6 +91,12 @@ import org.delia.util.DeliaExceptionHelper;
 					selectFrag.joinFrag = savedJoinedFrag;
 				}
 			}
+
+			if (selectFrag.fieldL.isEmpty()) {
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+				selectFrag.fieldL.add(fieldF);
+			}
+			
 			
 			return selectFrag;
 		}
@@ -105,7 +106,7 @@ import org.delia.util.DeliaExceptionHelper;
 			QueryFuncExp qfexp2 = selectFnHelper.findFn(spec, "fks");
 			//TODO: later add fk
 			//TODO: we need to distinguish which join. fix later
-			if (qfexp != null || qfexp2 != null) {
+			if (qfexp != null || qfexp2 != null || selectFrag.aliasMap.size() > 1) {
 				return true;
 			}
 			
@@ -221,7 +222,12 @@ import org.delia.util.DeliaExceptionHelper;
 		}
 
 		public TableFragment createTable(DStructType structType, SelectStatementFragment selectFrag) {
-			TableFragment tblFrag = new TableFragment();
+			TableFragment tblFrag = selectFrag.findByTableName(structType.getName());
+			if (tblFrag != null) {
+				return tblFrag;
+			}
+			
+			tblFrag = new TableFragment();
 			tblFrag.structType = structType;
 			createAlias(tblFrag);
 			tblFrag.name = structType.getName();
@@ -229,7 +235,12 @@ import org.delia.util.DeliaExceptionHelper;
 			return tblFrag;
 		}
 		public TableFragment createAssocTable(SelectStatementFragment selectFrag, String tableName) {
-			TableFragment tblFrag = new TableFragment();
+			TableFragment tblFrag = selectFrag.findByTableName(tableName);
+			if (tblFrag != null) {
+				return tblFrag;
+			}
+			
+			tblFrag = new TableFragment();
 			tblFrag.structType = null;
 			createAlias(tblFrag);
 			tblFrag.name = tableName;

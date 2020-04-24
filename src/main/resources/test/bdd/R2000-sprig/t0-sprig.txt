@@ -15,7 +15,7 @@ given:
   insert Customer { sid:33}
 when:
   insert Address {id: 100, cust: 33 }
-  let x = Customer[1]
+  let x = Customer[1].fks()
 then:
 value:a:Customer {
  vid:1
@@ -32,7 +32,7 @@ given:
   insert Customer { sid:33}
 when:
   insert Address {id: 100, cust: 33 }
-  let x = Customer[1]
+  let x = Customer[1].fks()
 then:
 value:a:Customer {
  vid:1
@@ -49,7 +49,7 @@ given:
   insert Customer { sid:33}
 when:
   insert Address {id: 100, cust: 33 }
-  let x = Customer['1']
+  let x = Customer['1'].fks()
 then:
 value:a:Customer {
  vid:'1'
@@ -65,7 +65,7 @@ given:
   insert Customer { }
 when:
   insert Address {id: 100, cust: 1 }
-  let x = Customer[1]
+  let x = Customer[1].fks()
 then:
 value:a:Customer {
  vid:1

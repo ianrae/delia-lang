@@ -263,14 +263,15 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 0;
+		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR2150File("t0-migrate-many-to-many3.txt", 2);
-		runR1350File("t0-filter-op-relation.txt", 13);
+//		runR1350File("t0-filter-op-relation.txt", 13);
+		runR2000File("t0-sprig.txt", 3);
 	}
 	
 	//---

@@ -16,7 +16,7 @@ given:
 
 when:
   insert Customer { id: 1, wid:33 }
-  let x = Customer[1]
+  let x = Customer[1].fks()
 then:
 value:a:Customer {
  vid:1
@@ -34,7 +34,7 @@ given:
   insert Customer {id: 2, wid: 34 }
 when:
   insert Address {id: 100, cust: 1 }
-  let x = Customer[1]
+  let x = Customer[1].fks()
 then:
 ERROR: unsupported-alter-field-change
 
