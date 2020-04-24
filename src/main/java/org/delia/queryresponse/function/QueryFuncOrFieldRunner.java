@@ -52,7 +52,7 @@ public class QueryFuncOrFieldRunner extends ServiceBase {
 						
 					QueryFieldExp qff = (QueryFieldExp) qfexp;
 					String fieldName = qff.funcName;
-					log.log("qff: " + fieldName);
+//					log.log("qff: " + fieldName);
 					List<DValue> newList = new ArrayList<>();
 
 					boolean checkFieldExists = true;
@@ -105,7 +105,7 @@ public class QueryFuncOrFieldRunner extends ServiceBase {
 			if (qfexp instanceof QueryFieldExp) {
 				QueryFieldExp qff = (QueryFieldExp) qfexp;
 				String fieldName = qff.funcName;
-				log.log("qff: " + fieldName);
+//				log.log("qff: " + fieldName);
 				break; //we're done
 			} else { //it's a fn to run
 				String fnName = qfexp.funcName;

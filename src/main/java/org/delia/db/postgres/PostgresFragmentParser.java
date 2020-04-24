@@ -57,7 +57,6 @@ import org.delia.util.DeliaExceptionHelper;
 			} else {
 				FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
 				selectFrag.fieldL.add(fieldF);
-				forceAddOrderByField(structType, fieldName, "desc", selectFrag);
 			}
 			
 			String asc = "desc";
