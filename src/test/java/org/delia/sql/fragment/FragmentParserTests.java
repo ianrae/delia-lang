@@ -44,6 +44,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,9 @@ public class FragmentParserTests extends NewBDDBase {
 		@Override
 		public String render() {
 			if (isStar) {
+				if (fnName != null) {
+					return String.format("%s(*)", fnName);
+				}
 				return "*";
 			} else if (fnName != null) {
 				return String.format("%s(%s)", fnName, super.render());
@@ -207,22 +211,23 @@ public class FragmentParserTests extends NewBDDBase {
 		}
 		
 		private void xgenerateQuery(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
-			StrCreator sc = new StrCreator();
 			QueryExp exp = spec.queryExp;
-			String typeName = exp.getTypeName();
 			//TODO: for now we implement exist using count(*). improve later
 			if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
-//				sc.o("SELECT COUNT(*) FROM %s", typeName);
+				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "count");
+				if (fieldName == null) {
+					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+					fieldF.fnName = "COUNT";
+					selectFrag.fieldL.add(fieldF);
+				} else {
+					addFnField("COUNT", fieldName, structType, selectFrag);
+				}
 			} else if (selectFnHelper.isMinPresent(spec)) {
-//				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
-//				sc.o("SELECT MIN(%s) FROM %s", fieldName, typeName);
+				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
+				addFnField("MIN", fieldName, structType, selectFrag);
 			} else if (selectFnHelper.isMaxPresent(spec)) {
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
-				TypePair pair = DValueHelper.findField(structType, fieldName);
-				FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
-				fieldF.fnName = "MAX";
-				addOrReplace(selectFrag, fieldF);
-//				sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
+				addFnField("MAX", fieldName, structType, selectFrag);
 			} else if (selectFnHelper.isFirstPresent(spec)) {
 //				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
 //				if (fieldName == null) {
@@ -245,6 +250,16 @@ public class FragmentParserTests extends NewBDDBase {
 //			sc.o(";");
 //			statement.sql = sc.str;
 //			return statement;
+		}
+
+		private void addFnField(String fnName, String fieldName, DStructType structType,
+				SelectStatementFragment selectFrag) {
+			FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, fieldName);
+			if (fieldF == null) {
+				DeliaExceptionHelper.throwError("unknown-field", "Field %s.%s unknown in %s function", structType.getName(), fieldName, fnName);
+			}
+			fieldF.fnName = fnName;
+			addOrReplace(selectFrag, fieldF);
 		}
 
 		private void addOrReplace(SelectStatementFragment selectFrag, FieldFragment fieldF) {
@@ -329,31 +344,54 @@ public class FragmentParserTests extends NewBDDBase {
 	@Test
 	public void testOp() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); 
+		fragmentParser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
-		SelectStatementFragment selectFrag = parser.parseSelect(spec);
+		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
 		
-		String sql = parser.render(selectFrag);
-		log.log(sql);
-		assertEquals("SELECT * FROM Flight as a WHERE a.field2 = ?", sql);
+		runAndChk(selectFrag, "SELECT * FROM Flight as a WHERE a.field2 = ?");
 	}
 	
 	@Test
 	public void testMax() {
 		String src = buildSrc();
 		src += " let x = Flight[1].field1.max()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 		
-		LetStatementExp letStatementExp = buildFromSrc(src);
-		
-		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
-		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
-		
-		String sql = fragmentParser.render(selectFrag);
-		log.log(sql);
-		assertEquals("SELECT MAX(a.field1) FROM Flight as a WHERE a.field1 = ?", sql);
+		runAndChk(selectFrag, "SELECT MAX(a.field1) FROM Flight as a WHERE a.field1 = ?");
 	}
 	
+	@Test
+	public void testMin() {
+		String src = buildSrc();
+		src += " let x = Flight[1].field1.min()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT MIN(a.field1) FROM Flight as a WHERE a.field1 = ?");
+	}
+	@Test
+	public void testCount() {
+		String src = buildSrc();
+		src += " let x = Flight[true].count()";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		
+		runAndChk(selectFrag, "SELECT COUNT(*) FROM Flight as a");
+	}
+	
+	
+	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
+		String sql = fragmentParser.render(selectFrag);
+		log.log(sql);
+		assertEquals(expected, sql);
+	}
+
+	private SelectStatementFragment buildSelectFragment(String src) {
+		LetStatementExp letStatementExp = buildFromSrc(src);
+		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
+		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
+		return selectFrag;
+	}
+
 	private LetStatementExp buildFromSrc(String src) {
 		DeliaDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();

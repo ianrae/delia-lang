@@ -5,8 +5,16 @@ import org.delia.sql.fragment.FragmentParserTests.FieldFragment;
 import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 public class FragmentHelper {
+	public static FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, String fieldName) {
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		if (pair == null) {
+			return null;
+		}
+		return buildFieldFrag(structType, selectFrag, pair);
+	}
 	public static FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, TypePair pair) {
 		FieldFragment fieldF = new FieldFragment();
 		fieldF.alias = findAlias(structType, selectFrag); //selectFrag.aliasMap.get(spec.queryExp.typeName).alias;
