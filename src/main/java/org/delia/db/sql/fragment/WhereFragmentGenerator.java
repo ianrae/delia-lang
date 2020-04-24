@@ -210,7 +210,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 //				return String.format("%s%s %s %s", snot, tmp.toString(), op, op2);
 				
 				OpFragment opFrag = new OpFragment(op);
-				opFrag.left = FragmentHelper.buildAliasedFrag(null, snot + op1);
+				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
 				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
 				return opFrag;
 			} else {
@@ -221,7 +221,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 //				Table tmp = new Table(alias, op2);
 //				return String.format("%s%s %s %s", snot, op1, op, tmp.toString());
 				OpFragment opFrag = new OpFragment(op);
-				opFrag.left = FragmentHelper.buildAliasedFrag(null, snot + op1);
+				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
 				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
 				return opFrag;
 			}

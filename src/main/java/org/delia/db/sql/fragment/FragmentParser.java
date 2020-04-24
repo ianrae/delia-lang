@@ -1,5 +1,6 @@
 package org.delia.db.sql.fragment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -87,10 +88,59 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 			
 			fixupForParentFields(structType, selectFrag);
+			removeJoinIfNotNeeded(structType, selectFrag);
 			
 			return selectFrag;
 		}
 		
+		private void removeJoinIfNotNeeded(DStructType structType, SelectStatementFragment selectFrag) {
+			if (selectFrag.joinFrag == null) {
+				return;
+			}
+			
+//			TableFragment joinTblFrag = selectFrag.findByTableName(selectFrag.joinFrag.joinTblFrag.name);
+			String alias = selectFrag.joinFrag.joinTblFrag.alias;
+			DStructType joinType = selectFrag.joinFrag.joinTblFrag.structType;
+			
+			//is join table mentioned anywhere
+			boolean mentioned = false;
+			for(FieldFragment ff: selectFrag.fieldL) {
+				if (alias.equals(ff.alias) || (joinType != null && joinType.equals(ff.structType))) {
+					mentioned = true;
+					break;
+				}
+			}
+			
+			for(SqlFragment ff: selectFrag.whereL) {
+				if (ff instanceof OpFragment) {
+					OpFragment opff = (OpFragment) ff;
+					if (alias.equals(opff.left.alias) || (alias.equals(opff.right.alias))) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+			
+			if (selectFrag.orderByFrag != null) {
+				if (alias.equals(selectFrag.orderByFrag.alias)) {
+					mentioned = true;
+				}
+				for(OrderByFragment obff: selectFrag.orderByFrag.additionalL) {
+					if (alias.equals(obff.alias)) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+
+			
+			if (! mentioned) {
+				log.log("removing join..");
+				selectFrag.joinFrag = null;
+			}
+			
+		}
+
 		private void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
 //			public List<FieldFragment> fieldL = new ArsrayList<>();
 //			public OrderByFragment orderByFrag = null;

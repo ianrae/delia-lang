@@ -34,6 +34,18 @@ public class SelectStatementFragment implements SqlFragment {
 		}
 		return null;
 	}
+	public TableFragment findByTableName(String tblName) {
+		if (tblName == null) {
+			return null;
+		}
+		for(String s: aliasMap.keySet()) {
+			TableFragment frag = aliasMap.get(s);
+			if (frag.name.equals(tblName)) {
+				return frag;
+			}
+		}
+		return null;
+	}
 	
 	@Override
 	public String render() {
