@@ -22,6 +22,19 @@ public class SelectStatementFragment implements SqlFragment {
 	public LimitFragment limitFrag = null;
 	public OffsetFragment offsetFrag = null;
 	
+	public TableFragment findByAlias(String alias) {
+		if (alias == null) {
+			return null;
+		}
+		for(String s: aliasMap.keySet()) {
+			TableFragment frag = aliasMap.get(s);
+			if (frag.alias.equals(alias)) {
+				return frag;
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public String render() {
 		StrCreator sc = new StrCreator();

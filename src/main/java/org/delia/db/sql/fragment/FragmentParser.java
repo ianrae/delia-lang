@@ -21,10 +21,14 @@ import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.TableInfo;
+import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -83,9 +87,69 @@ import org.delia.util.DeliaExceptionHelper;
 				selectFrag.fieldL.add(fieldF);
 			}
 			
+			fixupForParentFields(structType, selectFrag);
+			
 			return selectFrag;
 		}
 		
+		private void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
+//			public List<SqlFragment> earlyL = new ArrayList<>();
+//			public List<FieldFragment> fieldL = new ArrayList<>();
+//			public TableFragment tblFrag;
+//			public JoinFragment joinFrag; //TODO later a list
+//			public List<SqlFragment> whereL = new ArrayList<>();
+//			public OrderByFragment orderByFrag = null;
+//			public LimitFragment limitFrag = null;
+//			public OffsetFragment offsetFrag = null;
+
+			
+			for(SqlFragment frag: selectFrag.whereL) {
+				if (frag instanceof OpFragment) {
+					OpFragment opfrag = (OpFragment) frag;
+					TableFragment tblFrag = selectFrag.findByAlias(opfrag.left.alias);
+					if (tblFrag != null && tblFrag.structType.equals(structType)) {
+						//this is the main type
+						doParentFixup(opfrag.left, tblFrag, selectFrag);
+					}
+					
+					tblFrag = selectFrag.findByAlias(opfrag.right.alias);
+					if (tblFrag != null && tblFrag.structType.equals(structType)) {
+						//this is the main type
+						doParentFixup(opfrag.right, tblFrag, selectFrag);
+					}
+				}
+			}
+		}
+
+		//SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE  a.addr < ?  -- (111)
+		//a.addr is parent. change to b.id
+		private void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, SelectStatementFragment selectFrag) {
+			String fieldName = aliasFrag.name;
+			RelationOneRule oneRule = DRuleHelper.findOneRule(tblFrag.structType.getName(), fieldName, registry);
+			RelationInfo relInfo = oneRule.relInfo;
+			if (oneRule != null && relInfo.isParent) {
+				if (aliasFrag.name.equals(relInfo.fieldName)) {
+					doZFixup(aliasFrag, relInfo, selectFrag);
+				}
+			} else {
+				RelationManyRule manyRule = DRuleHelper.findManyRule(tblFrag.structType.getName(), fieldName, registry);
+				relInfo = manyRule.relInfo;
+				if (manyRule != null && manyRule.relInfo.isParent) {
+					doZFixup(aliasFrag, relInfo, selectFrag);
+				}
+				
+			}
+			
+		}
+
+		private void doZFixup(AliasedFragment aliasFrag, RelationInfo relInfo, SelectStatementFragment selectFrag) {
+			TableFragment otherSide = selectFrag.aliasMap.get(relInfo.farType.getName());
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relInfo.farType);
+			log.log("fixup %s.%s -> %s.%s", aliasFrag.alias, aliasFrag.name, otherSide.alias, pair.name);
+			aliasFrag.alias = otherSide.alias;
+			aliasFrag.name = pair.name;
+		}
+
 		private void addJoins(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			fkHelper.generateFKsQuery(spec, details, structType, selectFrag, this);
 		}
