@@ -1,6 +1,5 @@
 package org.delia.db.sql.fragment;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -44,6 +43,7 @@ import org.delia.util.DeliaExceptionHelper;
 		private SelectFuncHelper selectFnHelper;
 		private TableExistenceServiceImpl existSvc;
 		private FKHelper fkHelper;
+		private JoinFragment savedJoinedFrag;
 		
 		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory) {
 			super(factorySvc);
@@ -77,7 +77,7 @@ import org.delia.util.DeliaExceptionHelper;
 			selectFrag.tblFrag = tblFrag;
 			
 			initFields(spec, structType, selectFrag);
-			addJoins(spec, structType, selectFrag, details);
+//			addJoins(spec, structType, selectFrag, details);
 			addFns(spec, structType, selectFrag);
 
 			generateQueryFns(spec, structType, selectFrag);
@@ -88,19 +88,43 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 			
 			fixupForParentFields(structType, selectFrag);
-			removeJoinIfNotNeeded(structType, selectFrag);
+			if (needJoin(spec, structType, selectFrag, details)) {
+				//used saved join if we have one
+				if (savedJoinedFrag == null) {
+					addJoins(spec, structType, selectFrag, details);
+				} else {
+					selectFrag.joinFrag = savedJoinedFrag;
+				}
+			}
 			
 			return selectFrag;
 		}
 		
-		private void removeJoinIfNotNeeded(DStructType structType, SelectStatementFragment selectFrag) {
-			if (selectFrag.joinFrag == null) {
-				return;
+		private boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
+			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "fetch");
+			//TODO: we need to distinguish which join. fix later
+			if (qfexp != null) {
+				return true;
 			}
 			
-//			TableFragment joinTblFrag = selectFrag.findByTableName(selectFrag.joinFrag.joinTblFrag.name);
-			String alias = selectFrag.joinFrag.joinTblFrag.alias;
-			DStructType joinType = selectFrag.joinFrag.joinTblFrag.structType;
+			int numFields = selectFrag.fieldL.size();
+			addJoins(spec, structType, selectFrag, details);
+			if (selectFrag.joinFrag == null) {
+				return false;
+			}
+			
+			//remove the join-added fields
+			while(selectFrag.fieldL.size() != numFields) {
+				int n = selectFrag.fieldL.size();
+				selectFrag.fieldL.remove(n - 1);
+			}
+			
+			this.savedJoinedFrag = selectFrag.joinFrag;
+			selectFrag.joinFrag = null; //clear
+			
+			//SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE  a.id = ?  -- (55)
+			String alias = savedJoinedFrag.joinTblFrag.alias;
+			DStructType joinType = savedJoinedFrag.joinTblFrag.structType;
 			
 			//is join table mentioned anywhere
 			boolean mentioned = false;
@@ -134,11 +158,11 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 
 			
-			if (! mentioned) {
-				log.log("removing join..");
-				selectFrag.joinFrag = null;
+			if (mentioned) {
+				log.log("need join..");
+				return true;
 			}
-			
+			return false;
 		}
 
 		private void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
