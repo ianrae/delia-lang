@@ -184,7 +184,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
-		runR1700File("t0-let-field-func.txt", 2);
+		runR1700File("t0-let-field-func.txt", 3);
 		runR1700File("t0-let-field-multiple.txt", 5);
 		runR1700File("t0-let-field-relation.txt", 2);
 	}
@@ -262,7 +262,10 @@ public class NewBDDH2Tests extends NewBDDBase {
 		cleanTables = true;
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR500File("t0-relation-many-to-many.txt", 11);
-		runR1350File("t0-filter-op-relation.txt", 13);
+//		runR1350File("t0-filter-op-relation.txt", 13);
+//		runR1550File("t0-queryfn-oneone-parent.txt", 6);
+//		runR1700File("t0-let-field-single.txt", 3);
+		runR1700File("t0-let-field-func.txt", 3);
 	}
 	
 	//---

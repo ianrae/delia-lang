@@ -87,5 +87,8 @@ public class SelectStatementFragment implements SqlFragment {
 		}
 	}
 
+	public void clearFieldList() {
+		fieldL.clear();
+	}
 
 }

@@ -1,6 +1,5 @@
 package org.delia.db.sql.fragment;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -93,16 +92,9 @@ import org.delia.util.DeliaExceptionHelper;
 		}
 		
 		private void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
-//			public List<SqlFragment> earlyL = new ArrayList<>();
-//			public List<FieldFragment> fieldL = new ArrayList<>();
-//			public TableFragment tblFrag;
-//			public JoinFragment joinFrag; //TODO later a list
-//			public List<SqlFragment> whereL = new ArrayList<>();
+//			public List<FieldFragment> fieldL = new ArsrayList<>();
 //			public OrderByFragment orderByFrag = null;
-//			public LimitFragment limitFrag = null;
-//			public OffsetFragment offsetFrag = null;
 
-			
 			for(SqlFragment frag: selectFrag.whereL) {
 				if (frag instanceof OpFragment) {
 					OpFragment opfrag = (OpFragment) frag;
@@ -126,23 +118,21 @@ import org.delia.util.DeliaExceptionHelper;
 		private void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, SelectStatementFragment selectFrag) {
 			String fieldName = aliasFrag.name;
 			RelationOneRule oneRule = DRuleHelper.findOneRule(tblFrag.structType.getName(), fieldName, registry);
-			RelationInfo relInfo = oneRule.relInfo;
-			if (oneRule != null && relInfo.isParent) {
+			if (oneRule != null && oneRule.relInfo.isParent) {
+				RelationInfo relInfo = oneRule.relInfo;
 				if (aliasFrag.name.equals(relInfo.fieldName)) {
-					doZFixup(aliasFrag, relInfo, selectFrag);
+					changeToChild(aliasFrag, relInfo, selectFrag);
 				}
 			} else {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(tblFrag.structType.getName(), fieldName, registry);
-				relInfo = manyRule.relInfo;
 				if (manyRule != null && manyRule.relInfo.isParent) {
-					doZFixup(aliasFrag, relInfo, selectFrag);
+					RelationInfo relInfo = manyRule.relInfo;
+					changeToChild(aliasFrag, relInfo, selectFrag);
 				}
-				
 			}
-			
 		}
 
-		private void doZFixup(AliasedFragment aliasFrag, RelationInfo relInfo, SelectStatementFragment selectFrag) {
+		private void changeToChild(AliasedFragment aliasFrag, RelationInfo relInfo, SelectStatementFragment selectFrag) {
 			TableFragment otherSide = selectFrag.aliasMap.get(relInfo.farType.getName());
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relInfo.farType);
 			log.log("fixup %s.%s -> %s.%s", aliasFrag.alias, aliasFrag.name, otherSide.alias, pair.name);
@@ -241,6 +231,7 @@ import org.delia.util.DeliaExceptionHelper;
 			//TODO: for now we implement exist using count(*). improve later
 			if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "count");
+				selectFrag.clearFieldList();
 				if (fieldName == null) {
 					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
 					fieldF.fnName = "COUNT";
@@ -249,15 +240,18 @@ import org.delia.util.DeliaExceptionHelper;
 					addFnField("COUNT", fieldName, structType, selectFrag);
 				}
 			} else if (selectFnHelper.isMinPresent(spec)) {
+				selectFrag.clearFieldList();
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
 				addFnField("MIN", fieldName, structType, selectFrag);
 			} else if (selectFnHelper.isMaxPresent(spec)) {
+				selectFrag.clearFieldList();
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
 				addFnField("MAX", fieldName, structType, selectFrag);
 			} else if (selectFnHelper.isFirstPresent(spec)) {
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
 				AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
 				selectFrag.earlyL.add(top);
+				selectFrag.clearFieldList();
 				if (fieldName == null) {
 					FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); 
 					selectFrag.fieldL.add(fieldF);
@@ -269,6 +263,7 @@ import org.delia.util.DeliaExceptionHelper;
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
 				AliasedFragment top = FragmentHelper.buildAliasedFrag(null, "TOP 1 ");
 				selectFrag.earlyL.add(top);
+				selectFrag.clearFieldList();
 				if (fieldName == null) {
 					forceAddOrderByPrimaryKey(structType, selectFrag, "desc");
 				} else {
