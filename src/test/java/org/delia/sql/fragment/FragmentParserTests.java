@@ -10,10 +10,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.api.Delia;
+import org.delia.api.DeliaSessionImpl;
+import org.delia.api.MigrationAction;
 import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -237,7 +241,7 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		
 	}
-	
+
 
 	@Test
 	public void testPrimaryKey() {
@@ -277,7 +281,39 @@ public class FragmentParserTests extends NewBDDBase {
 		assertEquals("SELECT * FROM Flight as a WHERE a.field2 = ?", sql);
 	}
 	
+	@Test
+	public void testMax() {
+		String src = buildSrc();
+		src += " let x = Flight[1].max()";
+		
+		LetStatementExp letStatementExp = buildFromSrc(src);
+		
+		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
+		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
+		
+		String sql = fragmentParser.render(selectFrag);
+		log.log(sql);
+		assertEquals("SELECT * FROM Flight as a WHERE a.field2 = ?", sql);
+	}
 	
+	private LetStatementExp buildFromSrc(String src) {
+		DeliaDao dao = createDao(); 
+		Delia xdelia = dao.getDelia();
+		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
+		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);
+		this.fragmentParser = createFragmentParser(dao, src); 
+		
+//		List<Exp> expL = dao.getMostRecentSess().
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		LetStatementExp letStatementExp = null;
+		for(Exp exp: sessImpl.expL) {
+			if (exp instanceof LetStatementExp) {
+				letStatementExp = (LetStatementExp) exp;
+			}
+		}
+		return letStatementExp;
+	}
+
 	//---
 	private Delia delia;
 	private FactoryService factorySvc;
@@ -286,7 +322,9 @@ public class FragmentParserTests extends NewBDDBase {
 	private QueryBuilderService queryBuilderSvc;
 	private ScalarValueBuilder builder;
 
+	private FragmentParser fragmentParser;
 	
+
 	@Before
 	public void init() {
 	}
@@ -326,6 +364,10 @@ public class FragmentParserTests extends NewBDDBase {
 		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
 		return spec;
 	}
+	private QuerySpec buildQuery(QueryExp exp) {
+		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
+		return spec;
+	}
 
 	private FragmentParser createFragmentParser(String src) {
 		DeliaDao dao = createDao(); 
@@ -345,5 +387,21 @@ public class FragmentParserTests extends NewBDDBase {
 		return parser;
 	}
 
+	private FragmentParser createFragmentParser(DeliaDao dao, String src) {
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+		
+		this.delia = dao.getDelia();
+		this.factorySvc = delia.getFactoryService();
+		this.registry = dao.getRegistry();
+		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
+		
+		FragmentParser parser = new FragmentParser(factorySvc, registry, runner);
+		
+		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
+		this.builder = factorySvc.createScalarValueBuilder(registry);
+		
+		return parser;
+	}
 
 }
