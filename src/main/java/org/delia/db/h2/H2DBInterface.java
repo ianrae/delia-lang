@@ -19,6 +19,7 @@ import org.delia.db.SqlExecuteContext;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.FragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -96,22 +97,16 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		if (useFragmentParser) {
 			log.log("FRAG PARSEr....................");
 			createTableCreator(dbctx);
-			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
+			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
+			whereGen.fragmentParser = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 			parser.render(selectFrag);
 			statement = selectFrag.statement;
 		} else if (qtx.loadFKs) {
 			createTableCreator(dbctx);
-			if (useFragmentParser) {
-				log.log("FRAG PARSEr....................");
-				FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
-				SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
-				parser.render(selectFrag);
-				statement = selectFrag.statement;
-			} else {
-				FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
-				statement = smartgen.generateFKsQuery(spec, details);
-			}
+			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
+			statement = smartgen.generateFKsQuery(spec, details);
 		} else {
 			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
 			statement = sqlgen.generateQuery(spec);

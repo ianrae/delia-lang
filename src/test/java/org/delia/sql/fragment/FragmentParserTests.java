@@ -28,6 +28,7 @@ import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.FragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.Runner;
@@ -51,7 +52,7 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		String sql = parser.render(selectFrag);
 		log.log(sql);
-		assertEquals("SELECT * FROM Flight as a WHERE a.field1 = ?", sql);
+		assertEquals("SELECT * FROM Flight as a WHERE  a.field1 = ?", sql);
 	}
 	
 	@Test
@@ -74,7 +75,7 @@ public class FragmentParserTests extends NewBDDBase {
 		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
 		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec, details);
 		
-		runAndChk(selectFrag, "SELECT * FROM Flight as a WHERE a.field2 = ?");
+		runAndChk(selectFrag, "SELECT * FROM Flight as a WHERE  a.field2 = ?");
 	}
 	
 	@Test
@@ -83,7 +84,7 @@ public class FragmentParserTests extends NewBDDBase {
 		src += " let x = Flight[1].field1.max()";
 		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 		
-		runAndChk(selectFrag, "SELECT MAX(a.field1) FROM Flight as a WHERE a.field1 = ?");
+		runAndChk(selectFrag, "SELECT MAX(a.field1) FROM Flight as a WHERE  a.field1 = ?");
 	}
 	
 	@Test
@@ -92,7 +93,7 @@ public class FragmentParserTests extends NewBDDBase {
 		src += " let x = Flight[1].field1.min()";
 		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 		
-		runAndChk(selectFrag, "SELECT MIN(a.field1) FROM Flight as a WHERE a.field1 = ?");
+		runAndChk(selectFrag, "SELECT MIN(a.field1) FROM Flight as a WHERE  a.field1 = ?");
 	}
 	@Test
 	public void testCount() {
@@ -194,7 +195,7 @@ public class FragmentParserTests extends NewBDDBase {
 		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 
 		//[1] SQL:             SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id  WHERE  a.id=?;  -- (55)
-		runAndChk(selectFrag, "SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE a.id = ?");
+		runAndChk(selectFrag, "SELECT * FROM Customer as a WHERE  a.id = ?");
 		chkParamInt(selectFrag.statement, 1, 55);
 	}
 
@@ -305,7 +306,9 @@ public class FragmentParserTests extends NewBDDBase {
 	private FragmentParser createParser(DeliaDao dao) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		List<TableInfo> tblinfoL = new ArrayList<>();		
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
+		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
+		whereGen.fragmentParser = parser;
 		return parser;
 	}
 

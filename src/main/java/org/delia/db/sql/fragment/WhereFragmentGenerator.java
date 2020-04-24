@@ -46,9 +46,9 @@ public class WhereFragmentGenerator extends ServiceBase {
 	private FilterFnRunner filterRunner;
 	private ValueHelper valueHelper;
 	private VarEvaluator varEvaluator;
-	private FragmentParser fragmentParser;
+	public FragmentParser fragmentParser;
 
-	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, FragmentParser fragmentParser) {
+	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -57,7 +57,6 @@ public class WhereFragmentGenerator extends ServiceBase {
 		this.filterRunner = new FilterFnRunner(registry);
 		this.valueHelper = new ValueHelper(factorySvc);
 		this.varEvaluator = varEvaluator;
-		this.fragmentParser = fragmentParser;
 	}
 
 

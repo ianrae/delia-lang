@@ -21,6 +21,7 @@ import org.delia.db.h2.H2DBConnection;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.FragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -100,7 +101,9 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		if (useFragmentParser) {
 			log.log("FRAG PARSEr....................");
 			createTableCreator(dbctx);
-			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
+			WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
+			whereGen.fragmentParser = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 			parser.render(selectFrag);
 			statement = selectFrag.statement;
