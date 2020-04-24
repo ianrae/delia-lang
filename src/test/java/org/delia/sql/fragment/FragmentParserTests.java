@@ -22,6 +22,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
@@ -31,12 +32,12 @@ import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.VarEvaluator;
-import org.delia.sql.fragment.FragmentParserTests.TableFragment;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -80,12 +81,16 @@ public class FragmentParserTests extends NewBDDBase {
 		public DStructType structType;
 		public DType fieldType;
 		public boolean isStar;		
+		public String fnName;
 
 		@Override
 		public String render() {
 			if (isStar) {
 				return "*";
+			} else if (fnName != null) {
+				return String.format("%s(%s)", fnName, super.render());
 			}
+			
 			return super.render();
 		}
 	}
@@ -155,6 +160,7 @@ public class FragmentParserTests extends NewBDDBase {
 		private ValueHelper valueHelper;
 		private VarEvaluator varEvaluator;
 		private WhereFragmentGenerator whereGen;
+		private SelectFuncHelper selectFnHelper;
 		
 		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
 			super(factorySvc);
@@ -167,7 +173,8 @@ public class FragmentParserTests extends NewBDDBase {
 			this.valueHelper = new ValueHelper(factorySvc);
 			this.varEvaluator = varEvaluator;
 			this.whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
-			
+//			this.selectFnHelper = new SelectFuncHelper(new DBAccessContext(registry, varEvaluator));
+			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
 		}
 		
 		public void createAlias(AliasedFragment frag) {
@@ -189,10 +196,61 @@ public class FragmentParserTests extends NewBDDBase {
 			DStructType structType = getMainType(spec); 
 			initFields(spec, structType, selectFrag);
 			
-			FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-			selectFrag.fieldL.add(fieldF);
+			xgenerateQuery(spec, structType, selectFrag);
+			
+			if (selectFrag.fieldL.isEmpty()) {
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+				selectFrag.fieldL.add(fieldF);
+			}
 			
 			return selectFrag;
+		}
+		
+		private void xgenerateQuery(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			StrCreator sc = new StrCreator();
+			QueryExp exp = spec.queryExp;
+			String typeName = exp.getTypeName();
+			//TODO: for now we implement exist using count(*). improve later
+			if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
+//				sc.o("SELECT COUNT(*) FROM %s", typeName);
+			} else if (selectFnHelper.isMinPresent(spec)) {
+//				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
+//				sc.o("SELECT MIN(%s) FROM %s", fieldName, typeName);
+			} else if (selectFnHelper.isMaxPresent(spec)) {
+				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
+				TypePair pair = DValueHelper.findField(structType, fieldName);
+				FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
+				fieldF.fnName = "MAX";
+				addOrReplace(selectFrag, fieldF);
+//				sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
+			} else if (selectFnHelper.isFirstPresent(spec)) {
+//				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+//				if (fieldName == null) {
+//					sc.o("SELECT TOP 1 * FROM %s", typeName);
+//				} else {
+//					sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+//				}
+			} else if (selectFnHelper.isLastPresent(spec)) {
+//				spec = doSelectLast(sc, spec, typeName);
+			} else {
+//				sc.o("SELECT * FROM %s", typeName);
+			}
+//			SqlStatement statement = new SqlStatement();
+//
+//			statement = pwheregen.generateAWhere(spec);
+//			sc.o(statement.sql);
+//			
+//			generateQueryFns(sc, spec, typeName);
+//			
+//			sc.o(";");
+//			statement.sql = sc.str;
+//			return statement;
+		}
+
+		private void addOrReplace(SelectStatementFragment selectFrag, FieldFragment fieldF) {
+			selectFrag.fieldL.add(fieldF);
+			// TODO Auto-generated method stub
+			
 		}
 
 		private void initFields(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
@@ -284,7 +342,7 @@ public class FragmentParserTests extends NewBDDBase {
 	@Test
 	public void testMax() {
 		String src = buildSrc();
-		src += " let x = Flight[1].max()";
+		src += " let x = Flight[1].field1.max()";
 		
 		LetStatementExp letStatementExp = buildFromSrc(src);
 		
@@ -293,7 +351,7 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		String sql = fragmentParser.render(selectFrag);
 		log.log(sql);
-		assertEquals("SELECT * FROM Flight as a WHERE a.field2 = ?", sql);
+		assertEquals("SELECT MAX(a.field1) FROM Flight as a WHERE a.field1 = ?", sql);
 	}
 	
 	private LetStatementExp buildFromSrc(String src) {
