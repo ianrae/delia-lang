@@ -1,4 +1,4 @@
-package org.delia.sql.fragment;
+package org.delia.db.sql.fragment;
 
 import java.util.List;
 import java.util.StringJoiner;
@@ -24,9 +24,8 @@ import org.delia.db.sql.where.WhereExpression;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.db.sql.where.WherePhrase;
 import org.delia.runner.VarEvaluator;
-import org.delia.sql.fragment.FragmentParserTests.OpFragment;
+import org.delia.sql.fragment.FragmentParserTests;
 import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
-import org.delia.sql.fragment.FragmentParserTests.TableFragment;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -59,7 +58,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 	}
 
 
-	protected void addWhereClauseOp(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+	public void addWhereClauseOp(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 		doAddWhereClauseOp(spec, structType, selectFrag.statement, selectFrag);
 	}
 

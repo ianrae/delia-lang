@@ -19,22 +19,30 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
+import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.db.ValueHelper;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.fragment.AliasedFragment;
+import org.delia.db.sql.fragment.FieldFragment;
+import org.delia.db.sql.fragment.FragmentHelper;
+import org.delia.db.sql.fragment.LimitFragment;
+import org.delia.db.sql.fragment.OffsetFragment;
+import org.delia.db.sql.fragment.OrderByFragment;
+import org.delia.db.sql.fragment.SqlFragment;
+import org.delia.db.sql.fragment.TableFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
@@ -42,7 +50,6 @@ import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -55,105 +62,6 @@ import org.junit.Test;
 
 public class FragmentParserTests extends NewBDDBase {
 	
-	public static interface SqlFragment {
-		String render();
-	}
-	
-	public static class AliasedFragment implements SqlFragment {
-		public String alias;
-		public String name;
-		
-		public AliasedFragment() {
-		}
-		public AliasedFragment(String alias, String name) {
-			this.alias = alias;
-			this.name = name;
-		}
-		
-		@Override
-		public String render() {
-			if (StringUtils.isEmpty(alias)) {
-				return name;
-			}
-			return String.format("%s.%s", alias, name);
-		}
-	}
-	public static class TableFragment extends AliasedFragment {
-		@Override
-		public String render() {
-			if (StringUtils.isEmpty(alias)) {
-				return name;
-			}
-			return String.format("%s as %s", name, alias);
-		}
-	}
-	
-	public static class FieldFragment extends AliasedFragment {
-		public DStructType structType;
-		public DType fieldType;
-		public boolean isStar;		
-		public String fnName;
-
-		@Override
-		public String render() {
-			if (isStar) {
-				if (fnName != null) {
-					return String.format("%s(*)", fnName);
-				}
-				return "*";
-			} else if (fnName != null) {
-				return String.format("%s(%s)", fnName, super.render());
-			}
-			
-			return super.render();
-		}
-	}
-	
-	public static class OpFragment implements SqlFragment {
-		public AliasedFragment left;
-		public AliasedFragment right;
-		public String op;
-		
-		public OpFragment(String op) {
-			this.op = op;
-		}
-		
-		@Override
-		public String render() {
-			String s = String.format("%s %s %s", left.render(), op, right.render());
-			return s;
-		}
-	}
-	
-	public static class OrderByFragment extends AliasedFragment {
-		public String asc;
-		public List<OrderByFragment> additionalL = new ArrayList<>();
-
-		@Override
-		public String render() {
-			StrCreator sc = new StrCreator();
-			String s = asc == null ? "" : " " + asc;
-			sc.o(" ORDER BY %s%s", super.render(), s);
-			if (!additionalL.isEmpty()) {
-				sc.o(", ");
-				ListWalker<OrderByFragment> walker = new ListWalker<>(additionalL);
-				while(walker.hasNext()) {
-					OrderByFragment frag = walker.next();
-					sc.o(renderPhrase(frag));
-					walker.addIfNotLast(sc, ",");
-				}
-			}
-			
-			return sc.str;
-		}
-		
-		private String renderPhrase(OrderByFragment frag) {
-			String s = frag.asc == null ? "" : " " + frag.asc;
-			AliasedFragment afrag = new AliasedFragment(frag.alias, frag.name);
-			return String.format("%s%s", afrag.render(), s);
-		}
-	}
-	
 	public static class SelectStatementFragment implements SqlFragment {
 		public List<SqlFragment> earlyL = new ArrayList<>();
 		public List<FieldFragment> fieldL = new ArrayList<>();
@@ -162,6 +70,8 @@ public class FragmentParserTests extends NewBDDBase {
 		public SqlStatement statement = new SqlStatement();
 		public List<SqlFragment> whereL = new ArrayList<>();
 		public OrderByFragment orderByFrag = null;
+		public LimitFragment limitFrag = null;
+		public OffsetFragment offsetFrag = null;
 		
 		@Override
 		public String render() {
@@ -175,10 +85,17 @@ public class FragmentParserTests extends NewBDDBase {
 				renderWhereL(sc);
 			}
 			
-			if (orderByFrag != null) {
-				sc.o(orderByFrag.render());
-			}
+			renderIfPresent(sc, orderByFrag);
+			renderIfPresent(sc, limitFrag);
+			renderIfPresent(sc, offsetFrag);
 			return sc.str;
+		}
+
+
+		private void renderIfPresent(StrCreator sc, SqlFragment frag) {
+			if (frag != null) {
+				sc.o(frag.render());
+			}
 		}
 
 
@@ -213,9 +130,9 @@ public class FragmentParserTests extends NewBDDBase {
 		private int nextAliasIndex = 0;
 		private QueryTypeDetector queryDetectorSvc;
 		private DTypeRegistry registry;
-		private ScalarValueBuilder dvalBuilder;
-		private ValueHelper valueHelper;
-		private VarEvaluator varEvaluator;
+//		private ScalarValueBuilder dvalBuilder;
+//		private ValueHelper valueHelper;
+//		private VarEvaluator varEvaluator;
 		private WhereFragmentGenerator whereGen;
 		private SelectFuncHelper selectFnHelper;
 		
@@ -224,11 +141,11 @@ public class FragmentParserTests extends NewBDDBase {
 			this.registry = registry;
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
 			
-			this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
+//			this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
 //			this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc);
 //			this.filterRunner = new FilterFnRunner(registry);
-			this.valueHelper = new ValueHelper(factorySvc);
-			this.varEvaluator = varEvaluator;
+//			this.valueHelper = new ValueHelper(factorySvc);
+//			this.varEvaluator = varEvaluator;
 			this.whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 //			this.selectFnHelper = new SelectFuncHelper(new DBAccessContext(registry, varEvaluator));
 			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
@@ -267,8 +184,8 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		public void generateQueryFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			this.doOrderByIfPresent(spec, structType, selectFrag);
-//			this.selectFnHelper.doLimitIfPresent(sc, spec, typeName);
-//			this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);
+			this.doLimitIfPresent(spec, structType, selectFrag);
+			this.doOffsetIfPresent(spec, structType, selectFrag);
 		}
 		
 		private void doOrderByIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
@@ -302,12 +219,36 @@ public class FragmentParserTests extends NewBDDBase {
 			if (orderByFrag == null) {
 				selectFrag.orderByFrag = frag;
 			} else {
-				selectFrag.orderByFrag.additionalL.add(frag);
+				OrderByFragment tmp = selectFrag.orderByFrag; //swap
+				selectFrag.orderByFrag = frag;
+				selectFrag.orderByFrag.additionalL.add(tmp);
 			}
 		}
+		private void doLimitIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "limit");
+			if (qfexp == null) {
+				return;
+			}
+			IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
+			Integer n = exp.val;
+
+			LimitFragment frag = new LimitFragment(n);
+			selectFrag.limitFrag = frag;
+		}
+		private void doOffsetIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "offset");
+			if (qfexp == null) {
+				return;
+			}
+			IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
+			Integer n = exp.val;
+
+			OffsetFragment frag = new OffsetFragment(n);
+			selectFrag.offsetFrag = frag;
+		}
+
 
 		private void addFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
-			QueryExp exp = spec.queryExp;
 			//TODO: for now we implement exist using count(*). improve later
 			if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
 				String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "count");
@@ -349,12 +290,6 @@ public class FragmentParserTests extends NewBDDBase {
 			} else {
 //				sc.o("SELECT * FROM %s", typeName);
 			}
-//			
-//			generateQueryFns(sc, spec, typeName);
-//			
-//			sc.o(";");
-//			statement.sql = sc.str;
-//			return statement;
 		}
 
 		private void forceAddOrderByPrimaryKey(DStructType structType, SelectStatementFragment selectFrag, String asc) {
@@ -424,16 +359,13 @@ public class FragmentParserTests extends NewBDDBase {
 			return fieldF;
 		}
 		
-		private FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, TypePair pair) {
-			return FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
-		}
+//		private FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, TypePair pair) {
+//			return FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
+//		}
 
 		public String render(SelectStatementFragment selectFrag) {
-			
 			return selectFrag.render();
 		}
-		
-		
 	}
 
 
@@ -576,38 +508,15 @@ public class FragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2");
 	}
 	
-	
-
-	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.render(selectFrag);
-		log.log(sql);
-		assertEquals(expected, sql);
-	}
-
-	private SelectStatementFragment buildSelectFragment(String src) {
-		LetStatementExp letStatementExp = buildFromSrc(src);
-		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
-		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
-		return selectFrag;
-	}
-
-	private LetStatementExp buildFromSrc(String src) {
-		DeliaDao dao = createDao(); 
-		Delia xdelia = dao.getDelia();
-		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
-		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);
-		this.fragmentParser = createFragmentParser(dao, src); 
+	@Test
+	public void testOrderByLimitOffset() {
+		String src = buildSrc();
+		src += " let x = Flight[true].orderBy('field2').limit(4).offset(10)";
+		SelectStatementFragment selectFrag = buildSelectFragment(src); 
 		
-//		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
-		LetStatementExp letStatementExp = null;
-		for(Exp exp: sessImpl.expL) {
-			if (exp instanceof LetStatementExp) {
-				letStatementExp = (LetStatementExp) exp;
-			}
-		}
-		return letStatementExp;
+		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2 LIMIT 4 OFFSET 10");
 	}
+	
 
 	//---
 	private Delia delia;
@@ -704,5 +613,36 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		return parser;
 	}
+	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
+		String sql = fragmentParser.render(selectFrag);
+		log.log(sql);
+		assertEquals(expected, sql);
+	}
+
+	private SelectStatementFragment buildSelectFragment(String src) {
+		LetStatementExp letStatementExp = buildFromSrc(src);
+		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
+		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec);
+		return selectFrag;
+	}
+
+	private LetStatementExp buildFromSrc(String src) {
+		DeliaDao dao = createDao(); 
+		Delia xdelia = dao.getDelia();
+		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
+		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);
+		this.fragmentParser = createFragmentParser(dao, src); 
+		
+//		List<Exp> expL = dao.getMostRecentSess().
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		LetStatementExp letStatementExp = null;
+		for(Exp exp: sessImpl.expL) {
+			if (exp instanceof LetStatementExp) {
+				letStatementExp = (LetStatementExp) exp;
+			}
+		}
+		return letStatementExp;
+	}
+
 
 }

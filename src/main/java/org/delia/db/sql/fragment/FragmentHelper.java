@@ -1,8 +1,6 @@
-package org.delia.sql.fragment;
+package org.delia.db.sql.fragment;
 
-import org.delia.sql.fragment.FragmentParserTests.AliasedFragment;
-import org.delia.sql.fragment.FragmentParserTests.FieldFragment;
-import org.delia.sql.fragment.FragmentParserTests.OrderByFragment;
+import org.delia.sql.fragment.FragmentParserTests;
 import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
