@@ -25,7 +25,6 @@ import org.delia.db.sql.where.WhereOperand;
 import org.delia.db.sql.where.WherePhrase;
 import org.delia.runner.VarEvaluator;
 import org.delia.sql.fragment.FragmentParserTests;
-import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;

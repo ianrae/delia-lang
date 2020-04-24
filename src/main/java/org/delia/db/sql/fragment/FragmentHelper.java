@@ -1,6 +1,5 @@
 package org.delia.db.sql.fragment;
 
-import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;

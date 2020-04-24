@@ -255,12 +255,12 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
-		
+		useFragmentParser = true;
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
 //		runR1350File("t0-filter-op-string.txt", 13);
 		runR500File("t0-relation-one-to-one.txt", 9);
@@ -270,6 +270,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	private DBType dbType = DBType.H2;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
+	private boolean useFragmentParser = false;
 	
 	@Before
 	public void init() {
@@ -283,6 +284,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
+		db.useFragmentParser = useFragmentParser;
 		dbInterfaceToUse = db;
 //		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {

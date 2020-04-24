@@ -1,4 +1,4 @@
-package org.delia.sql.fragment;
+package org.delia.db.sql.fragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +14,6 @@ import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
-import org.delia.db.sql.fragment.FieldFragment;
-import org.delia.db.sql.fragment.FragmentHelper;
-import org.delia.db.sql.fragment.JoinFragment;
-import org.delia.db.sql.fragment.TableFragment;
-import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.TableInfoHelper;
@@ -32,8 +27,6 @@ import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.VarEvaluator;
-import org.delia.sql.fragment.FragmentParserTests.FragmentParser;
-import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
@@ -44,7 +37,6 @@ import org.delia.util.DeliaExceptionHelper;
 public class FKHelper extends ServiceBase {
 
 	private DTypeRegistry registry;
-	private int nextAliasIndex = 0;
 	private List<TableInfo> tblinfoL;
 	private QueryTypeDetector queryDetectorSvc;
 	private SqlWhereConverter whereConverter;
@@ -53,6 +45,7 @@ public class FKHelper extends ServiceBase {
 	private WhereFragmentGenerator pwheregen;
 //	private SqlHelperFactory sqlHelperFactory;
 	private SelectFuncHelper selectFnHelper;
+private FragmentParser fragmentParser;
 
 	public FKHelper(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
 			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc) {
@@ -76,6 +69,7 @@ public class FKHelper extends ServiceBase {
 
 	public void generateFKsQuery(QuerySpec spec, QueryDetails details, DStructType structType, 
 				SelectStatementFragment selectFrag, FragmentParser fragmentParser) {
+		this.fragmentParser = fragmentParser;
 		QueryExp exp = spec.queryExp;
 		
 		TableFragment tbl = selectFrag.tblFrag;
@@ -97,7 +91,7 @@ public class FKHelper extends ServiceBase {
 //			RelationManyRule manyRule = DRuleHelper.findManyRule(exp.getTypeName(), registry);
 			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
-				generateFKsQueryMany(spec, structType, exp, tbl, manyRule, details, selectFrag.statement, selectFrag, fragmentParser, adjustment);
+				generateFKsQueryMany(spec, structType, exp, tbl, manyRule, details, selectFrag, adjustment);
 //				sc.o(sql);
 //				sqlgen.generateQueryFns(sc, spec, exp.typeName);
 //				sc.o(";");
@@ -252,7 +246,7 @@ public class FKHelper extends ServiceBase {
 	}
 
 	private void generateFKsQueryMany(QuerySpec spec, DStructType structType, QueryExp exp, TableFragment tbl, RelationManyRule rule, QueryDetails details, 
-			SqlStatement statement, SelectStatementFragment selectFrag, FragmentParser fragmentParser, QueryAdjustment adjustment) {
+			SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
 		TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
@@ -262,7 +256,7 @@ public class FKHelper extends ServiceBase {
 			List<RelationManyRule> xfarL = findAllManyRules(rule.relInfo.farType.getName());
 //			RelationManyRule xfarRule = DRuleHelper.findManyRule(rule.relInfo.farType.getName(), registry);
 			RelationManyRule xfarRule = xfarL.isEmpty() ? null : xfarL.get(0);
-			doManyToMany(spec, structType, exp, xfarRule, tbl, tbl2, rule, details, selectFrag, adjustment, fragmentParser);
+			doManyToMany(spec, structType, exp, xfarRule, tbl, tbl2, rule, details, selectFrag, adjustment);
 		} else {
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 			genFields(structType, tbl, tbl2, rule.relInfo.fieldName, nearField, selectFrag, adjustment);
@@ -284,8 +278,7 @@ public class FKHelper extends ServiceBase {
 	}
 
 	private void doManyToMany(QuerySpec spec, DStructType structType, QueryExp exp, RelationManyRule farRule, TableFragment tbl, TableFragment tbl2, RelationManyRule otherRule, 
-					QueryDetails details, SelectStatementFragment selectFrag, QueryAdjustment adjustment,
-					FragmentParser fragmentParser) {
+					QueryDetails details, SelectStatementFragment selectFrag, QueryAdjustment adjustment)  {
 		RelationInfo info = farRule.relInfo;
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 
@@ -293,16 +286,14 @@ public class FKHelper extends ServiceBase {
 //		String actualTblName2 = this.tblName(tblinfo.tbl2);
 		String assocField = actualTblName1.equals(tbl.name) ? "rightv" : "leftv";
 		String assocField2 = actualTblName1.equals(tbl.name) ? "leftv" : "rightv";
-		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag.statement, selectFrag, adjustment, fragmentParser);
+		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag, adjustment);
 		details.mergeRows = true;
 		details.mergeOnField = otherRule.relInfo.fieldName;
 	}
 
 	private void genJoin(QuerySpec spec, DStructType structType, RelationInfo info, TableInfo tblinfo, TableFragment tbl, RelationManyRule otherRule, String assocField, 
-					String assocField2, QueryExp exp, SqlStatement statement, SelectStatementFragment selectFrag, QueryAdjustment adjustment,
-					FragmentParser fragmentParser) {
+					String assocField2, QueryExp exp, SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
 		TableFragment tblAssoc = fragmentParser.createAssocTable(selectFrag, tblinfo.assocTblName);
-		String typeName = info.farType.getName();
 		TypePair copy = new TypePair(assocField, null);
 		//TODO: fix adjustment
 		genFields(structType, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, selectFrag, adjustment);
@@ -328,9 +319,8 @@ public class FKHelper extends ServiceBase {
 			SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
 		//			sql = "SELECT c.id,a.id as addr FROM Customer as c JOIN Address as a ON a.cust=c.id WHERE c.id=55";
 		
-		boolean haveDoneCount = false;
+//		boolean haveDoneCount = false;
 		for(TypePair pair: structType.getAllFields()) {
-			String s;
 			FieldFragment ff = null;
 			if (pair.type.isStructShape()) {
 				if (tbl2 == null) {

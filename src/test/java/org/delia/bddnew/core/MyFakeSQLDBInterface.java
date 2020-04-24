@@ -21,6 +21,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 	private boolean deferFlag;
 	private boolean enableSQLLoggingFlag;
 	public String tablesToClean;
+	public boolean useFragmentParser;
 	
 	public MyFakeSQLDBInterface(DBType dbtype) {
 		super(null); //set later
@@ -40,6 +41,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
 			H2DBInterface h2db = new H2DBInterface(factorySvc, connFact);
 			actualInterface = h2db;
+			h2db.useFragmentParser = useFragmentParser;
 
 			actualInterface.init(factorySvc);
 

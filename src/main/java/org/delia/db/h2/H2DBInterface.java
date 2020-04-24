@@ -17,6 +17,8 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.fragment.FragmentParser;
+import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
@@ -38,6 +40,8 @@ import org.delia.util.DeliaExceptionHelper;
  *
  */
 public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInternal {
+	
+	public boolean useFragmentParser;
 
 	public H2DBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.H2, factorySvc, connFactory, new H2SqlHelperFactory(factorySvc));
@@ -89,8 +93,16 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		SqlStatement statement;
 		if (qtx.loadFKs) {
 			createTableCreator(dbctx);
-			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
-			statement = smartgen.generateFKsQuery(spec, details);
+			if (useFragmentParser) {
+				log.log("FRAG PARSEr....................");
+				FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, this, sqlHelperFactory);
+				SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+				parser.render(selectFrag);
+				statement = selectFrag.statement;
+			} else {
+				FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
+				statement = smartgen.generateFKsQuery(spec, details);
+			}
 		} else {
 			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
 			statement = sqlgen.generateQuery(spec);
