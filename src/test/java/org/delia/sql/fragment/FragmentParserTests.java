@@ -14,6 +14,8 @@ import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.ast.FilterExp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -22,19 +24,27 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.db.ValueHelper;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.memdb.filter.filterfn.FilterFnRunner;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.Table;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
+import org.delia.db.sql.where.SqlWhereConverter;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,8 +81,8 @@ public class FragmentParserTests extends NewBDDBase {
 	public static class FieldFragment extends AliasedFragment {
 		public DStructType structType;
 		public DType fieldType;
-		public boolean isStar;
-		
+		public boolean isStar;		
+
 		@Override
 		public String render() {
 			if (isStar) {
@@ -82,11 +92,28 @@ public class FragmentParserTests extends NewBDDBase {
 		}
 	}
 	
+	public static class OpFragment implements SqlFragment {
+		public AliasedFragment left;
+		public AliasedFragment right;
+		public String op;
+		
+		public OpFragment(String op) {
+			this.op = op;
+		}
+		
+		@Override
+		public String render() {
+			String s = String.format("%s %s %s", left.render(), op, right.render());
+			return s;
+		}
+	}
+	
 	public static class SelectStatementFragment implements SqlFragment {
 		public List<FieldFragment> fieldL = new ArrayList<>();
 		public TableFragment tblFrag;
 		public Map<String,TableFragment> aliasMap = new HashMap<>();
-		
+		public SqlStatement statement = new SqlStatement();
+		public List<SqlFragment> whereL = new ArrayList<>();
 		
 		@Override
 		public String render() {
@@ -94,7 +121,19 @@ public class FragmentParserTests extends NewBDDBase {
 			sc.o("SELECT ");
 			renderFields(sc);
 			sc.o(" FROM %s", tblFrag.render());
+			if (! whereL.isEmpty()) {
+				sc.o(" WHERE ");
+				renderWhereL(sc);
+			}
 			return sc.str;
+		}
+
+
+		private void renderWhereL(StrCreator sc) {
+			for(SqlFragment frag: whereL) {
+				String s = frag.render();
+				sc.o(s);
+			}
 		}
 
 
@@ -112,11 +151,21 @@ public class FragmentParserTests extends NewBDDBase {
 		private int nextAliasIndex = 0;
 		private QueryTypeDetector queryDetectorSvc;
 		private DTypeRegistry registry;
+		private ScalarValueBuilder dvalBuilder;
+		private ValueHelper valueHelper;
+		private VarEvaluator varEvaluator;
 		
-		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry) {
+		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
 			super(factorySvc);
 			this.registry = registry;
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
+			
+			this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
+//			this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc);
+//			this.filterRunner = new FilterFnRunner(registry);
+			this.valueHelper = new ValueHelper(factorySvc);
+			this.varEvaluator = varEvaluator;
+			
 		}
 		
 		public void createAlias(AliasedFragment frag) {
@@ -126,7 +175,6 @@ public class FragmentParserTests extends NewBDDBase {
 
 		public SelectStatementFragment parseSelect(QuerySpec spec) {
 			QueryExp exp = spec.queryExp;
-			
 			SelectStatementFragment selectFrag = new SelectStatementFragment();
 			
 			//init tbl
@@ -142,7 +190,7 @@ public class FragmentParserTests extends NewBDDBase {
 		}
 
 		private void initFields(QuerySpec spec, SelectStatementFragment selectFrag) {
-			DStructType structType = (DStructType) registry.getType(spec.queryExp.typeName);
+			DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(spec.queryExp.typeName);
 			
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {
@@ -162,6 +210,7 @@ public class FragmentParserTests extends NewBDDBase {
 				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
 				selectFrag.fieldL.add(fieldF);
 //				addWhereClausePrimaryKey(sc, spec, spec.queryExp.filter, typeName, tbl, statement);
+				addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
 			}
 				break;
 			}
@@ -177,6 +226,22 @@ public class FragmentParserTests extends NewBDDBase {
 			fieldF.structType = structType;
 			return fieldF;
 		}
+		
+		private FieldFragment buildFieldFrag(DStructType structType, SelectStatementFragment selectFrag, TypePair pair) {
+			FieldFragment fieldF = new FieldFragment();
+			fieldF.alias = findAlias(structType, selectFrag); //selectFrag.aliasMap.get(spec.queryExp.typeName).alias;
+			fieldF.fieldType = pair.type;
+			fieldF.name = pair.name;
+			fieldF.isStar = false;
+			fieldF.structType = structType;
+			return fieldF;
+		}
+		private AliasedFragment buildParam(SelectStatementFragment selectFrag) {
+			AliasedFragment fieldF = new AliasedFragment();
+			fieldF.alias = null;
+			fieldF.name = "?";
+			return fieldF;
+		}
 
 		private String findAlias(DStructType structType, SelectStatementFragment selectFrag) {
 			String s = selectFrag.aliasMap.get(structType.getName()).alias;
@@ -187,25 +252,67 @@ public class FragmentParserTests extends NewBDDBase {
 			
 			return selectFrag.render();
 		}
+		
+		protected void addWhereClausePrimaryKey(QuerySpec spec, FilterExp filter, DStructType structType, SelectStatementFragment selectFrag) {
+			if (filter != null) {
+				TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(structType);
+				if (keyPair == null) {
+					//err!!
+					DeliaExceptionHelper.throwError("no-primary-key", "Type '%s' has no primary key. Cannot do query by primary key", structType.getName());
+					return;
+				}
+				SqlStatement statement = selectFrag.statement;
+				
+				DType inner = keyPair.type;
+				DValue dval = null;
+				if (filter.cond instanceof IdentExp) {
+					IdentExp vv = (IdentExp) filter.cond;
+					String varName = vv.name();
+					List<DValue> dvalL = varEvaluator.lookupVar(varName);
+					if (dvalL == null) {
+						String msg = String.format("unknown var '%s' in primaryKey filter", varName);
+						DeliaExceptionHelper.throwError("unknown-var", msg);
+					} else if (dvalL.size() > 1) {
+						String msg = String.format("too many values (%d) in var '%s' in primaryKey filter", dvalL.size(), varName);
+						DeliaExceptionHelper.throwError("to-many-primary-key-vaues", msg);
+					} else {
+						dval = dvalL.get(0);
+					}
+				} else {
+					dval = valueInSql(inner.getShape(), filter.cond.strValue());
+				}
+				
+				statement.paramL.add(dval);
+				OpFragment opFrag = new OpFragment("=");
+				opFrag.left = buildFieldFrag(structType, selectFrag, keyPair);
+				opFrag.right = buildParam(selectFrag);
+				selectFrag.whereL.add(opFrag);
+			}
+		}
+		protected DValue valueInSql(Shape shape, Object value) {
+			return valueHelper.valueInSql(shape, value, registry);
+		}
+		
 	}
 	
 
 	@Test
 	public void testPrimaryKey() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); //new FragmentParser(factorySvc, registry);
+		FragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
 		SelectStatementFragment selectFrag = parser.parseSelect(spec);
 		
 		String sql = parser.render(selectFrag);
-		assertEquals("SELECT * FROM Flight as a", sql);
+		log.log(sql);
+		assertEquals("SELECT * FROM Flight as a WHERE a.field1 = ?", sql);
 	}
 	
 	@Test
 	public void testAllRows() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); //new FragmentParser(factorySvc, registry);
+		FragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildAllRowsQuery("Flight");
 		SelectStatementFragment selectFrag = parser.parseSelect(spec);
@@ -267,7 +374,7 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = new FragmentParser(factorySvc, registry);
+		FragmentParser parser = new FragmentParser(factorySvc, registry, runner);
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
