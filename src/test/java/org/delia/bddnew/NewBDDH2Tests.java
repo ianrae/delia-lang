@@ -231,7 +231,6 @@ public class NewBDDH2Tests extends NewBDDBase {
 	}
 	@Test
 	public void testR2150() {
-		runR500File("t0-relation-one-to-one.txt", 9);
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
@@ -247,6 +246,15 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many4.txt", 2);
 		//is no test 5 for many-to-one
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
+		
+		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many2.txt", 2);
+		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR2150File("t0-migrate-many-to-many4.txt", 2);
+		runR2150File("t0-migrate-many-to-many6.txt", 2);
+		runR2150File("t0-migrate-many-to-many6a.txt", 2);
+		runR2150File("t0-migrate-many-to-many7.txt", 0);
 	}
 	@Test
 	public void testR2200() {
@@ -265,7 +273,9 @@ public class NewBDDH2Tests extends NewBDDBase {
 //		runR1350File("t0-filter-op-relation.txt", 13);
 //		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 //		runR1700File("t0-let-field-single.txt", 3);
-		runR1700File("t0-let-field-func.txt", 3);
+//		runR1700File("t0-let-field-func.txt", 3);
+//		runR2100File("t0-migration15.txt", 2);
+		runR2150File("t0-migrate-many-to-many1.txt", 3);
 	}
 	
 	//---

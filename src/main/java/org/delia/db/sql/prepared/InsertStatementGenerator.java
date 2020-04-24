@@ -130,7 +130,10 @@ public class InsertStatementGenerator extends ServiceBase {
 		for(TypePair pair: dtype.getAllFields()) {
 			RelationInfo info = DRuleHelper.findManyToManyRelation(pair, dtype);
 			if (info != null) {
-				fillTableInfoIfNeeded(tblInfoL, info);
+				int x = fillTableInfoIfNeeded(tblInfoL, info);
+				if (x < 0) {
+					DeliaExceptionHelper.throwError("can't-find-assoc-tbl", "Can't find assoc table for '%s' and '%s'", info.nearType.getName(), info.farType.getName());
+				}
 				TableInfo tblinfo = TableInfoHelper.findTableInfo(tblInfoL, pair, info);
 				tblinfo.fieldName = pair.name;
 				sql += genAssocInsert(dval, pair, tblinfo, map, statement);
