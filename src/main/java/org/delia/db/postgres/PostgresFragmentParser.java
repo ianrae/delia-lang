@@ -61,8 +61,10 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 			
 			String asc = "desc";
-			OrderByFragment frag = FragmentHelper.buildRawOrderByFrag(structType, fieldName, asc, selectFrag);
+			OrderByFragment frag = FragmentHelper.buildOrderByFrag(structType, fieldName, asc, selectFrag);
 			addToOrderBy(frag, selectFrag);
 			
+			LimitFragment limitFrag = new LimitFragment(1);
+			selectFrag.limitFrag = limitFrag;
 		}
 	}

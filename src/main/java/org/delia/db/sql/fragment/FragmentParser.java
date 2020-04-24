@@ -289,11 +289,32 @@ import org.delia.util.DeliaExceptionHelper;
 			if (orderByFrag == null) {
 				selectFrag.orderByFrag = frag;
 			} else {
+				//only add if different
+				if (areEqualOrderBy(selectFrag.orderByFrag, frag)) {
+					return;
+				}
+				for(OrderByFragment obf: selectFrag.orderByFrag.additionalL) {
+					if (areEqualOrderBy(obf, frag)) {
+						return;
+					}
+				}
+				
 				OrderByFragment tmp = selectFrag.orderByFrag; //swap
 				selectFrag.orderByFrag = frag;
 				selectFrag.orderByFrag.additionalL.add(tmp);
 			}
 		}
+		private boolean areEqualOrderBy(OrderByFragment orderByFrag, OrderByFragment frag) {
+			if((frag.alias != null &&frag.alias.equals(orderByFrag.alias)) && frag.name.equals(orderByFrag.name)) {
+				if (frag.asc != null && frag.asc.equals(orderByFrag.asc)) {
+					return true;
+				} else if (frag.asc == null && orderByFrag.asc == null) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		protected void doLimitIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "limit");
 			if (qfexp == null) {
