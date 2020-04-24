@@ -16,7 +16,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -31,7 +31,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Address[100]
+  let x = Address[100].fks()
 then:
 value:a:Address {
  vid:100
@@ -48,7 +48,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -63,7 +63,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 44 }
-  let x = Customer[55];
+  let x = Customer[55].fks()
 then:
 ERROR: rule-relationOne
 }
@@ -80,7 +80,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -96,7 +96,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 ERROR: rule-relationOne
 
@@ -109,7 +109,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 44 }
-  let x = Customer[55];
+  let x = Customer[55].fks()
 then:
 ERROR: rule-relationOne
 }
@@ -123,7 +123,7 @@ given:
   insert Address {id: 100 }
 when:
   insert Customer {id: 55, addr: 100 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55

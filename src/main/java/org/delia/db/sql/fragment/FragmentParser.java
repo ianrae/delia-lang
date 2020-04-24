@@ -55,7 +55,7 @@ import org.delia.util.DeliaExceptionHelper;
 //			this.filterRunner = new FilterFnRunner(registry);
 //			this.valueHelper = new ValueHelper(factorySvc);
 //			this.varEvaluator = varEvaluator;
-			this.whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+			this.whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator, this);
 //			this.selectFnHelper = new SelectFuncHelper(new DBAccessContext(registry, varEvaluator));
 			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
 			this.existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(registry, varEvaluator));
@@ -102,8 +102,10 @@ import org.delia.util.DeliaExceptionHelper;
 		
 		private boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "fetch");
+			QueryFuncExp qfexp2 = selectFnHelper.findFn(spec, "fks");
+			//TODO: later add fk
 			//TODO: we need to distinguish which join. fix later
-			if (qfexp != null) {
+			if (qfexp != null || qfexp2 != null) {
 				return true;
 			}
 			

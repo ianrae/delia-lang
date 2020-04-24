@@ -16,7 +16,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -32,7 +32,7 @@ given:
   insert Customer {id: 155 }
 when:
   insert Address {id: 100, cust: 155 }
-  let x = Customer[155]
+  let x = Customer[155].fks()
 then:
 ERROR: rule-compare
 

@@ -23,6 +23,8 @@ import org.delia.db.sql.where.SqlWhereConverter;
 import org.delia.db.sql.where.WhereExpression;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.db.sql.where.WherePhrase;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
@@ -31,6 +33,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -43,8 +46,9 @@ public class WhereFragmentGenerator extends ServiceBase {
 	private FilterFnRunner filterRunner;
 	private ValueHelper valueHelper;
 	private VarEvaluator varEvaluator;
+	private FragmentParser fragmentParser;
 
-	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, FragmentParser fragmentParser) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -53,6 +57,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		this.filterRunner = new FilterFnRunner(registry);
 		this.valueHelper = new ValueHelper(factorySvc);
 		this.varEvaluator = varEvaluator;
+		this.fragmentParser = fragmentParser;
 	}
 
 
@@ -193,6 +198,9 @@ public class WhereFragmentGenerator extends ServiceBase {
 		TableFragment tbl = selectFrag.tblFrag;
 		setPhraseAliasIfNeeded(phrase.op1, tbl);
 		setPhraseAliasIfNeeded(phrase.op2, tbl);
+		doImplicitFetchIfNeeded(phrase.op1, tbl, selectFrag);
+		doImplicitFetchIfNeeded(phrase.op2, tbl, selectFrag);
+		
 		String op1 = operandToSql(phrase.op1, statement);
 		String op2 = operandToSql(phrase.op2, statement);
 		
@@ -224,6 +232,34 @@ public class WhereFragmentGenerator extends ServiceBase {
 				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
 				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
 				return opFrag;
+			}
+		}
+	}
+
+
+	private void doImplicitFetchIfNeeded(WhereOperand op1, TableFragment tbl, SelectStatementFragment selectFrag) {
+		String possibleFieldName = this.getColumnName(op1.exp);
+		if (possibleFieldName != null) {
+			if (DValueHelper.fieldExists(tbl.structType, possibleFieldName)) {
+				RelationOneRule oneRule = DRuleHelper.findOneRule(tbl.structType, possibleFieldName);
+				if (oneRule != null && oneRule.relInfo.isParent) {
+					DStructType farType = oneRule.relInfo.farType;
+					TableFragment otherTbl = selectFrag.findByTableName(farType.getName());
+					if (otherTbl == null) {
+						log.log("implicit(one) fetch %s.%s", farType.getName(), possibleFieldName);
+						fragmentParser.createTable(farType, selectFrag);
+					}
+				}
+				
+				RelationManyRule manyRule = DRuleHelper.findManyRule(tbl.structType, possibleFieldName);
+				if (manyRule != null && manyRule.relInfo.isParent) {
+					DStructType farType = manyRule.relInfo.farType;
+					TableFragment otherTbl = selectFrag.findByTableName(farType.getName());
+					if (otherTbl == null) {
+						log.log("implicit(many) fetch %s.%s", farType.getName(), possibleFieldName);
+						fragmentParser.createTable(farType, selectFrag);
+					}
+				}
 			}
 		}
 	}

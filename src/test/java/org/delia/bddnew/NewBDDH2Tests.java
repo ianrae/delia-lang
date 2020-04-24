@@ -270,8 +270,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		cleanTables = true;
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR2150File("t0-migrate-many-to-many3.txt", 2);
-//		runR1350File("t0-filter-op-relation.txt", 13);
-		runR1600File("t0-fetch-fks.txt", 4);
+		runR1350File("t0-filter-op-relation.txt", 13);
 	}
 	
 	//---
