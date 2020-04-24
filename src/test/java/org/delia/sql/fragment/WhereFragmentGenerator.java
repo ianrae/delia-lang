@@ -8,7 +8,6 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
-import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.core.FactoryService;
@@ -16,10 +15,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.ValueHelper;
 import org.delia.db.memdb.filter.filterfn.FilterFnRunner;
-import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
-import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.Table;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.where.InPhrase;
 import org.delia.db.sql.where.LogicalPhrase;
@@ -30,6 +26,7 @@ import org.delia.db.sql.where.WherePhrase;
 import org.delia.runner.VarEvaluator;
 import org.delia.sql.fragment.FragmentParserTests.OpFragment;
 import org.delia.sql.fragment.FragmentParserTests.SelectStatementFragment;
+import org.delia.sql.fragment.FragmentParserTests.TableFragment;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -62,8 +59,8 @@ public class WhereFragmentGenerator extends ServiceBase {
 	}
 
 
-	protected void addWhereClauseOp(StrCreator sc, QuerySpec spec, String typeName, Table tbl, SqlStatement statement) {
-		doAddWhereClauseOp(sc, spec, typeName, tbl, statement);
+	protected void addWhereClauseOp(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		doAddWhereClauseOp(spec, structType, selectFrag.statement, selectFrag);
 	}
 
 	public void addWhereClausePrimaryKey(QuerySpec spec, FilterExp filter, DStructType structType, SelectStatementFragment selectFrag) {
@@ -102,16 +99,6 @@ public class WhereFragmentGenerator extends ServiceBase {
 		}
 	}
 	
-	protected String whereWord(QuerySpec spec) {
-//		if (this.selectFnHelper.isExistsPresent(spec)) {
-////			return " WHERE EXISTS";
-//			return " WHERE EXISTS";
-//		} else {
-			return " WHERE ";
-//		}
-	}
-	
-
 	protected DValue valueInSql(Shape shape, Object value) {
 		return valueHelper.valueInSql(shape, value, registry);
 	}
@@ -127,32 +114,36 @@ public class WhereFragmentGenerator extends ServiceBase {
 
 	
 	//------------------------------
-	protected void doAddWhereClauseOp(StrCreator sc, QuerySpec spec, String typeName, Table tbl, SqlStatement statement) {
+	protected void doAddWhereClauseOp(QuerySpec spec, DStructType structType, SqlStatement statement, SelectStatementFragment selectFrag) {
 		FilterExp filter = spec.queryExp.filter;
+		String typeName = structType.getName();
 		
 		if (filter != null && filter.cond instanceof FilterOpFullExp) {
 			WhereExpression express = whereConverter.addWhereClauseOp(filter, typeName);
 			if (express != null) {
-				addWhereClauseOpFromPhrase(sc, spec, express, tbl, statement);
+				addWhereClauseOpFromPhrase(spec, express, statement, selectFrag);
 			}
 		} else {
-			sc.o("JJJJJJJJJJJJJJJ"); //TODO
+			//sc.o("JJJJJJJJJJJJJJJ"); //TODO
 		}
 	}
-	public void addWhereClauseOpFromPhrase(StrCreator sc, QuerySpec spec, WhereExpression express, Table tbl, SqlStatement statement) {
-		String s = whereWord(spec);
+	public void addWhereClauseOpFromPhrase(QuerySpec spec, WhereExpression express, SqlStatement statement, SelectStatementFragment selectFrag) {
+		OpFragment opFrag = null;
+		
 		if (express instanceof WherePhrase) {
-			s += doWherePhrase(sc, (WherePhrase) express, tbl, statement);
+			opFrag = doWherePhrase((WherePhrase) express, statement, selectFrag);
 		} else if (express instanceof LogicalPhrase) {
-			s += doLogicalPhrase(sc, (LogicalPhrase) express, tbl, statement);
+			opFrag = doLogicalPhrase((LogicalPhrase) express, statement, selectFrag);
 		} else if (express instanceof InPhrase) {
-			s += doInPhrase(sc, (InPhrase) express, tbl, statement);
+			opFrag = doInPhrase((InPhrase) express, statement, selectFrag);
 		}
 		//TODO: others??
 		
-		sc.addStr(s);
+		if (opFrag != null) {
+			selectFrag.whereL.add(opFrag);
+		}
 	}
-	protected String doInPhrase(StrCreator sc, InPhrase phrase, Table tbl, SqlStatement statement) {
+	protected OpFragment doInPhrase(InPhrase phrase, SqlStatement statement, SelectStatementFragment selectFrag) {
 		String op1 = operandToSql(phrase.op1, statement);
 		StringJoiner joiner = new StringJoiner(",");
 		for(Exp exp: phrase.valueL) {
@@ -167,44 +158,65 @@ public class WhereFragmentGenerator extends ServiceBase {
 			joiner.add(s);
 		}
 
+		TableFragment tbl = selectFrag.tblFrag;
 		if (tbl == null) {
-			return String.format("%s IN (%s)", op1, joiner.toString());
+			return null; //sc.o("%s IN (%s)", op1, joiner.toString()); //TODO can we remove???
 		} else {
 			//TODO: how do we know which op1 or op2 needs the alias???
 			String alias = phrase.op1.alias == null ? tbl.alias : phrase.op1.alias; 
-			Table tmp = new Table(alias, op1);
-			return String.format("%s IN (%s)", tmp.toString(), joiner.toString());
+//			Table tmp = new Table(alias, op1);
+			//sc.o("%s IN (%s)", tmp.toString(), joiner.toString());
+			
+			OpFragment opFrag = new OpFragment("IN");
+			opFrag.left = FragmentHelper.buildAliasedFrag(alias, op1);
+			opFrag.right = FragmentHelper.buildAliasedFrag(null, joiner.toString());
+			return opFrag;
 		}
+		
+		
 	}
 
-	protected String doLogicalPhrase(StrCreator sc, LogicalPhrase lphrase, Table tbl, SqlStatement statement) {
-		String s1 = doWherePhrase(sc, (WherePhrase) lphrase.express1, tbl, statement);
-		String s2 = doWherePhrase(sc, (WherePhrase) lphrase.express2, tbl, statement);
+	protected OpFragment doLogicalPhrase(LogicalPhrase lphrase, SqlStatement statement, SelectStatementFragment selectFrag) {
+		OpFragment frag1 = doWherePhrase((WherePhrase) lphrase.express1, statement, selectFrag);
+		OpFragment frag2 = doWherePhrase((WherePhrase) lphrase.express2, statement, selectFrag);
 		
 		String sand = lphrase.isAnd ? "and" : "or";
-		String s = String.format("%s %s %s", s1, sand, s2);
-		return s;
+		
+		OpFragment opFrag = new OpFragment(sand);
+		opFrag.left = FragmentHelper.buildAliasedFrag(null, frag1.render());
+		opFrag.right = FragmentHelper.buildAliasedFrag(null, frag2.render());
+		return opFrag;
 	}
 
-	protected String doWherePhrase(StrCreator sc, WherePhrase phrase, Table tbl, SqlStatement statement) {
+	protected OpFragment doWherePhrase(WherePhrase phrase, SqlStatement statement, SelectStatementFragment selectFrag) {
 		String op = opToSql(phrase.op);
 		adjustYearStuff(phrase.op1, phrase.op2);
 		String op1 = operandToSql(phrase.op1, statement);
 		String op2 = operandToSql(phrase.op2, statement);
 		
 		String snot = (phrase.notFlag) ? "NOT " : "";
+		TableFragment tbl = selectFrag.tblFrag;
 		if (tbl == null) {
-			return String.format("%s%s %s %s", snot, op1, op, op2);
+			return null; //String.format("%s%s %s %s", snot, op1, op, op2); //TODO; remove?
 		} else {
 			String alias;
 			if (!phrase.op1.isValue) {
 				alias = phrase.op1.alias == null ? tbl.alias : phrase.op1.alias; 
-				Table tmp = new Table(alias, op1);
-				return String.format("%s%s %s %s", snot, tmp.toString(), op, op2);
+//				Table tmp = new Table(alias, op1);
+//				return String.format("%s%s %s %s", snot, tmp.toString(), op, op2);
+				
+				OpFragment opFrag = new OpFragment(op);
+				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
+				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
+				return opFrag;
 			} else {
 				alias = phrase.op2.alias == null ? tbl.alias : phrase.op2.alias; 
-				Table tmp = new Table(alias, op2);
-				return String.format("%s%s %s %s", snot, op1, op, tmp.toString());
+//				Table tmp = new Table(alias, op2);
+//				return String.format("%s%s %s %s", snot, op1, op, tmp.toString());
+				OpFragment opFrag = new OpFragment(op);
+				opFrag.left = FragmentHelper.buildAliasedFrag(null, snot + op1);
+				opFrag.right = FragmentHelper.buildAliasedFrag(alias, op2);
+				return opFrag;
 			}
 		}
 	}

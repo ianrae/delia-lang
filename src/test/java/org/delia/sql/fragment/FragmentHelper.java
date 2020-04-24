@@ -28,5 +28,11 @@ public class FragmentHelper {
 		return s;
 	}
 	
+	public static AliasedFragment buildAliasedFrag(String alias, String name) {
+		AliasedFragment fieldF = new AliasedFragment();
+		fieldF.alias = alias;
+		fieldF.name = name;
+		return fieldF;
+	}
 
 }

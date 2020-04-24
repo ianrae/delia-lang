@@ -32,6 +32,7 @@ import org.delia.db.sql.table.ListWalker;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.VarEvaluator;
+import org.delia.sql.fragment.FragmentParserTests.TableFragment;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -138,6 +139,8 @@ public class FragmentParserTests extends NewBDDBase {
 				walker.addIfNotLast(sc, ",");
 			}
 		}
+
+
 	}
 	
 	public static class FragmentParser extends ServiceBase {
@@ -198,6 +201,7 @@ public class FragmentParserTests extends NewBDDBase {
 				break;
 			case OP:
 //				addWhereClauseOp(sc, spec, typeName, tbl, statement);
+				whereGen.addWhereClauseOp(spec, structType, selectFrag);
 				break;
 			case PRIMARY_KEY:
 			default:
@@ -256,6 +260,20 @@ public class FragmentParserTests extends NewBDDBase {
 		assertEquals("SELECT * FROM Flight as a", sql);
 	}
 	
+	@Test
+	public void testOp() {
+		String src = buildSrc();
+		FragmentParser parser = createFragmentParser(src); 
+		
+		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
+		SelectStatementFragment selectFrag = parser.parseSelect(spec);
+		
+		String sql = parser.render(selectFrag);
+		log.log(sql);
+		assertEquals("SELECT * FROM Flight as a WHERE a.field1 = ?", sql);
+	}
+	
+	
 	//---
 	private Delia delia;
 	private FactoryService factorySvc;
@@ -295,6 +313,12 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 	private QuerySpec buildAllRowsQuery(String typeName) {
 		QueryExp exp = queryBuilderSvc.createAllRowsQuery(typeName);
+		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
+		return spec;
+	}
+	private QuerySpec buildOpQuery(String typeName, String fieldName, int wid) {
+		DValue dval = builder.buildInt(wid);
+		QueryExp exp = queryBuilderSvc.createEqQuery(typeName, fieldName, dval);
 		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
 		return spec;
 	}
