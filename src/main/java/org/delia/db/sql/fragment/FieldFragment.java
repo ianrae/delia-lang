@@ -20,11 +20,12 @@ public class FieldFragment extends AliasedFragment {
 	}
 	
 	private String renderField(String arg) {
-		String suffix = asName == null ? "" : "as " + asName;
+		String suffix = asName == null ? "" : " as " + asName;
 		if (fnName != null) {
 			return String.format("%s(%s)%s", fnName, arg, suffix);
+		} else {
+			return String.format("%s%s", arg, suffix);
 		}
-		return arg;
 	}
 	
 }

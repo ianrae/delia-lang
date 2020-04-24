@@ -90,6 +90,8 @@ public class FragmentParserTests extends NewBDDBase {
 			renderEarly(sc);
 			renderFields(sc);
 			sc.o(" FROM %s", tblFrag.render());
+			renderIfPresent(sc, joinFrag);
+			
 			if (! whereL.isEmpty()) {
 				sc.o(" WHERE ");
 				renderWhereL(sc);
@@ -553,8 +555,9 @@ public class FragmentParserTests extends NewBDDBase {
 	public void test11Relation() {
 		String src = buildSrcOneToOne();
 		SelectStatementFragment selectFrag = buildSelectFragment(src); 
-		
-		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2 LIMIT 4 OFFSET 10");
+
+		//[1] SQL:             SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id  WHERE  a.id=?;  -- (55)
+		runAndChk(selectFrag, "SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE a.id = ?");
 	}
 
 	//---
