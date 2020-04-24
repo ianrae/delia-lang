@@ -45,6 +45,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 
 	public H2DBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.H2, factorySvc, connFactory, new H2SqlHelperFactory(factorySvc));
+		this.sqlHelperFactory.init(this);
 		this.errorConverter = new H2ErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
 	}
@@ -62,7 +63,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx) {
 		createTableCreator(dbctx);
-
+		
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
 		SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
@@ -141,6 +142,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public boolean doesTableExist(String tableName, DBAccessContext dbctx) {
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+		tableName = tableName.toUpperCase(); //information-schema is fussy in h2
 		return conn.newExecTableDetect(tableName, sqlgen, dbctx.disableSqlLogging);
 	}
 

@@ -275,7 +275,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 //		runR1700File("t0-let-field-single.txt", 3);
 //		runR1700File("t0-let-field-func.txt", 3);
 //		runR2100File("t0-migration15.txt", 2);
-		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
 	}
 	
 	//---

@@ -151,12 +151,6 @@ public class DBConnectionBase extends ServiceBase {
 			}        
 		} catch (SQLException e) {
 			convertAndRethrowException(e);
-//			String msg = e.getMessage();
-//			String target = String.format("Table \"%s\" not found", tableName.toUpperCase());
-//			if (msg.indexOf(target) >= 0) {
-//				log.logDebug("NO TABLE FOUND: " + tableName);
-//				return false;
-//			}
 		}
 
 		return tblExists;
