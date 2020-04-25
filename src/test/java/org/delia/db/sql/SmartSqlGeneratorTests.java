@@ -76,7 +76,8 @@ public class SmartSqlGeneratorTests extends TopoTestBase {
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement = gen.generateFKsQuery(spec, details);
 		
-		String expected = "SELECT * FROM Customer  WHERE  id=?;";
+//		String expected = "SELECT * FROM Customer  WHERE  id=?;";
+		String expected = "SELECT a.id,addr as addr FROM Customer as a  WHERE  id=?;";
 		assertEquals(expected, statement.sql);
 		chkParamInt(statement, 1, 55);
 	}

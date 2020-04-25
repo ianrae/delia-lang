@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.table.ListWalker;
 
 public abstract class StatementFragmentBase implements SqlFragment {
 	public SqlStatement statement = new SqlStatement();
@@ -44,4 +46,38 @@ public abstract class StatementFragmentBase implements SqlFragment {
 		return null;
 	}
 	
+	protected void renderIfPresent(StrCreator sc, SqlFragment frag) {
+		if (frag != null) {
+			sc.o(frag.render());
+		}
+	}
+
+
+	protected void renderEarly(StrCreator sc) {
+		for(SqlFragment frag: earlyL) {
+			String s = frag.render();
+			sc.o(s);
+		}
+	}
+
+	protected void renderWhereL(StrCreator sc) {
+		for(SqlFragment frag: whereL) {
+			String s = frag.render();
+			sc.o(s);
+		}
+	}
+
+
+	protected void renderFields(StrCreator sc) {
+		ListWalker<FieldFragment> walker = new ListWalker<>(fieldL);
+		while(walker.hasNext()) {
+			FieldFragment fieldF = walker.next();
+			sc.o(fieldF.render());
+			walker.addIfNotLast(sc, ",");
+		}
+	}
+
+	public void clearFieldList() {
+		fieldL.clear();
+	}
 }
