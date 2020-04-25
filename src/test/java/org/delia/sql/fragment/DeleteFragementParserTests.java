@@ -26,18 +26,13 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.fragment.FieldFragment;
-import org.delia.db.sql.fragment.FragmentParserBase;
-import org.delia.db.sql.fragment.StatementFragmentBase;
-import org.delia.db.sql.fragment.TableFragment;
+import org.delia.db.sql.fragment.DeleteFragmentParser;
+import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
-import org.delia.runner.VarEvaluator;
-import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -46,78 +41,6 @@ import org.junit.Test;
 
 
 public class DeleteFragementParserTests extends NewBDDBase {
-	
-	public static class DeleteStatementFragment extends StatementFragmentBase {
-		
-		@Override
-		public String render() {
-			StrCreator sc = new StrCreator();
-			sc.o("DELETE ");
-			renderEarly(sc);
-			renderFields(sc);
-			sc.o(" FROM %s", tblFrag.render());
-			renderIfPresent(sc, joinFrag);
-			
-			if (! whereL.isEmpty()) {
-				sc.o(" WHERE ");
-				renderWhereL(sc);
-			}
-			
-			renderIfPresent(sc, limitFrag);
-			return sc.str;
-		}
-	}	
-	
-	public static class DeleteFragmentParser extends FragmentParserBase {
-
-		public DeleteFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator,
-				List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory,
-				WhereFragmentGenerator whereGen) {
-			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
-		}
-		
-		public DeleteStatementFragment parseDelete(QuerySpec spec, QueryDetails details) {
-			DeleteStatementFragment selectFrag = new DeleteStatementFragment();
-			
-			//init tbl
-			DStructType structType = getMainType(spec); 
-			TableFragment tblFrag = createTable(structType, selectFrag);
-			selectFrag.tblFrag = tblFrag;
-			
-			initFields(spec, structType, selectFrag);
-//			addJoins(spec, structType, selectFrag, details);
-
-			generateDeleteFns(spec, structType, selectFrag);
-			
-			fixupForParentFields(structType, selectFrag);
-			if (needJoinBase(spec, structType, selectFrag, details)) {
-				//used saved join if we have one
-				if (savedJoinedFrag == null) {
-					addJoins(spec, structType, selectFrag, details);
-				} else {
-					selectFrag.joinFrag = savedJoinedFrag;
-				}
-			}
-
-			if (selectFrag.fieldL.isEmpty()) {
-				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-				selectFrag.fieldL.add(fieldF);
-			}
-			
-			
-			return selectFrag;
-		}
-		
-		public void generateDeleteFns(QuerySpec spec, DStructType structType, DeleteStatementFragment selectFrag) {
-			this.doLimitIfPresent(spec, structType, selectFrag);
-		}
-		
-		public String renderDelete(DeleteStatementFragment selectFrag) {
-			selectFrag.statement.sql = selectFrag.render();
-			return selectFrag.statement.sql;
-		}
-		
-	}
 	
 	@Test
 	public void testPrimaryKey() {
@@ -129,7 +52,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		
 		String sql = parser.renderDelete(selectFrag);
 		log.log(sql);
-		assertEquals("DELETE * FROM Flight as a WHERE  a.field1 = ?", sql);
+		assertEquals("DELETE FROM Flight as a WHERE  a.field1 = ?", sql);
 	}
 	
 	@Test
@@ -141,7 +64,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
 		
 		String sql = parser.renderDelete(selectFrag);
-		assertEquals("DELETE * FROM Flight as a", sql);
+		assertEquals("DELETE FROM Flight as a", sql);
 	}
 	
 	@Test
@@ -152,7 +75,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
 		DeleteStatementFragment selectFrag = fragmentParser.parseDelete(spec, details);
 		
-		runAndChk(selectFrag, "DELETE * FROM Flight as a WHERE  a.field2 = ?");
+		runAndChk(selectFrag, "DELETE FROM Flight as a WHERE  a.field2 = ?");
 	}
 	
 	//TODO: add support for limit later
@@ -171,7 +94,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 
 		//[1] SQL:             SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id  WHERE  a.id=?;  -- (55)
-		runAndChk(selectFrag, "DELETE * FROM Customer as a WHERE  a.id = ?");
+		runAndChk(selectFrag, "DELETE FROM Customer as a WHERE  a.id = ?");
 		chkParamInt(selectFrag.statement, 1, 55);
 	}
 

@@ -19,6 +19,8 @@ import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.fragment.DeleteFragmentParser;
+import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -162,8 +164,21 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	@Override
 	public void executeDelete(QuerySpec spec, DBAccessContext dbctx) {
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		SqlStatement statement = sqlgen.generateDelete(spec);
+		SqlStatement statement;
+		if (useFragmentParser) {
+			log.log("FRAG PARSER DELETE....................");
+			createTableCreator(dbctx);
+			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
+			whereGen.tableFragmentMaker = parser;
+			QueryDetails details = new QueryDetails();
+			DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
+			parser.renderDelete(selectFrag);
+			statement = selectFrag.statement;
+		} else {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			statement = sqlgen.generateDelete(spec);
+		}
 		logSql(statement);
 		createTableCreator(dbctx);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
