@@ -70,8 +70,6 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100");
 	}
@@ -84,8 +82,6 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100");
@@ -100,8 +96,6 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55");
 	}
@@ -115,14 +109,12 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55");
 	}
 	
 	
-	//scenario 1: ID
+	//scenario 1: ID-----------------------------
 	@Test
 	public void testManyToManyParentId() {
 		String src = buildSrcManyToMany();
@@ -132,8 +124,6 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE b.rightv = ?");
@@ -148,8 +138,6 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
 	}
@@ -163,10 +151,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55 WHERE b.leftv = ?");
 	}
 	@Test
 	public void testManyToManyParentId4() {
@@ -178,10 +164,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE b.rightv = ?");
 	}
 
 	
