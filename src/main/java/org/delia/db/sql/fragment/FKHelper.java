@@ -104,6 +104,13 @@ private FragmentParser fragmentParser;
 			TypePair tmp = new TypePair(rule.relInfo.fieldName, null);
 			genFields(structType, tbl, null, rule.relInfo.fieldName, tmp, selectFrag, adjustment);
 			//sc.o("SELECT %s FROM %s as %s", fields, tbl.name, tbl.alias);
+			
+			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
+			TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
+			joinFrag.joinTblFrag = tbl2;
+			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, rule.relInfo.fieldName);
+			joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tbl2, selectFrag, nearField);
+			selectFrag.joinFrag = joinFrag;
 			return;
 		} 
 		TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
@@ -284,8 +291,8 @@ private FragmentParser fragmentParser;
 
 		String actualTblName1 = this.tblName(tblinfo.tbl1); //postgres tables are lower-case
 //		String actualTblName2 = this.tblName(tblinfo.tbl2);
-		String assocField = actualTblName1.equals(tbl.name) ? "rightv" : "leftv";
-		String assocField2 = actualTblName1.equals(tbl.name) ? "leftv" : "rightv";
+		String assocField = actualTblName1.equalsIgnoreCase(tbl.name) ? "rightv" : "leftv";
+		String assocField2 = actualTblName1.equalsIgnoreCase(tbl.name) ? "leftv" : "rightv";
 		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag, adjustment);
 		details.mergeRows = true;
 		details.mergeOnField = otherRule.relInfo.fieldName;

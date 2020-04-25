@@ -264,17 +264,15 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 4;
+		testIndexToRun = 12;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
-//		runR2150File("t0-migrate-many-to-many2.txt", 2);
-//		runR1700File("t0-let-field-multiple.txt", 5);
-//		runR1500File("t0-queryfn-first.txt", 2);
-
+		runR1350File("t0-filter-op-int.txt", 13);
+//		runR1550File("t0-queryfn-oneone-child.txt", 6);
 //		runR2150File("t0-migrate-many-to-many1.txt", 3);
-		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
+//		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	
 	//---

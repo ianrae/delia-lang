@@ -58,7 +58,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), log);
 			PostgresDBInterface pgdb = new PostgresDBInterface(factorySvc, connFact);
 			actualInterface = pgdb;
-			pgdb.useFragmentParser = useFragmentParser;
+			//pgdb.useFragmentParser = useFragmentParser;
 			actualInterface.init(factorySvc);
 
 			if (cleanTables) {
