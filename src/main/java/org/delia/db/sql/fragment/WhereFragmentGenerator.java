@@ -215,7 +215,8 @@ public class WhereFragmentGenerator extends ServiceBase {
 				}
 				
 				OpFragment opFrag = new OpFragment(op);
-				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
+				opFrag.left = FragmentHelper.buildAliasedFrag(alias, op1);
+				opFrag.leftNot = phrase.notFlag;
 				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
 				return opFrag;
 			} else {
@@ -227,6 +228,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 				OpFragment opFrag = new OpFragment(op);
 				opFrag.left = FragmentHelper.buildAliasedFrag(null, op1);
 				opFrag.right = FragmentHelper.buildAliasedFrag(alias, snot + op2);
+				opFrag.rightNot = phrase.notFlag;
 				return opFrag;
 			}
 		}

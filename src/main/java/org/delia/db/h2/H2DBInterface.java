@@ -42,7 +42,7 @@ import org.delia.util.DeliaExceptionHelper;
  */
 public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInternal {
 	
-	public boolean useFragmentParser;
+	public boolean useFragmentParser = true;
 
 	public H2DBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.H2, factorySvc, connFactory, new H2SqlHelperFactory(factorySvc));
