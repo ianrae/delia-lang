@@ -187,6 +187,8 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
 	}
 	
+	
+	//=============== many to many ======================
 	@Test
 	public void testManyToMany() {
 		String src = buildSrcManyToMany();
@@ -199,9 +201,58 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
 	}
 	@Test
-	public void testManyToManyParent() {
+	public void testManyToManyParentAll() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[55] {wid: 333, addr:100}";
+		src += "\n  update Customer[true] {wid: 333, addr:100}";
+
+		List<TableInfo> tblinfoL = this.createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100");
+	}
+	@Test
+	public void testManyToManyParentAllOtherWay() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[true] {wid: 333, addr:100}";
+
+		List<TableInfo> tblinfoL = this.createTblInfoLOtherWay();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.right = 100");
+	}
+	@Test
+	public void testManyToManyParentAll3() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Address[true] {z: 7, cust:55}";
+
+		List<TableInfo> tblinfoL = this.createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
+		
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 55");
+	}
+	
+	
+	
+	
+	@Test
+	public void testManyToManyParentId() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[id > 10] {wid: 333, addr:100}";
 
 		UpdateStatementExp updateStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
@@ -211,6 +262,22 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		
 		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
 	}
+	@Test
+	public void testManyToManyParentOther() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[wid > 100] {wid: 333, addr:100}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
+		
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+	}
+	
+	
+	//===fix
 	@Test
 	public void testManyToManyChild() {
 		String src = buildSrcManyToMany();
@@ -267,6 +334,8 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	private QueryDetails details = new QueryDetails();
 	private boolean useAliasesFlag = true;
 	private UpdateFragmentParser fragmentParser;
+	private String sqlLine1;
+	private String sqlLine2;
 
 
 	@Before
@@ -325,7 +394,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		return spec;
 	}
 
-	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src) {
+	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -334,14 +403,17 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 
-		UpdateFragmentParser parser = createParser(dao); 
+		UpdateFragmentParser parser = createParser(dao, tblInfoL); 
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 
 		return parser;
 	}
 	private UpdateFragmentParser createParser(DeliaDao dao) {
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		List<TableInfo> tblinfoL = createTblInfoL(); 
+		return createParser(dao, tblinfoL);
+	}
+	private UpdateFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
+		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
@@ -358,11 +430,35 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		tblinfoL.add(info);
 		return tblinfoL;
 	}
+	private List<TableInfo> createTblInfoLOtherWay() {
+		List<TableInfo> tblinfoL = new ArrayList<>();
+		TableInfo info = new  TableInfo("Customer", "CustomerAddressAssoc");
+		info.tbl1 = "Customer";
+		info.tbl2 = "Address";
+		//public String fieldName;
+		tblinfoL.add(info);
+		return tblinfoL;
+	}
 
 	private void runAndChk(UpdateStatementFragment selectFrag, String expected) {
 		String sql = fragmentParser.renderSelect(selectFrag);
 		log.log(sql);
 		assertEquals(expected, sql);
+	}
+	private void runAndChkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
+		String sql = fragmentParser.renderSelect(selectFrag);
+		log.log(sql);
+		if (lineNum == 1) {
+			String[] ar = sql.split("\n");
+			this.sqlLine1 = ar[0];
+			this.sqlLine2 = ar[1];
+			assertEquals(expected, sqlLine1);
+		}
+	}
+	private void chkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
+		if (lineNum == 2) {
+			assertEquals(expected, sqlLine2);
+		}
 	}
 
 	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
@@ -373,12 +469,17 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	}
 
 	private UpdateStatementExp buildFromSrc(String src) {
+		List<TableInfo> tblinfoL = this.createTblInfoL();
+		return buildFromSrc(src, tblinfoL);
+	}
+	private UpdateStatementExp buildFromSrc(String src, List<TableInfo> tblinfoL) {
 		DeliaDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();
 		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
 		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);
-		this.fragmentParser = createFragmentParser(dao, src); 
-
+		log.log(src);
+		this.fragmentParser = createFragmentParser(dao, src, tblinfoL); 
+		
 		//		List<Exp> expL = dao.getMostRecentSess().
 		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
 		UpdateStatementExp updateStatementExp = null;
