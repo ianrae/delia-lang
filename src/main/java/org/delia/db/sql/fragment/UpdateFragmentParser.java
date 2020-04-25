@@ -1,5 +1,6 @@
 package org.delia.db.sql.fragment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,14 +176,106 @@ import org.delia.util.DeliaExceptionHelper;
 				if (existingWhereL.isEmpty()) {
 					buildAll(assocUpdateFrag, structType, mmMap, fieldName, info, "rightv");
 					return;
+				} else if (this.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+					List<OpFragment> oplist = findPrimaryKeyQuery(existingWhereL, info.farType);
+					log.log("aaaakkkkkkkkkkkkkkkkkk");
+					buildIdOnlyQuery(assocUpdateFrag, structType, mmMap, fieldName, info, "rightv", "leftv", oplist);
 				}
 			} else {
 				if (existingWhereL.isEmpty()) {
 					buildAll(assocUpdateFrag, structType, mmMap, fieldName, info, "leftv");
 					return;
+				} else if (this.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+					List<OpFragment> oplist = findPrimaryKeyQuery(existingWhereL, info.farType);
+					log.log("kkkkkkkkkkkkkkkkkk");
+					buildIdOnlyQuery(assocUpdateFrag, structType, mmMap, fieldName, info, "leftv", "rightv", oplist);
 				}
 			}
 		}
+
+		private List<OpFragment> findPrimaryKeyQuery(List<SqlFragment> existingWhereL, DStructType farType) {
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
+			List<OpFragment> oplist = new ArrayList<>();
+			
+			for(SqlFragment ff: existingWhereL) {
+				if (ff instanceof OpFragment) {
+					OpFragment opff = (OpFragment) ff;
+					if (opff.left.name.equals(pair.name) || opff.right.name.equals(pair.name)) {
+						oplist.add(opff);
+					}
+				}
+			}
+			return oplist;
+		}
+		private boolean isOnlyPrimaryKeyQuery(List<SqlFragment> existingWhereL, DStructType farType) {
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
+			
+			int failCount = 0;
+			for(SqlFragment ff: existingWhereL) {
+				if (ff instanceof OpFragment) {
+					OpFragment opff = (OpFragment) ff;
+					if (!opff.left.name.equals(pair.name) && !leftIsQuestionMark(opff)) {
+						failCount++;
+					}
+					if (!opff.right.name.equals(pair.name) && !rightIsQuestionMark(opff)) {
+						failCount++;
+					}
+				}
+			}
+			return failCount == 0;
+		}
+		private List<OpFragment> changeIdToAssocFieldName(List<OpFragment> existingWhereL, DStructType farType, String alias, String assocFieldName) {
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
+			List<OpFragment> oplist = new ArrayList<>();
+			
+			for(OpFragment opff: existingWhereL) {
+				if (opff.left.name.equals(pair.name)) {
+					OpFragment clone = new OpFragment(opff);
+					clone.left.alias = alias;
+					clone.left.name = assocFieldName;
+					oplist.add(clone);
+				} else if (opff.right.name.equals(pair.name)) {
+					OpFragment clone = new OpFragment(opff);
+					clone.right.alias = alias;
+					clone.right.name = assocFieldName;
+					oplist.add(clone);
+				}
+			}
+			return oplist;
+		}
+		
+		private boolean leftIsQuestionMark(OpFragment opff) {
+			return opff.left.name.equals("?");
+		}
+		private boolean rightIsQuestionMark(OpFragment opff) {
+			return opff.right.name.equals("?");
+		}
+		private void buildIdOnlyQuery(UpdateStatementFragment assocUpdateFrag, DStructType structType,
+				Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
+				String assocField2, List<OpFragment> oplist) {
+			DRelation drel = mmMap.get(fieldName); //100
+			DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+			
+//			TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName); //Customer.addr
+//			TypePair leftPair = new TypePair("rightv", pair1.type);
+//			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, leftPair);
+//			String valstr = dvalToUse == null ? null : dvalToUse.asString();
+//			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+//			assocUpdateFrag.fieldL.add(ff);
+			
+//			TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+			RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
+			TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
+			TypePair rightPair = new TypePair(assocFieldName, pair2.type);
+			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
+			String valstr = dvalToUse == null ? null : dvalToUse.asString();
+			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+			assocUpdateFrag.fieldL.add(ff);
+			
+			List<OpFragment> clonedL = changeIdToAssocFieldName(oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+			assocUpdateFrag.whereL.addAll(clonedL);
+		}
+
 
 		protected void buildAll(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName) {
 			DRelation drel = mmMap.get(fieldName); //100

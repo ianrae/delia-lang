@@ -150,8 +150,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
 	}
 	@Test
 	public void testManyToManyParentId3() {

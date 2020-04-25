@@ -10,6 +10,13 @@ public class OpFragment implements SqlFragment {
 	public OpFragment(String op) {
 		this.op = op;
 	}
+	public OpFragment(OpFragment orig) {
+		this.op = orig.op;
+		this.left = new AliasedFragment(orig.left.alias, orig.left.name);
+		this.right = new AliasedFragment(orig.right.alias, orig.right.name);
+		this.leftNot = orig.leftNot;
+		this.rightNot = orig.rightNot;
+	}
 	
 	@Override
 	public String render() {
