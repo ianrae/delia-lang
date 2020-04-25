@@ -23,6 +23,8 @@ import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.UpdateFragmentParser;
+import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
@@ -193,9 +195,25 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	
 	@Override
 	public int executeUpdate(QuerySpec spec, DValue dval, DBAccessContext dbctx) {
+		SqlStatement statement;
 		createTableCreator(dbctx);
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+		
+		if (useFragmentParser) {
+			log.log("FRAG PARSER UPDATE....................");
+			createTableCreator(dbctx);
+			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
+			whereGen.tableFragmentMaker = parser;
+			parser.useAliases(false);
+			QueryDetails details = new QueryDetails();
+			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval);
+			parser.renderUpdate(selectFrag);
+			statement = selectFrag.statement;
+		} else {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+		}
+		
 		if (statement.sql.isEmpty()) {
 			return 0; //nothing to update
 		}
