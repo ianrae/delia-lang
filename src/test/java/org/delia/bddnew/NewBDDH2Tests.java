@@ -282,6 +282,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Before
 	public void init() {
+		this.disableAllSlowTests = true;
+		disableAllSlowTestsIfNeeded();
 	}
 	@After
 	public void shutdown() {

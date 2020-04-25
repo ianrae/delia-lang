@@ -7,13 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.delia.base.UnitTestLog;
-import org.delia.bddnew.NewBDDBase.BDDGroup;
-import org.delia.bddnew.NewBDDBase.FileHelper;
 import org.delia.bddnew.core.BDDParser;
 import org.delia.bddnew.core.BDDTest;
 import org.delia.bddnew.core.BDDTestRunner;
@@ -71,7 +67,19 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected List<String> filesExecutedL = new ArrayList<>();
 	private BDDGroup currentGroup;
 	protected boolean enableAllFileCheck = true;
+	protected boolean disableAllSlowTests = false;
 
+	/**
+	 * When we want to run all unit tests but not have to wait
+	 * 15 minutes for H2 and Postgress BDD tests to run,
+	 * set disableAllSlowTests to true. They will fail immediately.
+	 */
+	protected void disableAllSlowTestsIfNeeded() {
+		if (disableAllSlowTests) {
+			throw new IllegalArgumentException("disable SLOW tests");
+		}
+	}
+	
 	protected String testFile(BDDGroup group, String filename) {
 		String s = fileHelper.getDir(group);
 		s += '/' + filename;
