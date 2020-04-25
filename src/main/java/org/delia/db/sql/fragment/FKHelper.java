@@ -107,6 +107,7 @@ private FragmentParser fragmentParser;
 			
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 			TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
+			JoinFragment joinFrag = new JoinFragment();
 			joinFrag.joinTblFrag = tbl2;
 			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, rule.relInfo.fieldName);
 			joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tbl2, selectFrag, nearField);

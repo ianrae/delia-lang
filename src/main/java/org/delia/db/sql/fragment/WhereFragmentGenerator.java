@@ -213,8 +213,6 @@ public class WhereFragmentGenerator extends ServiceBase {
 				if (IsFn(phrase.op1)) {
 					alias = null;
 				}
-//				Table tmp = new Table(alias, op1);
-//				return String.format("%s%s %s %s", snot, tmp.toString(), op, op2);
 				
 				OpFragment opFrag = new OpFragment(op);
 				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
@@ -225,11 +223,10 @@ public class WhereFragmentGenerator extends ServiceBase {
 				if (IsFn(phrase.op2)) {
 					alias = null;
 				}
-//				Table tmp = new Table(alias, op2);
-//				return String.format("%s%s %s %s", snot, op1, op, tmp.toString());
+				
 				OpFragment opFrag = new OpFragment(op);
-				opFrag.left = FragmentHelper.buildAliasedFrag(alias, snot + op1);
-				opFrag.right = FragmentHelper.buildAliasedFrag(null, op2);
+				opFrag.left = FragmentHelper.buildAliasedFrag(null, op1);
+				opFrag.right = FragmentHelper.buildAliasedFrag(alias, snot + op2);
 				return opFrag;
 			}
 		}
