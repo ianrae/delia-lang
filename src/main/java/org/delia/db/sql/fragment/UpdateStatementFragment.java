@@ -42,7 +42,7 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 				FieldFragment ff = walker.next();
 				String value = setValuesL.get(index);
 				sc.o("%s = %s", renderSetField(ff), value);
-				walker.addIfNotLast(sc, ",");
+				walker.addIfNotLast(sc, ", ");
 				index++;
 			}
 		}

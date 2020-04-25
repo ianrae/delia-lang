@@ -1,7 +1,8 @@
 package org.delia.db.sql.fragment;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
@@ -9,11 +10,14 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.table.TableInfo;
+import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -30,12 +34,14 @@ import org.delia.util.DeliaExceptionHelper;
 		public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal) {
 			UpdateStatementFragment selectFrag = new UpdateStatementFragment();
 
+			Map<String, DRelation> mmMap = new HashMap<>();
+			
 			//init tbl
 			DStructType structType = getMainType(spec); 
 			TableFragment tblFrag = createTable(structType, selectFrag);
 			selectFrag.tblFrag = tblFrag;
 
-			generateSetFields(spec, structType, selectFrag, partialVal);
+			generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
 			initFieldsAndWhere(spec, structType, selectFrag);
 			
 			//no min,max,etc in UPDATE
@@ -80,7 +86,7 @@ import org.delia.util.DeliaExceptionHelper;
 		}
 
 		private void generateSetFields(QuerySpec spec, DStructType structType, UpdateStatementFragment selectFrag,
-				DValue partialVal) {
+				DValue partialVal, Map<String, DRelation> mmMap) {
 			//we assume partialVal same type as structType!! (or maybe a base class)
 			
 			int index = selectFrag.fieldL.size(); //setValuesL is parallel array to fieldL
@@ -94,16 +100,47 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 			
 			for(String fieldName: partialVal.asMap().keySet()) {
-				DValue inner = partialVal.asMap().get(fieldName);
-
 				TypePair pair = DValueHelper.findField(structType, fieldName);
+				
+				if (pair.type.isStructShape()) {
+					if (! shouldGenerateFKConstraint(pair, structType)) {
+						continue;
+					}
+					if (DRuleHelper.isManyToManyRelation(pair, structType)) {
+						DValue inner = partialVal.asStruct().getField(pair.name);
+						if (inner != null) {
+							mmMap.put(pair.name, inner.asRelation());
+						}
+						continue;
+					}
+				}
+				
+				DValue inner = partialVal.asMap().get(fieldName);
+				if (inner == null) {
+					continue;
+				}
+				
+				DValue dvalToUse = inner;
+				if (inner.getType().isRelationShape()) {
+					DRelation drel = inner.asRelation();
+					dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+				}
+				
 				FieldFragment ff = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
-				String valstr = inner.asString();
+				String valstr = dvalToUse.asString();
 				selectFrag.setValuesL.add(valstr == null ? "null" : valstr);
 				selectFrag.fieldL.add(ff);
 				
 				index++;
 			}
+		}
+		private boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
+			//key goes in child only
+			RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
+			if (info != null && !info.isParent) {
+				return true;
+			}
+			return false;
 		}
 
 		protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
@@ -161,7 +198,8 @@ import org.delia.util.DeliaExceptionHelper;
 
 		public String renderUpdate(UpdateStatementFragment selectFrag) {
 			if(selectFrag.setValuesL.isEmpty()) {
-				return "";
+				selectFrag.statement.sql = ""; //nothing to do
+				return selectFrag.statement.sql;
 			}
 			
 			selectFrag.statement.sql = selectFrag.render();

@@ -58,6 +58,19 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		
 		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 = ?");
 	}
+	
+	@Test
+	public void testPrimaryKeyNoAlias() {
+		String src = buildSrc();
+		src += " update Flight[1] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		useAliasesFlag = false;
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight SET field2 = 111 WHERE field1 = ?");
+	}
 
 	@Test
 	public void testAllRows() {
@@ -105,11 +118,96 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		
 		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 = ?");
 	}
-	private DValue convertToDVal(UpdateStatementExp updateStatementExp) {
-		DStructType structType = (DStructType) registry.getType("Flight");
-		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
-		assertEquals(0, cres.localET.errorCount());
-		return cres.dval;
+	
+	@Test
+	public void testOneToOne() {
+		String src = buildSrcOneToOne();
+		src += "\n  update Customer[55] {wid: 333}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+	}
+	@Test
+	public void testOneToOneParent() {
+		String src = buildSrcOneToOne();
+		src += "\n  update Customer[55] {wid: 333, addr:100}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+	}
+	@Test
+	public void testOneToOneChild() {
+		String src = buildSrcOneToOne();
+		src += "\n  update Address[100] {z: 6, cust:55}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
+	}
+	
+	@Test
+	public void testOneToMany() {
+		String src = buildSrcOneToMany();
+		src += "\n  update Customer[55] {wid: 333}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+	}
+	@Test
+	public void testOneToManyParent() {
+		String src = buildSrcOneToMany();
+		src += "\n  update Customer[55] {wid: 333, addr:100}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+	}
+	@Test
+	public void testOneToManyChild() {
+		String src = buildSrcOneToMany();
+		src += "\n  update Address[100] {z: 6, cust:55}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
+	}
+	
+	@Test
+	public void testManyToManyLeft() {
+		String src = buildSrc();
+		src += " zzzzzzzzzzzzzzzzupdate Flight[true] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
+	}
+	@Test
+	public void testManyToManyRight() {
+		String src = buildSrc();
+		src += " zzzzzzzzzzzupdate Flight[true] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
 	}
 	
 //TODO: support orderBy
@@ -154,7 +252,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	private Runner runner;
 	private QueryBuilderService queryBuilderSvc;
 	private QueryDetails details = new QueryDetails();
-
+	private boolean useAliasesFlag = true;
 	private UpdateFragmentParser fragmentParser;
 
 
@@ -180,14 +278,21 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
 	}
-//	private String buildSrcOneToOne() {
-//		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one parent } end";
-//		src += "\n type Address struct {id int unique, relation cust Customer optional one } end";
-//		src += "\n  insert Customer {id: 55, wid: 33}";
-//		src += "\n  insert Address {id: 100, cust: 55 }";
-//		src += "\n  update Customer[55] {wid: 333}";
-//		return src;
-//	}
+	private String buildSrcOneToOne() {
+		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one parent } end";
+		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
+		src += "\n  insert Customer {id: 55, wid: 33}";
+		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+		return src;
+	}
+	private String buildSrcOneToMany() {
+		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
+		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
+		src += "\n  insert Customer {id: 55, wid: 33}";
+		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+		src += "\n  insert Address {id: 101, z:6, cust: 55 }";
+		return src;
+	}
 
 	@Override
 	public DBInterface createForTest() {
@@ -230,6 +335,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 
 	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
 		QuerySpec spec= buildQuery((QueryExp) exp.queryExp);
+		fragmentParser.useAliases(useAliasesFlag);
 		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval);
 		return selectFrag;
 	}
@@ -259,6 +365,15 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, null, sprigSvc);
 		cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
 		return cres;
+	}
+	private DValue convertToDVal(UpdateStatementExp updateStatementExp) {
+		return convertToDVal(updateStatementExp, "Flight");
+	}
+	private DValue convertToDVal(UpdateStatementExp updateStatementExp, String typeName) {
+		DStructType structType = (DStructType) registry.getType(typeName);
+		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
+		assertEquals(0, cres.localET.errorCount());
+		return cres.dval;
 	}
 
 }
