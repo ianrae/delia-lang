@@ -4,7 +4,9 @@ package org.delia.sql.fragment;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
@@ -26,14 +28,25 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentParser;
+import org.delia.db.sql.fragment.JoinFragment;
+import org.delia.db.sql.fragment.LimitFragment;
+import org.delia.db.sql.fragment.OffsetFragment;
+import org.delia.db.sql.fragment.OrderByFragment;
 import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.SqlFragment;
+import org.delia.db.sql.fragment.StatementFragmentBase;
+import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -43,13 +56,118 @@ import org.junit.Test;
 
 public class DeleteFragementParserTests extends NewBDDBase {
 	
+	public static class DeleteStatementFragment extends StatementFragmentBase {
+		
+		public List<SqlFragment> earlyL = new ArrayList<>();
+		public List<FieldFragment> fieldL = new ArrayList<>();
+		public TableFragment tblFrag;
+		public JoinFragment joinFrag; //TODO later a list
+		public List<SqlFragment> whereL = new ArrayList<>();
+		public LimitFragment limitFrag = null;
+		
+		@Override
+		public String render() {
+			StrCreator sc = new StrCreator();
+			sc.o("DELETE ");
+			renderEarly(sc);
+			renderFields(sc);
+			sc.o(" FROM %s", tblFrag.render());
+			renderIfPresent(sc, joinFrag);
+			
+			if (! whereL.isEmpty()) {
+				sc.o(" WHERE ");
+				renderWhereL(sc);
+			}
+			
+			renderIfPresent(sc, limitFrag);
+			return sc.str;
+		}
+
+
+		private void renderIfPresent(StrCreator sc, SqlFragment frag) {
+			if (frag != null) {
+				sc.o(frag.render());
+			}
+		}
+
+
+		private void renderEarly(StrCreator sc) {
+			for(SqlFragment frag: earlyL) {
+				String s = frag.render();
+				sc.o(s);
+			}
+		}
+
+		private void renderWhereL(StrCreator sc) {
+			for(SqlFragment frag: whereL) {
+				String s = frag.render();
+				sc.o(s);
+			}
+		}
+
+
+		private void renderFields(StrCreator sc) {
+			ListWalker<FieldFragment> walker = new ListWalker<>(fieldL);
+			while(walker.hasNext()) {
+				FieldFragment fieldF = walker.next();
+				sc.o(fieldF.render());
+				walker.addIfNotLast(sc, ",");
+			}
+		}
+
+		public void clearFieldList() {
+			fieldL.clear();
+		}
+
+	}	
+	
 	public static class DeleteFragmentParser extends FragmentParser {
 
 		public DeleteFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator,
 				List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory,
 				WhereFragmentGenerator whereGen) {
 			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
-			// TODO Auto-generated constructor stub
+		}
+		
+		public DeleteStatementFragment parseDelete(QuerySpec spec, QueryDetails details) {
+			DeleteStatementFragment selectFrag = new DeleteStatementFragment();
+			
+			//init tbl
+			DStructType structType = getMainType(spec); 
+			TableFragment tblFrag = createTable(structType, selectFrag);
+			selectFrag.tblFrag = tblFrag;
+			
+			initFields(spec, structType, selectFrag);
+//			addJoins(spec, structType, selectFrag, details);
+
+			generateDeleteFns(spec, structType, selectFrag);
+			
+			fixupForParentFields(structType, selectFrag);
+			if (needJoinBase(spec, structType, selectFrag, details)) {
+				//used saved join if we have one
+				if (savedJoinedFrag == null) {
+					addJoins(spec, structType, selectFrag, details);
+				} else {
+					selectFrag.joinFrag = savedJoinedFrag;
+				}
+			}
+
+			if (selectFrag.fieldL.isEmpty()) {
+				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+				selectFrag.fieldL.add(fieldF);
+			}
+			
+			
+			return selectFrag;
+		}
+		
+		public void generateDeleteFns(QuerySpec spec, DStructType structType, DeleteStatementFragment selectFrag) {
+			this.doLimitIfPresent(spec, structType, selectFrag);
+		}
+		
+		public String renderDelete(DeleteStatementFragment selectFrag) {
+			selectFrag.statement.sql = selectFrag.render();
+			return selectFrag.statement.sql;
 		}
 		
 	}
@@ -57,12 +175,12 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	@Test
 	public void testPrimaryKey() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); 
+		DeleteFragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
-		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+		DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
 		
-		String sql = parser.render(selectFrag);
+		String sql = parser.renderDelete(selectFrag);
 		log.log(sql);
 		assertEquals("SELECT * FROM Flight as a WHERE  a.field1 = ?", sql);
 	}
@@ -70,12 +188,12 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	@Test
 	public void testAllRows() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); 
+		DeleteFragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildAllRowsQuery("Flight");
-		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+		DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
 		
-		String sql = parser.render(selectFrag);
+		String sql = parser.renderDelete(selectFrag);
 		assertEquals("SELECT * FROM Flight as a", sql);
 	}
 	
@@ -85,7 +203,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		fragmentParser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
-		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec, details);
+		DeleteStatementFragment selectFrag = fragmentParser.parseDelete(spec, details);
 		
 		runAndChk(selectFrag, "SELECT * FROM Flight as a WHERE  a.field2 = ?");
 	}
@@ -94,7 +212,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testMax() {
 		String src = buildSrc();
 		src += " let x = Flight[1].field1.max()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT MAX(a.field1) FROM Flight as a WHERE  a.field1 = ?");
 	}
@@ -103,7 +221,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testMin() {
 		String src = buildSrc();
 		src += " let x = Flight[1].field1.min()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT MIN(a.field1) FROM Flight as a WHERE  a.field1 = ?");
 	}
@@ -111,7 +229,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testCount() {
 		String src = buildSrc();
 		src += " let x = Flight[true].count()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT COUNT(*) FROM Flight as a");
 	}
@@ -119,7 +237,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testCountField() {
 		String src = buildSrc();
 		src += " let x = Flight[true].field1.count()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT COUNT(a.field1) FROM Flight as a");
 	}
@@ -128,7 +246,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testFirst() {
 		String src = buildSrc();
 		src += " let x = Flight[true].first()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 * FROM Flight as a");
 	}
@@ -136,7 +254,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testFirstField() {
 		String src = buildSrc();
 		src += " let x = Flight[true].field1.first()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a");
 	}
@@ -145,7 +263,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testLast() {
 		String src = buildSrc();
 		src += " let x = Flight[true].last()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 * FROM Flight as a ORDER BY a.field1 desc");
 	}
@@ -153,7 +271,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testLastField() {
 		String src = buildSrc();
 		src += " let x = Flight[true].field1.last()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a ORDER BY a.field1 desc");
 	}
@@ -161,7 +279,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testLastFieldOrderBy() {
 		String src = buildSrc();
 		src += " let x = Flight[true].orderBy('field2').field1.last()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 a.field1 FROM Flight as a ORDER BY a.field2, a.field1 desc");
 	}
@@ -171,7 +289,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testLastNoPrimaryKey() {
 		String src = buildSrcNoPrimaryKey();
 		src += " let x = Flight[true].last()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 * FROM Flight as a");
 	}
@@ -179,7 +297,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testLastNoPrimaryKeyField() {
 		String src = buildSrcNoPrimaryKey();
 		src += " let x = Flight[true].field2.last()";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT TOP 1 a.field2 FROM Flight as a ORDER BY a.field2 desc");
 	}
@@ -188,7 +306,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testOrderBy() {
 		String src = buildSrc();
 		src += " let x = Flight[true].orderBy('field2')";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2");
 	}
@@ -196,7 +314,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	public void testOrderByLimitOffset() {
 		String src = buildSrc();
 		src += " let x = Flight[true].orderBy('field2').limit(4).offset(10)";
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 		
 		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2 LIMIT 4 OFFSET 10");
 	}
@@ -204,7 +322,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	@Test
 	public void test11Relation() {
 		String src = buildSrcOneToOne();
-		SelectStatementFragment selectFrag = buildSelectFragment(src); 
+		DeleteStatementFragment selectFrag = buildSelectFragment(src); 
 
 		//[1] SQL:             SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id  WHERE  a.id=?;  -- (55)
 		runAndChk(selectFrag, "SELECT * FROM Customer as a WHERE  a.id = ?");
@@ -220,7 +338,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	private ScalarValueBuilder builder;
 	private QueryDetails details = new QueryDetails();
 
-	private FragmentParser fragmentParser;
+	private DeleteFragmentParser fragmentParser;
 	
 
 	@Before
@@ -281,7 +399,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		return spec;
 	}
 
-	private FragmentParser createFragmentParser(String src) {
+	private DeleteFragmentParser createFragmentParser(String src) {
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
@@ -291,7 +409,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = createParser(dao); 
+		DeleteFragmentParser parser = createParser(dao); 
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
@@ -299,7 +417,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		return parser;
 	}
 
-	private FragmentParser createFragmentParser(DeliaDao dao, String src) {
+	private DeleteFragmentParser createFragmentParser(DeliaDao dao, String src) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -308,32 +426,32 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = createParser(dao); 
+		DeleteFragmentParser parser = createParser(dao); 
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
 		
 		return parser;
 	}
-	private FragmentParser createParser(DeliaDao dao) {
+	private DeleteFragmentParser createParser(DeliaDao dao) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
+		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}
 
-	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.render(selectFrag);
+	private void runAndChk(DeleteStatementFragment selectFrag, String expected) {
+		String sql = fragmentParser.renderDelete(selectFrag);
 		log.log(sql);
 		assertEquals(expected, sql);
 	}
 
-	private SelectStatementFragment buildSelectFragment(String src) {
+	private DeleteStatementFragment buildSelectFragment(String src) {
 		LetStatementExp letStatementExp = buildFromSrc(src);
 		QuerySpec spec= buildQuery((QueryExp) letStatementExp.value);
-		SelectStatementFragment selectFrag = fragmentParser.parseSelect(spec, details);
+		DeleteStatementFragment selectFrag = fragmentParser.parseDelete(spec, details);
 		return selectFrag;
 	}
 

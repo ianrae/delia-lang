@@ -103,6 +103,38 @@ import org.delia.util.DeliaExceptionHelper;
 		}
 		
 		protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
+			if (needJoinBase(spec, structType, selectFrag, details)) {
+				return true;
+			}
+			
+			if (selectFrag.joinFrag == null) {
+				return false;
+			}
+
+			String alias = savedJoinedFrag.joinTblFrag.alias;
+			
+			boolean mentioned = false;
+			if (selectFrag.orderByFrag != null) {
+				if (alias.equals(selectFrag.orderByFrag.alias)) {
+					mentioned = true;
+				}
+				for(OrderByFragment obff: selectFrag.orderByFrag.additionalL) {
+					if (alias.equals(obff.alias)) {
+						mentioned = true;
+						break;
+					}
+				}
+			}
+
+			
+			if (mentioned) {
+				log.log("need join..");
+				return true;
+			}
+			return false;
+		}
+		
+		protected boolean needJoinBase(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag, QueryDetails details) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "fetch");
 			QueryFuncExp qfexp2 = selectFnHelper.findFn(spec, "fks");
 			//TODO: later add fk
@@ -149,19 +181,6 @@ import org.delia.util.DeliaExceptionHelper;
 				}
 			}
 			
-			if (selectFrag.orderByFrag != null) {
-				if (alias.equals(selectFrag.orderByFrag.alias)) {
-					mentioned = true;
-				}
-				for(OrderByFragment obff: selectFrag.orderByFrag.additionalL) {
-					if (alias.equals(obff.alias)) {
-						mentioned = true;
-						break;
-					}
-				}
-			}
-
-			
 			if (mentioned) {
 				log.log("need join..");
 				return true;
@@ -169,7 +188,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return false;
 		}
 
-		protected void fixupForParentFields(DStructType structType, SelectStatementFragment selectFrag) {
+		protected void fixupForParentFields(DStructType structType, StatementFragmentBase selectFrag) {
 //			public List<FieldFragment> fieldL = new ArsrayList<>();
 //			public OrderByFragment orderByFrag = null;
 
@@ -193,7 +212,7 @@ import org.delia.util.DeliaExceptionHelper;
 
 		//SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE  a.addr < ?  -- (111)
 		//a.addr is parent. change to b.id
-		protected void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, SelectStatementFragment selectFrag) {
+		protected void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, StatementFragmentBase selectFrag) {
 			String fieldName = aliasFrag.name;
 			RelationOneRule oneRule = DRuleHelper.findOneRule(tblFrag.structType.getName(), fieldName, registry);
 			if (oneRule != null && oneRule.relInfo.isParent) {
@@ -210,7 +229,7 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 		}
 
-		protected void changeToChild(AliasedFragment aliasFrag, RelationInfo relInfo, SelectStatementFragment selectFrag) {
+		protected void changeToChild(AliasedFragment aliasFrag, RelationInfo relInfo, StatementFragmentBase selectFrag) {
 			TableFragment otherSide = selectFrag.aliasMap.get(relInfo.farType.getName());
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relInfo.farType);
 			log.log("fixup %s.%s -> %s.%s", aliasFrag.alias, aliasFrag.name, otherSide.alias, pair.name);
@@ -218,12 +237,12 @@ import org.delia.util.DeliaExceptionHelper;
 			aliasFrag.name = pair.name;
 		}
 
-		protected void addJoins(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
+		protected void addJoins(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag, QueryDetails details) {
 			fkHelper.generateFKsQuery(spec, details, structType, selectFrag, this);
 		}
 
 		@Override
-		public TableFragment createTable(DStructType structType, SelectStatementFragment selectFrag) {
+		public TableFragment createTable(DStructType structType, StatementFragmentBase selectFrag) {
 			TableFragment tblFrag = selectFrag.findByTableName(structType.getName());
 			if (tblFrag != null) {
 				return tblFrag;
@@ -237,7 +256,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return tblFrag;
 		}
 		@Override
-		public TableFragment createAssocTable(SelectStatementFragment selectFrag, String tableName) {
+		public TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName) {
 			TableFragment tblFrag = selectFrag.findByTableName(tableName);
 			if (tblFrag != null) {
 				return tblFrag;
@@ -317,7 +336,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return false;
 		}
 
-		protected void doLimitIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void doLimitIfPresent(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "limit");
 			if (qfexp == null) {
 				return;
@@ -434,7 +453,7 @@ import org.delia.util.DeliaExceptionHelper;
 			
 		}
 
-		protected void initFields(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+		protected void initFields(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 			
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {
@@ -462,7 +481,7 @@ import org.delia.util.DeliaExceptionHelper;
 			return structType;
 		}
 
-		protected FieldFragment buildStarFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
+		protected FieldFragment buildStarFieldFrag(DStructType structType, StatementFragmentBase selectFrag) {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);
 			if (pair == null) {
 				FieldFragment fieldF = FragmentHelper.buildEmptyFieldFrag(structType, selectFrag);
@@ -478,7 +497,7 @@ import org.delia.util.DeliaExceptionHelper;
 //			return FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
 //		}
 
-		public String render(SelectStatementFragment selectFrag) {
+		public String renderSelect(SelectStatementFragment selectFrag) {
 			selectFrag.statement.sql = selectFrag.render();
 			return selectFrag.statement.sql;
 		}

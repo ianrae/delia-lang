@@ -68,7 +68,7 @@ public class FKHelper extends ServiceBase {
 	}
 
 	public void generateFKsQuery(QuerySpec spec, QueryDetails details, DStructType structType, 
-				SelectStatementFragment selectFrag, TableFragmentMaker tableFragmentMaker) {
+				StatementFragmentBase selectFrag, TableFragmentMaker tableFragmentMaker) {
 		this.tableFragmentMaker = tableFragmentMaker;
 		QueryExp exp = spec.queryExp;
 		
@@ -254,7 +254,7 @@ public class FKHelper extends ServiceBase {
 	}
 
 	private void generateFKsQueryMany(QuerySpec spec, DStructType structType, QueryExp exp, TableFragment tbl, RelationManyRule rule, QueryDetails details, 
-			SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
+			StatementFragmentBase selectFrag, QueryAdjustment adjustment) {
 		TableFragment tbl2 = tableFragmentMaker.createTable(rule.relInfo.farType, selectFrag);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
@@ -286,7 +286,7 @@ public class FKHelper extends ServiceBase {
 	}
 
 	private void doManyToMany(QuerySpec spec, DStructType structType, QueryExp exp, RelationManyRule farRule, TableFragment tbl, TableFragment tbl2, RelationManyRule otherRule, 
-					QueryDetails details, SelectStatementFragment selectFrag, QueryAdjustment adjustment)  {
+					QueryDetails details, StatementFragmentBase selectFrag, QueryAdjustment adjustment)  {
 		RelationInfo info = farRule.relInfo;
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 
@@ -300,7 +300,7 @@ public class FKHelper extends ServiceBase {
 	}
 
 	private void genJoin(QuerySpec spec, DStructType structType, RelationInfo info, TableInfo tblinfo, TableFragment tbl, RelationManyRule otherRule, String assocField, 
-					String assocField2, QueryExp exp, SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
+					String assocField2, QueryExp exp, StatementFragmentBase selectFrag, QueryAdjustment adjustment) {
 		TableFragment tblAssoc = tableFragmentMaker.createAssocTable(selectFrag, tblinfo.assocTblName);
 		TypePair copy = new TypePair(assocField, null);
 		//TODO: fix adjustment
@@ -324,7 +324,7 @@ public class FKHelper extends ServiceBase {
 
 
 	private void genFields(DStructType structType, TableFragment tbl, TableFragment tbl2, String fieldName, TypePair nearField, 
-			SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
+			StatementFragmentBase selectFrag, QueryAdjustment adjustment) {
 		//			sql = "SELECT c.id,a.id as addr FROM Customer as c JOIN Address as a ON a.cust=c.id WHERE c.id=55";
 		
 //		boolean haveDoneCount = false;

@@ -50,7 +50,7 @@ public class FragmentParserTests extends NewBDDBase {
 		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 		
-		String sql = parser.render(selectFrag);
+		String sql = parser.renderSelect(selectFrag);
 		log.log(sql);
 		assertEquals("SELECT * FROM Flight as a WHERE  a.field1 = ?", sql);
 	}
@@ -63,7 +63,7 @@ public class FragmentParserTests extends NewBDDBase {
 		QuerySpec spec= buildAllRowsQuery("Flight");
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 		
-		String sql = parser.render(selectFrag);
+		String sql = parser.renderSelect(selectFrag);
 		assertEquals("SELECT * FROM Flight as a", sql);
 	}
 	
@@ -313,7 +313,7 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 
 	private void runAndChk(SelectStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.render(selectFrag);
+		String sql = fragmentParser.renderSelect(selectFrag);
 		log.log(sql);
 		assertEquals(expected, sql);
 	}

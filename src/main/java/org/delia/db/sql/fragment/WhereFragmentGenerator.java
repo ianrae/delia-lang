@@ -60,11 +60,11 @@ public class WhereFragmentGenerator extends ServiceBase {
 	}
 
 
-	public void addWhereClauseOp(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
+	public void addWhereClauseOp(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 		doAddWhereClauseOp(spec, structType, selectFrag.statement, selectFrag);
 	}
 
-	public void addWhereClausePrimaryKey(QuerySpec spec, FilterExp filter, DStructType structType, SelectStatementFragment selectFrag) {
+	public void addWhereClausePrimaryKey(QuerySpec spec, FilterExp filter, DStructType structType, StatementFragmentBase selectFrag) {
 		if (filter != null) {
 			TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(structType);
 			if (keyPair == null) {
@@ -115,7 +115,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 
 	
 	//------------------------------
-	protected void doAddWhereClauseOp(QuerySpec spec, DStructType structType, SqlStatement statement, SelectStatementFragment selectFrag) {
+	protected void doAddWhereClauseOp(QuerySpec spec, DStructType structType, SqlStatement statement, StatementFragmentBase selectFrag) {
 		FilterExp filter = spec.queryExp.filter;
 		String typeName = structType.getName();
 		
@@ -128,7 +128,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 			//sc.o("JJJJJJJJJJJJJJJ"); //TODO
 		}
 	}
-	public void addWhereClauseOpFromPhrase(QuerySpec spec, WhereExpression express, SqlStatement statement, SelectStatementFragment selectFrag) {
+	public void addWhereClauseOpFromPhrase(QuerySpec spec, WhereExpression express, SqlStatement statement, StatementFragmentBase selectFrag) {
 		OpFragment opFrag = null;
 		
 		if (express instanceof WherePhrase) {
@@ -144,7 +144,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 			selectFrag.whereL.add(opFrag);
 		}
 	}
-	protected OpFragment doInPhrase(InPhrase phrase, SqlStatement statement, SelectStatementFragment selectFrag) {
+	protected OpFragment doInPhrase(InPhrase phrase, SqlStatement statement, StatementFragmentBase selectFrag) {
 		String op1 = operandToSql(phrase.op1, statement);
 		StringJoiner joiner = new StringJoiner(",");
 		for(Exp exp: phrase.valueL) {
@@ -178,7 +178,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		
 	}
 
-	protected OpFragment doLogicalPhrase(LogicalPhrase lphrase, SqlStatement statement, SelectStatementFragment selectFrag) {
+	protected OpFragment doLogicalPhrase(LogicalPhrase lphrase, SqlStatement statement, StatementFragmentBase selectFrag) {
 		OpFragment frag1 = doWherePhrase((WherePhrase) lphrase.express1, statement, selectFrag);
 		OpFragment frag2 = doWherePhrase((WherePhrase) lphrase.express2, statement, selectFrag);
 		
@@ -190,7 +190,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		return opFrag;
 	}
 
-	protected OpFragment doWherePhrase(WherePhrase phrase, SqlStatement statement, SelectStatementFragment selectFrag) {
+	protected OpFragment doWherePhrase(WherePhrase phrase, SqlStatement statement, StatementFragmentBase selectFrag) {
 		String op = opToSql(phrase.op);
 		adjustYearStuff(phrase.op1, phrase.op2);
 
@@ -235,7 +235,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 	}
 
 
-	private void doImplicitFetchIfNeeded(WhereOperand op1, TableFragment tbl, SelectStatementFragment selectFrag) {
+	private void doImplicitFetchIfNeeded(WhereOperand op1, TableFragment tbl, StatementFragmentBase selectFrag) {
 		String possibleFieldName = this.getColumnName(op1.exp);
 		if (possibleFieldName != null) {
 			if (DValueHelper.fieldExists(tbl.structType, possibleFieldName)) {

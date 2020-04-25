@@ -4,7 +4,7 @@ import org.delia.type.DStructType;
 
 public interface TableFragmentMaker {
 
-	TableFragment createTable(DStructType structType, SelectStatementFragment selectFrag);
-	TableFragment createAssocTable(SelectStatementFragment selectFrag, String tableName);
+	TableFragment createTable(DStructType structType, StatementFragmentBase selectFrag);
+	TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName);
 
 }

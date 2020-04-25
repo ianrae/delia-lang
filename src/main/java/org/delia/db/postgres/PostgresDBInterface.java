@@ -105,7 +105,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			FragmentParser parser = new PostgresFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
 			whereGen.tableFragmentMaker = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
-			parser.render(selectFrag);
+			parser.renderSelect(selectFrag);
 			statement = selectFrag.statement;
 		} else if (qtx.loadFKs) {
 			createTableCreator(dbctx);
