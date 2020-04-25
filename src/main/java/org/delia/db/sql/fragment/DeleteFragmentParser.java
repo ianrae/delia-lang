@@ -28,7 +28,7 @@ public class DeleteFragmentParser extends FragmentParserBase {
 			TableFragment tblFrag = createTable(structType, selectFrag);
 			selectFrag.tblFrag = tblFrag;
 			
-			initFields(spec, structType, selectFrag);
+			initFieldsAndWhere(spec, structType, selectFrag);
 //			addJoins(spec, structType, selectFrag, details);
 
 			generateDeleteFns(spec, structType, selectFrag);

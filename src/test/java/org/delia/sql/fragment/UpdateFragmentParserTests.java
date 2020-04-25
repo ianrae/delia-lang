@@ -35,7 +35,6 @@ import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.SimpleErrorTracker;
@@ -51,6 +50,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +61,6 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	public static class UpdateStatementFragment extends SelectStatementFragment {
 
 		//parallel arrays
-//		public List<String> setNamesL = new ArrayList<>();
 		public List<String> setValuesL = new ArrayList<>();
 		
 		@Override
@@ -124,7 +123,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 			selectFrag.tblFrag = tblFrag;
 
 			generateSetFields(spec, structType, selectFrag, partialVal);
-			initFields(spec, structType, selectFrag);
+			initFieldsAndWhere(spec, structType, selectFrag);
 			
 			//no min,max,etc in UPDATE
 
@@ -140,12 +139,6 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 				}
 			}
 
-			if (selectFrag.fieldL.isEmpty()) {
-				FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
-				selectFrag.fieldL.add(fieldF);
-			}
-
-
 			return selectFrag;
 		}
 
@@ -155,10 +148,12 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 			
 			int index = selectFrag.fieldL.size(); //setValuesL is parallel array to fieldL
 			if (index != 0) {
+				
 				log.log("WHY FILLING INNNNNNNNN");
 				for(int i = 0; i < index; i++) {
 					selectFrag.setValuesL.add("????");
 				}
+				DeliaExceptionHelper.throwError("unexpeced-fields-in-update", "should not occur");
 			}
 			
 			for(String fieldName: partialVal.asMap().keySet()) {
@@ -179,30 +174,30 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 				return true;
 			}
 
-			if (selectFrag.joinFrag == null) {
-				return false;
-			}
-
-			String alias = savedJoinedFrag.joinTblFrag.alias;
-
-			boolean mentioned = false;
-			if (selectFrag.orderByFrag != null) {
-				if (alias.equals(selectFrag.orderByFrag.alias)) {
-					mentioned = true;
-				}
-				for(OrderByFragment obff: selectFrag.orderByFrag.additionalL) {
-					if (alias.equals(obff.alias)) {
-						mentioned = true;
-						break;
-					}
-				}
-			}
-
-
-			if (mentioned) {
-				log.log("need join..");
-				return true;
-			}
+//			if (selectFrag.joinFrag == null) {
+//				return false;
+//			}
+//
+//			String alias = savedJoinedFrag.joinTblFrag.alias;
+//
+//			boolean mentioned = false;
+//			if (selectFrag.orderByFrag != null) {
+//				if (alias.equals(selectFrag.orderByFrag.alias)) {
+//					mentioned = true;
+//				}
+//				for(OrderByFragment obff: selectFrag.orderByFrag.additionalL) {
+//					if (alias.equals(obff.alias)) {
+//						mentioned = true;
+//						break;
+//					}
+//				}
+//			}
+//
+//
+//			if (mentioned) {
+//				log.log("need join..");
+//				return true;
+//			}
 			return false;
 		}
 
@@ -233,42 +228,52 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		}
 	}	
 
-//	@Test
-//	public void testPrimaryKey() {
-//		String src = buildSrc();
-//		UpdateFragmentParser parser = createFragmentParser(src); 
-//
-//		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
-//		UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details);
-//
-//		String sql = parser.renderSelect(selectFrag);
-//		log.log(sql);
-////		UPDATE table_name SET field2 = value1, field3 = value2, ... WHERE condition;		
-//		assertEquals("UPDATE Flight as a SET field2=4 WHERE  a.field1 = ?", sql);
-//	}
-//
-//	@Test
-//	public void testAllRows() {
-//		String src = buildSrc();
-//		UpdateFragmentParser parser = createFragmentParser(src); 
-//
-//		QuerySpec spec= buildAllRowsQuery("Flight");
-//		UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details);
-//
-//		String sql = parser.renderSelect(selectFrag);
-//		assertEquals("SELECT * FROM Flight as a", sql);
-//	}
-//
-//	@Test
-//	public void testOp() {
-//		String src = buildSrc();
-//		fragmentParser = createFragmentParser(src); 
-//
-//		QuerySpec spec= buildOpQuery("Flight", "field2", 10);
-//		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details);
-//
-//		runAndChk(selectFrag, "SELECT * FROM Flight as a WHERE  a.field2 = ?");
-//	}
+	@Test
+	public void testPrimaryKey() {
+		String src = buildSrc();
+		src += " update Flight[1] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 = ?");
+	}
+
+	@Test
+	public void testAllRows() {
+		String src = buildSrc();
+		src += " update Flight[true] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
+	}
+
+	@Test
+	public void testOp() {
+		String src = buildSrc();
+		src += " update Flight[field1 > 0] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 > ?");
+	}
+	@Test
+	public void testOpNoPrimaryKey() {
+		String src = buildSrcNoPrimaryKey();
+		src += " update Flight[field1 > 0] {field2: 111}";
+		
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 > ?");
+	}
 
 	@Test
 	public void testBasic() {
@@ -276,14 +281,19 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		src += " update Flight[1] {field2: 111}";
 		
 		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-		DStructType structType = (DStructType) registry.getType("Flight");
-		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
-		assertEquals(0, cres.localET.errorCount());
-		
-		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, cres.dval); 
+		DValue dval = convertToDVal(updateStatementExp);
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 = ?");
 	}
+	private DValue convertToDVal(UpdateStatementExp updateStatementExp) {
+		DStructType structType = (DStructType) registry.getType("Flight");
+		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
+		assertEquals(0, cres.localET.errorCount());
+		return cres.dval;
+	}
+	
+//TODO: support orderBy
 //	@Test
 //	public void testOrderBy() {
 //		String src = buildSrc();
@@ -292,15 +302,22 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 //
 //		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2");
 //	}
+	
+	//TODO: support limit
 //	@Test
 //	public void testOrderByLimit() {
 //		String src = buildSrc();
-//		src += " let x = Flight[true].orderBy('field2').limit(4).offset(10)";
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(src); 
-//
-//		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2 LIMIT 4 OFFSET 10");
+//		src += " update Flight[true].limit(4) {field2: 111}";
+//		
+//		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+//		DValue dval = convertToDVal(updateStatementExp);
+//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+//		
+//		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
 //	}
-//
+
+
+	//TODO: support relations
 //	@Test
 //	public void test11Relation() {
 //		String src = buildSrcOneToOne();
@@ -317,7 +334,6 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	private DTypeRegistry registry;
 	private Runner runner;
 	private QueryBuilderService queryBuilderSvc;
-	private ScalarValueBuilder builder;
 	private QueryDetails details = new QueryDetails();
 
 	private UpdateFragmentParser fragmentParser;
@@ -345,58 +361,23 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
 	}
-	private String buildSrcOneToOne() {
-		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one parent } end";
-		src += "\n type Address struct {id int unique, relation cust Customer optional one } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Address {id: 100, cust: 55 }";
-		src += "\n  update Customer[55] {wid: 333}";
-		return src;
-	}
+//	private String buildSrcOneToOne() {
+//		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one parent } end";
+//		src += "\n type Address struct {id int unique, relation cust Customer optional one } end";
+//		src += "\n  insert Customer {id: 55, wid: 33}";
+//		src += "\n  insert Address {id: 100, cust: 55 }";
+//		src += "\n  update Customer[55] {wid: 333}";
+//		return src;
+//	}
 
 	@Override
 	public DBInterface createForTest() {
 		return new MemDBInterface();
 	}
 
-	private QuerySpec buildPrimaryKeyQuery(String typeName, int id) {
-		DValue dval = builder.buildInt(id);
-		QueryExp exp = queryBuilderSvc.createPrimaryKeyQuery(typeName, dval);
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
-	}
-	private QuerySpec buildAllRowsQuery(String typeName) {
-		QueryExp exp = queryBuilderSvc.createAllRowsQuery(typeName);
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
-	}
-	private QuerySpec buildOpQuery(String typeName, String fieldName, int wid) {
-		DValue dval = builder.buildInt(wid);
-		QueryExp exp = queryBuilderSvc.createEqQuery(typeName, fieldName, dval);
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
-	}
 	private QuerySpec buildQuery(QueryExp exp) {
 		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
 		return spec;
-	}
-
-	private UpdateFragmentParser createFragmentParser(String src) {
-		DeliaDao dao = createDao(); 
-		boolean b = dao.initialize(src);
-		assertEquals(true, b);
-
-		this.delia = dao.getDelia();
-		this.factorySvc = delia.getFactoryService();
-		this.registry = dao.getRegistry();
-		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
-
-		UpdateFragmentParser parser = createParser(dao); 
-
-		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
-		this.builder = factorySvc.createScalarValueBuilder(registry);
-
-		return parser;
 	}
 
 	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src) {
@@ -409,9 +390,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 
 		UpdateFragmentParser parser = createParser(dao); 
-
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
-		this.builder = factorySvc.createScalarValueBuilder(registry);
 
 		return parser;
 	}
@@ -454,11 +433,6 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		return updateStatementExp;
 	}
 
-	private void chkParamInt(SqlStatement statement, int n, int expected) {
-		assertEquals(n, statement.paramL.size());
-		assertEquals(expected, statement.paramL.get(n-1).asInt());
-	}
-	
 	private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
 		ConversionResult cres = new ConversionResult();
 		cres.localET = new SimpleErrorTracker(log);

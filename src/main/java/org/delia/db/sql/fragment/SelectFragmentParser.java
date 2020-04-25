@@ -37,7 +37,7 @@ public class SelectFragmentParser extends FragmentParserBase {
 		TableFragment tblFrag = createTable(structType, selectFrag);
 		selectFrag.tblFrag = tblFrag;
 
-		initFields(spec, structType, selectFrag);
+		initFieldsAndWhere(spec, structType, selectFrag);
 		//			addJoins(spec, structType, selectFrag, details);
 		addFns(spec, structType, selectFrag);
 

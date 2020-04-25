@@ -227,7 +227,7 @@ import org.delia.util.DeliaExceptionHelper;
 			
 		}
 
-		protected void initFields(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
+		protected void initFieldsAndWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 			
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {
