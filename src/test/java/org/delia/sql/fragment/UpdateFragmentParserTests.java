@@ -207,6 +207,8 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
+		
 		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
 	}
 	@Test

@@ -45,8 +45,8 @@ import org.delia.util.DeliaExceptionHelper;
 			selectFrag.tblFrag = tblFrag;
 
 			generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
-			generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
 			initFieldsAndWhere(spec, structType, selectFrag);
+			generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
 			
 			//no min,max,etc in UPDATE
 
@@ -64,6 +64,9 @@ import org.delia.util.DeliaExceptionHelper;
 			
 			if (! useAliases) {
 				removeAllAliases(selectFrag);
+				if (selectFrag.assocUpdateFrag != null) {
+					removeAllAliases(selectFrag.assocUpdateFrag);
+				}
 			}
 
 			return selectFrag;
@@ -156,35 +159,46 @@ import org.delia.util.DeliaExceptionHelper;
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, fieldName);
 				if (ruleMany != null) {
 					RelationInfo info = ruleMany.relInfo;
-					TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 					selectFrag.assocUpdateFrag = new UpdateStatementFragment();
-					selectFrag.assocUpdateFrag.tblFrag = this.createAssocTable(selectFrag.assocUpdateFrag, tblinfo.assocTblName);
-					//update assoctabl set leftv=x, rightv=y where leftv=x
-					
-					TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName);
-					DRelation drel = mmMap.get(fieldName);
-					DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
-					
-					TypePair leftPair = new TypePair("leftv", pair1.type);
-					FieldFragment ff = FragmentHelper.buildFieldFragForTable(selectFrag.assocUpdateFrag.tblFrag, selectFrag.assocUpdateFrag, leftPair);
-					String valstr = dvalToUse == null ? null : dvalToUse.asString();
-					selectFrag.assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-					selectFrag.assocUpdateFrag.fieldL.add(ff);
-					
-					TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-					RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
-					TypePair pair2 = DValueHelper.findField(info.farType, farInfo.fieldName);
-					TypePair rightPair = new TypePair("rightv", pair2.type);
-					ff = FragmentHelper.buildFieldFragForTable(selectFrag.assocUpdateFrag.tblFrag, selectFrag.assocUpdateFrag, rightPair);
-					valstr = dvalToUse == null ? null : dvalToUse.asString();
-					selectFrag.assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-					selectFrag.assocUpdateFrag.fieldL.add(ff);
+					genAssocField(selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info);
 				}
 			}
 		}
 
-		
-		
+		private void genAssocField(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info) {
+			//update assoctabl set leftv=x where rightv=y
+			TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+			assocUpdateFrag.tblFrag = this.createAssocTable(assocUpdateFrag, tblinfo.assocTblName);
+			
+			if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
+				TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName);
+				DRelation drel = mmMap.get(fieldName);
+				DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+				
+				TypePair leftPair = new TypePair("leftv", pair1.type);
+				FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, leftPair);
+				String valstr = dvalToUse == null ? null : dvalToUse.asString();
+				assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+				assocUpdateFrag.fieldL.add(ff);
+				
+				TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+//				RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
+//				TypePair pair2 = DValueHelper.findField(info.farType, farInfo.fieldName);
+//				TypePair rightPair = new TypePair("rightv", pair2.type);
+//				ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
+//				valstr = dvalToUse == null ? null : dvalToUse.asString();
+//				assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+//				assocUpdateFrag.fieldL.add(ff);
+				
+				OpFragment opFrag = new OpFragment("=");
+				opFrag.left = FragmentHelper.buildAliasedFrag(null, "rightv");
+				opFrag.right = FragmentHelper.buildAliasedFrag(null, "999999999");
+				assocUpdateFrag.whereL.add(opFrag);
+				log.log("jjjjjjjjjjjjjjjjjj");
+			} else {
+				//DDDD
+			}
+		}
 
 		protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			if (needJoinBase(spec, structType, selectFrag, details)) {
