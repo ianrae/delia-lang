@@ -45,7 +45,7 @@ public class FKHelper extends ServiceBase {
 //	private WhereFragmentGenerator pwheregen;
 //	private SqlHelperFactory sqlHelperFactory;
 	private SelectFuncHelper selectFnHelper;
-private FragmentParser fragmentParser;
+	private TableFragmentMaker tableFragmentMaker;
 
 	public FKHelper(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
 			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc) {
@@ -68,8 +68,8 @@ private FragmentParser fragmentParser;
 	}
 
 	public void generateFKsQuery(QuerySpec spec, QueryDetails details, DStructType structType, 
-				SelectStatementFragment selectFrag, FragmentParser fragmentParser) {
-		this.fragmentParser = fragmentParser;
+				SelectStatementFragment selectFrag, TableFragmentMaker tableFragmentMaker) {
+		this.tableFragmentMaker = tableFragmentMaker;
 		QueryExp exp = spec.queryExp;
 		
 		TableFragment tbl = selectFrag.tblFrag;
@@ -106,7 +106,7 @@ private FragmentParser fragmentParser;
 			//sc.o("SELECT %s FROM %s as %s", fields, tbl.name, tbl.alias);
 			
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
-			TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
+			TableFragment tbl2 = tableFragmentMaker.createTable(rule.relInfo.farType, selectFrag);
 			JoinFragment joinFrag = new JoinFragment();
 			joinFrag.joinTblFrag = tbl2;
 			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, rule.relInfo.fieldName);
@@ -114,7 +114,7 @@ private FragmentParser fragmentParser;
 			selectFrag.joinFrag = joinFrag;
 			return;
 		} 
-		TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
+		TableFragment tbl2 = tableFragmentMaker.createTable(rule.relInfo.farType, selectFrag);
 
 		TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 		genFields(structType, tbl, tbl2, rule.relInfo.fieldName, nearField, selectFrag, adjustment);
@@ -255,7 +255,7 @@ private FragmentParser fragmentParser;
 
 	private void generateFKsQueryMany(QuerySpec spec, DStructType structType, QueryExp exp, TableFragment tbl, RelationManyRule rule, QueryDetails details, 
 			SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
-		TableFragment tbl2 = fragmentParser.createTable(rule.relInfo.farType, selectFrag);
+		TableFragment tbl2 = tableFragmentMaker.createTable(rule.relInfo.farType, selectFrag);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
 //		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
@@ -301,7 +301,7 @@ private FragmentParser fragmentParser;
 
 	private void genJoin(QuerySpec spec, DStructType structType, RelationInfo info, TableInfo tblinfo, TableFragment tbl, RelationManyRule otherRule, String assocField, 
 					String assocField2, QueryExp exp, SelectStatementFragment selectFrag, QueryAdjustment adjustment) {
-		TableFragment tblAssoc = fragmentParser.createAssocTable(selectFrag, tblinfo.assocTblName);
+		TableFragment tblAssoc = tableFragmentMaker.createAssocTable(selectFrag, tblinfo.assocTblName);
 		TypePair copy = new TypePair(assocField, null);
 		//TODO: fix adjustment
 		genFields(structType, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, selectFrag, adjustment);

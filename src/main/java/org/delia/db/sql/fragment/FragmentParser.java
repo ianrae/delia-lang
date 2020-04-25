@@ -32,7 +32,7 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 //single use!!!
-	public class FragmentParser extends ServiceBase {
+	public class FragmentParser extends ServiceBase implements TableFragmentMaker {
 		protected int nextAliasIndex = 0;
 		protected QueryTypeDetector queryDetectorSvc;
 		protected DTypeRegistry registry;
@@ -222,6 +222,7 @@ import org.delia.util.DeliaExceptionHelper;
 			fkHelper.generateFKsQuery(spec, details, structType, selectFrag, this);
 		}
 
+		@Override
 		public TableFragment createTable(DStructType structType, SelectStatementFragment selectFrag) {
 			TableFragment tblFrag = selectFrag.findByTableName(structType.getName());
 			if (tblFrag != null) {
@@ -235,6 +236,7 @@ import org.delia.util.DeliaExceptionHelper;
 			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 			return tblFrag;
 		}
+		@Override
 		public TableFragment createAssocTable(SelectStatementFragment selectFrag, String tableName) {
 			TableFragment tblFrag = selectFrag.findByTableName(tableName);
 			if (tblFrag != null) {
@@ -304,7 +306,7 @@ import org.delia.util.DeliaExceptionHelper;
 				selectFrag.orderByFrag.additionalL.add(tmp);
 			}
 		}
-		private boolean areEqualOrderBy(OrderByFragment orderByFrag, OrderByFragment frag) {
+		protected boolean areEqualOrderBy(OrderByFragment orderByFrag, OrderByFragment frag) {
 			if((frag.alias != null &&frag.alias.equals(orderByFrag.alias)) && frag.name.equals(orderByFrag.name)) {
 				if (frag.asc != null && frag.asc.equals(orderByFrag.asc)) {
 					return true;

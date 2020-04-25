@@ -46,7 +46,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 	private FilterFnRunner filterRunner;
 	private ValueHelper valueHelper;
 	private VarEvaluator varEvaluator;
-	public FragmentParser fragmentParser;
+	public TableFragmentMaker tableFragmentMaker;
 
 	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
@@ -245,7 +245,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 					TableFragment otherTbl = selectFrag.findByTableName(farType.getName());
 					if (otherTbl == null) {
 						log.log("implicit(one) fetch %s.%s", farType.getName(), possibleFieldName);
-						fragmentParser.createTable(farType, selectFrag);
+						tableFragmentMaker.createTable(farType, selectFrag);
 					}
 				}
 				
@@ -255,7 +255,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 					TableFragment otherTbl = selectFrag.findByTableName(farType.getName());
 					if (otherTbl == null) {
 						log.log("implicit(many) fetch %s.%s", farType.getName(), possibleFieldName);
-						fragmentParser.createTable(farType, selectFrag);
+						tableFragmentMaker.createTable(farType, selectFrag);
 					}
 				}
 			}

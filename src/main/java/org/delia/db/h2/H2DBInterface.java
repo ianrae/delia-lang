@@ -99,7 +99,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParser parser = new FragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
-			whereGen.fragmentParser = parser;
+			whereGen.tableFragmentMaker = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 			parser.render(selectFrag);
 			statement = selectFrag.statement;

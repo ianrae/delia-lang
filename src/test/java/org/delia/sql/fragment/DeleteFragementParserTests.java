@@ -33,6 +33,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -40,7 +41,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class FragmentParserTests extends NewBDDBase {
+public class DeleteFragementParserTests extends NewBDDBase {
+	
+	public static class DeleteFragmentParser extends FragmentParser {
+
+		public DeleteFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator,
+				List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory,
+				WhereFragmentGenerator whereGen) {
+			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
+			// TODO Auto-generated constructor stub
+		}
+		
+	}
 	
 	@Test
 	public void testPrimaryKey() {
