@@ -9,8 +9,11 @@ import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
+import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -42,6 +45,7 @@ import org.delia.util.DeliaExceptionHelper;
 			selectFrag.tblFrag = tblFrag;
 
 			generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
+			generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
 			initFieldsAndWhere(spec, structType, selectFrag);
 			
 			//no min,max,etc in UPDATE
@@ -49,14 +53,14 @@ import org.delia.util.DeliaExceptionHelper;
 			generateUpdateFns(spec, structType, selectFrag);
 
 			fixupForParentFields(structType, selectFrag);
-			if (needJoin(spec, structType, selectFrag, details)) {
-				//used saved join if we have one
-				if (savedJoinedFrag == null) {
-					addJoins(spec, structType, selectFrag, details);
-				} else {
-					selectFrag.joinFrag = savedJoinedFrag;
-				}
-			}
+//			if (needJoin(spec, structType, selectFrag, details)) {
+//				//used saved join if we have one
+//				if (savedJoinedFrag == null) {
+//					addJoins(spec, structType, selectFrag, details);
+//				} else {
+//					selectFrag.joinFrag = savedJoinedFrag;
+//				}
+//			}
 			
 			if (! useAliases) {
 				removeAllAliases(selectFrag);
@@ -142,6 +146,45 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 			return false;
 		}
+		private void generateAssocUpdateIfNeeded(QuerySpec spec, DStructType structType,
+				UpdateStatementFragment selectFrag, Map<String, DRelation> mmMap) {
+			if (mmMap.isEmpty()) {
+				return;
+			}
+			
+			for(String fieldName: mmMap.keySet()) {
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, fieldName);
+				if (ruleMany != null) {
+					RelationInfo info = ruleMany.relInfo;
+					TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+					selectFrag.assocUpdateFrag = new UpdateStatementFragment();
+					selectFrag.assocUpdateFrag.tblFrag = this.createAssocTable(selectFrag.assocUpdateFrag, tblinfo.assocTblName);
+					//update assoctabl set leftv=x, rightv=y where leftv=x
+					
+					TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName);
+					DRelation drel = mmMap.get(fieldName);
+					DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+					
+					TypePair leftPair = new TypePair("leftv", pair1.type);
+					FieldFragment ff = FragmentHelper.buildFieldFragForTable(selectFrag.assocUpdateFrag.tblFrag, selectFrag.assocUpdateFrag, leftPair);
+					String valstr = dvalToUse == null ? null : dvalToUse.asString();
+					selectFrag.assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+					selectFrag.assocUpdateFrag.fieldL.add(ff);
+					
+					TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+					RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
+					TypePair pair2 = DValueHelper.findField(info.farType, farInfo.fieldName);
+					TypePair rightPair = new TypePair("rightv", pair2.type);
+					ff = FragmentHelper.buildFieldFragForTable(selectFrag.assocUpdateFrag.tblFrag, selectFrag.assocUpdateFrag, rightPair);
+					valstr = dvalToUse == null ? null : dvalToUse.asString();
+					selectFrag.assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+					selectFrag.assocUpdateFrag.fieldL.add(ff);
+				}
+			}
+		}
+
+		
+		
 
 		protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			if (needJoinBase(spec, structType, selectFrag, details)) {

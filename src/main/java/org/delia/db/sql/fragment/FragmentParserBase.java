@@ -44,13 +44,14 @@ import org.delia.util.DeliaExceptionHelper;
 		protected TableExistenceServiceImpl existSvc;
 		protected FKHelper fkHelper;
 		protected JoinFragment savedJoinedFrag;
+		protected List<TableInfo> tblinfoL;
 		
 		public FragmentParserBase(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 			super(factorySvc);
 			this.registry = registry;
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
-			
+			this.tblinfoL = tblinfoL;
 //			this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
 //			this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc);
 //			this.filterRunner = new FilterFnRunner(registry);

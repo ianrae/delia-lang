@@ -188,26 +188,37 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	}
 	
 	@Test
-	public void testManyToManyLeft() {
-		String src = buildSrc();
-		src += " zzzzzzzzzzzzzzzzupdate Flight[true] {field2: 111}";
-		
+	public void testManyToMany() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[55] {wid: 333}";
+
 		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-		DValue dval = convertToDVal(updateStatementExp);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
 	}
 	@Test
-	public void testManyToManyRight() {
-		String src = buildSrc();
-		src += " zzzzzzzzzzzupdate Flight[true] {field2: 111}";
-		
+	public void testManyToManyParent() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[55] {wid: 333, addr:100}";
+
 		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-		DValue dval = convertToDVal(updateStatementExp);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+	}
+	@Test
+	public void testManyToManyChild() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Address[100] {z: 6, cust:55}";
+
+		UpdateStatementExp updateStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
 	}
 	
 //TODO: support orderBy
@@ -293,6 +304,14 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		src += "\n  insert Address {id: 101, z:6, cust: 55 }";
 		return src;
 	}
+	private String buildSrcManyToMany() {
+		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
+		src += "\n type Address struct {id int unique, z int, relation cust Customer optional many } end";
+		src += "\n  insert Customer {id: 55, wid: 33}";
+		src += "\n  insert Customer {id: 56, wid: 34}";
+		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
+		return src;
+	}
 
 	@Override
 	public DBInterface createForTest() {
@@ -320,11 +339,22 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 	}
 	private UpdateFragmentParser createParser(DeliaDao dao) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
-		List<TableInfo> tblinfoL = new ArrayList<>();		
+		List<TableInfo> tblinfoL = createTblInfoL(); 
+		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
+	}
+
+	private List<TableInfo> createTblInfoL() {
+		List<TableInfo> tblinfoL = new ArrayList<>();
+		TableInfo info = new  TableInfo("Address", "AddressCustomerAssoc");
+		info.tbl1 = "Address";
+		info.tbl2 = "Customer";
+		//public String fieldName;
+		tblinfoL.add(info);
+		return tblinfoL;
 	}
 
 	private void runAndChk(UpdateStatementFragment selectFrag, String expected) {
