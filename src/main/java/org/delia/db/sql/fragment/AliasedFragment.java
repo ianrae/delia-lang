@@ -20,4 +20,11 @@ public class AliasedFragment implements SqlFragment {
 		}
 		return String.format("%s.%s", alias, name);
 	}
+	
+	public String renderAsAliasedFrag() {
+		if (StringUtils.isEmpty(alias)) {
+			return name;
+		}
+		return String.format("%s.%s", alias, name);
+	}
 }
