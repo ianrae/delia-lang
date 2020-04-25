@@ -30,7 +30,7 @@ import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.fragment.FieldFragment;
-import org.delia.db.sql.fragment.FragmentParser;
+import org.delia.db.sql.fragment.FragmentParserBase;
 import org.delia.db.sql.fragment.JoinFragment;
 import org.delia.db.sql.fragment.LimitFragment;
 import org.delia.db.sql.fragment.OffsetFragment;
@@ -121,7 +121,7 @@ public class DeleteFragementParserTests extends NewBDDBase {
 
 	}	
 	
-	public static class DeleteFragmentParser extends FragmentParser {
+	public static class DeleteFragmentParser extends FragmentParserBase {
 
 		public DeleteFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator,
 				List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory,

@@ -26,7 +26,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.db.sql.fragment.FragmentParser;
+import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -45,7 +45,7 @@ public class FragmentParserTests extends NewBDDBase {
 	@Test
 	public void testPrimaryKey() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); 
+		SelectFragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildPrimaryKeyQuery("Flight", 1);
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
@@ -58,7 +58,7 @@ public class FragmentParserTests extends NewBDDBase {
 	@Test
 	public void testAllRows() {
 		String src = buildSrc();
-		FragmentParser parser = createFragmentParser(src); 
+		SelectFragmentParser parser = createFragmentParser(src); 
 		
 		QuerySpec spec= buildAllRowsQuery("Flight");
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
@@ -208,7 +208,7 @@ public class FragmentParserTests extends NewBDDBase {
 	private ScalarValueBuilder builder;
 	private QueryDetails details = new QueryDetails();
 
-	private FragmentParser fragmentParser;
+	private SelectFragmentParser fragmentParser;
 	
 
 	@Before
@@ -269,7 +269,7 @@ public class FragmentParserTests extends NewBDDBase {
 		return spec;
 	}
 
-	private FragmentParser createFragmentParser(String src) {
+	private SelectFragmentParser createFragmentParser(String src) {
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
@@ -279,7 +279,7 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = createParser(dao); 
+		SelectFragmentParser parser = createParser(dao); 
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
@@ -287,7 +287,7 @@ public class FragmentParserTests extends NewBDDBase {
 		return parser;
 	}
 
-	private FragmentParser createFragmentParser(DeliaDao dao, String src) {
+	private SelectFragmentParser createFragmentParser(DeliaDao dao, String src) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -296,18 +296,18 @@ public class FragmentParserTests extends NewBDDBase {
 		this.registry = dao.getRegistry();
 		this.runner = new RunnerImpl(factorySvc, dao.getDbInterface());
 		
-		FragmentParser parser = createParser(dao); 
+		SelectFragmentParser parser = createParser(dao); 
 		
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
 		this.builder = factorySvc.createScalarValueBuilder(registry);
 		
 		return parser;
 	}
-	private FragmentParser createParser(DeliaDao dao) {
+	private SelectFragmentParser createParser(DeliaDao dao) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		FragmentParser parser = new FragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
+		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}

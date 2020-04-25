@@ -8,9 +8,9 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
-import org.delia.db.sql.fragment.FragmentParser;
 import org.delia.db.sql.fragment.LimitFragment;
 import org.delia.db.sql.fragment.OrderByFragment;
+import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.table.TableInfo;
@@ -22,7 +22,7 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 //single use!!!
-	public class PostgresFragmentParser extends FragmentParser {
+	public class PostgresFragmentParser extends SelectFragmentParser {
 		
 		public PostgresFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {

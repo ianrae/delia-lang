@@ -22,9 +22,9 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 //single use!!!
-	public class FragmentParser extends FragmentParserBase {
+	public class SelectFragmentParser extends FragmentParserBase {
 		
-		public FragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
+		public SelectFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
 		}
