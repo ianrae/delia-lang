@@ -131,10 +131,14 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+
+//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
+//		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
-		chkParams(selectFrag, 333, 55, 100, 55);
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE rightv = ? and leftv <> ?;");
+		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc KEY(rightv) VALUES(?,?)");
+		chkParams(selectFrag, 333, 55, 55, 100, 100, 55);
 	}
 	@Test
 	public void testParentIdOtherWay() {
@@ -251,6 +255,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	private String sqlLine1;
 	private String sqlLine2;
 	private LogLevel logLevel = LogLevel.DEBUG;
+	private String sqlLine3;
 
 	@Before
 	public void init() {
@@ -340,12 +345,17 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 			String[] ar = sql.split("\n");
 			this.sqlLine1 = ar[0];
 			this.sqlLine2 = ar[1];
+			if (ar.length > 2) {
+				this.sqlLine3 = ar[2];
+			}
 			assertEquals(expected, sqlLine1);
 		}
 	}
 	private void chkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
 		if (lineNum == 2) {
 			assertEquals(expected, sqlLine2);
+		} else if (lineNum == 3) {
+			assertEquals(expected, sqlLine3);
 		}
 	}
 

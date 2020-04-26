@@ -40,7 +40,8 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //			    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 //			    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 		updateFrag.assocUpdateFrag = null; //remove
-		
+		int startingNumParams = statement.paramL.size();
+
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
 		deleteFrag.tblFrag = new TableFragment();
@@ -65,7 +66,24 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
+		
+		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+		int extra = statement.paramL.size() - startingNumParams;
+		cloneParams(statement, clonedL, extra);
+		addForeignKeyId(mmMap, fieldName, statement);
+		//and again for mergeInto
+		cloneParams(statement, clonedL, 2, 0);
+		if (assocFieldName.equals("leftv")) {
+			swapLastTwo(statement);
+		}
 	}
+	
+	protected void addForeignKeyId(Map<String, DRelation> mmMap, String fieldName, SqlStatement statement) {
+		DRelation drel = mmMap.get(fieldName); //100
+		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+		statement.paramL.add(dvalToUse);
+	}
+	
 	
 	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
 		//clone params 
@@ -73,7 +91,10 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		for(SqlFragment ff: clonedL) {
 			numToAdd += ff.getNumSqlParams();
 		}
-		
+		cloneParams(statement, clonedL, numToAdd, extra);
+	}
+	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int numToAdd, int extra) {
+		//clone params 
 		int n = statement.paramL.size();
 		log.logDebug("cloneParams %d %d", numToAdd, n);
 		for(int i = 0; i < numToAdd; i++) {
@@ -81,6 +102,14 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			DValue previous = statement.paramL.get(k);
 			statement.paramL.add(previous); //add copy
 		}
+	}
+	private void swapLastTwo(SqlStatement statement) {
+		int n = statement.paramL.size();
+		log.logDebug("swapLastTwoParams %d", n);
+		DValue dval1 = statement.paramL.get(n - 2);
+		DValue dval2 = statement.paramL.get(n - 1);
+		statement.paramL.set(n - 2, dval2);
+		statement.paramL.set(n - 1, dval1);
 	}
 	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
