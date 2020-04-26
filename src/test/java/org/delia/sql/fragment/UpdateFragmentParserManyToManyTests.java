@@ -50,7 +50,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	//=============== many to many ======================
 	//scenario 1: ALL
 	@Test
-	public void testManyToMany() {
+	public void testNoManyToMany() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333}";
 
@@ -61,7 +61,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
 	}
 	@Test
-	public void testManyToManyParentAll() {
+	public void testParentAll() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:100}";
 
@@ -74,7 +74,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100");
 	}
 	@Test
-	public void testManyToManyParentAllOtherWay() {
+	public void testParentAllOtherWay() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:100}";
 
@@ -87,7 +87,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100");
 	}
 	@Test
-	public void testManyToManyParentAll3() {
+	public void testParentAll3() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[true] {z: 7, cust:55}";
 
@@ -100,7 +100,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55");
 	}
 	@Test
-	public void testManyToManyParentAll4() {
+	public void testParentAll4() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[true] {z: 7, cust:55}";
 
@@ -116,7 +116,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	
 	//scenario 2: ID-----------------------------
 	@Test
-	public void testManyToManyParentId() {
+	public void testParentId() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, addr:100}";
 
@@ -129,7 +129,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE b.rightv = ?");
 	}
 	@Test
-	public void testManyToManyParentIdOtherWay() {
+	public void testParentIdOtherWay() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, addr:100}";
 
@@ -142,7 +142,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
 	}
 	@Test
-	public void testManyToManyParentId3() {
+	public void testParentId3() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:55}";
 
@@ -155,7 +155,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55 WHERE b.leftv = ?");
 	}
 	@Test
-	public void testManyToManyParentId4() {
+	public void testParentId4() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:55}";
 
@@ -170,7 +170,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 
 	//scenario 3: OTHER -----------------------------
 	@Test
-	public void testManyToManyParentOther() {
+	public void testParentOther() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10] {wid: 333, addr:100}";
 
@@ -179,11 +179,11 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE b.rightv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.wid > ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE (SELECT id FROM CUSTOMER WHERE a.wid > ?)");
 	}
 	@Test
-	public void testManyToManyParentOtherOtherWay() {
+	public void testParentOtherOtherWay() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10] {wid: 333, addr:100}";
 
@@ -196,7 +196,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
 	}
 	@Test
-	public void testManyToManyParentOther3() {
+	public void testParentOther3() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:55}";
 
@@ -209,7 +209,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55 WHERE b.leftv = ?");
 	}
 	@Test
-	public void testManyToManyParentOther4() {
+	public void testParentOther4() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:55}";
 

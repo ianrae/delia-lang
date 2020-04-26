@@ -10,6 +10,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
+import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
@@ -176,8 +177,8 @@ import org.delia.util.DeliaExceptionHelper;
 				if (existingWhereL.isEmpty()) {
 					buildAll(assocUpdateFrag, structType, mmMap, fieldName, info, "rightv");
 					return;
-				} else if (this.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
-					List<OpFragment> oplist = findPrimaryKeyQuery(existingWhereL, info.farType);
+				} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+					List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 					log.log("aaaakkkkkkkkkkkkkkkkkk");
 					buildIdOnlyQuery(assocUpdateFrag, structType, mmMap, fieldName, info, "rightv", "leftv", oplist);
 				}
@@ -185,8 +186,8 @@ import org.delia.util.DeliaExceptionHelper;
 				if (existingWhereL.isEmpty()) {
 					buildAll(assocUpdateFrag, structType, mmMap, fieldName, info, "leftv");
 					return;
-				} else if (this.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
-					List<OpFragment> oplist = findPrimaryKeyQuery(existingWhereL, info.farType);
+				} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+					List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 					log.log("kkkkkkkkkkkkkkkkkk");
 					buildIdOnlyQuery(assocUpdateFrag, structType, mmMap, fieldName, info, "leftv", "rightv", oplist);
 				} else {
@@ -200,135 +201,47 @@ import org.delia.util.DeliaExceptionHelper;
 		private void buildIdOtherQuery(UpdateStatementFragment assocUpdateFrag, DStructType structType,
 				Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
 				List<SqlFragment> existingWhereL) {
-			DRelation drel = mmMap.get(fieldName); //100
-			DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 			
-//			TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName); //Customer.addr
-//			TypePair leftPair = new TypePair("rightv", pair1.type);
-//			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, leftPair);
-//			String valstr = dvalToUse == null ? null : dvalToUse.asString();
-//			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-//			assocUpdateFrag.fieldL.add(ff);
+			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName);
 			
-//			TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-			RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
-			TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
-			TypePair rightPair = new TypePair(assocFieldName, pair2.type);
-			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
-			String valstr = dvalToUse == null ? null : dvalToUse.asString();
-			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-			assocUpdateFrag.fieldL.add(ff);
-			
+			//update CAAssoc set rightv=100 where (select id from customer where lastname='smith')
+			TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+			StrCreator sc = new StrCreator();
+			sc.o("(SELECT %s FROM %s WHERE ", keyPair.name, info.nearType.getName());
+
 			List<OpFragment> tmpL = new ArrayList<>();
 			for(SqlFragment fff: existingWhereL) {
 				if (fff instanceof OpFragment) {
 					tmpL.add((OpFragment) fff);
 				}
 			}
+			List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(true, tmpL, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+			for(OpFragment opff: clonedL) {
+				sc.o(opff.render());
+			}
+			sc.o(")");
+			RawFragment rawFrag = new RawFragment(sc.str);
 			
-			List<OpFragment> clonedL = changeIdToAssocFieldName(true, tmpL, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
-			assocUpdateFrag.whereL.addAll(clonedL);
+			assocUpdateFrag.whereL.add(rawFrag);
 		}
 
-		private List<OpFragment> findPrimaryKeyQuery(List<SqlFragment> existingWhereL, DStructType farType) {
-			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
-			List<OpFragment> oplist = new ArrayList<>();
-			
-			for(SqlFragment ff: existingWhereL) {
-				if (ff instanceof OpFragment) {
-					OpFragment opff = (OpFragment) ff;
-					if (opff.left.name.equals(pair.name) || opff.right.name.equals(pair.name)) {
-						oplist.add(opff);
-					}
-				}
-			}
-			return oplist;
-		}
-		private boolean isOnlyPrimaryKeyQuery(List<SqlFragment> existingWhereL, DStructType farType) {
-			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
-			
-			int failCount = 0;
-			for(SqlFragment ff: existingWhereL) {
-				if (ff instanceof OpFragment) {
-					OpFragment opff = (OpFragment) ff;
-					if (!opff.left.name.equals(pair.name) && !leftIsQuestionMark(opff)) {
-						failCount++;
-					}
-					if (!opff.right.name.equals(pair.name) && !rightIsQuestionMark(opff)) {
-						failCount++;
-					}
-				}
-			}
-			return failCount == 0;
-		}
-		private List<OpFragment> changeIdToAssocFieldName(boolean cloneOthers, List<OpFragment> existingWhereL, DStructType farType, String alias, String assocFieldName) {
-			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
-			List<OpFragment> oplist = new ArrayList<>();
-			
-			for(OpFragment opff: existingWhereL) {
-				if (opff.left.name.equals(pair.name)) {
-					OpFragment clone = new OpFragment(opff);
-					clone.left.alias = alias;
-					clone.left.name = assocFieldName;
-					oplist.add(clone);
-				} else if (opff.right.name.equals(pair.name)) {
-					OpFragment clone = new OpFragment(opff);
-					clone.right.alias = alias;
-					clone.right.name = assocFieldName;
-					oplist.add(clone);
-				} else if (cloneOthers){
-					OpFragment clone = new OpFragment(opff);
-					oplist.add(clone);
-				}
-			}
-			return oplist;
-		}
-		
-		private boolean leftIsQuestionMark(OpFragment opff) {
-			return opff.left.name.equals("?");
-		}
-		private boolean rightIsQuestionMark(OpFragment opff) {
-			return opff.right.name.equals("?");
-		}
 		private void buildIdOnlyQuery(UpdateStatementFragment assocUpdateFrag, DStructType structType,
 				Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
 				String assocField2, List<OpFragment> oplist) {
-			DRelation drel = mmMap.get(fieldName); //100
-			DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName);
 			
-//			TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName); //Customer.addr
-//			TypePair leftPair = new TypePair("rightv", pair1.type);
-//			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, leftPair);
-//			String valstr = dvalToUse == null ? null : dvalToUse.asString();
-//			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-//			assocUpdateFrag.fieldL.add(ff);
-			
-//			TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-			RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
-			TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
-			TypePair rightPair = new TypePair(assocFieldName, pair2.type);
-			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
-			String valstr = dvalToUse == null ? null : dvalToUse.asString();
-			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-			assocUpdateFrag.fieldL.add(ff);
-			
-			List<OpFragment> clonedL = changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+			List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
 			assocUpdateFrag.whereL.addAll(clonedL);
 		}
 
 
 		protected void buildAll(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName) {
+			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName);
+		}
+		protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName) {
 			DRelation drel = mmMap.get(fieldName); //100
 			DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 			
-//			TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName); //Customer.addr
-//			TypePair leftPair = new TypePair("rightv", pair1.type);
-//			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, leftPair);
-//			String valstr = dvalToUse == null ? null : dvalToUse.asString();
-//			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
-//			assocUpdateFrag.fieldL.add(ff);
-			
-//			TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 			RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
 			TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
 			TypePair rightPair = new TypePair(assocFieldName, pair2.type);
@@ -336,17 +249,8 @@ import org.delia.util.DeliaExceptionHelper;
 			String valstr = dvalToUse == null ? null : dvalToUse.asString();
 			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
 			assocUpdateFrag.fieldL.add(ff);
-			
-//			OpFragment opFrag = new OpFragment("=");
-//			opFrag.left = FragmentHelper.buildAliasedFrag(null, "rightv");
-//			opFrag.right = FragmentHelper.buildAliasedFrag(null, "999999999");
-//			assocUpdateFrag.whereL.add(opFrag);
 		}
-
-		private String findFromWhere(List<SqlFragment> exitingWhereL) {
-			// TODO Auto-generated method stub
-			return null;
-		}
+		
 
 		protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
 			if (needJoinBase(spec, structType, selectFrag, details)) {
