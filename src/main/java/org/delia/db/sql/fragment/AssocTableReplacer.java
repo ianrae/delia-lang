@@ -51,18 +51,28 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		deleteFrag.whereL.add(rawFrag);
 		
 		//part 2. 
-		//    MERGE INTO CustomerAddressAssoc as T USING CustomerAddressAssoc AS S
-//	    ON T.leftv = S.leftv WHEN MATCHED THEN UPDATE SET T.rightv = ?
-//	    	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(?, ?)
+//	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
+//	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
 		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		mergeIntoFrag.tblFrag.alias = "t";
 		
 		sc = new StrCreator();
-		sc.o(" USING %s as s", mergeIntoFrag.tblFrag.name);
-		sc.o(" ON t.%s = s.%s", assocField2, assocField2);
+		String typeName = info.nearType.getName();
+		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		sc.o(" USING (SELECT %s FROM %s) as s", pair.name, typeName);
+		sc.o(" ON t.%s = s.%s", assocField2, pair.name);
 		sc.o("\n WHEN MATCHED THEN UPDATE SET t.%s = ?", assocFieldName);
-		sc.o("\n WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,?)", assocField2, assocFieldName);
+		
+		String fields;
+		if (assocFieldName.equals("leftv")) {
+			fields = String.format("(?,s.%s)", pair.name);
+		} else {
+			fields = String.format("(s.%s,?)", pair.name);
+		}
+		
+		sc.o("\n WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES %s", fields);
 		rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
 		
@@ -74,10 +84,8 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
-		cloneParams(statement, clonedL, 2, 0);
-		if (assocFieldName.equals("leftv")) {
-			swapLastTwo(statement);
-		}
+		cloneParams(statement, clonedL, 1, 0);
+		cloneParams(statement, clonedL, 1, 0);
 	}
 
 
