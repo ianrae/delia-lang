@@ -44,6 +44,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
+		deleteFrag.paramStartIndex = statement.paramL.size();
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		
 		StrCreator sc = new StrCreator();
@@ -56,7 +57,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, "");
-		
+
 		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
@@ -65,6 +66,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
+		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		cloneParams(statement, clonedL, 1, 0);
 		cloneParams(statement, clonedL, 1, 0);
 	}
@@ -115,6 +117,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		deleteFrag.paramStartIndex = statement.paramL.size();
 		
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
@@ -138,6 +141,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
+		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		cloneParams(statement, clonedL, 2, 0);
 		if (assocFieldName.equals("leftv")) {
 			swapLastTwo(statement);
@@ -159,7 +163,8 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
-		
+		deleteFrag.paramStartIndex = statement.paramL.size();
+
 //		StrCreator sc = new StrCreator();
 //		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
 //		RawFragment rawFrag = new RawFragment(sc.str);
@@ -186,7 +191,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, subSelectWhere);
-		
+
 		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
@@ -194,6 +199,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		int extra = statement.paramL.size() - startingNumParams;
 		cloneParams(statement, clonedL2, extra);
 		//and again for mergeInto
+		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		cloneParams(statement, clonedL2, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		addForeignKeyId(mmMap, fieldName, statement);

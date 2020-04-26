@@ -1,5 +1,6 @@
 package org.delia.db.sql.fragment;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -363,18 +364,52 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			return stgroup;
 		}
 
-		selectFrag.statement.sql = selectFrag.render();
+		SqlStatement mainStatement = selectFrag.statement;
+		mainStatement.sql = selectFrag.render();
+		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
+		
+		mainStatement.paramL.clear();
 		stgroup.add(selectFrag.statement);
-		addIfNotNull(stgroup, selectFrag.assocUpdateFrag);
-		addIfNotNull(stgroup, selectFrag.assocDeleteFrag);
-		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag);
+		initMainParams(mainStatement, save, selectFrag.assocUpdateFrag);
+		initMainParams(mainStatement, save, selectFrag.assocDeleteFrag);
+		initMainParams(mainStatement, save, selectFrag.assocMergeInfoFrag);
+		addIfNotNull(stgroup, selectFrag.assocUpdateFrag, save, nextStartIndex(selectFrag.assocDeleteFrag, selectFrag.assocMergeInfoFrag));
+		addIfNotNull(stgroup, selectFrag.assocDeleteFrag, save, nextStartIndex(selectFrag.assocMergeInfoFrag));
+		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag, save, Integer.MAX_VALUE);
 		return stgroup;
 	}
+	private int nextStartIndex(StatementFragmentBase... frags) {
+		for(StatementFragmentBase frag: frags) {
+			if (frag != null) {
+				return frag.paramStartIndex;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
 
-	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag) {
+	private void initMainParams(SqlStatement mainStatement, List<DValue> saveL, StatementFragmentBase innerFrag) {
+		if (! mainStatement.paramL.isEmpty()) {
+			return;
+		}
+		
+		if (innerFrag != null) {
+			for(int i = 0; i < innerFrag.paramStartIndex; i++) {
+				DValue dval = saveL.get(i);
+				mainStatement.paramL.add(dval);
+			}
+		}
+	}
+
+	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag, List<DValue> paramL, int nextStartIndex) {
 		if (innerFrag != null) {
 			SqlStatement stat = innerFrag.statement;
 			stat.sql = innerFrag.render();
+			//we are copying more than needed, but that's ok
+			int n = nextStartIndex < paramL.size() ? nextStartIndex : paramL.size();
+			for(int i = innerFrag.paramStartIndex; i < n; i++) {
+				DValue dval = paramL.get(i);
+				stat.paramL.add(dval);
+			}
 			stgroup.add(stat);
 		}
 	}

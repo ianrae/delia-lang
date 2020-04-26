@@ -19,7 +19,7 @@ public abstract class StatementFragmentBase implements SqlFragment {
 	public JoinFragment joinFrag; //TODO later a list
 	public List<SqlFragment> whereL = new ArrayList<>();
 	public LimitFragment limitFrag = null;
-	
+	public int paramStartIndex; //used with SqlStatementGroup
 	
 	public TableFragment findByAlias(String alias) {
 		if (alias == null) {
