@@ -114,7 +114,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	}
 	
 	
-	//scenario 1: ID-----------------------------
+	//scenario 2: ID-----------------------------
 	@Test
 	public void testManyToManyParentId() {
 		String src = buildSrcManyToMany();
@@ -168,82 +168,60 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE b.rightv = ?");
 	}
 
-	
-//	@Test
-//	public void testManyToManyParentId() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Customer[id > 10] {wid: 333, addr:100}";
-//
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(updateStatementExp, "Customer");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-//		
-//		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
-//	}
-//	@Test
-//	public void testManyToManyParentOther() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Customer[wid > 100] {wid: 333, addr:100}";
-//
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(updateStatementExp, "Customer");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		//UPDATE AddressCustomerAssoc SET b.leftv = 100 WHERE b.rightv = 55
-//		
-//		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
-//	}
-//	
-//	
-//	//===fix
-//	@Test
-//	public void testManyToManyChild() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Address[100] {z: 6, cust:55}";
-//
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(updateStatementExp, "Address");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
-//	}
-	
-//TODO: support orderBy
-//	@Test
-//	public void testOrderBy() {
-//		String src = buildSrc();
-//		src += " let x = Flight[true].orderBy('field2')";
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(src); 
-//
-//		runAndChk(selectFrag, "SELECT * FROM Flight as a ORDER BY a.field2");
-//	}
-	
-	//TODO: support limit
-//	@Test
-//	public void testOrderByLimit() {
-//		String src = buildSrc();
-//		src += " update Flight[true].limit(4) {field2: 111}";
-//		
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(updateStatementExp);
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
-//	}
+	//scenario 3: OTHER -----------------------------
+	@Test
+	public void testManyToManyParentOther() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[wid > 10] {wid: 333, addr:100}";
 
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE b.rightv = ?");
+	}
+	@Test
+	public void testManyToManyParentOtherOtherWay() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[wid > 10] {wid: 333, addr:100}";
 
-	//TODO: support relations
-//	@Test
-//	public void test11Relation() {
-//		String src = buildSrcOneToOne();
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(src); 
-//
-//		//[1] SQL:             SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id  WHERE  a.id=?;  -- (55)
-//		runAndChk(selectFrag, "SELECT * FROM Customer as a WHERE  a.id = ?");
-//		chkParamInt(selectFrag.statement, 1, 55);
-//	}
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
+	}
+	@Test
+	public void testManyToManyParentOther3() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Address[z > 10] {z: 7, cust:55}";
+
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55 WHERE b.leftv = ?");
+	}
+	@Test
+	public void testManyToManyParentOther4() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Address[z > 10] {z: 7, cust:55}";
+
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE b.rightv = ?");
+	}
+	
 
 	//---
 	private Delia delia;

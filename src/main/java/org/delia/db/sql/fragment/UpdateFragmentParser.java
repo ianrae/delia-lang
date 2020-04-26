@@ -189,8 +189,45 @@ import org.delia.util.DeliaExceptionHelper;
 					List<OpFragment> oplist = findPrimaryKeyQuery(existingWhereL, info.farType);
 					log.log("kkkkkkkkkkkkkkkkkk");
 					buildIdOnlyQuery(assocUpdateFrag, structType, mmMap, fieldName, info, "leftv", "rightv", oplist);
+				} else {
+					log.log("mmmmmmm");
+					buildIdOtherQuery(assocUpdateFrag, structType, mmMap, fieldName, info, "leftv", "rightv", existingWhereL);
+					
 				}
 			}
+		}
+
+		private void buildIdOtherQuery(UpdateStatementFragment assocUpdateFrag, DStructType structType,
+				Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
+				List<SqlFragment> existingWhereL) {
+			DRelation drel = mmMap.get(fieldName); //100
+			DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+			
+//			TypePair pair1 = DValueHelper.findField(info.nearType, info.fieldName); //Customer.addr
+//			TypePair leftPair = new TypePair("rightv", pair1.type);
+//			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, leftPair);
+//			String valstr = dvalToUse == null ? null : dvalToUse.asString();
+//			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+//			assocUpdateFrag.fieldL.add(ff);
+			
+//			TypePair otherPrimaryKeyPair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+			RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
+			TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
+			TypePair rightPair = new TypePair(assocFieldName, pair2.type);
+			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
+			String valstr = dvalToUse == null ? null : dvalToUse.asString();
+			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+			assocUpdateFrag.fieldL.add(ff);
+			
+			List<OpFragment> tmpL = new ArrayList<>();
+			for(SqlFragment fff: existingWhereL) {
+				if (fff instanceof OpFragment) {
+					tmpL.add((OpFragment) fff);
+				}
+			}
+			
+			List<OpFragment> clonedL = changeIdToAssocFieldName(true, tmpL, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+			assocUpdateFrag.whereL.addAll(clonedL);
 		}
 
 		private List<OpFragment> findPrimaryKeyQuery(List<SqlFragment> existingWhereL, DStructType farType) {
@@ -224,7 +261,7 @@ import org.delia.util.DeliaExceptionHelper;
 			}
 			return failCount == 0;
 		}
-		private List<OpFragment> changeIdToAssocFieldName(List<OpFragment> existingWhereL, DStructType farType, String alias, String assocFieldName) {
+		private List<OpFragment> changeIdToAssocFieldName(boolean cloneOthers, List<OpFragment> existingWhereL, DStructType farType, String alias, String assocFieldName) {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
 			List<OpFragment> oplist = new ArrayList<>();
 			
@@ -238,6 +275,9 @@ import org.delia.util.DeliaExceptionHelper;
 					OpFragment clone = new OpFragment(opff);
 					clone.right.alias = alias;
 					clone.right.name = assocFieldName;
+					oplist.add(clone);
+				} else if (cloneOthers){
+					OpFragment clone = new OpFragment(opff);
 					oplist.add(clone);
 				}
 			}
@@ -272,7 +312,7 @@ import org.delia.util.DeliaExceptionHelper;
 			assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
 			assocUpdateFrag.fieldL.add(ff);
 			
-			List<OpFragment> clonedL = changeIdToAssocFieldName(oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+			List<OpFragment> clonedL = changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
 			assocUpdateFrag.whereL.addAll(clonedL);
 		}
 
