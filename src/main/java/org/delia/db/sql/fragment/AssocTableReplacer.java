@@ -41,12 +41,17 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //			    delete CustomerAddressAssoc where rightv <> 100
 		updateFrag.assocUpdateFrag = null; //remove
 		int startingNumParams = statement.paramL.size();
-
+		
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
 		deleteFrag.paramStartIndex = statement.paramL.size();
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
-		
+		updateFrag.assocDeleteFrag = deleteFrag;
+
+		if (isForeignKeyIdNull(mmMap, fieldName)) {
+			return;
+		}
+
 		StrCreator sc = new StrCreator();
 		sc.o("%s <> ?", assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
 		RawFragment rawFrag = new RawFragment(sc.str);
@@ -58,7 +63,6 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, "");
 
-		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
@@ -119,6 +123,19 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		deleteFrag.paramStartIndex = statement.paramL.size();
 		
+		updateFrag.assocDeleteFrag = deleteFrag;
+		if (isForeignKeyIdNull(mmMap, fieldName)) {
+			StrCreator sc = new StrCreator();
+			sc.o("%s = ?", assocField2); //TODO should be rightv NOT IN (100) so can handle list
+			RawFragment rawFrag = new RawFragment(sc.str);
+			deleteFrag.whereL.add(rawFrag);
+			
+			List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+			int extra = statement.paramL.size() - startingNumParams;
+			cloneParams(statement, clonedL, extra);
+			return;
+		}
+		
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
 		RawFragment rawFrag = new RawFragment(sc.str);
@@ -133,7 +150,6 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
 		
-		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
@@ -165,9 +181,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		deleteFrag.paramStartIndex = statement.paramL.size();
 
-//		StrCreator sc = new StrCreator();
-//		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
-//		RawFragment rawFrag = new RawFragment(sc.str);
+		updateFrag.assocDeleteFrag = deleteFrag;
 		
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		StrCreator sc = new StrCreator();
@@ -186,13 +200,19 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		String subSelectWhere = sc.str.substring(pos);
 		subSelectWhere = StringUtils.substringBeforeLast(subSelectWhere, ")");
 		
+		if (this.isForeignKeyIdNull(mmMap, fieldName)) {
+			List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);
+			int extra = statement.paramL.size() - startingNumParams;
+			cloneParams(statement, clonedL2, extra);
+			return;
+		}
+		
 		//part 2. 
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, subSelectWhere);
 
-		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);
@@ -217,6 +237,10 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		DRelation drel = mmMap.get(fieldName); //100
 		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 		statement.paramL.add(dvalToUse);
+	}
+	protected boolean isForeignKeyIdNull(Map<String, DRelation> mmMap, String fieldName) {
+		DRelation drel = mmMap.get(fieldName); //100
+		return drel == null;
 	}
 	
 	

@@ -120,7 +120,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 				}
 				if (DRuleHelper.isManyToManyRelation(pair, structType)) {
 					DValue inner = partialVal.asStruct().getField(pair.name);
-					if (inner != null) {
+					if (inner == null) {
+						mmMap.put(pair.name, null);
+					} else {
 						mmMap.put(pair.name, inner.asRelation());
 					}
 					continue;
