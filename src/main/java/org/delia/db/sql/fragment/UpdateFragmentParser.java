@@ -10,6 +10,7 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
@@ -134,9 +135,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			}
 
 			FieldFragment ff = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
-			String valstr = dvalToUse.asString();
-			selectFrag.setValuesL.add(valstr == null ? "null" : valstr);
+			selectFrag.setValuesL.add("?");
 			selectFrag.fieldL.add(ff);
+			selectFrag.statement.paramL.add(dvalToUse);
 
 			index++;
 		}
@@ -160,13 +161,14 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			if (ruleMany != null) {
 				RelationInfo info = ruleMany.relInfo;
 				selectFrag.assocUpdateFrag = new UpdateStatementFragment();
-				genAssocField(selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias);
+				genAssocField(selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
+						selectFrag.tblFrag.alias, selectFrag.statement);
 			}
 		}
 	}
 
 	private void genAssocField(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
-			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias) {
+			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 		//update assoctabl set leftv=x where rightv=y
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 		assocUpdateFrag.tblFrag = this.createAssocTable(assocUpdateFrag, tblinfo.assocTblName);
@@ -187,23 +189,50 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		// 2. updating where filter by primaykey only
 		// 3. updating where filter includes other fields (eg Customer.firstName) which may include primaryKey fields.
 		if (existingWhereL.isEmpty()) {
-			buildAll(assocUpdateFrag, structType, mmMap, fieldName, info, field1);
+			buildUpdateAll(assocUpdateFrag, structType, mmMap, fieldName, info, field1, statement);
 			return;
 		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
 			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.log("kkkkkkkkkkkkkkkkkk");
-			buildIdOnlyQuery(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, oplist);
+			buildUpdateByIdOnly(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, oplist, statement);
 		} else {
 			log.log("mmmmmmm");
-			buildIdOtherQuery(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias);
+			buildUpdateOther(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
 		}
 	}
 
-	private void buildIdOtherQuery(UpdateStatementFragment assocUpdateFrag, DStructType structType,
-			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
-			List<SqlFragment> existingWhereL, String mainUpdateAlias) {
 
-		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName);
+	protected void buildUpdateAll(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
+		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
+	}
+	private void buildUpdateByIdOnly(UpdateStatementFragment assocUpdateFrag, DStructType structType,
+			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
+			String assocField2, List<OpFragment> oplist, SqlStatement statement) {
+		int startingNumParams = statement.paramL.size();
+		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
+
+		List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+		assocUpdateFrag.whereL.addAll(clonedL);
+		
+		int extra = statement.paramL.size() - startingNumParams;
+		cloneParams(statement, clonedL, extra);
+	}
+	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
+		//clone params 
+		int numToAdd = clonedL.size();
+		int n = statement.paramL.size();
+		for(int i = 0; i < numToAdd; i++) {
+			int k = n - (numToAdd - i) - extra;
+			DValue previous = statement.paramL.get(k);
+			statement.paramL.add(previous); //add copy
+		}
+	}
+	private void buildUpdateOther(UpdateStatementFragment assocUpdateFrag, DStructType structType,
+			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
+			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
+
+		int startingNumParams = statement.paramL.size();
+		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 
 		//update CAAssoc set rightv=100 where (select id from customer where lastname='smith')
 		//Create a sub-select whose where list is a copy of the main update statement's where list.
@@ -211,31 +240,19 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		StrCreator sc = new StrCreator();
 		sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
 
-		List<OpFragment> tmpL = WhereListHelper.cloneWhereList(existingWhereL);
-		//			List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(true, tmpL, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
-		for(OpFragment opff: tmpL) {
+		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);
+		for(OpFragment opff: clonedL) {
 			sc.o(opff.render());
 		}
 		sc.o(")");
 		RawFragment rawFrag = new RawFragment(sc.str);
 
 		assocUpdateFrag.whereL.add(rawFrag);
+		int extra = statement.paramL.size() - startingNumParams;
+		cloneParams(statement, clonedL, extra);
 	}
-
-	private void buildIdOnlyQuery(UpdateStatementFragment assocUpdateFrag, DStructType structType,
-			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
-			String assocField2, List<OpFragment> oplist) {
-		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName);
-
-		List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
-		assocUpdateFrag.whereL.addAll(clonedL);
-	}
-
-
-	protected void buildAll(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName) {
-		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName);
-	}
-	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName) {
+	
+	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
 		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 
@@ -243,8 +260,8 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
 		TypePair rightPair = new TypePair(assocFieldName, pair2.type);
 		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
-		String valstr = dvalToUse == null ? null : dvalToUse.asString();
-		assocUpdateFrag.setValuesL.add(valstr == null ? "null" : valstr);
+		statement.paramL.add(dvalToUse);
+		assocUpdateFrag.setValuesL.add("?");
 		assocUpdateFrag.fieldL.add(ff);
 	}
 

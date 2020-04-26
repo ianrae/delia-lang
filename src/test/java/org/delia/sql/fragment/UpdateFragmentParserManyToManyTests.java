@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
@@ -185,15 +186,15 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	@Test
 	public void testParentOtherOtherWay() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[wid > 10] {wid: 333, addr:100}";
+		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
 
 		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE  a.wid > ? and  a.id < ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
 	}
 	@Test
 	public void testParentOther3() {
@@ -205,8 +206,25 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55 WHERE b.leftv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE (SELECT id FROM Address as a WHERE a.z > ?)");
+		chkParams(selectFrag, 7,10,55, 10);
+	}
+	
+	//these tests use int params (but they could be long,date,...)
+	private void chkParams(UpdateStatementFragment selectFrag, Integer...args) {
+		StringJoiner joiner = new StringJoiner(",");
+		for(DValue dval: selectFrag.statement.paramL) {
+			joiner.add(dval.asString());
+		}
+		log.log("params: " + joiner.toString());
+		
+		assertEquals(args.length, selectFrag.statement.paramL.size());
+		int i = 0;
+		for(Integer arg: args) {
+			DValue dval = selectFrag.statement.paramL.get(i++);
+			assertEquals(arg.intValue(), dval.asInt());
+		}
 	}
 	@Test
 	public void testParentOther4() {
@@ -218,8 +236,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE b.rightv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.z > ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE (SELECT id FROM Address as a WHERE a.z > ?)");
 	}
 	
 
