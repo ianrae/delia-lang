@@ -11,32 +11,11 @@ background:
 thenType: struct
 
 ---
-title: update without relation
-thenType: int
-expectDVal:false
-when:
-  update Customer[true] {wid: 333}
-then:
-2
-
----
-title: update without relation query back
-when:
-  update Customer[true] {wid: 333}
-  let x = Customer[55].fks()
-then:
-value:a:Customer {
- vid:55
- vwid:333
- vaddr:{[100,101]}
-}
-
----
 title: update many-to-many
 thenType: int
 expectDVal:false
 when:
-  update Customer[true] {wid: 333, addr: [100]}
+  update Address[true] {z: 7, cust:55}
 then:
 2
 
@@ -44,12 +23,12 @@ then:
 title: update query back
 #TODO: this is wrong we should remove one row from assoc table
 when:
-  update Customer[true] {wid: 333, addr: [100]}
-  let x = Customer[55].fks()
+  update Address[true] {z: 7, cust:55}
+  let x = Address[100].fks()
 then:
-value:a:Customer {
- vid:55
- vwid:333
- vaddr:{[100,100]}
+value:a:Address {
+ vid:100
+ vz:7
+ vcust:{[55,56]}
 }
 
