@@ -264,7 +264,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void test8Debug() {
 //		testIndexToRun = 3;
-		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+//		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
@@ -272,7 +272,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 //		runR2150File("t0-migrate-many-to-many3.txt", 2);
 //		runR900File("t0-update-mm-all.txt", 4);
 //		runR900File("t0-update-mm-all-othertbl.txt", 2);
-		runR900File("t0-update-mm-id.txt", 4);
+//		runR900File("t0-update-mm-id.txt", 4);
+		runR900File("t0-update-mm-id-othertbl.txt", 2);
 	}
 	
 	//---
