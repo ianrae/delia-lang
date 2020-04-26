@@ -103,6 +103,64 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 	}
 	
+	public void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
+			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
+			String assocField2, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
+//		  scenario 3 id:
+//			  update Customer[55] {wid: 333, addr: [100]}
+//			  has sql:
+//			    update Customer set wid=333 where wid>20
+//	    	    delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
+//	    	    merge into CustomerAddressAssoc key(leftv) values(55,100) where leftv in (SELECT id FROM Address as a WHERE a.z > ?)
+		updateFrag.assocUpdateFrag = null; //remove
+		int startingNumParams = statement.paramL.size();
+
+		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
+		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		
+//		StrCreator sc = new StrCreator();
+//		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
+//		RawFragment rawFrag = new RawFragment(sc.str);
+		
+		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		StrCreator sc = new StrCreator();
+		sc.o(" %s.%s IN", assocUpdateFrag.tblFrag.alias, assocField2);
+		sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
+
+		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);
+		for(OpFragment opff: clonedL) {
+			sc.o(opff.render());
+		}
+		sc.o(")");
+		RawFragment rawFrag = new RawFragment(sc.str);
+		deleteFrag.whereL.add(rawFrag);
+		
+		//part 2. merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
+		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
+		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		
+		sc = new StrCreator();
+		sc.o(" KEY(%s) VALUES(?,?)", assocField2);
+		sc.o(" WHERE");
+		sc.o(rawFrag.render());
+		rawFrag = new RawFragment(sc.str);
+		mergeIntoFrag.rawFrag = rawFrag;
+		
+		updateFrag.assocDeleteFrag = deleteFrag;
+		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
+		
+		List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);
+		int extra = statement.paramL.size() - startingNumParams;
+		cloneParams(statement, clonedL2, extra);
+		addForeignKeyId(mmMap, fieldName, statement);
+		//and again for mergeInto
+		cloneParams(statement, clonedL2, 2, 0);
+		if (assocFieldName.equals("leftv")) {
+			swapLastTwo(statement);
+		}
+	}
+	
 	private TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
 		TableFragment tblFrag = new TableFragment();
 		tblFrag.alias = null;

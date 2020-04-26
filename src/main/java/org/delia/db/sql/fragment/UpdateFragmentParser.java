@@ -236,26 +236,31 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
 			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
-		int startingNumParams = statement.paramL.size();
-		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
-
-		//update CAAssoc set rightv=100 where (select id from customer where lastname='smith')
-		//Create a sub-select whose where list is a copy of the main update statement's where list.
-		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		StrCreator sc = new StrCreator();
-		sc.o(" %s.%s IN", assocUpdateFrag.tblFrag.alias, assocField2);
-		sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
-
-		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);
-		for(OpFragment opff: clonedL) {
-			sc.o(opff.render());
+		if (assocTblReplacer != null) {
+			log.logDebug("use assocTblReplacer");
+			assocTblReplacer.buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, existingWhereL, mainUpdateAlias, statement);
+		} else {
+			int startingNumParams = statement.paramL.size();
+			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
+	
+			//update CAAssoc set rightv=100 where (select id from customer where lastname='smith')
+			//Create a sub-select whose where list is a copy of the main update statement's where list.
+			TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+			StrCreator sc = new StrCreator();
+			sc.o(" %s.%s IN", assocUpdateFrag.tblFrag.alias, assocField2);
+			sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
+	
+			List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);
+			for(OpFragment opff: clonedL) {
+				sc.o(opff.render());
+			}
+			sc.o(")");
+			RawFragment rawFrag = new RawFragment(sc.str);
+	
+			assocUpdateFrag.whereL.add(rawFrag);
+			int extra = statement.paramL.size() - startingNumParams;
+			cloneParams(statement, clonedL, extra);
 		}
-		sc.o(")");
-		RawFragment rawFrag = new RawFragment(sc.str);
-
-		assocUpdateFrag.whereL.add(rawFrag);
-		int extra = statement.paramL.size() - startingNumParams;
-		cloneParams(statement, clonedL, extra);
 	}
 	
 	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {

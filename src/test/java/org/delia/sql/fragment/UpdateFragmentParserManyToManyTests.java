@@ -115,10 +115,10 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ?");
 //		chkParams(selectFrag, 7, 55);
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv <> ?");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE rightv <> ?");
 		chkNoLine(3); 
-		chkParams(selectFrag, 333, 100);
+		chkParams(selectFrag, 7, 55);
 	}
 	@Test
 	public void testParentAll4() {
@@ -229,9 +229,14 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
+//		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+//		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
+		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
-		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE  b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc KEY(rightv) VALUES(?,?) WHERE b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		chkParams(selectFrag, 333, 10, 500, 100, 500, 55, 100, 100, 55);
 	}
 	@Test
 	public void testParentOtherOtherWay() {
