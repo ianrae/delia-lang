@@ -7,6 +7,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBType;
 import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.h2.H2DBInterface;
 import org.delia.db.h2.test.H2TestCleaner;
@@ -197,7 +198,7 @@ public class H2MigrationTests extends TopoTestBase {
 		removeTestTables();
 	}
 	private void removeTestTables() {
-		H2TestCleaner cleaner = new H2TestCleaner();
+		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 		cleaner.deleteKnownTables(factorySvc, dbInterface);
 		
 		DBAccessContext dbctx = new DBAccessContext(null, null);

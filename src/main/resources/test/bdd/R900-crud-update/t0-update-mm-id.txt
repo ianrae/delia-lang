@@ -1,6 +1,6 @@
 # CRUD update tests
 
-FEATURE: CRUD update - many-to-many scenario 2 - by id only
+FEATURE: CRUD update - many-to-many scenario 1 - all
 background:
 	type Customer struct {id int unique, wid int, relation addr Address optional many } end
 	type Address struct {id int unique, z int, relation cust Customer optional many } end
@@ -11,16 +11,16 @@ background:
 thenType: struct
 
 ---
-title: update many-to-many
+title: update without relation
 thenType: int
 expectDVal:false
 when:
   update Customer[55] {wid: 333}
 then:
-2
+1
 
 ---
-title: update query back
+title: update without relation query back
 when:
   update Customer[55] {wid: 333}
   let x = Customer[55].fks()
@@ -29,5 +29,27 @@ value:a:Customer {
  vid:55
  vwid:333
  vaddr:{[100,101]}
+}
+
+---
+title: update many-to-many
+thenType: int
+expectDVal:false
+when:
+  update Customer[55] {wid: 333, addr: [100]}
+then:
+1
+
+---
+title: update query back
+#TODO: this is wrong we should remove one row from assoc table
+when:
+  update Customer[55] {wid: 333, addr: [100]}
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vwid:333
+ vaddr:{[100,100]}
 }
 

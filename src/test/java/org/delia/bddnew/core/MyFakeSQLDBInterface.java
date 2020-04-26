@@ -46,7 +46,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			actualInterface.init(factorySvc);
 
 			if (cleanTables) {
-				H2TestCleaner cleaner = new H2TestCleaner();
+				H2TestCleaner cleaner = new H2TestCleaner(dbType);
 				cleaner.deleteKnownTables(factorySvc, actualInterface);
 			}
 			
@@ -62,7 +62,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			actualInterface.init(factorySvc);
 
 			if (cleanTables) {
-				H2TestCleaner cleaner = new H2TestCleaner();
+				H2TestCleaner cleaner = new H2TestCleaner(dbType);
 				cleaner.deleteKnownTables(factorySvc, actualInterface);
 			}
 		}
@@ -75,7 +75,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 		}
 		
 		if (tablesToClean != null) {
-			H2TestCleaner cleaner = new H2TestCleaner();
+			H2TestCleaner cleaner = new H2TestCleaner(dbType);
 			cleaner.deleteTables(factorySvc, actualInterface, tablesToClean);
 			tablesToClean = null; //is a one-shot. only do for one test
 		}

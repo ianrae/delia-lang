@@ -4,10 +4,17 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
 
 public class H2TestCleaner {
+	
+	private DBType dbType;
+
+	public H2TestCleaner(DBType dbType) {
+		this.dbType = dbType;
+	}
 
 	//h2 persists tables across runs, so cleanup first
 	public void deleteKnownTables(FactoryService factorySvc, DBInterface innerInterface) {
@@ -16,12 +23,10 @@ public class H2TestCleaner {
 		innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
 		safeDeleteTable(executor, "cars;");
-		safeDeleteTable(executor, "ADDRESS;");
-		safeDeleteTable(executor, "Customer;");
-		safeDeleteTable(executor, "CUSTOMER;");
-		safeDeleteTable(executor, "CUSTOMERS;");
 		safeDeleteTable(executor, "CustomerAddressAssoc;");
 		safeDeleteTable(executor, "AddressCustomerAssoc;");
+		safeDeleteTable(executor, "Customer;");
+		safeDeleteTable(executor, "CUSTOMERS;");
 		safeDeleteTable(executor, "Address;");
 		safeDeleteTable(executor, "Customer;");
 		safeDeleteTable(executor, "Customer__BAK;");
@@ -47,9 +52,22 @@ public class H2TestCleaner {
 		log.log("--delete TABLES -- ");
 		String[] ar = tables.split(",");
 		for(String tbl: ar) {
+			tbl = adjustTblName(tbl);
 			log.log("delete table: %s", tbl);
 			safeDeleteTable(executor, tbl);
 			
+		}
+	}
+
+	private String adjustTblName(String tbl) {
+		switch(dbType) {
+		case H2:
+			return tbl.toUpperCase();
+		case POSTGRES:
+			return tbl.toLowerCase();
+		case MEM:
+		default:
+			return tbl;
 		}
 	}
 
