@@ -189,14 +189,15 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		// 2. updating where filter by primaykey only
 		// 3. updating where filter includes other fields (eg Customer.firstName) which may include primaryKey fields.
 		if (existingWhereL.isEmpty()) {
+			log.logDebug("m-to-n:scenario1");
 			buildUpdateAll(assocUpdateFrag, structType, mmMap, fieldName, info, field1, statement);
 			return;
 		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
 			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
-			log.log("kkkkkkkkkkkkkkkkkk");
+			log.logDebug("m-to-n:scenario2");
 			buildUpdateByIdOnly(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, oplist, statement);
 		} else {
-			log.log("mmmmmmm");
+			log.logDebug("m-to-n:scenario3");
 			buildUpdateOther(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
 		}
 	}
@@ -228,6 +229,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		//Create a sub-select whose where list is a copy of the main update statement's where list.
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		StrCreator sc = new StrCreator();
+		sc.o(" %s.%s IN", assocUpdateFrag.tblFrag.alias, assocField2);
 		sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
 
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);

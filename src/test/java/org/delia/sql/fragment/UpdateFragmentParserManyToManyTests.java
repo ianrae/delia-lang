@@ -191,7 +191,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
 		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
 	}
 	@Test
@@ -205,7 +205,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE b.leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
 		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
 	}
 	@Test
@@ -219,7 +219,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE (SELECT id FROM Address as a WHERE a.z > ?)");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE b.leftv IN (SELECT id FROM Address as a WHERE a.z > ?)");
 		chkParams(selectFrag, 7,10,55, 10);
 	}
 	
@@ -234,7 +234,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE (SELECT id FROM Address as a WHERE a.z > ?)");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE b.rightv IN (SELECT id FROM Address as a WHERE a.z > ?)");
 		chkParams(selectFrag, 7,10,55, 10);
 	}
 	
