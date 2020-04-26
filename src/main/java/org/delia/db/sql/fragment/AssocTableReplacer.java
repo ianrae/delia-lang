@@ -50,12 +50,34 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		RawFragment rawFrag = new RawFragment(sc.str);
 		deleteFrag.whereL.add(rawFrag);
 		
+		//part 2. 
+		//    MERGE INTO CustomerAddressAssoc as T USING CustomerAddressAssoc AS S
+//	    ON T.leftv = S.leftv WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//	    	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(?, ?)
+		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
+		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		mergeIntoFrag.tblFrag.alias = "t";
+		
+		sc = new StrCreator();
+		sc.o(" USING %s as s", mergeIntoFrag.tblFrag.name);
+		sc.o(" ON t.%s = s.%s", assocField2, assocField2);
+		sc.o("\n WHEN MATCHED THEN UPDATE SET t.%s = ?", assocFieldName);
+		sc.o("\n WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,?)", assocField2, assocFieldName);
+		rawFrag = new RawFragment(sc.str);
+		mergeIntoFrag.rawFrag = rawFrag;
+		
 		updateFrag.assocDeleteFrag = deleteFrag;
+		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
 		cloneParams(statement, clonedL, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
+		//and again for mergeInto
+		cloneParams(statement, clonedL, 2, 0);
+		if (assocFieldName.equals("leftv")) {
+			swapLastTwo(statement);
+		}
 	}
 
 

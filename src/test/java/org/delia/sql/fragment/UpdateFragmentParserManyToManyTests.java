@@ -78,9 +78,11 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 333, 100);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv <> ?");
-		chkNoLine(3); 
-		chkParams(selectFrag, 333, 100);
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv <> ?;");
+		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc as t USING AddressCustomerAssoc as s ON t.rightv = s.rightv");
+		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.leftv = ?");
+		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,?)");
+		chkParams(selectFrag, 333, 100, 100, 100, 8888);
 	}
 	@Test
 	public void testParentAllOtherWay() {
@@ -296,6 +298,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	private String sqlLine2;
 	private LogLevel logLevel = LogLevel.DEBUG;
 	private String sqlLine3;
+	private String sqlLine4;
+	private String sqlLine5;
 
 	@Before
 	public void init() {
@@ -387,6 +391,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 			this.sqlLine2 = ar[1];
 			if (ar.length > 2) {
 				this.sqlLine3 = ar[2];
+				this.sqlLine4 = ar[3];
+				this.sqlLine5 = ar[4];
 			}
 			assertEquals(expected, sqlLine1);
 		}
@@ -396,6 +402,10 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 			assertEquals(expected, sqlLine2);
 		} else if (lineNum == 3) {
 			assertEquals(expected, sqlLine3);
+		} else if (lineNum == 4) {
+			assertEquals(expected, sqlLine4);
+		} else if (lineNum == 5) {
+			assertEquals(expected, sqlLine5);
 		}
 	}
 	private void chkNoLine(int lineNum) {
@@ -403,6 +413,10 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 			assertEquals(null, sqlLine2);
 		} else if (lineNum == 3) {
 			assertEquals(null, sqlLine3);
+		} else if (lineNum == 4) {
+			assertEquals(null, sqlLine4);
+		} else if (lineNum == 5) {
+			assertEquals(null, sqlLine5);
 		}
 	}
 
