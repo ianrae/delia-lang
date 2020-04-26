@@ -54,11 +54,31 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2);
+		
+		updateFrag.assocDeleteFrag = deleteFrag;
+		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
+		
+		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+		int extra = statement.paramL.size() - startingNumParams;
+		cloneParams(statement, clonedL, extra);
+		addForeignKeyId(mmMap, fieldName, statement);
+		//and again for mergeInto
+		cloneParams(statement, clonedL, 1, 0);
+		cloneParams(statement, clonedL, 1, 0);
+	}
+	private MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
+			RelationInfo info, String assocFieldName, String assocField2) {
+		
+		//part 2. 
+//	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
+//	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
 		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		mergeIntoFrag.tblFrag.alias = "t";
 		
-		sc = new StrCreator();
+		StrCreator sc = new StrCreator();
 		String typeName = info.nearType.getName();
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		sc.o(" USING (SELECT %s FROM %s) as s", pair.name, typeName);
@@ -73,19 +93,9 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		
 		sc.o("\n WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES %s", fields);
-		rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
-		
-		updateFrag.assocDeleteFrag = deleteFrag;
-		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
-		
-		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
-		int extra = statement.paramL.size() - startingNumParams;
-		cloneParams(statement, clonedL, extra);
-		addForeignKeyId(mmMap, fieldName, statement);
-		//and again for mergeInto
-		cloneParams(statement, clonedL, 1, 0);
-		cloneParams(statement, clonedL, 1, 0);
+		return mergeIntoFrag;
 	}
 
 
@@ -166,16 +176,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		RawFragment rawFrag = new RawFragment(sc.str);
 		deleteFrag.whereL.add(rawFrag);
 		
-		//part 2. merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
-		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
-		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
-		
-		sc = new StrCreator();
-		sc.o(" KEY(%s) VALUES(?,?)", assocField2);
-		sc.o(" WHERE");
-		sc.o(rawFrag.render());
-		rawFrag = new RawFragment(sc.str);
-		mergeIntoFrag.rawFrag = rawFrag;
+		//part 2. 
+//	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
+//	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2);
 		
 		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
@@ -185,10 +190,8 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL2, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
-		cloneParams(statement, clonedL2, 2, 0);
-		if (assocFieldName.equals("leftv")) {
-			swapLastTwo(statement);
-		}
+		cloneParams(statement, clonedL2, 1, 0);
+		cloneParams(statement, clonedL2, 1, 0);
 	}
 	
 	private TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
