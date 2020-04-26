@@ -192,7 +192,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		// 3. updating where filter includes other fields (eg Customer.firstName) which may include primaryKey fields.
 		if (existingWhereL.isEmpty()) {
 			log.logDebug("m-to-n:scenario1");
-			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, statement);
+			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, statement);
 			return;
 		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
 			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
@@ -205,8 +205,14 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	}
 
 
-	protected void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
-		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
+	protected void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, 
+				String fieldName, RelationInfo info, String assocFieldName, String assocField2, SqlStatement statement) {
+		if (assocTblReplacer != null) {
+			log.logDebug("use assocTblReplacer");
+			assocTblReplacer.buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, statement);
+		} else {
+			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
+		}		
 	}
 	private void buildUpdateByIdOnly(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
@@ -214,7 +220,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		
 		if (assocTblReplacer != null) {
 			log.logDebug("use assocTblReplacer");
-			assocTblReplacer.buildUpdateByIdOnly(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, oplist, statement);
+			assocTblReplacer.buildUpdateByIdOnly(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, statement);
 		} else {
 			int startingNumParams = statement.paramL.size();
 			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);

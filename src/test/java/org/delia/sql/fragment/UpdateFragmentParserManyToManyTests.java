@@ -73,8 +73,13 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+//		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ?");
+//		chkParams(selectFrag, 333, 100);
+		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ?");
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv <> ?");
+		chkNoLine(3); 
 		chkParams(selectFrag, 333, 100);
 	}
 	@Test
@@ -87,8 +92,13 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+//		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ?");
+//		chkParams(selectFrag, 333, 100);
+		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ?");
+		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE rightv <> ?");
+		chkNoLine(3); 
 		chkParams(selectFrag, 333, 100);
 	}
 	@Test
@@ -101,9 +111,14 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ?");
-		chkParams(selectFrag, 7, 55);
+//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
+//		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ?");
+//		chkParams(selectFrag, 7, 55);
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv <> ?");
+		chkNoLine(3); 
+		chkParams(selectFrag, 333, 100);
 	}
 	@Test
 	public void testParentAll4() {
@@ -115,8 +130,13 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
+//		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ?");
+//		chkParams(selectFrag, 7, 55);
+
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ?");
+		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE leftv <> ?");
+		chkNoLine(3); 
 		chkParams(selectFrag, 7, 55);
 	}
 	
@@ -150,9 +170,14 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
+//		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE b.leftv = ?");
+//		chkParams(selectFrag, 333, 55, 100, 55);
+		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE b.leftv = ?");
-		chkParams(selectFrag, 333, 55, 100, 55);
+		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE leftv = ? and rightv <> ?;");
+		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc KEY(leftv) VALUES(?,?)");
+		chkParams(selectFrag, 333, 55, 55, 100, 55, 100);
 	}
 	@Test
 	public void testParentId3() {
@@ -164,9 +189,14 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
+//		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE b.leftv = ?");
+//		chkParams(selectFrag, 7, 100, 55, 100);
+		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE b.leftv = ?");
-		chkParams(selectFrag, 7, 100, 55, 100);
+		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv = ? and rightv <> ?;");
+		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc KEY(leftv) VALUES(?,?)");
+		chkParams(selectFrag, 7, 100, 100, 55, 100, 55);
 	}
 	@Test
 	public void testParentId4() {
@@ -178,9 +208,14 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
+//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
+//		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
+//		chkParams(selectFrag, 7, 100, 55, 100);
+		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
-		chkParams(selectFrag, 7, 100, 55, 100);
+		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE rightv = ? and leftv <> ?;");
+		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc KEY(rightv) VALUES(?,?)");
+		chkParams(selectFrag, 7, 100, 100, 55, 55, 100);
 	}
 
 	//scenario 3: OTHER -----------------------------
@@ -356,6 +391,13 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 			assertEquals(expected, sqlLine2);
 		} else if (lineNum == 3) {
 			assertEquals(expected, sqlLine3);
+		}
+	}
+	private void chkNoLine(int lineNum) {
+		if (lineNum == 2) {
+			assertEquals(null, sqlLine2);
+		} else if (lineNum == 3) {
+			assertEquals(null, sqlLine3);
 		}
 	}
 

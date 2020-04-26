@@ -28,11 +28,40 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
 	}
+	
+	
+	public void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
+			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
+			String assocField2, SqlStatement statement) {
+//		  scenario 1 all:
+//			  update Customer[true] {wid: 333, addr: [100]}
+//			  has sql:
+//			    update Customer set wid=333
+//			    delete CustomerAddressAssoc where rightv <> 100
+		updateFrag.assocUpdateFrag = null; //remove
+		int startingNumParams = statement.paramL.size();
+
+		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
+		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		
+		StrCreator sc = new StrCreator();
+		sc.o("%s <> ?", assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
+		RawFragment rawFrag = new RawFragment(sc.str);
+		deleteFrag.whereL.add(rawFrag);
+		
+		updateFrag.assocDeleteFrag = deleteFrag;
+		
+		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+		int extra = statement.paramL.size() - startingNumParams;
+		cloneParams(statement, clonedL, extra);
+		addForeignKeyId(mmMap, fieldName, statement);
+	}
 
 
 	public void buildUpdateByIdOnly(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
-			String assocField2, List<OpFragment> oplist, SqlStatement statement) {
+			String assocField2, SqlStatement statement) {
 //		  scenario 2 id:
 //			  update Customer[55] {wid: 333, addr: [100]}
 //			  has sql:
@@ -44,9 +73,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
-		deleteFrag.tblFrag = new TableFragment();
-		deleteFrag.tblFrag.alias = null;
-		deleteFrag.tblFrag.name = assocUpdateFrag.tblFrag.name;
+		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
@@ -55,9 +82,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		//part 2. merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
-		mergeIntoFrag.tblFrag = new TableFragment();
-		mergeIntoFrag.tblFrag.alias = null;
-		mergeIntoFrag.tblFrag.name = assocUpdateFrag.tblFrag.name;
+		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		
 		sc = new StrCreator();
 		sc.o(" KEY(%s) VALUES(?,?)", assocField2);
@@ -78,6 +103,14 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 	}
 	
+	private TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
+		TableFragment tblFrag = new TableFragment();
+		tblFrag.alias = null;
+		tblFrag.name = assocUpdateFrag.tblFrag.name;
+		return tblFrag;
+	}
+
+
 	protected void addForeignKeyId(Map<String, DRelation> mmMap, String fieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
 		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
