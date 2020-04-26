@@ -95,6 +95,11 @@ public class AllBDDTests extends NewBDDBase {
 	}
 	
 	@Test
+	public void testR950() {
+		runR950File("t0-crud-assoc-insert.txt", 0);
+	}
+
+	@Test
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 0);
 	}
@@ -269,6 +274,10 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
+	}
+	@Test
+	public void testR2300() {
+		runR2300File("t0-multi-relation.txt", 0);
 	}
 	
 	

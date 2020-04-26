@@ -31,6 +31,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R700_crud_insert,
 		R800_crud_delete,
 		R900_crud_update,
+		R950_crud_assoc_crud,
 		R1000_crud_upsert,
 		R1100_userfn,
 		R1200_let_scalar, 
@@ -46,7 +47,8 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R2000_sprig,
 		R2100_migration,
 		R2150_migration_relations,
-		R2200_security
+		R2200_security,
+		R2300_multi_relation
 	}
 	public static class FileHelper {
 		
@@ -110,6 +112,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected int runR900File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R900_crud_update, filename, numTests);
 	}
+	protected int runR950File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R950_crud_assoc_crud, filename, numTests);
+	}
 	protected int runR1000File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R1000_crud_upsert, filename, numTests);
 	}
@@ -157,6 +162,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runR2200File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2200_security, filename, numTests);
+	}
+	protected int runR2300File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2300_multi_relation, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("FILE: %s", filename);

@@ -29,10 +29,12 @@ import org.delia.util.DeliaExceptionHelper;
 public class UpdateFragmentParser extends SelectFragmentParser {
 
 	private boolean useAliases = true;
+	private AssocTableReplacer assocTblReplacer;
 
 	public UpdateFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
+		this.assocTblReplacer = new AssocTableReplacer(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
 	}
 
 	public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal) {
@@ -161,13 +163,13 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			if (ruleMany != null) {
 				RelationInfo info = ruleMany.relInfo;
 				selectFrag.assocUpdateFrag = new UpdateStatementFragment();
-				genAssocField(selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
+				genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
 						selectFrag.tblFrag.alias, selectFrag.statement);
 			}
 		}
 	}
 
-	private void genAssocField(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
+	private void genAssocField(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
 			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 		//update assoctabl set leftv=x where rightv=y
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
@@ -190,35 +192,41 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		// 3. updating where filter includes other fields (eg Customer.firstName) which may include primaryKey fields.
 		if (existingWhereL.isEmpty()) {
 			log.logDebug("m-to-n:scenario1");
-			buildUpdateAll(assocUpdateFrag, structType, mmMap, fieldName, info, field1, statement);
+			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, statement);
 			return;
 		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
 			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.logDebug("m-to-n:scenario2");
-			buildUpdateByIdOnly(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, oplist, statement);
+			buildUpdateByIdOnly(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, oplist, statement);
 		} else {
 			log.logDebug("m-to-n:scenario3");
-			buildUpdateOther(assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
+			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
 		}
 	}
 
 
-	protected void buildUpdateAll(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
+	protected void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 	}
-	private void buildUpdateByIdOnly(UpdateStatementFragment assocUpdateFrag, DStructType structType,
+	private void buildUpdateByIdOnly(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
 			String assocField2, List<OpFragment> oplist, SqlStatement statement) {
-		int startingNumParams = statement.paramL.size();
-		buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
-
-		List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
-		assocUpdateFrag.whereL.addAll(clonedL);
 		
-		int extra = statement.paramL.size() - startingNumParams;
-		cloneParams(statement, clonedL, extra);
+		if (assocTblReplacer != null) {
+			log.logDebug("use assocTblReplacer");
+			assocTblReplacer.buildUpdateByIdOnly(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, oplist, statement);
+		} else {
+			int startingNumParams = statement.paramL.size();
+			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
+
+			List<OpFragment> clonedL = WhereListHelper.changeIdToAssocFieldName(false, oplist, info.farType, assocUpdateFrag.tblFrag.alias, assocField2);
+			assocUpdateFrag.whereL.addAll(clonedL);
+			
+			int extra = statement.paramL.size() - startingNumParams;
+			cloneParams(statement, clonedL, extra);
+		}
 	}
-	private void buildUpdateOther(UpdateStatementFragment assocUpdateFrag, DStructType structType,
+	private void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
 			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 

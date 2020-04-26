@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.delia.type.DStructType;
 
 public class TableFragment extends AliasedFragment {
-	public DStructType structType;
+	public DStructType structType; //can be null for assoc table
 	
 	@Override
 	public String render() {

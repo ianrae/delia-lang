@@ -1,0 +1,4 @@
+#TODO 
+#      update Customer[45] { addr: insert [100]} add one assoc row
+#      update Customer[45] { addr: delete [100]} delete one assoc row
+#      update Customer[45] { addr: update [100,102]} pairs. replace row with 100 with 102

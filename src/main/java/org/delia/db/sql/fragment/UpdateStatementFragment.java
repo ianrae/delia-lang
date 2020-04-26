@@ -11,6 +11,8 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 		//parallel arrays
 		public List<String> setValuesL = new ArrayList<>();
 		public UpdateStatementFragment assocUpdateFrag; //TODO later support multiple
+		public DeleteStatementFragment assocDeleteFrag; //TODO later support multiple
+		public MergeIntoStatementFragment assocMergeInfoFrag; //TODO later support multiple
 		
 		@Override
 		public String render() {
@@ -29,9 +31,19 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 //			renderIfPresent(sc, orderByFrag);
 			renderIfPresent(sc, limitFrag);
 			
-			if (this.assocUpdateFrag != null) {
+			if (assocUpdateFrag != null) {
 				sc.o(";\n");
-				String ss = this.assocUpdateFrag.render();
+				String ss = assocUpdateFrag.render();
+				sc.o(ss);
+			}
+			if (assocDeleteFrag != null) {
+				sc.o(";\n");
+				String ss = assocDeleteFrag.render();
+				sc.o(ss);
+			}
+			if (assocMergeInfoFrag != null) {
+				sc.o(";\n");
+				String ss = assocMergeInfoFrag.render();
 				sc.o(ss);
 			}
 			return sc.str;
