@@ -33,6 +33,7 @@ import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.log.LogLevel;
 import org.delia.runner.ConversionResult;
 import org.delia.runner.DsonToDValueConverter;
 import org.delia.runner.Runner;
@@ -59,7 +60,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
+		chkParams(selectFrag, 333, 55);
 	}
 	@Test
 	public void testParentAll() {
@@ -71,8 +73,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ?");
+		chkParams(selectFrag, 333, 100);
 	}
 	@Test
 	public void testParentAllOtherWay() {
@@ -84,8 +87,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ?");
+		chkParams(selectFrag, 333, 100);
 	}
 	@Test
 	public void testParentAll3() {
@@ -97,8 +101,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ?");
+		chkParams(selectFrag, 7, 55);
 	}
 	@Test
 	public void testParentAll4() {
@@ -110,8 +115,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ?");
+		chkParams(selectFrag, 7, 55);
 	}
 	
 	
@@ -126,8 +132,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE b.rightv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
+		chkParams(selectFrag, 333, 55, 100, 55);
 	}
 	@Test
 	public void testParentIdOtherWay() {
@@ -139,8 +146,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE b.leftv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE b.leftv = ?");
+		chkParams(selectFrag, 333, 55, 100, 55);
 	}
 	@Test
 	public void testParentId3() {
@@ -152,8 +160,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = 55 WHERE b.leftv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE b.leftv = ?");
+		chkParams(selectFrag, 7, 100, 55, 100);
 	}
 	@Test
 	public void testParentId4() {
@@ -165,8 +174,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.id = ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE b.rightv = ?");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
+		chkParams(selectFrag, 7, 100, 55, 100);
 	}
 
 	//scenario 3: OTHER -----------------------------
@@ -180,8 +190,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
 	}
 	@Test
 	public void testParentOtherOtherWay() {
@@ -193,8 +204,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = 100 WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
+		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
 	}
 	@Test
 	public void testParentOther3() {
@@ -211,21 +223,6 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7,10,55, 10);
 	}
 	
-	//these tests use int params (but they could be long,date,...)
-	private void chkParams(UpdateStatementFragment selectFrag, Integer...args) {
-		StringJoiner joiner = new StringJoiner(",");
-		for(DValue dval: selectFrag.statement.paramL) {
-			joiner.add(dval.asString());
-		}
-		log.log("params: " + joiner.toString());
-		
-		assertEquals(args.length, selectFrag.statement.paramL.size());
-		int i = 0;
-		for(Integer arg: args) {
-			DValue dval = selectFrag.statement.paramL.get(i++);
-			assertEquals(arg.intValue(), dval.asInt());
-		}
-	}
 	@Test
 	public void testParentOther4() {
 		String src = buildSrcManyToMany();
@@ -236,8 +233,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = 7 WHERE a.z > ?;");
-		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = 55 WHERE (SELECT id FROM Address as a WHERE a.z > ?)");
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
+		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE (SELECT id FROM Address as a WHERE a.z > ?)");
+		chkParams(selectFrag, 7,10,55, 10);
 	}
 	
 
@@ -252,7 +250,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	private UpdateFragmentParser fragmentParser;
 	private String sqlLine1;
 	private String sqlLine2;
-
+	private LogLevel logLevel = LogLevel.DEBUG;
 
 	@Before
 	public void init() {
@@ -261,36 +259,10 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	private DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
+		delia.getLog().setLevel(logLevel);
 		return new DeliaDao(delia);
 	}
 
-	private String buildSrc() {
-		String src = "type Flight struct {field1 int unique, field2 int } end";
-		src += "\n insert Flight {field1: 1, field2: 10}";
-		src += "\n insert Flight {field1: 2, field2: 20}";
-		return src;
-	}
-	private String buildSrcNoPrimaryKey() {
-		String src = "type Flight struct {field1 int, field2 int } end";
-		src += "\n insert Flight {field1: 1, field2: 10}";
-		src += "\n insert Flight {field1: 2, field2: 20}";
-		return src;
-	}
-	private String buildSrcOneToOne() {
-		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one parent } end";
-		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
-		return src;
-	}
-	private String buildSrcOneToMany() {
-		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
-		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
-		src += "\n  insert Address {id: 101, z:6, cust: 55 }";
-		return src;
-	}
 	private String buildSrcManyToMany() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
 		src += "\n type Address struct {id int unique, z int, relation cust Customer optional many } end";
@@ -423,6 +395,21 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
 		assertEquals(0, cres.localET.errorCount());
 		return cres.dval;
+	}
+	//these tests use int params (but they could be long,date,...)
+	private void chkParams(UpdateStatementFragment selectFrag, Integer...args) {
+		StringJoiner joiner = new StringJoiner(",");
+		for(DValue dval: selectFrag.statement.paramL) {
+			joiner.add(dval.asString());
+		}
+		log.log("params: " + joiner.toString());
+		
+		assertEquals(args.length, selectFrag.statement.paramL.size());
+		int i = 0;
+		for(Integer arg: args) {
+			DValue dval = selectFrag.statement.paramL.get(i++);
+			assertEquals(arg.intValue(), dval.asInt());
+		}
 	}
 
 }

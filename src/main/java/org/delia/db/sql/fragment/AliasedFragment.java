@@ -29,9 +29,9 @@ public class AliasedFragment implements SqlFragment {
 	}
 	@Override
 	public int getNumSqlParams() {
-		if ("?".equals(name)) {
-			return 1;
+		if (name == null) {
+			return 0;
 		}
-		return 0;
+		return name.contains("?") ? 1 : 0; //TODO: can it ever be more than one??
 	}
 }
