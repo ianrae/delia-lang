@@ -11,6 +11,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
@@ -353,6 +354,29 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 
 		selectFrag.statement.sql = selectFrag.render();
 		return selectFrag.statement.sql;
+	}
+	
+	public SqlStatementGroup renderUpdateGroup(UpdateStatementFragment selectFrag) {
+		SqlStatementGroup stgroup = new SqlStatementGroup();
+		if(selectFrag.setValuesL.isEmpty()) {
+			selectFrag.statement.sql = ""; //nothing to do
+			return stgroup;
+		}
+
+		selectFrag.statement.sql = selectFrag.render();
+		stgroup.add(selectFrag.statement);
+		addIfNotNull(stgroup, selectFrag.assocUpdateFrag);
+		addIfNotNull(stgroup, selectFrag.assocDeleteFrag);
+		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag);
+		return stgroup;
+	}
+
+	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag) {
+		if (innerFrag != null) {
+			SqlStatement stat = innerFrag.statement;
+			stat.sql = innerFrag.render();
+			stgroup.add(stat);
+		}
 	}
 
 	public void useAliases(boolean b) {

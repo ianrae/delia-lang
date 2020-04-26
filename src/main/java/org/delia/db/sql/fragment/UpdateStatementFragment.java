@@ -31,21 +31,21 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 //			renderIfPresent(sc, orderByFrag);
 			renderIfPresent(sc, limitFrag);
 			
-			if (assocUpdateFrag != null) {
-				sc.o(";\n");
-				String ss = assocUpdateFrag.render();
-				sc.o(ss);
-			}
-			if (assocDeleteFrag != null) {
-				sc.o(";\n");
-				String ss = assocDeleteFrag.render();
-				sc.o(ss);
-			}
-			if (assocMergeInfoFrag != null) {
-				sc.o(";\n");
-				String ss = assocMergeInfoFrag.render();
-				sc.o(ss);
-			}
+//			if (assocUpdateFrag != null) {
+//				sc.o(";\n");
+//				String ss = assocUpdateFrag.render();
+//				sc.o(ss);
+//			}
+//			if (assocDeleteFrag != null) {
+//				sc.o(";\n");
+//				String ss = assocDeleteFrag.render();
+//				sc.o(ss);
+//			}
+//			if (assocMergeInfoFrag != null) {
+//				sc.o(";\n");
+//				String ss = assocMergeInfoFrag.render();
+//				sc.o(ss);
+//			}
 			return sc.str;
 		}
 		

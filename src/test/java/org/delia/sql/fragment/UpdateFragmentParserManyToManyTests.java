@@ -28,9 +28,13 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
+import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.LogLevel;
@@ -78,8 +82,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 333, 100);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Customer as a) as s ON t.rightv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Customer as a) as s ON t.rightv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.leftv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,s.id)");
 		chkParams(selectFrag, 333, 100, 100, 100);
@@ -99,8 +103,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 333, 100);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE rightv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Customer as a) as s ON t.leftv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Customer as a) as s ON t.leftv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.rightv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (s.id,?)");
 		chkParams(selectFrag, 333, 100, 100, 100);
@@ -121,8 +125,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 7, 55);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE rightv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Address as a) as s ON t.leftv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE rightv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Address as a) as s ON t.leftv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.rightv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (s.id,?)");
 		chkParams(selectFrag, 7, 55, 55, 55);
@@ -146,8 +150,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkNoLine(3); 
 //		chkParams(selectFrag, 7, 55);
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE leftv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Address as a) as s ON t.rightv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE leftv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Address as a) as s ON t.rightv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.leftv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,s.id)");
 		chkParams(selectFrag, 7, 55, 55, 55);
@@ -169,8 +173,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ? WHERE b.rightv = ?");
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE rightv = ? and leftv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc KEY(rightv) VALUES(?,?)");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE rightv = ? and leftv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM AddressCustomerAssoc KEY(rightv) VALUES(?,?)");
 		chkParams(selectFrag, 333, 55, 55, 100, 100, 55);
 	}
 	@Test
@@ -188,8 +192,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 333, 55, 100, 55);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE leftv = ? and rightv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc KEY(leftv) VALUES(?,?)");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE leftv = ? and rightv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM CustomerAddressAssoc KEY(leftv) VALUES(?,?)");
 		chkParams(selectFrag, 333, 55, 55, 100, 55, 100);
 	}
 	@Test
@@ -207,8 +211,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 7, 100, 55, 100);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE leftv = ? and rightv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc KEY(leftv) VALUES(?,?)");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ? and rightv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM AddressCustomerAssoc KEY(leftv) VALUES(?,?)");
 		chkParams(selectFrag, 7, 100, 100, 55, 100, 55);
 	}
 	@Test
@@ -226,8 +230,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 7, 100, 55, 100);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE rightv = ? and leftv <> ?;");
-		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc KEY(rightv) VALUES(?,?)");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv = ? and leftv <> ?;");
+		chkLine(3, selectFrag, " MERGE INTO FROM CustomerAddressAssoc KEY(rightv) VALUES(?,?)");
 		chkParams(selectFrag, 7, 100, 100, 55, 55, 100);
 	}
 
@@ -247,8 +251,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE  b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?) as s ON t.rightv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+		chkLine(3, selectFrag, " MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?) as s ON t.rightv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.leftv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,s.id)");
 		chkParams(selectFrag, 333, 10, 500, 10, 500, 10, 500, 100, 100);
@@ -266,9 +270,9 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
 //		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.rightv = ? WHERE b.leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
 //		chkParams(selectFrag, 333, 10, 500, 100, 10, 500);
-//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE  b.leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?) as s ON t.leftv = s.id");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  b.leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+		chkLine(3, selectFrag, " MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?) as s ON t.leftv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.rightv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (s.id,?)");
 		chkParams(selectFrag, 333, 10, 500, 10, 500, 10, 500, 100, 100);
@@ -287,8 +291,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.rightv = ? WHERE b.leftv IN (SELECT id FROM Address as a WHERE a.z > ?)");
 //		chkParams(selectFrag, 7,10,55, 10);
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-		chkLine(2, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE  b.leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-		chkLine(3, selectFrag, "MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Address as a WHERE a.z > ?) as s ON t.leftv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  b.leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+		chkLine(3, selectFrag, " MERGE INTO FROM AddressCustomerAssoc as t USING (SELECT id FROM Address as a WHERE a.z > ?) as s ON t.leftv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.rightv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (s.id,?)");
 		chkParams(selectFrag, 7, 10, 10, 10, 55, 55);
@@ -308,8 +312,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 //		chkLine(2, selectFrag, "UPDATE CustomerAddressAssoc as b SET b.leftv = ? WHERE b.rightv IN (SELECT id FROM Address as a WHERE a.z > ?)");
 //		chkParams(selectFrag, 7,10,55, 10);
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-		chkLine(2, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE  b.rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-		chkLine(3, selectFrag, "MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Address as a WHERE a.z > ?) as s ON t.rightv = s.id");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  b.rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+		chkLine(3, selectFrag, " MERGE INTO FROM CustomerAddressAssoc as t USING (SELECT id FROM Address as a WHERE a.z > ?) as s ON t.rightv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.leftv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,s.id)");
 		chkParams(selectFrag, 7, 10, 10, 10, 55, 55);
@@ -414,7 +418,8 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		assertEquals(expected, sql);
 	}
 	private void runAndChkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.renderSelect(selectFrag);
+		SqlStatementGroup stgroup = fragmentParser.renderUpdateGroup(selectFrag);
+		String sql = stgroup.flatten(); //fragmentParser.renderSelect(selectFrag);
 		log.log(sql);
 		if (lineNum == 1) {
 			String[] ar = sql.split("\n");

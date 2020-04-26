@@ -15,6 +15,7 @@ import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.DeliaError;
@@ -82,6 +83,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 
 	protected void logSql(String sql) {
 		sqlLog.log("SQL: " + sql);
+	}
+	protected void logStatementGroup(SqlStatementGroup stgroup) {
+		sqlLog.log("SQL: " + stgroup.flatten());
 	}
 
 	protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {

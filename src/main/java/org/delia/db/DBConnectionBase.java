@@ -13,6 +13,7 @@ import org.delia.db.h2.DBListingType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 
 public class DBConnectionBase extends ServiceBase {
@@ -86,6 +87,14 @@ public class DBConnectionBase extends ServiceBase {
 			updateCount = stm.executeUpdate();
 		} catch (SQLException e) {
 			convertAndRethrowException(e);
+		}
+		return updateCount;
+	}    
+	public int execUpdateStatementGroup(SqlStatementGroup stgroup, SqlExecuteContext sqlctx) {
+		//TODO: add batching later
+		int updateCount = 0;
+		for(SqlStatement statement: stgroup.statementL) {
+			updateCount += execUpdateStatement(statement, sqlctx);
 		}
 		return updateCount;
 	}    

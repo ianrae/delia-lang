@@ -29,6 +29,7 @@ import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
 import org.delia.runner.QueryResponse;
@@ -194,7 +195,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	
 	@Override
 	public int executeUpdate(QuerySpec spec, DValue dval, DBAccessContext dbctx) {
-		SqlStatement statement;
+		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		
 		if (useFragmentParser) {
@@ -205,22 +206,24 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval);
-			parser.renderUpdate(selectFrag);
-			statement = selectFrag.statement;
+			stgroup = parser.renderUpdateGroup(selectFrag);
+//			s = selectFrag.statement;
 		} else {
 			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-			statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+			stgroup = new SqlStatementGroup();
+			stgroup.add(statement);
 		}
-		if (statement.sql.isEmpty()) {
+		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
 		}
 		
-		logSql(statement);
+		logStatementGroup(stgroup);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		int updateCount = 0;
 		try {
 			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-			updateCount = conn.execUpdateStatement(statement, sqlctx); 
+			updateCount = conn.execUpdateStatementGroup(stgroup, sqlctx); 
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}
