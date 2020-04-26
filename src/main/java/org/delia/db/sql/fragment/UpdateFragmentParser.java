@@ -373,6 +373,11 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		initMainParams(mainStatement, save, selectFrag.assocUpdateFrag);
 		initMainParams(mainStatement, save, selectFrag.assocDeleteFrag);
 		initMainParams(mainStatement, save, selectFrag.assocMergeInfoFrag);
+		if (mainStatement.paramL.isEmpty()) {
+			mainStatement.paramL.addAll(save);
+			return stgroup; //no inner frags
+		}
+		
 		addIfNotNull(stgroup, selectFrag.assocUpdateFrag, save, nextStartIndex(selectFrag.assocDeleteFrag, selectFrag.assocMergeInfoFrag));
 		addIfNotNull(stgroup, selectFrag.assocDeleteFrag, save, nextStartIndex(selectFrag.assocMergeInfoFrag));
 		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag, save, Integer.MAX_VALUE);

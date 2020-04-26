@@ -278,7 +278,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 3;
+//		testIndexToRun = 0;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;

@@ -11,7 +11,7 @@ public class MergeIntoStatementFragment extends StatementFragmentBase {
 		StrCreator sc = new StrCreator();
 		sc.o("MERGE INTO");
 //		renderEarly(sc);
-		sc.o(" FROM %s", tblFrag.render());
+		sc.o(" %s", tblFrag.render());
 //		renderIfPresent(sc, joinFrag);
 		
 //		if (! whereL.isEmpty()) {
