@@ -172,15 +172,15 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	@Test
 	public void testParentOther() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[wid > 10] {wid: 333, addr:100}";
+		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
 
 		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.wid > ?;");
-		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE (SELECT id FROM CUSTOMER WHERE a.wid > ?)");
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE  a.wid > ? and  a.id < ?;");
+		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = 100 WHERE (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?)");
 	}
 	@Test
 	public void testParentOtherOtherWay() {
