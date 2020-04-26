@@ -20,4 +20,9 @@ public class DeleteStatementFragment extends StatementFragmentBase {
 		renderIfPresent(sc, limitFrag);
 		return sc.str;
 	}
+	
+	@Override
+	public int getNumSqlParams() {
+		return 0;//not needed
+	}
 }

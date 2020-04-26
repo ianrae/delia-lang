@@ -11,4 +11,9 @@ public class OffsetFragment implements SqlFragment {
 	public String render() {
 		return String.format(" OFFSET %d", amount);
 	}
+	
+	@Override
+	public int getNumSqlParams() {
+		return 0;
+	}
 }

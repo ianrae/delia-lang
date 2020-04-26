@@ -19,4 +19,8 @@ public class JoinFragment implements SqlFragment {
 		return sc.str;
 	}
 
+	@Override
+	public int getNumSqlParams() {
+		return 0;
+	}
 }

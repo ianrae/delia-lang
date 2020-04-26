@@ -33,4 +33,9 @@ public class OrderByFragment extends AliasedFragment {
 		AliasedFragment afrag = new AliasedFragment(frag.alias, frag.name);
 		return String.format("%s%s", afrag.render(), s);
 	}
+	
+	@Override
+	public int getNumSqlParams() {
+		return 0;
+	}
 }

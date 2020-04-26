@@ -11,4 +11,9 @@ public class LimitFragment implements SqlFragment {
 	public String render() {
 		return String.format(" LIMIT %d", amount);
 	}
+	
+	@Override
+	public int getNumSqlParams() {
+		return 0;
+	}
 }

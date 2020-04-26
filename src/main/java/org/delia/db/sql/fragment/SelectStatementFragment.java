@@ -28,6 +28,9 @@ public class SelectStatementFragment extends StatementFragmentBase {
 		return sc.str;
 	}
 
-
+	@Override
+	public int getNumSqlParams() {
+		return 0; //not needed
+	}
 
 }

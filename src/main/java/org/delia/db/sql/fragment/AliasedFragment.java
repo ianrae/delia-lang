@@ -27,4 +27,11 @@ public class AliasedFragment implements SqlFragment {
 		}
 		return String.format("%s.%s", alias, name);
 	}
+	@Override
+	public int getNumSqlParams() {
+		if ("?".equals(name)) {
+			return 1;
+		}
+		return 0;
+	}
 }

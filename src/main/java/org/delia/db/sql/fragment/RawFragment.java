@@ -12,6 +12,7 @@ package org.delia.db.sql.fragment;
  */
 public class RawFragment implements SqlFragment {
 	public String rawSql;
+	public int numSqlParams = 0; //!!
 	
 	public RawFragment(String rawSql) {
 		this.rawSql = rawSql;
@@ -20,5 +21,10 @@ public class RawFragment implements SqlFragment {
 	@Override
 	public String render() {
 		return rawSql;
+	}
+	
+	@Override
+	public int getNumSqlParams() {
+		return numSqlParams;
 	}
 }

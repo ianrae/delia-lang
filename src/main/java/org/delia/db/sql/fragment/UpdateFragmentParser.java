@@ -217,16 +217,6 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		int extra = statement.paramL.size() - startingNumParams;
 		cloneParams(statement, clonedL, extra);
 	}
-	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
-		//clone params 
-		int numToAdd = clonedL.size();
-		int n = statement.paramL.size();
-		for(int i = 0; i < numToAdd; i++) {
-			int k = n - (numToAdd - i) - extra;
-			DValue previous = statement.paramL.get(k);
-			statement.paramL.add(previous); //add copy
-		}
-	}
 	private void buildUpdateOther(UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
 			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
@@ -252,6 +242,21 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		cloneParams(statement, clonedL, extra);
 	}
 	
+	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
+		//clone params 
+		int numToAdd = 0;
+		for(SqlFragment ff: clonedL) {
+			numToAdd += ff.getNumSqlParams();
+		}
+		
+		int n = statement.paramL.size();
+		log.logDebug("cloneParams %d %d", numToAdd, n);
+		for(int i = 0; i < numToAdd; i++) {
+			int k = n - (numToAdd - i) - extra;
+			DValue previous = statement.paramL.get(k);
+			statement.paramL.add(previous); //add copy
+		}
+	}
 	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
 		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later

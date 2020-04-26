@@ -25,4 +25,10 @@ public class OpFragment implements SqlFragment {
 		String s = String.format(" %s%s %s %s%s", not1, left.render(), op, not2, right.render());
 		return s;
 	}
+	
+	@Override
+	public int getNumSqlParams() {
+		return left.getNumSqlParams() + right.getNumSqlParams();
+	}
+	
 }
