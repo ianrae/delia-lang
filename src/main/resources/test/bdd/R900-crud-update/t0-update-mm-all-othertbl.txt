@@ -29,6 +29,6 @@ then:
 value:a:Address {
  vid:100
  vz:7
- vcust:{[55,56]}
+ vcust:{[55,55]}
 }
 

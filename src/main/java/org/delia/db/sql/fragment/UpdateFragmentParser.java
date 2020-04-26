@@ -28,7 +28,7 @@ import org.delia.util.DeliaExceptionHelper;
 //single use!!!
 public class UpdateFragmentParser extends SelectFragmentParser {
 
-	private boolean useAliases;
+	private boolean useAliases = true;
 
 	public UpdateFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
