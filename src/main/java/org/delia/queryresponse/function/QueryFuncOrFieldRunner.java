@@ -67,7 +67,7 @@ public class QueryFuncOrFieldRunner extends ServiceBase {
 					result.dvalList = newList;
 				} else { //it's a fn to run
 					String fnName = qfexp.funcName;
-					log.log("qfn: " + fnName);
+//					log.log("qfn: " + fnName);
 					
 					QueryResponseFunction func = funcFactory.create(fnName, registry);
 					if (func == null) {
@@ -109,7 +109,7 @@ public class QueryFuncOrFieldRunner extends ServiceBase {
 				break; //we're done
 			} else { //it's a fn to run
 				String fnName = qfexp.funcName;
-				log.log("qfn: " + fnName);
+//				log.log("qfn: " + fnName);
 				trail.add(fnName);
 			}
 		}

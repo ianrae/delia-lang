@@ -41,7 +41,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
 			H2DBInterface h2db = new H2DBInterface(factorySvc, connFact);
 			actualInterface = h2db;
-			h2db.useFragmentParser = useFragmentParser;
+			//h2db.useFragmentParser = useFragmentParser;
 
 			actualInterface.init(factorySvc);
 
