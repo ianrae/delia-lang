@@ -85,6 +85,13 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR900() {
 		runR900File("t0-update.txt", 7);
+		//This will work when we fix issue of update needs to do delete
+//		runR900File("t0-update-mm-all.txt", 4);
+//		runR900File("t0-update-mm-all-othertbl.txt", 2);
+//		runR900File("t0-update-mm-id.txt", 4);
+//		runR900File("t0-update-mm-id-othertbl.txt", 2);
+//		runR900File("t0-update-mm-other.txt", 4);
+//		runR900File("t0-update-mm-other-othertbl.txt", 2);
 	}
 	
 	@Test
