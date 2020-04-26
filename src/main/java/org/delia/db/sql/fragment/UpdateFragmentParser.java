@@ -192,7 +192,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		// 3. updating where filter includes other fields (eg Customer.firstName) which may include primaryKey fields.
 		if (existingWhereL.isEmpty()) {
 			log.logDebug("m-to-n:scenario1");
-			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, statement);
+			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, mainUpdateAlias, statement);
 			return;
 		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
 			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
@@ -206,10 +206,10 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 
 
 	protected void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, 
-				String fieldName, RelationInfo info, String assocFieldName, String assocField2, SqlStatement statement) {
+				String fieldName, RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, SqlStatement statement) {
 		if (assocTblReplacer != null) {
 			log.logDebug("use assocTblReplacer");
-			assocTblReplacer.buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, statement);
+			assocTblReplacer.buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, mainUpdateAlias, statement);
 		} else {
 			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 		}		

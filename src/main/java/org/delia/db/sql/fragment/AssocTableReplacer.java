@@ -3,6 +3,7 @@ package org.delia.db.sql.fragment;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
 import org.delia.db.SqlHelperFactory;
@@ -32,7 +33,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	
 	public void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
-			String assocField2, SqlStatement statement) {
+			String assocField2, String mainUpdateAlias, SqlStatement statement) {
 //		  scenario 1 all:
 //			  update Customer[true] {wid: 333, addr: [100]}
 //			  has sql:
@@ -54,7 +55,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
-		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2);
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, "");
 		
 		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
@@ -68,7 +69,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, 1, 0);
 	}
 	private MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
-			RelationInfo info, String assocFieldName, String assocField2) {
+			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
 		
 		//part 2. 
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
@@ -81,7 +82,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		StrCreator sc = new StrCreator();
 		String typeName = info.nearType.getName();
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		sc.o(" USING (SELECT %s FROM %s) as s", pair.name, typeName);
+		sc.o(" USING (SELECT %s FROM %s as %s%s) as s", pair.name, typeName, mainUpdateAlias, subSelectWhere);
 		sc.o(" ON t.%s = s.%s", assocField2, pair.name);
 		sc.o("\n WHEN MATCHED THEN UPDATE SET t.%s = ?", assocFieldName);
 		
@@ -176,11 +177,15 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		RawFragment rawFrag = new RawFragment(sc.str);
 		deleteFrag.whereL.add(rawFrag);
 		
+		int pos = sc.str.indexOf(" WHERE ");
+		String subSelectWhere = sc.str.substring(pos);
+		subSelectWhere = StringUtils.substringBeforeLast(subSelectWhere, ")");
+		
 		//part 2. 
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
-		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2);
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, subSelectWhere);
 		
 		updateFrag.assocDeleteFrag = deleteFrag;
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
@@ -188,10 +193,10 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
 		cloneParams(statement, clonedL2, extra);
-		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
-		cloneParams(statement, clonedL2, 1, 0);
-		cloneParams(statement, clonedL2, 1, 0);
+		cloneParams(statement, clonedL2, extra);
+		addForeignKeyId(mmMap, fieldName, statement);
+		addForeignKeyId(mmMap, fieldName, statement);
 	}
 	
 	private TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
