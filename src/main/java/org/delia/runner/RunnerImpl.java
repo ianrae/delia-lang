@@ -505,6 +505,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				ConfigureService configSvc = factorySvc.getConfigureService();
 				qtx.loadFKs = configSvc.isPopulateFKsFlag();
 			}
+			
+			if (! qtx.loadFKs) {
+				qtx.pruneParentRelationFlag = true;
+			}
+			
 			return qtx;
 		}
 		private QuerySpec resolveFilterVars(QueryExp queryExp) {

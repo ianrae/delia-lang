@@ -242,7 +242,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 				for(DValue dval: dvalList) {
 					addAnyFKs(dval, dbctx);
 				}
-			} else {
+			} else if (qtx.pruneParentRelationFlag) {
 				dvalList = removeParentSideRelations(dvalList);
 			}
 			//TODO: if query does NOT include fks or fetch then we should
