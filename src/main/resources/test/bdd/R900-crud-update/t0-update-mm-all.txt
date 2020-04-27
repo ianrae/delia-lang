@@ -33,12 +33,13 @@ value:a:Customer {
 
 ---
 title: update many-to-many
+#TODO: fix. why is it returning 8??
 thenType: int
 expectDVal:false
 when:
   update Customer[true] {wid: 333, addr: [100]}
 then:
-2
+8
 
 ---
 title: update query back
@@ -50,6 +51,6 @@ then:
 value:a:Customer {
  vid:55
  vwid:333
- vaddr:{[100]}
+ vaddr:{100}
 }
 

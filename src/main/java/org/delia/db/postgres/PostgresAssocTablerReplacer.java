@@ -51,12 +51,12 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		String field2;
 		if (assocFieldName.equals("leftv")) {
 			field1 = "? as leftv";
-			field2 =  String.format("%s as rightv FROM %s", pair.name, typeName);
+			field2 =  String.format("%s as rightv", pair.name);
 		} else {
-			field1 =  String.format("%s as leftv FROM %s", pair.name, typeName);
+			field1 =  String.format("%s as leftv", pair.name);
 			field2 = "? as rightv";
 		}
-		sc.o("%s, %s) ", field1, field2);
+		sc.o("%s, %s FROM %s) ", field1, field2, typeName);
 		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.earlyL.add(rawFrag);
 		

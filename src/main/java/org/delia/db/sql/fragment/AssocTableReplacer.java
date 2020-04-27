@@ -70,7 +70,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
-		mergeIntoFrag.paramStartIndex = statement.paramL.size();
+		mergeIntoFrag.paramStartIndex = statement.paramL.size() - 1;
 		cloneParams(statement, clonedL, 1, 0);
 		cloneParams(statement, clonedL, 1, 0);
 		if (isPostgres) {
