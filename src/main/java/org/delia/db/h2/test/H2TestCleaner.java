@@ -22,6 +22,7 @@ public class H2TestCleaner {
 		boolean b = innerInterface.isSQLLoggingEnabled();
 		innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
+		factorySvc.getLog().log("CLEAN tables..");
 		safeDeleteTable(executor, "cars;");
 		safeDeleteTable(executor, "CustomerAddressAssoc;");
 		safeDeleteTable(executor, "AddressCustomerAssoc;");
