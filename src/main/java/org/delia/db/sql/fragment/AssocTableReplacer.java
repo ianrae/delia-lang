@@ -202,7 +202,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		StrCreator sc = new StrCreator();
-		sc.o(" %s.%s IN", assocUpdateFrag.tblFrag.alias, assocField2);
+		sc.o(" %s IN", assocField2);
 		sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
 
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);
@@ -233,15 +233,15 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
-		cloneParams(statement, clonedL2, extra);
+		int k = cloneParams(statement, clonedL2, extra);
 		//and again for mergeInto
 		if (isPostgres) {
-			mergeIntoFrag.paramStartIndex += clonedL2.size() + 1;
+			mergeIntoFrag.paramStartIndex += k;
 			cloneParams(statement, clonedL2, extra);
 			addForeignKeyId(mmMap, fieldName, statement);
 			int n = statement.paramL.size();
 			DValue last = statement.paramL.remove(n - 1);
-			statement.paramL.add(n - 3, last);
+			statement.paramL.add(n - k - 1, last);
 		} else {
 			cloneParams(statement, clonedL2, extra);
 			addForeignKeyId(mmMap, fieldName, statement);
@@ -268,13 +268,14 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	
 	
-	protected void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
+	protected int cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
 		//clone params 
 		int numToAdd = 0;
 		for(SqlFragment ff: clonedL) {
 			numToAdd += ff.getNumSqlParams();
 		}
 		cloneParams(statement, clonedL, numToAdd, extra);
+		return numToAdd;
 	}
 	protected void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int numToAdd, int extra) {
 		//clone params 

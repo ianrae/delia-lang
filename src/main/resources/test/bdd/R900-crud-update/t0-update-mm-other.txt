@@ -42,7 +42,6 @@ then:
 
 ---
 title: update query back
-#TODO: this is wrong we should remove one row from assoc table
 when:
   update Customer[wid == 33] {wid: 333, addr: [100]}
   let x = Customer[55].fks()
@@ -50,6 +49,6 @@ then:
 value:a:Customer {
  vid:55
  vwid:333
- vaddr:{[100,101]}
+ vaddr:{100}
 }
 
