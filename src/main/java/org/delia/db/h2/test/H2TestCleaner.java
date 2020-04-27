@@ -33,22 +33,22 @@ public class H2TestCleaner {
 		innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
 		log.log("CLEAN tables..");
-		safeDeleteTable(executor, "cars;");
-		safeDeleteTable(executor, "CustomerAddressAssoc;");
-		safeDeleteTable(executor, "AddressCustomerAssoc;");
-		safeDeleteTable(executor, "Customer;");
-		safeDeleteTable(executor, "CUSTOMERS;");
-		safeDeleteTable(executor, "Address;");
-		safeDeleteTable(executor, "Customer;");
-		safeDeleteTable(executor, "Address;");
-		safeDeleteTable(executor, "CustomerAddressAssoc;");
-		safeDeleteTable(executor, "AddressCustomerAssoc;");
-		safeDeleteTable(executor, "Customer__BAK;");
-		safeDeleteTable(executor, "Actor;");
-		safeDeleteTable(executor, "Flight;");
-		safeDeleteTable(executor, "Flight2;");
-		safeDeleteTable(executor, "BASE;");
-		safeDeleteTable(executor, "BASE2;");
+		safeDeleteTable(executor, "cars");
+		safeDeleteTable(executor, "CustomerAddressAssoc");
+		safeDeleteTable(executor, "AddressCustomerAssoc");
+		safeDeleteTable(executor, "Customer");
+		safeDeleteTable(executor, "CUSTOMERS");
+		safeDeleteTable(executor, "Address");
+		safeDeleteTable(executor, "Customer");
+		safeDeleteTable(executor, "Address");
+		safeDeleteTable(executor, "CustomerAddressAssoc");
+		safeDeleteTable(executor, "AddressCustomerAssoc");
+		safeDeleteTable(executor, "Customer__BAK");
+		safeDeleteTable(executor, "Actor");
+		safeDeleteTable(executor, "Flight");
+		safeDeleteTable(executor, "Flight2");
+		safeDeleteTable(executor, "BASE");
+		safeDeleteTable(executor, "BASE2");
 
 		String tbl = SchemaMigrator.SCHEMA_TABLE;
 		safeDeleteTable(executor, tbl.toLowerCase());
@@ -88,8 +88,13 @@ public class H2TestCleaner {
 	public void safeDeleteTable(DBExecutor executor, String tblName) {
 		tblName = adjustTblName(tblName);
 		try {
-			deleteContraintsForTable(executor, tblName);
-			executor.deleteTable(tblName);
+			if (executor instanceof H2DBExecutor) {
+				this.deleteH2TableCascade(executor, tblName);
+//				deleteContraintsForTable(executor, tblName);
+				executor.deleteTable(tblName);
+			} else {
+				executor.deleteTable(tblName);
+			}
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
 			
@@ -117,6 +122,18 @@ public class H2TestCleaner {
 				sql = String.format("ALTER TABLE %s DROP constraint %s", tblName, s);
 				h2exec.executeRawSql(sql);
 		    }
+			
+			sql = String.format("DROP TABLE if exists %s cascade;", tblName);
+			log.log(sql);
+			h2exec.executeRawSql(sql);
+		}
+	}
+	private void deleteH2TableCascade(DBExecutor executor, String tblName) throws SQLException {
+		if (executor instanceof H2DBExecutor) {
+			H2DBExecutor h2exec = (H2DBExecutor) executor;
+			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
+			//log.log(sql);
+			h2exec.executeRawSql(sql);
 		}
 	}
 

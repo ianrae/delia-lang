@@ -50,7 +50,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 				cleaner.deleteKnownTables(factorySvc, actualInterface);
 			}
 			
-			h2db.enumerateAllConstraints(log);
+			//h2db.enumerateAllConstraints(log);
 		}
 		break;
 		case POSTGRES:
