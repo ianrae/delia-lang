@@ -156,6 +156,12 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		if (assocFieldName.equals("leftv")) {
 			swapLastTwo(statement);
 		}
+		if (isPostgres) {
+			int n = statement.paramL.size();
+			DValue tmp = statement.paramL.get(n - 2);
+			statement.paramL.add(tmp);
+			statement.paramL.add(tmp);
+		}
 	}
 	
 	protected MergeIntoStatementFragment generateMergeForIdOnly(UpdateStatementFragment assocUpdateFrag, RelationInfo info, String assocFieldName, String assocField2, String subSelectWhere) {

@@ -26,6 +26,7 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 	public PostgresAssocTablerReplacer(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
+		this.isPostgres = true;
 	}
 	
 	protected MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
@@ -58,7 +59,7 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		} else {
 			fields = String.format("rightv = ?", pair.name);
 		}
-		sc.o(" ON CONFLICT (left,rightv) DO UPDATE SET %s", fields);
+		sc.o(" ON CONFLICT (leftv) DO UPDATE SET %s", fields);
 		
 		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
@@ -96,7 +97,7 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		} else {
 			fields = String.format("rightv = ?", pair.name);
 		}
-		sc.o(" ON CONFLICT (left,rightv) DO UPDATE SET %s", fields);
+		sc.o(" ON CONFLICT (leftv) DO UPDATE SET %s", fields);
 		
 		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
