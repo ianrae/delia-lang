@@ -33,10 +33,10 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
 		
 		//part 2. 
-//		 INSERT INTO AddressCustomerAssoc as a (leftv, rightv)
-//		  SELECT 100,b.id FROM Customer as b
-//		  ON CONFLICT (leftv,rightv) 
-//		  DO UPDATE SET leftv = 100
+//		INSERT INTO AddressCustomerAssoc as t (leftv,rightv) 
+//		VALUES(100, (SELECT s.id FROM Customer as s)) 
+//		ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = 100,rightv=55
+		
 		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
 		mergeIntoFrag.prefix = "INSERT INTO";
 		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
@@ -46,20 +46,25 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		sc.o(" (leftv,rightv)");
 		String typeName = info.nearType.getName();
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		String fields;
+		String field1;
+		String field2;
 		if (assocFieldName.equals("leftv")) {
-			fields = String.format("(?,s.%s)", pair.name);
+			field1 = "?";
+			field2 =  String.format("(SELECT s.%s FROM %s as %s)", pair.name, typeName, "s");
 		} else {
-			fields = String.format("(s.%s,?)", pair.name);
+			field1 =  String.format("(SELECT s.%s FROM %s as %s)", pair.name, typeName, "s");
+			field2 = "?";
 		}
-		
-		sc.o(" SELECT %s FROM %s as %s WHERE s.%s = ?", fields, typeName, "s", pair.name);
+
+		sc.o(" VALUES(%s,%s)", field1, field2);
 		if (assocFieldName.equals("leftv")) {
-			fields = String.format("leftv = ?", pair.name);
+			field1 = "?";
+			field2 =  String.format("s.%s", pair.name);
 		} else {
-			fields = String.format("rightv = ?", pair.name);
+			field2 =  String.format("s.%s", pair.name);
+			field2 = "?";
 		}
-		sc.o(" ON CONFLICT (leftv) DO UPDATE SET %s", fields);
+		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = %s,rightv=%s", field1, field2);
 		
 		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
@@ -78,8 +83,6 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		
 		StrCreator sc = new StrCreator();
 		sc.o(" (leftv,rightv)");
-		
-		
 		String typeName = info.nearType.getName();
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		String field1;

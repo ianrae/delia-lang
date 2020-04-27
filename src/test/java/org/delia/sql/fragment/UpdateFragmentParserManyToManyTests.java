@@ -67,7 +67,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333, 55);
 	}
 	@Test
-	public void testParentAll() {
+	public void testAll() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:100}";
 
@@ -88,7 +88,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333, 100, 100, 100);
 	}
 	@Test
-	public void testParentAllOtherWay() {
+	public void testAllOtherWay() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:100}";
 
@@ -110,7 +110,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 	}
 	@Test
-	public void testParentAll3() {
+	public void testAll3() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[true] {z: 7, cust:55}";
 
@@ -131,7 +131,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 55, 55, 55);
 	}
 	@Test
-	public void testParentAll4() {
+	public void testAll4() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[true] {z: 7, cust:55}";
 
@@ -156,7 +156,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 55, 55, 55);
 	}
 	@Test
-	public void testParentAll5() {
+	public void testAll5() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:null}";
 
@@ -174,7 +174,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333);
 	}
 	@Test
-	public void testParentAll6() {
+	public void testAll6() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:null}";
 
@@ -195,7 +195,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 	
 	//scenario 2: ID-----------------------------
 	@Test
-	public void testParentId() {
+	public void testId() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, addr:100}";
 
@@ -213,7 +213,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333, 55, 55, 100, 100, 55);
 	}
 	@Test
-	public void testParentIdOtherWay() {
+	public void testIdOtherWay() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, addr:100}";
 
@@ -232,7 +232,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333, 55, 55, 100, 55, 100);
 	}
 	@Test
-	public void testParentId3() {
+	public void testId3() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:55}";
 
@@ -251,7 +251,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 100, 100, 55, 100, 55);
 	}
 	@Test
-	public void testParentId4() {
+	public void testId4() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:55}";
 
@@ -270,7 +270,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 100, 100, 55, 55, 100);
 	}
 	@Test
-	public void testParentId5() {
+	public void testId5() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:null}";
 
@@ -288,7 +288,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 100, 100);
 	}
 	@Test
-	public void testParentId6() {
+	public void testId6() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:null}";
 
@@ -309,7 +309,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 
 	//scenario 3: OTHER -----------------------------
 	@Test
-	public void testParentOther() {
+	public void testOther() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
 
@@ -330,7 +330,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333, 10, 500, 10, 500, 10, 500, 100, 100);
 	}
 	@Test
-	public void testParentOtherOtherWay() {
+	public void testOtherOtherWay() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
 
@@ -350,7 +350,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 333, 10, 500, 10, 500, 10, 500, 100, 100);
 	}
 	@Test
-	public void testParentOther3() {
+	public void testOther3() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:55}";
 
@@ -370,7 +370,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 10, 10, 10, 55, 55);
 	}
 	@Test
-	public void testParentOther4() {
+	public void testOther4() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:55}";
 
@@ -390,7 +390,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 10, 10, 10, 55, 55);
 	}
 	@Test
-	public void testParentOther5() {
+	public void testOther5() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:null}";
 
@@ -407,7 +407,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkParams(selectFrag, 7, 10, 10);
 	}
 	@Test
-	public void testParentOther6() {
+	public void testOther6() {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:null}";
 

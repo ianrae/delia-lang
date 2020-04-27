@@ -73,6 +73,9 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		cloneParams(statement, clonedL, 1, 0);
 		cloneParams(statement, clonedL, 1, 0);
+		if (isPostgres) {
+//			cloneParams(statement, clonedL, 1, 0);
+		}
 	}
 	protected MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
 			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
@@ -156,15 +159,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		if (assocFieldName.equals("leftv")) {
 			swapLastTwo(statement);
 		}
+
 		if (isPostgres) {
 			int n = statement.paramL.size();
-//			statement.paramL.remove(n - 1);
-//			DValue tmp = statement.paramL.get(n - 2);
-//			statement.paramL.add(tmp);
 			cloneParams(statement, clonedL, 2, 0);
-		} else {
 		}
-		
 	}
 	
 	protected MergeIntoStatementFragment generateMergeForIdOnly(UpdateStatementFragment assocUpdateFrag, RelationInfo info, String assocFieldName, String assocField2, String subSelectWhere) {
