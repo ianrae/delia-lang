@@ -3,13 +3,13 @@ package org.delia.db.sql.fragment;
 import org.delia.db.sql.StrCreator;
 
 public class MergeIntoStatementFragment extends StatementFragmentBase {
-	
+	public String prefix = "MERGE INTO";
 	public RawFragment rawFrag;
 	
 	@Override
 	public String render() {
 		StrCreator sc = new StrCreator();
-		sc.o("MERGE INTO");
+		sc.o(prefix);
 //		renderEarly(sc);
 		sc.o(" %s", tblFrag.render());
 //		renderIfPresent(sc, joinFrag);

@@ -28,25 +28,23 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
 	}
 	
-	
 	protected MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
 			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
 		
 		//part 2. 
-//	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
-//	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
-//	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+//		 INSERT INTO AddressCustomerAssoc as a (leftv, rightv)
+//		  SELECT 100,b.id FROM Customer as b
+//		  ON CONFLICT (leftv,rightv) 
+//		  DO UPDATE SET leftv = 100
 		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
+		mergeIntoFrag.prefix = "INSERT INTO";
 		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		mergeIntoFrag.tblFrag.alias = "t";
 		
 		StrCreator sc = new StrCreator();
+		sc.o(" (leftv,rightv)");
 		String typeName = info.nearType.getName();
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		sc.o(" USING (SELECT %s FROM %s as %s%s) as s", pair.name, typeName, mainUpdateAlias, subSelectWhere);
-		sc.o(" ON t.%s = s.%s", assocField2, pair.name);
-		sc.o("\n WHEN MATCHED THEN UPDATE SET t.%s = ?", assocFieldName);
-		
 		String fields;
 		if (assocFieldName.equals("leftv")) {
 			fields = String.format("(?,s.%s)", pair.name);
@@ -54,7 +52,14 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 			fields = String.format("(s.%s,?)", pair.name);
 		}
 		
-		sc.o("\n WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES %s", fields);
+		sc.o(" SELECT %s FROM %s as %s%s as s", fields, typeName, "s", subSelectWhere);
+		if (assocFieldName.equals("leftv")) {
+			fields = String.format("leftv = ?", pair.name);
+		} else {
+			fields = String.format("rightv = ?", pair.name);
+		}
+		sc.o(" ON CONFLICT (left,rightv) DO UPDATE SET %s", fields);
+		
 		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
