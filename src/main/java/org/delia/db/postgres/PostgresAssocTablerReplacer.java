@@ -52,7 +52,7 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 			fields = String.format("(s.%s,?)", pair.name);
 		}
 		
-		sc.o(" SELECT %s FROM %s as %s%s as s", fields, typeName, "s", subSelectWhere);
+		sc.o(" SELECT %s FROM %s as %s%s", fields, typeName, "s", subSelectWhere);
 		if (assocFieldName.equals("leftv")) {
 			fields = String.format("leftv = ?", pair.name);
 		} else {
@@ -64,5 +64,44 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}
+	
+	protected MergeIntoStatementFragment generateMergeForIdOnly(UpdateStatementFragment assocUpdateFrag, RelationInfo info, String assocFieldName, String assocField2, String subSelectWhere) {
+		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
+		mergeIntoFrag.prefix = "INSERT INTO";
+		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		mergeIntoFrag.tblFrag.alias = "t";
+		
+//	     INSERT INTO AddressCustomerAssoc as a (leftv, rightv)
+//	     SELECT 100,b.id FROM Customer as b where leftv=55
+//	     ON CONFLICT (leftv,rightv) 
+//	     DO UPDATE SET leftv = 100
+		
+		StrCreator sc = new StrCreator();
+		sc.o(" (leftv,rightv)");
+		String typeName = info.nearType.getName();
+		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		String fields;
+		String fields2;
+		if (assocFieldName.equals("leftv")) {
+			fields = String.format("(?,s.%s)", pair.name);
+			fields2 = "rightv";
+		} else {
+			fields = String.format("(s.%s,?)", pair.name);
+			fields2 = "leftv";
+		}
+		
+		sc.o(" SELECT %s FROM %s as %s WHERE %s ", fields, typeName, "s", subSelectWhere);
+		if (assocFieldName.equals("leftv")) {
+			fields = String.format("leftv = ?", pair.name);
+		} else {
+			fields = String.format("rightv = ?", pair.name);
+		}
+		sc.o(" ON CONFLICT (left,rightv) DO UPDATE SET %s", fields);
+		
+		RawFragment rawFrag = new RawFragment(sc.str);
+		mergeIntoFrag.rawFrag = rawFrag;
+		return mergeIntoFrag;
+	}
+	
 
 }

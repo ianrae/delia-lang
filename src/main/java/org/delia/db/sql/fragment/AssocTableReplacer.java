@@ -31,7 +31,6 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
 	}
 	
-	
 	public void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
 			String assocField2, String mainUpdateAlias, SqlStatement statement) {
@@ -143,13 +142,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		deleteFrag.whereL.add(rawFrag);
 		
 		//part 2. merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
-		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
-		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
-		
-		sc = new StrCreator();
-		sc.o(" KEY(%s) VALUES(?,?)", assocField2);
-		rawFrag = new RawFragment(sc.str);
-		mergeIntoFrag.rawFrag = rawFrag;
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeForIdOnly(assocUpdateFrag, info, assocFieldName, assocField2, sc.str);
 		
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
@@ -165,6 +158,17 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 	}
 	
+	protected MergeIntoStatementFragment generateMergeForIdOnly(UpdateStatementFragment assocUpdateFrag, RelationInfo info, String assocFieldName, String assocField2, String subSelectWhere) {
+		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
+		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
+		
+		StrCreator sc = new StrCreator();
+		sc.o(" KEY(%s) VALUES(?,?)", assocField2);
+		RawFragment rawFrag = new RawFragment(sc.str);
+		mergeIntoFrag.rawFrag = rawFrag;
+		return mergeIntoFrag;
+	}
+
 	public void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
 			String assocField2, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
