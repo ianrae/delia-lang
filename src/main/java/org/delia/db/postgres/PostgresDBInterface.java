@@ -19,7 +19,6 @@ import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.sql.ConnectionFactory;
-import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;

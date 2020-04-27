@@ -13,6 +13,7 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 		public UpdateStatementFragment assocUpdateFrag; //TODO later support multiple
 		public DeleteStatementFragment assocDeleteFrag; //TODO later support multiple
 		public MergeIntoStatementFragment assocMergeInfoFrag; //TODO later support multiple
+		public boolean doUpdateLast = false;
 		
 		@Override
 		public String render() {
@@ -31,21 +32,6 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 //			renderIfPresent(sc, orderByFrag);
 			renderIfPresent(sc, limitFrag);
 			
-//			if (assocUpdateFrag != null) {
-//				sc.o(";\n");
-//				String ss = assocUpdateFrag.render();
-//				sc.o(ss);
-//			}
-//			if (assocDeleteFrag != null) {
-//				sc.o(";\n");
-//				String ss = assocDeleteFrag.render();
-//				sc.o(ss);
-//			}
-//			if (assocMergeInfoFrag != null) {
-//				sc.o(";\n");
-//				String ss = assocMergeInfoFrag.render();
-//				sc.o(ss);
-//			}
 			return sc.str;
 		}
 		

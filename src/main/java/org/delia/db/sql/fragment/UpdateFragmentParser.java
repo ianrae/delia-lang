@@ -240,6 +240,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
 			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
+		updateFrag.doUpdateLast = true; //in case we're updating any of the fields in the query
 		if (assocTblReplacer != null) {
 			log.logDebug("use assocTblReplacer");
 			assocTblReplacer.buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, existingWhereL, mainUpdateAlias, statement);
@@ -383,6 +384,19 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		addIfNotNull(stgroup, selectFrag.assocUpdateFrag, save, nextStartIndex(selectFrag.assocDeleteFrag, selectFrag.assocMergeInfoFrag));
 		addIfNotNull(stgroup, selectFrag.assocDeleteFrag, save, nextStartIndex(selectFrag.assocMergeInfoFrag));
 		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag, save, Integer.MAX_VALUE);
+		
+		if (selectFrag.doUpdateLast) {
+			SqlStatement stat = stgroup.statementL.remove(0); //move first to last
+			List<DValue> firstParams = stat.paramL;
+			stgroup.statementL.add(stat);
+			
+//			//swap param lists too
+//			SqlStatement newFirst = stgroup.statementL.get(0);
+//			List<DValue> tmp = stat.paramL;
+//			newFirst.paramL = firstParams;
+//			stat.paramL = tmp;
+		}
+		
 		return stgroup;
 	}
 	private int nextStartIndex(StatementFragmentBase... frags) {
