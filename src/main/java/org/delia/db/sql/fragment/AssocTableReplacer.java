@@ -68,7 +68,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		//and again for mergeInto
 		mergeIntoFrag.paramStartIndex = statement.paramL.size() - 1;
 		cloneParams(statement, clonedL, 1, 0);
-		cloneParams(statement, clonedL, 1, 0);
+//		cloneParams(statement, clonedL, 1, 0);
 		if (isPostgres) {
 			int n = statement.paramL.size();
 			statement.paramL.remove(n - 1);

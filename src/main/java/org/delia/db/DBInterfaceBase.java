@@ -85,7 +85,10 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		sqlLog.log("SQL: " + sql);
 	}
 	protected void logStatementGroup(SqlStatementGroup stgroup) {
-		sqlLog.log("SQL: " + stgroup.flatten());
+//		sqlLog.log("SQL: " + stgroup.flatten());
+		for(SqlStatement stat: stgroup.statementL) {
+			this.logSql(stat);
+		}
 	}
 
 	protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
