@@ -38,30 +38,30 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //			  update Customer[true] {wid: 333, addr: [100]}
 //			  has sql:
 //			    update Customer set wid=333
-//			    delete CustomerAddressAssoc where rightv <> 100
+//			    delete CustomerAddressAssoc
 		updateFrag.assocUpdateFrag = null; //remove
 		int startingNumParams = statement.paramL.size();
 		
-		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		//part 1. delete CustomerAddressAssoc
 		DeleteStatementFragment deleteFrag = new DeleteStatementFragment();
 		deleteFrag.paramStartIndex = statement.paramL.size();
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		updateFrag.assocDeleteFrag = deleteFrag;
 
-		if (isForeignKeyIdNull(mmMap, fieldName)) {
-			return;
-		}
+//		if (isForeignKeyIdNull(mmMap, fieldName)) {
+//			return;
+//		}
 
-		StrCreator sc = new StrCreator();
-		sc.o("%s <> ?", assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
-		RawFragment rawFrag = new RawFragment(sc.str);
-		deleteFrag.whereL.add(rawFrag);
+//		StrCreator sc = new StrCreator();
+//		sc.o("%s <> ?", assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
+//		RawFragment rawFrag = new RawFragment(sc.str);
+//		deleteFrag.whereL.add(rawFrag);
 		
 		//part 2. 
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
-		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, "");
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsingAll(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, "");
 
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
@@ -74,9 +74,17 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, 1, 0);
 		cloneParams(statement, clonedL, 1, 0);
 		if (isPostgres) {
+			int n = statement.paramL.size();
+			statement.paramL.remove(n - 1);
+			statement.paramL.remove(n - 2);
 //			cloneParams(statement, clonedL, 1, 0);
 		}
 	}
+	
+	protected MergeIntoStatementFragment generateMergeUsingAll(UpdateStatementFragment assocUpdateFrag, 
+			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
+		return generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, subSelectWhere);
+	}	
 	protected MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
 			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
 		

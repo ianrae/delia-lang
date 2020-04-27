@@ -77,10 +77,10 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Customer as s)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=s.id");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 333, 100,  100,100);
+		chkParams(selectFrag, 333,  100);
 	}
 	@Test
 	public void testAllOtherWay() {
