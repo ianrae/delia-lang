@@ -225,7 +225,8 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		int updateCount = 0;
 		try {
 			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-			updateCount = conn.execUpdateStatementGroup(stgroup, sqlctx); 
+			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
+			updateCount = findUpdateCount("update", updateCountL, stgroup);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}
@@ -233,6 +234,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		return updateCount;
 	}
 	
+
 	protected int executeSQL(String sql, DBAccessContext ctx) {
 		logSql(sql);
 		int updateCount = 0;

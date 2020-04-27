@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
@@ -90,13 +92,14 @@ public class DBConnectionBase extends ServiceBase {
 		}
 		return updateCount;
 	}    
-	public int execUpdateStatementGroup(SqlStatementGroup stgroup, SqlExecuteContext sqlctx) {
+	public List<Integer> execUpdateStatementGroup(SqlStatementGroup stgroup, SqlExecuteContext sqlctx) {
 		//TODO: add batching later
-		int updateCount = 0;
+		List<Integer>updateCountL = new ArrayList<>();
 		for(SqlStatement statement: stgroup.statementL) {
-			updateCount += execUpdateStatement(statement, sqlctx);
+			int updateCount = execUpdateStatement(statement, sqlctx);
+			updateCountL.add(updateCount);
 		}
-		return updateCount;
+		return updateCountL;
 	}    
 
 	public ResultSet execQueryStatement(SqlStatement statement, DBAccessContext dbctx) {

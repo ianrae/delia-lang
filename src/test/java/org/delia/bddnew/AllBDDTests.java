@@ -85,13 +85,12 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR900() {
 		runR900File("t0-update.txt", 7);
-		//This will work when we fix issue of update needs to do delete
-//		runR900File("t0-update-mm-all.txt", 4);
-//		runR900File("t0-update-mm-all-othertbl.txt", 2);
-//		runR900File("t0-update-mm-id.txt", 4);
-//		runR900File("t0-update-mm-id-othertbl.txt", 2);
-//		runR900File("t0-update-mm-other.txt", 4);
-//		runR900File("t0-update-mm-other-othertbl.txt", 2);
+		runR900File("t0-update-mm-all.txt", 4);
+		runR900File("t0-update-mm-all-othertbl.txt", 2);
+		runR900File("t0-update-mm-id.txt", 4);
+		runR900File("t0-update-mm-id-othertbl.txt", 2);
+		runR900File("t0-update-mm-other.txt", 4);
+		runR900File("t0-update-mm-other-othertbl.txt", 2);
 	}
 	
 	@Test
@@ -176,7 +175,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//TODOrunR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1550File("t0-queryfn-oneone-childa.txt", 6);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -290,7 +289,8 @@ public class AllBDDTests extends NewBDDBase {
 
 //		runR500File("t0-relation-one-to-many.txt", 9);
 //		runR1700File("t0-let-field-multiple.txt", 5); 
-		runR1350File("t0-filter-op-relation.txt", 13);
+//		runR1350File("t0-filter-op-relation.txt", 13);
+		runR900File("t0-update-mm-all.txt", 4);
 	}
 	
 	//---

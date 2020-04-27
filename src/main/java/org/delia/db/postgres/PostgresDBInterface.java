@@ -226,7 +226,8 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		int updateCount = 0;
 		try {
 			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-			updateCount = conn.execUpdateStatementGroup(stgroup, sqlctx); 
+			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
+			updateCount = findUpdateCount("update", updateCountL, stgroup);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}

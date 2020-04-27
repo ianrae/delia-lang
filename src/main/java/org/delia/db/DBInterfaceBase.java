@@ -294,4 +294,21 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		int n = random.nextInt(Integer.MAX_VALUE - 10);
 		return String.format("DConstraint_%d", n);
 	}
+	
+	protected int findUpdateCount(String target, List<Integer> updateCountL, SqlStatementGroup stgroup) {
+		int minPos = Integer.MAX_VALUE;
+		int foundResult = 0;
+		
+		int index = 0;
+		for(SqlStatement stat: stgroup.statementL) {
+			int pos = stat.sql.toLowerCase().indexOf(target);
+			if (pos >= 0 && pos < minPos) {
+				minPos = pos;
+				foundResult = updateCountL.get(index);
+			}
+			index++;
+		}
+		return foundResult;
+	}
+	
 }
