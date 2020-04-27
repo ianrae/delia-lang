@@ -23,7 +23,8 @@ import org.delia.util.DValueHelper;
 //single use!!!
 public class AssocTableReplacer extends SelectFragmentParser {
 
-	private boolean useAliases = true;
+	protected boolean useAliases = true;
+	protected boolean isPostgres = false; //hack
 
 	public AssocTableReplacer(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
@@ -74,7 +75,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		cloneParams(statement, clonedL, 1, 0);
 		cloneParams(statement, clonedL, 1, 0);
 	}
-	private MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
+	protected MergeIntoStatementFragment generateMergeUsing(UpdateStatementFragment assocUpdateFrag, 
 			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
 		
 		//part 2. 
@@ -225,7 +226,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		addForeignKeyId(mmMap, fieldName, statement);
 	}
 	
-	private TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
+	protected TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
 		TableFragment tblFrag = new TableFragment();
 		tblFrag.alias = null;
 		tblFrag.name = assocUpdateFrag.tblFrag.name;
@@ -244,7 +245,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	
 	
-	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
+	protected void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
 		//clone params 
 		int numToAdd = 0;
 		for(SqlFragment ff: clonedL) {
@@ -252,7 +253,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		cloneParams(statement, clonedL, numToAdd, extra);
 	}
-	private void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int numToAdd, int extra) {
+	protected void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int numToAdd, int extra) {
 		//clone params 
 		int n = statement.paramL.size();
 		log.logDebug("cloneParams %d %d", numToAdd, n);
@@ -262,7 +263,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			statement.paramL.add(previous); //add copy
 		}
 	}
-	private void swapLastTwo(SqlStatement statement) {
+	protected void swapLastTwo(SqlStatement statement) {
 		int n = statement.paramL.size();
 		log.logDebug("swapLastTwoParams %d", n);
 		DValue dval1 = statement.paramL.get(n - 2);

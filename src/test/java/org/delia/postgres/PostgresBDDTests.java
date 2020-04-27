@@ -285,6 +285,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		enableSQLLogging = true;
 
 		runR900File("t0-update-mm-all.txt", 4);
+//		runR500File("t0-relation-one-to-one-oneway.txt", 8);
 	}
 	
 	//---

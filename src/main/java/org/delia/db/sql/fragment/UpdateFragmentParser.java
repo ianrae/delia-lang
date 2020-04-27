@@ -34,9 +34,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	private AssocTableReplacer assocTblReplacer;
 
 	public UpdateFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
-			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
+			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, AssocTableReplacer assocTblReplacer) {
 		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
-		this.assocTblReplacer = new AssocTableReplacer(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
+		this.assocTblReplacer = assocTblReplacer;
 	}
 
 	public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal) {
