@@ -178,9 +178,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE rightv = ? and leftv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) SELECT (?,s.id) FROM Customer as s WHERE s.id = ?  ON CONFLICT (leftv) DO UPDATE SET leftv = ?");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Customer as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
-		chkParams(selectFrag, 333, 55, 55, 100, 100, 55, 100, 100);
+		chkParams(selectFrag, 333, 55, 55, 100,  100, 55, 100, 55);
 	}
 	@Test
 	public void testParentIdOtherWay() {
@@ -194,9 +194,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE leftv = ? and rightv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) SELECT (s.id,?) FROM Customer as s WHERE leftv = ? and rightv <> ?  ON CONFLICT (leftv) DO UPDATE SET rightv = ?");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Customer as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
-		chkParams(selectFrag, 333, 55, 55, 100, 55, 100);
+		chkParams(selectFrag, 333, 55, 55, 100,  55, 100, 55, 100);
 	}
 	@Test
 	public void testParentId3() {
@@ -210,9 +210,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ? and rightv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) SELECT (s.id,?) FROM Address as s WHERE leftv = ? and rightv <> ?  ON CONFLICT (leftv) DO UPDATE SET rightv = ?");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Address as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
-		chkParams(selectFrag, 7, 100, 100, 55, 100, 55);
+		chkParams(selectFrag, 7, 100, 100,55,  100,55,100,55);
 	}
 	@Test
 	public void testParentId4() {

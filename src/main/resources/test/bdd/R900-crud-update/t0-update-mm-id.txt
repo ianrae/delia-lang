@@ -50,6 +50,6 @@ then:
 value:a:Customer {
  vid:55
  vwid:333
- vaddr:{[100,100]}
+ vaddr:{100}
 }
 
