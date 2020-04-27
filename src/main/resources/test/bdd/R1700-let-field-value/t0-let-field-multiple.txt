@@ -2,7 +2,6 @@
 
 FEATURE: let field value 
 background:
- configure loadFKs = true
 thenType: struct
 
 # --- Multiple ---

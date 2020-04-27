@@ -1,7 +1,9 @@
 package org.delia.db.memdb;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -24,6 +26,8 @@ import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.FilterEvaluator;
@@ -34,6 +38,7 @@ import org.delia.type.DValue;
 import org.delia.type.DValueImpl;
 import org.delia.type.TypePair;
 import org.delia.type.TypeReplaceSpec;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
@@ -237,13 +242,63 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 				for(DValue dval: dvalList) {
 					addAnyFKs(dval, dbctx);
 				}
+			} else {
+				dvalList = removeParentSideRelations(dvalList);
 			}
+			//TODO: if query does NOT include fks or fetch then we should
+			//remove all parent side relations
 
 			qresp.dvalList = dvalList;
 			qresp.ok = true;
 			return qresp;
 		}
 	}
+
+	private List<DValue> removeParentSideRelations(List<DValue> dvalList) {
+		List<DValue> list = new ArrayList<>();
+		for(DValue dval: dvalList) {
+			dval = removeParentSideRelationsOne(dval);
+			list.add(dval);
+		}
+
+		return list;
+	}
+	private DValue removeParentSideRelationsOne(DValue dval) {
+		if (! dval.getType().isStructShape()) {
+			return dval;
+		}
+		DStructType structType = (DStructType) dval.getType();
+		List<String> doomedL =  new ArrayList<>();
+		for(TypePair pair: structType.getAllFields()) {
+			RelationOneRule oneRule = DRuleHelper.findOneRule(structType, pair.name);
+			if (oneRule != null) {
+				if (oneRule.relInfo.isParent) {
+					doomedL.add(pair.name);
+				}
+			} else {
+				RelationManyRule manyRule = DRuleHelper.findManyRule(structType, pair.name);
+				if (manyRule != null) {
+					if (manyRule.relInfo.isParent) {
+						doomedL.add(pair.name);
+					}
+				}
+			}
+		}
+		
+		//clone without doomed fields
+		if (doomedL.isEmpty()) {
+			return dval;
+		}
+		
+	    Map<String,DValue> cloneMap = new TreeMap<>(dval.asMap());
+	    for(String doomed: doomedL) {
+	    	cloneMap.remove(doomed);
+	    }
+		
+		DValueImpl clone = new DValueImpl(structType, cloneMap);
+		return clone;
+	}
+
 
 	private void addAnyFKs(DValue dval, DBAccessContext dbctx) {
 		DBExecutor dbexecutor = this.createExector(dbctx); //TODO handle close later
