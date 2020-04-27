@@ -81,6 +81,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,  100);
+		chkNumParams(1, 0, 1);
 	}
 	@Test
 	public void testAllOtherWay() {
@@ -97,7 +98,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,  100);
-		
+		chkNumParams(1, 0, 1);
 	}
 	@Test
 	public void testAll3() {
@@ -114,7 +115,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 7,  55);
-		
+		chkNumParams(1, 0, 1);
 	}
 	@Test
 	public void testAll4() {
@@ -131,6 +132,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 7,  55);
+		chkNumParams(1, 0, 1);
 	}
 	@Test
 	public void testAll5() {
@@ -145,6 +147,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc");
 		chkParams(selectFrag, 333);
+		chkNumParams(1, 0);
 	}
 	@Test
 	public void testAll6() {
@@ -159,6 +162,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
 		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc");
 		chkParams(selectFrag, 333);
+		chkNumParams(1, 0);
 	}
 	
 	
@@ -178,6 +182,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Customer as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333, 55, 55, 100,  100, 55, 100, 55);
+		chkNumParams(2, 2, 4);
 	}
 	@Test
 	public void testIdOtherWay() {
@@ -194,6 +199,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Customer as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333, 55, 55, 100,  55, 100, 55, 100);
+		chkNumParams(2, 2, 4);
 	}
 	@Test
 	public void testId3() {
@@ -210,6 +216,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Address as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 7, 100, 100,55,  100,55,100,55);
+		chkNumParams(2, 2, 4);
 	}
 	@Test
 	public void testId4() {
@@ -226,6 +233,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Address as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 7, 100, 100,55,  55,100,55,100);
+		chkNumParams(2, 2, 4);
 	}
 	@Test
 	public void testId5() {
@@ -240,6 +248,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ?");
 		chkParams(selectFrag, 7, 100, 100);
+		chkNumParams(2, 1);
 	}
 	@Test
 	public void testId6() {
@@ -254,6 +263,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv = ?");
 		chkParams(selectFrag, 7, 100, 100);
+		chkNumParams(2, 1);
 	}
 	
 
@@ -272,7 +282,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 333,10,500, 10,500, 100);
+		chkParams(selectFrag, 333,10,500, 10,500, 100,10,500);
+		chkNumParams(3, 2, 3);
 	}
 	@Test
 	public void testOtherOtherWay() {
@@ -289,6 +300,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,10,500, 10,500, 100);
+		chkNumParams(3, 2, 3);
 	}
 	@Test
 	public void testOther3() {
@@ -304,7 +316,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  b.leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
 		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address as a WHERE a.z > ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 7,10, 10, 55);
+		chkParams(selectFrag, 7,10, 10, 55,10);
+		chkNumParams(2, 1, 2);
 	}
 	@Test
 	public void testOther4() {
@@ -367,6 +380,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 	private String sqlLine3;
 	private String sqlLine4;
 	private String sqlLine5;
+	private List<Integer> numParamL = new ArrayList<>();
+
 
 	@Before
 	public void init() {
@@ -452,6 +467,10 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 	}
 	private void runAndChkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
 		SqlStatementGroup stgroup = fragmentParser.renderUpdateGroup(selectFrag);
+
+		for(SqlStatement stat: stgroup.statementL ) {
+			numParamL.add(stat.paramL.size());
+		}
 		
 		//recombine params
 		List<DValue> newL = new ArrayList<>();
@@ -498,6 +517,13 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 			assertEquals(null, sqlLine4);
 		} else if (lineNum == 5) {
 			assertEquals(null, sqlLine5);
+		}
+	}
+	private void chkNumParams(Integer... args) {
+		assertEquals("len", args.length, numParamL.size());
+		int i = 0;
+		for(Integer k : numParamL) {
+			assertEquals(args[i++].intValue(), k.intValue());
 		}
 	}
 
