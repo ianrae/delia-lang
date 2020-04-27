@@ -243,6 +243,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			DValue last = statement.paramL.remove(n - 1);
 			statement.paramL.add(n - k - 1, last);
 		} else {
+			mergeIntoFrag.paramStartIndex += k;
 			cloneParams(statement, clonedL2, extra);
 			addForeignKeyId(mmMap, fieldName, statement);
 			addForeignKeyId(mmMap, fieldName, statement);
