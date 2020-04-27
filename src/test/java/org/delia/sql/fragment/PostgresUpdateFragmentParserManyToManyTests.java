@@ -110,10 +110,11 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE rightv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) SELECT (s.id,?) FROM Address as s ON CONFLICT (leftv) DO UPDATE SET rightv = ?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 7, 55, 55, 55);
+		chkParams(selectFrag, 7,  55);
+		
 	}
 	@Test
 	public void testAll4() {
@@ -126,10 +127,10 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE leftv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) SELECT (?,s.id) FROM Address as s ON CONFLICT (leftv) DO UPDATE SET leftv = ?");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 7, 55, 55, 55);
+		chkParams(selectFrag, 7,  55);
 	}
 	@Test
 	public void testAll5() {
@@ -140,10 +141,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-		
-//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-//		chkLine(2, selectFrag, "UPDATE AddressCustomerAssoc as b SET b.leftv = ?");
-//		chkParams(selectFrag, 333, 100);
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc");
@@ -273,9 +270,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  b.rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) SELECT (?,s.id) FROM Customer as s WHERE  a.wid > ? and  a.id < ? ON CONFLICT (leftv) DO UPDATE SET leftv = ?");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 333, 10, 500, 10, 500, 10, 500, 100, 100);
+		chkParams(selectFrag, 333,10,500, 10,500, 100);
 	}
 	@Test
 	public void testOtherOtherWay() {
@@ -289,9 +286,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
 		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  b.leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) SELECT (s.id,?) FROM Customer as s WHERE  a.wid > ? and  a.id < ? ON CONFLICT (leftv) DO UPDATE SET rightv = ?");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 333, 10, 500, 10, 500, 10, 500, 100, 100);
+		chkParams(selectFrag, 333,10,500, 10,500, 100);
 	}
 	@Test
 	public void testOther3() {
@@ -305,9 +302,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  b.leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) SELECT (s.id,?) FROM Address as s WHERE a.z > ? ON CONFLICT (leftv) DO UPDATE SET rightv = ?");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address as a WHERE a.z > ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 7, 10, 10, 10, 55, 55);
+		chkParams(selectFrag, 7,10, 10, 55);
 	}
 	@Test
 	public void testOther4() {
@@ -321,9 +318,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
 		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  b.rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) SELECT (?,s.id) FROM Address as s WHERE a.z > ? ON CONFLICT (leftv) DO UPDATE SET leftv = ?");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address as a WHERE a.z > ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
 		chkNoLine(4);
-		chkParams(selectFrag, 7, 10, 10, 10, 55, 55);
+		chkParams(selectFrag, 7,10, 10, 55);
 	}
 	@Test
 	public void testOther5() {

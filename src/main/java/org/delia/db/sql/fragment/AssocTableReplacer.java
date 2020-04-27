@@ -48,14 +48,10 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		deleteFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		updateFrag.assocDeleteFrag = deleteFrag;
 
-//		if (isForeignKeyIdNull(mmMap, fieldName)) {
-//			return;
-//		}
+		if (isForeignKeyIdNull(mmMap, fieldName)) {
+			return;
+		}
 
-//		StrCreator sc = new StrCreator();
-//		sc.o("%s <> ?", assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
-//		RawFragment rawFrag = new RawFragment(sc.str);
-//		deleteFrag.whereL.add(rawFrag);
 		
 		//part 2. 
 //	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
@@ -193,7 +189,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //			  has sql:
 //			    update Customer set wid=333 where wid>20
 //	    	    delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
-//	    	    merge into CustomerAddressAssoc key(leftv) values(55,100) where leftv in (SELECT id FROM Address as a WHERE a.z > ?)
+//	    	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 		updateFrag.assocUpdateFrag = null; //remove
 		int startingNumParams = statement.paramL.size();
 
@@ -229,21 +225,23 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		
 		//part 2. 
-//	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
-//	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
-//	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+//	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, subSelectWhere);
 
 		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
 		
+		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
 		cloneParams(statement, clonedL2, extra);
 		//and again for mergeInto
-		mergeIntoFrag.paramStartIndex = statement.paramL.size();
-		cloneParams(statement, clonedL2, extra);
-		addForeignKeyId(mmMap, fieldName, statement);
-		addForeignKeyId(mmMap, fieldName, statement);
+		if (isPostgres) {
+			addForeignKeyId(mmMap, fieldName, statement);
+		} else {
+			cloneParams(statement, clonedL2, extra);
+			addForeignKeyId(mmMap, fieldName, statement);
+			addForeignKeyId(mmMap, fieldName, statement);
+		}
 	}
 	
 	protected TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {

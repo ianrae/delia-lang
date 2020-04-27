@@ -60,7 +60,6 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		RawFragment rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.earlyL.add(rawFrag);
 		
-//		SELECT * from cte1
 		sc = new StrCreator();
 		sc.o(" SELECT * from cte1");
 		
@@ -73,40 +72,40 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 			RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, String subSelectWhere) {
 		
 		//part 2. 
-//		INSERT INTO AddressCustomerAssoc as t (leftv,rightv) 
-//		VALUES(100, (SELECT s.id FROM Customer as s)) 
-//		ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = 100,rightv=55
+//		WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) 
+//		INSERT INTO AddressCustomerAssoc as t SELECT * from cte1 
 		
 		MergeIntoStatementFragment mergeIntoFrag = new MergeIntoStatementFragment();
-		mergeIntoFrag.prefix = "INSERT INTO";
+		mergeIntoFrag.prefix = "";
+		mergeIntoFrag.afterEarlyPrefix = "INSERT INTO";
 		mergeIntoFrag.tblFrag = initTblFrag(assocUpdateFrag);
 		mergeIntoFrag.tblFrag.alias = "t";
-		
+	
 		StrCreator sc = new StrCreator();
-		sc.o(" (leftv,rightv)");
+//		WITH cte1 AS (SELECT 100 as leftv,id as rightv from Customer) INSERT INTO AddressCustomerAssoc as t (leftv,rightv) SELECT * from cte1
+		sc.o("WITH cte1 AS (SELECT ");
 		String typeName = info.nearType.getName();
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		String field1;
 		String field2;
 		if (assocFieldName.equals("leftv")) {
-			field1 = "?";
-			field2 =  String.format("(SELECT s.%s FROM %s as %s)", pair.name, typeName, "s");
+			field1 = "? as leftv";
+			field2 =  String.format("%s as rightv", pair.name);
 		} else {
-			field1 =  String.format("(SELECT s.%s FROM %s as %s)", pair.name, typeName, "s");
-			field2 = "?";
+			field1 =  String.format("%s as leftv", pair.name);
+			field2 = "? as rightv";
 		}
-
-		sc.o(" VALUES(%s,%s)", field1, field2);
-		if (assocFieldName.equals("leftv")) {
-			field1 = "?";
-			field2 =  String.format("s.%s", pair.name);
-		} else {
-			field2 =  String.format("s.%s", pair.name);
-			field2 = "?";
-		}
-		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = %s,rightv=%s", field1, field2);
-		
+		sc.o("%s, %s", field1, field2);
+		sc.o(" FROM %s as %s", typeName, mainUpdateAlias);
+		sc.o("%s", subSelectWhere);
+		sc.o(") ");
 		RawFragment rawFrag = new RawFragment(sc.str);
+		mergeIntoFrag.earlyL.add(rawFrag);
+		
+		sc = new StrCreator();
+		sc.o(" SELECT * from cte1");
+		
+		rawFrag = new RawFragment(sc.str);
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}
