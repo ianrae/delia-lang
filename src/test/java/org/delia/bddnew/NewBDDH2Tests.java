@@ -283,6 +283,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
+		
 		runR900File("t0-update-mm-all.txt", 4);
 //		runR900File("t0-update-mm-all-othertbl.txt", 2);
 //		runR900File("t0-update-mm-id.txt", 4);

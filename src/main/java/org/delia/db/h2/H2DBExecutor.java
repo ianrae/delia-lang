@@ -1,5 +1,7 @@
 package org.delia.db.h2;
 
+import java.sql.ResultSet;
+
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
@@ -100,5 +102,15 @@ public class H2DBExecutor implements DBExecutor {
 	@Override
 	public void alterField(String typeName, String fieldName, String deltaFlags) {
 		dbInterface.alterField(typeName, fieldName, deltaFlags, dbctx);
+	}
+	
+	//internal
+	public void executeRawSql(String sql) {
+		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
+		conn.executeRawSql(sql);
+	}
+	public ResultSet executeRawQuery(String sql) {
+		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
+		return conn.execRawQuery(sql);
 	}
 }
