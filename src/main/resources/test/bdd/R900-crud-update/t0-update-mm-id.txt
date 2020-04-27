@@ -1,5 +1,5 @@
 # CRUD update tests
-
+# TODO: add tests where we update primary key value
 FEATURE: CRUD update - many-to-many scenario 2 - primary key only
 background:
 	type Customer struct {id int unique, wid int, relation addr Address optional many } end

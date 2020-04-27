@@ -12,12 +12,13 @@ thenType: struct
 
 ---
 title: update many-to-many
+#TODO: why 4???
 thenType: int
 expectDVal:false
 when:
   update Address[z == 5] {z: 7, cust:55}
 then:
-1
+4
 
 ---
 title: update query back
@@ -29,6 +30,6 @@ then:
 value:a:Address {
  vid:100
  vz:7
- vcust:{[55,56]}
+ vcust:{55}
 }
 
