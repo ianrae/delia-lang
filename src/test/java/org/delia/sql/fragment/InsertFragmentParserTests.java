@@ -57,7 +57,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
-import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,58 +77,56 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		}
 
 		public InsertStatementFragment parseInsert(String typeName, QueryDetails details, DValue partialVal) {
-			InsertStatementFragment selectFrag = new InsertStatementFragment();
+			InsertStatementFragment insertFrag = new InsertStatementFragment();
 
 			Map<String, DRelation> mmMap = new HashMap<>();
 
 			//init tbl
 			DStructType structType = getMainType(typeName); 
-			TableFragment tblFrag = createTable(structType, selectFrag);
-			selectFrag.tblFrag = tblFrag;
+			TableFragment tblFrag = createTable(structType, insertFrag);
+			insertFrag.tblFrag = tblFrag;
 
-			generateSetFields(structType, selectFrag, partialVal, mmMap);
-			generateAssocUpdateIfNeeded(structType, selectFrag, mmMap);
+			generateSetFields(structType, insertFrag, partialVal, mmMap);
+			generateAssocUpdateIfNeeded(structType, insertFrag, mmMap);
 
 //			fixupForParentFields(structType, selectFrag);
 
 			if (! useAliases) {
-				removeAllAliases(selectFrag);
-				if (selectFrag.assocUpdateFrag != null) {
-					removeAllAliases(selectFrag.assocUpdateFrag);
+				removeAllAliases(insertFrag);
+				if (insertFrag.assocUpdateFrag != null) {
+					removeAllAliases(insertFrag.assocUpdateFrag);
 				}
 			}
 
-			return selectFrag;
+			return insertFrag;
 		}
 
 		/**
 		 * Postgres doesn't like alias in UPDATE statements
-		 * @param selectFrag
+		 * @param insertFrag
 		 */
-		private void removeAllAliases(InsertStatementFragment selectFrag) {
-			for(FieldFragment ff: selectFrag.fieldL) {
+		private void removeAllAliases(InsertStatementFragment insertFrag) {
+			for(FieldFragment ff: insertFrag.fieldL) {
 				ff.alias = null;
 			}
-			selectFrag.tblFrag.alias = null;
+			insertFrag.tblFrag.alias = null;
 		}
 
-		private void generateSetFields(DStructType structType, InsertStatementFragment selectFrag,
+		private void generateSetFields(DStructType structType, InsertStatementFragment insertFrag,
 				DValue dval, Map<String, DRelation> mmMap) {
 			//we assume partialVal same type as structType!! (or maybe a base class)
 
-			int index = selectFrag.fieldL.size(); //setValuesL is parallel array to fieldL
+			int index = insertFrag.fieldL.size(); //setValuesL is parallel array to fieldL
 			if (index != 0) {
 
 				log.log("WHY FILLING INNNNNNNNN");
 				for(int i = 0; i < index; i++) {
-					selectFrag.setValuesL.add("????");
+					insertFrag.setValuesL.add("????");
 				}
 				DeliaExceptionHelper.throwError("unexpeced-fields-in-update", "should not occur");
 			}
 
-			for(String fieldName: dval.asMap().keySet()) {
-				TypePair pair = DValueHelper.findField(structType, fieldName);
-
+			for(TypePair pair: structType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					if (! shouldGenerateFKConstraint(pair, structType)) {
 						continue;
@@ -145,7 +142,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 					}
 				}
 
-				DValue inner = dval.asMap().get(fieldName);
+				DValue inner = dval.asMap().get(pair.name);
 				if (inner == null) {
 					continue;
 				}
@@ -156,10 +153,10 @@ public class InsertFragmentParserTests extends NewBDDBase {
 					dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 				}
 
-				FieldFragment ff = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
-				selectFrag.setValuesL.add("?");
-				selectFrag.fieldL.add(ff);
-				selectFrag.statement.paramL.add(dvalToUse);
+				FieldFragment ff = FragmentHelper.buildFieldFrag(structType, insertFrag, pair);
+				insertFrag.setValuesL.add("?");
+				insertFrag.fieldL.add(ff);
+				insertFrag.statement.paramL.add(dvalToUse);
 
 				index++;
 			}
@@ -173,7 +170,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			return false;
 		}
 		private void generateAssocUpdateIfNeeded(DStructType structType,
-				InsertStatementFragment selectFrag, Map<String, DRelation> mmMap) {
+				InsertStatementFragment insertFrag, Map<String, DRelation> mmMap) {
 			if (mmMap.isEmpty()) {
 				return;
 			}
@@ -182,7 +179,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, fieldName);
 				if (ruleMany != null) {
 					RelationInfo info = ruleMany.relInfo;
-					selectFrag.assocUpdateFrag = new InsertStatementFragment();
+					insertFrag.assocUpdateFrag = new InsertStatementFragment();
 //					genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
 //							selectFrag.tblFrag.alias, selectFrag.statement);
 				}
@@ -440,7 +437,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		chkParams(selectFrag, "55", "33");
 	}
 	@Test
-	public void testOneToOne2() {
+	public void testOneToOneChild() {
 		String src = buildSrcOneToOne();
 		src += "\n  insert Customer {id: 55, wid: 33}";
 		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
@@ -449,65 +446,37 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Address");
 		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
 		
-		runAndChk(selectFrag, "INSERT Address (cust, id, z) VALUES(?, ?, ?)");
-		chkParams(selectFrag, "55", "100", "5");
+		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
+		chkParams(selectFrag, "100", "5", "55");
 	}
-//	@Test
-//	public void testOneToOneParent() {
-//		String src = buildSrcOneToOne();
-//		src += "\n  update Customer[55] {wid: 333, addr:100}";
-//
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Customer");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
-//	}
-//	@Test
-//	public void testOneToOneChild() {
-//		String src = buildSrcOneToOne();
-//		src += "\n  update Address[100] {z: 6, cust:55}";
-//
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Address");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = ?, a.z = ? WHERE a.id = ?");
-//	}
-//	
-//	@Test
-//	public void testOneToMany() {
-//		String src = buildSrcOneToMany();
-//		src += "\n  update Customer[55] {wid: 333}";
-//
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Customer");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
-//	}
-//	@Test
-//	public void testOneToManyParent() {
-//		String src = buildSrcOneToMany();
-//		src += "\n  update Customer[55] {wid: 333, addr:100}";
-//
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Customer");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
-//	}
-//	@Test
-//	public void testOneToManyChild() {
-//		String src = buildSrcOneToMany();
-//		src += "\n  update Address[100] {z: 6, cust:55}";
-//
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Address");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = ?, a.z = ? WHERE a.id = ?");
-//	}
+
+	@Test
+	public void testOneToManyParent() {
+		String src = buildSrcOneToMany();
+		src += "\n  insert Customer {id: 55, wid: 33}";
+//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+//		src += "\n  insert Address {id: 101, z:6, cust: 55 }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+
+		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33");
+	}
+	@Test
+	public void testOneToManyChild() {
+		String src = buildSrcOneToMany();
+		src += "\n  insert Customer {id: 55, wid: 33}";
+		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Address");
+		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+
+		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
+		chkParams(selectFrag, "100", "5", "55");
+	}
 	
 	
 	//---
