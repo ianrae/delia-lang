@@ -1,5 +1,7 @@
 package org.delia.db;
 
+import java.util.Map;
+
 import org.delia.core.FactoryService;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
@@ -19,7 +21,7 @@ public interface DBInterface {
 	DBExecutor createExector(DBAccessContext ctx);
 	
 	DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx);
-	int executeUpdate(QuerySpec spec, DValue dvalPartial, DBAccessContext dbctx); 
+	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap, DBAccessContext dbctx); 
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx);
 	void executeDelete(QuerySpec spec, DBAccessContext dbctx);
 

@@ -1,6 +1,7 @@
 package org.delia.db.h2;
 
 import java.sql.ResultSet;
+import java.util.Map;
 
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
@@ -31,8 +32,8 @@ public class H2DBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalPartial) {
-		return dbInterface.executeUpdate(spec, dvalPartial, dbctx);
+	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
+		return dbInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
 	}
 
 	@Override

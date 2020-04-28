@@ -3,6 +3,7 @@ package org.delia.db.h2;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
@@ -215,7 +216,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	}
 	
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dval, DBAccessContext dbctx) {
+	public int executeUpdate(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		
@@ -228,7 +229,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
-			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval);
+			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
 			stgroup = parser.renderUpdateGroup(selectFrag);
 //			s = selectFrag.statement;
 		} else {

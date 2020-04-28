@@ -1,5 +1,7 @@
 package org.delia.db.postgres;
 
+import java.util.Map;
+
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
@@ -30,8 +32,8 @@ public class PostgresDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalPartial) {
-		return dbInterface.executeUpdate(spec, dvalPartial, dbctx);
+	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
+		return dbInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
 	}
 
 	@Override

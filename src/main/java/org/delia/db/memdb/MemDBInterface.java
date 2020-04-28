@@ -433,11 +433,11 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalUpdate, DBAccessContext dbctx) {
+	public int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		int numRowsAffected = 0;
 
 		try {
-			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, dbctx);
+			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, assocCrudMap, dbctx);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
 			//				qresp.ok = false;
@@ -446,7 +446,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		return numRowsAffected;
 	}
 
-	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, DBAccessContext dbctx) {
+	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		RowSelector selector = createSelector(spec, dbctx); //may throw
 		MemDBTable tbl = selector.getTbl();
 		List<DValue> dvalList = selector.match(tbl.rowL);

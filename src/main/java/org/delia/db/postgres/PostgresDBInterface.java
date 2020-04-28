@@ -3,6 +3,7 @@ package org.delia.db.postgres;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
@@ -198,7 +199,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	}
 	
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dval, DBAccessContext dbctx) {
+	public int executeUpdate(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		
@@ -212,7 +213,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			whereGen.tableFragmentMaker = parser;
 			parser.useAliases(false);
 			QueryDetails details = new QueryDetails();
-			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval);
+			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
 			stgroup = parser.renderUpdateGroup(selectFrag);
 		} else {
 			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
