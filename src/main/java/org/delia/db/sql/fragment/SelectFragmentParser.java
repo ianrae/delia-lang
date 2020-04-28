@@ -25,10 +25,9 @@ import org.delia.util.DeliaExceptionHelper;
 //single use!!!
 public class SelectFragmentParser extends FragmentParserBase {
 
-	public SelectFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, List<TableInfo> tblinfoL, 
-			DBInterface dbInterface, DBAccessContext dbctx, 
+	public SelectFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-		super(factorySvc, fpSvc, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+		super(factorySvc, fpSvc, sqlHelperFactory, whereGen);
 	}
 
 	public SelectStatementFragment parseSelect(QuerySpec spec, QueryDetails details) {

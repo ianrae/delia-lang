@@ -79,7 +79,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		if (useFragmentParser) {
 			log.log("FRAG PARSER UPDATE....................");
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null);
-			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory);
+			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, sqlHelperFactory);
 			String typeName = dval.getType().getName();
 			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
 			stgroup = parser.renderInsertGroup(selectFrag);
@@ -123,7 +123,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc, sqlHelperFactory, whereGen);
 			whereGen.tableFragmentMaker = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 			parser.renderSelect(selectFrag);
@@ -191,7 +191,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc, sqlHelperFactory, whereGen);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
@@ -224,8 +224,8 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, assocTblReplacer);
+		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc, sqlHelperFactory, whereGen);
+			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, sqlHelperFactory, whereGen, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval);

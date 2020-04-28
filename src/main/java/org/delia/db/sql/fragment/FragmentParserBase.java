@@ -38,8 +38,7 @@ import org.delia.util.DValueHelper;
 		protected JoinFragment savedJoinedFrag;
 		protected List<TableInfo> tblinfoL;
 		
-		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc, List<TableInfo> tblinfoL, 
-				DBInterface dbInterface, DBAccessContext dbctx, 
+		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 			super(factorySvc);
 			

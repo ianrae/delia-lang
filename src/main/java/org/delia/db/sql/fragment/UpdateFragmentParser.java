@@ -34,10 +34,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	private boolean useAliases = true;
 	private AssocTableReplacer assocTblReplacer;
 
-	public UpdateFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, List<TableInfo> tblinfoL, 
-			DBInterface dbInterface, DBAccessContext dbctx, 
+	public UpdateFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, AssocTableReplacer assocTblReplacer) {
-		super(factorySvc, fpSvc, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+		super(factorySvc, fpSvc, sqlHelperFactory, whereGen);
 		this.assocTblReplacer = assocTblReplacer;
 	}
 
