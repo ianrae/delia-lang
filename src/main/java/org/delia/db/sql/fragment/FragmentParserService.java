@@ -15,19 +15,19 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 
 public class FragmentParserService extends ServiceBase {
-	protected int nextAliasIndex = 0;
-	protected QueryTypeDetector queryDetectorSvc;
-	protected DTypeRegistry registry;
-	protected WhereFragmentGenerator whereGen;
-	protected SelectFuncHelper selectFnHelper;
-	protected TableExistenceServiceImpl existSvc;
-	protected FKHelper fkHelper;
-	protected JoinFragment savedJoinedFrag;
-	protected List<TableInfo> tblinfoL;
-	private VarEvaluator varEvaluator;
-	private DBInterface dbInterface;
-	private DBAccessContext dbctx;
-	private SqlHelperFactory sqlHelperFactory;
+	public int nextAliasIndex = 0;
+	public QueryTypeDetector queryDetectorSvc;
+	public DTypeRegistry registry;
+	public WhereFragmentGenerator whereGen;
+	public SelectFuncHelper selectFnHelper;
+	public TableExistenceServiceImpl existSvc;
+	public FKHelper fkHelper;
+	public JoinFragment savedJoinedFrag;
+	public List<TableInfo> tblinfoL;
+	public VarEvaluator varEvaluator;
+	public DBInterface dbInterface;
+	public DBAccessContext dbctx;
+	public SqlHelperFactory sqlHelperFactory;
 	
 	public FragmentParserService(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
 			DBInterface dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
@@ -56,6 +56,10 @@ public class FragmentParserService extends ServiceBase {
 
 	public FKHelper createFKHelper() {
 		return new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc);
+	}
+
+	public SelectFuncHelper createSelectFuncHelper() {
+		return new SelectFuncHelper(factorySvc, registry);
 	}
 
 }

@@ -331,7 +331,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		DBAccessContext dbctx = new DBAccessContext(runner);
 
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, null);
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory);
 		return parser;
 	}
 

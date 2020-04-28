@@ -25,10 +25,10 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 
 	private boolean useAliases = true;
 
-	public PostgresAssocTablerReplacer(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+	public PostgresAssocTablerReplacer(FactoryService factorySvc, FragmentParserService fpSvc, List<TableInfo> tblinfoL, 
 			DBInterface dbInterface, DBAccessContext dbctx, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-		super(factorySvc, fpSvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+		super(factorySvc, fpSvc, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 		this.isPostgres = true;
 	}
 	

@@ -30,10 +30,10 @@ public class InsertFragmentParser extends SelectFragmentParser {
 
 	private boolean useAliases = false;
 
-	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, List<TableInfo> tblinfoL, 
 			DBInterface dbInterface, DBAccessContext dbctx, 
 			SqlHelperFactory sqlHelperFactory) {
-		super(factorySvc, fpSvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, null);
+		super(factorySvc, fpSvc, tblinfoL, dbInterface, dbctx, sqlHelperFactory, null);
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {

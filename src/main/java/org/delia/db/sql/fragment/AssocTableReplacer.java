@@ -27,10 +27,10 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	protected boolean useAliases = true;
 	protected boolean isPostgres = false; //hack
 
-	public AssocTableReplacer(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface,
+	public AssocTableReplacer(FactoryService factorySvc, FragmentParserService fpSvc, List<TableInfo> tblinfoL, DBInterface dbInterface,
 			 DBAccessContext dbctx,
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-		super(factorySvc, fpSvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+		super(factorySvc, fpSvc, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 	}
 	
 	public void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
