@@ -5,17 +5,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
-import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
-import org.delia.runner.VarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
@@ -27,9 +21,8 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	protected boolean useAliases = true;
 	protected boolean isPostgres = false; //hack
 
-	public AssocTableReplacer(FactoryService factorySvc, FragmentParserService fpSvc, 
-			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-		super(factorySvc, fpSvc, sqlHelperFactory, whereGen);
+	public AssocTableReplacer(FactoryService factorySvc, FragmentParserService fpSvc) {
+		super(factorySvc, fpSvc);
 	}
 	
 	public void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,

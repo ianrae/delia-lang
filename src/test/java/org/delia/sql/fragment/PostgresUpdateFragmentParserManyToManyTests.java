@@ -443,8 +443,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
-		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc, sqlHelperFactory, whereGen);
-		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, sqlHelperFactory, whereGen, assocTblReplacer);
+		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
+		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}

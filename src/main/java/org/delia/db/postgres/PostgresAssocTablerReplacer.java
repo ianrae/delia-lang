@@ -1,22 +1,13 @@
 package org.delia.db.postgres;
 
-import java.util.List;
-
 import org.delia.core.FactoryService;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
-import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.MergeIntoStatementFragment;
 import org.delia.db.sql.fragment.RawFragment;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
-import org.delia.db.sql.fragment.WhereFragmentGenerator;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
-import org.delia.runner.VarEvaluator;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
@@ -25,9 +16,8 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 
 	private boolean useAliases = true;
 
-	public PostgresAssocTablerReplacer(FactoryService factorySvc, FragmentParserService fpSvc,  
-			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-		super(factorySvc, fpSvc, sqlHelperFactory, whereGen);
+	public PostgresAssocTablerReplacer(FactoryService factorySvc, FragmentParserService fpSvc) {
+		super(factorySvc, fpSvc);
 		this.isPostgres = true;
 	}
 	

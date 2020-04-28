@@ -3,46 +3,29 @@ package org.delia.sql.fragment;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
-import org.delia.bddnew.NewBDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
-import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.table.TableInfo;
-import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.ConversionResult;
-import org.delia.runner.DsonToDValueConverter;
-import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
-import org.delia.sprig.SprigService;
-import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -296,8 +279,8 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
-	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc, sqlHelperFactory, whereGen);
-		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, sqlHelperFactory, whereGen, assocTblReplacer);
+	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}

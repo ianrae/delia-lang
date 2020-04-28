@@ -423,8 +423,8 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
-	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc, sqlHelperFactory, whereGen);
-		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, sqlHelperFactory, whereGen, assocTblReplacer);
+	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}

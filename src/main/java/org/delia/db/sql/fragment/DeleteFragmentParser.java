@@ -1,24 +1,14 @@
 package org.delia.db.sql.fragment;
 
-import java.util.List;
-
 import org.delia.core.FactoryService;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.SqlHelperFactory;
-import org.delia.db.sql.table.TableInfo;
-import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
 
 public class DeleteFragmentParser extends FragmentParserBase {
 
-		public DeleteFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, 
-				SqlHelperFactory sqlHelperFactory,
-				WhereFragmentGenerator whereGen) {
-			super(factorySvc, fpSvc, sqlHelperFactory, whereGen);
+		public DeleteFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc) {
+			super(factorySvc, fpSvc);
 		}
 		
 		public DeleteStatementFragment parseDelete(QuerySpec spec, QueryDetails details) {

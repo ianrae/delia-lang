@@ -6,11 +6,8 @@ import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
@@ -19,7 +16,6 @@ import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
-import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
@@ -38,8 +34,7 @@ import org.delia.util.DValueHelper;
 		protected JoinFragment savedJoinedFrag;
 		protected List<TableInfo> tblinfoL;
 		
-		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc, 
-					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
+		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc) {
 			super(factorySvc);
 			
 			this.registry = fpSvc.registry;
