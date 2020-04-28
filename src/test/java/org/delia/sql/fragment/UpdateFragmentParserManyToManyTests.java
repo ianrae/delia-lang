@@ -117,7 +117,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " MERGE INTO AddressCustomerAssoc as t USING (SELECT id FROM Address as a) as s ON t.leftv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.rightv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (s.id,?)");
-		chkParams(selectFrag, 7, 55, 55, 55);
+		chkParams(selectFrag, 7, 55, 55);
 	}
 	@Test
 	public void testAll4() {
@@ -134,7 +134,7 @@ public class UpdateFragmentParserManyToManyTests extends NewBDDBase {
 		chkLine(3, selectFrag, " MERGE INTO CustomerAddressAssoc as t USING (SELECT id FROM Address as a) as s ON t.rightv = s.id");
 		chkLine(4, selectFrag, " WHEN MATCHED THEN UPDATE SET t.leftv = ?");
 		chkLine(5, selectFrag, " WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES (?,s.id)");
-		chkParams(selectFrag, 7, 55, 55, 55);
+		chkParams(selectFrag, 7, 55, 55);
 	}
 	@Test
 	public void testAll5() {

@@ -63,7 +63,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
-		cloneParams(statement, clonedL, extra);
+		int k = cloneParams(statement, clonedL, extra);
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
 		mergeIntoFrag.paramStartIndex = statement.paramL.size() - 1;
@@ -72,7 +72,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		if (isPostgres) {
 			int n = statement.paramL.size();
 			statement.paramL.remove(n - 1);
-			statement.paramL.remove(n - 2);
+//			statement.paramL.remove(n - 2);
 //			cloneParams(statement, clonedL, 1, 0);
 		}
 	}

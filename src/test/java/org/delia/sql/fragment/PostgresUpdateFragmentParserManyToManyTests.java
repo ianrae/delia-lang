@@ -607,9 +607,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
 		return cres;
 	}
-	private DValue convertToDVal(UpdateStatementExp updateStatementExp) {
-		return convertToDVal(updateStatementExp, "Flight");
-	}
 	private DValue convertToDVal(UpdateStatementExp updateStatementExp, String typeName) {
 		DStructType structType = (DStructType) registry.getType(typeName);
 		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);

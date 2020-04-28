@@ -175,7 +175,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -289,7 +289,7 @@ public class AllBDDTests extends NewBDDBase {
 
 //		runR1350File("t0-filter-op-relation.txt", 13);
 //		runR900File("t0-update-mm-all.txt", 4);
-		runR1550File("t0-queryfn-oneone-childa.txt", 6);
+//		runR1550File("t0-queryfn-oneone-childa.txt", 6);
 	}
 	
 	//---

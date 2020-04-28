@@ -57,7 +57,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp);
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 = ?");
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 = ?");
 	}
 	
 	@Test
@@ -70,7 +70,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		useAliasesFlag = false;
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight SET field2 = 111 WHERE field1 = ?");
+		runAndChk(selectFrag, "UPDATE Flight SET field2 = ? WHERE field1 = ?");
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp);
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111");
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ?");
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp);
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 > ?");
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 > ?");
 	}
 	@Test
 	public void testOpNoPrimaryKey() {
@@ -105,7 +105,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp);
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 > ?");
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 > ?");
 	}
 
 	@Test
@@ -117,7 +117,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp);
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = 111 WHERE a.field1 = ?");
+		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 = ?");
 	}
 	
 	@Test
@@ -129,7 +129,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
 	}
 	@Test
 	public void testOneToOneParent() {
@@ -140,7 +140,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
 	}
 	@Test
 	public void testOneToOneChild() {
@@ -151,7 +151,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = ?, a.z = ? WHERE a.id = ?");
 	}
 	
 	@Test
@@ -163,7 +163,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
 	}
 	@Test
 	public void testOneToManyParent() {
@@ -174,7 +174,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = 333 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
 	}
 	@Test
 	public void testOneToManyChild() {
@@ -185,7 +185,7 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
-		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = 55, a.z = 6 WHERE a.id = ?");
+		runAndChk(selectFrag, "UPDATE Address as a SET a.cust = ?, a.z = ? WHERE a.id = ?");
 	}
 	
 	
