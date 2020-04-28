@@ -228,7 +228,7 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 	//---
 	private QueryDetails details = new QueryDetails();
 	private UpdateFragmentParser fragmentParser;
-	private boolean useAliasesFlag;
+	private boolean useAliasesFlag = true;
 
 
 	@Before

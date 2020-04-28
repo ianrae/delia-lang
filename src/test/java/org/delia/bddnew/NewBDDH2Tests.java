@@ -288,8 +288,9 @@ public class NewBDDH2Tests extends NewBDDBase {
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
 //		runR2000File("t0-sprig.txt", 3);
 //		runR400File("t0-field-serial.txt", 7);
-//		runR900File("t0-update-mm-all.txt", 4);
-		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR900File("t0-update-mm-all.txt", 4);
+//		runR2150File("t0-migrate-many-to-many1.txt", 3);
+//		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	
 	//---
