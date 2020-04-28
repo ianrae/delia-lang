@@ -145,6 +145,12 @@ public class InsertFragmentParser extends SelectFragmentParser {
 				}
 				
 				RelationInfo info = ruleMany.relInfo;
+				int x = fillTableInfoIfNeeded(tblinfoL, info);
+				if (x < 0) {
+					DeliaExceptionHelper.throwError("can't-find-assoc-tbl", "Can't find assoc table for '%s' and '%s'", info.nearType.getName(), info.farType.getName());
+				}
+				
+				
 				DRelation drel = mmMap.get(fieldName);
 				for(DValue xdval: drel.getMultipleKeys()) {
 					InsertStatementFragment assocFrag = new InsertStatementFragment();
@@ -159,6 +165,10 @@ public class InsertFragmentParser extends SelectFragmentParser {
 				}
 			}
 		}
+	}
+
+	private int fillTableInfoIfNeeded(List<TableInfo> tblinfoL, RelationInfo info) {
+		return existSvc.fillTableInfoIfNeeded(tblinfoL, info);
 	}
 
 	private boolean genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, DValue xdval, 

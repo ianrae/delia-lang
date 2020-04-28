@@ -176,7 +176,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//TODO: runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		//runR1550File("t0-queryfn-oneone-childa.txt", 6);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -288,7 +288,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
 //		runR2000File("t0-sprig.txt", 3);
 //		runR400File("t0-field-serial.txt", 7);
-		runR900File("t0-update-mm-all.txt", 4);
+//		runR900File("t0-update-mm-all.txt", 4);
+		runR2150File("t0-migrate-many-to-many1.txt", 3);
 	}
 	
 	//---

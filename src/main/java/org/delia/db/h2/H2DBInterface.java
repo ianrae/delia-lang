@@ -77,7 +77,6 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		
 		if (useFragmentParser) {
 			log.log("FRAG PARSER UPDATE....................");
-			createTableCreator(dbctx);
 			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
 			String typeName = dval.getType().getName();
 			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
