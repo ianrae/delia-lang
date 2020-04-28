@@ -35,7 +35,6 @@ import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
 import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
-import org.delia.db.sql.fragment.SqlFragment;
 import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -183,17 +182,24 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				if (ruleMany != null) {
 					RelationInfo info = ruleMany.relInfo;
 					insertFrag.assocUpdateFrag = new InsertStatementFragment();
-					genAssocField(insertFrag, insertFrag.assocUpdateFrag, structType, dval, mmMap, fieldName, info,  
+					boolean wereSome = genAssocField(insertFrag, insertFrag.assocUpdateFrag, structType, dval, mmMap, fieldName, info,  
 							insertFrag.statement);
+					if (! wereSome) {
+						insertFrag.assocUpdateFrag = null;
+					}
 				}
 			}
 		}
 
-		private void genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, Map<String, DRelation> mmMap, String fieldName, 
+		private boolean genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, Map<String, DRelation> mmMap, String fieldName, 
 				RelationInfo info, SqlStatement statement) {
-			//update assoctabl set leftv=x where rightv=y
+			if (mmMap.get(fieldName) == null) {
+				return false;
+			}
+			
 			TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 			assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, tblinfo.assocTblName);
+			assocInsertFrag.paramStartIndex = insertFrag.statement.paramL.size();
 
 			//struct is Address AddressCustomerAssoc
 			String field1;
@@ -208,22 +214,34 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				DRelation drel = mmMap.get(fieldName);
 				for(DValue dval: drel.getMultipleKeys()) {
 					FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, insertFrag, keyPair1);
-					insertFrag.setValuesL.add("?");
-					insertFrag.fieldL.add(ff);
-					insertFrag.statement.paramL.add(mainDVal);
+					assocInsertFrag.setValuesL.add("?");
+					assocInsertFrag.fieldL.add(ff);
+					assocInsertFrag.statement.paramL.add(mainDVal);
 					
 					ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, insertFrag, keyPair2);
-					insertFrag.setValuesL.add("?");
-					insertFrag.fieldL.add(ff);
-					insertFrag.statement.paramL.add(dval);
+					assocInsertFrag.setValuesL.add("?");
+					assocInsertFrag.fieldL.add(ff);
+					assocInsertFrag.statement.paramL.add(dval);
 				}
 			} else {
 				field1 = "leftv";
 				field2 = "rightv";
 				keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 				keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+				DRelation drel = mmMap.get(fieldName);
+				for(DValue dval: drel.getMultipleKeys()) {
+					FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, keyPair1);
+					assocInsertFrag.setValuesL.add("?");
+					assocInsertFrag.fieldL.add(ff);
+					assocInsertFrag.statement.paramL.add(mainDVal);
+					
+					ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, keyPair2);
+					assocInsertFrag.setValuesL.add("?");
+					assocInsertFrag.fieldL.add(ff);
+					assocInsertFrag.statement.paramL.add(dval);
+				}
 			}
-
+			return true;
 		}
 
 //		protected void buildAssocTblUpdate(InsertStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
@@ -465,7 +483,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	}
 	
 	@Test
-	public void testManyToManyParent() {
+	public void testManyToManyParentNoAssocTbl() {
 		String src = buildSrcManyToMany();
 		src += "\n  insert Customer {id: 55, wid: 33}";
 //		src += "\n  insert Customer {id: 56, wid: 34}";
@@ -474,10 +492,31 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-
-		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		
+		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkNoLine(2);
+//		chkLine(2, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkParams(selectFrag, "55", "33");
+		chkNumParams(2);
 	}
+	@Test
+	public void testManyToManyParentWithAssocTbl1() {
+		String src = buildSrcManyToMany();
+		src += "\n  insert Customer {id: 55, wid: 33, addr:100}";
+//		src += "\n  insert Customer {id: 56, wid: 34}";
+//		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+		
+		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?);");
+		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (id, id) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33", "100", "55");
+		chkNumParams(2, 2);
+	}
+	
+	
 //	@Test
 //	public void testManyToManyChild() {
 //		String src = buildSrcOneToMany();
@@ -504,7 +543,10 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	private InsertFragmentParser fragmentParser;
 	private String sqlLine1;
 	private String sqlLine2;
-
+	private SqlStatementGroup currentGroup;
+	private List<Integer> numParamL = new ArrayList<>();
+	private String sqlLine3;
+	private String sqlLine4;
 
 	@Before
 	public void init() {
@@ -607,18 +649,59 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		assertEquals(expected, sql);
 	}
 	private void runAndChkLine(int lineNum, InsertStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.renderInsert(selectFrag);
+		SqlStatementGroup stgroup = fragmentParser.renderInsertGroup(selectFrag);
+		currentGroup = stgroup;
+		for(SqlStatement stat: stgroup.statementL ) {
+			numParamL.add(stat.paramL.size());
+		}
+		
+		//recombine params
+		List<DValue> newL = new ArrayList<>();
+		for(SqlStatement statement: stgroup.statementL) {
+			newL.addAll(statement.paramL);
+		}
+		stgroup.statementL.get(0).paramL = newL;
+		
+		String sql = stgroup.flatten(); //fragmentParser.renderSelect(selectFrag);
 		log.log(sql);
 		if (lineNum == 1) {
 			String[] ar = sql.split("\n");
 			this.sqlLine1 = ar[0];
-			this.sqlLine2 = ar[1];
+			if (ar.length > 1) {
+				this.sqlLine2 = ar[1];
+			}
+//			if (ar.length > 2) {
+//				this.sqlLine3 = ar[2];
+//			}
+//			if (ar.length > 3) {
+//				this.sqlLine4 = ar[3];
+//			}
+//			if (ar.length > 4) {
+//				this.sqlLine5 = ar[4];
+//			}
 			assertEquals(expected, sqlLine1);
 		}
 	}
 	private void chkLine(int lineNum, InsertStatementFragment selectFrag, String expected) {
 		if (lineNum == 2) {
 			assertEquals(expected, sqlLine2);
+		} else if (lineNum == 3) {
+			assertEquals(expected, sqlLine3);
+		} else if (lineNum == 4) {
+			assertEquals(expected, sqlLine4);
+//		} else if (lineNum == 5) {
+//			assertEquals(expected, sqlLine5);
+		}
+	}
+	private void chkNoLine(int lineNum) {
+		if (lineNum == 2) {
+			assertEquals(null, sqlLine2);
+		} else if (lineNum == 3) {
+			assertEquals(null, sqlLine3);
+		} else if (lineNum == 4) {
+			assertEquals(null, sqlLine4);
+//		} else if (lineNum == 5) {
+//			assertEquals(null, sqlLine5);
 		}
 	}
 
@@ -680,7 +763,8 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		stat = selectFrag.statement;
 		
 		for(DValue dval: stat.paramL) {
-			joiner.add(dval.asString());
+			String ss = convertToString(dval);
+			joiner.add(ss);
 		}
 		log.log("params: " + joiner.toString());
 		
@@ -688,7 +772,27 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		int i = 0;
 		for(String arg: args) {
 			DValue dval = stat.paramL.get(i++);
-			assertEquals(arg, dval.asString());
+			String ss = convertToString(dval);
+			assertEquals(arg, ss);
+		}
+	}
+	private String convertToString(DValue dval) {
+		if (dval.getType().isRelationShape()) {
+			DRelation drel = (DRelation) dval;
+			return drel.getForeignKey().asString();
+		} else if (dval.getType().isStructShape()) {
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			DValue inner = DValueHelper.getFieldValue(dval, pair.name);
+			return inner.asString();
+		} else {
+			return dval.asString();
+		}
+	}
+	private void chkNumParams(Integer... args) {
+		assertEquals("len", args.length, numParamL.size());
+		int i = 0;
+		for(Integer k : numParamL) {
+			assertEquals(args[i++].intValue(), k.intValue());
 		}
 	}
 }
