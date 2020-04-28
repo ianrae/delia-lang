@@ -34,7 +34,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		this.assocTblReplacer = assocTblReplacer;
 	}
 
-	public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal) {
+	public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap) {
 		UpdateStatementFragment selectFrag = new UpdateStatementFragment();
 
 		Map<String, DRelation> mmMap = new HashMap<>();
@@ -45,7 +45,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		selectFrag.tblFrag = tblFrag;
 
 		generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
-		initFieldsAndWhere(spec, structType, selectFrag);
+		initWhere(spec, structType, selectFrag);
 		generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
 
 		//no min,max,etc in UPDATE

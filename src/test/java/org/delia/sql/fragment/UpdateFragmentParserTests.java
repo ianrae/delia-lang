@@ -213,6 +213,7 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 	private QueryDetails details = new QueryDetails();
 	private UpdateFragmentParser fragmentParser;
 	private boolean useAliasesFlag = true;
+	private ConversionResult recentCres;
 
 
 	@Before
@@ -294,7 +295,7 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
 		QuerySpec spec= buildQuery((QueryExp) exp.queryExp);
 		fragmentParser.useAliases(useAliasesFlag);
-		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval);
+		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval, recentCres.assocCrudMap);
 		return selectFrag;
 	}
 
@@ -328,6 +329,7 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 		DStructType structType = (DStructType) registry.getType(typeName);
 		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
 		assertEquals(0, cres.localET.errorCount());
+		this.recentCres = cres;
 		return cres.dval;
 	}
 

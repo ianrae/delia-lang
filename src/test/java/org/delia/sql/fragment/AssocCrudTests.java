@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import org.delia.api.Delia;
@@ -57,12 +58,12 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	@Test
 	public void testAll() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[true] {wid: 333, addr:100}";
+		src += "\n  update Customer[true] {wid: 333, insert addr:100}";
 
 		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
-		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
@@ -399,6 +400,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	private boolean useAliasesFlag = true;
 	private UpdateFragmentParser fragmentParser;
 	private LogLevel logLevel = LogLevel.DEBUG;
+	private ConversionResult recentCres;
 
 
 	@Before
@@ -498,10 +500,10 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		}
 	}
 
-	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
+	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval, Map<String, String> assocCrudMap) {
 		QuerySpec spec= buildQuery((QueryExp) exp.queryExp);
 		fragmentParser.useAliases(useAliasesFlag);
-		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval);
+		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval, assocCrudMap);
 		return selectFrag;
 	}
 
@@ -531,6 +533,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	private DValue convertToDVal(UpdateStatementExp updateStatementExp, String typeName) {
 		DStructType structType = (DStructType) registry.getType(typeName);
 		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
+		this.recentCres = cres;
 		assertEquals(0, cres.localET.errorCount());
 		return cres.dval;
 	}

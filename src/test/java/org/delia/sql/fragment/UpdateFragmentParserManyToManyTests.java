@@ -385,6 +385,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 	private boolean useAliasesFlag = true;
 	private UpdateFragmentParser fragmentParser;
 	private LogLevel logLevel = LogLevel.DEBUG;
+	private ConversionResult recentCres;
 
 	@Before
 	public void init() {
@@ -481,7 +482,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
 		QuerySpec spec= buildQuery((QueryExp) exp.queryExp);
 		fragmentParser.useAliases(useAliasesFlag);
-		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval);
+		UpdateStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval, recentCres.assocCrudMap);
 		return selectFrag;
 	}
 
@@ -512,6 +513,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 		DStructType structType = (DStructType) registry.getType(typeName);
 		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
 		assertEquals(0, cres.localET.errorCount());
+		this.recentCres = cres;
 		return cres.dval;
 	}
 	//these tests use int params (but they could be long,date,...)

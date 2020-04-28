@@ -2,15 +2,20 @@ package org.delia.compiler;
 
 import java.util.List;
 
+import org.delia.compiler.ast.DsonFieldExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
+import org.delia.rule.rules.RelationManyRule;
 import org.delia.runner.InternalCompileState;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 //final checks using registry
@@ -31,10 +36,48 @@ public class Pass4Compiler extends CompilerPassBase {
 			if (exp instanceof TypeStatementExp) {
 				TypeStatementExp typeExp = (TypeStatementExp) exp;
 				checkPrimaryKeys(typeExp, results);
-			} 
+			} else if (exp instanceof InsertStatementExp) {
+				InsertStatementExp insExp = (InsertStatementExp) exp;
+				chkAssocCrudInsert(insExp, results);
+			} else if (exp instanceof UpdateStatementExp) {
+				UpdateStatementExp insExp = (UpdateStatementExp) exp;
+				chkAssocCrudUpdate(insExp, results);
+			}
 		}
 		
 		return results;
+	}
+
+	private void chkAssocCrudInsert(InsertStatementExp insExp, CompilerResults results) {
+		for(Exp exp: insExp.dsonExp.argL) {
+			if (exp instanceof DsonFieldExp) {
+				DsonFieldExp fexp = (DsonFieldExp) exp;
+				if (fexp.assocCrudAction != null) {
+					String action = fexp.assocCrudAction.strValue();
+					String msg = String.format("insert '%s': '%s' not allowed in insert statement'", insExp.typeName, action);
+					DeliaError err = createError("assoc-crud-in-insert-not-allowed", msg, insExp);
+					results.errors.add(err);
+				}
+			}
+		}
+	}
+	private void chkAssocCrudUpdate(UpdateStatementExp insExp, CompilerResults results) {
+		for(Exp exp: insExp.dsonExp.argL) {
+			if (exp instanceof DsonFieldExp) {
+				DsonFieldExp fexp = (DsonFieldExp) exp;
+				if (fexp.assocCrudAction != null) {
+					String fieldName = fexp.getFieldName();
+					DStructType structType = (DStructType) registry.getType(insExp.typeName);
+					RelationManyRule manyRule = DRuleHelper.findManyRule(structType, fieldName);
+					if (manyRule == null) {
+						String action = fexp.assocCrudAction.strValue();
+						String msg = String.format("update '%s': '%s' on field '%s' not allowed. Field is not a many relation.'", insExp.typeName, action, fieldName);
+						DeliaError err = createError("assoc-crud-in-update-not-allowed", msg, insExp);
+						results.errors.add(err);
+					}
+				}
+			}
+		}
 	}
 
 	private void checkPrimaryKeys(TypeStatementExp typeExp, CompilerResults results) {

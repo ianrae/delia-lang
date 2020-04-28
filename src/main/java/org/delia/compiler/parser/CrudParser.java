@@ -41,8 +41,8 @@ public class CrudParser extends ParserBase {
 				(IdentExp fieldNameExp, Token tok) -> fieldNameExp);
 	}
 	public static Parser<Exp> dsonField() {
-		return Parsers.sequence(dsonFieldName().optional(), fieldValue(), 
-				(IdentExp fieldNameExp, Exp exp) -> new DsonFieldExp(99, fieldNameExp, exp));
+		return Parsers.sequence(assocCrudAction().optional(), dsonFieldName().optional(), fieldValue(), 
+				(StringExp assocCrudAction, IdentExp fieldNameExp, Exp exp) -> new DsonFieldExp(99, fieldNameExp, exp, assocCrudAction));
 	}
 	public static Parser<DsonExp> dsonObj() {
 		return Parsers.sequence(term("{"), dsonField().many().sepBy(term(",")), term("}"), 
@@ -64,8 +64,8 @@ public class CrudParser extends ParserBase {
 				(Token tok, IdentExp typeName, DsonExp dsonExp) -> new InsertStatementExp(99, typeName, dsonExp));
 	}
 	public static Parser<UpdateStatementExp> updateStatement() {
-		return Parsers.sequence(term("update"), QueryParser.partialQuery(), assocCrudAction().optional(), dsonObj(), 
-				(Token tok, QueryExp queryExp, StringExp assocCrudAction, DsonExp dsonExp) -> new UpdateStatementExp(99, queryExp, dsonExp, assocCrudAction));
+		return Parsers.sequence(term("update"), QueryParser.partialQuery(), dsonObj(), 
+				(Token tok, QueryExp queryExp, DsonExp dsonExp) -> new UpdateStatementExp(99, queryExp, dsonExp));
 	}
 	public static Parser<DeleteStatementExp> deleteStatement() {
 		return Parsers.sequence(term("delete"), QueryParser.partialQuery(), 

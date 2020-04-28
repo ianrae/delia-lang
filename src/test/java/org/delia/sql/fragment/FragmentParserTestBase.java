@@ -123,6 +123,7 @@ public class FragmentParserTestBase extends NewBDDBase {
 		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
 		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, null, sprigSvc);
 		cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
+		cres.assocCrudMap = converter.getAssocCrudMap();
 		return cres;
 	}
 

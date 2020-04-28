@@ -4,14 +4,12 @@ public class UpdateStatementExp extends CrudExp {
 	public String typeName;
 	public DsonExp dsonExp;
 	public QueryExp queryExp;
-	public Exp assocCrudAction; //insert/delete/update
 
-	public UpdateStatementExp(int pos, QueryExp queryExp, DsonExp dsonExp, Exp assocCrudAction) {
+	public UpdateStatementExp(int pos, QueryExp queryExp, DsonExp dsonExp) {
 		super(pos);
 		this.queryExp = queryExp;
 		this.typeName = queryExp.typeName;
 		this.dsonExp = dsonExp;
-		this.assocCrudAction = assocCrudAction;
 	}
 	
 	public String getTypeName() {

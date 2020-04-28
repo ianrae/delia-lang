@@ -10,4 +10,5 @@ public class ConversionResult {
 	public DValue dval;
 	public ErrorTracker localET;
 	public Map<String,DValue> extraMap = new HashMap<>(); //ok for thread safety. short-lived obj 
+	public Map<String, String> assocCrudMap;
 }

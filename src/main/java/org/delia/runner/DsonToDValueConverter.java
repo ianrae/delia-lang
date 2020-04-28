@@ -3,6 +3,7 @@ package org.delia.runner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.DsonFieldExp;
@@ -32,6 +33,7 @@ public class DsonToDValueConverter extends ServiceBase {
 		private VarEvaluator varEvaluator;
 		private ScalarValueBuilder builder;
 		private SprigService sprigSvc;
+		private Map<String,String> assocCrudMap;
 		
 		public DsonToDValueConverter(FactoryService factorySvc, ErrorTracker localET, DTypeRegistry registry, VarEvaluator varEvaluator, SprigService sprigSvc) {
 			super(factorySvc);
@@ -46,6 +48,7 @@ public class DsonToDValueConverter extends ServiceBase {
 			return doConvertOne(typeName, dsonExp, false, cres);
 		}
 		public DValue convertOnePartial(String typeName, DsonExp dsonExp) {
+			this.assocCrudMap = new HashMap<>();
 			return doConvertOne(typeName, dsonExp, true, null);
 		}
 		private DValue doConvertOne(String typeName, DsonExp dsonExp, boolean isPartial, ConversionResult cres) {
@@ -83,6 +86,9 @@ public class DsonToDValueConverter extends ServiceBase {
 				DsonFieldExp fieldExp = (DsonFieldExp) exp;
 				String fieldName = fieldExp.getFieldName();
 				DType fieldType = findFieldType(dtype, fieldName); 
+				if (assocCrudMap != null && fieldExp.assocCrudAction != null) {
+					assocCrudMap.put(fieldName, fieldExp.assocCrudAction.strValue());
+				}
 				
 				//Customer.sid
 				if (sprigSvc.haveEnabledFor(dtype.getName(), fieldName) && cres != null) {
@@ -202,4 +208,9 @@ public class DsonToDValueConverter extends ServiceBase {
 			
 			return fieldExp.exp.strValue();
 		}
+
+		public Map<String, String> getAssocCrudMap() {
+			return assocCrudMap;
+		}
+
 	}

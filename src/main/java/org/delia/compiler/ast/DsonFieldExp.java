@@ -3,11 +3,13 @@ package org.delia.compiler.ast;
 public class DsonFieldExp extends ExpBase {
 	public String nameExp;
 	public Exp exp;
+	public StringExp assocCrudAction;
 
-	public DsonFieldExp(int pos, IdentExp name, Exp exp) {
+	public DsonFieldExp(int pos, IdentExp name, Exp exp, StringExp assocCrudAction) {
 		super(pos);
 		this.nameExp = name == null ? null : name.name();
 		this.exp = exp;
+		this.assocCrudAction = assocCrudAction;
 	}
 	
 	public String getFieldName() {
