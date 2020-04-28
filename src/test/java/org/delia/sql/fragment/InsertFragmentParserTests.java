@@ -19,7 +19,6 @@ import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
@@ -30,23 +29,18 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
+import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.fragment.OpFragment;
-import org.delia.db.sql.fragment.RawFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
-import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.SqlFragment;
 import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
-import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
-import org.delia.db.sql.fragment.WhereListHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
-import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.relation.RelationInfo;
@@ -72,8 +66,6 @@ import org.junit.Test;
 
 public class InsertFragmentParserTests extends NewBDDBase {
 	
-	//AAAA
-
 	//single use!!!
 	public static class InsertFragmentParser extends SelectFragmentParser {
 
@@ -86,33 +78,20 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			this.assocTblReplacer = assocTblReplacer;
 		}
 
-		public InsertStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal) {
+		public InsertStatementFragment parseInsert(String typeName, QueryDetails details, DValue partialVal) {
 			InsertStatementFragment selectFrag = new InsertStatementFragment();
 
 			Map<String, DRelation> mmMap = new HashMap<>();
 
 			//init tbl
-			DStructType structType = getMainType(spec); 
+			DStructType structType = getMainType(typeName); 
 			TableFragment tblFrag = createTable(structType, selectFrag);
 			selectFrag.tblFrag = tblFrag;
 
-			generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
-			initFieldsAndWhere(spec, structType, selectFrag);
-			generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
-
-			//no min,max,etc in UPDATE
-
-			generateUpdateFns(spec, structType, selectFrag);
+			generateSetFields(structType, selectFrag, partialVal, mmMap);
+			generateAssocUpdateIfNeeded(structType, selectFrag, mmMap);
 
 			fixupForParentFields(structType, selectFrag);
-			//			if (needJoin(spec, structType, selectFrag, details)) {
-			//				//used saved join if we have one
-			//				if (savedJoinedFrag == null) {
-			//					addJoins(spec, structType, selectFrag, details);
-			//				} else {
-			//					selectFrag.joinFrag = savedJoinedFrag;
-			//				}
-			//			}
 
 			if (! useAliases) {
 				removeAllAliases(selectFrag);
@@ -144,8 +123,8 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			}
 		}
 
-		private void generateSetFields(QuerySpec spec, DStructType structType, InsertStatementFragment selectFrag,
-				DValue partialVal, Map<String, DRelation> mmMap) {
+		private void generateSetFields(DStructType structType, InsertStatementFragment selectFrag,
+				DValue dval, Map<String, DRelation> mmMap) {
 			//we assume partialVal same type as structType!! (or maybe a base class)
 
 			int index = selectFrag.fieldL.size(); //setValuesL is parallel array to fieldL
@@ -158,7 +137,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				DeliaExceptionHelper.throwError("unexpeced-fields-in-update", "should not occur");
 			}
 
-			for(String fieldName: partialVal.asMap().keySet()) {
+			for(String fieldName: dval.asMap().keySet()) {
 				TypePair pair = DValueHelper.findField(structType, fieldName);
 
 				if (pair.type.isStructShape()) {
@@ -166,7 +145,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 						continue;
 					}
 					if (DRuleHelper.isManyToManyRelation(pair, structType)) {
-						DValue inner = partialVal.asStruct().getField(pair.name);
+						DValue inner = dval.asStruct().getField(pair.name);
 						if (inner == null) {
 							mmMap.put(pair.name, null);
 						} else {
@@ -176,7 +155,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 					}
 				}
 
-				DValue inner = partialVal.asMap().get(fieldName);
+				DValue inner = dval.asMap().get(fieldName);
 				if (inner == null) {
 					continue;
 				}
@@ -203,7 +182,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			}
 			return false;
 		}
-		private void generateAssocUpdateIfNeeded(QuerySpec spec, DStructType structType,
+		private void generateAssocUpdateIfNeeded(DStructType structType,
 				InsertStatementFragment selectFrag, Map<String, DRelation> mmMap) {
 			if (mmMap.isEmpty()) {
 				return;
@@ -344,27 +323,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 //		}
 //
 
-
-
-		public void generateUpdateFns(QuerySpec spec, DStructType structType, InsertStatementFragment selectFrag) {
-			//orderby supported only by MySQL which delia does not support
-			//			this.doOrderByIfPresent(spec, structType, selectFrag);
-			this.doLimitIfPresent(spec, structType, selectFrag);
-			//			this.doOffsetIfPresent(spec, structType, selectFrag);
-		}
-
-
-		//		protected void doOffsetIfPresent(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
-		//			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "offset");
-		//			if (qfexp == null) {
-		//				return;
-		//			}
-		//			IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
-		//			Integer n = exp.val;
-		//
-		//			OffsetFragment frag = new OffsetFragment(n);
-		//			selectFrag.offsetFrag = frag;
-		//		}
 
 		public String renderInsert(InsertStatementFragment selectFrag) {
 			if(selectFrag.setValuesL.isEmpty()) {
@@ -737,9 +695,8 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	}
 
 	private InsertStatementFragment buildUpdateFragment(InsertStatementExp exp, DValue dval) {
-		QuerySpec spec= buildQuery((QueryExp) exp.queryExp);
 		fragmentParser.useAliases(useAliasesFlag);
-		InsertStatementFragment selectFrag = fragmentParser.parseUpdate(spec, details, dval);
+		InsertStatementFragment selectFrag = fragmentParser.parseInsert(exp.typeName, details, dval);
 		return selectFrag;
 	}
 

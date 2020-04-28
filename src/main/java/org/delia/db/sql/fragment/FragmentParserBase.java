@@ -255,6 +255,10 @@ import org.delia.util.DeliaExceptionHelper;
 			DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(spec.queryExp.typeName);
 			return structType;
 		}
+		protected DStructType getMainType(String typeName) {
+			DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+			return structType;
+		}
 
 		protected FieldFragment buildStarFieldFrag(DStructType structType, StatementFragmentBase selectFrag) {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(structType);

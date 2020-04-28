@@ -18,18 +18,8 @@ public class InsertStatementFragment extends StatementFragmentBase {
 		public String render() {
 			StrCreator sc = new StrCreator();
 			sc.o("INSERT");
-			//renderEarly(sc);
 			sc.o(" %s", tblFrag.render());
 			renderInsertFields(sc);
-//			renderIfPresent(sc, joinFrag);
-
-//			if (! whereL.isEmpty()) {
-//				sc.o(" WHERE");
-//				renderWhereL(sc);
-//			}
-
-//			renderIfPresent(sc, orderByFrag);
-//			renderIfPresent(sc, limitFrag);
 			
 			return sc.str;
 		}
@@ -39,23 +29,30 @@ public class InsertStatementFragment extends StatementFragmentBase {
 				return;
 			}
 			
-			sc.o(" SET ");
-			int index = 0;
+			sc.o(" (");
 			ListWalker<FieldFragment> walker = new ListWalker<>(fieldL);
 			while(walker.hasNext()) {
 				FieldFragment ff = walker.next();
+				sc.o(ff.renderAsAliasedFrag());
+				walker.addIfNotLast(sc, ", ");
+			}
+			sc.o(")");
+
+			sc.o(" VALUES(");
+			int index = 0;
+			walker = new ListWalker<>(fieldL);
+			while(walker.hasNext()) {
+				walker.next();
 				String value = setValuesL.get(index);
-				sc.o("%s = %s", renderSetField(ff), value);
+				sc.o(value);
 				walker.addIfNotLast(sc, ", ");
 				index++;
 			}
+			sc.o(")");
+			
+			
 		}
 		
-		private String renderSetField(FieldFragment fieldF) {
-			String suffix = fieldF.asName == null ? "" : " as " + fieldF.asName;
-			return String.format("%s%s", fieldF.renderAsAliasedFrag(), suffix);
-		}
-
 		@Override
 		public int getNumSqlParams() {
 			// TODO Auto-generated method stub
