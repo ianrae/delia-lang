@@ -1,11 +1,7 @@
 package org.delia.db.sql.fragment;
 
 import java.util.List;
-import java.util.StringJoiner;
 
-import org.apache.commons.lang3.StringUtils;
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
@@ -29,16 +25,12 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.util.DeliaExceptionHelper;
 
 //single use!!!
 	public class FragmentParserBase extends ServiceBase implements TableFragmentMaker {
 		protected int nextAliasIndex = 0;
 		protected QueryTypeDetector queryDetectorSvc;
 		protected DTypeRegistry registry;
-//		protected ScalarValueBuilder dvalBuilder;
-//		protected ValueHelper valueHelper;
-//		protected VarEvaluator varEvaluator;
 		protected WhereFragmentGenerator whereGen;
 		protected SelectFuncHelper selectFnHelper;
 		protected TableExistenceServiceImpl existSvc;
@@ -46,24 +38,20 @@ import org.delia.util.DeliaExceptionHelper;
 		protected JoinFragment savedJoinedFrag;
 		protected List<TableInfo> tblinfoL;
 		
-		public FragmentParserBase(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
 				DBInterface dbInterface, DBAccessContext dbctx, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
 			super(factorySvc);
-			this.registry = registry;
-			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
-			this.tblinfoL = tblinfoL;
-//			this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
-//			this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc);
-//			this.filterRunner = new FilterFnRunner(registry);
-//			this.valueHelper = new ValueHelper(factorySvc);
-//			this.varEvaluator = varEvaluator;
-			this.whereGen = whereGen; 
-//			this.selectFnHelper = new SelectFuncHelper(new DBAccessContext(registry, varEvaluator));
-			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
-			this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
 			
-			this.fkHelper = new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc);
+//			FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+			this.registry = registry;
+			this.queryDetectorSvc = fpSvc.createQueryTypeDetector();
+			this.tblinfoL = tblinfoL;
+			this.whereGen = whereGen; 
+			this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
+			this.existSvc = fpSvc.createTableExistenceService(); //new TableExistenceServiceImpl(dbInterface, dbctx);
+			
+			this.fkHelper = fpSvc.createFKHelper(); //new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc);
 		}
 		
 		public void createAlias(AliasedFragment frag) {

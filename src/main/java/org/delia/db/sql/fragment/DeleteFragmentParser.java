@@ -15,10 +15,10 @@ import org.delia.type.DTypeRegistry;
 
 public class DeleteFragmentParser extends FragmentParserBase {
 
-		public DeleteFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator,
+		public DeleteFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator,
 				List<TableInfo> tblinfoL, DBInterface dbInterface,  DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory,
 				WhereFragmentGenerator whereGen) {
-			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+			super(factorySvc, fpSvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 		}
 		
 		public DeleteStatementFragment parseDelete(QuerySpec spec, QueryDetails details) {

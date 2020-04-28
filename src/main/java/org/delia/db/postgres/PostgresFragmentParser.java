@@ -9,6 +9,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.LimitFragment;
 import org.delia.db.sql.fragment.OrderByFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
@@ -25,10 +26,10 @@ import org.delia.util.DeliaExceptionHelper;
 //single use!!!
 	public class PostgresFragmentParser extends SelectFragmentParser {
 		
-		public PostgresFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+		public PostgresFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
 				DBInterface dbInterface, DBAccessContext dbctx, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+			super(factorySvc, fpSvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 		}
 		
 		protected void genFirst(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {

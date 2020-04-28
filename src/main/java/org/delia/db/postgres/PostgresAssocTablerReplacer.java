@@ -8,6 +8,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.fragment.AssocTableReplacer;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.MergeIntoStatementFragment;
 import org.delia.db.sql.fragment.RawFragment;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
@@ -24,10 +25,10 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 
 	private boolean useAliases = true;
 
-	public PostgresAssocTablerReplacer(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+	public PostgresAssocTablerReplacer(FactoryService factorySvc, FragmentParserService fpSvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
 			DBInterface dbInterface, DBAccessContext dbctx, 
 			SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
+		super(factorySvc, fpSvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 		this.isPostgres = true;
 	}
 	

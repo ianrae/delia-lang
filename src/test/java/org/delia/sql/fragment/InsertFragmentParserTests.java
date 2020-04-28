@@ -16,6 +16,7 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -329,7 +330,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		DBAccessContext dbctx = new DBAccessContext(runner);
 
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, null);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory);
 		return parser;
 	}
 

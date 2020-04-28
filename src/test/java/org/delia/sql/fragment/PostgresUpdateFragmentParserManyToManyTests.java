@@ -22,6 +22,7 @@ import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -441,8 +442,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		DBAccessContext dbctx = new DBAccessContext(runner);
-		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
-		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, assocTblReplacer);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}

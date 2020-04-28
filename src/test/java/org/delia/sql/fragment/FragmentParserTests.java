@@ -27,6 +27,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -309,7 +310,8 @@ public class FragmentParserTests extends NewBDDBase {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}

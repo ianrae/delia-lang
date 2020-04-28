@@ -20,6 +20,7 @@ import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.TableInfo;
@@ -175,7 +176,8 @@ public class DeleteFragementParserTests extends FragmentParserTestBase {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}
