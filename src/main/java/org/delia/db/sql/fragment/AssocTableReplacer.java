@@ -356,4 +356,38 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		assocInsertFrag.statement.paramL.add(dval);
 	}
 	
+	public void assocCrudDelete(UpdateStatementFragment updateFrag, 
+			DeleteStatementFragment deleteFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
+			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
+		
+//		//struct is Address AddressCustomerAssoc
+//		if (!reversed) {
+//			genAssocTblInsertRows(insertFrag, true, mainKeyVal, info.nearType, info.farType, keyVal, info);
+//		} else {
+//			genAssocTblInsertRows(insertFrag, false, mainKeyVal, info.farType, info.nearType, keyVal, info);
+//		}
+		
+		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		deleteFrag.paramStartIndex = statement.paramL.size();
+		
+		updateFrag.assocDeleteFrag = deleteFrag;
+		StrCreator sc = new StrCreator();
+		sc.o("%s = ? and %s == ?", "leftv", "right"); 
+		RawFragment rawFrag = new RawFragment(sc.str);
+		deleteFrag.whereL.add(rawFrag);
+		
+//		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+//		int extra = statement.paramL.size() - startingNumParams;
+//		int k = cloneParams(statement, clonedL, extra);
+		statement.paramL.add(keyVal);
+		//and again for mergeInto
+//		insertFrag.paramStartIndex = statement.paramL.size() - 1;
+//		cloneParams(statement, clonedL, 1, 0);
+//		if (isPostgres) {
+//			int n = statement.paramL.size();
+//			statement.paramL.remove(n - 1);
+//		}
+	}
+	
+	
 }

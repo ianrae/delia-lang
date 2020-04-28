@@ -174,6 +174,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 					case "update":
 						break;
 					case "delete":
+						assocCrudDelete(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
 						break;
 					default:
 						break;
@@ -186,17 +187,8 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	private void assocCrudInsert(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
 			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
-		//only for update by primary id. TODO: later support more
-		List<OpFragment> oplist = null;
-		if (existingWhereL.isEmpty()) {
-			log.logDebug("m-to-n:scenario1");
-			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, "insert");
-			return;
-		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
-			oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
-		} else {
-			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, "insert");
-		}
+		String action = "insert";
+		chkIfCrudActionAllowed(action, updateFrag, fieldName, existingWhereL, info);
 		
 		DRelation drel = mmMap.get(fieldName);
 		if (drel == null) {
@@ -218,6 +210,48 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 
 			updateFrag.assocCrudInsertL.add(insertFrag);
 			assocTblReplacer.assocCrudInsert(updateFrag, insertFrag, structType, mainDVal, inner, info, mainUpdateAlias, statement, reversed);
+		}
+	}
+	private void chkIfCrudActionAllowed(String action, UpdateStatementFragment updateFrag, String fieldName, List<SqlFragment> existingWhereL, RelationInfo info) {
+		//only for update by primary id. TODO: later support more
+//		List<OpFragment> oplist = null;
+		if (existingWhereL.isEmpty()) {
+			log.logDebug("m-to-n:scenario1");
+			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, action);
+			return;
+		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+//			oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
+		} else {
+			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, action);
+		}
+	}
+
+	private void assocCrudDelete(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
+			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
+
+		String action = "delete";
+		chkIfCrudActionAllowed(action, updateFrag, fieldName, existingWhereL, info);
+		
+		DRelation drel = mmMap.get(fieldName);
+		if (drel == null) {
+			DeliaExceptionHelper.throwError("assoc-crud-delete-null-not-allowed", "update %s field %s action '%s' not allowed with null value", updateFrag.tblFrag.name, fieldName, action);
+		}
+		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		TableFragment tblFrag = null;
+		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
+		for(DValue inner: drel.getMultipleKeys()) {
+			DeleteStatementFragment deleteFrage = new DeleteStatementFragment();
+			if (tblFrag == null) {
+				tblFrag = this.createAssocTable(deleteFrage, tblinfo.assocTblName);
+			} else {
+				tblFrag = new TableFragment(tblFrag);
+			}
+			deleteFrage.tblFrag = tblFrag;
+			
+			boolean reversed = tblinfo.tbl2.equalsIgnoreCase(structType.getName());
+
+			updateFrag.assocCrudDeleteL.add(deleteFrage);
+			assocTblReplacer.assocCrudDelete(updateFrag, deleteFrage, structType, mainDVal, inner, info, mainUpdateAlias, statement, reversed);
 		}
 	}
 	
