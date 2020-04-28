@@ -49,8 +49,6 @@ public class InsertStatementFragment extends StatementFragmentBase {
 				index++;
 			}
 			sc.o(")");
-			
-			
 		}
 		
 		@Override

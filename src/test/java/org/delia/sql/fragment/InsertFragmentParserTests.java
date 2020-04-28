@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
@@ -33,9 +34,7 @@ import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
 import org.delia.db.sql.fragment.InsertStatementFragment;
-import org.delia.db.sql.fragment.OpFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
-import org.delia.db.sql.fragment.SqlFragment;
 import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -69,7 +68,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	//single use!!!
 	public static class InsertFragmentParser extends SelectFragmentParser {
 
-		private boolean useAliases = true;
+		private boolean useAliases = false;
 		private AssocTableReplacer assocTblReplacer;
 
 		public InsertFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
@@ -91,7 +90,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			generateSetFields(structType, selectFrag, partialVal, mmMap);
 			generateAssocUpdateIfNeeded(structType, selectFrag, mmMap);
 
-			fixupForParentFields(structType, selectFrag);
+//			fixupForParentFields(structType, selectFrag);
 
 			if (! useAliases) {
 				removeAllAliases(selectFrag);
@@ -111,16 +110,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			for(FieldFragment ff: selectFrag.fieldL) {
 				ff.alias = null;
 			}
-			//			public List<SqlFragment> earlyL = new ArrayList<>();
 			selectFrag.tblFrag.alias = null;
-			//			public JoinFragment joinFrag; //TODO later a list
-			for(SqlFragment ff: selectFrag.whereL) {
-				if (ff instanceof OpFragment) {
-					OpFragment opff = (OpFragment) ff;
-					opff.left.alias = null;
-					opff.right.alias = null;
-				}
-			}
 		}
 
 		private void generateSetFields(DStructType structType, InsertStatementFragment selectFrag,
@@ -408,99 +398,60 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				stgroup.add(stat);
 			}
 		}
-
-		public void useAliases(boolean b) {
-			this.useAliases = b;
-		}
 	}	
 	
-	
-	///AAAB
-
 	@Test
-	public void testPrimaryKey() {
+	public void test1() {
 		String src = buildSrc();
 		src += "\n insert Flight {field1: 1, field2: 10}";
-//		src += "\n insert Flight {field1: 2, field2: 20}";
 		
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
 		
-		runAndChk(selectFrag, "xxxUPDATE Flight as a SET a.field2 = ? WHERE a.field1 = ?");
+		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
+		chkParams(selectFrag, "1", "10");
+//		chkNumParams(1, 0, 1);
+	}
+	@Test
+	public void test1Null() {
+		String src = buildSrcOptional();
+		src += "\n insert Flight {field1: 1}";
+		
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp);
+		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		
+		runAndChk(selectFrag, "INSERT Flight (field1) VALUES(?)");
+		chkParams(selectFrag, "1");
 	}
 	
-//	@Test
-//	public void testPrimaryKeyNoAlias() {
-//		String src = buildSrc();
-//		src += " update Flight[1] {field2: 111}";
-//		
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp);
-//		useAliasesFlag = false;
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Flight SET field2 = ? WHERE field1 = ?");
-//	}
-//
-//	@Test
-//	public void testAllRows() {
-//		String src = buildSrc();
-//		src += " update Flight[true] {field2: 111}";
-//		
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp);
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ?");
-//	}
-//
-//	@Test
-//	public void testOp() {
-//		String src = buildSrc();
-//		src += " update Flight[field1 > 0] {field2: 111}";
-//		
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp);
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 > ?");
-//	}
-//	@Test
-//	public void testOpNoPrimaryKey() {
-//		String src = buildSrcNoPrimaryKey();
-//		src += " update Flight[field1 > 0] {field2: 111}";
-//		
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp);
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 > ?");
-//	}
-//
-//	@Test
-//	public void testBasic() {
-//		String src = buildSrc();
-//		src += " update Flight[1] {field2: 111}";
-//		
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp);
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Flight as a SET a.field2 = ? WHERE a.field1 = ?");
-//	}
-//	
-//	@Test
-//	public void testOneToOne() {
-//		String src = buildSrcOneToOne();
-//		src += "\n  update Customer[55] {wid: 333}";
-//
-//		UpdateStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Customer");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//		
-//		runAndChk(selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?");
-//	}
+	@Test
+	public void testOneToOne() {
+		String src = buildSrcOneToOne();
+		src += "\n  insert Customer {id: 55, wid: 33}";
+//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		
+		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33");
+	}
+	@Test
+	public void testOneToOne2() {
+		String src = buildSrcOneToOne();
+		src += "\n  insert Customer {id: 55, wid: 33}";
+		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Address");
+		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		
+		runAndChk(selectFrag, "INSERT Address (cust, id, z) VALUES(?, ?, ?)");
+		chkParams(selectFrag, "55", "100", "5");
+	}
 //	@Test
 //	public void testOneToOneParent() {
 //		String src = buildSrcOneToOne();
@@ -566,7 +517,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	private Runner runner;
 	private QueryBuilderService queryBuilderSvc;
 	private QueryDetails details = new QueryDetails();
-	private boolean useAliasesFlag = true;
 	private InsertFragmentParser fragmentParser;
 	private String sqlLine1;
 	private String sqlLine2;
@@ -586,6 +536,10 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
 		return src;
 	}
+	private String buildSrcOptional() {
+		String src = "type Flight struct {field1 int unique, field2 int optional } end";
+		return src;
+	}
 	private String buildSrcNoPrimaryKey() {
 		String src = "type Flight struct {field1 int, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
@@ -595,8 +549,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	private String buildSrcOneToOne() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one parent } end";
 		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
 		return src;
 	}
 	private String buildSrcOneToMany() {
@@ -695,7 +647,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	}
 
 	private InsertStatementFragment buildUpdateFragment(InsertStatementExp exp, DValue dval) {
-		fragmentParser.useAliases(useAliasesFlag);
+//		fragmentParser.useAliases(useAliasesFlag);
 		InsertStatementFragment selectFrag = fragmentParser.parseInsert(exp.typeName, details, dval);
 		return selectFrag;
 	}
@@ -741,4 +693,23 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		return cres.dval;
 	}
 
+	//these tests use int params (but they could be long,date,...)
+	private void chkParams(InsertStatementFragment selectFrag, String...args) {
+		StringJoiner joiner = new StringJoiner(",");
+		
+		SqlStatement stat;
+		stat = selectFrag.statement;
+		
+		for(DValue dval: stat.paramL) {
+			joiner.add(dval.asString());
+		}
+		log.log("params: " + joiner.toString());
+		
+		assertEquals(args.length, stat.paramL.size());
+		int i = 0;
+		for(String arg: args) {
+			DValue dval = stat.paramL.get(i++);
+			assertEquals(arg, dval.asString());
+		}
+	}
 }
