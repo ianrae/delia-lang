@@ -14,6 +14,7 @@ import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.ListExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 
 /**
@@ -48,14 +49,23 @@ public class CrudParser extends ParserBase {
 				(Token tok, List<List<Exp>> arg, Token tok2) -> new DsonExp(tok.index(), arg));
 	}
 	
+	public static Parser<StringExp> assocCrudAction() {
+		return Parsers.or(term("insert"), term("update"), term("delete"))
+				.map(new org.codehaus.jparsec.functors.Map<Token, StringExp>() {
+					@Override
+					public StringExp map(Token tok) {
+						return new StringExp(tok.index(), (String)tok.toString());
+					}
+				});
+	}
 
 	public static Parser<InsertStatementExp> insertStatement() {
 		return Parsers.sequence(term("insert"), ident(), dsonObj(), 
 				(Token tok, IdentExp typeName, DsonExp dsonExp) -> new InsertStatementExp(99, typeName, dsonExp));
 	}
 	public static Parser<UpdateStatementExp> updateStatement() {
-		return Parsers.sequence(term("update"), QueryParser.partialQuery(), dsonObj(), 
-				(Token tok, QueryExp queryExp, DsonExp dsonExp) -> new UpdateStatementExp(99, queryExp, dsonExp));
+		return Parsers.sequence(term("update"), QueryParser.partialQuery(), assocCrudAction().optional(), dsonObj(), 
+				(Token tok, QueryExp queryExp, StringExp assocCrudAction, DsonExp dsonExp) -> new UpdateStatementExp(99, queryExp, dsonExp, assocCrudAction));
 	}
 	public static Parser<DeleteStatementExp> deleteStatement() {
 		return Parsers.sequence(term("delete"), QueryParser.partialQuery(), 

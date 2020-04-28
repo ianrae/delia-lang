@@ -272,13 +272,13 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		for(TypePair pair: structType.getAllFields()) {
 			RelationOneRule oneRule = DRuleHelper.findOneRule(structType, pair.name);
 			if (oneRule != null) {
-				if (oneRule.relInfo.isParent) {
+				if (oneRule.relInfo != null && oneRule.relInfo.isParent) {
 					doomedL.add(pair.name);
 				}
 			} else {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(structType, pair.name);
 				if (manyRule != null) {
-					if (manyRule.relInfo.isParent) {
+					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
 						doomedL.add(pair.name);
 					}
 				}
