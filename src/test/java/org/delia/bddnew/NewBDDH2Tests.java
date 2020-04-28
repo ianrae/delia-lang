@@ -286,7 +286,9 @@ public class NewBDDH2Tests extends NewBDDBase {
 		
 //		runR900File("t0-update-mm-other-othertbl.txt", 2);
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
-		runR2000File("t0-sprig.txt", 3);
+//		runR2000File("t0-sprig.txt", 3);
+//		runR400File("t0-field-serial.txt", 7);
+		runR900File("t0-update-mm-all.txt", 4);
 	}
 	
 	//---

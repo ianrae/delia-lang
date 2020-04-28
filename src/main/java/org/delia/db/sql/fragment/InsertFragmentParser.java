@@ -105,6 +105,10 @@ public class InsertFragmentParser extends SelectFragmentParser {
 				continue;
 			}
 
+			if (structType.fieldIsSerial(pair.name)) {
+				DeliaExceptionHelper.throwError("serial-value-cannot-be-provided", "Type %s, field %s - do not specify a value for a serial field", structType.getName(), pair.name);
+			}
+			
 			DValue dvalToUse = inner;
 			if (inner.getType().isRelationShape()) {
 				DRelation drel = inner.asRelation();
