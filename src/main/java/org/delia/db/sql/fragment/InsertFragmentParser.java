@@ -145,7 +145,6 @@ public class InsertFragmentParser extends SelectFragmentParser {
 					DeliaExceptionHelper.throwError("can't-find-assoc-tbl", "Can't find assoc table for '%s' and '%s'", info.nearType.getName(), info.farType.getName());
 				}
 				
-				
 				DRelation drel = mmMap.get(fieldName);
 				for(DValue xdval: drel.getMultipleKeys()) {
 					InsertStatementFragment assocFrag = new InsertStatementFragment();

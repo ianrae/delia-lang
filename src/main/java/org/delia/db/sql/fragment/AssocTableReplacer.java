@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.TableInfoHelper;
+import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -14,6 +16,7 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 //single use!!!
 public class AssocTableReplacer extends SelectFragmentParser {
@@ -244,7 +247,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 	}
 	
-	protected TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
+	protected TableFragment initTblFrag(StatementFragmentBase assocUpdateFrag) {
 		TableFragment tblFrag = new TableFragment();
 		tblFrag.alias = null;
 		tblFrag.name = assocUpdateFrag.tblFrag.name;
@@ -307,4 +310,46 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	public void useAliases(boolean b) {
 		this.useAliases = b;
 	}
+
+	public void assocCrudInsert(UpdateStatementFragment updateFrag, 
+			DStructType structType, DValue keyVal, RelationInfo info,
+			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
+		
+//	    INSERT INTO CustomerAddressAssoc as T (leftv, rightv) VALUES(s.id, ?)
+		InsertStatementFragment insertFrag = new InsertStatementFragment();
+		insertFrag.tblFrag = initTblFrag(updateFrag);
+		insertFrag.tblFrag.alias = "w";
+		
+		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
+		DValue mainDVal = builder.buildInt(777); //fix!!!
+		
+		//struct is Address AddressCustomerAssoc
+		if (!reversed) {
+			genAssocTblInsertRows(insertFrag, true, mainDVal, info.nearType, info.farType, keyVal, info);
+		} else {
+			genAssocTblInsertRows(insertFrag, false, mainDVal, info.farType, info.nearType, keyVal, info);
+		}
+	}
+	//TODO move to helper
+	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
+			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
+		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		if (mainDValFirst) {
+			genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
+			genxrow(assocInsertFrag, "rightv", keyPair2, xdval);
+		} else {
+			genxrow(assocInsertFrag, "leftv", keyPair1, xdval);
+			genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
+		}
+	}
+
+	private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {
+		TypePair tmpPair = new TypePair(assocFieldName, keyPair1.type);
+		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, tmpPair);
+		assocInsertFrag.setValuesL.add("?");
+		assocInsertFrag.fieldL.add(ff);
+		assocInsertFrag.statement.paramL.add(dval);
+	}
+	
 }

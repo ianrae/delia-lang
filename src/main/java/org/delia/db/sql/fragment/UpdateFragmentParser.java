@@ -46,7 +46,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 
 		generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
 		initWhere(spec, structType, selectFrag);
-		generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
+		generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap, assocCrudMap);
 
 		//no min,max,etc in UPDATE
 
@@ -152,7 +152,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		return false;
 	}
 	private void generateAssocUpdateIfNeeded(QuerySpec spec, DStructType structType,
-			UpdateStatementFragment selectFrag, Map<String, DRelation> mmMap) {
+			UpdateStatementFragment selectFrag, Map<String, DRelation> mmMap, Map<String, String> assocCrudMap) {
 		if (mmMap.isEmpty()) {
 			return;
 		}
@@ -161,13 +161,61 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, fieldName);
 			if (ruleMany != null) {
 				RelationInfo info = ruleMany.relInfo;
-				selectFrag.assocUpdateFrag = new UpdateStatementFragment();
-				genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
-						selectFrag.tblFrag.alias, selectFrag.statement);
+				String assocAction = assocCrudMap.get(fieldName);
+				if (assocAction == null) {
+					selectFrag.assocUpdateFrag = new UpdateStatementFragment();
+					genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
+							selectFrag.tblFrag.alias, selectFrag.statement);
+				} else {
+					switch(assocAction) {
+					case "insert":
+						assocCrudInsert(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
+						break;
+					case "update":
+						break;
+					case "delete":
+						break;
+					default:
+						break;
+					}
+				}
 			}
 		}
 	}
+	
+	private void assocCrudInsert(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
+			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
+//		//struct is Address AddressCustomerAssoc
+//		String field1;
+//		String field2;
+//		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
+//			field1 = "rightv";
+//			field2 = "leftv";
+//		} else {
+//			field1 = "leftv";
+//			field2 = "rightv";
+//		}
+
+		//only for update by primary id. TODO: later support more
+		List<OpFragment> oplist = null;
+		if (existingWhereL.isEmpty()) {
+			log.logDebug("m-to-n:scenario1");
+			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, "insert");
+			return;
+		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+			oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
+		} else {
+			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, "insert");
+		}
+		
+
+		DRelation drel = mmMap.get(fieldName);
+		for(DValue inner: drel.getMultipleKeys()) {
+			assocTblReplacer.assocCrudInsert(updateFrag, structType, inner, info, mainUpdateAlias, statement, false);
+		}
+	}
+	
 	private void genAssocField(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
 			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 		//update assoctabl set leftv=x where rightv=y
@@ -185,6 +233,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			field2 = "rightv";
 		}
 
+		
 		//3 scenarios here:
 		// 1. updating all records in assoc table
 		// 2. updating where filter by primaykey only
