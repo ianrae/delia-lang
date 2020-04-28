@@ -20,6 +20,7 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
@@ -374,8 +375,9 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	}
 	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		DBAccessContext dbctx = new DBAccessContext(runner);
 
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory);
 		return parser;
 	}
 

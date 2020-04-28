@@ -3,6 +3,7 @@ package org.delia.db.postgres;
 import java.util.List;
 
 import org.delia.core.FactoryService;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
@@ -24,9 +25,10 @@ import org.delia.util.DeliaExceptionHelper;
 //single use!!!
 	public class PostgresFragmentParser extends SelectFragmentParser {
 		
-		public PostgresFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
+		public PostgresFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+				DBInterface dbInterface, DBAccessContext dbctx, 
 					SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
-			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
+			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 		}
 		
 		protected void genFirst(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {

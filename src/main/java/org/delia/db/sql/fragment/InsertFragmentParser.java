@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -29,9 +30,10 @@ public class InsertFragmentParser extends SelectFragmentParser {
 
 	private boolean useAliases = false;
 
-	public InsertFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, DBInterface dbInterface, 
+	public InsertFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
+			DBInterface dbInterface, DBAccessContext dbctx, 
 			SqlHelperFactory sqlHelperFactory) {
-		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, null);
+		super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, null);
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {

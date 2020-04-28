@@ -107,7 +107,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			log.log("FRAG PARSEr....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
+			SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
 			whereGen.tableFragmentMaker = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
 			parser.renderSelect(selectFrag);
@@ -172,7 +172,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			log.log("FRAG PARSER DELETE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
+			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
@@ -203,8 +203,8 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			log.log("FRAG PARSER UPDATE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen);
-			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory, whereGen, assocTblReplacer);
+			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
 			parser.useAliases(false);
 			QueryDetails details = new QueryDetails();

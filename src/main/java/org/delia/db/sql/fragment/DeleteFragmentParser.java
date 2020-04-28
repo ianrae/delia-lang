@@ -3,6 +3,7 @@ package org.delia.db.sql.fragment;
 import java.util.List;
 
 import org.delia.core.FactoryService;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
@@ -15,9 +16,9 @@ import org.delia.type.DTypeRegistry;
 public class DeleteFragmentParser extends FragmentParserBase {
 
 		public DeleteFragmentParser(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator,
-				List<TableInfo> tblinfoL, DBInterface dbInterface, SqlHelperFactory sqlHelperFactory,
+				List<TableInfo> tblinfoL, DBInterface dbInterface,  DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory,
 				WhereFragmentGenerator whereGen) {
-			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, sqlHelperFactory, whereGen);
+			super(factorySvc, registry, varEvaluator, tblinfoL, dbInterface, dbctx, sqlHelperFactory, whereGen);
 		}
 		
 		public DeleteStatementFragment parseDelete(QuerySpec spec, QueryDetails details) {
