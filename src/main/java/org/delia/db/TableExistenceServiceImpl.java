@@ -11,6 +11,8 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 	private DBAccessContext dbctx;
 	private DBInterface dbInterface;
 	
+	public static boolean hackYesFlag; //for unit tests only
+	
 	public TableExistenceServiceImpl(DBInterface dbInterface, DBAccessContext dbctx) {
 		this.dbInterface = dbInterface;
 		this.dbctx = dbctx;
@@ -18,6 +20,9 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 	
 	@Override
 	public boolean doesTableExist(String tableName) {
+		if (hackYesFlag) {
+			return true;
+		}
 		return dbInterface.doesTableExist(tableName, dbctx);
 	}
 	

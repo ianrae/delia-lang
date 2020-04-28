@@ -10,47 +10,26 @@ import java.util.StringJoiner;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
-import org.delia.bddnew.NewBDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.compiler.ast.QueryExp;
-import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.QueryBuilderService;
-import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
-import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.ConversionResult;
-import org.delia.runner.DsonToDValueConverter;
-import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
-import org.delia.sprig.SprigService;
-import org.delia.sprig.SprigServiceImpl;
-import org.delia.type.DRelation;
 import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.TypePair;
-import org.delia.util.DValueHelper;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class InsertFragmentParserTests extends NewBDDBase {
+public class InsertFragmentParserTests extends FragmentParserTestBase {
 
 	@Test
 	public void test1() {
@@ -290,27 +269,10 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 
 	//---
-	private Delia delia;
-	private FactoryService factorySvc;
-	private DTypeRegistry registry;
-	private Runner runner;
-	private QueryBuilderService queryBuilderSvc;
 	private InsertFragmentParser fragmentParser;
-	private String sqlLine1;
-	private String sqlLine2;
-	private SqlStatementGroup currentGroup;
-	private List<Integer> numParamL = new ArrayList<>();
-	private String sqlLine3;
-	private String sqlLine4;
 
 	@Before
 	public void init() {
-	}
-
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
 	}
 
 	private String buildSrc() {
@@ -345,16 +307,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		return src;
 	}
 
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
-	}
-
-	private QuerySpec buildQuery(QueryExp exp) {
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
-	}
-
 	private InsertFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
@@ -379,25 +331,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory);
 		return parser;
-	}
-
-	private List<TableInfo> createTblInfoL() {
-		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Address", "AddressCustomerAssoc");
-		info.tbl1 = "Address";
-		info.tbl2 = "Customer";
-		//public String fieldName;
-		tblinfoL.add(info);
-		return tblinfoL;
-	}
-	private List<TableInfo> createTblInfoLOtherWay() {
-		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Customer", "CustomerAddressAssoc");
-		info.tbl1 = "Customer";
-		info.tbl2 = "Address";
-		//public String fieldName;
-		tblinfoL.add(info);
-		return tblinfoL;
 	}
 
 	private void runAndChk(InsertStatementFragment selectFrag, String expected) {
@@ -450,17 +383,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			//			assertEquals(expected, sqlLine5);
 		}
 	}
-	private void chkNoLine(int lineNum) {
-		if (lineNum == 2) {
-			assertEquals(null, sqlLine2);
-		} else if (lineNum == 3) {
-			assertEquals(null, sqlLine3);
-		} else if (lineNum == 4) {
-			assertEquals(null, sqlLine4);
-			//		} else if (lineNum == 5) {
-			//			assertEquals(null, sqlLine5);
-		}
-	}
 
 	private InsertStatementFragment buildInsertFragment(InsertStatementExp exp, DValue dval) {
 		//		fragmentParser.useAliases(useAliasesFlag);
@@ -491,14 +413,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		return insertStatementExp;
 	}
 
-	private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
-		ConversionResult cres = new ConversionResult();
-		cres.localET = new SimpleErrorTracker(log);
-		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
-		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, null, sprigSvc);
-		cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
-		return cres;
-	}
 	private DValue convertToDVal(InsertStatementExp insertStatementExp) {
 		return convertToDVal(insertStatementExp, "Flight", 0);
 	}
@@ -531,25 +445,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			DValue dval = stat.paramL.get(i++);
 			String ss = convertToString(dval);
 			assertEquals(arg, ss);
-		}
-	}
-	private String convertToString(DValue dval) {
-		if (dval.getType().isRelationShape()) {
-			DRelation drel = (DRelation) dval;
-			return drel.getForeignKey().asString();
-		} else if (dval.getType().isStructShape()) {
-			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-			DValue inner = DValueHelper.getFieldValue(dval, pair.name);
-			return inner.asString();
-		} else {
-			return dval.asString();
-		}
-	}
-	private void chkNumParams(Integer... args) {
-		assertEquals("len", args.length, numParamL.size());
-		int i = 0;
-		for(Integer k : numParamL) {
-			assertEquals(args[i++].intValue(), k.intValue());
 		}
 	}
 }

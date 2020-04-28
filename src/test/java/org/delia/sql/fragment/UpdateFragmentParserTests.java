@@ -47,7 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class UpdateFragmentParserTests extends NewBDDBase {
+public class UpdateFragmentParserTests extends FragmentParserTestBase {
 
 	@Test
 	public void testPrimaryKey() {
@@ -226,26 +226,13 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 //	}
 
 	//---
-	private Delia delia;
-	private FactoryService factorySvc;
-	private DTypeRegistry registry;
-	private Runner runner;
-	private QueryBuilderService queryBuilderSvc;
 	private QueryDetails details = new QueryDetails();
-	private boolean useAliasesFlag = true;
 	private UpdateFragmentParser fragmentParser;
-	private String sqlLine1;
-	private String sqlLine2;
+	private boolean useAliasesFlag;
 
 
 	@Before
 	public void init() {
-	}
-
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
 	}
 
 	private String buildSrc() {
@@ -284,16 +271,6 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		return src;
 	}
 
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
-	}
-
-	private QuerySpec buildQuery(QueryExp exp) {
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
-	}
-
 	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
@@ -323,44 +300,10 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		return parser;
 	}
 
-	private List<TableInfo> createTblInfoL() {
-		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Address", "AddressCustomerAssoc");
-		info.tbl1 = "Address";
-		info.tbl2 = "Customer";
-		//public String fieldName;
-		tblinfoL.add(info);
-		return tblinfoL;
-	}
-	private List<TableInfo> createTblInfoLOtherWay() {
-		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Customer", "CustomerAddressAssoc");
-		info.tbl1 = "Customer";
-		info.tbl2 = "Address";
-		//public String fieldName;
-		tblinfoL.add(info);
-		return tblinfoL;
-	}
-
 	private void runAndChk(UpdateStatementFragment selectFrag, String expected) {
 		String sql = fragmentParser.renderSelect(selectFrag);
 		log.log(sql);
 		assertEquals(expected, sql);
-	}
-	private void runAndChkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.renderSelect(selectFrag);
-		log.log(sql);
-		if (lineNum == 1) {
-			String[] ar = sql.split("\n");
-			this.sqlLine1 = ar[0];
-			this.sqlLine2 = ar[1];
-			assertEquals(expected, sqlLine1);
-		}
-	}
-	private void chkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
-		if (lineNum == 2) {
-			assertEquals(expected, sqlLine2);
-		}
 	}
 
 	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
@@ -393,14 +336,6 @@ public class UpdateFragmentParserTests extends NewBDDBase {
 		return updateStatementExp;
 	}
 
-	private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
-		ConversionResult cres = new ConversionResult();
-		cres.localET = new SimpleErrorTracker(log);
-		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
-		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, null, sprigSvc);
-		cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
-		return cres;
-	}
 	private DValue convertToDVal(UpdateStatementExp updateStatementExp) {
 		return convertToDVal(updateStatementExp, "Flight");
 	}

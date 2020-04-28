@@ -9,39 +9,28 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
-import org.delia.bddnew.NewBDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.TableInfo;
-import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class DeleteFragementParserTests extends NewBDDBase {
+public class DeleteFragementParserTests extends FragmentParserTestBase {
 	
 	@Test
 	public void testPrimaryKey() {
@@ -100,25 +89,12 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	}
 
 	//---
-	private Delia delia;
-	private FactoryService factorySvc;
-	private DTypeRegistry registry;
-	private Runner runner;
-	private QueryBuilderService queryBuilderSvc;
-	private ScalarValueBuilder builder;
-	private QueryDetails details = new QueryDetails();
 
 	private DeleteFragmentParser fragmentParser;
-	
-
+	private ScalarValueBuilder builder;
+	private QueryDetails details = new QueryDetails();
 	@Before
 	public void init() {
-	}
-
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
 	}
 
 	private String buildSrc() {
@@ -142,11 +118,6 @@ public class DeleteFragementParserTests extends NewBDDBase {
 		return src;
 	}
 
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
-	}
-	
 	private QuerySpec buildPrimaryKeyQuery(String typeName, int id) {
 		DValue dval = builder.buildInt(id);
 		QueryExp exp = queryBuilderSvc.createPrimaryKeyQuery(typeName, dval);
@@ -161,10 +132,6 @@ public class DeleteFragementParserTests extends NewBDDBase {
 	private QuerySpec buildOpQuery(String typeName, String fieldName, int wid) {
 		DValue dval = builder.buildInt(wid);
 		QueryExp exp = queryBuilderSvc.createEqQuery(typeName, fieldName, dval);
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
-	}
-	private QuerySpec buildQuery(QueryExp exp) {
 		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
 		return spec;
 	}

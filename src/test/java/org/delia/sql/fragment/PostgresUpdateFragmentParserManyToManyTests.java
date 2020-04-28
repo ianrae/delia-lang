@@ -10,20 +10,12 @@ import java.util.StringJoiner;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
-import org.delia.bddnew.NewBDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
-import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
@@ -36,22 +28,16 @@ import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
-import org.delia.error.SimpleErrorTracker;
 import org.delia.log.LogLevel;
 import org.delia.runner.ConversionResult;
-import org.delia.runner.DsonToDValueConverter;
-import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
-import org.delia.sprig.SprigService;
-import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
+public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserTestBase {
 
 	//=============== many to many ======================
 	//scenario 1: ALL
@@ -408,33 +394,14 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 	
 
 	//---
-	private Delia delia;
-	private FactoryService factorySvc;
-	private DTypeRegistry registry;
-	private Runner runner;
-	private QueryBuilderService queryBuilderSvc;
 	private QueryDetails details = new QueryDetails();
 	private boolean useAliasesFlag = true;
 	private UpdateFragmentParser fragmentParser;
-	private String sqlLine1;
-	private String sqlLine2;
 	private LogLevel logLevel = LogLevel.DEBUG;
-	private String sqlLine3;
-	private String sqlLine4;
-	private String sqlLine5;
-	private List<Integer> numParamL = new ArrayList<>();
-	private SqlStatementGroup currentGroup;
 
 
 	@Before
 	public void init() {
-	}
-
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		delia.getLog().setLevel(logLevel);
-		return new DeliaDao(delia);
 	}
 
 	private String buildSrcManyToMany() {
@@ -449,11 +416,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 	@Override
 	public DBInterface createForTest() {
 		return new MemDBInterface();
-	}
-
-	private QuerySpec buildQuery(QueryExp exp) {
-		QuerySpec spec= queryBuilderSvc.buildSpec(exp, runner);
-		return spec;
 	}
 
 	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
@@ -483,25 +445,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
-	}
-
-	private List<TableInfo> createTblInfoL() {
-		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Address", "AddressCustomerAssoc");
-		info.tbl1 = "Address";
-		info.tbl2 = "Customer";
-		//public String fieldName;
-		tblinfoL.add(info);
-		return tblinfoL;
-	}
-	private List<TableInfo> createTblInfoLOtherWay() {
-		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Customer", "CustomerAddressAssoc");
-		info.tbl1 = "Customer";
-		info.tbl2 = "Address";
-		//public String fieldName;
-		tblinfoL.add(info);
-		return tblinfoL;
 	}
 
 	private void runAndChk(UpdateStatementFragment selectFrag, String expected) {
@@ -552,24 +495,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 			assertEquals(expected, sqlLine5);
 		}
 	}
-	private void chkNoLine(int lineNum) {
-		if (lineNum == 2) {
-			assertEquals(null, sqlLine2);
-		} else if (lineNum == 3) {
-			assertEquals(null, sqlLine3);
-		} else if (lineNum == 4) {
-			assertEquals(null, sqlLine4);
-		} else if (lineNum == 5) {
-			assertEquals(null, sqlLine5);
-		}
-	}
-	private void chkNumParams(Integer... args) {
-		assertEquals("len", args.length, numParamL.size());
-		int i = 0;
-		for(Integer k : numParamL) {
-			assertEquals(args[i++].intValue(), k.intValue());
-		}
-	}
 
 	private UpdateStatementFragment buildUpdateFragment(UpdateStatementExp exp, DValue dval) {
 		QuerySpec spec= buildQuery((QueryExp) exp.queryExp);
@@ -601,14 +526,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends NewBDDBase {
 		return updateStatementExp;
 	}
 
-	private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
-		ConversionResult cres = new ConversionResult();
-		cres.localET = new SimpleErrorTracker(log);
-		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
-		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, null, sprigSvc);
-		cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
-		return cres;
-	}
 	private DValue convertToDVal(UpdateStatementExp updateStatementExp, String typeName) {
 		DStructType structType = (DStructType) registry.getType(typeName);
 		ConversionResult cres = buildPartialValue(structType, updateStatementExp.dsonExp);
