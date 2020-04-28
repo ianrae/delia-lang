@@ -23,13 +23,13 @@ public class MinFunction extends QueryResponseFunctionBase {
 			return qresp; //db already did it
 		}
 		
-		List<DValue> dvalList = ctx.getDValList();
+		List<DValue> dvalList = qresp.dvalList; //ctx.getDValList();
 		if (CollectionUtils.isEmpty(dvalList)) {
 			qresp.dvalList = null;
 			return qresp; //min of empty set is null
 		}
 		
-		Shape shape = detectShape(ctx);
+		Shape shape = detectShape(dvalList);
 		if (shape == null) {
 			return qresp;
 		}
@@ -119,11 +119,10 @@ public class MinFunction extends QueryResponseFunctionBase {
 
 	/**
 	 * may be all null
-	 * @param ctx query-fn context
+	 * @param dvalList values
 	 * @return shape or null
 	 */
-	private Shape detectShape(QueryFuncContext ctx) {
-		List<DValue> dvalList = ctx.getDValList();
+	private Shape detectShape(List<DValue> dvalList) {
 		for(DValue dval: dvalList) {
 			if (dval != null) {
 				return dval.getType().getShape();

@@ -199,7 +199,7 @@ public class DValueHelper {
 	}
 
 	public static void throwIfFieldNotExist(String msgPrefix, String fieldName, DValue dval) {
-		if (dval == null) {
+		if (dval == null || !dval.getType().isStructShape()) {
 			return;
 		}
 		DStructType dtype = (DStructType) dval.getType();

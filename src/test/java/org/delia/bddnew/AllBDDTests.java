@@ -287,10 +287,9 @@ public class AllBDDTests extends NewBDDBase {
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 
-//		runR500File("t0-relation-one-to-many.txt", 9);
-//		runR1700File("t0-let-field-multiple.txt", 5); 
 //		runR1350File("t0-filter-op-relation.txt", 13);
-		runR900File("t0-update-mm-all.txt", 4);
+//		runR900File("t0-update-mm-all.txt", 4);
+		runR1550File("t0-queryfn-oneone-childa.txt", 6);
 	}
 	
 	//---

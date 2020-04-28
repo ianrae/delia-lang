@@ -16,9 +16,11 @@ import org.delia.queryresponse.QueryResponseFunction;
 import org.delia.queryresponse.QueryResponseFunctionFactory;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
+import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringTrail;
 
 public class QueryFuncOrFieldRunner extends ServiceBase {
@@ -52,22 +54,35 @@ public class QueryFuncOrFieldRunner extends ServiceBase {
 						
 					QueryFieldExp qff = (QueryFieldExp) qfexp;
 					String fieldName = qff.funcName;
-//					log.log("qff: " + fieldName);
+					log.log("qff: " + fieldName);
 					List<DValue> newList = new ArrayList<>();
 
 					boolean checkFieldExists = true;
 					for(DValue dval: ctx.getDValList()) {
-						if (checkFieldExists) {
-							checkFieldExists = false;
-							DValueHelper.throwIfFieldNotExist("", fieldName, dval);
+						if (dval.getType().isStructShape()) {
+							if (checkFieldExists) {
+								checkFieldExists = false;
+								DValueHelper.throwIfFieldNotExist("", fieldName, dval);
+							}
+							
+							DValue inner = dval.asStruct().getField(qff.funcName);
+							newList.add(inner);
+						} else if (dval.getType().isRelationShape()) {
+							DRelation drel = dval.asRelation();
+							if (drel.getFetchedItems() == null) {
+								DeliaExceptionHelper.throwError("cannot-access-field-without-fetch", "field '%s' cannot be accessed because fetch() was not called", qff.funcName);
+							} else {
+								newList.addAll(drel.getFetchedItems());
+							}
+						} else {
+							//scalar
+							newList.add(dval);
 						}
-						DValue inner = dval.asStruct().getField(qff.funcName);
-						newList.add(inner);
 					}
 					result.dvalList = newList;
 				} else { //it's a fn to run
 					String fnName = qfexp.funcName;
-//					log.log("qfn: " + fnName);
+					log.log("qfn: " + fnName);
 					
 					QueryResponseFunction func = funcFactory.create(fnName, registry);
 					if (func == null) {
