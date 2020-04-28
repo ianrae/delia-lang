@@ -14,7 +14,7 @@ given:
 
 when:
   insert Customer {id: 1, wid:33, height:44}
-  let x = Customer[1]
+  let x = Customer[id==1]
 then:
 value:a:Customer {
  vid:1
@@ -30,7 +30,7 @@ given:
 
 when:
   insert Customer { wid:34, height:45}
-  let x = Customer[true].orderBy('id')
+  let x = Customer[wid > 23].orderBy('id')
 then:
 ERROR: migration-failed-due-to-policy
 }

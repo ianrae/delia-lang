@@ -7,13 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.delia.base.UnitTestLog;
-import org.delia.bddnew.NewBDDBase.BDDGroup;
-import org.delia.bddnew.NewBDDBase.FileHelper;
 import org.delia.bddnew.core.BDDParser;
 import org.delia.bddnew.core.BDDTest;
 import org.delia.bddnew.core.BDDTestRunner;
@@ -35,6 +31,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R700_crud_insert,
 		R800_crud_delete,
 		R900_crud_update,
+		R950_crud_assoc_crud,
 		R1000_crud_upsert,
 		R1100_userfn,
 		R1200_let_scalar, 
@@ -50,7 +47,8 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R2000_sprig,
 		R2100_migration,
 		R2150_migration_relations,
-		R2200_security
+		R2200_security,
+		R2300_multi_relation
 	}
 	public static class FileHelper {
 		
@@ -71,7 +69,19 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected List<String> filesExecutedL = new ArrayList<>();
 	private BDDGroup currentGroup;
 	protected boolean enableAllFileCheck = true;
+	protected boolean disableAllSlowTests = false;
 
+	/**
+	 * When we want to run all unit tests but not have to wait
+	 * 15 minutes for H2 and Postgress BDD tests to run,
+	 * set disableAllSlowTests to true. They will fail immediately.
+	 */
+	protected void disableAllSlowTestsIfNeeded() {
+		if (disableAllSlowTests) {
+			throw new IllegalArgumentException("disable SLOW tests");
+		}
+	}
+	
 	protected String testFile(BDDGroup group, String filename) {
 		String s = fileHelper.getDir(group);
 		s += '/' + filename;
@@ -101,6 +111,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runR900File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R900_crud_update, filename, numTests);
+	}
+	protected int runR950File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R950_crud_assoc_crud, filename, numTests);
 	}
 	protected int runR1000File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R1000_crud_upsert, filename, numTests);
@@ -149,6 +162,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runR2200File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2200_security, filename, numTests);
+	}
+	protected int runR2300File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2300_multi_relation, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("FILE: %s", filename);

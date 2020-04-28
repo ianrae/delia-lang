@@ -21,6 +21,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 	private boolean deferFlag;
 	private boolean enableSQLLoggingFlag;
 	public String tablesToClean;
+	public boolean useFragmentParser;
 	
 	public MyFakeSQLDBInterface(DBType dbtype) {
 		super(null); //set later
@@ -40,15 +41,16 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
 			H2DBInterface h2db = new H2DBInterface(factorySvc, connFact);
 			actualInterface = h2db;
+			//h2db.useFragmentParser = useFragmentParser;
 
 			actualInterface.init(factorySvc);
 
 			if (cleanTables) {
-				H2TestCleaner cleaner = new H2TestCleaner();
+				H2TestCleaner cleaner = new H2TestCleaner(dbType);
 				cleaner.deleteKnownTables(factorySvc, actualInterface);
 			}
 			
-			h2db.enumerateAllConstraints(log);
+			//h2db.enumerateAllConstraints(log);
 		}
 		break;
 		case POSTGRES:
@@ -56,11 +58,11 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), log);
 			PostgresDBInterface pgdb = new PostgresDBInterface(factorySvc, connFact);
 			actualInterface = pgdb;
-
+			//pgdb.useFragmentParser = useFragmentParser;
 			actualInterface.init(factorySvc);
 
 			if (cleanTables) {
-				H2TestCleaner cleaner = new H2TestCleaner();
+				H2TestCleaner cleaner = new H2TestCleaner(dbType);
 				cleaner.deleteKnownTables(factorySvc, actualInterface);
 			}
 		}
@@ -73,7 +75,7 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 		}
 		
 		if (tablesToClean != null) {
-			H2TestCleaner cleaner = new H2TestCleaner();
+			H2TestCleaner cleaner = new H2TestCleaner(dbType);
 			cleaner.deleteTables(factorySvc, actualInterface, tablesToClean);
 			tablesToClean = null; //is a one-shot. only do for one test
 		}

@@ -127,6 +127,10 @@ public class AssocTableCreator extends ServiceBase {
 			index++;
 		}
 		
+		if (index > 0) {
+			sc.o(",");
+		}
+		sc.o("UNIQUE(leftv,rightv)");
 		sc.o(");");
 		sc.nl();
 		

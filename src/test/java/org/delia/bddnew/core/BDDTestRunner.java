@@ -54,6 +54,7 @@ public class BDDTestRunner {
 
 	private int runTest(BDDTest test, int index) {
 		log("");
+		log("---------------------------------------");
 		log(String.format("Test%d: %s...", index, test.title));
 		String src = buildFrom(test.givenL);
 		src += "\n";

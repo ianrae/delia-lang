@@ -86,6 +86,17 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR900() {
 		runR900File("t0-update.txt", 7);
+		runR900File("t0-update-mm-all.txt", 4);
+		runR900File("t0-update-mm-all-othertbl.txt", 2);
+		runR900File("t0-update-mm-id.txt", 4);
+		runR900File("t0-update-mm-id-othertbl.txt", 2);
+		runR900File("t0-update-mm-other.txt", 4);
+		runR900File("t0-update-mm-other-othertbl.txt", 2);
+	}
+	
+	@Test
+	public void testR950() {
+		runR950File("t0-crud-assoc-insert.txt", 0);
 	}
 	
 	@Test
@@ -165,7 +176,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//TODO: runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		//runR1550File("t0-queryfn-oneone-childa.txt", 6);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -184,7 +195,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
-		runR1700File("t0-let-field-func.txt", 2);
+		runR1700File("t0-let-field-func.txt", 3);
 		runR1700File("t0-let-field-multiple.txt", 5);
 		runR1700File("t0-let-field-relation.txt", 2);
 	}
@@ -231,7 +242,6 @@ public class NewBDDH2Tests extends NewBDDBase {
 	}
 	@Test
 	public void testR2150() {
-		runR500File("t0-relation-one-to-one.txt", 9);
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
@@ -247,37 +257,52 @@ public class NewBDDH2Tests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many4.txt", 2);
 		//is no test 5 for many-to-one
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
+		
+		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many2.txt", 2);
+		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR2150File("t0-migrate-many-to-many4.txt", 2);
+		runR2150File("t0-migrate-many-to-many6.txt", 2);
+		runR2150File("t0-migrate-many-to-many6a.txt", 2);
+		runR2150File("t0-migrate-many-to-many7.txt", 0);
 	}
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
 	}
-	
+	@Test
+	public void testR2300() {
+		runR2300File("t0-multi-relation.txt", 0);
+	}
+
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 4;
+//		testIndexToRun = 3;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-//		runR1700File("t0-let-field-func.txt", 3);
-//		runR1550File("t0-queryfn-oneone-parent.txt", 6);
-//		runR1550File("t0-queryfn-oneone-parent2.txt", 4);
-//		runR1550File("t0-queryfn-oneone-child.txt", 6);
-//		runR1550File("t0-queryfn-onemany-parent.txt", 6);
-//		runR1550File("t0-queryfn-onemany-child.txt", 6);
-//		runR1550File("t0-queryfn-manymany-left.txt", 6);
+//		runR900File("t0-update-mm-other-othertbl.txt", 2);
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
+//		runR2000File("t0-sprig.txt", 3);
+//		runR400File("t0-field-serial.txt", 7);
+		runR900File("t0-update-mm-all.txt", 4);
+//		runR2150File("t0-migrate-many-to-many1.txt", 3);
+//		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	
 	//---
 	private DBType dbType = DBType.H2;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
+	private boolean useFragmentParser = true;
 	
 	@Before
 	public void init() {
+//		this.disableAllSlowTests = true;
+		disableAllSlowTestsIfNeeded();
 	}
 	@After
 	public void shutdown() {
@@ -288,6 +313,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
+		db.useFragmentParser = useFragmentParser;
 		dbInterfaceToUse = db;
 //		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {

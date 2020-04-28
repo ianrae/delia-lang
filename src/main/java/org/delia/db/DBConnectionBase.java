@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
@@ -13,6 +15,7 @@ import org.delia.db.h2.DBListingType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 
 public class DBConnectionBase extends ServiceBase {
@@ -48,6 +51,16 @@ public class DBConnectionBase extends ServiceBase {
 		return b;
 	}    
 	
+	
+	public List<Integer> execInsertStatementGroup(SqlStatementGroup stgroup, SqlExecuteContext sqlctx) {
+		//TODO: add batching later
+		List<Integer>insertCountL = new ArrayList<>();
+		for(SqlStatement statement: stgroup.statementL) {
+			int updateCount = executeInsertStatement(statement, sqlctx);
+			insertCountL.add(updateCount);
+		}
+		return insertCountL;
+	}    
 	public int executeInsertStatement(SqlStatement statement, SqlExecuteContext sqlctx) {
 		if (sqlctx.getGeneratedKeys) {
 			return executeInsertAndGenKeysx(statement, sqlctx);
@@ -70,7 +83,7 @@ public class DBConnectionBase extends ServiceBase {
 			PreparedStatement stm = valueHelper.createPrepStatementWithGenKey(statement, conn);
 			affectedRows = stm.executeUpdate();
 			if (affectedRows > 0) {
-				sqlctx.genKeys = stm.getGeneratedKeys();
+				sqlctx.genKeysL.add(stm.getGeneratedKeys());
 			}
 		} catch (SQLException e) {
 			convertAndRethrowException(e);
@@ -88,6 +101,15 @@ public class DBConnectionBase extends ServiceBase {
 			convertAndRethrowException(e);
 		}
 		return updateCount;
+	}    
+	public List<Integer> execUpdateStatementGroup(SqlStatementGroup stgroup, SqlExecuteContext sqlctx) {
+		//TODO: add batching later
+		List<Integer>updateCountL = new ArrayList<>();
+		for(SqlStatement statement: stgroup.statementL) {
+			int updateCount = execUpdateStatement(statement, sqlctx);
+			updateCountL.add(updateCount);
+		}
+		return updateCountL;
 	}    
 
 	public ResultSet execQueryStatement(SqlStatement statement, DBAccessContext dbctx) {
@@ -151,12 +173,6 @@ public class DBConnectionBase extends ServiceBase {
 			}        
 		} catch (SQLException e) {
 			convertAndRethrowException(e);
-//			String msg = e.getMessage();
-//			String target = String.format("Table \"%s\" not found", tableName.toUpperCase());
-//			if (msg.indexOf(target) >= 0) {
-//				log.logDebug("NO TABLE FOUND: " + tableName);
-//				return false;
-//			}
 		}
 
 		return tblExists;

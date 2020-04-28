@@ -12,7 +12,7 @@ thenType: struct
 title: < 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr < 111]
+  let x = Customer[addr < 111].fks()
 then:
 value:a:Customer {
  vid:55
@@ -22,7 +22,7 @@ value:a:Customer {
 title: < none
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr < 100]
+  let x = Customer[addr < 100].fks()
 then:
 null
 
@@ -30,7 +30,7 @@ null
 title: <= 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr <= 100]
+  let x = Customer[addr <= 100].fks()
 then:
 value:a:Customer {
  vid:55
@@ -40,7 +40,7 @@ value:a:Customer {
 title: <= none
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr <= 99]
+  let x = Customer[addr <= 99].fks()
 then:
 null
 
@@ -48,7 +48,7 @@ null
 title: > 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr > 99]
+  let x = Customer[addr > 99].fks()
 then:
 value:a:Customer {
  vid:55
@@ -58,7 +58,7 @@ value:a:Customer {
 title: > fail
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr > 100]
+  let x = Customer[addr > 100].fks()
 then:
 null
 
@@ -66,7 +66,7 @@ null
 title: >= 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr >= 99]
+  let x = Customer[addr >= 99].fks()
 then:
 value:a:Customer {
  vid:55
@@ -76,7 +76,7 @@ value:a:Customer {
 title: >= fail
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr >= 199]
+  let x = Customer[addr >= 199].fks()
 then:
 null
 
@@ -84,7 +84,7 @@ null
 title: == 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr == 100]
+  let x = Customer[addr == 100].fks()
 then:
 value:a:Customer {
  vid:55
@@ -94,7 +94,7 @@ value:a:Customer {
 title: == fail
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr == 101]
+  let x = Customer[addr == 101].fks()
 then:
 null
 
@@ -102,7 +102,7 @@ null
 title: != 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr != 101]
+  let x = Customer[addr != 101].fks()
 then:
 value:a:Customer {
  vid:55
@@ -112,7 +112,7 @@ value:a:Customer {
 title: != fail
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[addr != 100]
+  let x = Customer[addr != 100].fks()
 then:
 null
 
@@ -120,7 +120,7 @@ null
 title: reverse args. 
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[100 == addr]
+  let x = Customer[100 == addr].fks()
 then:
 value:a:Customer {
  vid:55

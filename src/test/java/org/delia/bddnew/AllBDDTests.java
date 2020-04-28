@@ -85,8 +85,19 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR900() {
 		runR900File("t0-update.txt", 7);
+		runR900File("t0-update-mm-all.txt", 4);
+		runR900File("t0-update-mm-all-othertbl.txt", 2);
+		runR900File("t0-update-mm-id.txt", 4);
+		runR900File("t0-update-mm-id-othertbl.txt", 2);
+		runR900File("t0-update-mm-other.txt", 4);
+		runR900File("t0-update-mm-other-othertbl.txt", 2);
 	}
 	
+	@Test
+	public void testR950() {
+		runR950File("t0-crud-assoc-insert.txt", 0);
+	}
+
 	@Test
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 0);
@@ -164,7 +175,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//TODOrunR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -183,7 +194,7 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
 		runR1700File("t0-let-field-func.txt", 3);
-		runR1700File("t0-let-field-multiple.txt", 5); //fix. addr should be null since no .fk
+		runR1700File("t0-let-field-multiple.txt", 5); 
 		runR1700File("t0-let-field-relation.txt", 2);
 	}
 	
@@ -263,17 +274,22 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
 	}
+	@Test
+	public void testR2300() {
+		runR2300File("t0-multi-relation.txt", 0);
+	}
 	
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 8;
+//		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
-//		runR2150File("t0-migrate-one-to-one1.txt", 3);
-//		runR500File("t0-relation-one-to-one.txt", 9);
-//		runR500File("t0-relation-one-to-many.txt", 9);
+
+//		runR1350File("t0-filter-op-relation.txt", 13);
+//		runR900File("t0-update-mm-all.txt", 4);
+//		runR1550File("t0-queryfn-oneone-childa.txt", 6);
 	}
 	
 	//---

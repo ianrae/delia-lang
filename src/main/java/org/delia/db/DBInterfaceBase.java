@@ -15,6 +15,7 @@ import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.DeliaError;
@@ -74,14 +75,32 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		this.et = factorySvc.getErrorTracker();
 	}
 
+	/**
+	 * we can only have generated one key even if did several inserts because
+	 * the additional inserts are just the assoc table.
+	 * @param ctx
+	 * @param sqlctx
+	 * @return
+	 * @throws SQLException
+	 */
 	protected DValue extractGeneratedKey(InsertContext ctx, SqlExecuteContext sqlctx) throws SQLException {
-		ResultSet rs = sqlctx.genKeys;
-		DValue genVal = valueHelper.extractGeneratedKey(rs, ctx.genKeytype.getShape(), sqlctx.registry);
-		return genVal;
+		for(ResultSet rs: sqlctx.genKeysL) {
+			DValue genVal = valueHelper.extractGeneratedKey(rs, ctx.genKeytype.getShape(), sqlctx.registry);
+			if (genVal != null) {
+				return genVal;
+			}
+		}
+		return null;
 	}
 
 	protected void logSql(String sql) {
 		sqlLog.log("SQL: " + sql);
+	}
+	protected void logStatementGroup(SqlStatementGroup stgroup) {
+//		sqlLog.log("SQL: " + stgroup.flatten());
+		for(SqlStatement stat: stgroup.statementL) {
+			this.logSql(stat);
+		}
 	}
 
 	protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
@@ -287,4 +306,21 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		int n = random.nextInt(Integer.MAX_VALUE - 10);
 		return String.format("DConstraint_%d", n);
 	}
+	
+	protected int findUpdateCount(String target, List<Integer> updateCountL, SqlStatementGroup stgroup) {
+		int minPos = Integer.MAX_VALUE;
+		int foundResult = 0;
+		
+		int index = 0;
+		for(SqlStatement stat: stgroup.statementL) {
+			int pos = stat.sql.toLowerCase().indexOf(target);
+			if (pos >= 0 && pos < minPos) {
+				minPos = pos;
+				foundResult = updateCountL.get(index);
+			}
+			index++;
+		}
+		return foundResult;
+	}
+	
 }

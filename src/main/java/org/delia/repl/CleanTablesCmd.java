@@ -28,7 +28,7 @@ public class CleanTablesCmd extends CmdBase {
 			log("error: this command is only avalailable for H2.");
 			return createEmptyRes();
 		}
-		H2TestCleaner cleaner = new H2TestCleaner();
+		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
 		return createEmptyRes();
 	}

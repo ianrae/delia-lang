@@ -208,6 +208,29 @@ public class DeliaDaoTests extends NewBDDBase {
 		assertEquals(2, res.getAsDValueList().size());
 	}
 	
+	@Test
+	public void testOp() {
+		String src = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+
+		//then a controller method
+		String type = "Flight";
+		String id = "3";
+		//insert
+		ResultValue res = dao.insertOne(type, "field1: 3, field2: 30");
+		assertEquals(true, res.ok);
+		
+		//query
+		res = dao.queryByFilter(type, "field1 == 3");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(30, dval.asStruct().getField("field2").asInt());
+		
+	}
+	
+	
 	//---
 
 	@Before

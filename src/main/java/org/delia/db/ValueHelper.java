@@ -30,6 +30,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.type.WrappedDate;
+import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class ValueHelper extends ServiceBase {
@@ -53,45 +54,55 @@ public class ValueHelper extends ServiceBase {
 	private PreparedStatement xcreatePrepStatement(PreparedStatement stm, SqlStatement statement, Connection conn) throws SQLException {
 		int index = 1;
 		for(DValue dval: statement.paramL) {
-			if (dval == null) {
-				stm.setObject(index++, null);
-				continue;
-			}
-
-			switch(dval.getType().getShape()) {
-			case INTEGER:
-				stm.setInt(index++, dval.asInt());
-				break;
-			case LONG:
-				stm.setLong(index++, dval.asLong());
-				break;
-			case NUMBER:
-				stm.setDouble(index++, dval.asNumber());
-				break;
-			case BOOLEAN:
-				stm.setBoolean(index++, dval.asBoolean());
-				break;
-			case STRING:
-				stm.setString(index++, dval.asString());
-				break;
-			case DATE:
-			{
-				TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-				TimeZone tz = tzSvc.getDefaultTimeZone();
-				Calendar cal = Calendar.getInstance(tz);
-				cal.setTime(dval.asDate());
-				Date dt = cal.getTime();
-				Timestamp ts = new Timestamp(dt.getTime());
-				stm.setTimestamp(index++, ts, cal);
-			}
-			break;
-			//			case RELATION:
-			//				//FIX
-			//				break;
-			}
+			index = doCreatePrepStatement(stm, dval, index);
 		}
 
 		return stm;
+	}
+	private int doCreatePrepStatement(PreparedStatement stm, DValue dval, int index) throws SQLException {
+		if (dval == null) {
+			stm.setObject(index++, null);
+			return index;
+		}
+
+		switch(dval.getType().getShape()) {
+		case INTEGER:
+			stm.setInt(index++, dval.asInt());
+			break;
+		case LONG:
+			stm.setLong(index++, dval.asLong());
+			break;
+		case NUMBER:
+			stm.setDouble(index++, dval.asNumber());
+			break;
+		case BOOLEAN:
+			stm.setBoolean(index++, dval.asBoolean());
+			break;
+		case STRING:
+			stm.setString(index++, dval.asString());
+			break;
+		case DATE:
+		{
+			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
+			TimeZone tz = tzSvc.getDefaultTimeZone();
+			Calendar cal = Calendar.getInstance(tz);
+			cal.setTime(dval.asDate());
+			Date dt = cal.getTime();
+			Timestamp ts = new Timestamp(dt.getTime());
+			stm.setTimestamp(index++, ts, cal);
+		}
+		break;
+		case STRUCT:
+		{
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			DValue key = DValueHelper.getFieldValue(dval, pair.name);
+			return doCreatePrepStatement(stm, key, index);
+		}
+		//			case RELATION:
+		//				//FIX
+		//				break;
+		}
+		return index;
 	}
 	
 	protected DValue extractGeneratedKey(ResultSet rs, Shape keyShape, DTypeRegistry registry) throws SQLException {

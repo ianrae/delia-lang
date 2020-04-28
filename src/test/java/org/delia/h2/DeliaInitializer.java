@@ -63,7 +63,7 @@ public class DeliaInitializer {
 			dbInterface = deliaTmp.getDBInterface(); //new H2DBInterface(factorySvc, H2ConnectionHelper.getTestDB());
 			dbInterface.init(factorySvc);
 			
-			H2TestCleaner cleaner = new H2TestCleaner();
+			H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 			cleaner.deleteKnownTables(factorySvc, dbInterface);
 		}
 		break;

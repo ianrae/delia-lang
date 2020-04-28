@@ -230,7 +230,7 @@ public class SelectFuncHelper extends ServiceBase {
 //		return qfexp != null;
 //	}
 	
-	protected QueryFuncExp findFn(QuerySpec spec, String targetFnName) {
+	public QueryFuncExp findFn(QuerySpec spec, String targetFnName) {
 		QueryExp queryExp = spec.queryExp;
 
 		if (CollectionUtils.isNotEmpty(queryExp.qfelist)) {

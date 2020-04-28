@@ -87,6 +87,17 @@ public class PostgresBDDTests extends NewBDDBase {
 	@Test
 	public void testR900() {
 		runR900File("t0-update.txt", 7);
+		runR900File("t0-update-mm-all.txt", 4);
+		runR900File("t0-update-mm-all-othertbl.txt", 2);
+		runR900File("t0-update-mm-id.txt", 4);
+		runR900File("t0-update-mm-id-othertbl.txt", 2);
+		runR900File("t0-update-mm-other.txt", 4);
+		runR900File("t0-update-mm-other-othertbl.txt", 2);
+	}
+	
+	@Test
+	public void testR950() {
+		runR950File("t0-crud-assoc-insert.txt", 0);
 	}
 	
 	@Test
@@ -261,26 +272,36 @@ public class PostgresBDDTests extends NewBDDBase {
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
 	}
-	
+	@Test
+	public void testR2300() {
+		runR2300File("t0-multi-relation.txt", 0);
+	}
+
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
-		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		testIndexToRun = 1;
+//		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
-//		runR2150File("t0-migrate-many-to-many2.txt", 2);
-//		runR1700File("t0-let-field-multiple.txt", 5);
-		runR1700File("t0-let-field-relation.txt", 2);
+		runR900File("t0-update-mm-all.txt", 4);
+//		runR900File("t0-update-mm-all-othertbl.txt", 2);
+//		runR900File("t0-update-mm-id.txt", 4);
+//		runR900File("t0-update-mm-id-othertbl.txt", 2);
+//		runR900File("t0-update-mm-other.txt", 4);
+//		runR900File("t0-update-mm-other-othertbl.txt", 2);
 	}
 	
 	//---
 	private DBType dbType = DBType.POSTGRES;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
+	private boolean useFragmentParser = true;
 	
 	@Before
 	public void init() {
+//		this.disableAllSlowTests = true;
+		disableAllSlowTestsIfNeeded();
 	}
 	@After
 	public void shutdown() {
@@ -291,6 +312,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
+		db.useFragmentParser = useFragmentParser;
 		dbInterfaceToUse = db;
 //		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {

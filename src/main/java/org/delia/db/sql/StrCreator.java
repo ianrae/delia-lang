@@ -1,7 +1,7 @@
 package org.delia.db.sql;
 
 public class StrCreator {
-	public String str = "";
+	public String str = ""; //TODO use StringBuilder for perf
 	
 	public String o(String fmt, String...args) {
 		String s = String.format(fmt, args);

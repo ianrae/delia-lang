@@ -16,7 +16,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -33,7 +33,7 @@ given:
 when:
   insert Address {id: 100, cust: 55 }
   insert Address {id: 101, cust: 55 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -51,7 +51,7 @@ given:
 when:
   insert Address {id: 100, cust: [55,57] }
   insert Address {id: 101, cust: [55,57] }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -69,7 +69,7 @@ given:
 when:
   insert Address {id: 100, cust: [55,57] }
   insert Address {id: 101, cust: [55,57] }
-  let x = Address[100]
+  let x = Address[100].fks()
 then:
 value:a:Address {
  vid:100
@@ -88,7 +88,7 @@ given:
 when:
   insert Address {id: 100, cust: [55,57,58] }
   insert Address {id: 101, cust: [55,57,58] }
-  let x = Address[101]
+  let x = Address[101].fks()
 then:
 value:a:Address {
  vid:101
@@ -105,7 +105,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -121,7 +121,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 44 }
-  let x = Customer[55];
+  let x = Customer[55].fks()
 then:
 ERROR: rule-relationMany
 }
@@ -137,7 +137,7 @@ given:
 when:
   insert Address {id: 100, cust: 55 }
   insert Address {id: 101, cust: 55 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
@@ -154,7 +154,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 ERROR: rule-mandatory
 
@@ -167,7 +167,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 44 }
-  let x = Customer[55];
+  let x = Customer[55].fks()
 then:
 ERROR: rule-relationMany
 }
@@ -182,7 +182,7 @@ given:
 when:
   insert Customer {id: 55, addr: 100 }
   insert Customer {id: 56, addr: 100 }
-  let x = Customer[55]
+  let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55

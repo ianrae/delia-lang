@@ -19,11 +19,20 @@ import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.fragment.DeleteFragmentParser;
+import org.delia.db.sql.fragment.DeleteStatementFragment;
+import org.delia.db.sql.fragment.FragmentParserService;
+import org.delia.db.sql.fragment.SelectFragmentParser;
+import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.UpdateFragmentParser;
+import org.delia.db.sql.fragment.UpdateStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
 import org.delia.runner.QueryResponse;
@@ -40,6 +49,7 @@ import org.delia.util.DeliaExceptionHelper;
  *
  */
 public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceInternal {
+	public boolean useFragmentParser = true;
 
 	public PostgresDBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.POSTGRES, factorySvc, connFactory, new PostgresSqlHelperFactory(factorySvc));
@@ -79,7 +89,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		}
 
 		DValue genVal = null;
-		if (ctx.extractGeneratedKeys && sqlctx.genKeys != null) {
+		if (ctx.extractGeneratedKeys && !sqlctx.genKeysL.isEmpty()) {
 			try {
 				genVal = extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {
@@ -94,7 +104,17 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
-		if (qtx.loadFKs) {
+		if (useFragmentParser) {
+			log.log("FRAG PARSEr....................");
+			createTableCreator(dbctx);
+			WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, fpSvc);
+			whereGen.tableFragmentMaker = parser;
+			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+			parser.renderSelect(selectFrag);
+			statement = selectFrag.statement;
+		} else if (qtx.loadFKs) {
 			createTableCreator(dbctx);
 			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
 			statement = smartgen.generateFKsQuery(spec, details);
@@ -149,8 +169,22 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	@Override
 	public void executeDelete(QuerySpec spec, DBAccessContext dbctx) {
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		SqlStatement statement = sqlgen.generateDelete(spec);
+		SqlStatement statement;
+		if (useFragmentParser) {
+			log.log("FRAG PARSER DELETE....................");
+			createTableCreator(dbctx);
+			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
+			whereGen.tableFragmentMaker = parser;
+			QueryDetails details = new QueryDetails();
+			DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
+			parser.renderDelete(selectFrag);
+			statement = selectFrag.statement;
+		} else {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			statement = sqlgen.generateDelete(spec);
+		}
 		logSql(statement);
 		createTableCreator(dbctx);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -165,19 +199,39 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	
 	@Override
 	public int executeUpdate(QuerySpec spec, DValue dval, DBAccessContext dbctx) {
+		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
-		if (statement.sql.isEmpty()) {
+		
+		if (useFragmentParser) {
+			log.log("FRAG PARSER UPDATE....................");
+			createTableCreator(dbctx);
+			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
+			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+			whereGen.tableFragmentMaker = parser;
+			parser.useAliases(false);
+			QueryDetails details = new QueryDetails();
+			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval);
+			stgroup = parser.renderUpdateGroup(selectFrag);
+		} else {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+			stgroup = new SqlStatementGroup();
+			stgroup.add(statement);
+		}
+		
+		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
 		}
 		
-		logSql(statement);
+		logStatementGroup(stgroup);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		int updateCount = 0;
 		try {
 			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-			updateCount = conn.execUpdateStatement(statement, sqlctx); 
+			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
+			updateCount = findUpdateCount("update", updateCountL, stgroup);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}

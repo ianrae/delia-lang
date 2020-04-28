@@ -8,4 +8,5 @@ package org.delia.db;
  */
 public class QueryContext { 
 	public boolean loadFKs;
+	public boolean pruneParentRelationFlag;
 }

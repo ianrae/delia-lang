@@ -12,6 +12,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -190,7 +191,7 @@ public class H2DBInterfaceTests {
 	
 	//h2 persists tables across runs, so cleanup first
 	private void deleteKnownTables() {
-		H2TestCleaner cleaner = new H2TestCleaner();
+		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 		cleaner.deleteKnownTables(factorySvc, dbInterface);
 	}
 

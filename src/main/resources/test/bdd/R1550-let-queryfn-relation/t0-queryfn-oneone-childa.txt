@@ -11,29 +11,39 @@ background:
 thenType: struct
 
 ---
-title: max
+title: max no fetch
 given:
  insert Address {id:100, cust:55}
 when:
   let x = Customer[true].addr.id.max()
 then:
-value:a:int:56
+ERROR:cannot-access-field-without-fetch
+
+---
+title: max with fetch
+given:
+ insert Address {id:100, cust:55}
+when:
+  let x = Customer[true].fetch("addr").id.max()
+then:
+value:a:int:100
+
 
 ---
 title: min
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].addr.id.min()
+  let x = Customer[true].fetch("addr").id.min()
 then:
-value:a:int:55
+value:a:int:100
 
 ---
 title: exist
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].addr.id.exist()
+  let x = Customer[true].fetch("addr").id.exist()
 then:
 value:a:boolean:true
 
@@ -42,24 +52,24 @@ title: count
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].addr.id.count()
+  let x = Customer[true].fetch("addr").id.count()
 then:
-value:a:long:2
+value:a:long:1
 
 ---
 title: first
 given:
  insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].addr.id.first()
+  let x = Customer[true].fetch("addr").id.first()
 then:
-value:a:int:55
+value:a:int:100
 
 ---
 title: last
 given:
  insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].addr.id.last()
+  let x = Customer[true].fetch("addr").id.last()
 then:
-value:a:int:56
+value:a:int:100

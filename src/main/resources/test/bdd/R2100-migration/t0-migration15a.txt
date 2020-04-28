@@ -30,7 +30,7 @@ given:
 
 when:
   insert Customer {id:2, wid:34, height:45}
-  let x = Customer[true].orderBy('id')
+  let x = Customer[id==2].orderBy('id')
 then:
 ERROR: migration-failed-due-to-policy
 }

@@ -11,6 +11,8 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 	private DBAccessContext dbctx;
 	private DBInterface dbInterface;
 	
+	public static boolean hackYesFlag; //for unit tests only
+	
 	public TableExistenceServiceImpl(DBInterface dbInterface, DBAccessContext dbctx) {
 		this.dbInterface = dbInterface;
 		this.dbctx = dbctx;
@@ -18,6 +20,9 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 	
 	@Override
 	public boolean doesTableExist(String tableName) {
+		if (hackYesFlag) {
+			return true;
+		}
 		return dbInterface.doesTableExist(tableName, dbctx);
 	}
 	
@@ -25,8 +30,19 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 	public int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
 		String tbl1 = info.nearType.getName();
 		String tbl2 = info.farType.getName();
+
+		int index = 0;
+		for(TableInfo inf: tblInfoL) {
+			if (inf.tbl1 == null) {
+				continue;
+			}
+			if (inf.tbl1.equalsIgnoreCase(tbl1) && inf.tbl2.equalsIgnoreCase(tbl2)) {
+				return index;
+			}
+			index++;
+		}
 		
-		int index = tblInfoL.size();
+		index = tblInfoL.size();
 		
 		//try tbl1 tbl2 Assoc
 		String assocTblName = AssocTableCreator.createAssocTableName(tbl1, tbl2);
