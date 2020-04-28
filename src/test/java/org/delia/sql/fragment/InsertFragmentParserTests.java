@@ -65,7 +65,7 @@ import org.junit.Test;
 
 
 public class InsertFragmentParserTests extends NewBDDBase {
-	
+
 	//single use!!!
 	public static class InsertFragmentParser extends SelectFragmentParser {
 
@@ -91,7 +91,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			generateSetFields(structType, insertFrag, dval, mmMap);
 			generateAssocUpdateIfNeeded(structType, insertFrag, dval, mmMap);
 
-//			fixupForParentFields(structType, selectFrag);
+			//			fixupForParentFields(structType, selectFrag);
 
 			if (! useAliases) {
 				removeAllAliases(insertFrag);
@@ -196,68 +196,44 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			if (mmMap.get(fieldName) == null) {
 				return false;
 			}
-			
+
 			TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 			assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, tblinfo.assocTblName);
 			assocInsertFrag.paramStartIndex = insertFrag.statement.paramL.size();
 
 			//struct is Address AddressCustomerAssoc
-			String field1;
-			String field2;
-			TypePair keyPair1;
-			TypePair keyPair2;
 			if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
-				field1 = "rightv";
-				field2 = "leftv";
-				keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-				keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-				DRelation drel = mmMap.get(fieldName);
-				for(DValue dval: drel.getMultipleKeys()) {
-					FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, insertFrag, keyPair1);
-					assocInsertFrag.setValuesL.add("?");
-					assocInsertFrag.fieldL.add(ff);
-					assocInsertFrag.statement.paramL.add(mainDVal);
-					
-					ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, insertFrag, keyPair2);
-					assocInsertFrag.setValuesL.add("?");
-					assocInsertFrag.fieldL.add(ff);
-					assocInsertFrag.statement.paramL.add(dval);
-				}
+				genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, mmMap, fieldName, info);
 			} else {
-				field1 = "leftv";
-				field2 = "rightv";
-				keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-				keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-				DRelation drel = mmMap.get(fieldName);
-				for(DValue dval: drel.getMultipleKeys()) {
-					FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, keyPair1);
-					assocInsertFrag.setValuesL.add("?");
-					assocInsertFrag.fieldL.add(ff);
-					assocInsertFrag.statement.paramL.add(mainDVal);
-					
-					ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, keyPair2);
-					assocInsertFrag.setValuesL.add("?");
-					assocInsertFrag.fieldL.add(ff);
-					assocInsertFrag.statement.paramL.add(dval);
-				}
+				genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, mmMap, fieldName, info);
 			}
 			return true;
 		}
 
-//		protected void buildAssocTblUpdate(InsertStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
-//			DRelation drel = mmMap.get(fieldName); //100
-//			DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
-//
-//			RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
-//			TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
-//			TypePair rightPair = new TypePair(assocFieldName, pair2.type);
-//			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);
-//			statement.paramL.add(dvalToUse);
-//			assocUpdateFrag.setValuesL.add("?");
-//			assocUpdateFrag.fieldL.add(ff);
-//		}
-//
+		private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
+				DValue mainDVal, DStructType farType,
+				DStructType nearType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info) {
+			TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+			TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+			DRelation drel = mmMap.get(fieldName);
+			for(DValue dval: drel.getMultipleKeys()) {
+				if (mainDValFirst) {
+					genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
+					genxrow(assocInsertFrag, "rightv", keyPair2, dval);
+				} else {
+					genxrow(assocInsertFrag, "leftv", keyPair1, dval);
+					genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
+				}
+			}
+		}
 
+		private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {
+			TypePair tmpPair = new TypePair(assocFieldName, keyPair1.type);
+			FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, tmpPair);
+			assocInsertFrag.setValuesL.add("?");
+			assocInsertFrag.fieldL.add(ff);
+			assocInsertFrag.statement.paramL.add(dval);
+		}
 
 		public String renderInsert(InsertStatementFragment selectFrag) {
 			if(selectFrag.setValuesL.isEmpty()) {
@@ -268,7 +244,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			selectFrag.statement.sql = selectFrag.render();
 			return selectFrag.statement.sql;
 		}
-		
+
 		public SqlStatementGroup renderInsertGroup(InsertStatementFragment selectFrag) {
 			SqlStatementGroup stgroup = new SqlStatementGroup();
 			if(selectFrag.setValuesL.isEmpty()) {
@@ -279,7 +255,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			SqlStatement mainStatement = selectFrag.statement;
 			mainStatement.sql = selectFrag.render();
 			List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
-			
+
 			mainStatement.paramL.clear();
 			stgroup.add(selectFrag.statement);
 			initMainParams(mainStatement, save, selectFrag.assocUpdateFrag);
@@ -289,23 +265,23 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				mainStatement.paramL.addAll(save);
 				return stgroup; //no inner frags
 			}
-			
+
 			addIfNotNull(stgroup, selectFrag.assocUpdateFrag, save, nextStartIndex(selectFrag.assocDeleteFrag, selectFrag.assocMergeInfoFrag));
 			addIfNotNull(stgroup, selectFrag.assocDeleteFrag, save, nextStartIndex(selectFrag.assocMergeInfoFrag));
 			addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag, save, Integer.MAX_VALUE);
-			
-//			if (selectFrag.doUpdateLast) {
-//				SqlStatement stat = stgroup.statementL.remove(0); //move first to last
-//				List<DValue> firstParams = stat.paramL;
-//				stgroup.statementL.add(stat);
-//				
-////				//swap param lists too
-////				SqlStatement newFirst = stgroup.statementL.get(0);
-////				List<DValue> tmp = stat.paramL;
-////				newFirst.paramL = firstParams;
-////				stat.paramL = tmp;
-//			}
-//			
+
+			//			if (selectFrag.doUpdateLast) {
+			//				SqlStatement stat = stgroup.statementL.remove(0); //move first to last
+			//				List<DValue> firstParams = stat.paramL;
+			//				stgroup.statementL.add(stat);
+			//				
+			////				//swap param lists too
+			////				SqlStatement newFirst = stgroup.statementL.get(0);
+			////				List<DValue> tmp = stat.paramL;
+			////				newFirst.paramL = firstParams;
+			////				stat.paramL = tmp;
+			//			}
+			//			
 			return stgroup;
 		}
 		private int nextStartIndex(StatementFragmentBase... frags) {
@@ -321,7 +297,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			if (! mainStatement.paramL.isEmpty()) {
 				return;
 			}
-			
+
 			if (innerFrag != null) {
 				for(int i = 0; i < innerFrag.paramStartIndex; i++) {
 					DValue dval = saveL.get(i);
@@ -344,25 +320,25 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			}
 		}
 	}	
-	
+
 	@Test
 	public void test1() {
 		String src = buildSrc();
 		src += "\n insert Flight {field1: 1, field2: 10}";
-		
+
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
 		chkParams(selectFrag, "1", "10");
-//		chkNumParams(1, 0, 1);
+		//		chkNumParams(1, 0, 1);
 	}
 	@Test
 	public void testBadField() {
 		String src = buildSrc();
 		src += "\n insert Flight {field1: 1, xxxfield2: 10}";
-		
+
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Flight", 1);
 		assertEquals(null, dval);
@@ -371,11 +347,11 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	public void test1Null() {
 		String src = buildSrcOptional();
 		src += "\n insert Flight {field1: 1}";
-		
+
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChk(selectFrag, "INSERT Flight (field1) VALUES(?)");
 		chkParams(selectFrag, "1");
 	}
@@ -383,25 +359,25 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	public void testNoPrimaryKey() {
 		String src = buildSrcNoPrimaryKey();
 		src += "\n insert Flight {field1: 1, field2: 10}";
-		
+
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
 		chkParams(selectFrag, "1", "10");
 	}
-	
+
 	@Test
 	public void testOneToOne() {
 		String src = buildSrcOneToOne();
 		src += "\n  insert Customer {id: 55, wid: 33}";
-//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+		//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
@@ -409,12 +385,12 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	public void testOneToOneWithChild() {
 		String src = buildSrcOneToOne();
 		src += "\n  insert Customer {id: 55, wid: 33, addr: 100}";
-//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+		//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
@@ -427,7 +403,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Address");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
 		chkParams(selectFrag, "100", "5", "55");
 	}
@@ -481,21 +457,21 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
 		chkParams(selectFrag, "100", "5", "55");
 	}
-	
+
 	@Test
 	public void testManyToManyParentNoAssocTbl() {
 		String src = buildSrcManyToMany();
 		src += "\n  insert Customer {id: 55, wid: 33}";
-//		src += "\n  insert Customer {id: 56, wid: 34}";
-//		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
+		//		src += "\n  insert Customer {id: 56, wid: 34}";
+		//		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
 		chkNoLine(2);
-//		chkLine(2, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
+		//		chkLine(2, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkParams(selectFrag, "55", "33");
 		chkNumParams(2);
 	}
@@ -503,36 +479,36 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	public void testManyToManyParentWithAssocTbl1() {
 		String src = buildSrcManyToMany();
 		src += "\n  insert Customer {id: 55, wid: 33, addr:100}";
-//		src += "\n  insert Customer {id: 56, wid: 34}";
-//		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
+		//		src += "\n  insert Customer {id: 56, wid: 34}";
+		//		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
-		
+
 		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (id, id) VALUES(?, ?)");
+		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33", "100", "55");
 		chkNumParams(2, 2);
 	}
-	
-	
-//	@Test
-//	public void testManyToManyChild() {
-//		String src = buildSrcOneToMany();
-//		src += "\n  insert Customer {id: 55, wid: 33}";
-//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
-//
-//		InsertStatementExp insertStatementExp = buildFromSrc(src);
-//		DValue dval = convertToDVal(insertStatementExp, "Address");
-//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
-//
-//		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
-//		chkParams(selectFrag, "100", "5", "55");
-//	}
-	
-	
-	
+
+
+	//	@Test
+	//	public void testManyToManyChild() {
+	//		String src = buildSrcOneToMany();
+	//		src += "\n  insert Customer {id: 55, wid: 33}";
+	//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+	//
+	//		InsertStatementExp insertStatementExp = buildFromSrc(src);
+	//		DValue dval = convertToDVal(insertStatementExp, "Address");
+	//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+	//
+	//		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
+	//		chkParams(selectFrag, "100", "5", "55");
+	//	}
+
+
+
 	//---
 	private Delia delia;
 	private FactoryService factorySvc;
@@ -616,9 +592,9 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	}
 	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
-		
+
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
+		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
@@ -654,14 +630,14 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		for(SqlStatement stat: stgroup.statementL ) {
 			numParamL.add(stat.paramL.size());
 		}
-		
+
 		//recombine params
 		List<DValue> newL = new ArrayList<>();
 		for(SqlStatement statement: stgroup.statementL) {
 			newL.addAll(statement.paramL);
 		}
 		stgroup.statementL.get(0).paramL = newL;
-		
+
 		String sql = stgroup.flatten(); //fragmentParser.renderSelect(selectFrag);
 		log.log(sql);
 		if (lineNum == 1) {
@@ -670,15 +646,15 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			if (ar.length > 1) {
 				this.sqlLine2 = ar[1];
 			}
-//			if (ar.length > 2) {
-//				this.sqlLine3 = ar[2];
-//			}
-//			if (ar.length > 3) {
-//				this.sqlLine4 = ar[3];
-//			}
-//			if (ar.length > 4) {
-//				this.sqlLine5 = ar[4];
-//			}
+			//			if (ar.length > 2) {
+			//				this.sqlLine3 = ar[2];
+			//			}
+			//			if (ar.length > 3) {
+			//				this.sqlLine4 = ar[3];
+			//			}
+			//			if (ar.length > 4) {
+			//				this.sqlLine5 = ar[4];
+			//			}
 			assertEquals(expected, sqlLine1);
 		}
 	}
@@ -689,8 +665,8 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			assertEquals(expected, sqlLine3);
 		} else if (lineNum == 4) {
 			assertEquals(expected, sqlLine4);
-//		} else if (lineNum == 5) {
-//			assertEquals(expected, sqlLine5);
+			//		} else if (lineNum == 5) {
+			//			assertEquals(expected, sqlLine5);
 		}
 	}
 	private void chkNoLine(int lineNum) {
@@ -700,13 +676,13 @@ public class InsertFragmentParserTests extends NewBDDBase {
 			assertEquals(null, sqlLine3);
 		} else if (lineNum == 4) {
 			assertEquals(null, sqlLine4);
-//		} else if (lineNum == 5) {
-//			assertEquals(null, sqlLine5);
+			//		} else if (lineNum == 5) {
+			//			assertEquals(null, sqlLine5);
 		}
 	}
 
 	private InsertStatementFragment buildInsertFragment(InsertStatementExp exp, DValue dval) {
-//		fragmentParser.useAliases(useAliasesFlag);
+		//		fragmentParser.useAliases(useAliasesFlag);
 		InsertStatementFragment selectFrag = fragmentParser.parseInsert(exp.typeName, details, dval);
 		return selectFrag;
 	}
@@ -722,7 +698,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);
 		log.log(src);
 		this.fragmentParser = createFragmentParser(dao, src, tblinfoL); 
-		
+
 		//		List<Exp> expL = dao.getMostRecentSess().
 		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
 		InsertStatementExp insertStatementExp = null;
@@ -758,16 +734,16 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	//these tests use int params (but they could be long,date,...)
 	private void chkParams(InsertStatementFragment selectFrag, String...args) {
 		StringJoiner joiner = new StringJoiner(",");
-		
+
 		SqlStatement stat;
 		stat = selectFrag.statement;
-		
+
 		for(DValue dval: stat.paramL) {
 			String ss = convertToString(dval);
 			joiner.add(ss);
 		}
 		log.log("params: " + joiner.toString());
-		
+
 		assertEquals(args.length, stat.paramL.size());
 		int i = 0;
 		for(String arg: args) {
