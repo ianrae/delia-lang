@@ -123,7 +123,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 				for(int i = 0; i < index; i++) {
 					insertFrag.setValuesL.add("????");
 				}
-				DeliaExceptionHelper.throwError("unexpeced-fields-in-update", "should not occur");
+				DeliaExceptionHelper.throwError("unexpeced-fields-in-insert", "should not occur");
 			}
 
 			for(TypePair pair: structType.getAllFields()) {
@@ -404,11 +404,20 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp);
-		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 		
 		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
 		chkParams(selectFrag, "1", "10");
 //		chkNumParams(1, 0, 1);
+	}
+	@Test
+	public void testBadField() {
+		String src = buildSrc();
+		src += "\n insert Flight {field1: 1, xxxfield2: 10}";
+		
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Flight", 1);
+		assertEquals(null, dval);
 	}
 	@Test
 	public void test1Null() {
@@ -417,10 +426,22 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp);
-		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 		
 		runAndChk(selectFrag, "INSERT Flight (field1) VALUES(?)");
 		chkParams(selectFrag, "1");
+	}
+	@Test
+	public void testNoPrimaryKey() {
+		String src = buildSrcNoPrimaryKey();
+		src += "\n insert Flight {field1: 1, field2: 10}";
+		
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp);
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+		
+		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
+		chkParams(selectFrag, "1", "10");
 	}
 	
 	@Test
@@ -431,7 +452,20 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
-		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+		
+		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33");
+	}
+	@Test
+	public void testOneToOneWithChild() {
+		String src = buildSrcOneToOne();
+		src += "\n  insert Customer {id: 55, wid: 33, addr: 100}";
+//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 		
 		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
@@ -444,7 +478,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Address");
-		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 		
 		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
 		chkParams(selectFrag, "100", "5", "55");
@@ -454,12 +488,34 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	public void testOneToManyParent() {
 		String src = buildSrcOneToMany();
 		src += "\n  insert Customer {id: 55, wid: 33}";
-//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
-//		src += "\n  insert Address {id: 101, z:6, cust: 55 }";
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
-		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+
+		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33");
+	}
+	@Test
+	public void testOneToManyParentWithChild() {
+		String src = buildSrcOneToMany();
+		src += "\n  insert Customer {id: 55, wid: 33, addr: 100}";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+
+		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33");
+	}
+	@Test
+	public void testOneToManyParentWithChild2() {
+		String src = buildSrcOneToMany();
+		src += "\n  insert Customer {id: 55, wid: 33, addr: [100,101]}";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
@@ -472,11 +528,40 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 		InsertStatementExp insertStatementExp = buildFromSrc(src);
 		DValue dval = convertToDVal(insertStatementExp, "Address");
-		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
 		chkParams(selectFrag, "100", "5", "55");
 	}
+	
+	@Test
+	public void testManyToManyParent() {
+		String src = buildSrcManyToMany();
+		src += "\n  insert Customer {id: 55, wid: 33}";
+//		src += "\n  insert Customer {id: 56, wid: 34}";
+//		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
+
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp, "Customer");
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+
+		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33");
+	}
+//	@Test
+//	public void testManyToManyChild() {
+//		String src = buildSrcOneToMany();
+//		src += "\n  insert Customer {id: 55, wid: 33}";
+//		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
+//
+//		InsertStatementExp insertStatementExp = buildFromSrc(src);
+//		DValue dval = convertToDVal(insertStatementExp, "Address");
+//		InsertStatementFragment selectFrag = buildUpdateFragment(insertStatementExp, dval); 
+//
+//		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
+//		chkParams(selectFrag, "100", "5", "55");
+//	}
+	
 	
 	
 	//---
@@ -511,8 +596,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	}
 	private String buildSrcNoPrimaryKey() {
 		String src = "type Flight struct {field1 int, field2 int } end";
-		src += "\n insert Flight {field1: 1, field2: 10}";
-		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
 	}
 	private String buildSrcOneToOne() {
@@ -523,17 +606,11 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	private String buildSrcOneToMany() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
 		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Address {id: 100, z:5, cust: 55 }";
-		src += "\n  insert Address {id: 101, z:6, cust: 55 }";
 		return src;
 	}
 	private String buildSrcManyToMany() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
 		src += "\n type Address struct {id int unique, z int, relation cust Customer optional many } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Customer {id: 56, wid: 34}";
-		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
 		return src;
 	}
 
@@ -615,7 +692,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		}
 	}
 
-	private InsertStatementFragment buildUpdateFragment(InsertStatementExp exp, DValue dval) {
+	private InsertStatementFragment buildInsertFragment(InsertStatementExp exp, DValue dval) {
 //		fragmentParser.useAliases(useAliasesFlag);
 		InsertStatementFragment selectFrag = fragmentParser.parseInsert(exp.typeName, details, dval);
 		return selectFrag;
@@ -653,12 +730,15 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		return cres;
 	}
 	private DValue convertToDVal(InsertStatementExp insertStatementExp) {
-		return convertToDVal(insertStatementExp, "Flight");
+		return convertToDVal(insertStatementExp, "Flight", 0);
 	}
 	private DValue convertToDVal(InsertStatementExp insertStatementExp, String typeName) {
+		return convertToDVal(insertStatementExp, typeName, 0);
+	}
+	private DValue convertToDVal(InsertStatementExp insertStatementExp, String typeName, int expectedErrorCount) {
 		DStructType structType = (DStructType) registry.getType(typeName);
 		ConversionResult cres = buildPartialValue(structType, insertStatementExp.dsonExp);
-		assertEquals(0, cres.localET.errorCount());
+		assertEquals(expectedErrorCount, cres.localET.errorCount());
 		return cres.dval;
 	}
 
