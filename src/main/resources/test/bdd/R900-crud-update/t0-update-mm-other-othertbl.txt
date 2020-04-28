@@ -12,17 +12,15 @@ thenType: struct
 
 ---
 title: update many-to-many
-#TODO: why 4???
 thenType: int
 expectDVal:false
 when:
   update Address[z == 5] {z: 7, cust:55}
 then:
-4
+1
 
 ---
 title: update query back
-#TODO: this is wrong we should remove one row from assoc table
 when:
   update Address[z == 5] {z: 7, cust:55}
   let x = Address[100].fks()

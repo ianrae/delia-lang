@@ -33,17 +33,15 @@ value:a:Customer {
 
 ---
 title: update many-to-many
-#TODO: fix. why is it returning 8??
 thenType: int
 expectDVal:false
 when:
   update Customer[true] {wid: 333, addr: [100]}
 then:
-8
+2
 
 ---
 title: update query back
-#TODO: this is wrong we should remove one row from assoc table
 when:
   update Customer[true] {wid: 333, addr: [100]}
   let x = Customer[55].fks()

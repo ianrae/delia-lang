@@ -33,13 +33,12 @@ value:a:Customer {
 
 ---
 title: update many-to-many
-#TODO: why getting 4??
 thenType: int
 expectDVal:false
 when:
   update Customer[wid == 33] {wid: 333, addr: [100]}
 then:
-4
+1
 
 ---
 title: update query back
