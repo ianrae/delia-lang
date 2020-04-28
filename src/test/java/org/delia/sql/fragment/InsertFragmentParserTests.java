@@ -63,7 +63,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Flight (field1, field2) VALUES(?, ?)");
 		chkParams(selectFrag, "1", "10");
 		//		chkNumParams(1, 0, 1);
 	}
@@ -85,7 +85,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Flight (field1) VALUES(?)");
+		runAndChk(selectFrag, "INSERT INTO Flight (field1) VALUES(?)");
 		chkParams(selectFrag, "1");
 	}
 	@Test
@@ -97,7 +97,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp);
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Flight (field1, field2) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Flight (field1, field2) VALUES(?, ?)");
 		chkParams(selectFrag, "1", "10");
 	}
 
@@ -111,7 +111,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
 	@Test
@@ -124,7 +124,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
 	@Test
@@ -137,7 +137,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Address");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Address (id, z, cust) VALUES(?, ?, ?)");
 		chkParams(selectFrag, "100", "5", "55");
 	}
 
@@ -150,7 +150,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
 	@Test
@@ -162,7 +162,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
 	@Test
@@ -174,7 +174,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33");
 	}
 	@Test
@@ -187,7 +187,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Address");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChk(selectFrag, "INSERT Address (id, z, cust) VALUES(?, ?, ?)");
+		runAndChk(selectFrag, "INSERT INTO Address (id, z, cust) VALUES(?, ?, ?)");
 		chkParams(selectFrag, "100", "5", "55");
 	}
 
@@ -202,7 +202,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?)");
+		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
 		chkNoLine(2);
 		//		chkLine(2, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkParams(selectFrag, "55", "33");
@@ -219,8 +219,8 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33", "100", "55");
 		chkNumParams(2, 2);
 	}
@@ -235,9 +235,9 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Customer");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChkLine(1, selectFrag, "INSERT Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33", "100", "55", "101", "55");
 		chkNumParams(2, 2, 2);
 	}
@@ -252,8 +252,8 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Address");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChkLine(1, selectFrag, "INSERT Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "100", "5", "100", "55");
 		chkNumParams(2, 2);
 	}
@@ -268,9 +268,9 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		DValue dval = convertToDVal(insertStatementExp, "Address");
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
-		runAndChkLine(1, selectFrag, "INSERT Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "100", "5", "100", "55", "100", "56");
 		chkNumParams(2, 2, 2);
 	}
@@ -282,7 +282,6 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	private DTypeRegistry registry;
 	private Runner runner;
 	private QueryBuilderService queryBuilderSvc;
-	private QueryDetails details = new QueryDetails();
 	private InsertFragmentParser fragmentParser;
 	private String sqlLine1;
 	private String sqlLine2;
@@ -360,10 +359,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen);
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory, whereGen, assocTblReplacer);
-		whereGen.tableFragmentMaker = parser;
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), sqlHelperFactory);
 		return parser;
 	}
 
@@ -450,7 +446,7 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 	private InsertStatementFragment buildInsertFragment(InsertStatementExp exp, DValue dval) {
 		//		fragmentParser.useAliases(useAliasesFlag);
-		InsertStatementFragment selectFrag = fragmentParser.parseInsert(exp.typeName, details, dval);
+		InsertStatementFragment selectFrag = fragmentParser.parseInsert(exp.typeName, dval);
 		return selectFrag;
 	}
 

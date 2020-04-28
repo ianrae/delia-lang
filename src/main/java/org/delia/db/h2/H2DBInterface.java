@@ -20,6 +20,8 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
+import org.delia.db.sql.fragment.InsertFragmentParser;
+import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
@@ -70,19 +72,34 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx) {
 		createTableCreator(dbctx);
-		
+		SqlStatementGroup stgroup;
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-		InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
-		SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
-		logSql(statement);
+		
+		if (useFragmentParser) {
+			log.log("FRAG PARSER UPDATE....................");
+			createTableCreator(dbctx);
+			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, sqlHelperFactory);
+			String typeName = dval.getType().getName();
+			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
+			stgroup = parser.renderInsertGroup(selectFrag);
+//			s = selectFrag.statement;
+		} else {
+			InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
+			SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
+			stgroup = new SqlStatementGroup();
+			stgroup.statementL.add(statement);
+		}		
+		
+		logStatementGroup(stgroup);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		try {
 			sqlctx.getGeneratedKeys = ctx.extractGeneratedKeys;
-			int n = conn.executeInsertStatement(statement, sqlctx); 
+//			int n = conn.executeInsertStatement(statement, sqlctx); 
+			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}
-
+		
 		DValue genVal = null;
 		if (ctx.extractGeneratedKeys && sqlctx.genKeys != null) {
 			try {

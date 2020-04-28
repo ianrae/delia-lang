@@ -15,7 +15,7 @@ public class InsertStatementFragment extends StatementFragmentBase {
 		@Override
 		public String render() {
 			StrCreator sc = new StrCreator();
-			sc.o("INSERT");
+			sc.o("INSERT INTO");
 			sc.o(" %s", tblFrag.render());
 			renderInsertFields(sc);
 			
