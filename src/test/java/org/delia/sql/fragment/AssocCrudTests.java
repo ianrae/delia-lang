@@ -134,89 +134,73 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		chkParams(selectFrag, 333,55, 100,55, 101,55);
 		chkNumParams(2, 2, 2);
 	}
+	@Test
+	public void testId2OtherWash() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[55] {wid: 333, insert addr:[100,101]}";
+
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressAssoc as b (b.leftv, b.rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as b (b.leftv, b.rightv) VALUES(?, ?)");
+		chkNoLine(4);
+		chkParams(selectFrag, 333,55, 55,100, 55,101);
+		chkNumParams(2, 2, 2);
+	}
 	
-//	@Test
-//	public void testIdOtherWay() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Customer[55] {wid: 333, addr:100}";
-//
-//		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
-//		DValue dval = convertToDVal(updateStatementExp, "Customer");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE leftv = ? and rightv <> ?;");
-//		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Customer as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
-//		chkNoLine(4);
-//		chkParams(selectFrag, 333, 55, 55, 100,  55, 100, 55, 100);
-//		chkNumParams(2, 2, 4);
-//	}
-//	@Test
-//	public void testId3() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Address[100] {z: 7, cust:55}";
-//
-//		List<TableInfo> tblinfoL = createTblInfoL();
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
-//		DValue dval = convertToDVal(updateStatementExp, "Address");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ? and rightv <> ?;");
-//		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Address as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
-//		chkNoLine(4);
-//		chkParams(selectFrag, 7, 100, 100,55,  100,55,100,55);
-//		chkNumParams(2, 2, 4);
-//	}
-//	@Test
-//	public void testId4() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Address[100] {z: 7, cust:55}";
-//
-//		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
-//		DValue dval = convertToDVal(updateStatementExp, "Address");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv = ? and leftv <> ?;");
-//		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Address as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
-//		chkNoLine(4);
-//		chkParams(selectFrag, 7, 100, 100,55,  55,100,55,100);
-//		chkNumParams(2, 2, 4);
-//	}
-//	@Test
-//	public void testId5() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Address[100] {z: 7, cust:null}";
-//
-//		List<TableInfo> tblinfoL = createTblInfoL();
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
-//		DValue dval = convertToDVal(updateStatementExp, "Address");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ?");
-//		chkParams(selectFrag, 7, 100, 100);
-//		chkNumParams(2, 1);
-//	}
-//	@Test
-//	public void testId6() {
-//		String src = buildSrcManyToMany();
-//		src += "\n  update Address[100] {z: 7, cust:null}";
-//
-//		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
-//		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
-//		DValue dval = convertToDVal(updateStatementExp, "Address");
-//		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
-//		
-//		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv = ?");
-//		chkParams(selectFrag, 7, 100, 100);
-//		chkNumParams(2, 1);
-//	}
-//	
+	@Test
+	public void testId3() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Address[100] {z: 7, insert cust:55}";
+
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc as b (b.leftv, b.rightv) VALUES(?, ?)");
+		chkNoLine(3);
+		chkParams(selectFrag, 7, 100, 100,55);
+		chkNumParams(2, 2);
+	}
+	@Test
+	public void testId3OtherWay() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Address[100] {z: 7, insert cust:55}";
+
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressAssoc as b (b.leftv, b.rightv) VALUES(?, ?)");
+		chkNoLine(3);
+		chkParams(selectFrag, 7, 100, 55,100);
+		chkNumParams(2, 2);
+	}
+	@Test(expected=DeliaException.class)
+	public void testId5() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[55] {wid: 333, insert addr:null}";
+
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc as b (b.leftv, b.rightv) VALUES(?, ?)");
+		chkNoLine(3);
+		chkParams(selectFrag, 333,55, 100,55);
+		chkNumParams(2, 2);
+	}
+	
 
 	//scenario 3: OTHER -----------------------------
 	@Test(expected=DeliaException.class)

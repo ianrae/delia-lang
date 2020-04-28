@@ -199,6 +199,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 		
 		DRelation drel = mmMap.get(fieldName);
+		if (drel == null) {
+			DeliaExceptionHelper.throwError("assoc-crud-insert-null-not-allowed", "update %s field %s action '%s' not allowed with null value", updateFrag.tblFrag.name, fieldName, "insert");
+		}
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 		TableFragment tblFrag = null;
 		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
