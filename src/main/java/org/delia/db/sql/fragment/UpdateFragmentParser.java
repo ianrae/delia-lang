@@ -462,6 +462,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
 			initMainParams(mainStatement, save, insFrag);
 		}
+		for(DeleteStatementFragment delFrag: updateFrag.assocCrudDeleteL) {
+			initMainParams(mainStatement, save, delFrag);
+		}
 		
 		if (mainStatement.paramL.isEmpty()) {
 			mainStatement.paramL.addAll(save);
@@ -473,6 +476,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, nextStartIndex(updateFrag.assocCrudInsertL));
 		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
 			addIfNotNull(stgroup, insFrag, save, nextStartIndex(updateFrag.assocCrudInsertL));
+		}
+		for(DeleteStatementFragment delFrag: updateFrag.assocCrudDeleteL) {
+			addIfNotNull(stgroup, delFrag, save, nextStartIndexDel(updateFrag.assocCrudDeleteL));
 		}
 		
 		if (updateFrag.doUpdateLast) {
@@ -492,6 +498,14 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		return Integer.MAX_VALUE;
 	}
 	private int nextStartIndex(List<InsertStatementFragment> fragL) {
+		for(StatementFragmentBase frag: fragL) {
+			if (frag != null) {
+				return frag.paramStartIndex;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
+	private int nextStartIndexDel(List<DeleteStatementFragment> fragL) {
 		for(StatementFragmentBase frag: fragL) {
 			if (frag != null) {
 				return frag.paramStartIndex;

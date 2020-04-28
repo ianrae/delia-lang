@@ -263,6 +263,17 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	
 	
+	protected DValue getLastParam(SqlStatement statement) {
+		int n = statement.paramL.size();
+		DValue dval = statement.paramL.get(n - 1);
+		return dval;
+	}
+	protected int cloneLastParam(SqlStatement statement) {
+		int n = statement.paramL.size();
+		DValue dval = statement.paramL.get(n - 1);
+		statement.paramL.add(dval);
+		return 1;
+	}
 	protected int cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
 		//clone params 
 		int numToAdd = 0;
@@ -360,26 +371,23 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			DeleteStatementFragment deleteFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
 			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
 		
-//		//struct is Address AddressCustomerAssoc
-//		if (!reversed) {
-//			genAssocTblInsertRows(insertFrag, true, mainKeyVal, info.nearType, info.farType, keyVal, info);
-//		} else {
-//			genAssocTblInsertRows(insertFrag, false, mainKeyVal, info.farType, info.nearType, keyVal, info);
-//		}
-		
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		deleteFrag.paramStartIndex = statement.paramL.size();
 		
-		updateFrag.assocDeleteFrag = deleteFrag;
+//		updateFrag.assocDeleteFrag = deleteFrag;
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s == ?", "leftv", "right"); 
 		RawFragment rawFrag = new RawFragment(sc.str);
 		deleteFrag.whereL.add(rawFrag);
 		
-//		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
-//		int extra = statement.paramL.size() - startingNumParams;
-//		int k = cloneParams(statement, clonedL, extra);
-		statement.paramL.add(keyVal);
+		if (reversed) {
+			DValue dvalx = getLastParam(statement);
+			statement.paramL.add(keyVal);
+			statement.paramL.add(dvalx);
+		} else {
+			cloneLastParam(statement);
+			statement.paramL.add(keyVal);
+		}
 		//and again for mergeInto
 //		insertFrag.paramStartIndex = statement.paramL.size() - 1;
 //		cloneParams(statement, clonedL, 1, 0);
