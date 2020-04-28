@@ -10,9 +10,7 @@ public class InsertStatementFragment extends StatementFragmentBase {
 
 		//parallel arrays
 		public List<String> setValuesL = new ArrayList<>();
-		public InsertStatementFragment assocUpdateFrag; //TODO later support multiple
-		public DeleteStatementFragment assocDeleteFrag; //TODO later support multiple
-		public MergeIntoStatementFragment assocMergeInfoFrag; //TODO later support multiple
+		public List<InsertStatementFragment> assocInsertFragL; 
 		
 		@Override
 		public String render() {
