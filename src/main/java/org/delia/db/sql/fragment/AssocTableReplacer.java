@@ -312,13 +312,10 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 
 	public void assocCrudInsert(UpdateStatementFragment updateFrag, 
-			DStructType structType, DValue keyVal, RelationInfo info,
+			InsertStatementFragment insertFrag, DStructType structType, DValue keyVal, RelationInfo info,
 			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
 		
 //	    INSERT INTO CustomerAddressAssoc as T (leftv, rightv) VALUES(s.id, ?)
-		InsertStatementFragment insertFrag = new InsertStatementFragment();
-		insertFrag.tblFrag = initTblFrag(updateFrag);
-		insertFrag.tblFrag.alias = "w";
 		
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue mainDVal = builder.buildInt(777); //fix!!!

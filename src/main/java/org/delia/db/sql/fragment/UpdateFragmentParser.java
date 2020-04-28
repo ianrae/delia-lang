@@ -212,7 +212,12 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 
 		DRelation drel = mmMap.get(fieldName);
 		for(DValue inner: drel.getMultipleKeys()) {
-			assocTblReplacer.assocCrudInsert(updateFrag, structType, inner, info, mainUpdateAlias, statement, false);
+			InsertStatementFragment insertFrag = new InsertStatementFragment();
+			TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+			insertFrag.tblFrag = this.createAssocTable(insertFrag, tblinfo.assocTblName);
+
+			updateFrag.assocCrudInsertL.add(insertFrag);
+			assocTblReplacer.assocCrudInsert(updateFrag, insertFrag, structType, inner, info, mainUpdateAlias, statement, false);
 		}
 	}
 	
@@ -404,47 +409,56 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		return selectFrag.statement.sql;
 	}
 	
-	public SqlStatementGroup renderUpdateGroup(UpdateStatementFragment selectFrag) {
+	public SqlStatementGroup renderUpdateGroup(UpdateStatementFragment updateFrag) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
-		if(selectFrag.setValuesL.isEmpty()) {
-			selectFrag.statement.sql = ""; //nothing to do
+		if(updateFrag.setValuesL.isEmpty()) {
+			updateFrag.statement.sql = ""; //nothing to do
 			return stgroup;
 		}
 
-		SqlStatement mainStatement = selectFrag.statement;
-		mainStatement.sql = selectFrag.render();
+		SqlStatement mainStatement = updateFrag.statement;
+		mainStatement.sql = updateFrag.render();
 		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
 		
 		mainStatement.paramL.clear();
-		stgroup.add(selectFrag.statement);
-		initMainParams(mainStatement, save, selectFrag.assocUpdateFrag);
-		initMainParams(mainStatement, save, selectFrag.assocDeleteFrag);
-		initMainParams(mainStatement, save, selectFrag.assocMergeInfoFrag);
+		stgroup.add(updateFrag.statement);
+		initMainParams(mainStatement, save, updateFrag.assocUpdateFrag);
+		initMainParams(mainStatement, save, updateFrag.assocDeleteFrag);
+		initMainParams(mainStatement, save, updateFrag.assocMergeInfoFrag);
+		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
+			initMainParams(mainStatement, save, insFrag);
+		}
+		
 		if (mainStatement.paramL.isEmpty()) {
 			mainStatement.paramL.addAll(save);
 			return stgroup; //no inner frags
 		}
 		
-		addIfNotNull(stgroup, selectFrag.assocUpdateFrag, save, nextStartIndex(selectFrag.assocDeleteFrag, selectFrag.assocMergeInfoFrag));
-		addIfNotNull(stgroup, selectFrag.assocDeleteFrag, save, nextStartIndex(selectFrag.assocMergeInfoFrag));
-		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag, save, Integer.MAX_VALUE);
+		addIfNotNull(stgroup, updateFrag.assocUpdateFrag, save, nextStartIndex(updateFrag.assocDeleteFrag, updateFrag.assocMergeInfoFrag));
+		addIfNotNull(stgroup, updateFrag.assocDeleteFrag, save, nextStartIndex(updateFrag.assocMergeInfoFrag));
+		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, nextStartIndex(updateFrag.assocCrudInsertL));
+		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
+			addIfNotNull(stgroup, insFrag, save, nextStartIndex(updateFrag.assocCrudInsertL));
+		}
 		
-		if (selectFrag.doUpdateLast) {
+		if (updateFrag.doUpdateLast) {
 			SqlStatement stat = stgroup.statementL.remove(0); //move first to last
-			List<DValue> firstParams = stat.paramL;
+//			List<DValue> firstParams = stat.paramL;
 			stgroup.statementL.add(stat);
-			
-//			//swap param lists too
-//			SqlStatement newFirst = stgroup.statementL.get(0);
-//			List<DValue> tmp = stat.paramL;
-//			newFirst.paramL = firstParams;
-//			stat.paramL = tmp;
 		}
 		
 		return stgroup;
 	}
 	private int nextStartIndex(StatementFragmentBase... frags) {
 		for(StatementFragmentBase frag: frags) {
+			if (frag != null) {
+				return frag.paramStartIndex;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
+	private int nextStartIndex(List<InsertStatementFragment> fragL) {
+		for(StatementFragmentBase frag: fragL) {
 			if (frag != null) {
 				return frag.paramStartIndex;
 			}

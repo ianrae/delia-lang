@@ -14,6 +14,7 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 		public DeleteStatementFragment assocDeleteFrag; //TODO later support multiple
 		public MergeIntoStatementFragment assocMergeInfoFrag; //TODO later support multiple
 		public boolean doUpdateLast = false;
+		public List<InsertStatementFragment> assocCrudInsertL = new ArrayList<>();
 		
 		@Override
 		public String render() {
