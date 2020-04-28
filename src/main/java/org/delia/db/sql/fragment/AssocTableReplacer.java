@@ -316,16 +316,29 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
 		
 //	    INSERT INTO CustomerAddressAssoc as T (leftv, rightv) VALUES(s.id, ?)
-		
+		int startingNumParams = statement.paramL.size();
+		DValue mainKeyVal = statement.paramL.get(startingNumParams - 1);
+
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
-		DValue mainDVal = builder.buildInt(777); //fix!!!
 		
 		//struct is Address AddressCustomerAssoc
 		if (!reversed) {
-			genAssocTblInsertRows(insertFrag, true, mainDVal, info.nearType, info.farType, keyVal, info);
+			genAssocTblInsertRows(insertFrag, true, mainKeyVal, info.nearType, info.farType, keyVal, info);
 		} else {
-			genAssocTblInsertRows(insertFrag, false, mainDVal, info.farType, info.nearType, keyVal, info);
+			genAssocTblInsertRows(insertFrag, false, mainKeyVal, info.farType, info.nearType, keyVal, info);
 		}
+		
+		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+		int extra = statement.paramL.size() - startingNumParams;
+//		int k = cloneParams(statement, clonedL, extra);
+		statement.paramL.add(keyVal);
+		//and again for mergeInto
+		insertFrag.paramStartIndex = statement.paramL.size() - 1;
+//		cloneParams(statement, clonedL, 1, 0);
+//		if (isPostgres) {
+//			int n = statement.paramL.size();
+//			statement.paramL.remove(n - 1);
+//		}
 	}
 	//TODO move to helper
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 

@@ -196,7 +196,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 //			field1 = "leftv";
 //			field2 = "rightv";
 //		}
-
+		
 		//only for update by primary id. TODO: later support more
 		List<OpFragment> oplist = null;
 		if (existingWhereL.isEmpty()) {
@@ -209,7 +209,6 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, "insert");
 		}
 		
-
 		DRelation drel = mmMap.get(fieldName);
 		for(DValue inner: drel.getMultipleKeys()) {
 			InsertStatementFragment insertFrag = new InsertStatementFragment();

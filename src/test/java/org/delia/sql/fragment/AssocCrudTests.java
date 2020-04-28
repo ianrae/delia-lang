@@ -167,11 +167,10 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE rightv = ? and leftv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Customer as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
-		chkNoLine(4);
-		chkParams(selectFrag, 333, 55, 55, 100,  100, 55, 100, 55);
-		chkNumParams(2, 2, 4);
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc as b (b.leftv, b.rightv) VALUES(?, ?)");
+		chkNoLine(3);
+		chkParams(selectFrag, 333,55, 100,55);
+		chkNumParams(2, 2);
 	}
 //	@Test
 //	public void testIdOtherWay() {
