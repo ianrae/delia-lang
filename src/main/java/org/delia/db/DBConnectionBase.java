@@ -51,6 +51,16 @@ public class DBConnectionBase extends ServiceBase {
 		return b;
 	}    
 	
+	
+	public List<Integer> execInsertStatementGroup(SqlStatementGroup stgroup, SqlExecuteContext sqlctx) {
+		//TODO: add batching later
+		List<Integer>insertCountL = new ArrayList<>();
+		for(SqlStatement statement: stgroup.statementL) {
+			int updateCount = executeInsertStatement(statement, sqlctx);
+			insertCountL.add(updateCount);
+		}
+		return insertCountL;
+	}    
 	public int executeInsertStatement(SqlStatement statement, SqlExecuteContext sqlctx) {
 		if (sqlctx.getGeneratedKeys) {
 			return executeInsertAndGenKeysx(statement, sqlctx);
@@ -73,7 +83,7 @@ public class DBConnectionBase extends ServiceBase {
 			PreparedStatement stm = valueHelper.createPrepStatementWithGenKey(statement, conn);
 			affectedRows = stm.executeUpdate();
 			if (affectedRows > 0) {
-				sqlctx.genKeys = stm.getGeneratedKeys();
+				sqlctx.genKeysL.add(stm.getGeneratedKeys());
 			}
 		} catch (SQLException e) {
 			convertAndRethrowException(e);

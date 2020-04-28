@@ -23,15 +23,12 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
-import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -100,7 +97,22 @@ public class InsertFragmentParserTests extends NewBDDBase {
 		runAndChk(selectFrag, "INSERT INTO Flight (field1, field2) VALUES(?, ?)");
 		chkParams(selectFrag, "1", "10");
 	}
+	@Test
+	public void testSerial() {
+		String src = buildSrcSerial();
+		src += "\n insert Flight {}";
 
+		InsertStatementExp insertStatementExp = buildFromSrc(src);
+		DValue dval = convertToDVal(insertStatementExp);
+		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
+
+		runAndChk(selectFrag, "INSERT INTO Flight DEFAULT VALUES");
+		chkParams(selectFrag);
+		//		chkNumParams(1, 0, 1);
+	}
+
+	
+	//------------------- relations ----------------
 	@Test
 	public void testOneToOne() {
 		String src = buildSrcOneToOne();
@@ -302,6 +314,10 @@ public class InsertFragmentParserTests extends NewBDDBase {
 
 	private String buildSrc() {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
+		return src;
+	}
+	private String buildSrcSerial() {
+		String src = "type Flight struct {field1 int primaryKey serial} end";
 		return src;
 	}
 	private String buildSrcOptional() {

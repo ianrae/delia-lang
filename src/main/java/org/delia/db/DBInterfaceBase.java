@@ -75,10 +75,22 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		this.et = factorySvc.getErrorTracker();
 	}
 
+	/**
+	 * we can only have generated one key even if did several inserts because
+	 * the additional inserts are just the assoc table.
+	 * @param ctx
+	 * @param sqlctx
+	 * @return
+	 * @throws SQLException
+	 */
 	protected DValue extractGeneratedKey(InsertContext ctx, SqlExecuteContext sqlctx) throws SQLException {
-		ResultSet rs = sqlctx.genKeys;
-		DValue genVal = valueHelper.extractGeneratedKey(rs, ctx.genKeytype.getShape(), sqlctx.registry);
-		return genVal;
+		for(ResultSet rs: sqlctx.genKeysL) {
+			DValue genVal = valueHelper.extractGeneratedKey(rs, ctx.genKeytype.getShape(), sqlctx.registry);
+			if (genVal != null) {
+				return genVal;
+			}
+		}
+		return null;
 	}
 
 	protected void logSql(String sql) {

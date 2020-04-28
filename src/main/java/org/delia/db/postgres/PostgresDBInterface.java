@@ -88,7 +88,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		}
 
 		DValue genVal = null;
-		if (ctx.extractGeneratedKeys && sqlctx.genKeys != null) {
+		if (ctx.extractGeneratedKeys && !sqlctx.genKeysL.isEmpty()) {
 			try {
 				genVal = extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {

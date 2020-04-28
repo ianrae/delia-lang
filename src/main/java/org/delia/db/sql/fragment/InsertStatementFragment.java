@@ -24,6 +24,7 @@ public class InsertStatementFragment extends StatementFragmentBase {
 		
 		protected void renderInsertFields(StrCreator sc) {
 			if (fieldL.isEmpty()) {
+				sc.o(" DEFAULT VALUES");
 				return;
 			}
 			

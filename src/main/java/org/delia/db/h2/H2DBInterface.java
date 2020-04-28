@@ -95,13 +95,13 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		try {
 			sqlctx.getGeneratedKeys = ctx.extractGeneratedKeys;
 //			int n = conn.executeInsertStatement(statement, sqlctx); 
-			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
+			List<Integer > updateCountL = conn.execInsertStatementGroup(stgroup, sqlctx);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}
 		
 		DValue genVal = null;
-		if (ctx.extractGeneratedKeys && sqlctx.genKeys != null) {
+		if (ctx.extractGeneratedKeys && !sqlctx.genKeysL.isEmpty()) {
 			try {
 				genVal = extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {

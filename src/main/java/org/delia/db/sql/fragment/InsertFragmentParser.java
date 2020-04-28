@@ -195,21 +195,12 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	}
 
 	public String renderInsert(InsertStatementFragment selectFrag) {
-		if(selectFrag.setValuesL.isEmpty()) {
-			selectFrag.statement.sql = ""; //nothing to do
-			return selectFrag.statement.sql;
-		}
-
 		selectFrag.statement.sql = selectFrag.render();
 		return selectFrag.statement.sql;
 	}
 
 	public SqlStatementGroup renderInsertGroup(InsertStatementFragment selectFrag) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
-		if(selectFrag.setValuesL.isEmpty()) {
-			selectFrag.statement.sql = ""; //nothing to do
-			return stgroup;
-		}
 
 		SqlStatement mainStatement = selectFrag.statement;
 		mainStatement.sql = selectFrag.render();
