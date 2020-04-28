@@ -7,8 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.db.sql.prepared.TableInfoHelper;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -16,7 +14,6 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.valuebuilder.ScalarValueBuilder;
 
 //single use!!!
 public class AssocTableReplacer extends SelectFragmentParser {
@@ -312,15 +309,12 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 
 	public void assocCrudInsert(UpdateStatementFragment updateFrag, 
-			InsertStatementFragment insertFrag, DStructType structType, DValue keyVal, RelationInfo info,
+			InsertStatementFragment insertFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
 			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
 		
 //	    INSERT INTO CustomerAddressAssoc as T (leftv, rightv) VALUES(s.id, ?)
-		int startingNumParams = statement.paramL.size();
-		DValue mainKeyVal = statement.paramL.get(startingNumParams - 1);
+//		int startingNumParams = statement.paramL.size();
 
-		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
-		
 		//struct is Address AddressCustomerAssoc
 		if (!reversed) {
 			genAssocTblInsertRows(insertFrag, true, mainKeyVal, info.nearType, info.farType, keyVal, info);
@@ -328,8 +322,8 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			genAssocTblInsertRows(insertFrag, false, mainKeyVal, info.farType, info.nearType, keyVal, info);
 		}
 		
-		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
-		int extra = statement.paramL.size() - startingNumParams;
+//		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
+//		int extra = statement.paramL.size() - startingNumParams;
 //		int k = cloneParams(statement, clonedL, extra);
 		statement.paramL.add(keyVal);
 		//and again for mergeInto

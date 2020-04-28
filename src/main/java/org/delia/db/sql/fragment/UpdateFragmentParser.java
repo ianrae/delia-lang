@@ -186,17 +186,6 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	private void assocCrudInsert(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
 			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
-//		//struct is Address AddressCustomerAssoc
-//		String field1;
-//		String field2;
-//		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
-//			field1 = "rightv";
-//			field2 = "leftv";
-//		} else {
-//			field1 = "leftv";
-//			field2 = "rightv";
-//		}
-		
 		//only for update by primary id. TODO: later support more
 		List<OpFragment> oplist = null;
 		if (existingWhereL.isEmpty()) {
@@ -210,13 +199,22 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 		
 		DRelation drel = mmMap.get(fieldName);
+		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		TableFragment tblFrag = null;
+		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
 		for(DValue inner: drel.getMultipleKeys()) {
 			InsertStatementFragment insertFrag = new InsertStatementFragment();
-			TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
-			insertFrag.tblFrag = this.createAssocTable(insertFrag, tblinfo.assocTblName);
+			if (tblFrag == null) {
+				tblFrag = this.createAssocTable(insertFrag, tblinfo.assocTblName);
+			} else {
+				tblFrag = new TableFragment(tblFrag);
+			}
+			insertFrag.tblFrag = tblFrag;
+			
+			boolean reversed = tblinfo.tbl2.equalsIgnoreCase(structType.getName());
 
 			updateFrag.assocCrudInsertL.add(insertFrag);
-			assocTblReplacer.assocCrudInsert(updateFrag, insertFrag, structType, inner, info, mainUpdateAlias, statement, false);
+			assocTblReplacer.assocCrudInsert(updateFrag, insertFrag, structType, mainDVal, inner, info, mainUpdateAlias, statement, reversed);
 		}
 	}
 	

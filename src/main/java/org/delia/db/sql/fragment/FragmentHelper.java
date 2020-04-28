@@ -51,6 +51,9 @@ public class FragmentHelper {
 		return s;
 	}
 	public static String findAliasForTable(TableFragment tblFrag, StatementFragmentBase selectFrag) {
+		if (tblFrag.alias != null) {
+			return tblFrag.alias;
+		}
 		String s = selectFrag.aliasMap.get(tblFrag.name).alias;
 		return s;
 	}
