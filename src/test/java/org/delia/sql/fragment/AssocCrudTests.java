@@ -41,6 +41,45 @@ import org.junit.Test;
 
 
 public class AssocCrudTests extends FragmentParserTestBase {
+	
+//	//=============== one-to-one ======================
+	@Test(expected=DeliaException.class)
+	public void testOneToOne() {
+		String src = buildSrcOneToOne();
+		src += "\n  update Customer[true] {wid: 333, insert addr:100}";
+
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
+		chkNoLine(4);
+		chkParams(selectFrag, 333,  100);
+		chkNumParams(1, 0, 1);
+	}
+	
+//	//=============== one-to-many ======================
+	@Test(expected=DeliaException.class)
+	public void testOneToMany() {
+		String src = buildSrcManyToOne();
+		src += "\n  update Customer[true] {wid: 333, insert addr:100}";
+		src += "\n  update Address[true] {z:5, cust:100}";
+
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Address");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+		
+		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
+		chkNoLine(4);
+		chkParams(selectFrag, 333,  100);
+		chkNumParams(1, 0, 1);
+	}
 
 //	//=============== many to many ======================
 	@Test(expected=DeliaException.class)
@@ -183,7 +222,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	@Test(expected=DeliaException.class)
 	public void testOther() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
+		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, insert addr:100}";
 
 		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
@@ -211,12 +250,19 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	public void init() {
 	}
 
+	private String buildSrcOneToOne() {
+		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one } end";
+		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
+		return src;
+	}
+	private String buildSrcManyToOne() {
+		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
+		src += "\n type Address struct {id int unique, z int, relation cust Customer optional one } end";
+		return src;
+	}
 	private String buildSrcManyToMany() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
 		src += "\n type Address struct {id int unique, z int, relation cust Customer optional many } end";
-		src += "\n  insert Customer {id: 55, wid: 33}";
-		src += "\n  insert Customer {id: 56, wid: 34}";
-		src += "\n  insert Address {id: 100, z:5, cust: [55,56] }";
 		return src;
 	}
 

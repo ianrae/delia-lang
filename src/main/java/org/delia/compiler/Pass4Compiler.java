@@ -9,6 +9,8 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
+import org.delia.relation.RelationCardinality;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.runner.InternalCompileState;
 import org.delia.type.DStructType;
@@ -72,6 +74,11 @@ public class Pass4Compiler extends CompilerPassBase {
 					if (manyRule == null) {
 						String action = fexp.assocCrudAction.strValue();
 						String msg = String.format("update '%s': '%s' on field '%s' not allowed. Field is not a many relation.'", insExp.typeName, action, fieldName);
+						DeliaError err = createError("assoc-crud-in-update-not-allowed", msg, insExp);
+						results.errors.add(err);
+					} else if (!RelationCardinality.MANY_TO_MANY.equals(manyRule.relInfo.cardinality)) {
+						String action = fexp.assocCrudAction.strValue();
+						String msg = String.format("update '%s': '%s' on field '%s' not allowed. Field is not a many-to-many relation.'", insExp.typeName, action, fieldName);
 						DeliaError err = createError("assoc-crud-in-update-not-allowed", msg, insExp);
 						results.errors.add(err);
 					}
