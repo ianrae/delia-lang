@@ -35,12 +35,33 @@ public class TLangTests  extends NewBDDBase {
 		public ScalarValueBuilder builder;
 	}
 	public interface TLangStatement {
+		boolean evalCondition();
 		void execute(DValue value, TLangResult result, TLangContext ctx);
 	}
 	
 	public static class TLangProgram {
 		List<TLangStatement> statements = new ArrayList<>();
 	}
+	
+	public static class IfStatement implements TLangStatement {
+		@Override
+		public void execute(DValue value, TLangResult result, TLangContext ctx) {
+		}
+		@Override
+		public boolean evalCondition() {
+			return false;
+		}
+	}
+	public static class EndIfStatement implements TLangStatement {
+		@Override
+		public void execute(DValue value, TLangResult result, TLangContext ctx) {
+		}
+		@Override
+		public boolean evalCondition() {
+			return true;
+		}
+	}
+
 	
 	public static class TLangRunner extends ServiceBase {
 
@@ -57,13 +78,23 @@ public class TLangTests  extends NewBDDBase {
 			
 			DValue dval = initialValue;
 			TLangResult res = new TLangResult();
-			for(TLangStatement statement: program.statements) {
-				TLangContext ctx = new TLangContext();
-				ctx.builder = scalarBuilder;
-				res.ok = true;
-				statement.execute(dval, res, ctx);
-				if (! res.ok) {
-					break;
+			int ipIndex;
+			for(ipIndex = 0; ipIndex < program.statements.size(); ipIndex++) {
+				TLangStatement statement = program.statements.get(ipIndex);
+				if (statement.evalCondition()) {
+					TLangContext ctx = new TLangContext();
+					ctx.builder = scalarBuilder;
+					res.ok = true;
+					statement.execute(dval, res, ctx);
+					if (! res.ok) {
+						break;
+					}
+					dval = (DValue) res.val;
+				} else {
+					ipIndex = findNext(program, ipIndex);
+					if (ipIndex < 0) {
+						//err missing endif
+					}
 				}
 			}
 			
@@ -73,19 +104,42 @@ public class TLangTests  extends NewBDDBase {
 			result.val = dval;
 			return result;
 		}
+
+		private int findNext(TLangProgram program, int ipIndexCurrent) {
+			for(int ipIndex = ipIndexCurrent + 1; ipIndex < program.statements.size(); ipIndex++) {
+				TLangStatement statement = program.statements.get(ipIndex);
+				if (statement instanceof EndIfStatement) {
+					return ipIndex;
+				}
+			}
+			return -1;
+		}
 	}
 	
-	public static class ToUpperStatement implements TLangStatement {
-
+	public static abstract class TLangStatementBase implements TLangStatement {
+		@Override
+		public abstract void execute(DValue value, TLangResult result, TLangContext ctx);
+		@Override
+		public boolean evalCondition() {
+			return true;
+		}
+	}
+	public static class ToUpperStatement extends TLangStatementBase {
 		@Override
 		public void execute(DValue value, TLangResult result, TLangContext ctx) {
 			String s = value.asString();
 			s = s.toUpperCase();
-			DValue x = ctx.builder.buildString(s);
-			
-			result.val = x;
+			result.val = ctx.builder.buildString(s);
 		}
-		
+
+	}
+	public static class AddXStatement extends TLangStatementBase {
+		@Override
+		public void execute(DValue value, TLangResult result, TLangContext ctx) {
+			String s = value.asString();
+			s += "X";
+			result.val = ctx.builder.buildString(s);
+		}
 	}
 	
 	@Test
@@ -99,12 +153,13 @@ public class TLangTests  extends NewBDDBase {
 
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
-		assertEquals("ABC", dval.asString());
+		assertEquals("ABCX", dval.asString());
 	}
 
 	private TLangProgram createProgram() {
 		TLangProgram prog = new TLangProgram();
 		prog.statements.add(new ToUpperStatement());
+		prog.statements.add(new AddXStatement());
 		return prog;
 	}
 
