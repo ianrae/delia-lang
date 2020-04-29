@@ -236,11 +236,17 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		DRelation drel = mmMap.get(fieldName);
 		if (drel == null) {
 			DeliaExceptionHelper.throwError("assoc-crud-update-null-not-allowed", "update %s field %s action '%s' not allowed with null value", updateFrag.tblFrag.name, fieldName, action);
+		} else if (drel.getMultipleKeys().size() % 2 != 0) {
+			DeliaExceptionHelper.throwError("assoc-crud-update-pairs-needed", "update %s field %s: udpate action requires pairs of values", updateFrag.tblFrag.name, fieldName);
 		}
+		
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 		TableFragment tblFrag = null;
 		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
-		for(DValue inner: drel.getMultipleKeys()) {
+		for(int i = 0; i < drel.getMultipleKeys().size(); i+= 2) {
+			DValue oldVal = drel.getMultipleKeys().get(i);
+			DValue newVal = drel.getMultipleKeys().get(i+1);
+			
 			UpdateStatementFragment innerUpdateFrag = new UpdateStatementFragment();
 			if (tblFrag == null) {
 				tblFrag = this.createAssocTable(innerUpdateFrag, tblinfo.assocTblName);
@@ -252,7 +258,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			boolean reversed = tblinfo.tbl2.equalsIgnoreCase(structType.getName());
 
 			updateFrag.assocCrudUpdateL.add(innerUpdateFrag);
-			assocTblReplacer.assocCrudUpdate(updateFrag, innerUpdateFrag, structType, mainDVal, inner, info, mainUpdateAlias, statement, reversed);
+			assocTblReplacer.assocCrudUpdate(updateFrag, innerUpdateFrag, structType, mainDVal, oldVal, newVal, info, mainUpdateAlias, statement, reversed);
 		}
 	}
 	private void assocCrudDelete(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 

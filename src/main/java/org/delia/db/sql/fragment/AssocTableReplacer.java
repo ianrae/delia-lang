@@ -386,7 +386,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	
 	public void assocCrudUpdate(UpdateStatementFragment updateFrag, 
-			UpdateStatementFragment innerUpdateFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
+			UpdateStatementFragment innerUpdateFrag, DStructType structType, DValue mainKeyVal, DValue oldVal, DValue newVal, RelationInfo info,
 			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
 		
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
@@ -395,11 +395,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		if (reversed) {
-			genxrow(innerUpdateFrag, "leftv", keyPair1, keyVal);
+			genxrow(innerUpdateFrag, "leftv", keyPair1, newVal);
 			genxrow(innerUpdateFrag, "rightv", keyPair2, mainKeyVal);
 		} else {
 			genxrow(innerUpdateFrag, "leftv", keyPair1, mainKeyVal);
-			genxrow(innerUpdateFrag, "rightv", keyPair2, keyVal);
+			genxrow(innerUpdateFrag, "rightv", keyPair2, newVal);
 		}
 		
 		StrCreator sc = new StrCreator();
@@ -412,11 +412,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		innerUpdateFrag.statement.paramL.clear();
 		
 		if (reversed) {
-			statement.paramL.add(keyVal);
+			statement.paramL.add(oldVal);
 			statement.paramL.add(mainKeyVal);
 		} else {
 			statement.paramL.add(mainKeyVal);
-			statement.paramL.add(keyVal);
+			statement.paramL.add(oldVal);
 		}
 	}
 	

@@ -324,10 +324,20 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	
 	
 	//==================== assocCrud delete -----------------------------
+	@Test(expected=DeliaException.class)
+	public void testIdUpdateNotPairs() {
+		String src = buildSrcManyToMany();
+		src += "\n  update Customer[55] {wid: 333, update addr:[100]}"; 
+
+		List<TableInfo> tblinfoL = createTblInfoL();
+		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
+		DValue dval = convertToDVal(updateStatementExp, "Customer");
+		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
+	}
 	@Test
 	public void testIdUpdate() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[55] {wid: 333, update addr:100}";
+		src += "\n  update Customer[55] {wid: 333, update addr:[100,222]}"; 
 
 		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
@@ -337,13 +347,13 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
 		chkNoLine(3);
-		chkParams(selectFrag, 333,55, 100,55, 100,55);
+		chkParams(selectFrag, 333,55, 222,55, 100,55);
 		chkNumParams(2, 4);
 	}
 	@Test
 	public void testIdUpdate2() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[55] {wid: 333, update addr:[100,101]}";
+		src += "\n  update Customer[55] {wid: 333, update addr:[100,222,101,223]}";
 
 		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
@@ -354,13 +364,13 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?;");
 		chkLine(3, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
 		chkNoLine(4);
-		chkParams(selectFrag, 333,55, 100,55,100,55, 101,55,101,55);
+		chkParams(selectFrag, 333,55, 222,55,100,55, 223,55,101,55);
 		chkNumParams(2, 4, 4);
 	}
 	@Test
 	public void testId2OtherWayUpdate() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Customer[55] {wid: 333, update addr:[100,101]}";
+		src += "\n  update Customer[55] {wid: 333, update addr:[100,222,101,223]}";
 
 		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
@@ -371,14 +381,14 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		chkLine(2, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?;");
 		chkLine(3, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
 		chkNoLine(4);
-		chkParams(selectFrag, 333,55, 55,100,55,100,  55,101,55,101);
+		chkParams(selectFrag, 333,55, 55,222,55,100,  55,223,55,101);
 		chkNumParams(2, 4, 4);
 	}
 	
 	@Test
 	public void testId3Update() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Address[100] {z: 7, update cust:55}";
+		src += "\n  update Address[100] {z: 7, update cust:[55,56]}";
 
 		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
@@ -388,13 +398,13 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
 		chkNoLine(3);
-		chkParams(selectFrag, 7,100, 100,55,100,55);
+		chkParams(selectFrag, 7,100, 100,56,100,55);
 		chkNumParams(2, 4);
 	}
 	@Test
 	public void testId3OtherWayUpdate() {
 		String src = buildSrcManyToMany();
-		src += "\n  update Address[100] {z: 7, update cust:55}";
+		src += "\n  update Address[100] {z: 7, update cust:[55,56]}";
 
 		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
@@ -404,7 +414,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
 		chkLine(2, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
 		chkNoLine(3);
-		chkParams(selectFrag, 7,100, 55,100,55,100);
+		chkParams(selectFrag, 7,100, 56,100,55,100);
 		chkNumParams(2, 4);
 	}
 	@Test(expected=DeliaException.class)
