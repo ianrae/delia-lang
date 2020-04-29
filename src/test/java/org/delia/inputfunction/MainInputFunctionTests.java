@@ -2,6 +2,8 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +16,7 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
@@ -25,7 +28,10 @@ import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.filter.OP;
 import org.delia.error.DeliaError;
 import org.delia.inputfunction.InputFunctionTests.HdrInfo;
+import org.delia.inputfunction.InputFunctionTests.InputFunctionRunner;
 import org.delia.inputfunction.InputFunctionTests.LineObj;
+import org.delia.runner.DValueIterator;
+import org.delia.runner.ResultValue;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.DValueOpEvaluator;
 import org.delia.tlang.runner.IsMissingCondition;
@@ -44,9 +50,38 @@ import org.junit.Test;
 
 public class MainInputFunctionTests  extends NewBDDBase {
 	
-	public static class ProgramSet {
-		public Map<String,TLangProgram> map = new ConcurrentHashMap<>();
+	public static class ProgramSpec {
+		public TLangProgram prog;
+		public IdentPairExp outputField;
 	}
+	
+	public static class ProgramSet {
+		public Map<String,ProgramSpec> map = new ConcurrentHashMap<>();
+		public HdrInfo hdr;
+	}
+	
+	public class LineObjIterator implements Iterator<LineObj> {
+		private List<LineObj> list;
+		private int index;
+
+		public LineObjIterator(List<LineObj> list) {
+			this.list = list;
+			this.index = 0;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return index < list.size();
+		}
+
+		@Override
+		public LineObj next() {
+			LineObj con = list.get(index++);
+			return con;
+		}
+	}
+	
+	
 	
 	public static class TLangService extends ServiceBase {
 
@@ -62,8 +97,13 @@ public class MainInputFunctionTests  extends NewBDDBase {
 				TLangProgram program = new TLangProgram();
 				String infield = mappingExp.inputField.name();
 				
-				progset.map.put(infield, program);
+				ProgramSpec spec = new ProgramSpec();
+				spec.outputField = mappingExp.outputField;
+				spec.prog = program;
+				progset.map.put(infield, spec);
 			}
+			
+			progset.hdr = this.createHdrFrom(infnExp);
 			return progset;
 		}
 		private InputFunctionDefStatementExp findFunction(String inputFnName, DeliaSession session) {
@@ -78,8 +118,46 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			}
 			return null;
 		}
+		private HdrInfo createHdrFrom(InputFunctionDefStatementExp inFnExp) {
+			HdrInfo hdr = new HdrInfo();
+			int index = 0;
+			for(Exp exp: inFnExp.bodyExp.statementL) {
+				InputFuncMappingExp mapping = (InputFuncMappingExp) exp;
+				hdr.map.put(index, mapping.inputField.name());
+				index++;
+			}
+			return hdr;
+		}
 		
-		public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> totalErrorL) {
+		
+		public List<DValue> process(ProgramSet progset, LineObjIterator lineObjIter, Delia delia, DeliaSession session, List<DeliaError> totalErrorL) {
+			
+			while(lineObjIter.hasNext()) {
+				LineObj lineObj = lineObjIter.next();
+				
+				InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, session.getExecutionContext().registry);
+				
+				HdrInfo hdr = progset.hdr;
+				inFuncRunner.setProgramSet(progset);
+				List<DeliaError> errL = new ArrayList<>();
+				List<DValue> dvals = inFuncRunner.process(hdr, lineObj, errL);
+				if (! errL.isEmpty()) {
+					log.logError("failed!");
+				} else {
+					//hmm. or do we do insert Customer {....}
+					//i think we can do insert Customer {} with empty dson and somehow
+					//pass in the already build dval runner.setAlreadyBuiltDVal()
+					//TODO dvals may be Customer,Address, ... fix this code here
+					DValueIterator iter = new DValueIterator(dvals);
+					delia.getOptions().insertPrebuiltValueIterator = iter;
+					String s = String.format("insert Customer {}");
+					ResultValue res = delia.continueExecution(s, session);
+					if (! res.ok) {
+						//err
+					}
+					delia.getOptions().insertPrebuiltValueIterator = null;
+				}
+			}
 			return null;
 		}		
 	}

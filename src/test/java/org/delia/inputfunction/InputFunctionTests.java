@@ -25,9 +25,12 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
+import org.delia.inputfunction.MainInputFunctionTests.ProgramSet;
+import org.delia.inputfunction.MainInputFunctionTests.ProgramSpec;
 import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
+import org.delia.tlang.runner.TLangProgram;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -68,7 +71,7 @@ public class InputFunctionTests  extends NewBDDBase {
 
 		private DTypeRegistry registry;
 		private ScalarValueBuilder scalarBuilder;
-		private InputFunctionDefStatementExp inFnExp;
+		private ProgramSet progset;
 
 		public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
@@ -170,13 +173,13 @@ public class InputFunctionTests  extends NewBDDBase {
 		}
 
 		private IdentPairExp findOutputMapping(String inputField) {
-			for(Exp exp: this.inFnExp.bodyExp.statementL) {
-				InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
-				if (mappingExp.inputField.name().equals(inputField)) {
-					return mappingExp.outputField;
-				}
+			ProgramSpec spec = progset.map.get(inputField);
+			if (spec == null) {
+				//err
+				return null;
 			}
-			return null;
+			
+			return spec.outputField;
 		}
 
 		private Map<String, String> createInputMap(HdrInfo hdr, LineObj lineObj) {
@@ -194,8 +197,8 @@ public class InputFunctionTests  extends NewBDDBase {
 			return inputData;
 		}
 
-		public void setFnExp(InputFunctionDefStatementExp inFnExp) {
-			this.inFnExp = inFnExp;
+		public void setProgramSet(ProgramSet progset) {
+			this.progset = progset;
 		}
 		
 	}
@@ -241,7 +244,8 @@ public class InputFunctionTests  extends NewBDDBase {
 		List<DeliaError> totalErrorL = new ArrayList<>();
 		HdrInfo hdr = createHdrFrom(inFnExp);
 		LineObj lineObj = createLineObj();
-		inFuncRunner.setFnExp(inFnExp);
+		ProgramSet progset = createProgramSet(hdr, inFnExp);
+		inFuncRunner.setProgramSet(progset);
 		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
 		chkNoErrors(totalErrorL);
 		assertEquals(1, dvals.size());
@@ -262,6 +266,23 @@ public class InputFunctionTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
 		assertEquals("bob", dval.asStruct().getField("name").asString());
+	}
+
+	private ProgramSet createProgramSet(HdrInfo hdr, InputFunctionDefStatementExp inFnExp) {
+		ProgramSet progset = new ProgramSet();
+		progset.hdr = hdr;
+		buildProgset(progset, inFnExp);
+		return progset;
+	}
+	
+	private void buildProgset(ProgramSet progset, InputFunctionDefStatementExp inFnExp) {
+		for(Exp exp: inFnExp.bodyExp.statementL) {
+			InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
+			ProgramSpec spec = new ProgramSpec();
+			spec.prog = new TLangProgram();
+			spec.outputField = mappingExp.outputField;
+			progset.map.put(mappingExp.inputField.name(), spec);
+		}
 	}
 
 	private void chkNoErrors(List<DeliaError> totalErrorL) {
