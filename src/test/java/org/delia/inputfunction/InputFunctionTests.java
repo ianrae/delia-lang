@@ -26,6 +26,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,10 +60,12 @@ public class InputFunctionTests  extends NewBDDBase {
 	public static class XConv extends ServiceBase {
 
 		private DTypeRegistry registry;
+		private ScalarValueBuilder scalarBuilder;
 
 		public XConv(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
 			this.registry = registry;
+			this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		}
 		
 		public void foo() {
@@ -88,6 +91,10 @@ public class InputFunctionTests  extends NewBDDBase {
 			}
 			return dvalL;
 		}
+		public boolean validate(List<DValue> dvals, List<DeliaError> totalErrorL) {
+			//to do. validationrunner
+			return true;
+		}
 
 		private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
 			StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
@@ -99,6 +106,9 @@ public class InputFunctionTests  extends NewBDDBase {
 				switch(dtype.getShape()) {
 				case INTEGER:
 					inner = buildInt(input);
+					break;
+				case STRING:
+					inner = buildString(input);
 					break;
 				default:
 					//err not supported
@@ -118,15 +128,32 @@ public class InputFunctionTests  extends NewBDDBase {
 		}
 
 		private DValue buildInt(Object input) {
-			// TODO Auto-generated method stub
-			return null;
+			if (input == null) {
+				return null;
+			}
+			
+			if (input instanceof Integer) {
+				Integer value = (Integer) input; 
+				return scalarBuilder.buildInt(value);
+			} else {
+				String s = input.toString();
+				return scalarBuilder.buildInt(s);
+			}
+		}
+		private DValue buildString(Object input) {
+			if (input == null) {
+				return null;
+			}
+			
+			String s = input.toString();
+			return scalarBuilder.buildString(s);
 		}
 
 		private List<ProcessedInputData> runTLang(Map<String, String> inputData) {
 			List<ProcessedInputData> list = new ArrayList<>();
 			ProcessedInputData data = new ProcessedInputData();
 			data.structType = (DStructType) registry.getType("Customer");
-			
+			list.add(data);
 			for(String fieldName: inputData.keySet()) {
 				String value = inputData.get(fieldName); 
 				//run tlang...
@@ -155,18 +182,24 @@ public class InputFunctionTests  extends NewBDDBase {
 	public void test() {
 		XConv xconv = createXConv();
 		xconv.foo();
-		assertEquals(1,2);
 		
 		List<DeliaError> totalErrorL = new ArrayList<>();
 		HdrInfo hdr = createHdr();
 		LineObj lineObj = createLineObj();
 		List<DValue> dvals = xconv.process(hdr, lineObj, totalErrorL);
-		assertEquals(22, dvals.size());
+		assertEquals(0, totalErrorL.size());
+		assertEquals(1, dvals.size());
+		
+		boolean b = xconv.validate(dvals, totalErrorL);
+		assertEquals(true, b);
+		//hmm. or do we do insert Customer {....}
+		//i think we can do insert Customer {} with empty dson and somehow
+		//pass in the already build dval runner.setAlreadyBuiltDVal()
 	}
 	
 
 	private LineObj createLineObj() {
-		String[] ar = { "bob", "33" };
+		String[] ar = { "1", "bob", "33" };
 		LineObj lineObj = new LineObj(ar, 1);
 		return lineObj;
 	}
@@ -174,6 +207,7 @@ public class InputFunctionTests  extends NewBDDBase {
 
 	private HdrInfo createHdr() {
 		HdrInfo hdr = new HdrInfo();
+		hdr.map.put(0, "id");
 		hdr.map.put(1, "name");
 		hdr.map.put(2, "wid");
 		return hdr;
@@ -195,11 +229,11 @@ public class InputFunctionTests  extends NewBDDBase {
 	public void init() {
 		this.dao = this.createDao();
 		this.delia = dao.getDelia();
-		String src = buildSrcOneToOne();
+		String src = buildSrc();
 		this.session = delia.beginSession(src);
 		this.registry = session.getExecutionContext().registry;
 	}
-	private String buildSrcOneToOne() {
+	private String buildSrc() {
 		String src = " type Customer struct {id int unique, wid int, name string } end";
 		return src;
 	}
@@ -210,12 +244,6 @@ public class InputFunctionTests  extends NewBDDBase {
 		return new DeliaDao(delia);
 	}
 
-	private String buildSrc() {
-		String src = "type Flight struct {field1 int unique, field2 int } end";
-		src += "\n insert Flight {field1: 1, field2: 10}";
-		src += "\n insert Flight {field1: 2, field2: 20}";
-		return src;
-	}
 
 	@Override
 	public DBInterface createForTest() {

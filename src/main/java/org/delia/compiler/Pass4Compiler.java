@@ -10,7 +10,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
 import org.delia.relation.RelationCardinality;
-import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.runner.InternalCompileState;
 import org.delia.type.DStructType;
