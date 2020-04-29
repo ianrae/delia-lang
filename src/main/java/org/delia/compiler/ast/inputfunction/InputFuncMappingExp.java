@@ -3,11 +3,11 @@ package org.delia.compiler.ast.inputfunction;
 import org.delia.compiler.ast.ExpBase;
 import org.delia.compiler.ast.IdentExp;
 
-public class InputFuncStatementExp extends ExpBase {
+public class InputFuncMappingExp extends ExpBase {
 	public IdentExp inputField;
 	public IdentPairExp outputField;
 
-	public InputFuncStatementExp(int pos, IdentExp inputExp, IdentPairExp outputExp) {
+	public InputFuncMappingExp(int pos, IdentExp inputExp, IdentPairExp outputExp) {
 		super(pos);
 		this.inputField = inputExp;
 		this.outputField = outputExp;

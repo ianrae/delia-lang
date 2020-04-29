@@ -10,7 +10,7 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
-import org.delia.compiler.ast.inputfunction.InputFuncStatementExp;
+import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.parser.InputFunctionParser;
 import org.delia.compiler.parser.NameAndFuncParser;
@@ -52,7 +52,7 @@ public class InputFunctionParserTests  extends NewBDDBase {
 
 	private void chkFnStatement(InputFunctionDefStatementExp infnExp, int i, String expected, String s2, String s3) {
 		Exp z = infnExp.bodyExp.statementL.get(i);
-		InputFuncStatementExp stexp = (InputFuncStatementExp) z;
+		InputFuncMappingExp stexp = (InputFuncMappingExp) z;
 		assertEquals(expected, stexp.inputField.name());
 		assertEquals(s2, stexp.outputField.val1);
 		assertEquals(s3, stexp.outputField.val2);

@@ -10,7 +10,7 @@ import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncHeaderExp;
-import org.delia.compiler.ast.inputfunction.InputFuncStatementExp;
+import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionBodyExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 
@@ -23,12 +23,12 @@ public class InputFunctionParser extends ParserBase {
 //					NameAndFuncParser.parseNameAndFuncs()
 //					);
 //		}
-		public static Parser<Exp> fnBodyStatements() {
+		private static Parser<Exp> fnBodyStatements() {
 			return Parsers.sequence(ident(), term("->"), identPair(),
-					(IdentExp field, Token tok, IdentPairExp output) -> new InputFuncStatementExp(99, field, output));
+					(IdentExp field, Token tok, IdentPairExp output) -> new InputFuncMappingExp(99, field, output));
 		}
 		
-		public static Parser<InputFunctionBodyExp> fnBody() {
+		private static Parser<InputFunctionBodyExp> fnBody() {
 			return Parsers.or(fnBodyStatements().many().sepBy(term(","))).
 					map(new org.codehaus.jparsec.functors.Map<List<List<Exp>>, InputFunctionBodyExp>() {
 						@Override
@@ -38,21 +38,21 @@ public class InputFunctionParser extends ParserBase {
 					});
 		}
 		
-		public static Parser<StringExp> inputFunc() {
+		private static Parser<StringExp> inputFunc() {
 			return Parsers.sequence(term("input"), term("function"), 
 					(Token fn, Token tok) -> new StringExp(99, ""));
 		}
 		
-		public static Parser<IdentPairExp> identPair() {
+		private static Parser<IdentPairExp> identPair() {
 			return Parsers.sequence(ident(), term("."), ident(), 
 					(IdentExp exp1, Token tok, IdentExp exp2) -> new IdentPairExp(99, exp1.name(), exp2.name()));
 		}
-		public static Parser<IdentPairExp> identPairArg() {
+		private static Parser<IdentPairExp> identPairArg() {
 			return Parsers.sequence(ident(), ident(), 
 					(IdentExp exp1, IdentExp exp2) -> new IdentPairExp(99, exp1.name(), exp2.name()));
 		}
 
-		public static Parser<InputFuncHeaderExp> inputFn1() {
+		private static Parser<InputFuncHeaderExp> inputFn1() {
 			return Parsers.sequence(inputFunc(), ident(), term("("), identPairArg().many().sepBy(term(",")), term(")"), 
 					(StringExp fn, IdentExp exp1, Token tok, List<List<IdentPairExp>> args, Token tok2) -> new InputFuncHeaderExp(exp1, args));
 		}
