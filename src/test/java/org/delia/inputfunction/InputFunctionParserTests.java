@@ -224,8 +224,37 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		String src = "input function foo(Customer c) {}";
 		InputFunctionDefStatementExp infnExp = parse(src);
 		assertEquals("foo", infnExp.funcName);
+		assertEquals(1, infnExp.argsL.size());
+		chkArg(infnExp, 0, "Customer", "c");
 	}
 	
+	@Test
+	public void test2() {
+		String src = "input function foo(Customer c, Address a) { 3, 'abc'}";
+		InputFunctionDefStatementExp infnExp = parse(src);
+		assertEquals("foo", infnExp.funcName);
+		assertEquals(2, infnExp.argsL.size());
+		chkArg(infnExp, 0, "Customer", "c");
+		chkArg(infnExp, 1, "Address", "a");
+		
+		assertEquals(2, infnExp.bodyExp.statementL.size());
+		chkTlang(infnExp, 0, "3");
+		chkTlang(infnExp, 1, "abc");
+	}
+
+
+	private void chkTlang(InputFunctionDefStatementExp infnExp, int i, String expected) {
+		Exp z = infnExp.bodyExp.statementL.get(i);
+		String s = z.strValue();
+		assertEquals(expected, s);
+	}
+
+	private void chkArg(InputFunctionDefStatementExp infnExp, int i, String expected, String expected2) {
+		IdentPairExp pairExp = infnExp.argsL.get(i);
+		assertEquals(expected, pairExp.typeName());
+		assertEquals(expected2, pairExp.argName());
+	}
+
 
 
 	// --
