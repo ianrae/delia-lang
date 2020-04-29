@@ -3,6 +3,7 @@ package org.delia.inputfunction;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.delia.api.Delia;
@@ -20,8 +21,12 @@ import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.filter.OP;
 import org.delia.db.memdb.filter.OpEvaluator;
 import org.delia.error.DeliaError;
+import org.delia.other.StringTrail;
+import org.delia.runner.DeliaException;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +41,7 @@ public class TLangTests  extends NewBDDBase {
 		public ScalarValueBuilder builder;
 	}
 	public interface TLangStatement {
+		String getName();
 		boolean evalCondition(DValue dval);
 		void execute(DValue value, TLangResult result, TLangContext ctx);
 	}
@@ -71,14 +77,12 @@ public class TLangTests  extends NewBDDBase {
 	}
 	public static class OpCondition implements Condition {
 		private OpEvaluator evaluator;
-		//		public OP op;
 
 		public OpCondition(OpEvaluator evaluator) {
 			this.evaluator = evaluator;
 		}
 		@Override
 		public boolean eval(DValue dval) {
-//			return dval == null || dval.asString().isEmpty();
 			return evaluator.match(dval);
 		}
 	}
@@ -91,14 +95,34 @@ public class TLangTests  extends NewBDDBase {
 		public boolean execute() {
 			if (left instanceof Integer) {
 				return doInteger((Integer)left, (Integer)right);
+			} else if (left instanceof Long) {
+				return doLong((Long)left, (Long)right);
+			} else if (left instanceof Double) {
+				return doDouble((Double)left, (Double) right);
 			} else if (left instanceof String) {
 				return doString((String)left, (String) right);
+			} else if (left instanceof Boolean) {
+				return doBoolean((Boolean)left, (Boolean)right);
+			} else if (left instanceof Date) {
+				return doDate((Date)left, (Date)right);
 			} else {
-				//!!!
+				DeliaExceptionHelper.throwError("tlang-unknown-type", "TLANG unkown type: %s", left.getClass().getSimpleName());
 				return false;
 			}
 		} 
 		
+		private boolean doBoolean(Boolean b1, Boolean b2) {
+			switch(op) {
+			case EQ:
+				return b1 == b2; 
+			case NEQ:
+				return b1 != b2; 
+			default:
+				DeliaExceptionHelper.throwError("tlang-unsupported-op", "TLANG unsupported op: %s (boolean)", op.name());
+				return false;
+			}
+		}
+
 		protected boolean doInteger(Integer n1, Integer n2) {
 			switch(op) {
 			case LT:
@@ -114,7 +138,46 @@ public class TLangTests  extends NewBDDBase {
 			case NEQ:
 				return n1.compareTo(n2) != 0; 
 			default:
-				return false; //err!
+				DeliaExceptionHelper.throwError("tlang-unsupported-op", "TLANG unsupported op: %s (int)", op.name());
+				return false;
+			}
+		}
+		protected boolean doLong(Long n1, Long n2) {
+			switch(op) {
+			case LT:
+				return n1.compareTo(n2) < 0; 
+			case LE:
+				return n1.compareTo(n2) <= 0; 
+			case GT:
+				return n1.compareTo(n2) > 0; 
+			case GE:
+				return n1.compareTo(n2) >= 0; 
+			case EQ:
+				return n1.compareTo(n2) == 0; 
+			case NEQ:
+				return n1.compareTo(n2) != 0; 
+			default:
+				DeliaExceptionHelper.throwError("tlang-unsupported-op", "TLANG unsupported op: %s (long)", op.name());
+				return false;
+			}
+		}
+		protected boolean doDouble(Double n1, Double n2) {
+			switch(op) {
+			case LT:
+				return n1.compareTo(n2) < 0; 
+			case LE:
+				return n1.compareTo(n2) <= 0; 
+			case GT:
+				return n1.compareTo(n2) > 0; 
+			case GE:
+				return n1.compareTo(n2) >= 0; 
+			case EQ:
+				return n1.compareTo(n2) == 0; 
+			case NEQ:
+				return n1.compareTo(n2) != 0; 
+			default:
+				DeliaExceptionHelper.throwError("tlang-unsupported-op", "TLANG unsupported op: %s (number)", op.name());
+				return false;
 			}
 		}
 		protected boolean doString(String s1, String s2) {
@@ -132,11 +195,15 @@ public class TLangTests  extends NewBDDBase {
 			case NEQ:
 				return s1.compareTo(s2) != 0; 
 			default:
-				return false; //err!
+				DeliaExceptionHelper.throwError("tlang-unsupported-op", "TLANG unsupported op: %s (string)", op.name());
+				return false;
 			}
-
 		}
-		
+		public boolean doDate(Date left, Date right) {
+			long n1 = left.getTime();
+			long n2 = right.getTime();
+			return doLong(n1, n2);
+		}
 	}
 	
 	
@@ -170,19 +237,49 @@ public class TLangTests  extends NewBDDBase {
 			}
 			
 			return innerEval.execute();
-//			String s1 = leftval.asString();
-//			String s2 = rightval.asString();
-//			return s1.equals(s2);
 		}
 		
 		private EvalSpec createInnerEval(DValue leftval, DValue rightval) {
-			switch(leftval.getType().getShape()) {
+			Shape shape = leftval.getType().getShape();
+			switch(shape) {
 			case INTEGER:
 			{
 				EvalSpec espec = new EvalSpec();
 				espec.op = op;
 				espec.left = leftval.asInt();
 				espec.right = rightval.asInt();
+				return espec;
+			}
+			case LONG:
+			{
+				EvalSpec espec = new EvalSpec();
+				espec.op = op;
+				espec.left = leftval.asLong();
+				espec.right = rightval.asLong();
+				return espec;
+			}
+			case NUMBER:
+			{
+				EvalSpec espec = new EvalSpec();
+				espec.op = op;
+				espec.left = leftval.asNumber();
+				espec.right = rightval.asNumber();
+				return espec;
+			}
+			case BOOLEAN:
+			{
+				EvalSpec espec = new EvalSpec();
+				espec.op = op;
+				espec.left = leftval.asBoolean();
+				espec.right = rightval.asBoolean();
+				return espec;
+			}
+			case DATE:
+			{
+				EvalSpec espec = new EvalSpec();
+				espec.op = op;
+				espec.left = leftval.asDate();
+				espec.right = rightval.asDate();
 				return espec;
 			}
 			case STRING:
@@ -193,21 +290,20 @@ public class TLangTests  extends NewBDDBase {
 				espec.right = rightval.asString();
 				return espec;
 			}
+			default:
+				DeliaExceptionHelper.throwError("tlang-unsupported-shape", "TLANG unsupported shape: %s", shape.name());
+				return null;
 			}
-			// TODO Auto-generated method stub
-			return null;
 		}
 
 		@Override
 		public void setRightVar(Object rightVar) {
 			this.rightVar = rightVar;
 		}
-
 		@Override
 		public void setNegFlag(boolean negFlag) {
 			this.negFlag = negFlag;
 		}
-		
 	}
 
 
@@ -225,6 +321,10 @@ public class TLangTests  extends NewBDDBase {
 		public boolean evalCondition(DValue dval) {
 			return cond.eval(dval);
 		}
+		@Override
+		public String getName() {
+			return "if";
+		}
 	}
 	public static class ElseIfStatement implements TLangStatement {
 		public Condition cond;
@@ -239,6 +339,10 @@ public class TLangTests  extends NewBDDBase {
 		public boolean evalCondition(DValue dval) {
 			return cond.eval(dval);
 		}
+		@Override
+		public String getName() {
+			return "elseif";
+		}
 	}
 	public static class EndIfStatement implements TLangStatement {
 		@Override
@@ -249,6 +353,10 @@ public class TLangTests  extends NewBDDBase {
 		public boolean evalCondition(DValue dval) {
 			return true;
 		}
+		@Override
+		public String getName() {
+			return "endif";
+		}
 	}
 
 
@@ -256,6 +364,7 @@ public class TLangTests  extends NewBDDBase {
 
 		private DTypeRegistry registry;
 		private ScalarValueBuilder scalarBuilder;
+		public StringTrail trail = new StringTrail();
 
 		public TLangRunner(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
@@ -264,6 +373,7 @@ public class TLangTests  extends NewBDDBase {
 		}
 
 		public TLangResult execute(TLangProgram program, DValue initialValue) {
+			trail = new StringTrail();
 
 			DValue dval = initialValue;
 			TLangResult res = new TLangResult();
@@ -274,12 +384,17 @@ public class TLangTests  extends NewBDDBase {
 					TLangContext ctx = new TLangContext();
 					ctx.builder = scalarBuilder;
 					res.ok = true;
+					trail.add(statement.getName());
 					statement.execute(dval, res, ctx);
 					if (! res.ok) {
 						break;
 					}
 					dval = (DValue) res.val;
 				} else {
+					if (statement instanceof IfStatement) {
+						trail.add(statement.getName());
+					}
+					
 					ipIndex = findNext(program, ipIndex);
 					if (ipIndex < 0) {
 						//err missing endif
@@ -297,7 +412,7 @@ public class TLangTests  extends NewBDDBase {
 			for(int ipIndex = ipIndexCurrent + 1; ipIndex < program.statements.size(); ipIndex++) {
 				TLangStatement statement = program.statements.get(ipIndex);
 				if (statement instanceof EndIfStatement || statement instanceof ElseIfStatement) {
-					return ipIndex;
+					return ipIndex - 1; //so elseif/endif get executed
 				}
 			}
 			return -1;
@@ -305,22 +420,56 @@ public class TLangTests  extends NewBDDBase {
 	}
 
 	public static abstract class TLangStatementBase implements TLangStatement {
+		protected String name;
+		
+		public TLangStatementBase(String name) {
+			this.name = name;
+		}
 		@Override
 		public abstract void execute(DValue value, TLangResult result, TLangContext ctx);
 		@Override
 		public boolean evalCondition(DValue dval) {
 			return true;
 		}
+		@Override
+		public String getName() {
+			return name;
+		}
 	}
-	public static class ToUpperStatement extends TLangStatementBase {
+	public static abstract class StringStatement extends TLangStatementBase {
+		public StringStatement(String name) {
+			super(name);
+		}
 		@Override
 		public void execute(DValue value, TLangResult result, TLangContext ctx) {
 			String s = value.asString();
-			s = s.toUpperCase();
+			s = executeStr(s, ctx);
 			result.val = ctx.builder.buildString(s);
+		}
+		protected abstract String executeStr(String s, TLangContext ctx);
+	}
+	public static class ToUpperStatement extends StringStatement {
+		public ToUpperStatement() {
+			super("toUpperCase");
+		}
+		@Override
+		protected String executeStr(String s, TLangContext ctx) {
+			return s.toUpperCase();
+		}
+	}
+	public static class TrimStatement extends StringStatement {
+		public TrimStatement() {
+			super("trim");
+		}
+		@Override
+		protected String executeStr(String s, TLangContext ctx) {
+			return s.trim();
 		}
 	}
 	public static class AddXStatement extends TLangStatementBase {
+		public AddXStatement() {
+			super("addX");
+		}
 		@Override
 		public void execute(DValue value, TLangResult result, TLangContext ctx) {
 			String s = value.asString();
@@ -331,6 +480,7 @@ public class TLangTests  extends NewBDDBase {
 	public static class ValueStatement extends TLangStatementBase {
 		private DValue dval;
 		public ValueStatement(DValue dval) {
+			super("value");
 			this.dval = dval;
 		}
 		@Override
@@ -351,6 +501,7 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("ABCX", dval.asString());
+		chkTrail(inFuncRunner, "toUpperCase;addX");
 	}
 
 	@Test
@@ -364,6 +515,7 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("abcX", dval.asString());
+		chkTrail(inFuncRunner, "if;endif;addX");
 	}
 	@Test
 	public void test2a() {
@@ -376,6 +528,7 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("ABCX", dval.asString());
+		chkTrail(inFuncRunner, "if;toUpperCase;endif;addX");
 	}
 	@Test
 	public void test3() {
@@ -388,6 +541,7 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("Z", dval.asString());
+		chkTrail(inFuncRunner, "if;value;endif");
 	}
 	@Test
 	public void test3a() {
@@ -400,6 +554,7 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("ZX", dval.asString());
+		chkTrail(inFuncRunner, "if;value;endif;addX");
 	}
 	@Test
 	public void test4IfTrue() {
@@ -412,6 +567,7 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("Z", dval.asString());
+		chkTrail(inFuncRunner, "if;value;endif");
 	}
 	@Test
 	public void test4IfFalse() {
@@ -424,8 +580,37 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals("something", dval.asString());
+		chkTrail(inFuncRunner, "if;endif");
 	}
 
+	// --
+	//	private DeliaDao dao;
+	private Delia delia;
+	private DeliaSession session;
+	private DTypeRegistry registry;
+	ScalarValueBuilder builder;
+
+	@Before
+	public void init() {
+		DeliaDao dao = this.createDao();
+		this.delia = dao.getDelia();
+		String src = buildSrc();
+		this.session = delia.beginSession(src);
+		this.registry = session.getExecutionContext().registry;
+		this.builder = delia.getFactoryService().createScalarValueBuilder(registry);
+	}
+	private String buildSrc() {
+		String src = " type Customer struct {id int unique, wid int, name string } end";
+		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+
+		return src;
+	}
+
+	private DeliaDao createDao() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		return new DeliaDao(delia);
+	}
 	private TLangProgram createProgram() {
 		TLangProgram prog = new TLangProgram();
 		prog.statements.add(new ToUpperStatement());
@@ -482,34 +667,11 @@ public class TLangTests  extends NewBDDBase {
 	}
 
 
-	// --
-	//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
-	private DTypeRegistry registry;
-	ScalarValueBuilder builder;
-
-	@Before
-	public void init() {
-		DeliaDao dao = this.createDao();
-		this.delia = dao.getDelia();
-		String src = buildSrc();
-		this.session = delia.beginSession(src);
-		this.registry = session.getExecutionContext().registry;
-		this.builder = delia.getFactoryService().createScalarValueBuilder(registry);
-	}
-	private String buildSrc() {
-		String src = " type Customer struct {id int unique, wid int, name string } end";
-		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
-
-		return src;
+	private void chkTrail(TLangRunner inFuncRunner, String expected) {
+		delia.getLog().log(inFuncRunner.trail.getTrail());
+		assertEquals(expected, inFuncRunner.trail.getTrail());
 	}
 
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
-	}
 
 
 	@Override
