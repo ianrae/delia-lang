@@ -313,8 +313,6 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		assocUpdateFrag.setValuesL.add("?");
 		assocUpdateFrag.fieldL.add(ff);
 	}
-
-
 	public void useAliases(boolean b) {
 		this.useAliases = b;
 	}
@@ -333,19 +331,9 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			genAssocTblInsertRows(insertFrag, false, mainKeyVal, info.farType, info.nearType, keyVal, info);
 		}
 		
-//		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
-//		int extra = statement.paramL.size() - startingNumParams;
-//		int k = cloneParams(statement, clonedL, extra);
-//		statement.paramL.add(keyVal);
 		insertFrag.paramStartIndex = statement.paramL.size();
 		statement.paramL.addAll(insertFrag.statement.paramL);
 		insertFrag.statement.paramL.clear();
-		//and again for mergeInto
-//		cloneParams(statement, clonedL, 1, 0);
-//		if (isPostgres) {
-//			int n = statement.paramL.size();
-//			statement.paramL.remove(n - 1);
-//		}
 	}
 	//TODO move to helper
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
@@ -368,6 +356,13 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		assocInsertFrag.fieldL.add(ff);
 		assocInsertFrag.statement.paramL.add(dval);
 	}
+	private void genxrow(UpdateStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {
+		TypePair tmpPair = new TypePair(assocFieldName, keyPair1.type);
+		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, tmpPair);
+		assocInsertFrag.setValuesL.add("?");
+		assocInsertFrag.fieldL.add(ff);
+		assocInsertFrag.statement.paramL.add(dval);
+	}
 	
 	public void assocCrudDelete(UpdateStatementFragment updateFrag, 
 			DeleteStatementFragment deleteFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
@@ -376,28 +371,53 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 		deleteFrag.paramStartIndex = statement.paramL.size();
 		
-//		updateFrag.assocDeleteFrag = deleteFrag;
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s == ?", "leftv", "right"); 
 		RawFragment rawFrag = new RawFragment(sc.str);
 		deleteFrag.whereL.add(rawFrag);
 		
 		if (reversed) {
-//			DValue dvalx = getLastParam(statement);
 			statement.paramL.add(keyVal);
 			statement.paramL.add(mainKeyVal);
 		} else {
 			statement.paramL.add(mainKeyVal);
 			statement.paramL.add(keyVal);
 		}
-		//and again for mergeInto
-//		insertFrag.paramStartIndex = statement.paramL.size() - 1;
-//		cloneParams(statement, clonedL, 1, 0);
-//		if (isPostgres) {
-//			int n = statement.paramL.size();
-//			statement.paramL.remove(n - 1);
-//		}
 	}
 	
+	public void assocCrudUpdate(UpdateStatementFragment updateFrag, 
+			UpdateStatementFragment innerUpdateFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
+			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
+		
+		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		innerUpdateFrag.paramStartIndex = statement.paramL.size();
+		
+		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		if (reversed) {
+			genxrow(innerUpdateFrag, "leftv", keyPair1, mainKeyVal);
+			genxrow(innerUpdateFrag, "rightv", keyPair2, keyVal);
+		} else {
+			genxrow(innerUpdateFrag, "leftv", keyPair1, keyVal);
+			genxrow(innerUpdateFrag, "rightv", keyPair2, mainKeyVal);
+		}
+		
+		StrCreator sc = new StrCreator();
+		sc.o(" %s = ? and %s == ?", "leftv", "right"); 
+		RawFragment rawFrag = new RawFragment(sc.str);
+		innerUpdateFrag.whereL.add(rawFrag);
+		
+		innerUpdateFrag.paramStartIndex = statement.paramL.size();
+		statement.paramL.addAll(innerUpdateFrag.statement.paramL);
+		innerUpdateFrag.statement.paramL.clear();
+		
+		if (reversed) {
+			statement.paramL.add(keyVal);
+			statement.paramL.add(mainKeyVal);
+		} else {
+			statement.paramL.add(mainKeyVal);
+			statement.paramL.add(keyVal);
+		}
+	}
 	
 }
