@@ -49,17 +49,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class MainInputFunctionTests  extends NewBDDBase {
-	
+
 	public static class ProgramSpec {
 		public TLangProgram prog;
 		public IdentPairExp outputField;
 	}
-	
+
 	public static class ProgramSet {
 		public Map<String,ProgramSpec> map = new ConcurrentHashMap<>();
 		public HdrInfo hdr;
 	}
-	
+
 	public class LineObjIterator implements Iterator<LineObj> {
 		private List<LineObj> list;
 		private int index;
@@ -68,7 +68,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			this.list = list;
 			this.index = 0;
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return index < list.size();
@@ -80,15 +80,15 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			return con;
 		}
 	}
-	
-	
-	
+
+
+
 	public static class TLangService extends ServiceBase {
 
 		public TLangService(FactoryService factorySvc) {
 			super(factorySvc);
 		}
-		
+
 		public ProgramSet buildProgram(String inputFnName, DeliaSession session) {
 			ProgramSet progset = new ProgramSet();
 			InputFunctionDefStatementExp infnExp = findFunction(inputFnName, session);
@@ -96,13 +96,13 @@ public class MainInputFunctionTests  extends NewBDDBase {
 				InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
 				TLangProgram program = new TLangProgram();
 				String infield = mappingExp.inputField.name();
-				
+
 				ProgramSpec spec = new ProgramSpec();
 				spec.outputField = mappingExp.outputField;
 				spec.prog = program;
 				progset.map.put(infield, spec);
 			}
-			
+
 			progset.hdr = this.createHdrFrom(infnExp);
 			return progset;
 		}
@@ -128,15 +128,13 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			}
 			return hdr;
 		}
-		
-		
-		public List<DValue> process(ProgramSet progset, LineObjIterator lineObjIter, Delia delia, DeliaSession session, List<DeliaError> totalErrorL) {
-			
+
+		public void process(ProgramSet progset, LineObjIterator lineObjIter, Delia delia, DeliaSession session, List<DeliaError> totalErrorL) {
 			while(lineObjIter.hasNext()) {
 				LineObj lineObj = lineObjIter.next();
-				
+
 				InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, session.getExecutionContext().registry);
-				
+
 				HdrInfo hdr = progset.hdr;
 				inFuncRunner.setProgramSet(progset);
 				List<DeliaError> errL = new ArrayList<>();
@@ -158,20 +156,38 @@ public class MainInputFunctionTests  extends NewBDDBase {
 					delia.getOptions().insertPrebuiltValueIterator = null;
 				}
 			}
-			return null;
 		}		
 	}
-	
-	
-	
+
+
+
 	@Test
 	public void test1() {
-		
+
 		TLangService tlangSvc = new TLangService(delia.getFactoryService());
-		
+
 		ProgramSet progset = tlangSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
+		LineObjIterator lineObjIter = createIter();
+		List<DeliaError> totalErrorL = new ArrayList<>();
+		tlangSvc.process(progset, lineObjIter, delia, session, totalErrorL);
+
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals("bob", dval.asStruct().getField("name").asString());
+		
+		long n  = dao.count("Customer");
+		assertEquals(1L, n);
+	}
+
+
+	private LineObjIterator createIter() {
+		List<LineObj> list = new ArrayList<>();
+		list.add(this.createLineObj());
+		return new LineObjIterator(list);
 	}
 
 
@@ -196,6 +212,13 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
 
 		return src;
+	}
+	
+	
+	private LineObj createLineObj() {
+		String[] ar = { "1", "33","bob" };
+		LineObj lineObj = new LineObj(ar, 1);
+		return lineObj;
 	}
 
 	private DeliaDao createDao() {
@@ -231,7 +254,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	}
 	private TLangProgram createProgram4(boolean bb) {
 		TLangProgram prog = new TLangProgram();
-		
+
 		DValueOpEvaluator eval = new DValueOpEvaluator(OP.EQ);
 		OpCondition cond = new OpCondition(eval);
 		DValue xx = builder.buildString("abc");
