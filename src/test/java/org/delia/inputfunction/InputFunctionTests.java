@@ -200,36 +200,36 @@ public class InputFunctionTests  extends NewBDDBase {
 		
 	}
 	
-	@Test
-	public void test() {
-		InputFunctionRunner inFuncRunner = createXConv();
-		inFuncRunner.foo();
-		
-		List<DeliaError> totalErrorL = new ArrayList<>();
-		HdrInfo hdr = createHdr();
-		LineObj lineObj = createLineObj();
-		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
-		assertEquals(0, totalErrorL.size());
-		assertEquals(1, dvals.size());
-		
-		//hmm. or do we do insert Customer {....}
-		//i think we can do insert Customer {} with empty dson and somehow
-		//pass in the already build dval runner.setAlreadyBuiltDVal()
-		
-		DValueIterator iter = new DValueIterator(dvals);
-		delia.getOptions().insertPrebuiltValueIterator = iter;
-		String s = String.format("insert Customer {}");
-		ResultValue res = delia.continueExecution(s, session);
-		assertEquals(true, res.ok);
-		delia.getOptions().insertPrebuiltValueIterator = null;
-		
-		DeliaDao dao = new DeliaDao(delia, session);
-		res = dao.queryByPrimaryKey("Customer", "1");
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals("bob", dval.asStruct().getField("name").asString());
-	}
-	
+//	@Test
+//	public void test() {
+//		InputFunctionRunner inFuncRunner = createXConv();
+//		inFuncRunner.foo();
+//		
+//		List<DeliaError> totalErrorL = new ArrayList<>();
+//		HdrInfo hdr = createHdr();
+//		LineObj lineObj = createLineObj();
+//		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
+//		assertEquals(0, totalErrorL.size());
+//		assertEquals(1, dvals.size());
+//		
+//		//hmm. or do we do insert Customer {....}
+//		//i think we can do insert Customer {} with empty dson and somehow
+//		//pass in the already build dval runner.setAlreadyBuiltDVal()
+//		
+//		DValueIterator iter = new DValueIterator(dvals);
+//		delia.getOptions().insertPrebuiltValueIterator = iter;
+//		String s = String.format("insert Customer {}");
+//		ResultValue res = delia.continueExecution(s, session);
+//		assertEquals(true, res.ok);
+//		delia.getOptions().insertPrebuiltValueIterator = null;
+//		
+//		DeliaDao dao = new DeliaDao(delia, session);
+//		res = dao.queryByPrimaryKey("Customer", "1");
+//		assertEquals(true, res.ok);
+//		DValue dval = res.getAsDValue();
+//		assertEquals("bob", dval.asStruct().getField("name").asString());
+//	}
+//	
 	@Test
 	public void test2() {
 		InputFunctionRunner inFuncRunner = createXConv();
