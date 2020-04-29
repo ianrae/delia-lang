@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -18,6 +19,7 @@ public class ExecutionState {
 	public DTypeRegistry registry;
 	public Map<String,ResultValue> varMap = new ConcurrentHashMap<>();
 	public Map<String,UserFunctionDefStatementExp> userFnMap = new ConcurrentHashMap<>();
+	public Map<String,InputFunctionDefStatementExp> inputFnMap = new ConcurrentHashMap<>();
 	public DeliaGeneratePhase generator;
 	public SprigService sprigSvc;
 	

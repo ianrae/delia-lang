@@ -20,6 +20,7 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UserFnCallExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
@@ -65,6 +66,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private QueryFuncOrFieldRunner qffRunner;
 		protected FetchRunnerImpl fetchRunner;
 		private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
+		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,String> activeUserFnMap = new HashMap<>(); //what's executing.  //ok for thread-safety
 		private ScalarBuilder scalarBuilder;
 		private SprigService sprigSvc;
@@ -90,6 +92,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			}
 			ctx.delcaredVarMap.putAll(this.varMap);
 			ctx.declaredUserFnMap.putAll(this.userFnMap);
+			ctx.declaredInputFnMap.putAll(this.inputFnMap);
 			return ctx;
 		}
 		@Override
@@ -99,6 +102,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ctx.registry = registry;
 			ctx.varMap.putAll(this.varMap);
 			ctx.userFnMap.putAll(this.userFnMap);
+			ctx.inputFnMap.putAll(this.inputFnMap);
 			ctx.generator = this.createGenerator();
 			ctx.sprigSvc = sprigSvc;
 			return ctx;
@@ -129,6 +133,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				this.registry = ctx.registry;
 				this.varMap = ctx.varMap;
 				this.userFnMap = ctx.userFnMap;
+				this.inputFnMap = ctx.inputFnMap;
 				this.sprigSvc = ctx.sprigSvc;
 			}
 			
@@ -190,6 +195,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				executeEndSource((EndSourceStatementExp)exp, res); //TODO: what is this??
 			} else if (exp instanceof ConfigureStatementExp) {
 				executeConfigureStatement((ConfigureStatementExp)exp, res);
+			} else if (exp instanceof InputFunctionDefStatementExp) {
+				executeInputFuncDefStatement((InputFunctionDefStatementExp)exp, res);
 			}
 			
 			return res;
@@ -222,6 +229,13 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private void executeUserFuncDefStatement(UserFunctionDefStatementExp exp, ResultValue res) {
 			//TODO pass2 should ensure same fn not defined twice
 			userFnMap.put(exp.funcName, exp);
+			res.ok = true;
+			res.shape = null;
+			res.val = null;
+		}
+		private void executeInputFuncDefStatement(InputFunctionDefStatementExp exp, ResultValue res) {
+			//TODO pass2 should ensure same fn not defined twice
+			inputFnMap.put(exp.funcName, exp);
 			res.ok = true;
 			res.shape = null;
 			res.val = null;
@@ -758,5 +772,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
 			this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
+		}
+		public Map<String, InputFunctionDefStatementExp> getInputFnMap() {
+			return inputFnMap;
 		}
 	}

@@ -14,6 +14,9 @@ import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
@@ -21,6 +24,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
+import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.type.DStructType;
@@ -92,10 +96,6 @@ public class InputFunctionTests  extends NewBDDBase {
 				}
 			}
 			return dvalL;
-		}
-		public boolean validate(List<DValue> dvals, List<DeliaError> totalErrorL) {
-			//to do. validationrunner
-			return true;
 		}
 
 		private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
@@ -178,6 +178,8 @@ public class InputFunctionTests  extends NewBDDBase {
 			}
 			return inputData;
 		}
+		
+		
 	}
 	
 	@Test
@@ -192,8 +194,6 @@ public class InputFunctionTests  extends NewBDDBase {
 		assertEquals(0, totalErrorL.size());
 		assertEquals(1, dvals.size());
 		
-		boolean b = inFuncRunner.validate(dvals, totalErrorL);
-		assertEquals(true, b);
 		//hmm. or do we do insert Customer {....}
 		//i think we can do insert Customer {} with empty dson and somehow
 		//pass in the already build dval runner.setAlreadyBuiltDVal()
@@ -212,6 +212,61 @@ public class InputFunctionTests  extends NewBDDBase {
 		assertEquals("bob", dval.asStruct().getField("name").asString());
 	}
 	
+	@Test
+	public void test2() {
+		InputFunctionRunner inFuncRunner = createXConv();
+		inFuncRunner.foo();
+		
+		delia.getLog().setLevel(LogLevel.DEBUG);
+		InputFunctionDefStatementExp inFnExp = findInputFn(session, "foo");
+		
+		List<DeliaError> totalErrorL = new ArrayList<>();
+		HdrInfo hdr = createHdrFrom(inFnExp);
+		LineObj lineObj = createLineObj();
+		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
+		chkNoErrors(totalErrorL);
+		assertEquals(1, dvals.size());
+		
+		//hmm. or do we do insert Customer {....}
+		//i think we can do insert Customer {} with empty dson and somehow
+		//pass in the already build dval runner.setAlreadyBuiltDVal()
+		
+		DValueIterator iter = new DValueIterator(dvals);
+		delia.getOptions().insertPrebuiltValueIterator = iter;
+		String s = String.format("insert Customer {}");
+		ResultValue res = delia.continueExecution(s, session);
+		assertEquals(true, res.ok);
+		delia.getOptions().insertPrebuiltValueIterator = null;
+		
+		DeliaDao dao = new DeliaDao(delia, session);
+		res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals("bob", dval.asStruct().getField("name").asString());
+	}
+
+	private void chkNoErrors(List<DeliaError> totalErrorL) {
+		for(DeliaError err: totalErrorL) {
+			delia.getLog().log("err: %s", err.toString());
+		}
+		assertEquals(0, totalErrorL.size());
+	}
+
+	private HdrInfo createHdrFrom(InputFunctionDefStatementExp inFnExp) {
+		HdrInfo hdr = new HdrInfo();
+		int index = 0;
+		for(Exp exp: inFnExp.bodyExp.statementL) {
+			InputFuncMappingExp mapping = (InputFuncMappingExp) exp;
+			hdr.map.put(index, mapping.inputField.name());
+			index++;
+		}
+		return hdr;
+	}
+
+	private InputFunctionDefStatementExp findInputFn(DeliaSession session2, String fnName) {
+		InputFunctionDefStatementExp infnExp = session2.getExecutionContext().inputFnMap.get(fnName);
+		return infnExp;
+	}
 
 	private LineObj createLineObj() {
 		String[] ar = { "1", "bob", "33" };
@@ -250,6 +305,8 @@ public class InputFunctionTests  extends NewBDDBase {
 	}
 	private String buildSrc() {
 		String src = " type Customer struct {id int unique, wid int, name string } end";
+		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+		
 		return src;
 	}
 
