@@ -203,7 +203,13 @@ public class InputFunctionTests  extends NewBDDBase {
 		String s = String.format("insert Customer {}");
 		ResultValue res = delia.continueExecution(s, session);
 		assertEquals(true, res.ok);
+		delia.getOptions().insertPrebuiltValueIterator = null;
 		
+		DeliaDao dao = new DeliaDao(delia, session);
+		res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals("bob", dval.asStruct().getField("name").asString());
 	}
 	
 
@@ -229,14 +235,14 @@ public class InputFunctionTests  extends NewBDDBase {
 
 
 	// --
-	private DeliaDao dao;
+//	private DeliaDao dao;
 	private Delia delia;
 	private DeliaSession session;
 	private DTypeRegistry registry;
 
 	@Before
 	public void init() {
-		this.dao = this.createDao();
+		DeliaDao dao = this.createDao();
 		this.delia = dao.getDelia();
 		String src = buildSrc();
 		this.session = delia.beginSession(src);
