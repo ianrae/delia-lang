@@ -26,16 +26,19 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
+import org.delia.error.ErrorTracker;
+import org.delia.error.SimpleErrorTracker;
 import org.delia.inputfunction.InputFunctionTests.HdrInfo;
 import org.delia.inputfunction.InputFunctionTests.InputFunctionRunner;
 import org.delia.inputfunction.InputFunctionTests.LineObj;
 import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
+import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.tlang.runner.TLangProgram;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -129,7 +132,8 @@ public class MainInputFunctionTests  extends NewBDDBase {
 
 		public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
 			InputFunctionResult fnResult = new InputFunctionResult();
-			InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry);
+			ErrorTracker localET = new SimpleErrorTracker(log);
+			InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET);
 			HdrInfo hdr = request.progset.hdr;
 			inFuncRunner.setProgramSet(request.progset);
 			
@@ -140,15 +144,18 @@ public class MainInputFunctionTests  extends NewBDDBase {
 				LineObj lineObj = lineObjIter.next();
 
 				List<DeliaError> errL = new ArrayList<>();
-				List<DValue> dvals = inFuncRunner.process(hdr, lineObj, errL); //one row
+				List<DValue> dvals = processLineObj(inFuncRunner, hdr, lineObj, errL); //one row
 				if (! errL.isEmpty()) {
 					log.logError("failed!");
 					fnResult.totalErrorL.addAll(errL);
 				} else {
 					for(DValue dval: dvals) {
-						log.logDebug("line%d: dval '%s'", lineNum, dval.getType().getName());
+						TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+						DValue inner = pair == null ? null : DValueHelper.getFieldValue(dval, pair.name);
+						
+						log.logDebug("line%d: dval '%s' %s", lineNum, dval.getType().getName(), inner == null ? "null" : inner.asString());
 						fnResult.numDValuesProcessed++;
-						executeInsert(dval, request, fnResult);
+						executeInsert(dval, request, fnResult, lineNum);
 					}
 				}
 				lineNum++;
@@ -157,15 +164,38 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			return fnResult;
 		}
 
-		private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult) {
+		private List<DValue> processLineObj(InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
+			List<DValue> dvals = null;
+			try {
+				dvals = inFuncRunner.process(hdr, lineObj, errL);
+			} catch (DeliaException e) {
+				DeliaError err = e.getLastError();
+				err.setLineAndPos(lineObj.lineNum, 0);
+				errL.add(err);
+			}
+			return dvals;
+		}
+
+		private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum) {
 			DValueIterator iter = new DValueIterator(dval);
 			request.delia.getOptions().insertPrebuiltValueIterator = iter;
 			String typeName = dval.getType().getName();
 			String s = String.format("insert %s {}", typeName);
-			ResultValue res = request.delia.continueExecution(s, request.session);
-			if (! res.ok) {
-				//err
-				fnResult.totalErrorL.addAll(res.errors);
+			
+			ResultValue res;
+			try {
+				res = request.delia.continueExecution(s, request.session);
+				if (! res.ok) {
+					//err
+					for(DeliaError err: res.errors) {
+						err.setLineAndPos(lineNum, 0);
+					}
+					fnResult.totalErrorL.addAll(res.errors);
+				}
+			} catch (DeliaException e) {
+				DeliaError err = e.getLastError();
+				err.setLineAndPos(lineNum, 0);
+				fnResult.totalErrorL.add(err);
 			}
 			request.delia.getOptions().insertPrebuiltValueIterator = null;
 		}		
@@ -174,11 +204,12 @@ public class MainInputFunctionTests  extends NewBDDBase {
 
 	@Test
 	public void test1() {
+		createDelia(false);
 		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = tlangSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
-		LineObjIterator lineObjIter = createIter(1);
+		LineObjIterator lineObjIter = createIter(1, true);
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
 		request.progset = progset;
@@ -186,6 +217,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
 		assertEquals(0, result.totalErrorL.size());
 		assertEquals(1, result.numRowsProcessed);
+		assertEquals(1, result.numDValuesProcessed);
 
 		DeliaDao dao = new DeliaDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
@@ -199,18 +231,20 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	
 	@Test
 	public void test2() {
+		createDelia(false);
 		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = tlangSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
-		LineObjIterator lineObjIter = createIter(2);
+		LineObjIterator lineObjIter = createIter(2, true);
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
 		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
 		assertEquals(0, result.totalErrorL.size());
-		assertEquals(1, result.numRowsProcessed);
+		assertEquals(2, result.numRowsProcessed);
+		assertEquals(2, result.numDValuesProcessed);
 
 		DeliaDao dao = new DeliaDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
@@ -220,28 +254,90 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		
 		long n  = dao.count("Customer");
 		assertEquals(2L, n);
+		
+		res = dao.queryByPrimaryKey("Customer", "2");
+		assertEquals(true, res.ok);
+		dval = res.getAsDValue();
+		assertEquals("bob", dval.asStruct().getField("name").asString());
 	}
 
+	@Test
+	public void test3Rule() {
+		createDelia(true);
+		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		assertEquals(3, progset.map.size());
+		
+		LineObjIterator lineObjIter = createIter(2,true);
+		InputFunctionRequest request = new InputFunctionRequest();
+		request.delia = delia;
+		request.progset = progset;
+		request.session = session;
+		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		assertEquals(2, result.totalErrorL.size());
+		assertEquals(2, result.numRowsProcessed);
+		assertEquals(2, result.numDValuesProcessed);
+		
+		DeliaError err = result.totalErrorL.get(0);
+		assertEquals(1, err.getLineNum());
+
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(null, dval);
+		
+		long n  = dao.count("Customer");
+		assertEquals(0L, n);
+	}
+	@Test
+	public void test4BadLineObj() {
+		createDelia(true);
+		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		assertEquals(3, progset.map.size());
+		
+		LineObjIterator lineObjIter = createIter(2,false);
+		InputFunctionRequest request = new InputFunctionRequest();
+		request.delia = delia;
+		request.progset = progset;
+		request.session = session;
+		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		assertEquals(2, result.totalErrorL.size());
+		assertEquals(2, result.numRowsProcessed);
+		assertEquals(0, result.numDValuesProcessed);
+		
+		DeliaError err = result.totalErrorL.get(0);
+		assertEquals(1, err.getLineNum());
+
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(null, dval);
+		
+		long n  = dao.count("Customer");
+		assertEquals(0L, n);
+	}
 
 	// --
 	//	private DeliaDao dao;
 	private Delia delia;
 	private DeliaSession session;
-	private DTypeRegistry registry;
-	ScalarValueBuilder builder;
 
 	@Before
 	public void init() {
 		DeliaDao dao = this.createDao();
 		this.delia = dao.getDelia();
-		String src = buildSrc();
+	}
+	private void createDelia(boolean withRules) {
+		String src = buildSrc(withRules);
 		this.session = delia.beginSession(src);
-		this.registry = session.getExecutionContext().registry;
-		this.builder = delia.getFactoryService().createScalarValueBuilder(registry);
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
 	}
-	private String buildSrc() {
-		String src = " type Customer struct {id int unique, wid int, name string } end";
+	private String buildSrc(boolean withRules) {
+		String rules = withRules ? "name.len() > 4" : "";
+		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rules);
 		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
 
 		return src;
@@ -257,24 +353,21 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		return new MemDBInterface();
 	}
 	
-	
-	private LineObjIterator createIter(int n) {
+	private LineObjIterator createIter(int n, boolean goodObj) {
 		List<LineObj> list = new ArrayList<>();
 		for(int i = 0; i < n; i++) {
-			list.add(this.createLineObj(i));
+			list.add(this.createLineObj(i + 1, goodObj));
 		}
 		return new LineObjIterator(list);
 	}
-	private LineObj createLineObj(int i) {
+	private LineObj createLineObj(int id, boolean goodObj) {
 		String[] ar = { "", "33","bob" };
-		ar[0] = String.format("%d", i);
+		ar[0] = String.format("%d", id);
+		if (! goodObj) {
+			ar[1] = "bbb"; //not an int
+		}
 		
 		LineObj lineObj = new LineObj(ar, 1);
 		return lineObj;
 	}
-
-
-
-
-
 }

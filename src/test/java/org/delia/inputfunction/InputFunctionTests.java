@@ -25,6 +25,8 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
+import org.delia.error.ErrorTracker;
+import org.delia.error.SimpleErrorTracker;
 import org.delia.inputfunction.MainInputFunctionTests.ProgramSet;
 import org.delia.inputfunction.MainInputFunctionTests.ProgramSpec;
 import org.delia.log.LogLevel;
@@ -35,6 +37,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
@@ -73,17 +76,14 @@ public class InputFunctionTests  extends NewBDDBase {
 		private ScalarValueBuilder scalarBuilder;
 		private ProgramSet progset;
 
-		public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry) {
+		public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET) {
 			super(factorySvc);
 			this.registry = registry;
 			this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
+			this.et = localET;
 		}
 		
-		public void foo() {
-			log.log("fffff");
-		}
-		
-		public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> totalErrorL) {
+		public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL) {
 			List<DValue> dvalL = new ArrayList<>();
 			
 			Map<String,String> inputData = createInputMap(hdr, lineObj);
@@ -97,7 +97,7 @@ public class InputFunctionTests  extends NewBDDBase {
 				if (errL.isEmpty()) {
 					dvalL.add(dval);
 				} else {
-					totalErrorL.addAll(errL);
+					lineErrorsL.addAll(errL);
 				}
 			}
 			return dvalL;
@@ -110,7 +110,8 @@ public class InputFunctionTests  extends NewBDDBase {
 				
 				DValue inner = null;
 				DType dtype = pair.type;
-				switch(dtype.getShape()) {
+				Shape shape = dtype.getShape();
+				switch(shape) {
 				case INTEGER:
 					inner = buildInt(input);
 					break;
@@ -119,6 +120,8 @@ public class InputFunctionTests  extends NewBDDBase {
 					break;
 				default:
 					//err not supported
+					String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
+					errL.add(new DeliaError("unsupported-input-field-type", msg));
 					break;
 				}
 				structBuilder.addField(pair.name, inner);
@@ -189,6 +192,8 @@ public class InputFunctionTests  extends NewBDDBase {
 				String fieldName = hdr.map.get(index);
 				if (fieldName == null) {
 					//err
+					String msg = String.format("line%d: column %d - no column header found", lineObj.lineNum, index);
+					et.add("unknown-input-field", msg);
 				} else {
 					inputData.put(fieldName, s);
 				}
@@ -236,18 +241,18 @@ public class InputFunctionTests  extends NewBDDBase {
 	@Test
 	public void test2() {
 		InputFunctionRunner inFuncRunner = createXConv();
-		inFuncRunner.foo();
 		
 		delia.getLog().setLevel(LogLevel.DEBUG);
 		InputFunctionDefStatementExp inFnExp = findInputFn(session, "foo");
 		
-		List<DeliaError> totalErrorL = new ArrayList<>();
 		HdrInfo hdr = createHdrFrom(inFnExp);
 		LineObj lineObj = createLineObj();
 		ProgramSet progset = createProgramSet(hdr, inFnExp);
 		inFuncRunner.setProgramSet(progset);
-		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
-		chkNoErrors(totalErrorL);
+		List<DeliaError> lineErrL = new ArrayList<>();
+		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL);
+		chkNoErrors(lineErrL);
+		chkNoErrors(localET.getErrors());
 		assertEquals(1, dvals.size());
 		
 		//hmm. or do we do insert Customer {....}
@@ -325,7 +330,8 @@ public class InputFunctionTests  extends NewBDDBase {
 
 
 	private InputFunctionRunner createXConv() {
-		return new InputFunctionRunner(delia.getFactoryService(), registry);
+		localET = new SimpleErrorTracker(delia.getLog());
+		return new InputFunctionRunner(delia.getFactoryService(), registry, localET);
 	}
 
 
@@ -334,6 +340,7 @@ public class InputFunctionTests  extends NewBDDBase {
 	private Delia delia;
 	private DeliaSession session;
 	private DTypeRegistry registry;
+	private ErrorTracker localET;
 
 	@Before
 	public void init() {
@@ -356,11 +363,8 @@ public class InputFunctionTests  extends NewBDDBase {
 		return new DeliaDao(delia);
 	}
 
-
 	@Override
 	public DBInterface createForTest() {
 		return new MemDBInterface();
 	}
-	
-	
 }
