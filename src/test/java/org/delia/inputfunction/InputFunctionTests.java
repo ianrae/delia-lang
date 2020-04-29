@@ -39,6 +39,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.junit.Before;
@@ -105,7 +106,15 @@ public class InputFunctionTests  extends NewBDDBase {
 
 		private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
 			StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
-			for(TypePair pair: data.structType.getAllFields()) {
+			
+			for(String outputFieldName: data.map.keySet()) {
+				TypePair pair = DValueHelper.findField(data.structType, outputFieldName);
+				if (pair == null) {
+					String msg = String.format("%s.%s - field not found. bad mapping", data.structType.getName(), outputFieldName);
+					errL.add(new DeliaError("bad-mapping-in-input-function", msg));
+					return null;
+				}
+				
 				Object input = data.map.get(pair.name);
 				
 				DValue inner = null;
@@ -168,6 +177,9 @@ public class InputFunctionTests  extends NewBDDBase {
 			for(String inputField: inputData.keySet()) {
 				String value = inputData.get(inputField);
 				IdentPairExp outPair = findOutputMapping(inputField);
+				if (outPair == null) {
+					continue;
+				}
 				//match with Customer!!
 				//run tlang...
 				data.map.put(outPair.argName(), value); //fieldname might be different
@@ -179,6 +191,8 @@ public class InputFunctionTests  extends NewBDDBase {
 			ProgramSpec spec = progset.map.get(inputField);
 			if (spec == null) {
 				//err
+				String msg = String.format("input field '%s' - no mapping found in input function", inputField);
+				et.add("bad-mapping-output-field", msg);
 				return null;
 			}
 			

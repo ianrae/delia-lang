@@ -337,14 +337,14 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	@Test
 	public void test4BadInputFunc() {
 //		createDelia(true);
-		String src = buildSrcBadInputFunc(true);
+		String src = buildSrcBadInputFunc(false);
 		this.session = delia.beginSession(src);
 		
 		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = tlangSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
-		LineObjIterator lineObjIter = createIter(2,false);
+		LineObjIterator lineObjIter = createIter(2,true);
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
 		request.progset = progset;
@@ -379,8 +379,9 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	}
 	private void createDelia(boolean withRules) {
 		String src = buildSrc(withRules);
-		this.session = delia.beginSession(src);
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
+		delia.getLog().log(src);
+		this.session = delia.beginSession(src);
 	}
 	private String buildSrc(boolean withRules) {
 		String rules = withRules ? "name.len() > 4" : "";
