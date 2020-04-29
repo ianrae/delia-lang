@@ -147,7 +147,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 				List<DValue> dvals = processLineObj(inFuncRunner, hdr, lineObj, errL); //one row
 				if (! errL.isEmpty()) {
 					log.logError("failed!");
-					fnResult.totalErrorL.addAll(errL);
+					addErrors(errL, fnResult.totalErrorL, lineNum);
 				} else {
 					for(DValue dval: dvals) {
 						TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
@@ -160,6 +160,10 @@ public class MainInputFunctionTests  extends NewBDDBase {
 				}
 				lineNum++;
 			}
+
+			if (localET.errorCount() > 0) {
+				fnResult.totalErrorL.addAll(localET.getErrors());
+			}
 			
 			return fnResult;
 		}
@@ -169,9 +173,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			try {
 				dvals = inFuncRunner.process(hdr, lineObj, errL);
 			} catch (DeliaException e) {
-				DeliaError err = e.getLastError();
-				err.setLineAndPos(lineObj.lineNum, 0);
-				errL.add(err);
+				addError(e, errL, lineObj.lineNum);
 			}
 			return dvals;
 		}
@@ -188,17 +190,29 @@ public class MainInputFunctionTests  extends NewBDDBase {
 				if (! res.ok) {
 					//err
 					for(DeliaError err: res.errors) {
-						err.setLineAndPos(lineNum, 0);
+						addError(err, fnResult.totalErrorL, lineNum);
 					}
-					fnResult.totalErrorL.addAll(res.errors);
 				}
 			} catch (DeliaException e) {
-				DeliaError err = e.getLastError();
-				err.setLineAndPos(lineNum, 0);
-				fnResult.totalErrorL.add(err);
+				addError(e, fnResult.totalErrorL, lineNum);
 			}
 			request.delia.getOptions().insertPrebuiltValueIterator = null;
 		}		
+		
+		private void addError(DeliaError err, List<DeliaError> errL, int lineNum) {
+			err.setLineAndPos(lineNum, 0);
+			errL.add(err);
+			log.logError("error: %s", err.toString());
+		}
+		private void addError(DeliaException e, List<DeliaError> errL, int lineNum) {
+			DeliaError err = e.getLastError();
+			addError(err, errL, lineNum);
+		}
+		private void addErrors(List<DeliaError> srcErrorL, List<DeliaError> errL, int lineNum) {
+			for(DeliaError err: srcErrorL) {
+				addError(err, errL, lineNum);
+			}
+		}
 	}
 
 
@@ -319,6 +333,39 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		long n  = dao.count("Customer");
 		assertEquals(0L, n);
 	}
+	
+	@Test
+	public void test4BadInputFunc() {
+//		createDelia(true);
+		String src = buildSrcBadInputFunc(true);
+		this.session = delia.beginSession(src);
+		
+		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		assertEquals(3, progset.map.size());
+		
+		LineObjIterator lineObjIter = createIter(2,false);
+		InputFunctionRequest request = new InputFunctionRequest();
+		request.delia = delia;
+		request.progset = progset;
+		request.session = session;
+		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		assertEquals(2, result.totalErrorL.size());
+		assertEquals(2, result.numRowsProcessed);
+		assertEquals(0, result.numDValuesProcessed);
+		
+		DeliaError err = result.totalErrorL.get(0);
+		assertEquals(1, err.getLineNum());
+
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(null, dval);
+		
+		long n  = dao.count("Customer");
+		assertEquals(0L, n);
+	}
 
 	// --
 	//	private DeliaDao dao;
@@ -339,6 +386,13 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		String rules = withRules ? "name.len() > 4" : "";
 		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rules);
 		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+
+		return src;
+	}
+	private String buildSrcBadInputFunc(boolean withRules) {
+		String rules = withRules ? "name.len() > 4" : "";
+		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rules);
+		src += " input function foo(Customer c) { ID -> c.xid, WID -> c.wid, NAME -> c.name}";
 
 		return src;
 	}
