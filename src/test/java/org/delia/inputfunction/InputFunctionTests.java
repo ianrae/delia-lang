@@ -15,6 +15,7 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
@@ -67,6 +68,7 @@ public class InputFunctionTests  extends NewBDDBase {
 
 		private DTypeRegistry registry;
 		private ScalarValueBuilder scalarBuilder;
+		private InputFunctionDefStatementExp inFnExp;
 
 		public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
@@ -156,12 +158,25 @@ public class InputFunctionTests  extends NewBDDBase {
 			ProcessedInputData data = new ProcessedInputData();
 			data.structType = (DStructType) registry.getType("Customer");
 			list.add(data);
-			for(String fieldName: inputData.keySet()) {
-				String value = inputData.get(fieldName); 
+			
+			for(String inputField: inputData.keySet()) {
+				String value = inputData.get(inputField);
+				IdentPairExp outPair = findOutputMapping(inputField);
+				//match with Customer!!
 				//run tlang...
-				data.map.put(fieldName, value); //fieldname might be different
+				data.map.put(outPair.argName(), value); //fieldname might be different
 			}
 			return list;
+		}
+
+		private IdentPairExp findOutputMapping(String inputField) {
+			for(Exp exp: this.inFnExp.bodyExp.statementL) {
+				InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
+				if (mappingExp.inputField.name().equals(inputField)) {
+					return mappingExp.outputField;
+				}
+			}
+			return null;
 		}
 
 		private Map<String, String> createInputMap(HdrInfo hdr, LineObj lineObj) {
@@ -178,7 +193,10 @@ public class InputFunctionTests  extends NewBDDBase {
 			}
 			return inputData;
 		}
-		
+
+		public void setFnExp(InputFunctionDefStatementExp inFnExp) {
+			this.inFnExp = inFnExp;
+		}
 		
 	}
 	
@@ -223,6 +241,7 @@ public class InputFunctionTests  extends NewBDDBase {
 		List<DeliaError> totalErrorL = new ArrayList<>();
 		HdrInfo hdr = createHdrFrom(inFnExp);
 		LineObj lineObj = createLineObj();
+		inFuncRunner.setFnExp(inFnExp);
 		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
 		chkNoErrors(totalErrorL);
 		assertEquals(1, dvals.size());
@@ -269,7 +288,7 @@ public class InputFunctionTests  extends NewBDDBase {
 	}
 
 	private LineObj createLineObj() {
-		String[] ar = { "1", "bob", "33" };
+		String[] ar = { "1", "33","bob" };
 		LineObj lineObj = new LineObj(ar, 1);
 		return lineObj;
 	}
