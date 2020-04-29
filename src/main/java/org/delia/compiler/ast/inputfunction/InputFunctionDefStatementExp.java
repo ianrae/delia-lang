@@ -1,8 +1,10 @@
 package org.delia.compiler.ast.inputfunction;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.ExpBase;
 
 public class InputFunctionDefStatementExp extends ExpBase {
@@ -15,6 +17,16 @@ public class InputFunctionDefStatementExp extends ExpBase {
 		this.funcName = hdrExp.fnName;
 		this.argsL = hdrExp.argsL;
 		this.bodyExp = body;
+	}
+	
+	public List<InputFuncMappingExp> getMappings() {
+		List<InputFuncMappingExp> list = new ArrayList<>();
+		for(Exp exp: bodyExp.statementL) {
+			if (exp instanceof InputFuncMappingExp) {
+				list.add((InputFuncMappingExp)exp);
+			}
+		}
+		return list;
 	}
 	
 	@Override

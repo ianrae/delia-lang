@@ -7,6 +7,9 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.inputfunction.IdentPairExp;
+import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
 import org.delia.relation.RelationCardinality;
@@ -43,10 +46,53 @@ public class Pass4Compiler extends CompilerPassBase {
 			} else if (exp instanceof UpdateStatementExp) {
 				UpdateStatementExp insExp = (UpdateStatementExp) exp;
 				chkAssocCrudUpdate(insExp, results);
+			} else if (exp instanceof InputFunctionDefStatementExp) {
+				InputFunctionDefStatementExp funcExp = (InputFunctionDefStatementExp) exp;
+				chkInputFunc(funcExp, results);
 			}
 		}
 		
 		return results;
+	}
+
+	private void chkInputFunc(InputFunctionDefStatementExp funcExp, CompilerResults results) {
+		for(InputFuncMappingExp mappingExp: funcExp.getMappings()) {
+			String alias = mappingExp.outputField.typeName();
+			String fieldName = mappingExp.outputField.argName();
+			
+			
+			String typeName = null;
+			for(IdentPairExp pairExp: funcExp.argsL) {
+				if (pairExp.val2.equals(alias)) {
+					typeName = pairExp.val1;
+				}
+			}
+			
+			if (typeName == null) {
+				String msg = String.format("input function '%s': unknown alias '%s'.", funcExp.funcName, alias);
+				DeliaError err = createError("input-function-unknown-alias", msg, funcExp);
+				results.errors.add(err);
+				return;
+			}			
+			
+			if (! registry.existsType(typeName)) {
+				String msg = String.format("input function '%s': unknown type '%s'.", funcExp.funcName, typeName);
+				DeliaError err = createError("input-function-unknown-typename", msg, funcExp);
+				results.errors.add(err);
+			} else {
+				DType dtype = registry.getType(typeName);
+				if (! dtype.isStructShape()) {
+					String msg = String.format("input function '%s': type '%s' is not a struct.", funcExp.funcName, typeName);
+					DeliaError err = createError("input-function-bad-typename", msg, funcExp);
+					results.errors.add(err);
+				}
+				if (! DValueHelper.fieldExists(dtype, fieldName)) {
+					String msg = String.format("input function '%s': unknown field '%s.%s'", funcExp.funcName, typeName, fieldName);
+					DeliaError err = createError("input-function-unknown-field", msg, funcExp);
+					results.errors.add(err);
+				}
+			}
+		}
 	}
 
 	private void chkAssocCrudInsert(InsertStatementExp insExp, CompilerResults results) {
