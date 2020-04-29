@@ -142,6 +142,10 @@ public class FragmentParserTestBase extends NewBDDBase {
 	protected void chkNumParams(Integer... args) {
 		assertEquals("len", args.length, numParamL.size());
 		int i = 0;
+//		for(Integer k : numParamL) {
+//			log.log("stat%d: %d", i, k);
+//		}
+		i = 0;
 		for(Integer k : numParamL) {
 			assertEquals(args[i++].intValue(), k.intValue());
 		}

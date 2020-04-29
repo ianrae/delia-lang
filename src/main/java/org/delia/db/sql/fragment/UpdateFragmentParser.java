@@ -272,7 +272,6 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			field2 = "rightv";
 		}
 
-		
 		//3 scenarios here:
 		// 1. updating all records in assoc table
 		// 2. updating where filter by primaykey only
