@@ -2,28 +2,38 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
+import org.delia.api.DeliaSessionImpl;
 import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
+import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.filter.OP;
+import org.delia.error.DeliaError;
+import org.delia.inputfunction.InputFunctionTests.HdrInfo;
+import org.delia.inputfunction.InputFunctionTests.LineObj;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.DValueOpEvaluator;
 import org.delia.tlang.runner.IsMissingCondition;
 import org.delia.tlang.runner.OpCondition;
-import org.delia.tlang.runner.TLangContext;
 import org.delia.tlang.runner.TLangProgram;
-import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
-import org.delia.tlang.statement.TLangStatementBase;
 import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.ValueStatement;
 import org.delia.type.DTypeRegistry;
@@ -32,111 +42,60 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TLangTests  extends NewBDDBase {
-	public static class AddXStatement extends TLangStatementBase {
-		public AddXStatement() {
-			super("addX");
-		}
-		@Override
-		public void execute(DValue value, TLangResult result, TLangContext ctx) {
-			String s = value.asString();
-			s += "X";
-			result.val = ctx.builder.buildString(s);
-		}
+public class MainInputFunctionTests  extends NewBDDBase {
+	
+	public static class ProgramSet {
+		public Map<String,TLangProgram> map = new ConcurrentHashMap<>();
 	}
+	
+	public static class TLangService extends ServiceBase {
+
+		public TLangService(FactoryService factorySvc) {
+			super(factorySvc);
+		}
+		
+		public ProgramSet buildProgram(String inputFnName, DeliaSession session) {
+			ProgramSet progset = new ProgramSet();
+			InputFunctionDefStatementExp infnExp = findFunction(inputFnName, session);
+			for(Exp exp: infnExp.bodyExp.statementL) {
+				InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
+				TLangProgram program = new TLangProgram();
+				String infield = mappingExp.inputField.name();
+				
+				progset.map.put(infield, program);
+			}
+			return progset;
+		}
+		private InputFunctionDefStatementExp findFunction(String inputFnName, DeliaSession session) {
+			DeliaSessionImpl sessionimpl = (DeliaSessionImpl) session;
+			for(Exp exp: sessionimpl.expL) {
+				if (exp instanceof InputFunctionDefStatementExp) {
+					InputFunctionDefStatementExp infnExp = (InputFunctionDefStatementExp) exp;
+					if (infnExp.funcName.equals(inputFnName)) {
+						return infnExp;
+					}
+				}
+			}
+			return null;
+		}
+		
+		public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> totalErrorL) {
+			return null;
+		}		
+	}
+	
+	
 	
 	@Test
 	public void test1() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram();
-
-		DValue initialValue = builder.buildString("abc");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("ABCX", dval.asString());
-		chkTrail(tlangRunner, "toUpperCase;addX");
+		
+		TLangService tlangSvc = new TLangService(delia.getFactoryService());
+		
+		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		assertEquals(3, progset.map.size());
+		
 	}
 
-	@Test
-	public void test2() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram2(false);
-
-		DValue initialValue = builder.buildString("abc");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("abcX", dval.asString());
-		chkTrail(tlangRunner, "if;endif;addX");
-	}
-	@Test
-	public void test2a() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram2(true);
-
-		DValue initialValue = builder.buildString("abc");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("ABCX", dval.asString());
-		chkTrail(tlangRunner, "if;toUpperCase;endif;addX");
-	}
-	@Test
-	public void test3() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram3(false);
-
-		DValue initialValue = builder.buildString("");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("Z", dval.asString());
-		chkTrail(tlangRunner, "if;value;endif");
-	}
-	@Test
-	public void test3a() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram3(true);
-
-		DValue initialValue = builder.buildString("");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("ZX", dval.asString());
-		chkTrail(tlangRunner, "if;value;endif;addX");
-	}
-	@Test
-	public void test4IfTrue() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram4(false);
-
-		DValue initialValue = builder.buildString("abc");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("Z", dval.asString());
-		chkTrail(tlangRunner, "if;value;endif");
-	}
-	@Test
-	public void test4IfFalse() {
-		TLangRunner tlangRunner = createTLangRunner();
-		TLangProgram prog = createProgram4(false);
-
-		DValue initialValue = builder.buildString("something");
-		TLangResult res = tlangRunner.execute(prog, initialValue);
-
-		assertEquals(true, res.ok);
-		DValue dval = (DValue) res.val;
-		assertEquals("something", dval.asString());
-		chkTrail(tlangRunner, "if;endif");
-	}
 
 	// --
 	//	private DeliaDao dao;
@@ -169,7 +128,7 @@ public class TLangTests  extends NewBDDBase {
 	private TLangProgram createProgram() {
 		TLangProgram prog = new TLangProgram();
 		prog.statements.add(new ToUpperStatement());
-		prog.statements.add(new AddXStatement());
+		prog.statements.add(new TLangTests.AddXStatement());
 		return prog;
 	}
 	private TLangProgram createProgram2(boolean bb) {
@@ -177,7 +136,7 @@ public class TLangTests  extends NewBDDBase {
 		prog.statements.add(new IfStatement(new BasicCondition(bb)));
 		prog.statements.add(new ToUpperStatement());
 		prog.statements.add(new EndIfStatement());
-		prog.statements.add(new AddXStatement());
+		prog.statements.add(new TLangTests.AddXStatement());
 		return prog;
 	}
 	private TLangProgram createProgram3(boolean bb) {
@@ -188,7 +147,7 @@ public class TLangTests  extends NewBDDBase {
 		prog.statements.add(new ValueStatement(x));
 		prog.statements.add(new EndIfStatement());
 		if (bb) {
-			prog.statements.add(new AddXStatement());
+			prog.statements.add(new TLangTests.AddXStatement());
 		}
 		return prog;
 	}
@@ -205,7 +164,7 @@ public class TLangTests  extends NewBDDBase {
 		prog.statements.add(new ValueStatement(x));
 		prog.statements.add(new EndIfStatement());
 		if (bb) {
-			prog.statements.add(new AddXStatement());
+			prog.statements.add(new TLangTests.AddXStatement());
 		}
 		return prog;
 	}
