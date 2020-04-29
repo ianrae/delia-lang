@@ -395,11 +395,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
 		if (reversed) {
-			genxrow(innerUpdateFrag, "leftv", keyPair1, mainKeyVal);
-			genxrow(innerUpdateFrag, "rightv", keyPair2, keyVal);
-		} else {
 			genxrow(innerUpdateFrag, "leftv", keyPair1, keyVal);
 			genxrow(innerUpdateFrag, "rightv", keyPair2, mainKeyVal);
+		} else {
+			genxrow(innerUpdateFrag, "leftv", keyPair1, mainKeyVal);
+			genxrow(innerUpdateFrag, "rightv", keyPair2, keyVal);
 		}
 		
 		StrCreator sc = new StrCreator();
