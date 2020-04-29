@@ -1,5 +1,6 @@
 package org.delia.runner;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,6 +13,11 @@ public class DValueIterator implements Iterator<DValue> {
 
 	public DValueIterator(List<DValue> list) {
 		this.list = list;
+		this.index = 0;
+	}
+	public DValueIterator(DValue dval) {
+		this.list = new ArrayList<>();
+		this.list.add(dval);
 		this.index = 0;
 	}
 	
