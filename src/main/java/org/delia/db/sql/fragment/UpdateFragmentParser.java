@@ -473,12 +473,12 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		
 		addIfNotNull(stgroup, updateFrag.assocUpdateFrag, save, nextStartIndex(updateFrag.assocDeleteFrag, updateFrag.assocMergeInfoFrag));
 		addIfNotNull(stgroup, updateFrag.assocDeleteFrag, save, nextStartIndex(updateFrag.assocMergeInfoFrag));
-		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, nextStartIndex(updateFrag.assocCrudInsertL));
+		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, nextStartIndex(null, updateFrag.assocCrudInsertL));
 		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
-			addIfNotNull(stgroup, insFrag, save, nextStartIndex(updateFrag.assocCrudInsertL));
+			addIfNotNull(stgroup, insFrag, save, nextStartIndex(insFrag, updateFrag.assocCrudInsertL));
 		}
 		for(DeleteStatementFragment delFrag: updateFrag.assocCrudDeleteL) {
-			addIfNotNull(stgroup, delFrag, save, nextStartIndexDel(updateFrag.assocCrudDeleteL));
+			addIfNotNull(stgroup, delFrag, save, nextStartIndexDel(delFrag, updateFrag.assocCrudDeleteL));
 		}
 		
 		if (updateFrag.doUpdateLast) {
@@ -497,18 +497,28 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 		return Integer.MAX_VALUE;
 	}
-	private int nextStartIndex(List<InsertStatementFragment> fragL) {
+	private int nextStartIndex(InsertStatementFragment currentFrag, List<InsertStatementFragment> fragL) {
+		boolean haveSeenCurrent = false;
 		for(StatementFragmentBase frag: fragL) {
-			if (frag != null) {
-				return frag.paramStartIndex;
+			if (frag == currentFrag) {
+				haveSeenCurrent = true;
+			} else if (frag != null) {
+				if (haveSeenCurrent) {
+					return frag.paramStartIndex;
+				}
 			}
 		}
 		return Integer.MAX_VALUE;
 	}
-	private int nextStartIndexDel(List<DeleteStatementFragment> fragL) {
+	private int nextStartIndexDel(DeleteStatementFragment currentFrag, List<DeleteStatementFragment> fragL) {
+		boolean haveSeenCurrent = false;
 		for(StatementFragmentBase frag: fragL) {
 			if (frag != null) {
-				return frag.paramStartIndex;
+				if (frag == currentFrag) {
+					haveSeenCurrent = true;
+				} else if (haveSeenCurrent) {
+					return frag.paramStartIndex;
+				}
 			}
 		}
 		return Integer.MAX_VALUE;

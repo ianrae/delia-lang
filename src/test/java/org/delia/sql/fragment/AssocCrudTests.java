@@ -253,8 +253,8 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and right == ?;");
 		chkLine(3, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and right == ?");
 		chkNoLine(4);
-		chkParams(selectFrag, 333,55, 100,55);
-		chkNumParams(2, 2);
+		chkParams(selectFrag, 333,55, 100,55, 101,55);
+		chkNumParams(2, 2, 2);
 	}
 	@Test
 	public void testId2OtherWayDelete() {
