@@ -88,6 +88,27 @@ public class InputFunctionParserTests  extends NewBDDBase {
 			return null;
 		}
 	}	
+	
+	public static class InputFuncStatementExp extends ExpBase {
+		public IdentExp inputField;
+		public IdentPairExp outputField;
+
+		public InputFuncStatementExp(int pos, IdentExp inputExp, IdentPairExp outputExp) {
+			super(pos);
+			this.inputField = inputExp;
+			this.outputField = outputExp;
+		}
+		
+		@Override
+		public String strValue() {
+			return String.format("%s -> %s.%s", inputField.name(), outputField.val1, outputField.val2);
+		}
+
+		@Override
+		public String toString() {
+			return strValue();
+		}
+	}	
 
 	public static class InputFunctionBodyExp extends ExpBase {
 		public List<Exp> statementL = new ArrayList<>();
@@ -179,11 +200,17 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	}	
 	
 	public static class InputFunctionParser extends ParserBase {
+		
+		
+//		public static Parser<Exp> fnBodyStatements() {
+//			return Parsers.or(ident(),
+//					LetParser.explicitValue(),
+//					NameAndFuncParser.parseNameAndFuncs()
+//					);
+//		}
 		public static Parser<Exp> fnBodyStatements() {
-			return Parsers.or(ident(),
-					LetParser.explicitValue(),
-					NameAndFuncParser.parseNameAndFuncs()
-					);
+			return Parsers.sequence(ident(), term("->"), identPair(),
+					(IdentExp field, Token tok, IdentPairExp output) -> new InputFuncStatementExp(99, field, output));
 		}
 		
 		public static Parser<InputFunctionBodyExp> fnBody() {
@@ -202,12 +229,16 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		}
 		
 		public static Parser<IdentPairExp> identPair() {
+			return Parsers.sequence(ident(), term("."), ident(), 
+					(IdentExp exp1, Token tok, IdentExp exp2) -> new IdentPairExp(99, exp1.name(), exp2.name()));
+		}
+		public static Parser<IdentPairExp> identPairArg() {
 			return Parsers.sequence(ident(), ident(), 
 					(IdentExp exp1, IdentExp exp2) -> new IdentPairExp(99, exp1.name(), exp2.name()));
 		}
 
 		public static Parser<InputFuncHeaderExp> inputFn1() {
-			return Parsers.sequence(inputFunc(), ident(), term("("), identPair().many().sepBy(term(",")), term(")"), 
+			return Parsers.sequence(inputFunc(), ident(), term("("), identPairArg().many().sepBy(term(",")), term(")"), 
 					(StringExp fn, IdentExp exp1, Token tok, List<List<IdentPairExp>> args, Token tok2) -> new InputFuncHeaderExp(exp1, args));
 		}
 		
@@ -230,7 +261,7 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	
 	@Test
 	public void test2() {
-		String src = "input function foo(Customer c, Address a) { 3, 'abc'}";
+		String src = "input function foo(Customer c, Address a) { field -> c.firstName, f2 -> c.z}";
 		InputFunctionDefStatementExp infnExp = parse(src);
 		assertEquals("foo", infnExp.funcName);
 		assertEquals(2, infnExp.argsL.size());
@@ -238,15 +269,17 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		chkArg(infnExp, 1, "Address", "a");
 		
 		assertEquals(2, infnExp.bodyExp.statementL.size());
-		chkTlang(infnExp, 0, "3");
-		chkTlang(infnExp, 1, "abc");
+		chkFnStatement(infnExp, 0, "field", "c", "firstName");
+		chkFnStatement(infnExp, 1, "f2", "c", "z");
 	}
 
 
-	private void chkTlang(InputFunctionDefStatementExp infnExp, int i, String expected) {
+	private void chkFnStatement(InputFunctionDefStatementExp infnExp, int i, String expected, String s2, String s3) {
 		Exp z = infnExp.bodyExp.statementL.get(i);
-		String s = z.strValue();
-		assertEquals(expected, s);
+		InputFuncStatementExp stexp = (InputFuncStatementExp) z;
+		assertEquals(expected, stexp.inputField.name());
+		assertEquals(s2, stexp.outputField.val1);
+		assertEquals(s3, stexp.outputField.val2);
 	}
 
 	private void chkArg(InputFunctionDefStatementExp infnExp, int i, String expected, String expected2) {
