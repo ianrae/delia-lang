@@ -21,6 +21,8 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
+import org.delia.runner.DValueIterator;
+import org.delia.runner.ResultValue;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -57,12 +59,12 @@ public class InputFunctionTests  extends NewBDDBase {
 		Map<String,Object> map = new HashMap<>();
 	}
 	
-	public static class XConv extends ServiceBase {
+	public static class InputFunctionRunner extends ServiceBase {
 
 		private DTypeRegistry registry;
 		private ScalarValueBuilder scalarBuilder;
 
-		public XConv(FactoryService factorySvc, DTypeRegistry registry) {
+		public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
 			this.registry = registry;
 			this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
@@ -180,21 +182,28 @@ public class InputFunctionTests  extends NewBDDBase {
 	
 	@Test
 	public void test() {
-		XConv xconv = createXConv();
-		xconv.foo();
+		InputFunctionRunner inFuncRunner = createXConv();
+		inFuncRunner.foo();
 		
 		List<DeliaError> totalErrorL = new ArrayList<>();
 		HdrInfo hdr = createHdr();
 		LineObj lineObj = createLineObj();
-		List<DValue> dvals = xconv.process(hdr, lineObj, totalErrorL);
+		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, totalErrorL);
 		assertEquals(0, totalErrorL.size());
 		assertEquals(1, dvals.size());
 		
-		boolean b = xconv.validate(dvals, totalErrorL);
+		boolean b = inFuncRunner.validate(dvals, totalErrorL);
 		assertEquals(true, b);
 		//hmm. or do we do insert Customer {....}
 		//i think we can do insert Customer {} with empty dson and somehow
 		//pass in the already build dval runner.setAlreadyBuiltDVal()
+		
+		DValueIterator iter = new DValueIterator(dvals);
+		delia.getOptions().insertPrebuiltValueIterator = iter;
+		String s = String.format("insert Customer {}");
+		ResultValue res = delia.continueExecution(s, session);
+		assertEquals(true, res.ok);
+		
 	}
 	
 
@@ -214,8 +223,8 @@ public class InputFunctionTests  extends NewBDDBase {
 	}
 
 
-	private XConv createXConv() {
-		return new XConv(delia.getFactoryService(), registry);
+	private InputFunctionRunner createXConv() {
+		return new InputFunctionRunner(delia.getFactoryService(), registry);
 	}
 
 

@@ -68,6 +68,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private Map<String,String> activeUserFnMap = new HashMap<>(); //what's executing.  //ok for thread-safety
 		private ScalarBuilder scalarBuilder;
 		private SprigService sprigSvc;
+		private DValueIterator insertPrebuiltValueIterator;
 
 		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
 			super(factorySvc);
@@ -399,6 +400,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private ConversionResult buildValue(DStructType dtype, DsonExp dsonExp) {
 			ConversionResult cres = new ConversionResult();
 			cres.localET = new SimpleErrorTracker(log);
+			if (insertPrebuiltValueIterator != null) {
+				cres.dval = insertPrebuiltValueIterator.next();
+				return cres;
+			}
+			
 			//TODO need local error tracker!!
 			
 			VarEvaluator varEvaluator = this;
@@ -748,5 +754,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public SprigService getSprigSvc() {
 			return sprigSvc;
+		}
+		@Override
+		public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
+			this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
 		}
 	}
