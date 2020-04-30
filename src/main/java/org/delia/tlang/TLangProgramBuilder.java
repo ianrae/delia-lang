@@ -39,6 +39,7 @@ public class TLangProgramBuilder extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private ScalarValueBuilder builder;
+	private TLangStatement additionalStatement;
 
 	public TLangProgramBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -58,6 +59,10 @@ public class TLangProgramBuilder extends ServiceBase {
 			TLangStatement statement = parseStatement(exp);
 			if (statement != null) {
 				program.statements.add(statement);
+				if (additionalStatement != null) {
+					program.statements.add(additionalStatement);
+					additionalStatement = null;
+				}
 			}
 		}
 
@@ -129,6 +134,10 @@ public class TLangProgramBuilder extends ServiceBase {
 		} else if (exp instanceof IfStatementExp) {
 			IfStatementExp ifexp = (IfStatementExp) exp;
 			Condition cond = buildCondition(ifexp); //new BasicCondition(true); //!!!
+			
+			//and the body
+			this.additionalStatement = this.parseStatement(ifexp.statement); //** recursion **
+			
 			if (ifexp.isIf) {
 				return new IfStatement(cond);
 			} else {

@@ -10,7 +10,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
-import org.delia.runner.VarEvaluator;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.tlang.runner.TLangVarEvaluator;
@@ -147,6 +146,7 @@ public class InputFunctionRunner extends ServiceBase {
 				if (!res.ok) {
 					log.log("ltang failed!");
 				}
+				log.log("trail: %s", tlangRunner.trail.getTrail());
 				DValue finalValue = (DValue) res.val;
 				value = finalValue.asString();
 			}
