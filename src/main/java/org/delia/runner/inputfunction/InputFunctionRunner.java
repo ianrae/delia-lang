@@ -11,7 +11,6 @@ import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.inputfunction.MainInputFunctionTests;
-import org.delia.inputfunction.ProcessedInputData;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;

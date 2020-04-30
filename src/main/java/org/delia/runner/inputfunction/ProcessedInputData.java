@@ -1,4 +1,4 @@
-package org.delia.inputfunction;
+package org.delia.runner.inputfunction;
 
 import java.util.HashMap;
 import java.util.Map;
