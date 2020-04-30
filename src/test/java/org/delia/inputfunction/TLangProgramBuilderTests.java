@@ -166,6 +166,11 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 		}
 
 		private Condition buildCondition(IfStatementExp ifexp) {
+			if (ifexp.condition instanceof BooleanExp) {
+				BooleanExp bexp = (BooleanExp) ifexp.condition;
+				return new BasicCondition(bexp.val);
+			}
+			
 			FilterOpExp filter = (FilterOpExp) ifexp.condition;
 			OP op = OP.createFromString(filter.op);
 			
