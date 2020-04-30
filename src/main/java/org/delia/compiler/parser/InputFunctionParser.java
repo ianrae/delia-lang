@@ -36,7 +36,7 @@ public class InputFunctionParser extends ParserBase {
 	}
 
 	private static Parser<TLangBodyExp> tlangBody1() {
-		return Parsers.sequence(term("using"), term("{"), tlangBody(), term("{"),
+		return Parsers.sequence(term("using"), term("{"), tlangBody(), term("}"),
 				(Token tok, Token tok2, TLangBodyExp body, Token tok3) -> body);
 	}
 
