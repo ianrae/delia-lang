@@ -56,6 +56,7 @@ public static class NameAndFuncParser2 extends ParserBase {
 			});
 		}
 		private static Parser<XNAFSingleExp> fieldOrFn() {
+//			return Parsers.or(ruleFn1(), ruleFn1NoArg()); 
 			return Parsers.or(ruleFn1(), ruleFn1NoArg()); 
 		}
 		private static Parser<XNAFSingleExp> ruleFn2() {
@@ -74,7 +75,9 @@ public static class NameAndFuncParser2 extends ParserBase {
 	
 	@Test
 	public void test() {
-		XNAFMultiExp z = parse("x(5)");
+		XNAFMultiExp z = parse("x");
+		XNAFMultiExp z2 = parse("x(5)");
+		XNAFMultiExp z3 = parse("x.y(5)");
 	}
 	
 

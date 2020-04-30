@@ -20,6 +20,7 @@ import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.ast.inputfunction.TLangBodyExp;
 import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.compiler.parser.InputFunctionParser;
 import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.TerminalParser;
@@ -91,24 +92,23 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	@Test
 	public void testTLangIdent() {
 		chkTLangIdent("x", "x");
-//		chkTLangIdent("x.y(5)", "x", "5");
-//		chkTLangIdent("x(5)", "x", "5");
+		chkTLangIdent("x.y(5)", "x", "5");
+		chkTLangIdent("x(5)", "x", "5");
 	}
 
 	private void chkTLangIdent(String tlang, String expected, String...args) {
 		TLangBodyExp texp = doTLang(tlang);
 		
-		IdentExp x1 = (IdentExp) texp.statementL.get(0);
-		assertEquals(expected, x1.val);
+		XNAFMultiExp x1 = (XNAFMultiExp) texp.statementL.get(0);
+		assertEquals(expected, x1.qfeL.get(0).funcName);
 		if (args.length == 0) {
 			chkStatementSize(texp, 1);
 		} else {
-			chkStatementSize(texp, 2);
-			XNAFMultiExp x2 = (XNAFMultiExp) texp.statementL.get(1);
+			chkStatementSize(texp, 1);
+			XNAFMultiExp x2 = (XNAFMultiExp) texp.statementL.get(0);
 			for(String arg: args) {
-				assertEquals("x", x1.name());
-				assertEquals("y", x2.qfeL.get(0).funcName);
-
+				XNAFSingleExp sexp = x2.qfeL.get(0);
+				assertEquals(arg, sexp.argL.get(0).strValue());
 			}
 		}
 		

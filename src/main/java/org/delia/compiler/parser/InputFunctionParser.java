@@ -19,7 +19,7 @@ public class InputFunctionParser extends ParserBase {
 
 
 	public static Parser<Exp> tlangBodyStatements() {
-		return Parsers.or(ident(),
+		return Parsers.or(
 				LetParser.explicitValue(),
 				NameAndFuncParser.parseNameAndFuncs()
 				);
