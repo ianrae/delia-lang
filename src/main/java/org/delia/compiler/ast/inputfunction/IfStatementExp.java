@@ -7,11 +7,13 @@ public class IfStatementExp extends ExpBase {
 
 	public Exp condition;
 	public Exp statement;
+	public boolean isIf; //true means if, false means elseif
 
-	public IfStatementExp(int pos, Exp cond, Exp statement) {
+	public IfStatementExp(int pos, Exp cond, Exp statement, boolean isIf) {
 		super(pos);
 		this.condition = cond;
 		this.statement = statement;
+		this.isIf = isIf; 
 	}
 	
 	@Override

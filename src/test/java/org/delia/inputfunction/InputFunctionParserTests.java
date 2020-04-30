@@ -10,7 +10,6 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
@@ -35,7 +34,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class InputFunctionParserTests  extends NewBDDBase {
-	
 	
 	@Test
 	public void test() {
