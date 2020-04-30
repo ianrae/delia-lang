@@ -9,6 +9,8 @@ import org.delia.tlang.statement.AbbreviateStatement;
 import org.delia.tlang.statement.AsDateStatement;
 import org.delia.tlang.statement.CombineStatement;
 import org.delia.tlang.statement.FailsStatement;
+import org.delia.tlang.statement.SubstringAfterStatement;
+import org.delia.tlang.statement.SubstringBeforeStatement;
 import org.delia.tlang.statement.SubstringStatement;
 import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.TrimStatement;
@@ -57,6 +59,16 @@ public class TLangStatementFactory extends ServiceBase {
 		}
 		case "fail":
 			return new FailsStatement();
+		case "substringBefore":
+		{
+			Exp arg1 = getArg(fieldOrFn, 0, true);
+			return new SubstringBeforeStatement(arg1);
+		}
+		case "substringAfter":
+		{
+			Exp arg1 = getArg(fieldOrFn, 0, true);
+			return new SubstringAfterStatement(arg1);
+		}
 		default:
 			DeliaExceptionHelper.throwError("tlang-unknown-fn", "Unknown function '%s'", fnName);
 		}

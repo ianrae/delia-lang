@@ -95,6 +95,18 @@ public class DataImportServiceTests  extends NewBDDBase {
 		buildAndRun("substring(0,1)", lineObjIter);
 		chkCustomer(1, "b");
 	}
+	@Test
+	public void testSubstringBefore() {
+		LineObjIterator lineObjIter = createIter(1, "apple tree");
+		buildAndRun("substringBefore('tree')", lineObjIter);
+		chkCustomer(1, "apple ");
+	}
+	@Test
+	public void testSubstringAfter() {
+		LineObjIterator lineObjIter = createIter(1, "apple tree");
+		buildAndRun("substringAfter('apple')", lineObjIter);
+		chkCustomer(1, " tree");
+	}
 	
 	@Test
 	public void testUpper() {
