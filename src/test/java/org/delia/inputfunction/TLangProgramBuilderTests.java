@@ -15,12 +15,10 @@ import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.inputfunction.EndIfStatementExp;
-import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.IfStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionBodyExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
-import org.delia.compiler.ast.inputfunction.TLangBodyExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.compiler.parser.InputFunctionParser;
@@ -33,6 +31,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.runner.DeliaException;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.Condition;
 import org.delia.tlang.runner.TLangProgram;
@@ -42,8 +41,10 @@ import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
 import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.ValueStatement;
+import org.delia.tlang.statement.VariableStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +76,36 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 					program.statements.add(statement);
 				}
 			}
+			
+			validateProgram(program);
 			return program;
+		}
+
+		private void validateProgram(TLangProgram program) {
+			boolean inIf = false;
+			for(TLangStatement statement: program.statements) {
+				if (statement instanceof IfStatement) {
+					if (inIf) {
+						DeliaExceptionHelper.throwError("tlang-nested-if-not-allowed", "Nested if statements not allowed in TLANG");
+					} 
+					inIf = true;
+				} else if (statement instanceof ElseIfStatement) {
+					if (!inIf) {
+						DeliaExceptionHelper.throwError("tlang-missing-if", "elseif without a preceeding if statement.");
+					}
+				} else if (statement instanceof EndIfStatement) {
+					if (!inIf) {
+						DeliaExceptionHelper.throwError("tlang-missing-if", "endif without a preceeding if statement.");
+					}
+					inIf = false;
+				}
+			}
+			
+			if (inIf) {
+				DeliaExceptionHelper.throwError("tlang-missing-endif", "if without an endif statement.");
+			}
+			
+			
 		}
 
 		private TLangStatement parseStatement(Exp exp) {
@@ -91,7 +121,7 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 					return new ToUpperStatement(); //fix!!
 				} else {
 					//var reference
-					return null;
+					return new VariableStatement(fieldOrFn.funcName);
 				}
 			} else if (exp instanceof IntegerExp) {
 				DValue dval = builder.buildInt(((IntegerExp) exp).val);
@@ -128,26 +158,31 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 	}
 	
 	@Test
-	public void testTLang2() {
-		InputFunctionDefStatementExp infnExp = doTLang("35");
-		TLangProgramBuilder programBuilder = new TLangProgramBuilder(delia.getFactoryService(), registry);
-
-		InputFunctionBodyExp body = infnExp.bodyExp;
-		InputFuncMappingExp mappingExp = (InputFuncMappingExp) body.statementL.get(0);
-		TLangProgram program = programBuilder.build(mappingExp);
-		assertEquals(1, program.statements.size());
-		ValueStatement statement = (ValueStatement) program.statements.get(0);
+	public void test1() {
+		ValueStatement statement = buildTLang("35", 1, ValueStatement.class);
 		assertEquals(35, statement.getDVal().asInt());
 	}
-		
-		
-	private InputFunctionDefStatementExp doTLang(String tlang) {
-		String src = String.format("input function foo(Customer c, Address a) { field -> c.firstName using { %s }}", tlang);
-		InputFunctionDefStatementExp infnExp = parse(src);
-		return infnExp;
+	@Test
+	public void testVar() {
+		VariableStatement statement = buildTLang("zz", 1, VariableStatement.class);
+		assertEquals("zz", statement.getVarName());
 	}
-
-
+	@Test
+	public void testIf() {
+		IfStatement statement = buildTLang("if true then zz,endif", 2, IfStatement.class);
+		assertEquals("if", statement.getName());
+		
+		EndIfStatement stat2 = (EndIfStatement) recentProgram.statements.get(1);
+		assertEquals("endif", stat2.getName());
+	}
+	@Test(expected=DeliaException.class)
+	public void testIfMissingEndif() {
+		IfStatement statement = buildTLang("if true then zz", 2, IfStatement.class);
+		assertEquals("if", statement.getName());
+		
+		EndIfStatement stat2 = (EndIfStatement) recentProgram.statements.get(1);
+		assertEquals("endif", stat2.getName());
+	}
 
 
 	// --
@@ -155,6 +190,7 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 	private Delia delia;
 	private DeliaSession session;
 	private DTypeRegistry registry;
+	private TLangProgram recentProgram;
 
 	@Before
 	public void init() {
@@ -194,6 +230,23 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 	public DBInterface createForTest() {
 		return new MemDBInterface();
 	}
-	
+	private <T extends TLangStatement> T buildTLang(String tlang, int expectedSize, Class<T> clazz) {
+		InputFunctionDefStatementExp infnExp = doTLang(tlang);
+		TLangProgramBuilder programBuilder = new TLangProgramBuilder(delia.getFactoryService(), registry);
+
+		InputFunctionBodyExp body = infnExp.bodyExp;
+		InputFuncMappingExp mappingExp = (InputFuncMappingExp) body.statementL.get(0);
+		TLangProgram program = programBuilder.build(mappingExp);
+		recentProgram = program;
+		assertEquals(expectedSize, program.statements.size());
+		return (T)program.statements.get(0);
+	}
+	private InputFunctionDefStatementExp doTLang(String tlang) {
+		String src = String.format("input function foo(Customer c, Address a) { field -> c.firstName using { %s }}", tlang);
+		InputFunctionDefStatementExp infnExp = parse(src);
+		return infnExp;
+	}
+
+
 	
 }
