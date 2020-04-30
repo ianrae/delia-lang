@@ -3,6 +3,7 @@ package org.delia.tlang.runner;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.other.StringTrail;
+import org.delia.runner.VarEvaluator;
 import org.delia.tlang.statement.ElseIfStatement;
 import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
@@ -15,11 +16,15 @@ public class TLangRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ScalarValueBuilder scalarBuilder;
 	public StringTrail trail = new StringTrail();
+	private VarEvaluator varEvaluator;
 
 	public TLangRunner(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
+	}
+	public void setVarEvaluator(VarEvaluator varEvaluator) {
+		this.varEvaluator = varEvaluator;
 	}
 
 	public TLangResult execute(TLangProgram program, DValue initialValue) {
@@ -33,6 +38,8 @@ public class TLangRunner extends ServiceBase {
 			if (statement.evalCondition(dval)) {
 				TLangContext ctx = new TLangContext();
 				ctx.builder = scalarBuilder;
+				ctx.varEvaluator = varEvaluator;
+				
 				res.ok = true;
 				trail.add(statement.getName());
 				statement.execute(dval, res, ctx);

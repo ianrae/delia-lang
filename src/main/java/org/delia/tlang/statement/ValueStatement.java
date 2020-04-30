@@ -14,7 +14,7 @@ public class ValueStatement extends TLangStatementBase {
 	public void execute(DValue value, TLangResult result, TLangContext ctx) {
 		result.val = dval;
 	}
-	public DValue getDval() {
+	public DValue getDVal() {
 		return dval;
 	}
 

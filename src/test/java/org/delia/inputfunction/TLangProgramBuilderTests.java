@@ -137,7 +137,7 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 		TLangProgram program = programBuilder.build(mappingExp);
 		assertEquals(1, program.statements.size());
 		ValueStatement statement = (ValueStatement) program.statements.get(0);
-		assertEquals(35, statement.getDval().asInt());
+		assertEquals(35, statement.getDVal().asInt());
 	}
 		
 		

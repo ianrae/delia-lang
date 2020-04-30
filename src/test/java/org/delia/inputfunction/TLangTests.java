@@ -13,6 +13,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.filter.OP;
+import org.delia.runner.VarEvaluator;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.DValueOpEvaluator;
 import org.delia.tlang.runner.IsMissingCondition;
@@ -26,6 +27,7 @@ import org.delia.tlang.statement.IfStatement;
 import org.delia.tlang.statement.TLangStatementBase;
 import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.ValueStatement;
+import org.delia.tlang.statement.VariableStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -137,14 +139,29 @@ public class TLangTests  extends NewBDDBase {
 		assertEquals("something", dval.asString());
 		chkTrail(tlangRunner, "if;endif");
 	}
+	@Test
+	public void test5Var() {
+		TLangRunner tlangRunner = createTLangRunner();
+		TLangProgram prog = createProgram5(false);
+
+		DValue initialValue = builder.buildString("something");
+		VarEvaluator varEvaluator = null;
+		tlangRunner.setVarEvaluator(varEvaluator);
+		TLangResult res = tlangRunner.execute(prog, initialValue);
+
+		assertEquals(true, res.ok);
+		DValue dval = (DValue) res.val;
+		assertEquals("something", dval.asString());
+		chkTrail(tlangRunner, "if;endif");
+	}
 
 	// --
 	//	private DeliaDao dao;
 	private Delia delia;
 	private DeliaSession session;
 	private DTypeRegistry registry;
-	ScalarValueBuilder builder;
-
+	private ScalarValueBuilder builder;
+	
 	@Before
 	public void init() {
 		DeliaDao dao = this.createDao();
@@ -207,6 +224,13 @@ public class TLangTests  extends NewBDDBase {
 		if (bb) {
 			prog.statements.add(new AddXStatement());
 		}
+		return prog;
+	}
+	
+	private TLangProgram createProgram5(boolean bb) {
+		TLangProgram prog = new TLangProgram();
+		
+		prog.statements.add(new VariableStatement("z"));
 		return prog;
 	}
 
