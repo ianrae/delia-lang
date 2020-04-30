@@ -35,7 +35,7 @@ import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFunctionTests  extends NewBDDBase {
+public class InputFunctionRunnerTests  extends NewBDDBase {
 	
 	@Test
 	public void test2() {

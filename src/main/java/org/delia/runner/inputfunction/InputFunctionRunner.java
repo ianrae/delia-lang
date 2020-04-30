@@ -10,7 +10,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
-import org.delia.inputfunction.MainInputFunctionTests;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.type.DStructType;
@@ -145,8 +144,6 @@ public class InputFunctionRunner extends ServiceBase {
 				DValue finalValue = (DValue) res.val;
 				value = finalValue.asString();
 			}
-
-			
 			
 			data.map.put(outPair.argName(), value); //fieldname might be different
 		}
