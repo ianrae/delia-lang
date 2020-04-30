@@ -10,8 +10,10 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
+import org.delia.runner.VarEvaluator;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
+import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -27,12 +29,14 @@ public class InputFunctionRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ScalarValueBuilder scalarBuilder;
 	private ProgramSet progset;
+	private VarEvaluator varEvaluator;
 
-	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET) {
+	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.registry = registry;
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		this.et = localET;
+		this.varEvaluator = varEvaluator;
 	}
 	
 	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL) {
@@ -136,6 +140,7 @@ public class InputFunctionRunner extends ServiceBase {
 			//run tlang...
 			if (spec.prog != null) {
 				TLangRunner tlangRunner = new TLangRunner(factorySvc, registry);
+				tlangRunner.setVarEvaluator(varEvaluator);
 				DValue initialValue = scalarBuilder.buildString(value);
 				TLangResult res = tlangRunner.execute(spec.prog, initialValue);
 				if (!res.ok) {

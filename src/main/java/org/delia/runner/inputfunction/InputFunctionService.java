@@ -16,8 +16,10 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.runner.VarEvaluator;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
+import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
@@ -74,7 +76,9 @@ public class InputFunctionService extends ServiceBase {
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
 		InputFunctionResult fnResult = new InputFunctionResult();
 		ErrorTracker localET = new SimpleErrorTracker(log);
-		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET);
+		VarEvaluator varEvaluator = new TLangVarEvaluator(request.session.getExecutionContext());
+		
+		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET, varEvaluator);
 		HdrInfo hdr = request.progset.hdr;
 		inFuncRunner.setProgramSet(request.progset);
 		

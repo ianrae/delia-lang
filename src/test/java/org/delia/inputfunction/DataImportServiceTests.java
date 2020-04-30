@@ -47,6 +47,27 @@ public class DataImportServiceTests  extends NewBDDBase {
 		long n  = dao.count("Customer");
 		assertEquals(1L, n);
 	}
+	
+	@Test
+	public void test2() {
+		createDelia("var1");
+		DataImportService importSvc = new DataImportService(delia, session);
+
+		LineObjIterator lineObjIter = createIter(1, true);
+		InputFunctionResult result = importSvc.buildAndRun("foo", lineObjIter);
+		assertEquals(0, result.totalErrorL.size());
+		assertEquals(1, result.numRowsProcessed);
+		assertEquals(1, result.numDValuesProcessed);
+
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals("55", dval.asStruct().getField("name").asString());
+
+		long n  = dao.count("Customer");
+		assertEquals(1L, n);
+	}
 
 
 	// --
@@ -68,6 +89,7 @@ public class DataImportServiceTests  extends NewBDDBase {
 	private String buildSrc(String tlang) {
 		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
 		src += String.format(" input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name using { %s }}", tlang);
+		src += String.format(" let var1 = 55");
 
 		return src;
 	}

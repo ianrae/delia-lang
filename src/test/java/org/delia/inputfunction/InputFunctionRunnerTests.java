@@ -24,12 +24,14 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
+import org.delia.runner.VarEvaluator;
 import org.delia.runner.inputfunction.HdrInfo;
 import org.delia.runner.inputfunction.InputFunctionRunner;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.ProgramSpec;
 import org.delia.tlang.runner.TLangProgram;
+import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -130,7 +132,8 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 
 	private InputFunctionRunner createXConv() {
 		localET = new SimpleErrorTracker(delia.getLog());
-		return new InputFunctionRunner(delia.getFactoryService(), registry, localET);
+		VarEvaluator varEvaluator = new TLangVarEvaluator(session.getExecutionContext());
+		return new InputFunctionRunner(delia.getFactoryService(), registry, localET, varEvaluator);
 	}
 
 
