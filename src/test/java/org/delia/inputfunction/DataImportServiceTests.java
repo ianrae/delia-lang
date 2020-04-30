@@ -116,6 +116,12 @@ public class DataImportServiceTests  extends NewBDDBase {
 		buildAndRun("abbreviate(4)", lineObjIter);
 		chkCustomer(1, "long");
 	}
+	@Test
+	public void testAbbreviate2() {
+		LineObjIterator lineObjIter = createIter(1, "longer");
+		buildAndRun("abbreviate(4,true)", lineObjIter);
+		chkCustomer(1, "l...");
+	}
 	
 	// --
 	//	private DeliaDao dao;

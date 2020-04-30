@@ -23,9 +23,13 @@ public class AbbreviateStatement extends StringStatement {
 	@Override
 	protected String executeStr(String s, TLangContext ctx) {
 		if (arg2 == null || !arg2.booleanValue()) {
-			return StringUtils.abbreviate(s, "", arg1);
+			if (s.length() > arg1) {
+				return s.substring(0, arg1);
+			} else {
+				return s;
+			}
 		} else {
-			return StringUtils.abbreviate(s, arg1); //with
+			return StringUtils.abbreviate(s, "...", arg1); //with
 		}
 	}
 }
