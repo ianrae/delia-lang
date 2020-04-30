@@ -30,6 +30,7 @@ public class InputFunctionRunner extends ServiceBase {
 	private ScalarValueBuilder scalarBuilder;
 	private ProgramSet progset;
 	private TLangVarEvaluator varEvaluator;
+	private boolean haltNowFlag;
 
 	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator) {
 		super(factorySvc);
@@ -41,10 +42,14 @@ public class InputFunctionRunner extends ServiceBase {
 	
 	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL) {
 		List<DValue> dvalL = new ArrayList<>();
+		haltNowFlag = false;
 		
 		Map<String,String> inputData = createInputMap(hdr, lineObj);
 		//it can produce multiple
 		List<ProcessedInputData> processedDataL = runTLang(inputData);
+		if (haltNowFlag) {
+			return dvalL;
+		}
 
 		for(ProcessedInputData data: processedDataL) {
 			List<DeliaError> errL = new ArrayList<>();
@@ -150,8 +155,14 @@ public class InputFunctionRunner extends ServiceBase {
 					log.log("ltang failed!");
 				}
 				log.log("trail: %s", tlangRunner.getTrail());
+				
 				DValue finalValue = (DValue) res.val;
 				value = finalValue.asString();
+				if (res.failFlag) {
+					haltNowFlag = true;
+					data.map.put(outPair.argName(), value); //fieldname might be different
+					return list;
+				}
 			}
 			
 			data.map.put(outPair.argName(), value); //fieldname might be different
@@ -190,6 +201,10 @@ public class InputFunctionRunner extends ServiceBase {
 
 	public void setProgramSet(ProgramSet progset) {
 		this.progset = progset;
+	}
+
+	public boolean wasHalted() {
+		return haltNowFlag;
 	}
 	
 }

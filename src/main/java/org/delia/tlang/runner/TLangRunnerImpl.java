@@ -59,6 +59,11 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				if (! res.ok) {
 					break;
 				}
+				if (ctx.failFlag) {
+					log.log("fail!!!");
+					res.failFlag = true;
+					break;
+				}
 				dval = (DValue) res.val;
 			} else {
 				if (statement instanceof IfStatement) {

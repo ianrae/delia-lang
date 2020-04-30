@@ -136,6 +136,28 @@ public class DataImportServiceTests  extends NewBDDBase {
 		chkCustomer(1, "bobaa");
 	}
 	
+//	@Test
+//	public void testConstant() {
+//		String src = buildSrc("");
+//		src = src.replace("NAME", "'william'");
+//		this.delia.getLog().setLevel(LogLevel.DEBUG);
+//		delia.getLog().log(src);
+//		this.session = delia.beginSession(src);
+//		
+//		LineObjIterator lineObjIter = createIter(1);
+//		buildAndRun(lineObjIter);
+//		chkCustomer(1, "bobaa");
+//	}
+	
+	@Test
+	public void testFail() {
+		LineObjIterator lineObjIter = createIter(1);
+		InputFunctionResult result = buildAndRun("fail()", lineObjIter);
+		assertEquals(true, result.wasHalted);
+		chkNoCustomer(1);
+	}
+	
+	
 	// --
 	//	private DeliaDao dao;
 	private Delia delia;
@@ -166,6 +188,9 @@ public class DataImportServiceTests  extends NewBDDBase {
 	}
 	private InputFunctionResult buildAndRun(String tlang, LineObjIterator lineObjIter) {
 		createDelia(tlang);
+		return buildAndRun(lineObjIter);
+	}
+	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter) {
 		DataImportService importSvc = new DataImportService(delia, session);
 
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
@@ -182,6 +207,12 @@ public class DataImportServiceTests  extends NewBDDBase {
 		assertEquals(expected, dval.asStruct().getField("name").asString());
 		long n  = dao.count("Customer");
 		assertEquals(1L, n);
+	}
+	private void chkNoCustomer(Integer id) {
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
+		assertEquals(true, res.ok);
+		assertEquals(0, res.getAsDValueList().size());
 	}
 
 

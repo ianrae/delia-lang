@@ -94,6 +94,11 @@ public class InputFunctionService extends ServiceBase {
 				log.logError("failed!");
 				addErrors(errL, fnResult.errors, lineNum);
 			} else {
+				if (inFuncRunner.wasHalted()) {
+					fnResult.wasHalted = true;
+					return fnResult;
+				}
+				
 				for(DValue dval: dvals) {
 					TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 					DValue inner = pair == null ? null : DValueHelper.getFieldValue(dval, pair.name);

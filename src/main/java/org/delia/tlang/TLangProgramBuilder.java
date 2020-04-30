@@ -27,6 +27,7 @@ import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangStatement;
 import org.delia.tlang.statement.ElseIfStatement;
 import org.delia.tlang.statement.EndIfStatement;
+import org.delia.tlang.statement.FailsStatement;
 import org.delia.tlang.statement.IfStatement;
 import org.delia.tlang.statement.ValueStatement;
 import org.delia.tlang.statement.VariableStatement;

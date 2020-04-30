@@ -9,4 +9,5 @@ public class TLangContext {
 	public ScalarValueBuilder builder;
 	public VarEvaluator varEvaluator;
 	public Map<String, String> inputDataMap;
+	public boolean failFlag;
 }
