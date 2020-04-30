@@ -61,6 +61,28 @@ public class DataImportServiceTests  extends NewBDDBase {
 		buildAndRun("if value != 'bob' then, 'sue', 'sandy', endif", lineObjIter);
 		chkCustomer(1, "bob");
 	}
+	
+	@Test
+	public void testEmpty() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("", lineObjIter);
+		chkCustomer(1, "bob");
+	}
+	
+	
+	@Test
+	public void testMissing() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("if missing then, 'sue', endif", lineObjIter);
+		chkCustomer(1, "bob");
+	}
+//	@Test
+//	public void testNotMissing() {
+//		LineObjIterator lineObjIter = createIter(1, true);
+//		buildAndRun("if !missing then, 'sue', endif", lineObjIter);
+//		chkCustomer(1, "sue");
+//	}
+	
 
 	// --
 	//	private DeliaDao dao;

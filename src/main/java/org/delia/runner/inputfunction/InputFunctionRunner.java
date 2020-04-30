@@ -12,6 +12,7 @@ import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
+import org.delia.tlang.runner.TLangRunnerImpl;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -138,7 +139,7 @@ public class InputFunctionRunner extends ServiceBase {
 			//match with Customer!!
 			//run tlang...
 			if (spec.prog != null) {
-				TLangRunner tlangRunner = new TLangRunner(factorySvc, registry);
+				TLangRunner tlangRunner = new TLangRunnerImpl(factorySvc, registry);
 				tlangRunner.setVarEvaluator(varEvaluator);
 				DValue initialValue = scalarBuilder.buildString(value);
 				varEvaluator.setValueVar(initialValue);
@@ -146,7 +147,7 @@ public class InputFunctionRunner extends ServiceBase {
 				if (!res.ok) {
 					log.log("ltang failed!");
 				}
-				log.log("trail: %s", tlangRunner.trail.getTrail());
+				log.log("trail: %s", tlangRunner.getTrail());
 				DValue finalValue = (DValue) res.val;
 				value = finalValue.asString();
 			}

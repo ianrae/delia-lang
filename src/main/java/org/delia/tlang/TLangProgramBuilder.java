@@ -3,6 +3,7 @@ package org.delia.tlang;
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
@@ -19,6 +20,7 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.Condition;
 import org.delia.tlang.runner.DValueOpEvaluator;
+import org.delia.tlang.runner.IsMissingCondition;
 import org.delia.tlang.runner.OpCondition;
 import org.delia.tlang.runner.StatementOpEvaluator;
 import org.delia.tlang.runner.TLangProgram;
@@ -147,6 +149,12 @@ public class TLangProgramBuilder extends ServiceBase {
 		if (ifexp.condition instanceof BooleanExp) {
 			BooleanExp bexp = (BooleanExp) ifexp.condition;
 			return new BasicCondition(bexp.val);
+		} else if (ifexp.condition instanceof IdentExp) {
+			String str = ifexp.condition.strValue();
+			if (str.equals("missing")) {
+				return new IsMissingCondition();
+			}
+			DeliaExceptionHelper.throwError("unknown-condition", "Unknown condition '%s'", str);
 		}
 
 		FilterOpExp filter = (FilterOpExp) ifexp.condition;

@@ -26,6 +26,7 @@ import org.delia.tlang.runner.TLangContext;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
+import org.delia.tlang.runner.TLangRunnerImpl;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
@@ -254,11 +255,11 @@ public class TLangTests  extends NewBDDBase {
 	}
 
 	private TLangRunner createTLangRunner() {
-		return new TLangRunner(delia.getFactoryService(), registry);
+		return new TLangRunnerImpl(delia.getFactoryService(), registry);
 	}
 	private void chkTrail(TLangRunner tlangRunner, String expected) {
-		delia.getLog().log(tlangRunner.trail.getTrail());
-		assertEquals(expected, tlangRunner.trail.getTrail());
+		delia.getLog().log(tlangRunner.getTrail());
+		assertEquals(expected, tlangRunner.getTrail());
 	}
 
 
