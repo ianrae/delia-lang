@@ -26,7 +26,8 @@ public class TerminalParser {
 		        "function", "package", "import", "null", "optional", "unique", "primaryKey",
 		        "relation", "one", "many", "parent", "serial",
 		        "insert", "update", "delete", "input",
-		        "using", "if", "then", "elseif", "endif")
+		        //and for tlang
+		        "using", "if", "then", "elseif", "endif", "return")
 		.build();
 	
 

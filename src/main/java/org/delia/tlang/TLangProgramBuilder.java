@@ -134,7 +134,7 @@ public class TLangProgramBuilder extends ServiceBase {
 			Condition cond = buildCondition(ifexp); //new BasicCondition(true); //!!!
 			
 			if (ifexp.isIf) {
-				return new IfStatement(cond);
+				return new IfStatement(cond, true);
 			} else {
 				return new ElseIfStatement(cond);
 			}

@@ -84,12 +84,9 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 	}
 	
 	private void statementFixup(TLangStatement statement) {
-		if (statement instanceof IfStatement) {
-			IfStatement ifstat = (IfStatement) statement;
-			ifstat.cond.setTLangRunner(this);
-		} else if (statement instanceof ElseIfStatement) {
-			ElseIfStatement ifstat = (ElseIfStatement) statement;
-			ifstat.cond.setTLangRunner(this);
+		if (statement instanceof NeedsTLangRunner) {
+			NeedsTLangRunner needsRunner = (NeedsTLangRunner) statement;
+			needsRunner.setTLangRunner(this);
 		}
 	}
 	@Override

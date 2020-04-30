@@ -211,7 +211,7 @@ public class TLangTests  extends NewBDDBase {
 	}
 	private TLangProgram createProgram2(boolean bb) {
 		TLangProgram prog = new TLangProgram();
-		prog.statements.add(new IfStatement(new BasicCondition(bb)));
+		prog.statements.add(new IfStatement(new BasicCondition(bb), false));
 		prog.statements.add(new ToUpperStatement(true));
 		prog.statements.add(new EndIfStatement());
 		prog.statements.add(new AddXStatement());
@@ -219,7 +219,7 @@ public class TLangTests  extends NewBDDBase {
 	}
 	private TLangProgram createProgram3(boolean bb) {
 		TLangProgram prog = new TLangProgram();
-		prog.statements.add(new IfStatement(new IsMissingCondition()));
+		prog.statements.add(new IfStatement(new IsMissingCondition(), false));
 
 		DValue x = builder.buildString("Z");
 		prog.statements.add(new ValueStatement(x));
@@ -236,7 +236,7 @@ public class TLangTests  extends NewBDDBase {
 		OpCondition cond = new OpCondition(eval);
 		DValue xx = builder.buildString("abc");
 		eval.setRightVar(xx);
-		prog.statements.add(new IfStatement(cond));
+		prog.statements.add(new IfStatement(cond, false));
 
 		DValue x = builder.buildString("Z");
 		prog.statements.add(new ValueStatement(x));
