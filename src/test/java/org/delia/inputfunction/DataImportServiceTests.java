@@ -44,10 +44,23 @@ public class DataImportServiceTests  extends NewBDDBase {
 	@Test
 	public void test3() {
 		LineObjIterator lineObjIter = createIter(1, true);
-		buildAndRun("if value == 'bob' then 'sue', endif", lineObjIter);
+		buildAndRun("if value == 'bob' then, 'sue', endif", lineObjIter);
 		chkCustomer(1, "sue");
 	}
 
+	@Test
+	public void test3a() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("if value == 'bob' then, 'sue', 'sandy', endif", lineObjIter);
+		chkCustomer(1, "sandy");
+	}
+	
+	@Test
+	public void test4() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("if value != 'bob' then, 'sue', 'sandy', endif", lineObjIter);
+		chkCustomer(1, "bob");
+	}
 
 	// --
 	//	private DeliaDao dao;

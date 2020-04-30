@@ -107,8 +107,8 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	
 	@Test
 	public void testIf() {
-		chkIf("if x then 33", "x");
-		chkIf("elseif x then 33", "x");
+		chkIf("if x then", "x");
+		chkIf("elseif x then", "x");
 	}
 	@Test
 	public void testEndIf() {
@@ -120,7 +120,6 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		
 		IfStatementExp x1 = (IfStatementExp) texp.statementL.get(0);
 		assertEquals(expected, x1.condition.strValue());
-		assertEquals("33", x1.statement.strValue());
 	}
 	private void chkEndIf(String tlang) {
 		TLangBodyExp texp = doTLang(tlang);
