@@ -8,7 +8,9 @@ import org.codehaus.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.StringExp;
+import org.delia.compiler.ast.inputfunction.EndIfStatementExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
+import org.delia.compiler.ast.inputfunction.IfStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFuncHeaderExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionBodyExp;
@@ -18,15 +20,53 @@ import org.delia.compiler.ast.inputfunction.TLangBodyExp;
 public class InputFunctionParser extends ParserBase {
 
 
-	public static Parser<Exp> tlangBodyStatements() {
+	public static Parser<Exp> tlangSingleStatement() {
 		return Parsers.or(
 				LetParser.explicitValue(),
 				NameAndFuncParser.parseNameAndFuncs()
 				);
 	}
+	
+	private static Parser<Exp> condition() {
+		return Parsers.or(
+				LetParser.explicitValue(),
+				ident()
+				);
+	}
+	
+	private static Parser<IfStatementExp> ifStatement() {
+		return Parsers.sequence(term("if"), condition(), term("then"), tlangSingleStatement(),
+				(Token tok, Exp cond, Token tok3, Exp statement) -> new IfStatementExp(99, cond, statement));
+	}
+	private static Parser<IfStatementExp> elseIfStatement() {
+		return Parsers.sequence(term("elseif"), condition(), term("then"), tlangSingleStatement(),
+				(Token tok, Exp cond, Token tok3, Exp statement) -> new IfStatementExp(99, cond, statement));
+	}
+	
+	
+	private static Parser<Exp> endIfStatement() {
+		return Parsers.or(term("endif")).
+				map(new org.codehaus.jparsec.functors.Map<Token, EndIfStatementExp>() {
+					@Override
+					public EndIfStatementExp map(Token arg0) {
+						return new EndIfStatementExp(99);
+					}
+				});
+	}
+	
+	
+	public static Parser<Exp> tlangBodyStatement() {
+		return Parsers.or(
+				tlangSingleStatement(),
+				ifStatement(),
+				elseIfStatement(),
+				endIfStatement()
+				);
+	}
+	
 
 	private static Parser<TLangBodyExp> tlangBody() {
-		return Parsers.or(tlangBodyStatements().many().sepBy(term(","))).
+		return Parsers.or(tlangBodyStatement().many().sepBy(term(","))).
 				map(new org.codehaus.jparsec.functors.Map<List<List<Exp>>, TLangBodyExp>() {
 					@Override
 					public TLangBodyExp map(List<List<Exp>> list) {

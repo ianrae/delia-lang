@@ -71,12 +71,21 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		
 		TLangBodyExp texp = chkFnStatement(infnExp, 0, "field", "c", "firstName").tlangBody;
 		
-		IdentExp x1 = (IdentExp) texp.statementL.get(0);
-		XNAFMultiExp x2 = (XNAFMultiExp) texp.statementL.get(1);
-		assertEquals("x", x1.name());
-		assertEquals("y", x2.qfeL.get(0).funcName);
+		XNAFMultiExp multi = (XNAFMultiExp) texp.statementL.get(0);
+		String name = getOne(multi);
+		assertEquals("x", name);
+		assertEquals("y", getSecond(multi));
 	}
 	
+	private String getOne(Exp exp) {
+		XNAFMultiExp x1 = (XNAFMultiExp) exp;
+		return x1.qfeL.get(0).funcName;
+	}
+	private String getSecond(Exp exp) {
+		XNAFMultiExp x1 = (XNAFMultiExp) exp;
+		return x1.qfeL.get(1).funcName;
+	}
+
 	@Test
 	public void testTLang2() {
 		chkTLangInt("35", 35);
@@ -91,12 +100,17 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	
 	@Test
 	public void testTLangIdent() {
-		chkTLangIdent("x", "x");
-		chkTLangIdent("x.y(5)", "x", "5");
-		chkTLangIdent("x(5)", "x", "5");
+		chkTLangIdent("x", "x", 0);
+		chkTLangIdent("x.y(5)", "x", 1, "5");
+		chkTLangIdent("x(5)", "x", 0, "5");
+	}
+	
+	@Test
+	public void testIf() {
+		chkTLangIdent("if true then x", "x", 0);
 	}
 
-	private void chkTLangIdent(String tlang, String expected, String...args) {
+	private void chkTLangIdent(String tlang, String expected, int indexWithArgs, String...args) {
 		TLangBodyExp texp = doTLang(tlang);
 		
 		XNAFMultiExp x1 = (XNAFMultiExp) texp.statementL.get(0);
@@ -106,8 +120,9 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		} else {
 			chkStatementSize(texp, 1);
 			XNAFMultiExp x2 = (XNAFMultiExp) texp.statementL.get(0);
+			XNAFSingleExp sexp = x2.qfeL.get(indexWithArgs);
+			
 			for(String arg: args) {
-				XNAFSingleExp sexp = x2.qfeL.get(0);
 				assertEquals(arg, sexp.argL.get(0).strValue());
 			}
 		}

@@ -26,7 +26,7 @@ public class TerminalParser {
 		        "function", "package", "import", "null", "optional", "unique", "primaryKey",
 		        "relation", "one", "many", "parent", "serial",
 		        "insert", "update", "delete", "input",
-		        "using")
+		        "using", "if", "then", "elseif", "endif")
 		.build();
 	
 
