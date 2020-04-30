@@ -84,6 +84,19 @@ public class DataImportServiceTests  extends NewBDDBase {
 //	}
 	
 
+	@Test
+	public void testSubstring() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("substring(2)", lineObjIter);
+		chkCustomer(1, "b");
+	}
+	@Test
+	public void testSubstring2() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("substring(0,1)", lineObjIter);
+		chkCustomer(1, "bo");
+	}
+	
 	// --
 	//	private DeliaDao dao;
 	private Delia delia;

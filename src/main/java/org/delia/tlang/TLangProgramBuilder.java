@@ -28,8 +28,6 @@ import org.delia.tlang.runner.TLangStatement;
 import org.delia.tlang.statement.ElseIfStatement;
 import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
-import org.delia.tlang.statement.ToUpperStatement;
-import org.delia.tlang.statement.TrimStatement;
 import org.delia.tlang.statement.ValueStatement;
 import org.delia.tlang.statement.VariableStatement;
 import org.delia.type.DTypeRegistry;
@@ -39,14 +37,16 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class TLangProgramBuilder extends ServiceBase {
 
-	private DTypeRegistry registry;
+//	private DTypeRegistry registry;
 	private ScalarValueBuilder builder;
+	private TLangStatementFactory statementFactory;
 
 	public TLangProgramBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.et = new SimpleErrorTracker(log); //local et
-		this.registry = registry;
+//		this.registry = registry;
 		this.builder = factorySvc.createScalarValueBuilder(registry);
+		this.statementFactory = new TLangStatementFactory(factorySvc);
 	}
 
 	public TLangProgram build(InputFuncMappingExp mappingExp) {
@@ -174,16 +174,7 @@ public class TLangProgramBuilder extends ServiceBase {
 	}
 
 	private TLangStatement buildFnStatement(XNAFSingleExp fieldOrFn) {
-		String fnName = fieldOrFn.funcName;
-		switch(fnName) {
-		case "toUpperCase":
-			return new ToUpperStatement();
-		case "trim":
-			return new TrimStatement();
-		default:
-			DeliaExceptionHelper.throwError("tlang-unknown-fn", "Unknown function '%s'", fnName);
-		}
-		return null;
+		return statementFactory.create(fieldOrFn);
 	}
 
 }
