@@ -15,7 +15,9 @@ import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
+import org.delia.compiler.ast.inputfunction.EndIfStatementExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
+import org.delia.compiler.ast.inputfunction.IfStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.ast.inputfunction.TLangBodyExp;
@@ -107,7 +109,25 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	
 	@Test
 	public void testIf() {
-		chkTLangIdent("if true then x", "x", 0);
+		chkIf("if x then 33", "x");
+		chkIf("elseif x then 33", "x");
+	}
+	@Test
+	public void testEndIf() {
+		chkEndIf("endif");
+	}
+	
+	private void chkIf(String tlang, String expected) {
+		TLangBodyExp texp = doTLang(tlang);
+		
+		IfStatementExp x1 = (IfStatementExp) texp.statementL.get(0);
+		assertEquals(expected, x1.condition.strValue());
+		assertEquals("33", x1.statement.strValue());
+	}
+	private void chkEndIf(String tlang) {
+		TLangBodyExp texp = doTLang(tlang);
+		
+		EndIfStatementExp x1 = (EndIfStatementExp) texp.statementL.get(0);
 	}
 
 	private void chkTLangIdent(String tlang, String expected, int indexWithArgs, String...args) {
@@ -126,8 +146,6 @@ public class InputFunctionParserTests  extends NewBDDBase {
 				assertEquals(arg, sexp.argL.get(0).strValue());
 			}
 		}
-		
-		
 	}
 	private void chkTLangString(String tlang, String expected) {
 		TLangBodyExp texp = doTLang(tlang);

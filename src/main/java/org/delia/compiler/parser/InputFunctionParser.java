@@ -57,10 +57,10 @@ public class InputFunctionParser extends ParserBase {
 	
 	public static Parser<Exp> tlangBodyStatement() {
 		return Parsers.or(
-				tlangSingleStatement(),
 				ifStatement(),
 				elseIfStatement(),
-				endIfStatement()
+				endIfStatement(),
+				tlangSingleStatement()
 				);
 	}
 	
