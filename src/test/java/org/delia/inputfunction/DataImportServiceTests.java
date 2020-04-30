@@ -123,12 +123,17 @@ public class DataImportServiceTests  extends NewBDDBase {
 		chkCustomer(1, "l...");
 	}
 	
-	
 	@Test
 	public void testAsDate() {
 		LineObjIterator lineObjIter = createIter(1, "31/3/1990");
 		buildAndRun("asDate('dd/MM/yyyy')", lineObjIter);
-		chkCustomer(1, "l...");
+		chkCustomer(1, "1990-03-31T05:00:00.000+0000");
+	}
+	@Test
+	public void testCombine() {
+		LineObjIterator lineObjIter = createIter(1);
+		buildAndRun("combine(NAME,'aa')", lineObjIter);
+		chkCustomer(1, "bobaa");
 	}
 	
 	// --

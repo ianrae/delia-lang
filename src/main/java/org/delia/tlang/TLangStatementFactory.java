@@ -7,6 +7,7 @@ import org.delia.core.ServiceBase;
 import org.delia.tlang.runner.TLangStatement;
 import org.delia.tlang.statement.AbbreviateStatement;
 import org.delia.tlang.statement.AsDateStatement;
+import org.delia.tlang.statement.CombineStatement;
 import org.delia.tlang.statement.SubstringStatement;
 import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.TrimStatement;
@@ -45,6 +46,13 @@ public class TLangStatementFactory extends ServiceBase {
 		{
 			Exp arg1 = getArg(fieldOrFn, 0, true);
 			return new AsDateStatement(arg1);
+		}
+		case "combine":
+		{
+			Exp arg1 = getArg(fieldOrFn, 0, true);
+			Exp arg2 = getArg(fieldOrFn, 1, false);
+			Exp arg3 = getArg(fieldOrFn, 2, false);
+			return new CombineStatement(arg1, arg2, arg3);
 		}
 		default:
 			DeliaExceptionHelper.throwError("tlang-unknown-fn", "Unknown function '%s'", fnName);

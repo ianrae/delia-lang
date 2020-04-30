@@ -143,6 +143,8 @@ public class InputFunctionRunner extends ServiceBase {
 				tlangRunner.setVarEvaluator(varEvaluator);
 				DValue initialValue = scalarBuilder.buildString(value);
 				varEvaluator.setValueVar(initialValue);
+				tlangRunner.setInputMap(inputData);
+				
 				TLangResult res = tlangRunner.execute(spec.prog, initialValue);
 				if (!res.ok) {
 					log.log("ltang failed!");

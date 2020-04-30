@@ -1,5 +1,7 @@
 package org.delia.tlang.runner;
 
+import java.util.Map;
+
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.other.StringTrail;
@@ -17,6 +19,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 	private ScalarValueBuilder scalarBuilder;
 	private StringTrail trail = new StringTrail();
 	private VarEvaluator varEvaluator;
+	private Map<String, String> inputDataMap;
 
 	public TLangRunnerImpl(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -48,6 +51,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				TLangContext ctx = new TLangContext();
 				ctx.builder = scalarBuilder;
 				ctx.varEvaluator = varEvaluator;
+				ctx.inputDataMap = inputDataMap;
 				
 				res.ok = true;
 				trail.add(statement.getName());
@@ -109,5 +113,11 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 			}
 		}
 		return -1;
+	}
+
+
+	@Override
+	public void setInputMap(Map<String, String> inputData) {
+		this.inputDataMap = inputData;
 	}
 }
