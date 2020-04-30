@@ -123,6 +123,14 @@ public class DataImportServiceTests  extends NewBDDBase {
 		chkCustomer(1, "l...");
 	}
 	
+	
+	@Test
+	public void testAsDate() {
+		LineObjIterator lineObjIter = createIter(1, "31/3/1990");
+		buildAndRun("asDate('dd/MM/yyyy')", lineObjIter);
+		chkCustomer(1, "l...");
+	}
+	
 	// --
 	//	private DeliaDao dao;
 	private Delia delia;
@@ -155,8 +163,8 @@ public class DataImportServiceTests  extends NewBDDBase {
 		createDelia(tlang);
 		DataImportService importSvc = new DataImportService(delia, session);
 
-		InputFunctionResult result = importSvc.buildAndRun("foo", lineObjIter);
-		assertEquals(0, result.totalErrorL.size());
+		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
+		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(1, result.numDValuesProcessed);
 		return result;

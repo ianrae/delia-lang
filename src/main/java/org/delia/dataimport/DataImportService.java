@@ -20,7 +20,7 @@ public class DataImportService extends ServiceBase {
 		this.session = session;
 	}
 
-	public InputFunctionResult buildAndRun(String inputFnName, LineObjIterator lineObjIter) {
+	public InputFunctionResult importIntoDatabase(String inputFnName, LineObjIterator lineObjIter) {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
 

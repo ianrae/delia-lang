@@ -92,7 +92,7 @@ public class InputFunctionService extends ServiceBase {
 			List<DValue> dvals = processLineObj(inFuncRunner, hdr, lineObj, errL); //one row
 			if (! errL.isEmpty()) {
 				log.logError("failed!");
-				addErrors(errL, fnResult.totalErrorL, lineNum);
+				addErrors(errL, fnResult.errors, lineNum);
 			} else {
 				for(DValue dval: dvals) {
 					TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
@@ -107,7 +107,7 @@ public class InputFunctionService extends ServiceBase {
 		}
 
 		if (localET.errorCount() > 0) {
-			fnResult.totalErrorL.addAll(localET.getErrors());
+			fnResult.errors.addAll(localET.getErrors());
 		}
 		
 		return fnResult;
@@ -135,11 +135,11 @@ public class InputFunctionService extends ServiceBase {
 			if (! res.ok) {
 				//err
 				for(DeliaError err: res.errors) {
-					addError(err, fnResult.totalErrorL, lineNum);
+					addError(err, fnResult.errors, lineNum);
 				}
 			}
 		} catch (DeliaException e) {
-			addError(e, fnResult.totalErrorL, lineNum);
+			addError(e, fnResult.errors, lineNum);
 		}
 		request.session.setInsertPrebuiltValueIterator(null);
 	}		
