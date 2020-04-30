@@ -151,8 +151,9 @@ public class DataImportServiceTests  extends NewBDDBase {
 	
 	@Test
 	public void testFail() {
+		createDelia("fail()");
 		LineObjIterator lineObjIter = createIter(1);
-		InputFunctionResult result = buildAndRun("fail()", lineObjIter);
+		InputFunctionResult result = buildAndRunFail(lineObjIter);
 		assertEquals(true, result.wasHalted);
 		chkNoCustomer(1);
 	}
@@ -197,6 +198,15 @@ public class DataImportServiceTests  extends NewBDDBase {
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(1, result.numDValuesProcessed);
+		return result;
+	}
+	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
+		DataImportService importSvc = new DataImportService(delia, session);
+
+		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
+		assertEquals(0, result.errors.size());
+		assertEquals(1, result.numRowsProcessed);
+		assertEquals(0, result.numDValuesProcessed);
 		return result;
 	}
 	private void chkCustomer(Integer id, String expected) {
