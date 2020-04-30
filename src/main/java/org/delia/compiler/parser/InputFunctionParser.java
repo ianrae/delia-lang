@@ -37,11 +37,15 @@ public class InputFunctionParser extends ParserBase {
 	
 	private static Parser<IfStatementExp> ifStatement() {
 		return Parsers.sequence(term("if"), condition(), term("then"), 
-				(Token tok, Exp cond, Token tok3) -> new IfStatementExp(99, cond, true));
+				(Token tok, Exp cond, Token tok3) -> new IfStatementExp(99, cond, true, false));
+	}
+	private static Parser<IfStatementExp> ifReturnStatement() {
+		return Parsers.sequence(term("if"), condition(), term("return"), 
+				(Token tok, Exp cond, Token tok3) -> new IfStatementExp(99, cond, true, true));
 	}
 	private static Parser<IfStatementExp> elseIfStatement() {
 		return Parsers.sequence(term("elseif"), condition(), term("then"),
-				(Token tok, Exp cond, Token tok3) -> new IfStatementExp(99, cond, false));
+				(Token tok, Exp cond, Token tok3) -> new IfStatementExp(99, cond, false, false));
 	}
 	
 	
@@ -59,6 +63,7 @@ public class InputFunctionParser extends ParserBase {
 	public static Parser<Exp> tlangBodyStatement() {
 		return Parsers.or(
 				ifStatement(),
+				ifReturnStatement(),
 				elseIfStatement(),
 				endIfStatement(),
 				tlangSingleStatement()

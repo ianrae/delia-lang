@@ -20,6 +20,9 @@ public class IfStatement implements TLangStatement, NeedsTLangRunner {
 	@Override
 	public void execute(DValue value, TLangResult result, TLangContext ctx) {
 		result.val = value;
+		if (isIfThenReturn) {
+			ctx.stopFlag = true;
+		}
 	}
 	@Override
 	public boolean evalCondition(DValue dval) {

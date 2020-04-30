@@ -10,4 +10,5 @@ public class TLangContext {
 	public VarEvaluator varEvaluator;
 	public Map<String, String> inputDataMap;
 	public boolean failFlag;
+	public boolean stopFlag;
 }

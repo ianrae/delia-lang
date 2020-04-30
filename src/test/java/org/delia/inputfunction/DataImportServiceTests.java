@@ -63,6 +63,13 @@ public class DataImportServiceTests  extends NewBDDBase {
 	}
 	
 	@Test
+	public void test3c() {
+		LineObjIterator lineObjIter = createIter(1);
+		buildAndRun("if value == 'bob' return 'grady'", lineObjIter);
+		chkCustomer(1, "grady");
+	}
+	
+	@Test
 	public void testEmpty() {
 		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("", lineObjIter);
