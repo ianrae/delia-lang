@@ -49,6 +49,19 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		chkFnStatement(infnExp, 1, "f2", "c", "z");
 	}
 
+	@Test
+	public void testTLang() {
+		String src = "input function foo(Customer c, Address a) { field -> c.firstName using { x }, f2 -> c.z}";
+		InputFunctionDefStatementExp infnExp = parse(src);
+		assertEquals("foo", infnExp.funcName);
+		assertEquals(2, infnExp.argsL.size());
+		chkArg(infnExp, 0, "Customer", "c");
+		chkArg(infnExp, 1, "Address", "a");
+		
+		assertEquals(2, infnExp.bodyExp.statementL.size());
+		chkFnStatement(infnExp, 0, "field", "c", "firstName");
+		chkFnStatement(infnExp, 1, "f2", "c", "z");
+	}
 
 	private void chkFnStatement(InputFunctionDefStatementExp infnExp, int i, String expected, String s2, String s3) {
 		Exp z = infnExp.bodyExp.statementL.get(i);
