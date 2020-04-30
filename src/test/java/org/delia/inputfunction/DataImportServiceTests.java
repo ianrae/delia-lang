@@ -94,7 +94,21 @@ public class DataImportServiceTests  extends NewBDDBase {
 	public void testSubstring2() {
 		LineObjIterator lineObjIter = createIter(1, true);
 		buildAndRun("substring(0,1)", lineObjIter);
-		chkCustomer(1, "bo");
+		chkCustomer(1, "b");
+	}
+	
+	@Test
+	public void testUpper() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("toUpperCase()", lineObjIter);
+		chkCustomer(1, "BOB");
+	}
+	
+	@Test
+	public void testLower() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("toLowerCase()", lineObjIter);
+		chkCustomer(1, "bob");
 	}
 	
 	// --

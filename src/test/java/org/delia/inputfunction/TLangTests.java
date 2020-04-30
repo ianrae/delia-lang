@@ -205,14 +205,14 @@ public class TLangTests  extends NewBDDBase {
 	}
 	private TLangProgram createProgram() {
 		TLangProgram prog = new TLangProgram();
-		prog.statements.add(new ToUpperStatement());
+		prog.statements.add(new ToUpperStatement(true));
 		prog.statements.add(new AddXStatement());
 		return prog;
 	}
 	private TLangProgram createProgram2(boolean bb) {
 		TLangProgram prog = new TLangProgram();
 		prog.statements.add(new IfStatement(new BasicCondition(bb)));
-		prog.statements.add(new ToUpperStatement());
+		prog.statements.add(new ToUpperStatement(true));
 		prog.statements.add(new EndIfStatement());
 		prog.statements.add(new AddXStatement());
 		return prog;

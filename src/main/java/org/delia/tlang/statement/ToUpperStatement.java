@@ -3,11 +3,13 @@ package org.delia.tlang.statement;
 import org.delia.tlang.runner.TLangContext;
 
 public class ToUpperStatement extends StringStatement {
-	public ToUpperStatement() {
+	private boolean b;
+	public ToUpperStatement(boolean b) {
 		super("toUpperCase");
+		this.b = b;
 	}
 	@Override
 	protected String executeStr(String s, TLangContext ctx) {
-		return s.toUpperCase();
+		return (b) ? s.toUpperCase() : s.toLowerCase();
 	}
 }

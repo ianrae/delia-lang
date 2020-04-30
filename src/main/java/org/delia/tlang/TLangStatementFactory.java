@@ -22,7 +22,9 @@ public class TLangStatementFactory extends ServiceBase {
 		String fnName = fieldOrFn.funcName;
 		switch(fnName) {
 		case "toUpperCase":
-			return new ToUpperStatement();
+			return new ToUpperStatement(true);
+		case "toLowerCase":
+			return new ToUpperStatement(false);
 		case "trim":
 			return new TrimStatement();
 		case "substring":

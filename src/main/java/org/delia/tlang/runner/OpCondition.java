@@ -15,7 +15,7 @@ public class OpCondition implements Condition {
 	}
 	@Override
 	public void setTLangRunner(TLangRunner tlangRunner) {
-		if (evaluator instanceof TLangRunner) {
+		if (evaluator instanceof StatementOpEvaluator) {
 			StatementOpEvaluator statEval = (StatementOpEvaluator) evaluator;
 			statEval.setTlangRunner(tlangRunner);
 		}
