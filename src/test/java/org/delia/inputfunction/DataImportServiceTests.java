@@ -29,42 +29,42 @@ public class DataImportServiceTests  extends NewBDDBase {
 
 	@Test
 	public void test1() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("'able'", lineObjIter);
 		chkCustomer(1, "able");
 	}
 	
 	@Test
 	public void test2() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("var1", lineObjIter);
 		chkCustomer(1, "55");
 	}
 	
 	@Test
 	public void test3() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("if value == 'bob' then, 'sue', endif", lineObjIter);
 		chkCustomer(1, "sue");
 	}
 
 	@Test
 	public void test3a() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("if value == 'bob' then, 'sue', 'sandy', endif", lineObjIter);
 		chkCustomer(1, "sandy");
 	}
 	
 	@Test
 	public void test4() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("if value != 'bob' then, 'sue', 'sandy', endif", lineObjIter);
 		chkCustomer(1, "bob");
 	}
 	
 	@Test
 	public void testEmpty() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("", lineObjIter);
 		chkCustomer(1, "bob");
 	}
@@ -72,43 +72,49 @@ public class DataImportServiceTests  extends NewBDDBase {
 	
 	@Test
 	public void testMissing() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("if missing then, 'sue', endif", lineObjIter);
 		chkCustomer(1, "bob");
 	}
 //	@Test
 //	public void testNotMissing() {
-//		LineObjIterator lineObjIter = createIter(1, true);
+//		LineObjIterator lineObjIter = createIter(1);
 //		buildAndRun("if !missing then, 'sue', endif", lineObjIter);
 //		chkCustomer(1, "sue");
 //	}
 	
-
 	@Test
 	public void testSubstring() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("substring(2)", lineObjIter);
 		chkCustomer(1, "b");
 	}
 	@Test
 	public void testSubstring2() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("substring(0,1)", lineObjIter);
 		chkCustomer(1, "b");
 	}
 	
 	@Test
 	public void testUpper() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("toUpperCase()", lineObjIter);
 		chkCustomer(1, "BOB");
 	}
 	
 	@Test
 	public void testLower() {
-		LineObjIterator lineObjIter = createIter(1, true);
+		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun("toLowerCase()", lineObjIter);
 		chkCustomer(1, "bob");
+	}
+	
+	@Test
+	public void testAbbreviate() {
+		LineObjIterator lineObjIter = createIter(1, "longer");
+		buildAndRun("abbreviate(4)", lineObjIter);
+		chkCustomer(1, "long");
 	}
 	
 	// --
@@ -167,19 +173,20 @@ public class DataImportServiceTests  extends NewBDDBase {
 		return new MemDBInterface();
 	}
 
-	private LineObjIterator createIter(int n, boolean goodObj) {
+	private LineObjIterator createIter(int n) {
+		return createIter(n, "bob");
+	}
+	private LineObjIterator createIter(int n, String nameStr) {
 		List<LineObj> list = new ArrayList<>();
 		for(int i = 0; i < n; i++) {
-			list.add(this.createLineObj(i + 1, goodObj));
+			list.add(this.createLineObj(i + 1, nameStr));
 		}
 		return new LineObjIterator(list);
 	}
-	private LineObj createLineObj(int id, boolean goodObj) {
-		String[] ar = { "", "33","bob" };
+	private LineObj createLineObj(int id, String nameStr) {
+		String[] ar = { "", "33", "bob" };
 		ar[0] = String.format("%d", id);
-		if (! goodObj) {
-			ar[1] = "bbb"; //not an int
-		}
+		ar[2] = nameStr;
 
 		LineObj lineObj = new LineObj(ar, 1);
 		return lineObj;

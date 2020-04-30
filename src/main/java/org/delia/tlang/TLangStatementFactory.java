@@ -5,6 +5,7 @@ import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.tlang.runner.TLangStatement;
+import org.delia.tlang.statement.AbbreviateStatement;
 import org.delia.tlang.statement.SubstringStatement;
 import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.TrimStatement;
@@ -32,6 +33,13 @@ public class TLangStatementFactory extends ServiceBase {
 			Exp arg1 = getArg(fieldOrFn, 0, true);
 			Exp arg2 = getArg(fieldOrFn, 1, false);
 			return new SubstringStatement(arg1, arg2);
+		}
+		case "abbreviate":
+		{
+			Exp arg1 = getArg(fieldOrFn, 0, true);
+			Exp arg2 = getArg(fieldOrFn, 1, false);
+			return new AbbreviateStatement(arg1, arg2);
+			
 		}
 		default:
 			DeliaExceptionHelper.throwError("tlang-unknown-fn", "Unknown function '%s'", fnName);
