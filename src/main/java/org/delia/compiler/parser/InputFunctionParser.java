@@ -29,6 +29,7 @@ public class InputFunctionParser extends ParserBase {
 	
 	private static Parser<Exp> condition() {
 		return Parsers.or(
+				RuleParser.opexpr(),
 				LetParser.explicitValue(),
 				ident()
 				);

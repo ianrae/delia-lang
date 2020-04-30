@@ -37,7 +37,7 @@ public class RuleParser extends ParserBase {
 			return QueryParser.filterop();
 		}
 		
-		private static Parser<FilterOpExp> opexpr() {
+		public static Parser<FilterOpExp> opexpr() {
 			return Parsers.sequence(Parsers.INDEX, ruleArg(), ruleOp(), ruleArg(),
 					(Integer pos, Exp op1, StringExp op, Exp op2) -> new FilterOpExp(pos, op1, op, op2));
 		}

@@ -64,6 +64,23 @@ public class TLangRunner extends ServiceBase {
 		result.val = dval;
 		return result;
 	}
+	
+	public TLangResult executeOne(TLangStatement statement, DValue initialValue) {
+		DValue dval = initialValue;
+		TLangResult res = new TLangResult();
+		TLangContext ctx = new TLangContext();
+		ctx.builder = scalarBuilder;
+		ctx.varEvaluator = varEvaluator;
+
+		res.ok = true;
+		statement.execute(dval, res, ctx);
+		dval = (DValue) res.val;
+
+		TLangResult result = res;
+		result.ok = true;
+		result.val = dval;
+		return result;
+	}
 
 	private int findNext(TLangProgram program, int ipIndexCurrent) {
 		for(int ipIndex = ipIndexCurrent + 1; ipIndex < program.statements.size(); ipIndex++) {
