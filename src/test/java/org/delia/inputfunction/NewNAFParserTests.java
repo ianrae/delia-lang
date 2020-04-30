@@ -1,29 +1,29 @@
-package org.delia.compiler.parser;
+package org.delia.inputfunction;
 
 import java.util.List;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Token;
+import org.delia.bddnew.NewBDDBase;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
+import org.delia.compiler.parser.LetParser;
+import org.delia.compiler.parser.NameAndFuncParser;
+import org.delia.compiler.parser.ParserBase;
+import org.delia.compiler.parser.TerminalParser;
+import org.delia.db.DBInterface;
+import org.delia.db.memdb.MemDBInterface;
+import org.junit.Before;
+import org.junit.Test;
 
-/**
- * parses expressions like
- *    firstName
- *    firstName.len()
- *    firstName.contains('x')
- *    firstName.contains(other.foo()) //ruleArgRef - recursive
- *    
- * Used in rules, and in query filter expressions
- * 
- * @author Ian Rae
- *
- */
-public class NameAndFuncParser extends ParserBase {
+public class NewNAFParserTests  extends NewBDDBase {
+	
+	
+public static class NameAndFuncParser2 extends ParserBase {
 		
 		private static final Parser.Reference<Exp> ruleArgRef = Parser.newReference();
 		public static void initLazy() {
@@ -70,4 +70,32 @@ public class NameAndFuncParser extends ParserBase {
 					(Integer pos, Token notTok, List<List<XNAFSingleExp>> qfelist) -> new XNAFMultiExp(pos, notTok == null, qfelist));
 		}
 		
+	}	
+	
+	@Test
+	public void test() {
+		XNAFMultiExp z = parse("x(5)");
 	}
+	
+
+
+	// --
+
+	@Before
+	public void init() {
+	}
+	
+	private XNAFMultiExp parse(String src) {
+		log.log(src);
+		NameAndFuncParser.initLazy();
+		Exp exp = NameAndFuncParser2.parseNameAndFuncs().from(TerminalParser.tokenizer, TerminalParser.ignored.skipMany()).parse(src);
+		return (XNAFMultiExp) exp;
+	}
+	
+	@Override
+	public DBInterface createForTest() {
+		return new MemDBInterface();
+	}
+	
+	
+}

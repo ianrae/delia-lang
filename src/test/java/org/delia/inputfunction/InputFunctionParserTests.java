@@ -14,6 +14,7 @@ import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
+import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
@@ -78,17 +79,48 @@ public class InputFunctionParserTests  extends NewBDDBase {
 	@Test
 	public void testTLang2() {
 		chkTLangInt("35", 35);
-		
 		Long bign = getLongNum();
 		chkTLangLong(bign.toString(), getLongNum());
-		
 		Double dd = -1045.678;
 		chkTLangDouble(dd.toString(), dd);
 		
 		chkTLangBoolean("true", true);
+		chkTLangString("'abc'", "abc");
 	}
 	
+	@Test
+	public void testTLangIdent() {
+		chkTLangIdent("x", "x");
+//		chkTLangIdent("x.y(5)", "x", "5");
+//		chkTLangIdent("x(5)", "x", "5");
+	}
 
+	private void chkTLangIdent(String tlang, String expected, String...args) {
+		TLangBodyExp texp = doTLang(tlang);
+		
+		IdentExp x1 = (IdentExp) texp.statementL.get(0);
+		assertEquals(expected, x1.val);
+		if (args.length == 0) {
+			chkStatementSize(texp, 1);
+		} else {
+			chkStatementSize(texp, 2);
+			XNAFMultiExp x2 = (XNAFMultiExp) texp.statementL.get(1);
+			for(String arg: args) {
+				assertEquals("x", x1.name());
+				assertEquals("y", x2.qfeL.get(0).funcName);
+
+			}
+		}
+		
+		
+	}
+	private void chkTLangString(String tlang, String expected) {
+		TLangBodyExp texp = doTLang(tlang);
+		
+		StringExp x1 = (StringExp) texp.statementL.get(0);
+		assertEquals(expected, x1.val);
+		chkStatementSize(texp, 1);
+	}
 	private void chkTLangBoolean(String tlang, boolean expected) {
 		TLangBodyExp texp = doTLang(tlang);
 		
