@@ -11,6 +11,8 @@ import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.inputfunction.MainInputFunctionTests;
+import org.delia.tlang.runner.TLangResult;
+import org.delia.tlang.runner.TLangRunner;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -126,18 +128,32 @@ public class InputFunctionRunner extends ServiceBase {
 		
 		for(String inputField: inputData.keySet()) {
 			String value = inputData.get(inputField);
-			IdentPairExp outPair = findOutputMapping(inputField);
-			if (outPair == null) {
+			ProgramSpec spec = findOutputMapping(inputField);
+			if (spec == null || spec.outputField == null) {
 				continue;
 			}
+			IdentPairExp outPair = spec.outputField;
 			//match with Customer!!
 			//run tlang...
+			if (spec.prog != null) {
+				TLangRunner tlangRunner = new TLangRunner(factorySvc, registry);
+				DValue initialValue = scalarBuilder.buildString(value);
+				TLangResult res = tlangRunner.execute(spec.prog, initialValue);
+				if (!res.ok) {
+					log.log("ltang failed!");
+				}
+				DValue finalValue = (DValue) res.val;
+				value = finalValue.asString();
+			}
+
+			
+			
 			data.map.put(outPair.argName(), value); //fieldname might be different
 		}
 		return list;
 	}
 
-	private IdentPairExp findOutputMapping(String inputField) {
+	private ProgramSpec findOutputMapping(String inputField) {
 		ProgramSpec spec = progset.map.get(inputField);
 		if (spec == null) {
 			//err
@@ -146,7 +162,7 @@ public class InputFunctionRunner extends ServiceBase {
 			return null;
 		}
 		
-		return spec.outputField;
+		return spec;
 	}
 
 	private Map<String, String> createInputMap(HdrInfo hdr, LineObj lineObj) {

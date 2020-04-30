@@ -16,6 +16,7 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -31,7 +32,11 @@ public class InputFunctionService extends ServiceBase {
 		InputFunctionDefStatementExp infnExp = findFunction(inputFnName, session);
 		for(Exp exp: infnExp.bodyExp.statementL) {
 			InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
-			TLangProgram program = new TLangProgram();
+//			TLangProgram program = new TLangProgram();
+			
+			TLangProgramBuilder programBuilder = new TLangProgramBuilder(factorySvc, session.getExecutionContext().registry);
+			TLangProgram program = programBuilder.build(mappingExp);
+			
 			String infield = mappingExp.inputField.name();
 
 			ProgramSpec spec = new ProgramSpec();

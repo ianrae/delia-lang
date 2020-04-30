@@ -48,7 +48,7 @@ public class TLangProgramBuilder extends ServiceBase {
 	}
 
 	public TLangProgram build(InputFuncMappingExp mappingExp) {
-		if (mappingExp.tlangBody.statementL.isEmpty()) {
+		if (mappingExp.tlangBody == null || mappingExp.tlangBody.statementL.isEmpty()) {
 			return null; //no tlang
 		}
 
