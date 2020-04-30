@@ -2,6 +2,8 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.bddnew.NewBDDBase;
@@ -13,6 +15,8 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.filter.OP;
+import org.delia.runner.QueryResponse;
+import org.delia.runner.ResultValue;
 import org.delia.runner.VarEvaluator;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.DValueOpEvaluator;
@@ -22,6 +26,7 @@ import org.delia.tlang.runner.TLangContext;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
+import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
 import org.delia.tlang.statement.TLangStatementBase;
@@ -145,14 +150,28 @@ public class TLangTests  extends NewBDDBase {
 		TLangProgram prog = createProgram5(false);
 
 		DValue initialValue = builder.buildString("something");
-		VarEvaluator varEvaluator = null;
+
+		buildVar("z", "abcd");
+		
+		VarEvaluator varEvaluator = new TLangVarEvaluator(session.getExecutionContext());
 		tlangRunner.setVarEvaluator(varEvaluator);
 		TLangResult res = tlangRunner.execute(prog, initialValue);
 
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
-		assertEquals("something", dval.asString());
-		chkTrail(tlangRunner, "if;endif");
+		assertEquals("abcd", dval.asString());
+		chkTrail(tlangRunner, "var");
+	}
+
+	private void buildVar(String varName, String str) {
+		DValue varvalue = builder.buildString(str);
+		QueryResponse qresp = new QueryResponse();
+		qresp.ok = true;
+		qresp.dvalList = Collections.singletonList(varvalue);
+		ResultValue res = new ResultValue();
+		res.ok = true;
+		res.val = qresp;
+		session.getExecutionContext().varMap.put(varName, res);
 	}
 
 	// --
