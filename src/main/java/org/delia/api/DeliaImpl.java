@@ -84,7 +84,7 @@ public class DeliaImpl implements Delia {
 	protected Runner createRunner(DeliaSession dbsess) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		Runner runner = new RunnerImpl(factorySvc, dbInterface);
-		runner.setInsertPrebuiltValueIterator(this.deliaOptions.insertPrebuiltValueIterator);
+		runner.setInsertPrebuiltValueIterator(dbsess == null ? null: dbsess.getInsertPrebuiltValueIterator());
 		boolean b; 
 		if (dbsess == null) {
 			b = runner.init(null); 

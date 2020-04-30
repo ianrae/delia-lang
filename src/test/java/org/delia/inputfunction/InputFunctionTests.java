@@ -274,11 +274,11 @@ public class InputFunctionTests  extends NewBDDBase {
 		//pass in the already build dval runner.setAlreadyBuiltDVal()
 		
 		DValueIterator iter = new DValueIterator(dvals);
-		delia.getOptions().insertPrebuiltValueIterator = iter;
+		session.setInsertPrebuiltValueIterator(iter);
 		String s = String.format("insert Customer {}");
 		ResultValue res = delia.continueExecution(s, session);
 		assertEquals(true, res.ok);
-		delia.getOptions().insertPrebuiltValueIterator = null;
+		session.setInsertPrebuiltValueIterator(null);
 		
 		DeliaDao dao = new DeliaDao(delia, session);
 		res = dao.queryByPrimaryKey("Customer", "1");

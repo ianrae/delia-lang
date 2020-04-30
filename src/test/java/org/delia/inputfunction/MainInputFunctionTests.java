@@ -180,7 +180,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 
 		private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum) {
 			DValueIterator iter = new DValueIterator(dval);
-			request.delia.getOptions().insertPrebuiltValueIterator = iter;
+			request.session.setInsertPrebuiltValueIterator(iter);
 			String typeName = dval.getType().getName();
 			String s = String.format("insert %s {}", typeName);
 			
@@ -196,7 +196,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 			} catch (DeliaException e) {
 				addError(e, fnResult.totalErrorL, lineNum);
 			}
-			request.delia.getOptions().insertPrebuiltValueIterator = null;
+			request.session.setInsertPrebuiltValueIterator(null);
 		}		
 		
 		private void addError(DeliaError err, List<DeliaError> errL, int lineNum) {
@@ -219,8 +219,8 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	@Test
 	public void test1() {
 		createDelia(false);
-		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
-		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
 		LineObjIterator lineObjIter = createIter(1, true);
@@ -228,7 +228,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
-		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(0, result.totalErrorL.size());
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(1, result.numDValuesProcessed);
@@ -246,8 +246,8 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	@Test
 	public void test2() {
 		createDelia(false);
-		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
-		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
 		LineObjIterator lineObjIter = createIter(2, true);
@@ -255,7 +255,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
-		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(0, result.totalErrorL.size());
 		assertEquals(2, result.numRowsProcessed);
 		assertEquals(2, result.numDValuesProcessed);
@@ -278,8 +278,8 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	@Test
 	public void test3Rule() {
 		createDelia(true);
-		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
-		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
 		LineObjIterator lineObjIter = createIter(2,true);
@@ -287,7 +287,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
-		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(2, result.totalErrorL.size());
 		assertEquals(2, result.numRowsProcessed);
 		assertEquals(2, result.numDValuesProcessed);
@@ -307,8 +307,8 @@ public class MainInputFunctionTests  extends NewBDDBase {
 	@Test
 	public void test4BadLineObj() {
 		createDelia(true);
-		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
-		ProgramSet progset = tlangSvc.buildProgram("foo", session);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.map.size());
 		
 		LineObjIterator lineObjIter = createIter(2,false);
@@ -316,7 +316,7 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
-		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
+		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(2, result.totalErrorL.size());
 		assertEquals(2, result.numRowsProcessed);
 		assertEquals(0, result.numDValuesProcessed);
@@ -334,37 +334,11 @@ public class MainInputFunctionTests  extends NewBDDBase {
 		assertEquals(0L, n);
 	}
 	
-	@Test
+	@Test(expected=DeliaException.class)
 	public void test4BadInputFunc() {
 //		createDelia(true);
 		String src = buildSrcBadInputFunc(false);
 		this.session = delia.beginSession(src);
-		
-		InputFunctionService tlangSvc = new InputFunctionService(delia.getFactoryService());
-		ProgramSet progset = tlangSvc.buildProgram("foo", session);
-		assertEquals(3, progset.map.size());
-		
-		LineObjIterator lineObjIter = createIter(2,true);
-		InputFunctionRequest request = new InputFunctionRequest();
-		request.delia = delia;
-		request.progset = progset;
-		request.session = session;
-		InputFunctionResult result = tlangSvc.process(request, lineObjIter);
-		assertEquals(2, result.totalErrorL.size());
-		assertEquals(2, result.numRowsProcessed);
-		assertEquals(0, result.numDValuesProcessed);
-		
-		DeliaError err = result.totalErrorL.get(0);
-		assertEquals(1, err.getLineNum());
-
-		DeliaDao dao = new DeliaDao(delia, session);
-		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals(null, dval);
-		
-		long n  = dao.count("Customer");
-		assertEquals(0L, n);
 	}
 
 	// --

@@ -1,6 +1,5 @@
 package org.delia.api;
 
-import org.delia.runner.DValueIterator;
 
 /**
  * Options that can be changed during the lifetime of a Delia object.
@@ -14,5 +13,4 @@ public class DeliaOptions {
 	public boolean enableExecution = true;
 	public boolean useSafeMigrationPolicy = true;
 	public boolean enableAutomaticMigrations = true;
-	public DValueIterator insertPrebuiltValueIterator = null;
 }
