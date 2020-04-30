@@ -44,6 +44,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 		DValue dval = initialValue;
 		TLangResult res = new TLangResult();
 		int ipIndex;
+		int stopCounter = Integer.MAX_VALUE;
 		for(ipIndex = 0; ipIndex < program.statements.size(); ipIndex++) {
 			TLangStatement statement = program.statements.get(ipIndex);
 			statementFixup(statement);
@@ -66,6 +67,8 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				} else if (ctx.stopFlag) {
 					log.log("stop!"); //normal stop
 					break;
+				} else if (ctx.stopAfterNextFlag) {
+					stopCounter = 1;
 				}
 				
 				dval = (DValue) res.val;
@@ -78,6 +81,11 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				if (ipIndex < 0) {
 					//err missing endif
 				}
+			}
+			
+			if (stopCounter-- <= 0) {
+				log.log("stop!"); //normal stop
+				break;
 			}
 		}
 

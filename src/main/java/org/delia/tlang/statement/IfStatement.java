@@ -10,7 +10,7 @@ import org.delia.type.DValue;
 
 public class IfStatement implements TLangStatement, NeedsTLangRunner {
 	public Condition cond;
-	private boolean isIfThenReturn;
+	public boolean isIfThenReturn;
 
 	public IfStatement(Condition cond, boolean isIfThenReturn) {
 		this.cond = cond;
@@ -21,7 +21,7 @@ public class IfStatement implements TLangStatement, NeedsTLangRunner {
 	public void execute(DValue value, TLangResult result, TLangContext ctx) {
 		result.val = value;
 		if (isIfThenReturn) {
-			ctx.stopFlag = true;
+			ctx.stopAfterNextFlag = true;
 		}
 	}
 	@Override

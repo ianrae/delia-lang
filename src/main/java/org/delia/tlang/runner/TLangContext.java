@@ -11,4 +11,5 @@ public class TLangContext {
 	public Map<String, String> inputDataMap;
 	public boolean failFlag;
 	public boolean stopFlag;
+	public boolean stopAfterNextFlag;
 }

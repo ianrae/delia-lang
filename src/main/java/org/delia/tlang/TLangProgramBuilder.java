@@ -27,7 +27,6 @@ import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangStatement;
 import org.delia.tlang.statement.ElseIfStatement;
 import org.delia.tlang.statement.EndIfStatement;
-import org.delia.tlang.statement.FailsStatement;
 import org.delia.tlang.statement.IfStatement;
 import org.delia.tlang.statement.ValueStatement;
 import org.delia.tlang.statement.VariableStatement;
@@ -41,6 +40,7 @@ public class TLangProgramBuilder extends ServiceBase {
 //	private DTypeRegistry registry;
 	private ScalarValueBuilder builder;
 	private TLangStatementFactory statementFactory;
+	private TLangStatement additionalStatement;
 
 	public TLangProgramBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -61,6 +61,10 @@ public class TLangProgramBuilder extends ServiceBase {
 			TLangStatement statement = parseStatement(exp);
 			if (statement != null) {
 				program.statements.add(statement);
+				if (additionalStatement != null) {
+					program.statements.add(additionalStatement);
+					additionalStatement = null;
+				}
 			}
 		}
 
@@ -75,6 +79,10 @@ public class TLangProgramBuilder extends ServiceBase {
 				if (inIf) {
 					DeliaExceptionHelper.throwError("tlang-nested-if-not-allowed", "Nested if statements not allowed in TLANG");
 				} 
+				IfStatement ifstat = (IfStatement) statement;
+				if (ifstat.isIfThenReturn) {
+					break;
+				}
 				inIf = true;
 			} else if (statement instanceof ElseIfStatement) {
 				if (!inIf) {
@@ -134,6 +142,9 @@ public class TLangProgramBuilder extends ServiceBase {
 			Condition cond = buildCondition(ifexp); //new BasicCondition(true); //!!!
 			
 			if (ifexp.isIf) {
+				if (ifexp.isIfReturn) {
+					this.additionalStatement = parseStatement(ifexp.returnStatement); //**recursion**
+				}
 				return new IfStatement(cond, ifexp.isIfReturn);
 			} else {
 				return new ElseIfStatement(cond);
