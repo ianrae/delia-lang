@@ -76,7 +76,7 @@ public class InputFunctionService extends ServiceBase {
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
 		InputFunctionResult fnResult = new InputFunctionResult();
 		ErrorTracker localET = new SimpleErrorTracker(log);
-		VarEvaluator varEvaluator = new TLangVarEvaluator(request.session.getExecutionContext());
+		TLangVarEvaluator varEvaluator = new TLangVarEvaluator(request.session.getExecutionContext());
 		
 		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET, varEvaluator);
 		HdrInfo hdr = request.progset.hdr;

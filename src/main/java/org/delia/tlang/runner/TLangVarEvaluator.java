@@ -11,6 +11,7 @@ import org.delia.type.DValue;
 public class TLangVarEvaluator implements VarEvaluator {
 
 	private ExecutionState execState;
+	private DValue valueVar;
 
 	public TLangVarEvaluator(ExecutionState execState) {
 		this.execState = execState;
@@ -18,6 +19,10 @@ public class TLangVarEvaluator implements VarEvaluator {
 
 	@Override
 	public List<DValue> lookupVar(String varName) {
+		if (varName.equals("value")) {
+			return Collections.singletonList(valueVar);
+		}
+		
 		ResultValue res = execState.varMap.get(varName);
 		if (res.val instanceof DValue) {
 			DValue dval = (DValue) res.val;
@@ -30,5 +35,9 @@ public class TLangVarEvaluator implements VarEvaluator {
 	@Override
 	public String evalVarAsString(String varName, String typeName) {
 		throw new IllegalArgumentException("SprigVarEvaluator.lookupVar not IMPLEMENTED!");
+	}
+
+	public void setValueVar(DValue initialValue) {
+		this.valueVar = initialValue;
 	}
 }

@@ -13,4 +13,7 @@ public class OpCondition implements Condition {
 	public boolean eval(DValue dval) {
 		return evaluator.match(dval);
 	}
+	@Override
+	public void setTLangRunner(TLangRunner tlangRunner) {
+	}
 }

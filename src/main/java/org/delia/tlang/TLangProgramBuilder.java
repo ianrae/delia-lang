@@ -155,6 +155,7 @@ public class TLangProgramBuilder extends ServiceBase {
 		TLangStatement stat2 = this.parseStatement(filter.op2); //** recursion **
 		//how set stat1?
 		StatementOpEvaluator evaluator = new StatementOpEvaluator(op);
+		evaluator.setLeftStatement(stat1);
 		evaluator.setRightVar(stat2);
 		DValueOpEvaluator dvalEval = new DValueOpEvaluator(op);
 		evaluator.setDvalEvaluator(dvalEval);

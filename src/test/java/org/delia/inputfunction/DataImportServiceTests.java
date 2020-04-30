@@ -29,44 +29,23 @@ public class DataImportServiceTests  extends NewBDDBase {
 
 	@Test
 	public void test1() {
-		createDelia("'able'");
-		DataImportService importSvc = new DataImportService(delia, session);
-
 		LineObjIterator lineObjIter = createIter(1, true);
-		InputFunctionResult result = importSvc.buildAndRun("foo", lineObjIter);
-		assertEquals(0, result.totalErrorL.size());
-		assertEquals(1, result.numRowsProcessed);
-		assertEquals(1, result.numDValuesProcessed);
-
-		DeliaDao dao = new DeliaDao(delia, session);
-		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals("able", dval.asStruct().getField("name").asString());
-
-		long n  = dao.count("Customer");
-		assertEquals(1L, n);
+		buildAndRun("'able'", lineObjIter);
+		chkCustomer(1, "able");
 	}
 	
 	@Test
 	public void test2() {
-		createDelia("var1");
-		DataImportService importSvc = new DataImportService(delia, session);
-
 		LineObjIterator lineObjIter = createIter(1, true);
-		InputFunctionResult result = importSvc.buildAndRun("foo", lineObjIter);
-		assertEquals(0, result.totalErrorL.size());
-		assertEquals(1, result.numRowsProcessed);
-		assertEquals(1, result.numDValuesProcessed);
-
-		DeliaDao dao = new DeliaDao(delia, session);
-		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals("55", dval.asStruct().getField("name").asString());
-
-		long n  = dao.count("Customer");
-		assertEquals(1L, n);
+		buildAndRun("var1", lineObjIter);
+		chkCustomer(1, "55");
+	}
+	
+	@Test
+	public void test3() {
+		LineObjIterator lineObjIter = createIter(1, true);
+		buildAndRun("if value == 'bob' then 'sue', endif", lineObjIter);
+		chkCustomer(1, "sue");
 	}
 
 
@@ -98,6 +77,28 @@ public class DataImportServiceTests  extends NewBDDBase {
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaDao(delia);
 	}
+	private InputFunctionResult buildAndRun(String tlang, LineObjIterator lineObjIter) {
+		createDelia(tlang);
+		DataImportService importSvc = new DataImportService(delia, session);
+
+		InputFunctionResult result = importSvc.buildAndRun("foo", lineObjIter);
+		assertEquals(0, result.totalErrorL.size());
+		assertEquals(1, result.numRowsProcessed);
+		assertEquals(1, result.numDValuesProcessed);
+		return result;
+	}
+	private void chkCustomer(Integer id, String expected) {
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(expected, dval.asStruct().getField("name").asString());
+		long n  = dao.count("Customer");
+		assertEquals(1L, n);
+	}
+
+
+	
 
 	@Override
 	public DBInterface createForTest() {

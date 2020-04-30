@@ -11,6 +11,7 @@ public class StatementOpEvaluator implements OpEvaluator {
 	protected boolean negFlag;
 	private TLangRunner tlangRunner;
 	private DValueOpEvaluator dvalEvaluator;
+	private TLangStatement leftStatement;
 
 	public StatementOpEvaluator(OP op) {
 		this.op = op;
@@ -26,7 +27,7 @@ public class StatementOpEvaluator implements OpEvaluator {
 		}
 	}
 	protected boolean doMatch(Object left) {
-		TLangStatement leftval = (TLangStatement) left;
+		TLangStatement leftval = leftStatement;
 		TLangStatement rightval = (TLangStatement) rightVar;
 		
 		TLangResult res1 = tlangRunner.executeOne(leftval, null);
@@ -57,5 +58,9 @@ public class StatementOpEvaluator implements OpEvaluator {
 
 	public void setDvalEvaluator(DValueOpEvaluator dvalEvaluator) {
 		this.dvalEvaluator = dvalEvaluator;
+	}
+
+	public void setLeftStatement(TLangStatement stat1) {
+		this.leftStatement = stat1;
 	}
 }

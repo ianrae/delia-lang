@@ -29,9 +29,9 @@ public class InputFunctionRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ScalarValueBuilder scalarBuilder;
 	private ProgramSet progset;
-	private VarEvaluator varEvaluator;
+	private TLangVarEvaluator varEvaluator;
 
-	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, VarEvaluator varEvaluator) {
+	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.registry = registry;
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
@@ -142,6 +142,7 @@ public class InputFunctionRunner extends ServiceBase {
 				TLangRunner tlangRunner = new TLangRunner(factorySvc, registry);
 				tlangRunner.setVarEvaluator(varEvaluator);
 				DValue initialValue = scalarBuilder.buildString(value);
+				varEvaluator.setValueVar(initialValue);
 				TLangResult res = tlangRunner.execute(spec.prog, initialValue);
 				if (!res.ok) {
 					log.log("ltang failed!");

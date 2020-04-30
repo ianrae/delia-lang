@@ -12,4 +12,7 @@ public class BasicCondition implements Condition {
 	public boolean eval(DValue dval) {
 		return flag;
 	}
+	@Override
+	public void setTLangRunner(TLangRunner tlangRunner) {
+	}
 }

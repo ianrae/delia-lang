@@ -132,7 +132,7 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 
 	private InputFunctionRunner createXConv() {
 		localET = new SimpleErrorTracker(delia.getLog());
-		VarEvaluator varEvaluator = new TLangVarEvaluator(session.getExecutionContext());
+		TLangVarEvaluator varEvaluator = new TLangVarEvaluator(session.getExecutionContext());
 		return new InputFunctionRunner(delia.getFactoryService(), registry, localET, varEvaluator);
 	}
 

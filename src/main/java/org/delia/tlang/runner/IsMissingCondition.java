@@ -10,4 +10,7 @@ public class IsMissingCondition implements Condition {
 	public boolean eval(DValue dval) {
 		return dval == null || dval.asString().isEmpty();
 	}
+	@Override
+	public void setTLangRunner(TLangRunner tlangRunner) {
+	}
 }

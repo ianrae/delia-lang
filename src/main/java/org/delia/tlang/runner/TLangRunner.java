@@ -35,6 +35,7 @@ public class TLangRunner extends ServiceBase {
 		int ipIndex;
 		for(ipIndex = 0; ipIndex < program.statements.size(); ipIndex++) {
 			TLangStatement statement = program.statements.get(ipIndex);
+			statementFixup(statement);
 			if (statement.evalCondition(dval)) {
 				TLangContext ctx = new TLangContext();
 				ctx.builder = scalarBuilder;
@@ -65,6 +66,15 @@ public class TLangRunner extends ServiceBase {
 		return result;
 	}
 	
+	private void statementFixup(TLangStatement statement) {
+		if (statement instanceof IfStatement) {
+			IfStatement ifstat = (IfStatement) statement;
+			ifstat.cond.setTLangRunner(this);
+		} else if (statement instanceof ElseIfStatement) {
+			ElseIfStatement ifstat = (ElseIfStatement) statement;
+			ifstat.cond.setTLangRunner(this);
+		}
+	}
 	public TLangResult executeOne(TLangStatement statement, DValue initialValue) {
 		DValue dval = initialValue;
 		TLangResult res = new TLangResult();
