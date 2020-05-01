@@ -4,13 +4,13 @@ import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.other.StringTrail;
 import org.delia.runner.VarEvaluator;
 import org.delia.tlang.statement.ElseIfStatement;
 import org.delia.tlang.statement.EndIfStatement;
 import org.delia.tlang.statement.IfStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.StringTrail;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class TLangRunnerImpl extends ServiceBase implements TLangRunner {

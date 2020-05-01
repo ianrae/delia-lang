@@ -226,7 +226,7 @@ public class NorthwindTests extends NewBDDBase {
 
 
 	// ---
-	private final String BASE_DIR = "src/main/resources/test/northwind/";
+	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 
 	@Before
 	public void init() {
