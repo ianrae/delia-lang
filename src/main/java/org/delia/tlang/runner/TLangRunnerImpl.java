@@ -19,7 +19,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 	private ScalarValueBuilder scalarBuilder;
 	private StringTrail trail = new StringTrail();
 	private VarEvaluator varEvaluator;
-	private Map<String, String> inputDataMap;
+	private Map<String, Object> inputDataMap;
 
 	public TLangRunnerImpl(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -131,7 +131,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 
 
 	@Override
-	public void setInputMap(Map<String, String> inputData) {
+	public void setInputMap(Map<String, Object> inputData) {
 		this.inputDataMap = inputData;
 	}
 }

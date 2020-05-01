@@ -44,7 +44,7 @@ public class InputFunctionRunner extends ServiceBase {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
-		Map<String,String> inputData = createInputMap(hdr, lineObj);
+		Map<String,Object> inputData = createInputMap(hdr, lineObj);
 		//it can produce multiple
 		List<ProcessedInputData> processedDataL = runTLang(inputData);
 		if (haltNowFlag) {
@@ -128,14 +128,24 @@ public class InputFunctionRunner extends ServiceBase {
 		return scalarBuilder.buildString(s);
 	}
 
-	private List<ProcessedInputData> runTLang(Map<String, String> inputData) {
+	private List<ProcessedInputData> runTLang(Map<String, Object> inputData) {
 		List<ProcessedInputData> list = new ArrayList<>();
 		ProcessedInputData data = new ProcessedInputData();
 		data.structType = (DStructType) registry.getType("Customer");
 		list.add(data);
 		
 		for(String inputField: inputData.keySet()) {
-			String value = inputData.get(inputField);
+			
+			//if (progset.map)
+			
+			String value;
+			Object obj = inputData.get(inputField);
+			if (obj instanceof DValue) {
+				DValue synthValue = (DValue) obj;
+				value = synthValue.asString();
+			} else {
+				value = obj.toString(); //was a string
+			}
 			ProgramSpec spec = findOutputMapping(inputField);
 			if (spec == null || spec.outputField == null) {
 				continue;
@@ -182,8 +192,9 @@ public class InputFunctionRunner extends ServiceBase {
 		return spec;
 	}
 
-	private Map<String, String> createInputMap(HdrInfo hdr, LineObj lineObj) {
-		Map<String,String> inputData = new HashMap<>();
+	//produces a map of String (for CSV data) or DValues (for synthetic fields)
+	private Map<String, Object> createInputMap(HdrInfo hdr, LineObj lineObj) {
+		Map<String,Object> inputData = new HashMap<>();
 		int index = 0;
 		for(String s: lineObj.elements) {
 			String fieldName = hdr.map.get(index);
@@ -196,6 +207,15 @@ public class InputFunctionRunner extends ServiceBase {
 			}
 			index++;
 		}
+		
+		//and do synthetic fields
+		for(String inputField: progset.map.keySet()) {
+			ProgramSpec spec = progset.map.get(inputField);
+			if (spec.syntheticValue != null) {
+				inputData.put(inputField, spec.syntheticValue);
+			}
+		}
+
 		return inputData;
 	}
 

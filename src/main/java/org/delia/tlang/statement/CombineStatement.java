@@ -27,7 +27,7 @@ public class CombineStatement extends StringStatement {
 		if (exp instanceof IdentExp) {
 			IdentExp iexp = (IdentExp) exp;
 			String inputColumn = iexp.val;
-			String value = ctx.inputDataMap.get(inputColumn);
+			String value = ctx.getInputColumnAsString(inputColumn);
 			return value;
 		} else if (exp instanceof StringExp) {
 			StringExp sexp = (StringExp) exp;

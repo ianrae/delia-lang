@@ -66,7 +66,7 @@ public class Pass4Compiler extends CompilerPassBase {
 				String msg = String.format("input function '%s': invalid input field '%s'.", funcExp.funcName, mappingExp.inputField.strValue());
 				DeliaError err = createError("input-function-invalid-input-field", msg, funcExp);
 				results.errors.add(err);
-			} else {
+			} else if (mappingExp.isSyntheticInputField()) {
 				XNAFSingleExp sexp = mappingExp.getSingleExp();
 				if (sexp.argL.size() != 1) {
 					String msg = String.format("input function '%s': 'value' function must have a single parameter.", funcExp.funcName);
