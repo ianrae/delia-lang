@@ -141,10 +141,8 @@ public class TLangProgramBuilder extends ServiceBase {
 			IfStatementExp ifexp = (IfStatementExp) exp;
 			Condition cond = buildCondition(ifexp); //new BasicCondition(true); //!!!
 			
+			additionalStatement = parseStatement(ifexp.nextStatement); //**recursion**
 			if (ifexp.isIf) {
-				if (ifexp.isIfReturn) {
-					this.additionalStatement = parseStatement(ifexp.returnStatement); //**recursion**
-				}
 				return new IfStatement(cond, ifexp.isIfReturn);
 			} else {
 				return new ElseIfStatement(cond);

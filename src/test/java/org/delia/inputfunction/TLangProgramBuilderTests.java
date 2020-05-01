@@ -47,10 +47,10 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 	}
 	@Test
 	public void testIf() {
-		IfStatement statement = buildTLang("if true then zz,endif", 2, IfStatement.class);
+		IfStatement statement = buildTLang("if true then zz,endif", 3, IfStatement.class);
 		assertEquals("if", statement.getName());
 		
-		EndIfStatement stat2 = (EndIfStatement) recentProgram.statements.get(1);
+		EndIfStatement stat2 = (EndIfStatement) recentProgram.statements.get(2);
 		assertEquals("endif", stat2.getName());
 	}
 	@Test(expected=DeliaException.class)
@@ -63,10 +63,10 @@ public class TLangProgramBuilderTests  extends NewBDDBase {
 	}
 	@Test
 	public void testIfOp() {
-		IfStatement statement = buildTLang("if x > 5 then zz,endif", 2, IfStatement.class);
+		IfStatement statement = buildTLang("if x > 5 then zz,endif", 3, IfStatement.class);
 		assertEquals("if", statement.getName());
 		
-		EndIfStatement stat2 = (EndIfStatement) recentProgram.statements.get(1);
+		EndIfStatement stat2 = (EndIfStatement) recentProgram.statements.get(2);
 		assertEquals("endif", stat2.getName());
 	}
 	
