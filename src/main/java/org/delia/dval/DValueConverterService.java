@@ -174,8 +174,12 @@ public class DValueConverterService extends ServiceBase {
 			return exp.strValue();
 		}
 	}
+
 	
 	public DValue createDValFromExp(Exp valueExp, ScalarValueBuilder builder) {
+		return createDValFromExp(valueExp, builder, true);
+	}
+	public DValue createDValFromExp(Exp valueExp, ScalarValueBuilder builder, boolean treatUnknownAsString) {
 		if (valueExp instanceof IntegerExp) {
 			IntegerExp exp = (IntegerExp) valueExp;
 			return builder.buildInt(exp.val);
@@ -192,7 +196,11 @@ public class DValueConverterService extends ServiceBase {
 		} else if (valueExp instanceof NullExp) {
 			return null; //TODO: is this ok?
 		} else { //treat as string
-			return builder.buildString(valueExp.strValue());
+			if (treatUnknownAsString) {
+				return builder.buildString(valueExp.strValue());
+			} else {
+				return null;
+			}
 		}
 	}
 	

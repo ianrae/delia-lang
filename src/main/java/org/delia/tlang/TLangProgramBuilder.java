@@ -4,10 +4,6 @@ import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.IdentExp;
-import org.delia.compiler.ast.IntegerExp;
-import org.delia.compiler.ast.LongExp;
-import org.delia.compiler.ast.NumberExp;
-import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.inputfunction.EndIfStatementExp;
 import org.delia.compiler.ast.inputfunction.IfStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
@@ -16,6 +12,7 @@ import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.memdb.filter.OP;
+import org.delia.dval.DValueConverterService;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.tlang.runner.BasicCondition;
 import org.delia.tlang.runner.Condition;
@@ -41,6 +38,7 @@ public class TLangProgramBuilder extends ServiceBase {
 	private ScalarValueBuilder builder;
 	private TLangStatementFactory statementFactory;
 	private TLangStatement additionalStatement;
+	private DValueConverterService dvalConverter;
 
 	public TLangProgramBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -48,6 +46,7 @@ public class TLangProgramBuilder extends ServiceBase {
 //		this.registry = registry;
 		this.builder = factorySvc.createScalarValueBuilder(registry);
 		this.statementFactory = new TLangStatementFactory(factorySvc);
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 
 	public TLangProgram build(InputFuncMappingExp mappingExp) {
@@ -102,6 +101,11 @@ public class TLangProgramBuilder extends ServiceBase {
 	}
 
 	private TLangStatement parseStatement(Exp exp) {
+		DValue dval = dvalConverter.createDValFromExp(exp, builder, false);
+		if (dval != null) {
+			return new ValueStatement(dval);
+		}
+		
 		if (exp instanceof XNAFMultiExp) {
 			XNAFMultiExp multiExp = (XNAFMultiExp) exp;
 			if (multiExp.qfeL.size() > 2) {
@@ -121,22 +125,6 @@ public class TLangProgramBuilder extends ServiceBase {
 					return new VariableStatement(fieldOrFn.funcName);
 				}
 			}
-		} else if (exp instanceof IntegerExp) {
-			DValue dval = builder.buildInt(((IntegerExp) exp).val);
-			return new ValueStatement(dval);
-		} else if (exp instanceof LongExp) {
-			DValue dval = builder.buildLong(((LongExp) exp).val);
-			return new ValueStatement(dval);
-		} else if (exp instanceof NumberExp) {
-			DValue dval = builder.buildNumber(((NumberExp) exp).val);
-			return new ValueStatement(dval);
-		} else if (exp instanceof BooleanExp) {
-			DValue dval = builder.buildBoolean(((BooleanExp) exp).val);
-			return new ValueStatement(dval);
-		} else if (exp instanceof StringExp) {
-			DValue dval = builder.buildString(((StringExp) exp).val);
-			//TODO date later!1
-			return new ValueStatement(dval);
 		} else if (exp instanceof IfStatementExp) {
 			IfStatementExp ifexp = (IfStatementExp) exp;
 			Condition cond = buildCondition(ifexp); //new BasicCondition(true); //!!!

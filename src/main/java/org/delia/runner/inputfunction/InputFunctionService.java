@@ -14,6 +14,7 @@ import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
@@ -35,9 +36,11 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class InputFunctionService extends ServiceBase {
 	private Random rand = new Random();
+	private DValueConverterService dvalConverter;
 	
 	public InputFunctionService(FactoryService factorySvc) {
 		super(factorySvc);
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 
 	public ProgramSet buildProgram(String inputFnName, DeliaSession session) {
@@ -93,7 +96,7 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 	private DValue buildSyntheticValue(InputFuncMappingExp mappingExp, ScalarValueBuilder scalarBuilder) {
-		return SyntheticFieldHelper.buildSyntheticValue(mappingExp, scalarBuilder);
+		return SyntheticFieldHelper.buildSyntheticValue(mappingExp, this.dvalConverter, scalarBuilder);
 	}
 	private String generateSyntheticFieldName(Map<String, ProgramSpec> map) {
 		return SyntheticFieldHelper.generateSyntheticFieldName(map, rand);
