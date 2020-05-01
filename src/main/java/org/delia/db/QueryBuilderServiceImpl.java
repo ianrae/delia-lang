@@ -10,15 +10,14 @@ import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
-import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
-import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
+import org.delia.dval.DValueConverterService;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DType;
@@ -29,11 +28,11 @@ import org.delia.util.DeliaExceptionHelper;
 public class QueryBuilderServiceImpl implements QueryBuilderService {
 	
 	private FactoryService factorySvc;
-	private DateFormatService fmtSvc;
+	private DValueConverterService dvalConverter;
 
 	public QueryBuilderServiceImpl(FactoryService factorySvc) {
 		this.factorySvc = factorySvc;
-		this.fmtSvc = factorySvc.getDateFormatService();
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 
 	@Override
@@ -58,26 +57,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	}
 
 	private Exp createExpFor(DValue inner) {
-		switch(inner.getType().getShape()) {
-		case INTEGER:
-			return new IntegerExp(inner.asInt());
-		case LONG:
-			return new LongExp(inner.asLong());
-		case NUMBER:
-			return new NumberExp(inner.asNumber());
-		case STRING:
-			return new StringExp(inner.asString());
-		case BOOLEAN:
-			return new BooleanExp(inner.asBoolean());
-		case DATE:
-		{
-			String s = fmtSvc.format(inner.asDate());
-			return new StringExp(s);
-		}
-		default:
-			//err
-			return null;
-		}
+		return dvalConverter.createExpFor(inner);
 	}
 
 	@Override
