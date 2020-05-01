@@ -85,9 +85,16 @@ public class InputFunctionParser extends ParserBase {
 		return Parsers.sequence(term("using"), term("{"), tlangBody(), term("}"),
 				(Token tok, Token tok2, TLangBodyExp body, Token tok3) -> body);
 	}
+	
+	private static Parser<Exp> inputField() {
+		return Parsers.or(
+				LetParser.explicitValue(),
+				NameAndFuncParser.parseNameAndFuncs()
+				);
+	}
 
 	private static Parser<Exp> fnBodyStatements() {
-		return Parsers.sequence(NameAndFuncParser.parseNameAndFuncs(), term("->"), identPair(), tlangBody1().optional(),
+		return Parsers.sequence(inputField(), term("->"), identPair(), tlangBody1().optional(),
 				(Exp field, Token tok, IdentPairExp output, TLangBodyExp body) -> new InputFuncMappingExp(99, field, output, body));
 	}
 

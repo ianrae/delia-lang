@@ -177,6 +177,7 @@ public class DataImportServiceTests  extends NewBDDBase {
 	}
 	
 	
+	
 	// --
 	//	private DeliaDao dao;
 	private Delia delia;
@@ -196,6 +197,13 @@ public class DataImportServiceTests  extends NewBDDBase {
 	private String buildSrc(String tlang) {
 		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
 		src += String.format(" input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name using { %s }}", tlang);
+		src += String.format(" let var1 = 55");
+
+		return src;
+	}
+	private String buildSrc2(String tlang) {
+		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
+		src += String.format(" input function foo(Customer c) { 'CUST ID' -> c.id, WID -> c.wid, NAME -> c.name using { %s }}", tlang);
 		src += String.format(" let var1 = 55");
 
 		return src;
