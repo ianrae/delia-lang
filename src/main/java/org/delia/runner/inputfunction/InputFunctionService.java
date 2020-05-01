@@ -85,6 +85,7 @@ public class InputFunctionService extends ServiceBase {
 				DeliaExceptionHelper.throwError("type-not-struct-for-import", "Type '%s' is not a struct in input function '%s'", pair.typeName(), infnExp.funcName);
 			}
 			progset.outputTypes.add((DStructType) dtype);
+			progset.outputAliases.add(pair.argName());
 		}
 	}
 

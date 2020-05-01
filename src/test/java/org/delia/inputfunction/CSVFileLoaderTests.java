@@ -32,7 +32,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 
 	@Test
 	public void test1() {
-		String path = BASE_DIR + "northwind-small.txt";
+		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
 		buildAndRun("", fileLoader);
 	}
@@ -65,8 +65,8 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	private String buildSrc(String tlang) {
 		String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
 		//categoryID,categoryName,description,picture
-		src += String.format(" input function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ", tlang);
-		src += String.format(" let var1 = 55");
+		src += String.format(" \ninput function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ", tlang);
+		src += String.format(" \nlet var1 = 55");
 
 		return src;
 	}

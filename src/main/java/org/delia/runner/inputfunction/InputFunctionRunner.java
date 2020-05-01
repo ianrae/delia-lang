@@ -195,11 +195,28 @@ public class InputFunctionRunner extends ServiceBase {
 
 	private List<ProcessedInputData> runTLang(Map<String, Object> inputData) {
 		List<ProcessedInputData> list = new ArrayList<>();
+		
+		int index = 0;
+		for(DStructType structType: progset.outputTypes) {
+			String alias = progset.outputAliases.get(index);
+			ProcessedInputData data = runTLangForType(alias, structType, inputData);
+			data.structType = structType;
+			list.add(data);
+			index++;
+		}
+		return list;
+	}
+	private ProcessedInputData runTLangForType(String alias, DStructType structType, Map<String, Object> inputData) {
 		ProcessedInputData data = new ProcessedInputData();
-		data.structType = (DStructType) registry.getType("Customer");
-		list.add(data);
 		
 		for(String inputField: inputData.keySet()) {
+			ProgramSpec spec = findOutputMapping(inputField);
+			if (spec == null || spec.outputField == null) {
+				continue;
+			}
+			if (!spec.outputField.val1.equals(alias)) {
+				continue;
+			}
 			
 			String value;
 			Object obj = inputData.get(inputField);
@@ -209,10 +226,6 @@ public class InputFunctionRunner extends ServiceBase {
 				//TODO we should keep this as a dval all the way through
 			} else {
 				value = obj.toString(); //was a string
-			}
-			ProgramSpec spec = findOutputMapping(inputField);
-			if (spec == null || spec.outputField == null) {
-				continue;
 			}
 			IdentPairExp outPair = spec.outputField;
 			//match with Customer!!
@@ -235,13 +248,13 @@ public class InputFunctionRunner extends ServiceBase {
 				if (res.failFlag) {
 					haltNowFlag = true;
 					data.map.put(outPair.argName(), value); //fieldname might be different
-					return list;
+					return data;
 				}
 			}
 			
 			data.map.put(outPair.argName(), value); //fieldname might be different
 		}
-		return list;
+		return data;
 	}
 
 	private ProgramSpec findOutputMapping(String inputField) {
