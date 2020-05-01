@@ -136,6 +136,8 @@ public class InputFunctionService extends ServiceBase {
 		//read header
 		HdrInfo hdr = readHeader(request, lineObjIter);
 		request.progset.hdr = hdr;
+		fnResult.numColumnsProcessedPerRow = request.progset.fieldMap.size();
+		fnResult.progset = request.progset;
 		
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {

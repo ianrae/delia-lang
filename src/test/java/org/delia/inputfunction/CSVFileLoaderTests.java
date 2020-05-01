@@ -34,6 +34,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	public void test1() {
 		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		numExpectedColumnsProcessed = 4;
 		buildAndRun(true, fileLoader, 8);
 	}
 
@@ -41,6 +42,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	public void testOutOfOrder() {
 		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		numExpectedColumnsProcessed = 4;
 		buildAndRun(false, fileLoader, 8);
 	}
 	
@@ -50,6 +52,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	//	private DeliaDao dao;
 	private Delia delia;
 	private DeliaSession session;
+	private int numExpectedColumnsProcessed;
 
 	@Before
 	public void init() {
@@ -102,6 +105,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		assertEquals(0, result.errors.size());
 		assertEquals(expectedNumRows, result.numRowsProcessed);
 		assertEquals(expectedNumRows, result.numDValuesProcessed);
+		assertEquals(numExpectedColumnsProcessed, result.numColumnsProcessedPerRow);
 		return result;
 	}
 	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {

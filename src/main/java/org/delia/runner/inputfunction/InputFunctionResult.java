@@ -9,5 +9,7 @@ public class InputFunctionResult {
 	public List<DeliaError> errors = new ArrayList<>();
 	public int numRowsProcessed;
 	public int numDValuesProcessed;
+	public int numColumnsProcessedPerRow;
 	public boolean wasHalted;
+	public ProgramSet progset;
 }
