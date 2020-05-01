@@ -1,7 +1,6 @@
 package org.delia.runner.inputfunction;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import java.util.Map;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.tlang.runner.TLangResult;
@@ -32,6 +32,7 @@ public class InputFunctionRunner extends ServiceBase {
 	private ProgramSet progset;
 	private TLangVarEvaluator varEvaluator;
 	private boolean haltNowFlag;
+	private DValueConverterService dvalConverter;
 
 	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator) {
 		super(factorySvc);
@@ -39,6 +40,7 @@ public class InputFunctionRunner extends ServiceBase {
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		this.et = localET;
 		this.varEvaluator = varEvaluator;
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 	
 	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL) {
@@ -81,26 +83,8 @@ public class InputFunctionRunner extends ServiceBase {
 			DValue inner = null;
 			DType dtype = pair.type;
 			Shape shape = dtype.getShape();
-			switch(shape) {
-			case INTEGER:
-				inner = buildInt(input);
-				break;
-			case LONG:
-				inner = buildLong(input);
-				break;
-			case NUMBER:
-				inner = buildNumber(input);
-				break;
-			case BOOLEAN:
-				inner = buildBoolean(input);
-				break;
-			case STRING:
-				inner = buildString(input);
-				break;
-			case DATE:
-				inner = buildDate(input);
-				break;
-			default:
+			inner = dvalConverter.buildFromObject(input, shape, scalarBuilder);
+			if (input != null && inner == null) {
 				//err not supported
 				String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
 				errL.add(new DeliaError("unsupported-input-field-type", msg));
@@ -116,80 +100,6 @@ public class InputFunctionRunner extends ServiceBase {
 			return null;
 		} else {
 			return structBuilder.getDValue();
-		}
-	}
-
-	private DValue buildInt(Object input) {
-		if (input == null) {
-			return null;
-		}
-		
-		if (input instanceof Integer) {
-			Integer value = (Integer) input; 
-			return scalarBuilder.buildInt(value);
-		} else {
-			String s = input.toString();
-			return scalarBuilder.buildInt(s);
-		}
-	}
-	private DValue buildLong(Object input) {
-		if (input == null) {
-			return null;
-		}
-		
-		if (input instanceof Long) {
-			Long value = (Long) input; 
-			return scalarBuilder.buildLong(value);
-		} else {
-			String s = input.toString();
-			return scalarBuilder.buildLong(s);
-		}
-	}
-	private DValue buildNumber(Object input) {
-		if (input == null) {
-			return null;
-		}
-		
-		if (input instanceof Double) {
-			Double value = (Double) input; 
-			return scalarBuilder.buildNumber(value);
-		} else {
-			String s = input.toString();
-			return scalarBuilder.buildNumber(s);
-		}
-	}
-	private DValue buildBoolean(Object input) {
-		if (input == null) {
-			return null;
-		}
-		
-		if (input instanceof Boolean) {
-			Boolean value = (Boolean) input; 
-			return scalarBuilder.buildBoolean(value);
-		} else {
-			String s = input.toString();
-			return scalarBuilder.buildBoolean(s);
-		}
-	}
-	private DValue buildString(Object input) {
-		if (input == null) {
-			return null;
-		}
-		
-		String s = input.toString();
-		return scalarBuilder.buildString(s);
-	}
-	private DValue buildDate(Object input) {
-		if (input == null) {
-			return null;
-		}
-		
-		if (input instanceof Date) {
-			Date value = (Date) input; 
-			return scalarBuilder.buildDate(value);
-		} else {
-			String s = input.toString();
-			return scalarBuilder.buildDate(s);
 		}
 	}
 
