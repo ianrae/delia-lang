@@ -46,6 +46,7 @@ public class InputFunctionService extends ServiceBase {
 		if (infnExp == null) {
 			return null;
 		}
+		progset.inFnExp = infnExp;
 		
 		addTargetTypes(progset, infnExp, session);
 		
