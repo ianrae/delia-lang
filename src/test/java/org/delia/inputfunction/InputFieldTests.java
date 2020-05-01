@@ -47,6 +47,16 @@ public class InputFieldTests  extends NewBDDBase {
 		String src = buildSrcSynthetic("value(66)", "extra int");
 		runImport(src);
 		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals(66, dval.asInt());
+	}
+	@Test
+	public void testSyntheticFieldIntNull() {
+		String src = buildSrcSynthetic("value(null)", "extra int optional");
+		runImport(src);
+		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals(null, dval);
 	}
 	
 	
@@ -130,6 +140,13 @@ public class InputFieldTests  extends NewBDDBase {
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
 		assertEquals(true, res.ok);
 		assertEquals(0, res.getAsDValueList().size());
+	}
+	private DValue getCustomerExtra(Integer id) {
+		DeliaDao dao = new DeliaDao(delia, session);
+		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		return dval.asStruct().getField("extra");
 	}
 
 

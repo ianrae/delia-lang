@@ -136,13 +136,12 @@ public class InputFunctionRunner extends ServiceBase {
 		
 		for(String inputField: inputData.keySet()) {
 			
-			//if (progset.map)
-			
 			String value;
 			Object obj = inputData.get(inputField);
 			if (obj instanceof DValue) {
 				DValue synthValue = (DValue) obj;
 				value = synthValue.asString();
+				//TODO we should keep this as a dval all the way through
 			} else {
 				value = obj.toString(); //was a string
 			}
