@@ -47,7 +47,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
-		assertEquals(1, result.numDValuesProcessed);
+		assertEquals(1, result.numRowsInserted);
 
 		DeliaDao dao = new DeliaDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
@@ -74,7 +74,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(0, result.errors.size());
 		assertEquals(2, result.numRowsProcessed);
-		assertEquals(2, result.numDValuesProcessed);
+		assertEquals(2, result.numRowsInserted);
 
 		DeliaDao dao = new DeliaDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
@@ -106,7 +106,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(2, result.errors.size());
 		assertEquals(2, result.numRowsProcessed);
-		assertEquals(2, result.numDValuesProcessed);
+		assertEquals(2, result.numRowsInserted);
 		
 		DeliaError err = result.errors.get(0);
 		assertEquals(1, err.getLineNum());
@@ -135,7 +135,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		assertEquals(2, result.errors.size());
 		assertEquals(2, result.numRowsProcessed);
-		assertEquals(0, result.numDValuesProcessed);
+		assertEquals(0, result.numRowsInserted);
 		
 		DeliaError err = result.errors.get(0);
 		assertEquals(1, err.getLineNum());

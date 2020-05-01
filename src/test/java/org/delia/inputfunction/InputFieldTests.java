@@ -156,7 +156,7 @@ public class InputFieldTests  extends NewBDDBase {
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
-		assertEquals(1, result.numDValuesProcessed);
+		assertEquals(1, result.numRowsInserted);
 		return result;
 	}
 	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
@@ -165,7 +165,7 @@ public class InputFieldTests  extends NewBDDBase {
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
-		assertEquals(0, result.numDValuesProcessed);
+		assertEquals(0, result.numRowsInserted);
 		return result;
 	}
 	private void chkCustomer(Integer id, String expected) {

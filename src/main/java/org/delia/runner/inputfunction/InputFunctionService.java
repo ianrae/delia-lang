@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
@@ -18,6 +17,7 @@ import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
@@ -139,6 +139,7 @@ public class InputFunctionService extends ServiceBase {
 		fnResult.numColumnsProcessedPerRow = request.progset.fieldMap.size();
 		fnResult.progset = request.progset;
 		
+		TypePair keyPair = null;
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {
 			//log.logDebug("line %d:", lineNum);
@@ -157,11 +158,15 @@ public class InputFunctionService extends ServiceBase {
 				}
 				
 				for(DValue dval: dvals) {
-					TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-					DValue inner = pair == null ? null : DValueHelper.getFieldValue(dval, pair.name);
-					
-					log.logDebug("line %d: dval '%s' %s", lineNum, dval.getType().getName(), inner == null ? "null" : inner.asString());
-					fnResult.numDValuesProcessed++;
+					if (isDebugLogEnabled()) {
+						if (keyPair == null) { //only do once. perf optimization
+							keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+						}
+						DValue inner = keyPair == null ? null : DValueHelper.getFieldValue(dval, keyPair.name);
+						log.logDebug("line %d: dval '%s' %s", lineNum, dval.getType().getName(), inner == null ? "null" : inner.asString());
+					}
+					fnResult.numRowsInserted++;
+					//TODO: queue up a bunch of dvals and then do a batch insert
 					executeInsert(dval, request, fnResult, lineNum);
 				}
 			}
@@ -173,6 +178,10 @@ public class InputFunctionService extends ServiceBase {
 		}
 		
 		return fnResult;
+	}
+
+	private boolean isDebugLogEnabled() {
+		return log.getLevel().equals(LogLevel.DEBUG);
 	}
 
 	private HdrInfo readHeader(InputFunctionRequest request, LineObjIterator lineObjIter) {

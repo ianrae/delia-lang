@@ -104,7 +104,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
 		assertEquals(expectedNumRows, result.numRowsProcessed);
-		assertEquals(expectedNumRows, result.numDValuesProcessed);
+		assertEquals(expectedNumRows, result.numRowsInserted);
 		assertEquals(numExpectedColumnsProcessed, result.numColumnsProcessedPerRow);
 		return result;
 	}
@@ -114,7 +114,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
-		assertEquals(0, result.numDValuesProcessed);
+		assertEquals(0, result.numRowsInserted);
 		return result;
 	}
 	private void chkCustomer(Integer id, String expected) {
