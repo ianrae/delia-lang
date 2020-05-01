@@ -132,9 +132,14 @@ public class InputFunctionService extends ServiceBase {
 		HdrInfo hdr = request.progset.hdr;
 		inFuncRunner.setProgramSet(request.progset);
 		
+		//read header
+		if (lineObjIter.hasNext()) {
+			LineObj lineObj = lineObjIter.next();
+		}
+		
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {
-			log.logDebug("line%d:", lineNum);
+			//log.logDebug("line%d:", lineNum);
 			fnResult.numRowsProcessed++;
 			LineObj lineObj = lineObjIter.next();
 

@@ -34,7 +34,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	public void test1() {
 		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
-		buildAndRun("", fileLoader);
+		buildAndRun("", fileLoader, 8);
 	}
 	
 	// --
@@ -75,17 +75,17 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaDao(delia);
 	}
-	private InputFunctionResult buildAndRun(String tlang, LineObjIterator lineObjIter) {
+	private InputFunctionResult buildAndRun(String tlang, LineObjIterator lineObjIter, int expectedNumRows) {
 		createDelia(tlang);
-		return buildAndRun(lineObjIter);
+		return buildAndRun(lineObjIter, expectedNumRows);
 	}
-	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter) {
+	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedNumRows) {
 		DataImportService importSvc = new DataImportService(delia, session);
 
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
-		assertEquals(1, result.numRowsProcessed);
-		assertEquals(1, result.numDValuesProcessed);
+		assertEquals(expectedNumRows, result.numRowsProcessed);
+		assertEquals(expectedNumRows, result.numDValuesProcessed);
 		return result;
 	}
 	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
