@@ -6,6 +6,7 @@ import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
+import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.core.DateFormatService;
@@ -148,6 +149,50 @@ public class DValueConverterService extends ServiceBase {
 		default:
 			//err
 			return null;
+		}
+	}
+	
+	public Object extractObj(Exp exp) {
+		if (exp instanceof NullExp) {
+			return null;
+		} else if (exp instanceof IntegerExp) {
+			Integer n = ((IntegerExp)exp).val;
+			return n;
+		} else if (exp instanceof LongExp) {
+			Long n = ((LongExp)exp).val;
+			return n;
+		} else if (exp instanceof NumberExp) {
+			Double n = ((NumberExp)exp).val;
+			return n;
+		} else if (exp instanceof BooleanExp) {
+			Boolean n = ((BooleanExp)exp).val;
+			return n;
+		} else if (exp instanceof StringExp) {
+			return exp.strValue();
+		} else {
+			//Do date and relation later: TODO
+			return exp.strValue();
+		}
+	}
+	
+	public DValue createDValFromExp(Exp valueExp, ScalarValueBuilder builder) {
+		if (valueExp instanceof IntegerExp) {
+			IntegerExp exp = (IntegerExp) valueExp;
+			return builder.buildInt(exp.val);
+		} else if (valueExp instanceof LongExp) {
+			LongExp exp = (LongExp) valueExp;
+			return builder.buildLong(exp.val);
+		} else if (valueExp instanceof BooleanExp) {
+			BooleanExp exp = (BooleanExp) valueExp;
+			return builder.buildBoolean(exp.val);
+		} else if (valueExp instanceof NumberExp) {
+			NumberExp exp = (NumberExp) valueExp;
+			return builder.buildNumber(exp.val);
+			//note. date _must_ be explicit type (since it's formatted as a string
+		} else if (valueExp instanceof NullExp) {
+			return null; //TODO: is this ok?
+		} else { //treat as string
+			return builder.buildString(valueExp.strValue());
 		}
 	}
 	

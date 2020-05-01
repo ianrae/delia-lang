@@ -8,6 +8,7 @@ import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueConverterService;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -22,11 +23,13 @@ public class ScalarBuilder extends ServiceBase {
 	
 	private DTypeRegistry registry;
 	private ScalarValueBuilder builder;
+	private DValueConverterService dvalConverter;
 	
 	public ScalarBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.builder = factorySvc.createScalarValueBuilder(registry);
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 	
 	public DValue buildDValue(Exp valueExp, String typeName) {
@@ -36,16 +39,16 @@ public class ScalarBuilder extends ServiceBase {
 		
 		DValue dval;
 		if (typeName == null) {
-			dval = createBuilder(valueExp);
+			dval = createDVal(valueExp);
 		} else {
-			dval = createBuilderExplicit(valueExp, typeName);
+			dval = createDValExplicit(valueExp, typeName);
 		}
 //		DValueInternal dvi = (DValueInternal) dval;
 //		dvi.setValidationState(ValidationState.VALID);
 		return dval;
 	}
 	
-	private DValue createBuilderExplicit(Exp valueExp, String typeName) {
+	private DValue createDValExplicit(Exp valueExp, String typeName) {
 		TypeInfo info = new TypeInfo();
 		
 		if (isType("int", typeName, info)) {
@@ -104,25 +107,8 @@ public class ScalarBuilder extends ServiceBase {
 		et.add("wrong-type", msg);
 	}
 
-	private DValue createBuilder(Exp valueExp) {
-		if (valueExp instanceof IntegerExp) {
-			IntegerExp exp = (IntegerExp) valueExp;
-			return builder.buildInt(exp.val);
-		} else if (valueExp instanceof LongExp) {
-			LongExp exp = (LongExp) valueExp;
-			return builder.buildLong(exp.val);
-		} else if (valueExp instanceof BooleanExp) {
-			BooleanExp exp = (BooleanExp) valueExp;
-			return builder.buildBoolean(exp.val);
-		} else if (valueExp instanceof NumberExp) {
-			NumberExp exp = (NumberExp) valueExp;
-			return builder.buildNumber(exp.val);
-			//note. date _must_ be explicit type (since it's formatted as a string
-		} else if (valueExp instanceof NullExp) {
-			return null; //TODO: is this ok?
-		} else { //treat as string
-			return builder.buildString(valueExp.strValue());
-		}
+	private DValue createDVal(Exp valueExp) {
+		return dvalConverter.createDValFromExp(valueExp, builder);
 	}
 
 	private boolean isType(String s, String typeName, TypeInfo info) {
