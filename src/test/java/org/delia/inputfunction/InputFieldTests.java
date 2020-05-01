@@ -29,7 +29,6 @@ import org.junit.Test;
 
 public class InputFieldTests  extends NewBDDBase {
 
-	
 	@Test
 	public void testColumnNameWithSpaces() {
 		String src = buildSrc("'CUST ID'");
