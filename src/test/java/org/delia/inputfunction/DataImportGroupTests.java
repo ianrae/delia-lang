@@ -64,11 +64,18 @@ public class DataImportGroupTests  extends NewBDDBase {
 	}
 
 	@Test
-	public void test1() {
+	public void testCategories() {
 		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
 		numExpectedColumnsProcessed = 4;
-		buildAndRun(fileLoader, 8);
+		buildAndRun(1, fileLoader, 8);
+	}
+	@Test
+	public void testProducts() {
+		String path = BASE_DIR + "products.csv";
+		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		numExpectedColumnsProcessed = 4;
+		buildAndRun(2, fileLoader, 8);
 	}
 	
 	
@@ -86,24 +93,40 @@ public class DataImportGroupTests  extends NewBDDBase {
 		this.delia = dao.getDelia();
 	}
 
-	private void createDelia() {
-		String src = buildSrc();
+	private void createDelia(int which) {
+		String src;
+		if (which == 1) {
+			src = buildSrc(true);
+		} else {
+			src = buildSrcProduct();
+		}
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
 	}
-	private String buildSrc() {
-		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
-		src += String.format(" input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name using { %s }}");
-		src += String.format(" let var1 = 55");
+	private String buildSrc(boolean inOrder) {
+		if (inOrder) {
+			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+			//categoryID,categoryName,description,picture
+			src += String.format(" \ninput function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ");
+			src += String.format(" \nlet var1 = 55");
 
-		return src;
+			return src;
+		} else {
+			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+			//categoryID,categoryName,description,picture
+			src += String.format(" \ninput function foo(Category c) { categoryName -> c.categoryName, description -> c.description, picture -> c.picture, categoryID -> c.categoryID } ");
+			src += String.format(" \nlet var1 = 55");
+
+			return src;
+		}
 	}
 	private String buildSrcProduct() {
-		String src = " type Product struct { productID int unique, productName string, category Category, quantityPerUnit string";
-		src += "unitPrice string, unitsInStock int, unitsOnOrder int, reorderLevel int, discontinued int } end";
-		src += " input function supplier1(Product p) { ";
-		src += " productID -> p.productID, productName -> p.productName, categoryID -> p.category, quantityPerUnit -> p.quantityPerUnit";
+		String src = " type Product struct { productID int unique, productName string, category Category, quantityPerUnit string, ";
+		src += "\n unitPrice string, unitsInStock int, unitsOnOrder int, reorderLevel int, discontinued int } end";
+		src += "\n  input function supplier1(Product p) { ";
+		src += "\n  productID -> p.productID, productName -> p.productName, categoryID -> p.category, quantityPerUnit -> p.quantityPerUnit";
+		src += " }";
 
 		return src;
 	}
@@ -112,8 +135,8 @@ public class DataImportGroupTests  extends NewBDDBase {
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaDao(delia);
 	}
-	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedRows) {
-		createDelia();
+	private InputFunctionResult buildAndRun(int which, LineObjIterator lineObjIter, int expectedRows) {
+		createDelia(which);
 		ImportGroupService groupSvc = new ImportGroupService(delia.getFactoryService());
 		groupSvc.addImport("foo", lineObjIter);
 		
