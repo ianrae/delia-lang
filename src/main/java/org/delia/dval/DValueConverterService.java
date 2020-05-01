@@ -193,6 +193,9 @@ public class DValueConverterService extends ServiceBase {
 			NumberExp exp = (NumberExp) valueExp;
 			return builder.buildNumber(exp.val);
 			//note. date _must_ be explicit type (since it's formatted as a string
+		} else if (valueExp instanceof StringExp) {
+			StringExp exp = (StringExp) valueExp;
+			return builder.buildString(exp.val);
 		} else if (valueExp instanceof NullExp) {
 			return null; //TODO: is this ok?
 		} else { //treat as string
