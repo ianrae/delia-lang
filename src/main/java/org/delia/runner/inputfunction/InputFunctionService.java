@@ -1,9 +1,11 @@
 package org.delia.runner.inputfunction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
@@ -70,7 +72,7 @@ public class InputFunctionService extends ServiceBase {
 			progset.fieldMap.put(infield, spec);
 		}
 
-		progset.hdr = this.createHdrFrom(infnExp);
+//		progset.hdr = this.createHdrFrom(infnExp);
 		return progset;
 	}
 	private void addTargetTypes(ProgramSet progset, InputFunctionDefStatementExp infnExp, DeliaSession session) {
@@ -129,17 +131,11 @@ public class InputFunctionService extends ServiceBase {
 		TLangVarEvaluator varEvaluator = new TLangVarEvaluator(request.session.getExecutionContext());
 		
 		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET, varEvaluator);
-		HdrInfo hdr = request.progset.hdr;
 		inFuncRunner.setProgramSet(request.progset);
 		
 		//read header
-		int numToIgnore = lineObjIter.getNumHdrRows();
-		while (numToIgnore-- > 0) {
-			if (!lineObjIter.hasNext()) {
-				return fnResult; //empty file
-			}
-			LineObj lineObj = lineObjIter.next();
-		}
+		HdrInfo hdr = readHeader(request, lineObjIter);
+		request.progset.hdr = hdr;
 		
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {
@@ -175,6 +171,42 @@ public class InputFunctionService extends ServiceBase {
 		}
 		
 		return fnResult;
+	}
+
+	private HdrInfo readHeader(InputFunctionRequest request, LineObjIterator lineObjIter) {
+		LineObj hdrLineObj = null; //TODO support more than one later
+		int numToIgnore = lineObjIter.getNumHdrRows();
+		while (numToIgnore-- > 0) {
+			if (!lineObjIter.hasNext()) {
+				return null; //empty file
+			}
+			hdrLineObj = lineObjIter.next();
+		}
+		
+		if (hdrLineObj == null) {
+			return this.createHdrFrom(request.progset.inFnExp);
+		}
+		
+		//build hdr from header row
+		HdrInfo hdr = new HdrInfo();
+		Map<String,ProgramSpec> saveFieldMap = new HashMap<>(request.progset.fieldMap);
+		request.progset.fieldMap.clear();
+		int index = 0;
+		for(String columnName: hdrLineObj.elements) {
+			if (saveFieldMap.containsKey(columnName)) {
+				ProgramSpec spec = saveFieldMap.get(columnName);
+				request.progset.fieldMap.put(columnName, spec);
+				hdr.map.put(index, columnName);
+			}
+			index++;
+		}
+		
+		int numMissed = saveFieldMap.size() - request.progset.fieldMap.size();
+		if (numMissed != 0) {
+			log.log("%d columns missed. Perhaps input function has incorrect input column name?", numMissed);
+		}
+		
+		return hdr;
 	}
 
 	private List<DValue> processLineObj(InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {

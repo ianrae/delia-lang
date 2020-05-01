@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.type.DStructType;
 
 public class ProgramSet {
@@ -12,4 +13,5 @@ public class ProgramSet {
 	public HdrInfo hdr;
 	public List<DStructType> outputTypes = new ArrayList<>();
 	public List<String> outputAliases = new ArrayList<>(); //parallel to outputTypes
+	public InputFunctionDefStatementExp inFnExp;
 }
