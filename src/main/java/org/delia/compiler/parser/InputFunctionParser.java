@@ -87,8 +87,8 @@ public class InputFunctionParser extends ParserBase {
 	}
 
 	private static Parser<Exp> fnBodyStatements() {
-		return Parsers.sequence(ident(), term("->"), identPair(), tlangBody1().optional(),
-				(IdentExp field, Token tok, IdentPairExp output, TLangBodyExp body) -> new InputFuncMappingExp(99, field, output, body));
+		return Parsers.sequence(NameAndFuncParser.parseNameAndFuncs(), term("->"), identPair(), tlangBody1().optional(),
+				(Exp field, Token tok, IdentPairExp output, TLangBodyExp body) -> new InputFuncMappingExp(99, field, output, body));
 	}
 
 	private static Parser<InputFunctionBodyExp> fnBody() {

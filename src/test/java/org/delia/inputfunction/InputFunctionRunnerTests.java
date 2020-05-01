@@ -87,7 +87,7 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 			ProgramSpec spec = new ProgramSpec();
 			spec.prog = new TLangProgram();
 			spec.outputField = mappingExp.outputField;
-			progset.map.put(mappingExp.inputField.name(), spec);
+			progset.map.put(mappingExp.getInputField(), spec);
 		}
 	}
 
@@ -103,7 +103,7 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		int index = 0;
 		for(Exp exp: inFnExp.bodyExp.statementL) {
 			InputFuncMappingExp mapping = (InputFuncMappingExp) exp;
-			hdr.map.put(index, mapping.inputField.name());
+			hdr.map.put(index, mapping.getInputField());
 			index++;
 		}
 		return hdr;

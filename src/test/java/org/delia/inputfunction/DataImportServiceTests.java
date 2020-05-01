@@ -76,7 +76,6 @@ public class DataImportServiceTests  extends NewBDDBase {
 		chkCustomer(1, "bob");
 	}
 	
-	
 	@Test
 	public void testMissing() {
 		LineObjIterator lineObjIter = createIter(1);

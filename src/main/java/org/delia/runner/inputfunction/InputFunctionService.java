@@ -39,7 +39,7 @@ public class InputFunctionService extends ServiceBase {
 			TLangProgramBuilder programBuilder = new TLangProgramBuilder(factorySvc, session.getExecutionContext().registry);
 			TLangProgram program = programBuilder.build(mappingExp);
 			
-			String infield = mappingExp.inputField.name();
+			String infield = mappingExp.getInputField();
 
 			ProgramSpec spec = new ProgramSpec();
 			spec.outputField = mappingExp.outputField;
@@ -67,7 +67,7 @@ public class InputFunctionService extends ServiceBase {
 		int index = 0;
 		for(Exp exp: inFnExp.bodyExp.statementL) {
 			InputFuncMappingExp mapping = (InputFuncMappingExp) exp;
-			hdr.map.put(index, mapping.inputField.name());
+			hdr.map.put(index, mapping.getInputField());
 			index++;
 		}
 		return hdr;

@@ -1,23 +1,30 @@
 package org.delia.compiler.ast.inputfunction;
 
+import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.ExpBase;
 import org.delia.compiler.ast.IdentExp;
+import org.delia.compiler.astx.XNAFMultiExp;
 
 public class InputFuncMappingExp extends ExpBase {
-	public IdentExp inputField;
+	public Exp inputField;
 	public IdentPairExp outputField;
 	public TLangBodyExp tlangBody;
 
-	public InputFuncMappingExp(int pos, IdentExp inputExp, IdentPairExp outputExp, TLangBodyExp tlangBody) {
+	public InputFuncMappingExp(int pos, Exp inputExp, IdentPairExp outputExp, TLangBodyExp tlangBody) {
 		super(pos);
 		this.inputField = inputExp;
 		this.outputField = outputExp;
 		this.tlangBody = tlangBody;
 	}
 	
+	public String getInputField() {
+		XNAFMultiExp multiExp = (XNAFMultiExp) inputField;
+		return multiExp.qfeL.get(0).funcName;
+	}
+	
 	@Override
 	public String strValue() {
-		return String.format("%s -> %s.%s", inputField.name(), outputField.val1, outputField.val2);
+		return String.format("%s -> %s.%s", inputField.strValue(), outputField.val1, outputField.val2);
 	}
 
 	@Override

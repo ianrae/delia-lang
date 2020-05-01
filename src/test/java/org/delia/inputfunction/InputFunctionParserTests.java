@@ -192,11 +192,11 @@ public class InputFunctionParserTests  extends NewBDDBase {
 
 	private InputFuncMappingExp chkFnStatement(InputFunctionDefStatementExp infnExp, int i, String expected, String s2, String s3) {
 		Exp z = infnExp.bodyExp.statementL.get(i);
-		InputFuncMappingExp stexp = (InputFuncMappingExp) z;
-		assertEquals(expected, stexp.inputField.name());
-		assertEquals(s2, stexp.outputField.val1);
-		assertEquals(s3, stexp.outputField.val2);
-		return stexp;
+		InputFuncMappingExp mappingExp = (InputFuncMappingExp) z;
+		assertEquals(expected, mappingExp.getInputField());
+		assertEquals(s2, mappingExp.outputField.val1);
+		assertEquals(s3, mappingExp.outputField.val2);
+		return mappingExp;
 	}
 
 	private void chkArg(InputFunctionDefStatementExp infnExp, int i, String expected, String expected2) {
