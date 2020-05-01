@@ -146,6 +146,12 @@ public class InputFunctionService extends ServiceBase {
 		TypePair keyPair = null;
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {
+			if (fnResult.errors.size() > request.stopAfterErrorThreshold) {
+				log.log("halting -- more than %d errors", request.stopAfterErrorThreshold);
+				break;
+			}
+			
+			
 			//log.logDebug("line %d:", lineNum);
 			fnResult.numRowsProcessed++;
 			LineObj lineObj = lineObjIter.next();
@@ -212,10 +218,14 @@ public class InputFunctionService extends ServiceBase {
 				ProgramSpec spec = saveFieldMap.get(columnName);
 				request.progset.fieldMap.put(columnName, spec);
 				hdr.map.put(index, columnName);
+				log.logDebug("column: %s", columnName);
+			} else {
+				log.log("column: %s - can't find match", columnName);
 			}
 			index++;
 		}
 		
+		log.log("found %d columns", request.progset.fieldMap.size());
 		int numMissed = saveFieldMap.size() - request.progset.fieldMap.size();
 		if (numMissed != 0) {
 			log.log("%d columns missed. Perhaps input function has incorrect input column name?", numMissed);

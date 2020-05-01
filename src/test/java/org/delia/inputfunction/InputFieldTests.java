@@ -151,7 +151,7 @@ public class InputFieldTests  extends NewBDDBase {
 		return new DeliaDao(delia);
 	}
 	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter) {
-		DataImportService importSvc = new DataImportService(delia, session);
+		DataImportService importSvc = new DataImportService(delia, session, 0);
 
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
@@ -160,7 +160,7 @@ public class InputFieldTests  extends NewBDDBase {
 		return result;
 	}
 	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
-		DataImportService importSvc = new DataImportService(delia, session);
+		DataImportService importSvc = new DataImportService(delia, session, 0);
 
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());

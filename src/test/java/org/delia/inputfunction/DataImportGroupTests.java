@@ -48,11 +48,11 @@ public class DataImportGroupTests  extends NewBDDBase {
 			this.groupL.add(pair);
 		}
 		
-		List<InputFunctionResult> run(Delia delia, DeliaSession session) {
+		List<InputFunctionResult> run(Delia delia, DeliaSession session, int stopAfterErrorThreshold) {
 			List<InputFunctionResult> resultL = new ArrayList<>();
 			
 			for(GroupPair pair: groupL) {
-				DataImportService importSvc = new DataImportService(delia, session);
+				DataImportService importSvc = new DataImportService(delia, session, stopAfterErrorThreshold);
 
 				InputFunctionResult result = importSvc.importIntoDatabase(pair.inputFnName, pair.iter);
 				resultL.add(result);
@@ -68,14 +68,16 @@ public class DataImportGroupTests  extends NewBDDBase {
 		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
 		numExpectedColumnsProcessed = 4;
-		buildAndRun(1, fileLoader, 8);
+		buildAndRun(1, "foo", fileLoader, 8);
 	}
 	@Test
 	public void testProducts() {
 		String path = BASE_DIR + "products.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		log.log(path);
 		numExpectedColumnsProcessed = 4;
-		buildAndRun(2, fileLoader, 8);
+		stopAfterErrorThreshold = 10;
+		buildAndRun(2, "prod1", fileLoader, 8);
 	}
 	
 	
@@ -86,6 +88,7 @@ public class DataImportGroupTests  extends NewBDDBase {
 	private Delia delia;
 	private DeliaSession session;
 	private int numExpectedColumnsProcessed;
+	private int stopAfterErrorThreshold;
 
 	@Before
 	public void init() {
@@ -122,9 +125,10 @@ public class DataImportGroupTests  extends NewBDDBase {
 		}
 	}
 	private String buildSrcProduct() {
-		String src = " type Product struct { productID int unique, productName string, category Category, quantityPerUnit string, ";
+		String src = buildSrc(true);
+		src += "\n type Product struct { productID int unique, productName string, relation category Category one optional, quantityPerUnit string, ";
 		src += "\n unitPrice string, unitsInStock int, unitsOnOrder int, reorderLevel int, discontinued int } end";
-		src += "\n  input function supplier1(Product p) { ";
+		src += "\n  input function prod1(Product p) { ";
 		src += "\n  productID -> p.productID, productName -> p.productName, categoryID -> p.category, quantityPerUnit -> p.quantityPerUnit";
 		src += " }";
 
@@ -135,12 +139,12 @@ public class DataImportGroupTests  extends NewBDDBase {
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaDao(delia);
 	}
-	private InputFunctionResult buildAndRun(int which, LineObjIterator lineObjIter, int expectedRows) {
+	private InputFunctionResult buildAndRun(int which, String inFnName, LineObjIterator lineObjIter, int expectedRows) {
 		createDelia(which);
 		ImportGroupService groupSvc = new ImportGroupService(delia.getFactoryService());
-		groupSvc.addImport("foo", lineObjIter);
+		groupSvc.addImport(inFnName, lineObjIter);
 		
-		List<InputFunctionResult> resultL = groupSvc.run(delia, session);
+		List<InputFunctionResult> resultL = groupSvc.run(delia, session, stopAfterErrorThreshold);
 		assertEquals(1, resultL.size());
 		InputFunctionResult result = resultL.get(0);
 		assertEquals(0, result.errors.size());

@@ -7,4 +7,5 @@ public class InputFunctionRequest {
 	public ProgramSet progset;
 	public Delia delia;
 	public DeliaSession session;
+	public int stopAfterErrorThreshold;
 }

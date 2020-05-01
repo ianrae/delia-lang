@@ -14,11 +14,13 @@ public class DataImportService extends ServiceBase {
 
 	private Delia delia;
 	private DeliaSession session;
+	private int stopAfterErrorThreshold;
 
-	public DataImportService(Delia delia, DeliaSession session) {
+	public DataImportService(Delia delia, DeliaSession session, int stopAfterErrorThreshold) {
 		super(delia.getFactoryService());
 		this.delia = delia;
 		this.session = session;
+		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
 	}
 
 	public InputFunctionResult importIntoDatabase(String inputFnName, LineObjIterator lineObjIter) {
@@ -31,6 +33,7 @@ public class DataImportService extends ServiceBase {
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
+		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		return result;
 	}
