@@ -34,7 +34,14 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	public void test1() {
 		String path = BASE_DIR + "categories.csv";
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
-		buildAndRun("", fileLoader, 8);
+		buildAndRun(true, fileLoader, 8);
+	}
+
+	@Test
+	public void testOutOfOrder() {
+		String path = BASE_DIR + "categories.csv";
+		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		buildAndRun(false, fileLoader, 8);
 	}
 	
 	// --
@@ -49,8 +56,8 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		DeliaDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
-	private void createDelia(String tlang) {
-		String src = buildSrc(tlang);
+	private void createDelia(boolean inOrder) {
+		String src = buildSrc(inOrder);
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
@@ -62,21 +69,30 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 //
 //		return src;
 //	}
-	private String buildSrc(String tlang) {
-		String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
-		//categoryID,categoryName,description,picture
-		src += String.format(" \ninput function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ", tlang);
-		src += String.format(" \nlet var1 = 55");
+	private String buildSrc(boolean inOrder) {
+		if (inOrder) {
+			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+			//categoryID,categoryName,description,picture
+			src += String.format(" \ninput function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ");
+			src += String.format(" \nlet var1 = 55");
 
-		return src;
+			return src;
+		} else {
+			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+			//categoryID,categoryName,description,picture
+			src += String.format(" \ninput function foo(Category c) { categoryName -> c.categoryName, description -> c.description, picture -> c.picture, categoryID -> c.categoryID } ");
+			src += String.format(" \nlet var1 = 55");
+
+			return src;
+		}
 	}
 	private DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaDao(delia);
 	}
-	private InputFunctionResult buildAndRun(String tlang, LineObjIterator lineObjIter, int expectedNumRows) {
-		createDelia(tlang);
+	private InputFunctionResult buildAndRun(boolean inOrder, LineObjIterator lineObjIter, int expectedNumRows) {
+		createDelia(inOrder);
 		return buildAndRun(lineObjIter, expectedNumRows);
 	}
 	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedNumRows) {
