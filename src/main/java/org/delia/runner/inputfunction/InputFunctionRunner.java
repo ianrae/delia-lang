@@ -1,6 +1,7 @@
 package org.delia.runner.inputfunction;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,9 @@ public class InputFunctionRunner extends ServiceBase {
 			case STRING:
 				inner = buildString(input);
 				break;
+			case DATE:
+				inner = buildDate(input);
+				break;
 			default:
 				//err not supported
 				String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
@@ -174,6 +178,19 @@ public class InputFunctionRunner extends ServiceBase {
 		
 		String s = input.toString();
 		return scalarBuilder.buildString(s);
+	}
+	private DValue buildDate(Object input) {
+		if (input == null) {
+			return null;
+		}
+		
+		if (input instanceof Date) {
+			Date value = (Date) input; 
+			return scalarBuilder.buildDate(value);
+		} else {
+			String s = input.toString();
+			return scalarBuilder.buildDate(s);
+		}
 	}
 
 	private List<ProcessedInputData> runTLang(Map<String, Object> inputData) {
