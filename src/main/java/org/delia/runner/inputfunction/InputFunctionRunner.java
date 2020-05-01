@@ -84,6 +84,15 @@ public class InputFunctionRunner extends ServiceBase {
 			case INTEGER:
 				inner = buildInt(input);
 				break;
+			case LONG:
+				inner = buildLong(input);
+				break;
+			case NUMBER:
+				inner = buildNumber(input);
+				break;
+			case BOOLEAN:
+				inner = buildBoolean(input);
+				break;
 			case STRING:
 				inner = buildString(input);
 				break;
@@ -117,6 +126,45 @@ public class InputFunctionRunner extends ServiceBase {
 		} else {
 			String s = input.toString();
 			return scalarBuilder.buildInt(s);
+		}
+	}
+	private DValue buildLong(Object input) {
+		if (input == null) {
+			return null;
+		}
+		
+		if (input instanceof Long) {
+			Long value = (Long) input; 
+			return scalarBuilder.buildLong(value);
+		} else {
+			String s = input.toString();
+			return scalarBuilder.buildLong(s);
+		}
+	}
+	private DValue buildNumber(Object input) {
+		if (input == null) {
+			return null;
+		}
+		
+		if (input instanceof Double) {
+			Double value = (Double) input; 
+			return scalarBuilder.buildNumber(value);
+		} else {
+			String s = input.toString();
+			return scalarBuilder.buildNumber(s);
+		}
+	}
+	private DValue buildBoolean(Object input) {
+		if (input == null) {
+			return null;
+		}
+		
+		if (input instanceof Boolean) {
+			Boolean value = (Boolean) input; 
+			return scalarBuilder.buildBoolean(value);
+		} else {
+			String s = input.toString();
+			return scalarBuilder.buildBoolean(s);
 		}
 	}
 	private DValue buildString(Object input) {

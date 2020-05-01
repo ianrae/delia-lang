@@ -3,6 +3,7 @@ package org.delia.inputfunction;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.delia.api.Delia;
@@ -57,6 +58,47 @@ public class InputFieldTests  extends NewBDDBase {
 		chkCustomer(1, "bob");
 		DValue dval = getCustomerExtra(1);
 		assertEquals(null, dval);
+	}
+	@Test
+	public void testSyntheticFieldLong() {
+		String src = buildSrcSynthetic("value(66)", "extra long");
+		runImport(src);
+		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals(66L, dval.asLong());
+	}
+	@Test
+	public void testSyntheticFieldNumber() {
+		String src = buildSrcSynthetic("value(66.2)", "extra number");
+		runImport(src);
+		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals(66.2, dval.asNumber(), 0.0001);
+	}
+	@Test
+	public void testSyntheticFieldBoolean() {
+		String src = buildSrcSynthetic("value(true)", "extra boolean");
+		runImport(src);
+		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals(true, dval.asBoolean());
+	}
+	@Test
+	public void testSyntheticFieldString() {
+		String src = buildSrcSynthetic("value('a dog')", "extra string");
+		runImport(src);
+		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals("a dog", dval.asString());
+	}
+	@Test
+	public void testSyntheticFieldDate() {
+		String src = buildSrcSynthetic("value('2019')", "extra date");
+		runImport(src);
+		chkCustomer(1, "bob");
+		DValue dval = getCustomerExtra(1);
+		assertEquals("2019-01-01T00:00:00.000+0000", dval.asString());
+		Date dt = dval.asDate();
 	}
 	
 	
