@@ -21,4 +21,9 @@ public class LineObjIteratorImpl implements LineObjIterator {
 		LineObj con = list.get(index++);
 		return con;
 	}
+
+	@Override
+	public int getNumHdrRows() {
+		return 0;
+	}
 }

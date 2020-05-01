@@ -133,13 +133,17 @@ public class InputFunctionService extends ServiceBase {
 		inFuncRunner.setProgramSet(request.progset);
 		
 		//read header
-		if (lineObjIter.hasNext()) {
+		int numToIgnore = lineObjIter.getNumHdrRows();
+		while (numToIgnore-- > 0) {
+			if (!lineObjIter.hasNext()) {
+				return fnResult; //empty file
+			}
 			LineObj lineObj = lineObjIter.next();
 		}
 		
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {
-			//log.logDebug("line%d:", lineNum);
+			//log.logDebug("line %d:", lineNum);
 			fnResult.numRowsProcessed++;
 			LineObj lineObj = lineObjIter.next();
 
@@ -158,7 +162,7 @@ public class InputFunctionService extends ServiceBase {
 					TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 					DValue inner = pair == null ? null : DValueHelper.getFieldValue(dval, pair.name);
 					
-					log.logDebug("line%d: dval '%s' %s", lineNum, dval.getType().getName(), inner == null ? "null" : inner.asString());
+					log.logDebug("line %d: dval '%s' %s", lineNum, dval.getType().getName(), inner == null ? "null" : inner.asString());
 					fnResult.numDValuesProcessed++;
 					executeInsert(dval, request, fnResult, lineNum);
 				}

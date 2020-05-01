@@ -21,6 +21,7 @@ public class CSVFileLoader implements LineObjIterator {
 	private String delim = ",";
 	private boolean ignoreBlankLines = true;
 	private String[] pendingNextLine;
+	private int numHdrRows = 1;
 
 	public CSVFileLoader(String path) {
 		this.path = path;
@@ -93,5 +94,10 @@ public class CSVFileLoader implements LineObjIterator {
 		}
 		
 		return lineObj;
+	}
+
+	@Override
+	public int getNumHdrRows() {
+		return numHdrRows;
 	}
 }
