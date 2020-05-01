@@ -6,15 +6,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
 
 import org.delia.runner.inputfunction.LineObj;
+import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.util.DeliaExceptionHelper;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 
-public class CSVFileLoader implements Iterator<LineObj> {
+public class CSVFileLoader implements LineObjIterator {
 	private String path;
 	private CSVReader csvreader;
 	private int lineNum;

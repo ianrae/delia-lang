@@ -24,6 +24,7 @@ import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class InputFunctionService extends ServiceBase {
@@ -36,6 +37,9 @@ public class InputFunctionService extends ServiceBase {
 	public ProgramSet buildProgram(String inputFnName, DeliaSession session) {
 		ProgramSet progset = new ProgramSet();
 		InputFunctionDefStatementExp infnExp = findFunction(inputFnName, session);
+		if (infnExp == null) {
+			return null;
+		}
 		ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(session.getExecutionContext().registry);
 		
 		for(Exp exp: infnExp.bodyExp.statementL) {
@@ -70,6 +74,10 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 	private InputFunctionDefStatementExp findFunction(String inputFnName, DeliaSession session) {
+		if (session == null) {
+			DeliaExceptionHelper.throwError("no-session", "session is null. You need to call beginSession");
+		}
+		
 		DeliaSessionImpl sessionimpl = (DeliaSessionImpl) session;
 		for(Exp exp: sessionimpl.expL) {
 			if (exp instanceof InputFunctionDefStatementExp) {

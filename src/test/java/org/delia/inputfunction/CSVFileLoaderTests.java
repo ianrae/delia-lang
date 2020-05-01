@@ -33,13 +33,9 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	@Test
 	public void test1() {
 		String path = BASE_DIR + "northwind-small.txt";
-
 		CSVFileLoader fileLoader = new CSVFileLoader(path);
-		
-//		buildAndRun(fileLoader);
+		buildAndRun("", fileLoader);
 	}
-	
-	
 	
 	
 	// --

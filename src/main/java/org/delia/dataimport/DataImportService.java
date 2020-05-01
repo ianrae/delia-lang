@@ -8,6 +8,7 @@ import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.ProgramSet;
+import org.delia.util.DeliaExceptionHelper;
 
 public class DataImportService extends ServiceBase {
 
@@ -23,7 +24,9 @@ public class DataImportService extends ServiceBase {
 	public InputFunctionResult importIntoDatabase(String inputFnName, LineObjIterator lineObjIter) {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
-
+		if (progset == null) {
+			DeliaExceptionHelper.throwError("cant-find-user-fn", "Can't find input fn '%s'", inputFnName);
+		}
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
 		request.progset = progset;
