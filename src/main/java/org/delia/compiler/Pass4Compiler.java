@@ -11,6 +11,7 @@ import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
 import org.delia.relation.RelationCardinality;
@@ -65,6 +66,13 @@ public class Pass4Compiler extends CompilerPassBase {
 				String msg = String.format("input function '%s': invalid input field '%s'.", funcExp.funcName, mappingExp.inputField.strValue());
 				DeliaError err = createError("input-function-invalid-input-field", msg, funcExp);
 				results.errors.add(err);
+			} else {
+				XNAFSingleExp sexp = mappingExp.getSingleExp();
+				if (sexp.argL.size() != 1) {
+					String msg = String.format("input function '%s': 'value' function must have a single parameter.", funcExp.funcName);
+					DeliaError err = createError("input-function-invalid-synthetic-field", msg, funcExp);
+					results.errors.add(err);
+				}
 			}
 			
 			String typeName = null;

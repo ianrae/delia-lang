@@ -2,12 +2,16 @@ package org.delia.runner.inputfunction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
@@ -16,7 +20,6 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
-import org.delia.runner.VarEvaluator;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
@@ -25,6 +28,8 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
 public class InputFunctionService extends ServiceBase {
+	private Random rand = new Random();
+	
 	public InputFunctionService(FactoryService factorySvc) {
 		super(factorySvc);
 	}
@@ -39,9 +44,15 @@ public class InputFunctionService extends ServiceBase {
 			TLangProgramBuilder programBuilder = new TLangProgramBuilder(factorySvc, session.getExecutionContext().registry);
 			TLangProgram program = programBuilder.build(mappingExp);
 			
-			String infield = mappingExp.getInputField();
-
 			ProgramSpec spec = new ProgramSpec();
+			String infield;
+			if (mappingExp.isSyntheticInputField()) {
+				infield = generateSyntheticFieldName(progset.map);
+				spec.syntheticValue = buildSyntheticValue(mappingExp);
+			} else {
+				infield = mappingExp.getInputField();
+			}
+
 			spec.outputField = mappingExp.outputField;
 			spec.prog = program;
 			progset.map.put(infield, spec);
@@ -50,6 +61,29 @@ public class InputFunctionService extends ServiceBase {
 		progset.hdr = this.createHdrFrom(infnExp);
 		return progset;
 	}
+	private DValue buildSyntheticValue(InputFuncMappingExp mappingExp) {
+		XNAFSingleExp sexp = mappingExp.getSingleExp();
+		Exp arg1 = sexp.argL.get(0);
+		if (arg1 instanceof IntegerExp) {
+			
+		}
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private String generateSyntheticFieldName(Map<String, ProgramSpec> map) {
+		for(int n = 0; n < 1000; n++) {
+			int k = rand.nextInt(999999);
+			String fieldName = String.format("synthetic%d", k);
+			if (! map.containsKey(fieldName)) {
+				return fieldName;
+			}
+		}
+		//give up and with fail
+		return null;
+	}
+
 	private InputFunctionDefStatementExp findFunction(String inputFnName, DeliaSession session) {
 		DeliaSessionImpl sessionimpl = (DeliaSessionImpl) session;
 		for(Exp exp: sessionimpl.expL) {
