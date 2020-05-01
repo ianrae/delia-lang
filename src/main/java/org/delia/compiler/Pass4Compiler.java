@@ -10,6 +10,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
+import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
 import org.delia.relation.RelationCardinality;
@@ -60,6 +61,11 @@ public class Pass4Compiler extends CompilerPassBase {
 			String alias = mappingExp.outputField.typeName();
 			String fieldName = mappingExp.outputField.argName();
 			
+			if (! mappingExp.isValidInputField()) {
+				String msg = String.format("input function '%s': invalid input field '%s'.", funcExp.funcName, mappingExp.inputField.strValue());
+				DeliaError err = createError("input-function-invalid-input-field", msg, funcExp);
+				results.errors.add(err);
+			}
 			
 			String typeName = null;
 			for(IdentPairExp pairExp: funcExp.argsL) {

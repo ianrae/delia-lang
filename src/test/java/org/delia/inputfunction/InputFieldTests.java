@@ -17,6 +17,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
+import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
@@ -35,9 +36,15 @@ public class InputFieldTests  extends NewBDDBase {
 		chkCustomer(1, "bob");
 	}
 	
+	@Test(expected=DeliaException.class)
+	public void testSyntheticFieldIntBad() {
+		String src = buildSrcSynthetic("66", "extra int");
+		runImport(src);
+		chkCustomer(1, "bob");
+	}
 	@Test
 	public void testSyntheticFieldInt() {
-		String src = buildSrc("'CUST ID'");
+		String src = buildSrcSynthetic("value(66)", "extra int");
 		runImport(src);
 		chkCustomer(1, "bob");
 	}
@@ -77,6 +84,15 @@ public class InputFieldTests  extends NewBDDBase {
 
 		return src;
 	}
+	private String buildSrcSynthetic(String columnName, String extraField) {
+		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string, %s } end", extraField);
+		src += String.format(" input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name using {  }, %s -> c.extra }", columnName);
+		src += String.format(" let var1 = 55");
+
+		return src;
+	}
+	
+	
 	private DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
