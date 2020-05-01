@@ -87,7 +87,7 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 			ProgramSpec spec = new ProgramSpec();
 			spec.prog = new TLangProgram();
 			spec.outputField = mappingExp.outputField;
-			progset.map.put(mappingExp.getInputField(), spec);
+			progset.fieldMap.put(mappingExp.getInputField(), spec);
 		}
 	}
 

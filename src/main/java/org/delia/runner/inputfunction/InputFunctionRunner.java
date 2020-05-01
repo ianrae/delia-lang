@@ -245,7 +245,7 @@ public class InputFunctionRunner extends ServiceBase {
 	}
 
 	private ProgramSpec findOutputMapping(String inputField) {
-		ProgramSpec spec = progset.map.get(inputField);
+		ProgramSpec spec = progset.fieldMap.get(inputField);
 		if (spec == null) {
 			//err
 			String msg = String.format("input field '%s' - no mapping found in input function", inputField);
@@ -273,8 +273,8 @@ public class InputFunctionRunner extends ServiceBase {
 		}
 		
 		//and do synthetic fields
-		for(String inputField: progset.map.keySet()) {
-			ProgramSpec spec = progset.map.get(inputField);
+		for(String inputField: progset.fieldMap.keySet()) {
+			ProgramSpec spec = progset.fieldMap.get(inputField);
 			if (spec.syntheticValue != null) {
 				inputData.put(inputField, spec.syntheticValue);
 			}

@@ -37,7 +37,6 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		buildAndRun("", fileLoader);
 	}
 	
-	
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 	
@@ -56,16 +55,17 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
 	}
+//	private String buildSrc(String tlang) {
+//		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
+//		src += String.format(" input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name using { %s }}", tlang);
+//		src += String.format(" let var1 = 55");
+//
+//		return src;
+//	}
 	private String buildSrc(String tlang) {
-		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
-		src += String.format(" input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name using { %s }}", tlang);
-		src += String.format(" let var1 = 55");
-
-		return src;
-	}
-	private String buildSrc2(String tlang) {
-		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
-		src += String.format(" input function foo(Customer c) { 'CUST ID' -> c.id, WID -> c.wid, NAME -> c.name using { %s }}", tlang);
+		String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+		//categoryID,categoryName,description,picture
+		src += String.format(" input function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ", tlang);
 		src += String.format(" let var1 = 55");
 
 		return src;

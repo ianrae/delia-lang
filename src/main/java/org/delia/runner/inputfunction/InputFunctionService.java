@@ -8,6 +8,7 @@ import java.util.Random;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
@@ -21,6 +22,9 @@ import org.delia.runner.ResultValue;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
+import org.delia.type.DStructType;
+import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
@@ -40,6 +44,9 @@ public class InputFunctionService extends ServiceBase {
 		if (infnExp == null) {
 			return null;
 		}
+		
+		addTargetTypes(progset, infnExp, session);
+		
 		ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(session.getExecutionContext().registry);
 		
 		for(Exp exp: infnExp.bodyExp.statementL) {
@@ -52,7 +59,7 @@ public class InputFunctionService extends ServiceBase {
 			ProgramSpec spec = new ProgramSpec();
 			String infield;
 			if (mappingExp.isSyntheticInputField()) {
-				infield = generateSyntheticFieldName(progset.map);
+				infield = generateSyntheticFieldName(progset.fieldMap);
 				spec.syntheticValue = buildSyntheticValue(mappingExp, scalarBuilder);
 			} else {
 				infield = mappingExp.getInputField();
@@ -60,12 +67,27 @@ public class InputFunctionService extends ServiceBase {
 
 			spec.outputField = mappingExp.outputField;
 			spec.prog = program;
-			progset.map.put(infield, spec);
+			progset.fieldMap.put(infield, spec);
 		}
 
 		progset.hdr = this.createHdrFrom(infnExp);
 		return progset;
 	}
+	private void addTargetTypes(ProgramSet progset, InputFunctionDefStatementExp infnExp, DeliaSession session) {
+		DTypeRegistry registry = session.getExecutionContext().registry;
+		
+		for(IdentPairExp pair: infnExp.argsL) {
+			DType dtype = registry.getType(pair.typeName());
+			if (dtype == null) {
+				DeliaExceptionHelper.throwError("type-not-found-for-import", "Can't find type '%s' in input function '%s'", pair.typeName(), infnExp.funcName);
+			}
+			if (! dtype.isStructShape()) {
+				DeliaExceptionHelper.throwError("type-not-struct-for-import", "Type '%s' is not a struct in input function '%s'", pair.typeName(), infnExp.funcName);
+			}
+			progset.outputTypes.add((DStructType) dtype);
+		}
+	}
+
 	private DValue buildSyntheticValue(InputFuncMappingExp mappingExp, ScalarValueBuilder scalarBuilder) {
 		return SyntheticFieldHelper.buildSyntheticValue(mappingExp, scalarBuilder);
 	}

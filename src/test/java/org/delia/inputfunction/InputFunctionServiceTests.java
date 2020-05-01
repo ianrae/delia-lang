@@ -37,7 +37,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		createDelia(false);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
-		assertEquals(3, progset.map.size());
+		assertEquals(3, progset.fieldMap.size());
 		
 		LineObjIterator lineObjIter = createIter(1, true);
 		InputFunctionRequest request = new InputFunctionRequest();
@@ -64,7 +64,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		createDelia(false);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
-		assertEquals(3, progset.map.size());
+		assertEquals(3, progset.fieldMap.size());
 		
 		LineObjIterator lineObjIter = createIter(2, true);
 		InputFunctionRequest request = new InputFunctionRequest();
@@ -96,7 +96,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		createDelia(true);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
-		assertEquals(3, progset.map.size());
+		assertEquals(3, progset.fieldMap.size());
 		
 		LineObjIterator lineObjIter = createIter(2,true);
 		InputFunctionRequest request = new InputFunctionRequest();
@@ -125,7 +125,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		createDelia(true);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
-		assertEquals(3, progset.map.size());
+		assertEquals(3, progset.fieldMap.size());
 		
 		LineObjIterator lineObjIter = createIter(2,false);
 		InputFunctionRequest request = new InputFunctionRequest();
