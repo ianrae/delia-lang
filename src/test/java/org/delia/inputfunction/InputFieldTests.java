@@ -23,6 +23,7 @@ import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
+import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -206,7 +207,7 @@ public class InputFieldTests  extends NewBDDBase {
 		for(int i = 0; i < n; i++) {
 			list.add(this.createLineObj(i + 1, nameStr));
 		}
-		return new LineObjIterator(list);
+		return new LineObjIteratorImpl(list);
 	}
 	private LineObj createLineObj(int id, String nameStr) {
 		String[] ar = { "", "33", "bob" };
