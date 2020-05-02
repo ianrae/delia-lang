@@ -256,6 +256,47 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		return updateCount;
 	}
 	
+	@Override
+	public int executeUpsert(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
+		SqlStatementGroup stgroup;
+		createTableCreator(dbctx);
+		//TODO implement this!!
+		if (useFragmentParser) {
+			log.log("FRAG PARSER UPSERT....................");
+			createTableCreator(dbctx);
+			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+			whereGen.tableFragmentMaker = parser;
+			QueryDetails details = new QueryDetails();
+			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
+			stgroup = parser.renderUpdateGroup(selectFrag);
+//			s = selectFrag.statement;
+		} else {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+			stgroup = new SqlStatementGroup();
+			stgroup.add(statement);
+		}
+		if (stgroup.statementL.isEmpty()) {
+			return 0; //nothing to update
+		}
+		
+		logStatementGroup(stgroup);
+		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
+		int updateCount = 0;
+		try {
+			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
+			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
+			updateCount = findUpdateCount("update", updateCountL, stgroup);
+		} catch (DBValidationException e) {
+			convertAndRethrow(e, dbctx);
+		}
+		
+		return updateCount;
+	}
+	
 
 	protected int executeSQL(String sql, DBAccessContext ctx) {
 		logSql(sql);

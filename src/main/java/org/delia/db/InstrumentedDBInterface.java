@@ -13,6 +13,7 @@ public class InstrumentedDBInterface implements DBInterface {
 	public DBInterface actualInterface;
 	public int insertCount; //TODO: atomic thread-safe int later
 	public int updateCount;
+	public int upsertCount;
 	public int deleteCount;
 	public int queryCount;
 	
@@ -40,6 +41,11 @@ public class InstrumentedDBInterface implements DBInterface {
 	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		this.updateCount++;
 		return actualInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
+	}
+	@Override
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
+		this.upsertCount++;
+		return actualInterface.executeUpdate(spec, dvalFull, assocCrudMap, dbctx);
 	}
 
 	@Override

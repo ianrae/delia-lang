@@ -15,6 +15,7 @@ public interface DBExecutor {
 	
 	DValue executeInsert(DValue dval, InsertContext ctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
+	int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap); 
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx);
 	void executeDelete(QuerySpec spec);
 

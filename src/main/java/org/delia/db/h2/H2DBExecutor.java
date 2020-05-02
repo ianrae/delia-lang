@@ -35,6 +35,10 @@ public class H2DBExecutor implements DBExecutor {
 	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
 		return dbInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
 	}
+	@Override
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap) {
+		return dbInterface.executeUpsert(spec, dvalFull, assocCrudMap, dbctx);
+	}
 
 	@Override
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx) {

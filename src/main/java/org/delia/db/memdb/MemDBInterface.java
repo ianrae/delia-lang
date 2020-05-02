@@ -448,6 +448,21 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		}
 		return numRowsAffected;
 	}
+	
+	@Override
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
+		int numRowsAffected = 0;
+
+		//TODO implement this!!
+		try {
+//			numRowsAffected = doExecuteSert(spec, dvalFull, assocCrudMap, dbctx);
+		} catch (InternalException e) {
+			throw new DBException(e.getLastError());
+			//				qresp.ok = false;
+			//				qresp.err = e.getLastError();
+		}
+		return numRowsAffected;
+	}
 
 	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		RowSelector selector = createSelector(spec, dbctx); //may throw
