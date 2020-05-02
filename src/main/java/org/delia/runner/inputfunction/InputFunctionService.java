@@ -205,6 +205,7 @@ public class InputFunctionService extends ServiceBase {
 		}
 		
 		//build hdr from header row
+		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
 		HdrInfo hdr = new HdrInfo();
 		Map<String,ProgramSpec> saveFieldMap = new HashMap<>(request.progset.fieldMap);
 		request.progset.fieldMap.clear();
@@ -215,6 +216,9 @@ public class InputFunctionService extends ServiceBase {
 				request.progset.fieldMap.put(columnName, spec);
 				hdr.map.put(index, columnName);
 				log.logDebug("column: %s", columnName);
+				
+				ImportSpec ispec = ispecBuilder.findImportSpec(request.progset, spec.outputField);
+				ispecBuilder.addInputColumn(ispec, spec.inputField, index, spec.outputField.val2);
 			} else {
 				log.log("column: %s - can't find match", columnName);
 			}

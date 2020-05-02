@@ -1,5 +1,6 @@
 package org.delia.runner.inputfunction;
 
+import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
@@ -43,8 +44,11 @@ public class ImportSpecBuilder {
 		return null;
 	}
 	public ImportSpec findImportSpec(ProgramSet progset, InputFuncMappingExp mapping) {
+		return findImportSpec(progset, mapping.outputField);
+	}
+	public ImportSpec findImportSpec(ProgramSet progset, IdentPairExp outputField) {
 		for(ProgramSet.OutputSpec ospec: progset.outputSpecs) {
-			if (ospec.alias.equals(mapping.outputField.val1)) {
+			if (ospec.alias.equals(outputField.val1)) {
 				return ospec.ispec;
 			}
 		}

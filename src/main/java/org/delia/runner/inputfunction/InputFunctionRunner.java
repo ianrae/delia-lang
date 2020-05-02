@@ -192,9 +192,11 @@ public class InputFunctionRunner extends ServiceBase {
 					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
 					inputData.put(ifh.columnName, inputValue);
-				} else {
+				} else if (ofh.syntheticFieldName != null) {
 					String inputField = ofh.syntheticFieldName;
 					inputData.put(inputField, ofh.syntheticValue);
+				} else {
+					DeliaExceptionHelper.throwError("bad-output-field-handle", "OFH %s bad", ofh.fieldName);
 				}
 			}
 		}
