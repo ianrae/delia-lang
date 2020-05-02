@@ -3,14 +3,12 @@ package org.delia.dataimport;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
-import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.ProgramSet;
-import org.delia.type.DStructType;
 import org.delia.util.DeliaExceptionHelper;
 
 public class DataImportService extends ServiceBase {

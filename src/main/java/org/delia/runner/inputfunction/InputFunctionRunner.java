@@ -11,6 +11,7 @@ import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
+import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.tlang.runner.TLangRunnerImpl;
@@ -182,18 +183,30 @@ public class InputFunctionRunner extends ServiceBase {
 	//produces a map of String (for CSV data) or DValues (for synthetic fields)
 	private Map<String, Object> createInputMap(HdrInfo hdr, LineObj lineObj) {
 		Map<String,Object> inputData = new HashMap<>();
-		int index = 0;
-		for(String s: lineObj.elements) {
-			String fieldName = hdr.map.get(index);
-			if (fieldName == null) {
-				//err
-				String msg = String.format("line%d: column %d - no column header found", lineObj.lineNum, index);
-				et.add("unknown-input-field", msg);
-			} else {
-				inputData.put(fieldName, s);
+		
+		for(OutputSpec ospec: progset.outputSpecs) {
+			ImportSpec ispec = ospec.ispec;
+			for(OutputFieldHandle ofh: ispec.ofhList) {
+				if (ofh.ifhIndex >= 0) {
+					String inputValue = lineObj.elements[ofh.ifhIndex];
+					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
+					inputData.put(ifh.columnName, inputValue);
+				}
 			}
-			index++;
 		}
+		
+//		int index = 0;
+//		for(String s: lineObj.elements) {
+//			String fieldName = hdr.map.get(index);
+//			if (fieldName == null) {
+//				//err
+//				String msg = String.format("line%d: column %d - no column header found", lineObj.lineNum, index);
+//				et.add("unknown-input-field", msg);
+//			} else {
+//				inputData.put(fieldName, s);
+//			}
+//			index++;
+//		}
 		
 		//and do synthetic fields
 		for(String inputField: progset.fieldMap.keySet()) {

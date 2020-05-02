@@ -13,7 +13,7 @@ public class OutputFieldHandle {
 	public DStructType structType;
 	public String fieldName;
 	public int fieldIndex; //index of field in structType
-	public int ifhIndex;
+	public int ifhIndex = -1; //if < 0 then is synthetic field
 	//TODO: add list additional ifh indexes for combine(FIRSTNAME,'',LASTNAME)
 	public int[] arMetrics; //for NMIDR error counters
 }

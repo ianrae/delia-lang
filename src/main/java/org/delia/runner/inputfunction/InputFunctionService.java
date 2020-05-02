@@ -136,6 +136,7 @@ public class InputFunctionService extends ServiceBase {
 		fnResult.numColumnsProcessedPerRow = request.progset.fieldMap.size();
 		fnResult.progset = request.progset;
 		
+		// - the main loop -- reads csv file line by line
 		TypePair keyPair = null;
 		int lineNum = 1;
 		while(lineObjIter.hasNext()) {
