@@ -29,7 +29,7 @@ public class DateYearScalarTests extends ScopeTestBase {
 	@Test
 	public void testLetInvalid() {
 		createScalarType("year() == 2019");
-		DValue dval = execLetScalarFail("'2011' in '2019'");
+		DValue dval = execLetScalarFail("'2011' == '2019'");
 		chkInvalid(dval);
 	}
 	@Test
