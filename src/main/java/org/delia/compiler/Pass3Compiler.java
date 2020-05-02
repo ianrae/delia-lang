@@ -11,6 +11,7 @@ import org.delia.compiler.ast.StructFieldExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UserFnCallExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;
 import org.delia.runner.InternalCompileState;
@@ -24,6 +25,7 @@ public class Pass3Compiler extends CompilerPassBase {
 	private Map<String,TypeSpec> typeMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
 	private Map<String,ResultValue> varMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
 	private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
+	private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
 	private boolean buildTypeMapFlag = true;
 	private Pass3RuleCompiler ruleCompiler;
 	
@@ -36,6 +38,7 @@ public class Pass3Compiler extends CompilerPassBase {
 			this.typeMap.putAll(execCtx.compiledTypeMap);
 			this.varMap.putAll(execCtx.delcaredVarMap);
 			this.userFnMap.putAll(execCtx.declaredUserFnMap);
+			this.inputFnMap.putAll(execCtx.declaredInputFnMap);
 		}
 	}
 
@@ -82,6 +85,15 @@ public class Pass3Compiler extends CompilerPassBase {
 					results.errors.add(err);
 				}
 				userFnMap.put(funcExp.funcName, funcExp);
+			} else if (exp instanceof InputFunctionDefStatementExp) {
+				InputFunctionDefStatementExp funcExp = (InputFunctionDefStatementExp) exp;
+//				log.log("fn " + exp.strValue());
+				if (userFnMap.containsKey(funcExp.funcName)) {
+					String msg = String.format("input function '%s' already defined. Cannot redefine", funcExp.funcName);
+					DeliaError err = createError("input-func-duplicate", msg, exp);
+					results.errors.add(err);
+				}
+				inputFnMap.put(funcExp.funcName, funcExp);
 			} 
 		}
 		

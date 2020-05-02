@@ -10,7 +10,6 @@ public class DetailedError extends DeliaError {
 	
 	private Type errorType;
 	private String srcFile;
-	private int lineNum;
 	private String errorName;
 	private String typeName;
 	private String fieldName;
@@ -29,12 +28,6 @@ public class DetailedError extends DeliaError {
 	}
 	public void setErrorType(Type errorType) {
 		this.errorType = errorType;
-	}
-	public int getLineNum() {
-		return lineNum;
-	}
-	public void setLineNum(int lineNum) {
-		this.lineNum = lineNum;
 	}
 	public String getSrcFile() {
 		return srcFile;

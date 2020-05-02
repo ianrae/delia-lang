@@ -1,5 +1,7 @@
 package org.delia.db;
 
+import java.util.Map;
+
 import org.delia.core.FactoryService;
 import org.delia.db.memdb.MemDBExecutor;
 import org.delia.db.memdb.MemDBInterface;
@@ -35,9 +37,9 @@ public class InstrumentedDBInterface implements DBInterface {
 	}
 
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalPartial, DBAccessContext dbctx) {
+	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		this.updateCount++;
-		return actualInterface.executeUpdate(spec, dvalPartial, dbctx);
+		return actualInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
 	}
 
 	@Override

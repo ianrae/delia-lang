@@ -121,4 +121,10 @@ public class SimpleErrorTracker implements ErrorTracker {
 		}
 		return errL.get(errL.size() - 1);
 	}
+	@Override
+	public void addAll(List<DeliaError> errL) {
+		for(DeliaError err: errL) {
+			add(err);
+		}
+	}
 }

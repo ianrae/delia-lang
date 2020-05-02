@@ -70,4 +70,7 @@ public class RuleRuleOperand implements RuleOperand {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	public String getFieldName() {
+		return fieldName;
+	}
 }

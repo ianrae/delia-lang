@@ -12,18 +12,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.IntegerExp;
-import org.delia.compiler.ast.LongExp;
-import org.delia.compiler.ast.NullExp;
-import org.delia.compiler.ast.NumberExp;
-import org.delia.compiler.ast.StringExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.core.TimeZoneService;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.dval.DValueConverterService;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -37,10 +32,12 @@ public class ValueHelper extends ServiceBase {
 
 
 	private DateFormatService fmtSvc;
+	private DValueConverterService dvalConverter;
 
 	public ValueHelper(FactoryService factorySvc) {
 		super(factorySvc);
 		this.fmtSvc = factorySvc.getDateFormatService();
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 	
 	public PreparedStatement createPrepStatement(SqlStatement statement, Connection conn) throws SQLException {
@@ -354,26 +351,7 @@ public class ValueHelper extends ServiceBase {
 	}
 
 	public Object extractObj(Exp exp) {
-		if (exp instanceof NullExp) {
-			return null;
-		} else if (exp instanceof IntegerExp) {
-			Integer n = ((IntegerExp)exp).val;
-			return n;
-		} else if (exp instanceof LongExp) {
-			Long n = ((LongExp)exp).val;
-			return n;
-		} else if (exp instanceof NumberExp) {
-			Double n = ((NumberExp)exp).val;
-			return n;
-		} else if (exp instanceof BooleanExp) {
-			Boolean n = ((BooleanExp)exp).val;
-			return n;
-		} else if (exp instanceof StringExp) {
-			return exp.strValue();
-		} else {
-			//Do date and relation later: TODO
-			return exp.strValue();
-		}
+		return dvalConverter.extractObj(exp);
 	}
 	
 	public void fixupForExist(List<DValue> dvalList, DBAccessContext dbctx) {

@@ -91,8 +91,8 @@ public class CompareOpRule extends DRuleBase {
 			if (!b) {
 				String s1 = String.format("%s", obj1);
 				String s2 = String.format("%s", obj2);
-				String msg = String.format("rulefail '%s' in '%s'", s1, s2);
-				ctx.addError(this, msg);
+				String msg = String.format("rulefail '%s' %s '%s'", s1, op, s2);
+				ctx.addError(this, msg, oper1, oper2);
 			}
 			return b;
 		}

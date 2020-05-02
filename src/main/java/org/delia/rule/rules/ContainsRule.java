@@ -23,7 +23,7 @@ public class ContainsRule extends DRuleBase {
 			if (! s.contains(arg1)) {
 				String s1 = StringUtil.atMostChars(s, 80);
 				String msg = String.format("%s needs to contain '%s': '%s'", getSubject(), arg1, s1);
-				ctx.addError(this, msg);
+				ctx.addError(this, msg, oper1);
 				return false;
 			}
 			return true;

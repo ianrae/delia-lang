@@ -1,5 +1,6 @@
 package org.delia.rule.rules;
 
+import org.delia.error.DetailedError;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
 import org.delia.rule.RuleGuard;
@@ -21,7 +22,8 @@ public class MandatoryRule extends DRuleBase {
 				
 				if (inner == null) {
 					String msg = String.format("Type '%s': mandatory field '%s' is null", dtype.getName(), fieldName);
-					ctx.addError(this, msg);
+					DetailedError err = ctx.addError(this, msg);
+					err.setFieldName(fieldName);
 					return false;
 				}
 			}

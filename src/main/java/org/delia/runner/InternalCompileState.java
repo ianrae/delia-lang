@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
+import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 
 /**
  * Represents the compile state of a delia program.
@@ -19,6 +20,7 @@ public class InternalCompileState {
 	public Map<String,ResultValue> delcaredVarMap = new ConcurrentHashMap<>(); //this does NOT hold the runtime vars
 	
 	public Map<String,UserFunctionDefStatementExp> declaredUserFnMap = new ConcurrentHashMap<>();
+	public Map<String,InputFunctionDefStatementExp> declaredInputFnMap = new ConcurrentHashMap<>();
 	
 	public InternalCompileState() {
 	}

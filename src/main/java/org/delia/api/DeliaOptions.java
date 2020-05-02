@@ -1,5 +1,6 @@
 package org.delia.api;
 
+
 /**
  * Options that can be changed during the lifetime of a Delia object.
  * 

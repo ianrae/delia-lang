@@ -42,7 +42,9 @@ public class NameAndFuncParser extends ParserBase {
 		}
 		private static Parser<XNAFSingleExp> ruleFn1() {
 			return Parsers.sequence(ident(), term("("), fnOperand().many().sepBy(term(",")), term(")"), 
-					(IdentExp exp1, Token tok, List<List<Exp>> arg, Token tok2) -> new XNAFSingleExp(tok.index(), exp1, arg, true));
+					(IdentExp exp1, Token tok, List<List<Exp>> arg, 
+							Token tok2) 
+					-> new XNAFSingleExp(tok.index(), exp1, arg, true));
 		}
 		private static Parser<XNAFSingleExp> ruleFn1NoArg() {
 			return Parsers.or(ident()).

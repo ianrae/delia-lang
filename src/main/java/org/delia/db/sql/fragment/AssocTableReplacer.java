@@ -244,7 +244,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 	}
 	
-	protected TableFragment initTblFrag(UpdateStatementFragment assocUpdateFrag) {
+	protected TableFragment initTblFrag(StatementFragmentBase assocUpdateFrag) {
 		TableFragment tblFrag = new TableFragment();
 		tblFrag.alias = null;
 		tblFrag.name = assocUpdateFrag.tblFrag.name;
@@ -263,6 +263,17 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	
 	
+	protected DValue getLastParam(SqlStatement statement) {
+		int n = statement.paramL.size();
+		DValue dval = statement.paramL.get(n - 1);
+		return dval;
+	}
+	protected int cloneLastParam(SqlStatement statement) {
+		int n = statement.paramL.size();
+		DValue dval = statement.paramL.get(n - 1);
+		statement.paramL.add(dval);
+		return 1;
+	}
 	protected int cloneParams(SqlStatement statement, List<OpFragment> clonedL, int extra) {
 		//clone params 
 		int numToAdd = 0;
@@ -302,9 +313,111 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		assocUpdateFrag.setValuesL.add("?");
 		assocUpdateFrag.fieldL.add(ff);
 	}
-
-
 	public void useAliases(boolean b) {
 		this.useAliases = b;
 	}
+
+	public void assocCrudInsert(UpdateStatementFragment updateFrag, 
+			InsertStatementFragment insertFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
+			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
+		
+//	    INSERT INTO CustomerAddressAssoc as T (leftv, rightv) VALUES(s.id, ?)
+//		int startingNumParams = statement.paramL.size();
+
+		//struct is Address AddressCustomerAssoc
+		if (!reversed) {
+			genAssocTblInsertRows(insertFrag, true, mainKeyVal, info.nearType, info.farType, keyVal, info);
+		} else {
+			genAssocTblInsertRows(insertFrag, false, mainKeyVal, info.farType, info.nearType, keyVal, info);
+		}
+		
+		insertFrag.paramStartIndex = statement.paramL.size();
+		statement.paramL.addAll(insertFrag.statement.paramL);
+		insertFrag.statement.paramL.clear();
+	}
+	//TODO move to helper
+	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
+			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
+		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		if (mainDValFirst) {
+			genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
+			genxrow(assocInsertFrag, "rightv", keyPair2, xdval);
+		} else {
+			genxrow(assocInsertFrag, "leftv", keyPair1, xdval);
+			genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
+		}
+	}
+
+	private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {
+		TypePair tmpPair = new TypePair(assocFieldName, keyPair1.type);
+		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, tmpPair);
+		assocInsertFrag.setValuesL.add("?");
+		assocInsertFrag.fieldL.add(ff);
+		assocInsertFrag.statement.paramL.add(dval);
+	}
+	private void genxrow(UpdateStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {
+		TypePair tmpPair = new TypePair(assocFieldName, keyPair1.type);
+		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocInsertFrag.tblFrag, assocInsertFrag, tmpPair);
+		assocInsertFrag.setValuesL.add("?");
+		assocInsertFrag.fieldL.add(ff);
+		assocInsertFrag.statement.paramL.add(dval);
+	}
+	
+	public void assocCrudDelete(UpdateStatementFragment updateFrag, 
+			DeleteStatementFragment deleteFrag, DStructType structType, DValue mainKeyVal, DValue keyVal, RelationInfo info,
+			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
+		
+		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		deleteFrag.paramStartIndex = statement.paramL.size();
+		
+		StrCreator sc = new StrCreator();
+		sc.o("%s = ? and %s == ?", "leftv", "right"); 
+		RawFragment rawFrag = new RawFragment(sc.str);
+		deleteFrag.whereL.add(rawFrag);
+		
+		if (reversed) {
+			statement.paramL.add(keyVal);
+			statement.paramL.add(mainKeyVal);
+		} else {
+			statement.paramL.add(mainKeyVal);
+			statement.paramL.add(keyVal);
+		}
+	}
+	
+	public void assocCrudUpdate(UpdateStatementFragment updateFrag, 
+			UpdateStatementFragment innerUpdateFrag, DStructType structType, DValue mainKeyVal, DValue oldVal, DValue newVal, RelationInfo info,
+			String mainUpdateAlias, SqlStatement statement, boolean reversed) {
+		
+		//part 1. delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+		innerUpdateFrag.paramStartIndex = statement.paramL.size();
+		
+		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+		if (reversed) {
+			genxrow(innerUpdateFrag, "leftv", keyPair1, newVal);
+			genxrow(innerUpdateFrag, "rightv", keyPair2, mainKeyVal);
+		} else {
+			genxrow(innerUpdateFrag, "leftv", keyPair1, mainKeyVal);
+			genxrow(innerUpdateFrag, "rightv", keyPair2, newVal);
+		}
+		
+		StrCreator sc = new StrCreator();
+		sc.o(" %s = ? and %s == ?", "leftv", "right"); 
+		RawFragment rawFrag = new RawFragment(sc.str);
+		innerUpdateFrag.whereL.add(rawFrag);
+		
+		innerUpdateFrag.paramStartIndex = statement.paramL.size();
+		statement.paramL.addAll(innerUpdateFrag.statement.paramL);
+		innerUpdateFrag.statement.paramL.clear();
+		
+		if (reversed) {
+			statement.paramL.add(oldVal);
+			statement.paramL.add(mainKeyVal);
+		} else {
+			statement.paramL.add(mainKeyVal);
+			statement.paramL.add(oldVal);
+		}
+	}
+	
 }

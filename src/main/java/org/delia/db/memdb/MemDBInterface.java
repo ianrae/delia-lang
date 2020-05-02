@@ -24,6 +24,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
 import org.delia.rule.rules.RelationManyRule;
@@ -203,7 +204,9 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 			QueryContext qtx = new QueryContext();
 			QueryResponse qresp = executeQuery(spec, qtx, dbctx);
 			if (qresp.ok && !qresp.emptyResults()) {
-				DeliaError err = et.add("duplicate-unique-value", String.format("%s. row with unique field '%s' = '%s' already exists", structType.getName(), uniqueField, inner.asString()));
+				DetailedError err = new DetailedError("duplicate-unique-value", String.format("%s. row with unique field '%s' = '%s' already exists", structType.getName(), uniqueField, inner.asString()));
+				err.setFieldName(uniqueField);
+				et.add(err);
 				throw new DBException(err);
 			}
 		}
@@ -272,13 +275,13 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		for(TypePair pair: structType.getAllFields()) {
 			RelationOneRule oneRule = DRuleHelper.findOneRule(structType, pair.name);
 			if (oneRule != null) {
-				if (oneRule.relInfo.isParent) {
+				if (oneRule.relInfo != null && oneRule.relInfo.isParent) {
 					doomedL.add(pair.name);
 				}
 			} else {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(structType, pair.name);
 				if (manyRule != null) {
-					if (manyRule.relInfo.isParent) {
+					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
 						doomedL.add(pair.name);
 					}
 				}
@@ -433,11 +436,11 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalUpdate, DBAccessContext dbctx) {
+	public int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		int numRowsAffected = 0;
 
 		try {
-			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, dbctx);
+			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, assocCrudMap, dbctx);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
 			//				qresp.ok = false;
@@ -446,7 +449,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		return numRowsAffected;
 	}
 
-	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, DBAccessContext dbctx) {
+	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		RowSelector selector = createSelector(spec, dbctx); //may throw
 		MemDBTable tbl = selector.getTbl();
 		List<DValue> dvalList = selector.match(tbl.rowL);

@@ -3,6 +3,7 @@ package org.delia.rule.rules;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.error.DetailedError;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
@@ -47,7 +48,7 @@ public class RelationOneRule extends DRuleBase {
 			if (mustHaveFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' one -  a foreign key value must be specified.", key);
-				ctx.addError(this, msg);
+				addDetailedError(ctx, msg, getSubject());
 				return false;
 			}
 			return true; 
@@ -66,7 +67,7 @@ public class RelationOneRule extends DRuleBase {
 			if (CollectionUtils.isEmpty(qrespFetch.dvalList)) {
 				String key = drel.getForeignKey().asString();
 				String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-				ctx.addError(this, msg);
+				addDetailedError(ctx, msg, getSubject());
 				return false;
 			}
 			
@@ -89,13 +90,17 @@ public class RelationOneRule extends DRuleBase {
 				if (!CollectionUtils.isEmpty(qrespFetch.dvalList)) {
 					String key = drel.getForeignKey().asString();
 					String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
-					ctx.addError(this, msg);
+					addDetailedError(ctx, msg, getSubject());
 					return false;
 				}
 			}
 		}
 
 		return true;
+	}
+	private void addDetailedError(DRuleContext ctx, String msg, String fieldName) {
+		DetailedError err = ctx.addError(this, msg);
+		err.setFieldName(fieldName);
 	}
 	//TODO: should we save results in del.setFetchedItems ??
 	//TODO: the following mutates a DValue. is this ok for multi-threading?

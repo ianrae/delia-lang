@@ -92,5 +92,12 @@ public interface Runner extends VarEvaluator {
 	DTypeRegistry getRegistry();
 	TypeRunner createTypeRunner();
 	SprigService getSprigSvc();
+
+	/**
+	 * Used to execute insert using already created DValues instead of the DsonExp
+	 * in the insert statement.
+	 * @param insertPrebuiltValueIterator
+	 */
+	void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator);
 	
 }

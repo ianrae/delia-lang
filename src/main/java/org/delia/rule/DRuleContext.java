@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.db.DBCapabilties;
 import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.runner.FetchRunner;
 
@@ -25,13 +26,38 @@ public class DRuleContext {
 		this.populateFKsFlag = populateFKsFlag;
 		this.fetchRunner = fetchRunner;
 	}
-	public DeliaError addError(String id, String msg) {
+	public DetailedError addError(String id, String msg) {
 		String msg2 = String.format("%s - in rule: %s", msg, ruleText);
-		DeliaError err = et.add(id, msg2);
+		DetailedError err = new DetailedError(id, msg2);
+		et.add(err);
 		return err;
 	}
-	public DeliaError addError(DRule rule, String msg) {
-		return addError("rule-" + rule.getName(), msg);
+	public DetailedError addError(DRule rule, String msg) {
+		return addError(rule, msg, null, null);
+	}
+	public DetailedError addError(DRule rule, String msg, RuleOperand oper1) {
+		return addError(rule, msg, oper1, null);
+	}
+	public DetailedError addError(DRule rule, String msg, RuleOperand oper1, RuleOperand oper2) {
+		DetailedError err = addError("rule-" + rule.getName(), msg);
+		String field1 = oper1 == null ? null : oper1.getSubject();
+		String field2 = oper2 == null ? null : oper2.getSubject();
+		
+		if (oper1 instanceof RuleRuleOperand) {
+			RuleRuleOperand rrop = (RuleRuleOperand) oper1;
+			field1 = rrop.getFieldName();
+		}
+		if (oper2 instanceof RuleRuleOperand) {
+			RuleRuleOperand rrop = (RuleRuleOperand) oper2;
+			field2 = rrop.getFieldName();
+		}
+		
+		if (field1 != null) {
+			err.setFieldName(field1);
+		} else if (field2 != null) {
+			err.setFieldName(field2);
+		}
+		return err;
 	}
 	public boolean hasErrors() {
 		return !et.areNoErrors();

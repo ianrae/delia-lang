@@ -65,6 +65,9 @@ public abstract class DValueBuilder {
 	protected void addNoDataError(String msg) {
 		addOldErrorMsgZ(ErrorType.NODATA, msg);
 	}
+	protected void addNoDataError(String msg, String fieldName) {
+		addOldErrorMsgZ(ErrorType.NODATA, msg).setFieldName(fieldName);
+	}
 	protected void addWrongTypeError(String s) {
 		addOldErrorMsgZ(ErrorType.WRONGTYPE, String.format("wrong type - %s", s));
 	}

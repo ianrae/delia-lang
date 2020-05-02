@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.error.DetailedError;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.DRuleBase;
@@ -23,7 +24,6 @@ import org.delia.type.TypePair;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
 public class RelationManyRule extends DRuleBase {
@@ -46,7 +46,7 @@ public class RelationManyRule extends DRuleBase {
 			if (mustHaveFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' many -  a foreign key value must be specified.", key);
-				ctx.addError(this, msg);
+				addDetailedError(ctx, msg, getSubject());
 				return false;
 			}
 			return true; //TODO: fix later.
@@ -64,7 +64,7 @@ public class RelationManyRule extends DRuleBase {
 			if (CollectionUtils.isEmpty(qrespFetch.dvalList)) {
 				String key = drel.getForeignKey().asString();
 				String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-				ctx.addError(this, msg);
+				addDetailedError(ctx, msg, getSubject());
 				return false;
 			}
 
@@ -81,6 +81,10 @@ public class RelationManyRule extends DRuleBase {
 		}
 
 		return true;
+	}
+	private void addDetailedError(DRuleContext ctx, String msg, String fieldName) {
+		DetailedError err = ctx.addError(this, msg);
+		err.setFieldName(fieldName);
 	}
 
 	private void populateOtherSideOfRelation(DValue dval, DRuleContext ctx, QueryResponse qrespFetch) {

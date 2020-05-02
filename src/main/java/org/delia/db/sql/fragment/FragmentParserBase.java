@@ -210,7 +210,7 @@ import org.delia.util.DValueHelper;
 			
 		}
 
-		protected void initFieldsAndWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
+		protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 			
 			QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 			switch(queryType) {

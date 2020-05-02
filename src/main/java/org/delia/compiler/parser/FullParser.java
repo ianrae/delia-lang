@@ -21,7 +21,8 @@ public class FullParser {
 				CrudParser.allCrudStatements(),
 				TypeParser.typeStatement(),
 				UserFnParser.userFunction(),
-				ConfigureParser.configAssignment());
+				ConfigureParser.configAssignment(),
+				InputFunctionParser.inputFunction());
 	}
 	public static Exp parseOne(String input){
 		RuleParser.initLazy();		

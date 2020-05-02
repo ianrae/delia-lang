@@ -34,7 +34,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		this.assocTblReplacer = assocTblReplacer;
 	}
 
-	public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal) {
+	public UpdateStatementFragment parseUpdate(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap) {
 		UpdateStatementFragment selectFrag = new UpdateStatementFragment();
 
 		Map<String, DRelation> mmMap = new HashMap<>();
@@ -45,8 +45,8 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		selectFrag.tblFrag = tblFrag;
 
 		generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
-		initFieldsAndWhere(spec, structType, selectFrag);
-		generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap);
+		initWhere(spec, structType, selectFrag);
+		generateAssocUpdateIfNeeded(spec, structType, selectFrag, mmMap, assocCrudMap);
 
 		//no min,max,etc in UPDATE
 
@@ -92,16 +92,16 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 	}
 
-	private void generateSetFields(QuerySpec spec, DStructType structType, UpdateStatementFragment selectFrag,
+	private void generateSetFields(QuerySpec spec, DStructType structType, UpdateStatementFragment updateFrag,
 			DValue partialVal, Map<String, DRelation> mmMap) {
 		//we assume partialVal same type as structType!! (or maybe a base class)
 
-		int index = selectFrag.fieldL.size(); //setValuesL is parallel array to fieldL
+		int index = updateFrag.fieldL.size(); //setValuesL is parallel array to fieldL
 		if (index != 0) {
 
 			log.log("WHY FILLING INNNNNNNNN");
 			for(int i = 0; i < index; i++) {
-				selectFrag.setValuesL.add("????");
+				updateFrag.setValuesL.add("????");
 			}
 			DeliaExceptionHelper.throwError("unexpeced-fields-in-update", "should not occur");
 		}
@@ -135,10 +135,10 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 				dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 			}
 
-			FieldFragment ff = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
-			selectFrag.setValuesL.add("?");
-			selectFrag.fieldL.add(ff);
-			selectFrag.statement.paramL.add(dvalToUse);
+			FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);
+			updateFrag.setValuesL.add("?");
+			updateFrag.fieldL.add(ff);
+			updateFrag.statement.paramL.add(dvalToUse);
 
 			index++;
 		}
@@ -152,7 +152,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		return false;
 	}
 	private void generateAssocUpdateIfNeeded(QuerySpec spec, DStructType structType,
-			UpdateStatementFragment selectFrag, Map<String, DRelation> mmMap) {
+			UpdateStatementFragment selectFrag, Map<String, DRelation> mmMap, Map<String, String> assocCrudMap) {
 		if (mmMap.isEmpty()) {
 			return;
 		}
@@ -161,13 +161,135 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, fieldName);
 			if (ruleMany != null) {
 				RelationInfo info = ruleMany.relInfo;
-				selectFrag.assocUpdateFrag = new UpdateStatementFragment();
-				genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
-						selectFrag.tblFrag.alias, selectFrag.statement);
+				String assocAction = assocCrudMap.get(fieldName);
+				if (assocAction == null) {
+					selectFrag.assocUpdateFrag = new UpdateStatementFragment();
+					genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
+							selectFrag.tblFrag.alias, selectFrag.statement);
+				} else {
+					switch(assocAction) {
+					case "insert":
+						assocCrudInsert(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
+						break;
+					case "update":
+						assocCrudUpdate(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
+						break;
+					case "delete":
+						assocCrudDelete(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
+						break;
+					default:
+						break;
+					}
+				}
 			}
 		}
 	}
+	
+	private void assocCrudInsert(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
+			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
+		String action = "insert";
+		chkIfCrudActionAllowed(action, updateFrag, fieldName, existingWhereL, info);
+		
+		DRelation drel = mmMap.get(fieldName);
+		if (drel == null) {
+			DeliaExceptionHelper.throwError("assoc-crud-insert-null-not-allowed", "update %s field %s action '%s' not allowed with null value", updateFrag.tblFrag.name, fieldName, action);
+		}
+		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		TableFragment tblFrag = null;
+		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
+		for(DValue inner: drel.getMultipleKeys()) {
+			InsertStatementFragment insertFrag = new InsertStatementFragment();
+			if (tblFrag == null) {
+				tblFrag = this.createAssocTable(insertFrag, tblinfo.assocTblName);
+			} else {
+				tblFrag = new TableFragment(tblFrag);
+			}
+			insertFrag.tblFrag = tblFrag;
+			
+			boolean reversed = tblinfo.tbl2.equalsIgnoreCase(structType.getName());
+
+			updateFrag.assocCrudInsertL.add(insertFrag);
+			assocTblReplacer.assocCrudInsert(updateFrag, insertFrag, structType, mainDVal, inner, info, mainUpdateAlias, statement, reversed);
+		}
+	}
+	private void chkIfCrudActionAllowed(String action, UpdateStatementFragment updateFrag, String fieldName, List<SqlFragment> existingWhereL, RelationInfo info) {
+		//only for update by primary id. TODO: later support more
+//		List<OpFragment> oplist = null;
+		if (existingWhereL.isEmpty()) {
+			log.logDebug("m-to-n:scenario1");
+			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, action);
+			return;
+		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
+//			oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
+		} else {
+			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, action);
+		}
+	}
+
+	private void assocCrudUpdate(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
+			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
+
+		String action = "update";
+		chkIfCrudActionAllowed(action, updateFrag, fieldName, existingWhereL, info);
+		
+		DRelation drel = mmMap.get(fieldName);
+		if (drel == null) {
+			DeliaExceptionHelper.throwError("assoc-crud-update-null-not-allowed", "update %s field %s action '%s' not allowed with null value", updateFrag.tblFrag.name, fieldName, action);
+		} else if (drel.getMultipleKeys().size() % 2 != 0) {
+			DeliaExceptionHelper.throwError("assoc-crud-update-pairs-needed", "update %s field %s: udpate action requires pairs of values", updateFrag.tblFrag.name, fieldName);
+		}
+		
+		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		TableFragment tblFrag = null;
+		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
+		for(int i = 0; i < drel.getMultipleKeys().size(); i+= 2) {
+			DValue oldVal = drel.getMultipleKeys().get(i);
+			DValue newVal = drel.getMultipleKeys().get(i+1);
+			
+			UpdateStatementFragment innerUpdateFrag = new UpdateStatementFragment();
+			if (tblFrag == null) {
+				tblFrag = this.createAssocTable(innerUpdateFrag, tblinfo.assocTblName);
+			} else {
+				tblFrag = new TableFragment(tblFrag);
+			}
+			innerUpdateFrag.tblFrag = tblFrag;
+			
+			boolean reversed = tblinfo.tbl2.equalsIgnoreCase(structType.getName());
+
+			updateFrag.assocCrudUpdateL.add(innerUpdateFrag);
+			assocTblReplacer.assocCrudUpdate(updateFrag, innerUpdateFrag, structType, mainDVal, oldVal, newVal, info, mainUpdateAlias, statement, reversed);
+		}
+	}
+	private void assocCrudDelete(UpdateStatementFragment updateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
+			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
+
+		String action = "delete";
+		chkIfCrudActionAllowed(action, updateFrag, fieldName, existingWhereL, info);
+		
+		DRelation drel = mmMap.get(fieldName);
+		if (drel == null) {
+			DeliaExceptionHelper.throwError("assoc-crud-delete-null-not-allowed", "update %s field %s action '%s' not allowed with null value", updateFrag.tblFrag.name, fieldName, action);
+		}
+		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		TableFragment tblFrag = null;
+		DValue mainDVal = statement.paramL.get(statement.paramL.size() - 1);
+		for(DValue inner: drel.getMultipleKeys()) {
+			DeleteStatementFragment deleteFrage = new DeleteStatementFragment();
+			if (tblFrag == null) {
+				tblFrag = this.createAssocTable(deleteFrage, tblinfo.assocTblName);
+			} else {
+				tblFrag = new TableFragment(tblFrag);
+			}
+			deleteFrage.tblFrag = tblFrag;
+			
+			boolean reversed = tblinfo.tbl2.equalsIgnoreCase(structType.getName());
+
+			updateFrag.assocCrudDeleteL.add(deleteFrage);
+			assocTblReplacer.assocCrudDelete(updateFrag, deleteFrage, structType, mainDVal, inner, info, mainUpdateAlias, statement, reversed);
+		}
+	}
+	
 	private void genAssocField(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, 
 			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 		//update assoctabl set leftv=x where rightv=y
@@ -355,55 +477,65 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		return selectFrag.statement.sql;
 	}
 	
-	public SqlStatementGroup renderUpdateGroup(UpdateStatementFragment selectFrag) {
+	public SqlStatementGroup renderUpdateGroup(UpdateStatementFragment updateFrag) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
-		if(selectFrag.setValuesL.isEmpty()) {
-			selectFrag.statement.sql = ""; //nothing to do
+		if(updateFrag.setValuesL.isEmpty()) {
+			updateFrag.statement.sql = ""; //nothing to do
 			return stgroup;
 		}
 
-		SqlStatement mainStatement = selectFrag.statement;
-		mainStatement.sql = selectFrag.render();
+		SqlStatement mainStatement = updateFrag.statement;
+		mainStatement.sql = updateFrag.render();
 		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
 		
+		List<StatementFragmentBase> allL = new ArrayList<>();
 		mainStatement.paramL.clear();
-		stgroup.add(selectFrag.statement);
-		initMainParams(mainStatement, save, selectFrag.assocUpdateFrag);
-		initMainParams(mainStatement, save, selectFrag.assocDeleteFrag);
-		initMainParams(mainStatement, save, selectFrag.assocMergeInfoFrag);
+		stgroup.add(updateFrag.statement);
+		initMainParams(mainStatement, save, allL, updateFrag.assocUpdateFrag);
+		initMainParams(mainStatement, save, allL, updateFrag.assocDeleteFrag);
+		initMainParams(mainStatement, save, allL, updateFrag.assocMergeInfoFrag);
+		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
+			initMainParams(mainStatement, save, allL, insFrag);
+		}
+		for(DeleteStatementFragment delFrag: updateFrag.assocCrudDeleteL) {
+			initMainParams(mainStatement, save, allL, delFrag);
+		}
+		for(UpdateStatementFragment upFrag: updateFrag.assocCrudUpdateL) {
+			initMainParams(mainStatement, save,  allL,upFrag);
+		}
+		
 		if (mainStatement.paramL.isEmpty()) {
 			mainStatement.paramL.addAll(save);
 			return stgroup; //no inner frags
 		}
 		
-		addIfNotNull(stgroup, selectFrag.assocUpdateFrag, save, nextStartIndex(selectFrag.assocDeleteFrag, selectFrag.assocMergeInfoFrag));
-		addIfNotNull(stgroup, selectFrag.assocDeleteFrag, save, nextStartIndex(selectFrag.assocMergeInfoFrag));
-		addIfNotNull(stgroup, selectFrag.assocMergeInfoFrag, save, Integer.MAX_VALUE);
+		addIfNotNull(stgroup, updateFrag.assocUpdateFrag, save, allL);
+		addIfNotNull(stgroup, updateFrag.assocDeleteFrag, save, allL);
+		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, allL);
+		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
+			addIfNotNull(stgroup, insFrag, save, allL);
+		}
+		for(DeleteStatementFragment delFrag: updateFrag.assocCrudDeleteL) {
+			addIfNotNull(stgroup, delFrag, save, allL);
+		}
+		for(UpdateStatementFragment upFrag: updateFrag.assocCrudUpdateL) {
+			addIfNotNull(stgroup, upFrag, save, allL);
+		}
 		
-		if (selectFrag.doUpdateLast) {
+		if (updateFrag.doUpdateLast) {
 			SqlStatement stat = stgroup.statementL.remove(0); //move first to last
-			List<DValue> firstParams = stat.paramL;
+//			List<DValue> firstParams = stat.paramL;
 			stgroup.statementL.add(stat);
-			
-//			//swap param lists too
-//			SqlStatement newFirst = stgroup.statementL.get(0);
-//			List<DValue> tmp = stat.paramL;
-//			newFirst.paramL = firstParams;
-//			stat.paramL = tmp;
 		}
 		
 		return stgroup;
 	}
-	private int nextStartIndex(StatementFragmentBase... frags) {
-		for(StatementFragmentBase frag: frags) {
-			if (frag != null) {
-				return frag.paramStartIndex;
-			}
-		}
-		return Integer.MAX_VALUE;
-	}
 
-	private void initMainParams(SqlStatement mainStatement, List<DValue> saveL, StatementFragmentBase innerFrag) {
+	private void initMainParams(SqlStatement mainStatement, List<DValue> saveL, List<StatementFragmentBase> allL, StatementFragmentBase innerFrag) {
+		if (innerFrag != null) {
+			allL.add(innerFrag);
+		}
+		
 		if (! mainStatement.paramL.isEmpty()) {
 			return;
 		}
@@ -416,7 +548,20 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 	}
 
-	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag, List<DValue> paramL, int nextStartIndex) {
+	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag, List<DValue> paramL, List<StatementFragmentBase> allL) {
+		int nextStartIndex = 0;
+		int k = 0;
+		for(StatementFragmentBase sfb: allL) {
+			if (sfb == innerFrag) {
+				if (k < allL.size() - 1) {
+					nextStartIndex = allL.get(k+1).paramStartIndex;
+				} else {
+					nextStartIndex = Integer.MAX_VALUE;
+				}
+			}
+			k++;
+		}
+		
 		if (innerFrag != null) {
 			SqlStatement stat = innerFrag.statement;
 			stat.sql = innerFrag.render();
