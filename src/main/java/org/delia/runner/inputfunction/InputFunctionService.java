@@ -291,9 +291,14 @@ public class InputFunctionService extends ServiceBase {
 			DeliaError err = e.getLastError();
 			if (errIdIStartsWith(err, "rule-")) {
 				if (metricsObserver != null && err instanceof DetailedError) {
-					DetailedError derr = (DetailedError) err;
 					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
-					metricsObserver.onInvalid2Error(ispec, derr.getFieldName());
+					if (err.getId().equals("rule-relationOne") || err.getId().equals("rule-relationOne")) {
+						DetailedError derr = (DetailedError) err;
+						metricsObserver.onRelationError(ispec, derr.getFieldName());
+					} else {
+						DetailedError derr = (DetailedError) err;
+						metricsObserver.onInvalid2Error(ispec, derr.getFieldName());
+					}
 				}
 			} else if (errIdIs(err, "duplicate-unique-value")) {
 				if (metricsObserver != null && err instanceof DetailedError) {

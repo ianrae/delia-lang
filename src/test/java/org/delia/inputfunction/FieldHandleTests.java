@@ -145,7 +145,7 @@ public class FieldHandleTests  extends NewBDDBase {
 	}
 
 	@Test
-	public void testIDError() {
+	public void testDError() {
 		createDelia(3);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
