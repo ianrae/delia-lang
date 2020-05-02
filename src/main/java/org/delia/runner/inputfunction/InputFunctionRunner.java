@@ -91,11 +91,6 @@ public class InputFunctionRunner extends ServiceBase {
 			DType dtype = pair.type;
 			Shape shape = dtype.getShape();
 			inner = buildScalarValue(input, shape, errL, pair, data, metricsObserver); 
-			if (input != null && inner == null) {
-				//err not supported
-				String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
-				errL.add(new DeliaError("unsupported-input-field-type", msg));
-			}
 			structBuilder.addField(pair.name, inner);
 		}			
 		

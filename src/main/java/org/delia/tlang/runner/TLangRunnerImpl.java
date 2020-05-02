@@ -73,13 +73,23 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				
 				dval = (DValue) res.val;
 			} else {
+				boolean needToFindNext = true;
 				if (statement instanceof IfStatement) {
 					trail.add(statement.getName());
+					IfStatement ifstat = (IfStatement) statement;
+					if (ifstat.isIfThenReturn) {
+						needToFindNext = false;
+					}
 				}
 				
-				ipIndex = findNext(program, ipIndex);
-				if (ipIndex < 0) {
-					//err missing endif
+				if (needToFindNext) {
+					ipIndex = findNext(program, ipIndex);
+					if (ipIndex < 0) {
+						//err missing endif
+						log.log("fail!!!");
+						res.failFlag = true;
+						break;
+					}
 				}
 			}
 			
