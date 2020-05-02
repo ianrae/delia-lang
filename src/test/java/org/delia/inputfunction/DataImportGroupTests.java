@@ -127,7 +127,7 @@ public class DataImportGroupTests  extends NewBDDBase {
 	private String buildSrcProduct() {
 		String src = buildSrc(true);
 		src += "\n type Product struct { productID int unique, productName string, relation category Category one optional, quantityPerUnit string, ";
-		src += "\n unitPrice string, unitsInStock int, unitsOnOrder int, reorderLevel int, discontinued int } end";
+		src += "\n unitPrice string optional, unitsInStock int optional, unitsOnOrder int optional, reorderLevel int optional, discontinued int  optional} end";
 		src += "\n  input function prod1(Product p) { ";
 		src += "\n  productID -> p.productID, productName -> p.productName, categoryID -> p.category, quantityPerUnit -> p.quantityPerUnit";
 		src += " }";

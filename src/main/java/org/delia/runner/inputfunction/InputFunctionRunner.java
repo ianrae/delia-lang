@@ -81,6 +81,7 @@ public class InputFunctionRunner extends ServiceBase {
 			}
 			
 			Object input = data.outputFieldMap.get(pair.name);
+			log.log("field: %s = %s", outputFieldName, input);
 			
 			DValue inner = null;
 			DType dtype = pair.type;
@@ -90,7 +91,6 @@ public class InputFunctionRunner extends ServiceBase {
 				//err not supported
 				String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
 				errL.add(new DeliaError("unsupported-input-field-type", msg));
-				break;
 			}
 			structBuilder.addField(pair.name, inner);
 		}			
@@ -192,9 +192,11 @@ public class InputFunctionRunner extends ServiceBase {
 					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
 					inputData.put(ifh.columnName, inputValue);
+					log.log("input: %d:%s = %s", ifh.columnIndex, ifh.columnName, inputValue);
 				} else if (ofh.syntheticFieldName != null) {
 					String inputField = ofh.syntheticFieldName;
 					inputData.put(inputField, ofh.syntheticValue);
+					log.log("input(synth): %s = %s", inputField, ofh.syntheticValue);
 				} else {
 					DeliaExceptionHelper.throwError("bad-output-field-handle", "OFH %s bad", ofh.fieldName);
 				}
