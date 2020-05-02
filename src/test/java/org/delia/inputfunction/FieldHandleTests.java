@@ -86,7 +86,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		assertEquals(2, observer.rowCounter);
 		assertEquals(0, observer.successfulRowCounter);
 		assertEquals(2, observer.failedRowCounter);
-		assertEquals(22, observer.currentRowMetrics[OutputFieldHandle.INDEX_N]);
+		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_N]);
 	}
 	private void addImportSpec(ProgramSet progset) {
 		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);

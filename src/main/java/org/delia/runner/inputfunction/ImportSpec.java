@@ -9,4 +9,5 @@ public class ImportSpec {
 	public DStructType structType;
 	public List<InputFieldHandle> ifhList = new ArrayList<>();
 	public List<OutputFieldHandle> ofhList = new ArrayList<>();
+	public List<OutputFieldHandle> unMappedOfhList = new ArrayList<>();
 }

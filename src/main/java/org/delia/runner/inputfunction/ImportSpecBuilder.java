@@ -17,7 +17,16 @@ public class ImportSpecBuilder {
 		for(TypePair pair: structType.getAllFields()) {
 			ProgramSpec pspec = findField(progset, alias, pair.name);
 			if (pspec == null) {
-				//not being imported
+				//not being imported. still need ofh for N errors
+				OutputFieldHandle ofh = new OutputFieldHandle();
+				ofh.structType = structType;
+				ofh.fieldIndex = index;
+				ofh.fieldName = pair.name;
+				ofh.syntheticValue = null; 
+				ofh.syntheticFieldName = null;
+				ofh.arMetrics = new int[OutputFieldHandle.NUM_METRICS];
+				
+				ispec.unMappedOfhList.add(ofh);
 			} else {
 				OutputFieldHandle ofh = new OutputFieldHandle();
 				ofh.structType = structType;

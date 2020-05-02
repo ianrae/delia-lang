@@ -29,36 +29,58 @@ public class SimpleImportMetricObserver implements ImportMetricObserver {
 	@Override
 	public void onNoMappingError(ImportSpec ispec, String outputFieldName) {
 		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
-		if (ofh == null) return;
-		ofh.arMetrics[OutputFieldHandle.INDEX_N]++;
+		if (ofh == null) {
+			for(OutputFieldHandle tmp: ispec.unMappedOfhList) {
+				if (tmp.fieldName.equals(outputFieldName)) {
+					ofh = tmp;
+					break;
+				}
+			}
+		}
+		
+		int k = OutputFieldHandle.INDEX_N;
+		currentRowMetrics[k]++;
+		ofh.arMetrics[k]++;
 	}
 
 	@Override
 	public void onMissingError(ImportSpec ispec, String outputFieldName) {
 		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
 		if (ofh == null) return;
-		ofh.arMetrics[OutputFieldHandle.INDEX_M]++;
+		
+		int k = OutputFieldHandle.INDEX_M;
+		currentRowMetrics[k]++;
+		ofh.arMetrics[k]++;
 	}
 
 	@Override
 	public void onInvalidError(ImportSpec ispec, String outputFieldName) {
 		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
 		if (ofh == null) return;
-		ofh.arMetrics[OutputFieldHandle.INDEX_I]++;
+
+		int k = OutputFieldHandle.INDEX_I;
+		currentRowMetrics[k]++;
+		ofh.arMetrics[k]++;
 	}
 
 	@Override
 	public void onDuplicateError(ImportSpec ispec, String outputFieldName) {
 		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
 		if (ofh == null) return;
-		ofh.arMetrics[OutputFieldHandle.INDEX_D]++;
+		
+		int k = OutputFieldHandle.INDEX_D;
+		currentRowMetrics[k]++;
+		ofh.arMetrics[k]++;
 	}
 
 	@Override
 	public void onRelationError(ImportSpec ispec, String outputFieldName) {
 		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
 		if (ofh == null) return;
-		ofh.arMetrics[OutputFieldHandle.INDEX_R]++;
+		
+		int k = OutputFieldHandle.INDEX_R;
+		currentRowMetrics[k]++;
+		ofh.arMetrics[k]++;
 	}
 	
 	private OutputFieldHandle findOfh(ImportSpec ispec, String outputFieldName) {
