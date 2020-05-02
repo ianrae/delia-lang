@@ -103,6 +103,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 	}
 	
+	
 	@Test
 	public void testIError() {
 		createDelia(0);
@@ -181,7 +182,8 @@ public class FieldHandleTests  extends NewBDDBase {
 	private String buildCustomerSrc(int which) {
 		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
 		if (which == 0) {
-			src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+			src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, ";
+			src += " NAME -> c.name using { if missing return null} }";
 		} else if (which == 1) {
 			src += " input function foo(Customer c) { ID -> c.id, NAME -> c.name}";
 		}

@@ -4,6 +4,7 @@ import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.IdentExp;
+import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.inputfunction.EndIfStatementExp;
 import org.delia.compiler.ast.inputfunction.IfStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
@@ -31,6 +32,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
+
 
 public class TLangProgramBuilder extends ServiceBase {
 
@@ -102,7 +104,7 @@ public class TLangProgramBuilder extends ServiceBase {
 
 	private TLangStatement parseStatement(Exp exp) {
 		DValue dval = dvalConverter.createDValFromExp(exp, builder, false);
-		if (dval != null) {
+		if (dval != null || exp instanceof NullExp) {
 			return new ValueStatement(dval);
 		}
 		

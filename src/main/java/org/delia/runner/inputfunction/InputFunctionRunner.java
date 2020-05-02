@@ -195,7 +195,7 @@ public class InputFunctionRunner extends ServiceBase {
 				log.log("trail: %s", tlangRunner.getTrail());
 				
 				DValue finalValue = (DValue) res.val;
-				value = finalValue.asString();
+				value = finalValue == null ? null : finalValue.asString();
 				if (res.failFlag) {
 					haltNowFlag = true;
 					data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
