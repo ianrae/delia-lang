@@ -34,14 +34,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class FieldHandleTests  extends NewBDDBase {
-	
+
 	public static class InputFieldHandle {
 		public String columnName;
 		public int columnIndex; //element of LineObj.   SYNTH + id for synthetic
 	}
 	public static class OutputFieldHandle {
 		public static final int NUM_METRICS = 5;
-		
+		public static final int INDEX_N = 0;
+		public static final int INDEX_M = 1;
+		public static final int INDEX_I = 2;
+		public static final int INDEX_D = 3;
+		public static final int INDEX_R = 4;
+
 		public DStructType structType;
 		public String fieldName;
 		public int fieldIndex; //index of field in structType
@@ -49,32 +54,32 @@ public class FieldHandleTests  extends NewBDDBase {
 		//TODO: add list additional ifh indexes for combine(FIRSTNAME,'',LASTNAME)
 		public int[] arMetrics; //for NMIDR error counters
 	}
-	
+
 	public static class ImportSpec {
 		public DStructType structType;
 		public List<InputFieldHandle> ifhList = new ArrayList<>();
 		public List<OutputFieldHandle> ofhList = new ArrayList<>();
 	}
-	
+
 	public interface ImportMetricObserver {
 		void onRowStart(ImportSpec ispec, int rowNum);
 		void onRowEnd(ImportSpec ispec, int rowNum, boolean success);
-		
+
 		void onNoMappingError(ImportSpec ispec, OutputFieldHandle ofh);
 		void onMissingError(ImportSpec ispec, OutputFieldHandle ofh);
 		void onInvalidError(ImportSpec ispec, OutputFieldHandle ofh);
 		void onDuplicateError(ImportSpec ispec, OutputFieldHandle ofh);
 		void onRelationError(ImportSpec ispec, OutputFieldHandle ofh);
 	}
-	
+
 	public static class ImportSpecBuilder {
-	
+
 		public ImportSpec buildSpecFor(ProgramSet progset, DStructType structType) {
 			ImportSpec ispec = new ImportSpec();
 			ispec.structType = structType;
-			
+
 			String alias = findAlias(progset, structType);
-			
+
 			int index = 0;
 			for(TypePair pair: structType.getAllFields()) {
 				ProgramSpec pspec = findField(progset, alias, pair.name);
@@ -90,7 +95,7 @@ public class FieldHandleTests  extends NewBDDBase {
 				}
 				index++;
 			}
-			
+
 			return ispec;
 		}
 
@@ -111,29 +116,106 @@ public class FieldHandleTests  extends NewBDDBase {
 			}
 			return null;
 		}
+
+		public void addInputColumn(ImportSpec ispec, String columnName, int colIndex, String outputFieldName) {
+			InputFieldHandle ifh = new InputFieldHandle();
+			ifh.columnIndex = colIndex;
+			ifh.columnName = columnName;
+			ispec.ifhList.add(ifh);
+
+			for(OutputFieldHandle ofh: ispec.ofhList) {
+				if (ofh.fieldName.equals(outputFieldName)) {
+					ofh.ifhIndex = ispec.ifhList.size() - 1;
+				}
+			}
+
+		}
+	}
+	
+	public static class SimpleImportMetricObserver implements ImportMetricObserver {
+		public int rowCounter; //num rows attempted
+		public int failedRowCounter;
+		public int successfulRowCounter;
+		public int[] currentRowMetrics = new int[OutputFieldHandle.NUM_METRICS];
+//		public int[] totalMetrics = new int[OutputFieldHandle.NUM_METRICS];
+
+		@Override
+		public void onRowStart(ImportSpec ispec, int rowNum) {
+			rowCounter++;
+		}
+
+		@Override
+		public void onRowEnd(ImportSpec ispec, int rowNum, boolean success) {
+			if (! success) {
+				failedRowCounter++;
+			} else {
+				successfulRowCounter++;
+			}
+			
+			int n = 0;
+			for(int i = 0; i < currentRowMetrics.length; i++) {
+				n += currentRowMetrics[i];
+			}
+			//n is number of errors for this row
+			
+		}
+
+		@Override
+		public void onNoMappingError(ImportSpec ispec, OutputFieldHandle ofh) {
+			ofh.arMetrics[OutputFieldHandle.INDEX_N]++;
+		}
+
+		@Override
+		public void onMissingError(ImportSpec ispec, OutputFieldHandle ofh) {
+			ofh.arMetrics[OutputFieldHandle.INDEX_M]++;
+		}
+
+		@Override
+		public void onInvalidError(ImportSpec ispec, OutputFieldHandle ofh) {
+			ofh.arMetrics[OutputFieldHandle.INDEX_I]++;
+		}
+
+		@Override
+		public void onDuplicateError(ImportSpec ispec, OutputFieldHandle ofh) {
+			ofh.arMetrics[OutputFieldHandle.INDEX_D]++;
+		}
+
+		@Override
+		public void onRelationError(ImportSpec ispec, OutputFieldHandle ofh) {
+			ofh.arMetrics[OutputFieldHandle.INDEX_R]++;
+		}
+		
 	}
 
 	@Test
 	public void test1() {
 		String path = BASE_DIR + "categories.csv";
 		createDelia(true);
-//		CSVFileLoader fileLoader = new CSVFileLoader(path);
-//		numExpectedColumnsProcessed = 4;
-//		buildAndRun(true, fileLoader, 8);
-		
+		//		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		//		numExpectedColumnsProcessed = 4;
+		//		buildAndRun(true, fileLoader, 8);
+
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
 		DStructType structType = progset.outputTypes.get(0);
 		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
-		
+
 		ImportSpec ispec = ispecBuilder.buildSpecFor(progset, structType);
 		assertEquals(3, ispec.ofhList.size());
+		OutputFieldHandle ofh = ispec.ofhList.get(0);
+		assertEquals(structType, ofh.structType);
+		assertEquals(0, ofh.fieldIndex);
+		assertEquals("id", ofh.fieldName);
+
+		ofh.ifhIndex = -1;
+		ispecBuilder.addInputColumn(ispec, "ID", 11, "id");
+		assertEquals(0, ofh.ifhIndex);
 	}
 
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-	
+
 	//	private DeliaDao dao;
 	private Delia delia;
 	private DeliaSession session;
@@ -157,8 +239,8 @@ public class FieldHandleTests  extends NewBDDBase {
 
 		return src;
 	}
-	
-	
+
+
 	private String buildCategorySrc(boolean inOrder) {
 		if (inOrder) {
 			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
@@ -221,7 +303,7 @@ public class FieldHandleTests  extends NewBDDBase {
 	}
 
 
-	
+
 
 	@Override
 	public DBInterface createForTest() {
