@@ -25,6 +25,8 @@ import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.HdrInfo;
+import org.delia.runner.inputfunction.ImportSpec;
+import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRunner;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.ProgramSet;
@@ -55,6 +57,8 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		ospec.alias = "c";
 		ospec.structType = structType;
 		progset.outputSpecs.add(ospec);
+		addImportSpec(progset);
+		
 		inFuncRunner.setProgramSet(progset);
 		List<DeliaError> lineErrL = new ArrayList<>();
 		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL);
@@ -80,6 +84,17 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		assertEquals("bob", dval.asStruct().getField("name").asString());
 	}
 
+	private ImportSpec addImportSpec(ProgramSet progset) {
+		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
+		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
+		ospec.ispec = ispecBuilder.buildSpecFor(progset, ospec.structType);
+		
+		ispecBuilder.addInputColumn(ospec.ispec, "ID", 0, "id");
+		ispecBuilder.addInputColumn(ospec.ispec, "WID", 1, "wid");
+		ispecBuilder.addInputColumn(ospec.ispec, "NAME", 2, "name");
+		
+		return ospec.ispec;
+	}
 	private ProgramSet createProgramSet(HdrInfo hdr, InputFunctionDefStatementExp inFnExp) {
 		ProgramSet progset = new ProgramSet();
 		progset.hdr = hdr;
@@ -130,9 +145,9 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 
 	private HdrInfo createHdr() {
 		HdrInfo hdr = new HdrInfo();
-		hdr.map.put(0, "id");
-		hdr.map.put(1, "name");
-		hdr.map.put(2, "wid");
+		hdr.map.put(0, "ID");
+		hdr.map.put(1, "WID");
+		hdr.map.put(2, "NAME");
 		return hdr;
 	}
 

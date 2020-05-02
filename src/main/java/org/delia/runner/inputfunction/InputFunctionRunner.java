@@ -137,7 +137,7 @@ public class InputFunctionRunner extends ServiceBase {
 				value = synthValue.asString();
 				//TODO we should keep this as a dval all the way through
 			} else {
-				value = obj.toString(); //was a string
+				value = (obj == null) ? null : obj.toString(); //was a string
 			}
 			IdentPairExp outPair = spec.outputField;
 			//match with Customer!!

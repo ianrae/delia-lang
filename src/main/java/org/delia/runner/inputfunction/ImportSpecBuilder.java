@@ -62,13 +62,18 @@ public class ImportSpecBuilder {
 	}
 
 	public void addInputColumn(ImportSpec ispec, String columnName, int colIndex, String outputFieldName) {
-		InputFieldHandle ifh = new InputFieldHandle();
-		ifh.columnIndex = colIndex;
-		ifh.columnName = columnName;
-		ispec.ifhList.add(ifh);
-
+		//don't add ifh for synthetic fields
 		for(OutputFieldHandle ofh: ispec.ofhList) {
 			if (ofh.fieldName.equals(outputFieldName)) {
+				if (ofh.syntheticFieldName != null) {
+					return;
+				}
+				
+				InputFieldHandle ifh = new InputFieldHandle();
+				ifh.columnIndex = colIndex;
+				ifh.columnName = columnName;
+				ispec.ifhList.add(ifh);
+				
 				ofh.ifhIndex = ispec.ifhList.size() - 1;
 				break;
 			}
