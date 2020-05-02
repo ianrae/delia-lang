@@ -33,7 +33,7 @@ public class EntityBeanTests extends NewBDDBase {
 	
 	/**
 	 * This would normally be code-gen'd.
-	 * The entity is completely disconnected from its orignation DValue.
+	 * The entity is completely disconnected from its original DValue.
 	 * We use constructor injection (and reflection) to build an
 	 * entity object from a DValue.
 	 * 
@@ -43,13 +43,28 @@ public class EntityBeanTests extends NewBDDBase {
 	 *  -if app calls setter and sets to the existing value
 	 *  this may have app semantics, and we should persist
 	 *  all values that were set (even if they have not changed value).
-	 *
+	 *  
+	 * Relations
+	 *  -child-side: normal getter/setter for fk
+	 *  -parent-side
+	 *    getAddr_FK() //returns child FK if .fks() or .fetch() was done, else null
+	 *    no setter
+	 * -if you do a query using fetch: Customer[55].fetch('addr')
+	 * you get back an entity-response object that you can use
+	 * to build both object
+	 *   Customer cust = entityResponse.getSingleValue(Customer.class);
+	 *   Address addr = entityResponse.getSingleValue(Address.class);
+	 *  -this will return the address owned by the customer.
+	 *  -and if you got back a list of customers
+	 *   List<Customer> custL = entityResponse.getList(Customer.class);
+	 *   List<Address> addrL = entityResponse.getList(Address.class);
+	 *  
 	 */
 	public static class FlightEntity implements DValueEntity {
 		private int field1; //if optional then we use Integer
 		private int field2;
 		private boolean[] arFlags = new boolean[2]; //2 fields
-		//note arFlags is only for delcared fields of this class
+		//note arFlags is only for declared fields of this class
 		//when derive subclass it will have its own arFlags2, arFlags3, etc
 		
 		public FlightEntity(int field1, int field2) {
@@ -108,7 +123,7 @@ public class EntityBeanTests extends NewBDDBase {
 			return sb.toString();
 		}
 
-		private boolean zrenderUpdateFields(StringBuilder sb) {
+		protected boolean zrenderUpdateFields(StringBuilder sb) {
 			boolean needComma = false;
 			if (arFlags[0]) {
 				sb.append("field1");
@@ -140,6 +155,8 @@ public class EntityBeanTests extends NewBDDBase {
 		}
 		
 		//standard getters/setters
+		//would not include setter for serial primaryKey
+		//would not include parent relation values
 		public int getField3() {
 			return field3;
 		}
@@ -168,6 +185,7 @@ public class EntityBeanTests extends NewBDDBase {
 		}
 		
 		//derived class would invoke super.zrenderFullFields(sb) and then add its own
+		@Override
 		protected boolean zrenderFullFields(StringBuilder sb) {
 			boolean needComma = super.zrenderFullFields(sb);
 			if (needComma) {
@@ -196,7 +214,8 @@ public class EntityBeanTests extends NewBDDBase {
 			return sb.toString();
 		}
 
-		private boolean zrenderUpdateFields(StringBuilder sb) {
+		@Override
+		protected boolean zrenderUpdateFields(StringBuilder sb) {
 			boolean needComma = super.zrenderUpdateFields(sb);
 			
 			if (arFlagsChildFlightEntity[0]) {
@@ -222,6 +241,34 @@ public class EntityBeanTests extends NewBDDBase {
 			return needComma;
 		}
 	}
+	
+	/*
+	 * how about the Dao?
+	 * -use a TypeDao?
+	 * 
+	 *  ResultValue res = dao.findByPrimaryKey(44);
+	 *  FlightEntity entity = dao.buildEntity(res, FlightEntity.class);
+	 * 
+	 * -or codegen a FlightDao? 
+	 *   FlightDao ...
+	 *   Flight entity = dao.queryById(10).orderBy("lastName").findOne(); //id is name of primary key field
+	 *     .findOne returns single entity
+	 *     .findMany returns a list
+	 *     .findAny returns null or one entity
+	 *     .find() returns EntityResponse from which you can get one or many
+	 *   
+	 *   EntityResponse resp = dao.doQuery(...)
+	 *   Customer cust = resp...(Customer.class)
+	 *   Address addr = resp..., Address.class)
+	 *   
+	 *   dao.insert(cust) of List<Customer> or stream of customer
+	 *   n = dao.update(cust) //cust must have been produced by a query (we need correct dirty flags)
+	 *   dao.delete(cust)
+	 *   
+	 *   dao needs so support callling user fns. that's a big selling point of delia
+	 *   -user functions are where we can do lots of sql optimization
+	 *   EntityResp resp = dao.invokeFunction("foo", 33, "abc");
+	 */
 	
 	@Test
 	public void testEntity() {
