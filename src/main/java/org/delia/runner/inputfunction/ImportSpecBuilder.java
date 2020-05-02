@@ -23,6 +23,7 @@ public class ImportSpecBuilder {
 				ofh.fieldIndex = index;
 				ofh.fieldName = pair.name;
 				ofh.syntheticValue = pspec.syntheticValue; 
+				ofh.syntheticFieldName = pspec.syntheticFieldName;
 				ofh.arMetrics = new int[OutputFieldHandle.NUM_METRICS];
 				
 				ispec.ofhList.add(ofh);

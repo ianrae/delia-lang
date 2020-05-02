@@ -193,7 +193,7 @@ public class InputFunctionRunner extends ServiceBase {
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
 					inputData.put(ifh.columnName, inputValue);
 				} else {
-					String inputField = progset.syntheticMap.get(ofh.syntheticValue);
+					String inputField = ofh.syntheticFieldName;
 					inputData.put(inputField, ofh.syntheticValue);
 				}
 			}

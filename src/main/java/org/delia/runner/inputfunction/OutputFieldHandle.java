@@ -18,4 +18,5 @@ public class OutputFieldHandle {
 	//TODO: add list additional ifh indexes for combine(FIRSTNAME,'',LASTNAME)
 	public int[] arMetrics; //for NMIDR error counters
 	public DValue syntheticValue; //null or synthetic value
+	public String syntheticFieldName;
 }

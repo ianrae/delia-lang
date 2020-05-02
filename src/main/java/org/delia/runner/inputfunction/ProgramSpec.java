@@ -9,4 +9,5 @@ public class ProgramSpec {
 	public String inputField;
 	public IdentPairExp outputField;
 	public DValue syntheticValue;
+	public String syntheticFieldName;
 }
