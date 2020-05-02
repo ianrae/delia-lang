@@ -20,118 +20,23 @@ import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
+import org.delia.runner.inputfunction.ImportMetricObserver;
+import org.delia.runner.inputfunction.ImportSpec;
+import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
+import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
-import org.delia.runner.inputfunction.ProgramSpec;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
-import org.delia.type.TypePair;
 import org.junit.Before;
 import org.junit.Test;
 
 public class FieldHandleTests  extends NewBDDBase {
 
-	public static class InputFieldHandle {
-		public String columnName;
-		public int columnIndex; //element of LineObj.   SYNTH + id for synthetic
-	}
-	public static class OutputFieldHandle {
-		public static final int NUM_METRICS = 5;
-		public static final int INDEX_N = 0;
-		public static final int INDEX_M = 1;
-		public static final int INDEX_I = 2;
-		public static final int INDEX_D = 3;
-		public static final int INDEX_R = 4;
-
-		public DStructType structType;
-		public String fieldName;
-		public int fieldIndex; //index of field in structType
-		public int ifhIndex;
-		//TODO: add list additional ifh indexes for combine(FIRSTNAME,'',LASTNAME)
-		public int[] arMetrics; //for NMIDR error counters
-	}
-
-	public static class ImportSpec {
-		public DStructType structType;
-		public List<InputFieldHandle> ifhList = new ArrayList<>();
-		public List<OutputFieldHandle> ofhList = new ArrayList<>();
-	}
-
-	public interface ImportMetricObserver {
-		void onRowStart(ImportSpec ispec, int rowNum);
-		void onRowEnd(ImportSpec ispec, int rowNum, boolean success);
-
-		void onNoMappingError(ImportSpec ispec, OutputFieldHandle ofh);
-		void onMissingError(ImportSpec ispec, OutputFieldHandle ofh);
-		void onInvalidError(ImportSpec ispec, OutputFieldHandle ofh);
-		void onDuplicateError(ImportSpec ispec, OutputFieldHandle ofh);
-		void onRelationError(ImportSpec ispec, OutputFieldHandle ofh);
-	}
-
-	public static class ImportSpecBuilder {
-
-		public ImportSpec buildSpecFor(ProgramSet progset, DStructType structType) {
-			ImportSpec ispec = new ImportSpec();
-			ispec.structType = structType;
-
-			String alias = findAlias(progset, structType);
-
-			int index = 0;
-			for(TypePair pair: structType.getAllFields()) {
-				ProgramSpec pspec = findField(progset, alias, pair.name);
-				if (pspec == null) {
-					//not being imported
-				} else {
-					OutputFieldHandle ofh = new OutputFieldHandle();
-					ofh.structType = structType;
-					ofh.fieldIndex = index;
-					ofh.fieldName = pair.name;
-					ofh.arMetrics = new int[OutputFieldHandle.NUM_METRICS];
-					ispec.ofhList.add(ofh);
-				}
-				index++;
-			}
-
-			return ispec;
-		}
-
-		private String findAlias(ProgramSet progset, DStructType structType) {
-			int i = progset.outputTypes.indexOf(structType);
-			if (i >= 0) {
-				return progset.outputAliases.get(i);
-			}
-			return null;
-		}
-
-		private ProgramSpec findField(ProgramSet progset, String alias, String outputFieldName) {
-			for(String inputField: progset.fieldMap.keySet()) {
-				ProgramSpec pspec = progset.fieldMap.get(inputField);
-				if (pspec.outputField.val1.equals(alias) && pspec.outputField.val2.equals(outputFieldName)) {
-					return pspec;
-				}
-			}
-			return null;
-		}
-
-		public void addInputColumn(ImportSpec ispec, String columnName, int colIndex, String outputFieldName) {
-			InputFieldHandle ifh = new InputFieldHandle();
-			ifh.columnIndex = colIndex;
-			ifh.columnName = columnName;
-			ispec.ifhList.add(ifh);
-
-			for(OutputFieldHandle ofh: ispec.ofhList) {
-				if (ofh.fieldName.equals(outputFieldName)) {
-					ofh.ifhIndex = ispec.ifhList.size() - 1;
-				}
-			}
-
-		}
-	}
-	
 	public static class SimpleImportMetricObserver implements ImportMetricObserver {
 		public int rowCounter; //num rows attempted
 		public int failedRowCounter;
