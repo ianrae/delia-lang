@@ -5,6 +5,8 @@ import java.util.StringJoiner;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
+import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
@@ -95,8 +97,24 @@ public class DataImportService extends ServiceBase {
 				joiner.add(String.format("%3d", totals[i]));
 			}
 				
-			String ss = String.format("%15s     : %s", "totals", joiner.toString());
+			String ss = String.format("%15s     : %s", "TOTALS", joiner.toString());
 			log.log(ss);
+		}
+		
+		if (!result.errors.isEmpty()) {
+			int nn = result.errors.size() > 20 ? 20 : result.errors.size();
+			log.log("");
+			log.log("first %d errors: ", nn);
+			for(int i = 0; i < nn; i++) {
+				DeliaError err = result.errors.get(i);
+				String fieldName = "";
+				if (err instanceof DetailedError) {
+					DetailedError derr = (DetailedError) err;
+					fieldName = derr.getFieldName();
+				}
+				String msg = err.toString();
+				log.log("  line %d: %s - %s", err.getLineNum(), fieldName, msg);
+			}
 		}
 		
 		
