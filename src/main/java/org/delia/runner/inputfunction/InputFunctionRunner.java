@@ -105,7 +105,8 @@ public class InputFunctionRunner extends ServiceBase {
 				for(DetailedError err: structBuilder.getValidationErrors()) {
 					if (ErrorType.MISSINGFIELD.name().equals(err.getId())) {
 						metricsObserver.onNoMappingError(ispec, err.getFieldName());
-						log.log("a");
+					} else if (ErrorType.NODATA.name().equals(err.getId())) {
+						metricsObserver.onMissingError(ispec, err.getFieldName());
 					}
 				}
 			}

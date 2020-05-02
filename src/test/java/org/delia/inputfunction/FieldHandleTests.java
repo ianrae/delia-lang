@@ -63,31 +63,80 @@ public class FieldHandleTests  extends NewBDDBase {
 	@Test
 	public void testNError() {
 		createDelia(1);
-
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-		inputFnSvc.setMetricsObserver(observer);
-		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
-		assertEquals(2, progset.fieldMap.size());
-		addImportSpec(progset);
+		ProgramSet progset = buildProgSet(inputFnSvc, observer, 2); 
 		
 		LineObjIterator lineObjIter = createIter(2);
+		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
+		chkResult(result, 2, 2, 0);
+		
+		chkObserver(observer, 2, 0, 2);
+		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_N]);
+	}
+	@Test
+	public void testMError() {
+		createDelia(0);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
+		
+		LineObjIterator lineObjIter = createIter(2, null); //no bob
+		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
+		chkResult(result, 2, 3, 0);
+		
+		chkObserver(observer, 2, 0, 2);
+		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
+	}
+	
+	@Test
+	public void testIError() {
+		createDelia(0);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
+		
+		LineObjIterator lineObjIter = createIter(2);
+		LineObj line1 = currentLineObjL.get(0);
+		line1.elements[1] = "notanint";
+		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
+		chkResult(result, 2, 3, 1);
+		
+		chkObserver(observer, 2, 1, 1);
+		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I]);
+	}
 
+	
+	private ProgramSet buildProgSet(InputFunctionService inputFnSvc, SimpleImportMetricObserver observer, int expectedSize) {
+		inputFnSvc.setMetricsObserver(observer);
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
+		assertEquals(expectedSize, progset.fieldMap.size());
+		addImportSpec(progset);
+		return progset;
+	}
+
+	private void chkObserver(SimpleImportMetricObserver observer, int i, int j, int k) {
+		assertEquals(i, observer.rowCounter);
+		assertEquals(j, observer.successfulRowCounter);
+		assertEquals(k, observer.failedRowCounter);
+	}
+
+	private void chkResult(InputFunctionResult result, int i, int j, int k) {
+		assertEquals(i, result.numRowsProcessed);
+		assertEquals(j, result.numColumnsProcessedPerRow);
+		assertEquals(k, result.numRowsInserted);
+		assertEquals(false, result.wasHalted);
+	}
+
+	private InputFunctionResult runImport(InputFunctionService inputFnSvc, ProgramSet progset, LineObjIterator lineObjIter) {
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
 		request.progset = progset;
 		request.session = session;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
-		assertEquals(2, result.numRowsProcessed);
-		assertEquals(2, result.numColumnsProcessedPerRow);
-		assertEquals(0, result.numRowsInserted);
-		assertEquals(false, result.wasHalted);
-		
-		assertEquals(2, observer.rowCounter);
-		assertEquals(0, observer.successfulRowCounter);
-		assertEquals(2, observer.failedRowCounter);
-		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_N]);
+		return result;
 	}
+
 	private void addImportSpec(ProgramSet progset) {
 		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
 		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
@@ -101,6 +150,8 @@ public class FieldHandleTests  extends NewBDDBase {
 	private Delia delia;
 	private DeliaSession session;
 	private int numExpectedColumnsProcessed;
+	private List<LineObj> currentLineObjL;
+
 
 	@Before
 	public void init() {
@@ -199,6 +250,7 @@ public class FieldHandleTests  extends NewBDDBase {
 	}
 	private LineObjIterator createIter(int n, String nameStr) {
 		List<LineObj> list = new ArrayList<>();
+		currentLineObjL = list;
 		for(int i = 0; i < n; i++) {
 			list.add(this.createLineObj(i + 1, nameStr));
 		}

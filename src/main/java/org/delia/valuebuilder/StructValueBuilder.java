@@ -49,7 +49,7 @@ public class StructValueBuilder extends DValueBuilder {
 		boolean isOptional = structType.fieldIsOptional(fieldName);
 		if (dval == null && !isOptional) {
 			if (logNullErr) {
-				addNoDataError("null field value");
+				addNoDataError("null field value for mandatory field", fieldName);
 			}
 			return;
 		}
