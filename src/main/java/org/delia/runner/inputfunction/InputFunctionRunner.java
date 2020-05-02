@@ -10,7 +10,9 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
+import org.delia.error.ErrorType;
 import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
@@ -98,6 +100,15 @@ public class InputFunctionRunner extends ServiceBase {
 		
 		boolean b = structBuilder.finish();
 		if (!b) {
+			if (metricsObserver != null) {
+				ImportSpec ispec = findImportSpec(data.structType);
+				for(DetailedError err: structBuilder.getValidationErrors()) {
+					if (ErrorType.MISSINGFIELD.name().equals(err.getId())) {
+						metricsObserver.onNoMappingError(ispec, err.getFieldName());
+						log.log("a");
+					}
+				}
+			}
 			//err
 			errL.addAll(structBuilder.getValidationErrors());
 			return null;
@@ -180,6 +191,14 @@ public class InputFunctionRunner extends ServiceBase {
 		}
 		
 		return spec;
+	}
+	private ImportSpec findImportSpec(DStructType structType) {
+		for(ProgramSet.OutputSpec ospec: progset.outputSpecs) {
+			if (ospec.structType == structType) {
+				return ospec.ispec;
+			}
+		}
+		return null;
 	}
 
 	//produces a map of String (for CSV data) or DValues (for synthetic fields)

@@ -13,16 +13,15 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaDao;
-import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
-import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
+import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObj;
@@ -30,6 +29,7 @@ import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
+import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -37,68 +37,9 @@ import org.junit.Test;
 
 public class FieldHandleTests  extends NewBDDBase {
 
-	public static class SimpleImportMetricObserver implements ImportMetricObserver {
-		public int rowCounter; //num rows attempted
-		public int failedRowCounter;
-		public int successfulRowCounter;
-		public int[] currentRowMetrics = new int[OutputFieldHandle.NUM_METRICS];
-//		public int[] totalMetrics = new int[OutputFieldHandle.NUM_METRICS];
-
-		@Override
-		public void onRowStart(ProgramSet progsec, int rowNum) {
-			rowCounter++;
-		}
-
-		@Override
-		public void onRowEnd(ProgramSet progsec, int rowNum, boolean success) {
-			if (! success) {
-				failedRowCounter++;
-			} else {
-				successfulRowCounter++;
-			}
-			
-			int n = 0;
-			for(int i = 0; i < currentRowMetrics.length; i++) {
-				n += currentRowMetrics[i];
-			}
-			//n is number of errors for this row
-			
-		}
-
-		@Override
-		public void onNoMappingError(ImportSpec ispec, OutputFieldHandle ofh) {
-			ofh.arMetrics[OutputFieldHandle.INDEX_N]++;
-		}
-
-		@Override
-		public void onMissingError(ImportSpec ispec, OutputFieldHandle ofh) {
-			ofh.arMetrics[OutputFieldHandle.INDEX_M]++;
-		}
-
-		@Override
-		public void onInvalidError(ImportSpec ispec, OutputFieldHandle ofh) {
-			ofh.arMetrics[OutputFieldHandle.INDEX_I]++;
-		}
-
-		@Override
-		public void onDuplicateError(ImportSpec ispec, OutputFieldHandle ofh) {
-			ofh.arMetrics[OutputFieldHandle.INDEX_D]++;
-		}
-
-		@Override
-		public void onRelationError(ImportSpec ispec, OutputFieldHandle ofh) {
-			ofh.arMetrics[OutputFieldHandle.INDEX_R]++;
-		}
-		
-	}
-
 	@Test
-	public void test1() {
-		String path = BASE_DIR + "categories.csv";
-		createDelia(true);
-		//		CSVFileLoader fileLoader = new CSVFileLoader(path);
-		//		numExpectedColumnsProcessed = 4;
-		//		buildAndRun(true, fileLoader, 8);
+	public void testFieldHandle() {
+		createDelia(0);
 
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
@@ -118,6 +59,40 @@ public class FieldHandleTests  extends NewBDDBase {
 		ispecBuilder.addInputColumn(ispec, "ID", 11, "id");
 		assertEquals(0, ofh.ifhIndex);
 	}
+	
+	@Test
+	public void testNError() {
+		createDelia(1);
+
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		inputFnSvc.setMetricsObserver(observer);
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
+		assertEquals(2, progset.fieldMap.size());
+		addImportSpec(progset);
+		
+		LineObjIterator lineObjIter = createIter(2);
+
+		InputFunctionRequest request = new InputFunctionRequest();
+		request.delia = delia;
+		request.progset = progset;
+		request.session = session;
+		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
+		assertEquals(2, result.numRowsProcessed);
+		assertEquals(2, result.numColumnsProcessedPerRow);
+		assertEquals(0, result.numRowsInserted);
+		assertEquals(false, result.wasHalted);
+		
+		assertEquals(2, observer.rowCounter);
+		assertEquals(0, observer.successfulRowCounter);
+		assertEquals(2, observer.failedRowCounter);
+		assertEquals(22, observer.currentRowMetrics[OutputFieldHandle.INDEX_N]);
+	}
+	private void addImportSpec(ProgramSet progset) {
+		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
+		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
+		ospec.ispec = ispecBuilder.buildSpecFor(progset, ospec.structType);
+	}
 
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
@@ -132,16 +107,19 @@ public class FieldHandleTests  extends NewBDDBase {
 		DeliaDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
-	private void createDelia(boolean inOrder) {
-		String src = buildCustomerSrc(false);
+	private void createDelia(int which) {
+		String src = buildCustomerSrc(which);
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
 	}
-	private String buildCustomerSrc(boolean withRules) {
-		String rules = withRules ? "name.len() > 4" : "";
-		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rules);
-		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+	private String buildCustomerSrc(int which) {
+		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
+		if (which == 0) {
+			src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+		} else if (which == 1) {
+			src += " input function foo(Customer c) { ID -> c.id, NAME -> c.name}";
+		}
 
 		return src;
 	}
@@ -169,8 +147,8 @@ public class FieldHandleTests  extends NewBDDBase {
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaDao(delia);
 	}
-	private InputFunctionResult buildAndRun(boolean inOrder, LineObjIterator lineObjIter, int expectedNumRows) {
-		createDelia(inOrder);
+	private InputFunctionResult buildAndRun(int which, LineObjIterator lineObjIter, int expectedNumRows) {
+		createDelia(which);
 		return buildAndRun(lineObjIter, expectedNumRows);
 	}
 	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedNumRows) {

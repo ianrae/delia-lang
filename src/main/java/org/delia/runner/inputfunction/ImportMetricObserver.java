@@ -4,9 +4,9 @@ public interface ImportMetricObserver {
 	void onRowStart(ProgramSet progsec, int rowNum);
 	void onRowEnd(ProgramSet progsec, int rowNum, boolean success);
 
-	void onNoMappingError(ImportSpec ispec, OutputFieldHandle ofh);
-	void onMissingError(ImportSpec ispec, OutputFieldHandle ofh);
-	void onInvalidError(ImportSpec ispec, OutputFieldHandle ofh);
-	void onDuplicateError(ImportSpec ispec, OutputFieldHandle ofh);
-	void onRelationError(ImportSpec ispec, OutputFieldHandle ofh);
+	void onNoMappingError(ImportSpec ispec, String outputFieldName);
+	void onMissingError(ImportSpec ispec, String outputFieldName);
+	void onInvalidError(ImportSpec ispec, String outputFieldName);
+	void onDuplicateError(ImportSpec ispec, String outputFieldName);
+	void onRelationError(ImportSpec ispec, String outputFieldName);
 }
