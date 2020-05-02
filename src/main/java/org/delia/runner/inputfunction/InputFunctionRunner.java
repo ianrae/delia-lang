@@ -23,6 +23,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
@@ -187,10 +188,15 @@ public class InputFunctionRunner extends ServiceBase {
 		for(OutputSpec ospec: progset.outputSpecs) {
 			ImportSpec ispec = ospec.ispec;
 			for(OutputFieldHandle ofh: ispec.ofhList) {
-				if (ofh.ifhIndex >= 0) {
+				if (ofh.syntheticValue != null) {
+					String inputField = progset.syntheticMap.get(ofh.syntheticValue);
+					inputData.put(inputField, ofh.syntheticValue);
+				} else if (ofh.ifhIndex >= 0) {
 					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
 					inputData.put(ifh.columnName, inputValue);
+				} else {
+					DeliaExceptionHelper.throwError("bad-ofh-index", "bad ofh index");
 				}
 			}
 		}
@@ -208,13 +214,13 @@ public class InputFunctionRunner extends ServiceBase {
 //			index++;
 //		}
 		
-		//and do synthetic fields
-		for(String inputField: progset.fieldMap.keySet()) {
-			ProgramSpec spec = progset.fieldMap.get(inputField);
-			if (spec.syntheticValue != null) {
-				inputData.put(inputField, spec.syntheticValue);
-			}
-		}
+//		//and do synthetic fields
+//		for(String inputField: progset.fieldMap.keySet()) {
+//			ProgramSpec spec = progset.fieldMap.get(inputField);
+//			if (spec.syntheticValue != null) {
+//				inputData.put(inputField, spec.syntheticValue);
+//			}
+//		}
 
 		return inputData;
 	}

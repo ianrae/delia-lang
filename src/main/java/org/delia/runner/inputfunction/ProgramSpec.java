@@ -6,6 +6,7 @@ import org.delia.type.DValue;
 
 public class ProgramSpec {
 	public TLangProgram prog;
+	public String inputField;
 	public IdentPairExp outputField;
 	public DValue syntheticValue;
 }

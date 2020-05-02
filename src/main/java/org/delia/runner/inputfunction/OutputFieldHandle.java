@@ -1,6 +1,7 @@
 package org.delia.runner.inputfunction;
 
 import org.delia.type.DStructType;
+import org.delia.type.DValue;
 
 public class OutputFieldHandle {
 	public static final int NUM_METRICS = 5;
@@ -16,4 +17,5 @@ public class OutputFieldHandle {
 	public int ifhIndex = -1; //if < 0 then is synthetic field
 	//TODO: add list additional ifh indexes for combine(FIRSTNAME,'',LASTNAME)
 	public int[] arMetrics; //for NMIDR error counters
+	public DValue syntheticValue; //null or synthetic value
 }
