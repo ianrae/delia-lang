@@ -3,6 +3,7 @@ package org.delia.dataimport;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
+import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -16,6 +17,7 @@ public class DataImportService extends ServiceBase {
 	private Delia delia;
 	private DeliaSession session;
 	private int stopAfterErrorThreshold;
+	private ImportMetricObserver metricsObserver;
 
 	public DataImportService(Delia delia, DeliaSession session, int stopAfterErrorThreshold) {
 		super(delia.getFactoryService());
@@ -26,6 +28,7 @@ public class DataImportService extends ServiceBase {
 
 	public InputFunctionResult importIntoDatabase(String inputFnName, LineObjIterator lineObjIter) {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		inputFnSvc.setMetricsObserver(metricsObserver);
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
 		if (progset == null) {
 			DeliaExceptionHelper.throwError("cant-find-user-fn", "Can't find input fn '%s'", inputFnName);
@@ -43,5 +46,13 @@ public class DataImportService extends ServiceBase {
 		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		return result;
+	}
+
+	public ImportMetricObserver getMetricsObserver() {
+		return metricsObserver;
+	}
+
+	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
+		this.metricsObserver = metricsObserver;
 	}
 }

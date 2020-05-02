@@ -37,7 +37,8 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 public class InputFunctionService extends ServiceBase {
 	private Random rand = new Random();
 	private DValueConverterService dvalConverter;
-	
+	private ImportMetricObserver metricsObserver;
+
 	public InputFunctionService(FactoryService factorySvc) {
 		super(factorySvc);
 		this.dvalConverter = new DValueConverterService(factorySvc);
@@ -132,6 +133,7 @@ public class InputFunctionService extends ServiceBase {
 		
 		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET, varEvaluator);
 		inFuncRunner.setProgramSet(request.progset);
+		inFuncRunner.setMetricsObserver(metricsObserver);
 		
 		//read header
 		HdrInfo hdr = readHeader(request, lineObjIter);
@@ -146,6 +148,9 @@ public class InputFunctionService extends ServiceBase {
 			if (fnResult.errors.size() > request.stopAfterErrorThreshold) {
 				log.log("halting -- more than %d errors", request.stopAfterErrorThreshold);
 				break;
+			}
+			if (metricsObserver != null) {
+				metricsObserver.onRowStart(request.progset, lineNum);
 			}
 			
 			//log.logDebug("line %d:", lineNum);
@@ -173,9 +178,14 @@ public class InputFunctionService extends ServiceBase {
 					}
 					fnResult.numRowsInserted++;
 					//TODO: queue up a bunch of dvals and then do a batch insert
-					executeInsert(dval, request, fnResult, lineNum);
+					executeInsert(dval, request, fnResult, lineNum, errL);
 				}
 			}
+			
+			if (metricsObserver != null) {
+				metricsObserver.onRowEnd(request.progset, lineNum, errL.isEmpty());
+			}
+			
 			lineNum++;
 		}
 
@@ -260,7 +270,7 @@ public class InputFunctionService extends ServiceBase {
 		return dvals;
 	}
 
-	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum) {
+	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
 		DValueIterator iter = new DValueIterator(dval);
 		request.session.setInsertPrebuiltValueIterator(iter);
 		String typeName = dval.getType().getName();
@@ -272,11 +282,11 @@ public class InputFunctionService extends ServiceBase {
 			if (! res.ok) {
 				//err
 				for(DeliaError err: res.errors) {
-					addError(err, fnResult.errors, lineNum);
+					addError(err, errL, lineNum);
 				}
 			}
 		} catch (DeliaException e) {
-			addError(e, fnResult.errors, lineNum);
+			addError(e, errL, lineNum);
 		}
 		request.session.setInsertPrebuiltValueIterator(null);
 	}		
@@ -294,5 +304,13 @@ public class InputFunctionService extends ServiceBase {
 		for(DeliaError err: srcErrorL) {
 			addError(err, errL, lineNum);
 		}
+	}
+
+	public ImportMetricObserver getMetricsObserver() {
+		return metricsObserver;
+	}
+
+	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
+		this.metricsObserver = metricsObserver;
 	}
 }

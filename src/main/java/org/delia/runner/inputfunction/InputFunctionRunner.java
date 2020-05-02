@@ -35,6 +35,7 @@ public class InputFunctionRunner extends ServiceBase {
 	private TLangVarEvaluator varEvaluator;
 	private boolean haltNowFlag;
 	private DValueConverterService dvalConverter;
+	private ImportMetricObserver metricsObserver;
 
 	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator) {
 		super(factorySvc);
@@ -81,7 +82,7 @@ public class InputFunctionRunner extends ServiceBase {
 			}
 			
 			Object input = data.outputFieldMap.get(pair.name);
-			log.log("field: %s = %s", outputFieldName, input);
+			log.logDebug("field: %s = %s", outputFieldName, input);
 			
 			DValue inner = null;
 			DType dtype = pair.type;
@@ -192,11 +193,11 @@ public class InputFunctionRunner extends ServiceBase {
 					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
 					inputData.put(ifh.columnName, inputValue);
-					log.log("input: %d:%s = %s", ifh.columnIndex, ifh.columnName, inputValue);
+					log.logDebug("input: %d:%s = %s", ifh.columnIndex, ifh.columnName, inputValue);
 				} else if (ofh.syntheticFieldName != null) {
 					String inputField = ofh.syntheticFieldName;
 					inputData.put(inputField, ofh.syntheticValue);
-					log.log("input(synth): %s = %s", inputField, ofh.syntheticValue);
+					log.logDebug("input(synth): %s = %s", inputField, ofh.syntheticValue);
 				} else {
 					DeliaExceptionHelper.throwError("bad-output-field-handle", "OFH %s bad", ofh.fieldName);
 				}
@@ -233,6 +234,14 @@ public class InputFunctionRunner extends ServiceBase {
 
 	public boolean wasHalted() {
 		return haltNowFlag;
+	}
+
+	public ImportMetricObserver getMetricsObserver() {
+		return metricsObserver;
+	}
+
+	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
+		this.metricsObserver = metricsObserver;
 	}
 	
 }

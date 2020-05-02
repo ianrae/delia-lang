@@ -45,12 +45,12 @@ public class FieldHandleTests  extends NewBDDBase {
 //		public int[] totalMetrics = new int[OutputFieldHandle.NUM_METRICS];
 
 		@Override
-		public void onRowStart(ImportSpec ispec, int rowNum) {
+		public void onRowStart(ProgramSet progsec, int rowNum) {
 			rowCounter++;
 		}
 
 		@Override
-		public void onRowEnd(ImportSpec ispec, int rowNum, boolean success) {
+		public void onRowEnd(ProgramSet progsec, int rowNum, boolean success) {
 			if (! success) {
 				failedRowCounter++;
 			} else {
