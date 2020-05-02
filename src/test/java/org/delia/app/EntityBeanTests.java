@@ -49,6 +49,8 @@ public class EntityBeanTests extends NewBDDBase {
 		private int field1; //if optional then we use Integer
 		private int field2;
 		private boolean[] arFlags = new boolean[2]; //2 fields
+		//note arFlags is only for delcared fields of this class
+		//when derive subclass it will have its own arFlags2, arFlags3, etc
 		
 		public FlightEntity(int field1, int field2) {
 			this.field1 = field1;
@@ -73,31 +75,153 @@ public class EntityBeanTests extends NewBDDBase {
 		@Override
 		public String zrenderFull() {
 			//would not include serial primaryKeys, or parent relation values
-			String delia = String.format("{field1:%d, field2:%d}", field1, field2);
-			return delia;
+//			String delia = String.format("{field1:%d, field2:%d}", field1, field2);
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append('{');
+			zrenderFullFields(sb);
+			sb.append('}');
+			
+			return sb.toString();
 		}
+		
+		//derived class would invoke super.zrenderFullFields(sb) and then add its own
+		protected boolean zrenderFullFields(StringBuilder sb) {
+			sb.append("field1");
+			sb.append(':');
+			sb.append(field1);
+			sb.append(", field2");
+			sb.append(':');
+			sb.append(field2);
+			return true;
+		}
+
 		@Override
 		public String zrenderUpdate() {
 			//would not include serial primaryKeys, or parent relation values
 			//generate update dson for all changed fields
 			StringBuilder sb = new StringBuilder();
 			sb.append('{');
-			if (arFlags[0]) {
-				sb.append("field1");
-				sb.append(':');
-				sb.append(field1);
-			}
-			if (arFlags[1]) {
-				sb.append("field2");
-				sb.append(':');
-				sb.append(field2);
-			}
+			zrenderUpdateFields(sb);
 			sb.append('}');
 			
 			return sb.toString();
 		}
+
+		private boolean zrenderUpdateFields(StringBuilder sb) {
+			boolean needComma = false;
+			if (arFlags[0]) {
+				sb.append("field1");
+				sb.append(':');
+				sb.append(field1);
+				needComma = true;
+			}
+			if (arFlags[1]) {
+				sb.append(", field2");
+				sb.append(':');
+				sb.append(field2);
+				needComma = true;
+			}
+			return needComma;
+		}
 	}
 	
+	public static class ChildFlightEntity extends FlightEntity {
+		private int field3; //if optional then we use Integer
+		private int field4;
+		private boolean[] arFlagsChildFlightEntity = new boolean[2]; //2 fields
+		//note arFlags is only for delcared fields of this class
+		//when derive subclass it will have its own arFlags2, arFlags3, etc
+		
+		public ChildFlightEntity(int field1, int field2, int field3, int field4) {
+			super(field1, field2);
+			this.field3 = field3;
+			this.field4 = field4;
+		}
+		
+		//standard getters/setters
+		public int getField3() {
+			return field3;
+		}
+		public void setField3(int field3) {
+			this.field3 = field3;
+			arFlagsChildFlightEntity[0] = true;
+		}
+		public int getField4() {
+			return field4;
+		}
+		public void setField4(int field4) {
+			this.field4 = field4;
+			arFlagsChildFlightEntity[1] = true;
+		}
+		@Override
+		public String zrenderFull() {
+			//would not include serial primaryKeys, or parent relation values
+//			String delia = String.format("{field1:%d, field2:%d}", field1, field2);
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append('{');
+			zrenderFullFields(sb);
+			sb.append('}');
+			
+			return sb.toString();
+		}
+		
+		//derived class would invoke super.zrenderFullFields(sb) and then add its own
+		protected boolean zrenderFullFields(StringBuilder sb) {
+			boolean needComma = super.zrenderFullFields(sb);
+			if (needComma) {
+				sb.append(',');
+				sb.append(' ');
+			}
+			
+			sb.append("field3");
+			sb.append(':');
+			sb.append(field3);
+			sb.append(", field4");
+			sb.append(':');
+			sb.append(field4);
+			return true;
+		}
+
+		@Override
+		public String zrenderUpdate() {
+			//would not include serial primaryKeys, or parent relation values
+			//generate update dson for all changed fields
+			StringBuilder sb = new StringBuilder();
+			sb.append('{');
+			zrenderUpdateFields(sb);
+			sb.append('}');
+			
+			return sb.toString();
+		}
+
+		private boolean zrenderUpdateFields(StringBuilder sb) {
+			boolean needComma = super.zrenderUpdateFields(sb);
+			
+			if (arFlagsChildFlightEntity[0]) {
+				if (needComma) {
+					sb.append(',');
+					sb.append(' ');
+				}
+				sb.append("field3");
+				sb.append(':');
+				sb.append(field3);
+				needComma = true;
+			}
+			if (arFlagsChildFlightEntity[1]) {
+				if (needComma) {
+					sb.append(',');
+					sb.append(' ');
+				}
+				sb.append("field4");
+				sb.append(':');
+				sb.append(field4);
+				needComma = true;
+			}
+			return needComma;
+		}
+	}
 	
 	@Test
 	public void testEntity() {
@@ -115,6 +239,24 @@ public class EntityBeanTests extends NewBDDBase {
 		entity.setField2(21);
 		s = entity.zrenderUpdate();
 		assertEquals("{field1:20, field2:21}", s);
+	}
+	
+	@Test
+	public void testChildEntity() {
+		ChildFlightEntity entity = new ChildFlightEntity(10, 11, 12, 13);
+		String s = entity.zrenderFull();
+		assertEquals("{field1:10, field2:11, field3:12, field4:13}", s);
+		
+		s = entity.zrenderUpdate();
+		assertEquals("{}", s);
+
+		entity.setField1(20);
+		s = entity.zrenderUpdate();
+		assertEquals("{field1:20}", s);
+		
+		entity.setField4(23);
+		s = entity.zrenderUpdate();
+		assertEquals("{field1:20, field4:23}", s);
 	}
 	
 	@Test
