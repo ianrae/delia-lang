@@ -107,10 +107,10 @@ public class InputFunctionRunner extends ServiceBase {
 		List<ProcessedInputData> list = new ArrayList<>();
 		
 		int index = 0;
-		for(DStructType structType: progset.outputTypes) {
-			String alias = progset.outputAliases.get(index);
-			ProcessedInputData data = runTLangForType(alias, structType, inputData);
-			data.structType = structType;
+		for(ProgramSet.OutputSpec ospec: progset.outputSpecs) {
+			String alias = ospec.alias;
+			ProcessedInputData data = runTLangForType(alias, ospec.structType, inputData);
+			data.structType = ospec.structType;
 			list.add(data);
 			index++;
 		}

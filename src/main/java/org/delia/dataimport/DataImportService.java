@@ -34,9 +34,8 @@ public class DataImportService extends ServiceBase {
 		}
 		
 		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
-		for(DStructType structType: progset.outputTypes) {
-			ImportSpec ispec = ispecBuilder.buildSpecFor(progset, structType);
-			progset.importSpecs.add(ispec);
+		for(ProgramSet.OutputSpec outspec: progset.outputSpecs) {
+			outspec.ispec = ispecBuilder.buildSpecFor(progset, outspec.structType);
 		}
 		
 		InputFunctionRequest request = new InputFunctionRequest();

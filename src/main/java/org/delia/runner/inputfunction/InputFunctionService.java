@@ -90,8 +90,11 @@ public class InputFunctionService extends ServiceBase {
 			if (! dtype.isStructShape()) {
 				DeliaExceptionHelper.throwError("type-not-struct-for-import", "Type '%s' is not a struct in input function '%s'", pair.typeName(), infnExp.funcName);
 			}
-			progset.outputTypes.add((DStructType) dtype);
-			progset.outputAliases.add(pair.argName());
+			
+			ProgramSet.OutputSpec ospec = new ProgramSet.OutputSpec();
+			ospec.structType = (DStructType) dtype;
+			ospec.alias = pair.argName();
+			progset.outputSpecs.add(ospec);
 		}
 	}
 

@@ -103,7 +103,8 @@ public class FieldHandleTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
-		DStructType structType = progset.outputTypes.get(0);
+		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
+		DStructType structType = ospec.structType;
 		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
 
 		ImportSpec ispec = ispecBuilder.buildSpecFor(progset, structType);

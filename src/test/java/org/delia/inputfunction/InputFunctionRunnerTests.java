@@ -51,8 +51,10 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		ProgramSet progset = createProgramSet(hdr, inFnExp);
 		progset.inFnExp = inFnExp;
 		DStructType structType = (DStructType) registry.getType("Customer");
-		progset.outputAliases.add("c");
-		progset.outputTypes.add(structType);
+		ProgramSet.OutputSpec ospec = new ProgramSet.OutputSpec();
+		ospec.alias = "c";
+		ospec.structType = structType;
+		progset.outputSpecs.add(ospec);
 		inFuncRunner.setProgramSet(progset);
 		List<DeliaError> lineErrL = new ArrayList<>();
 		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL);

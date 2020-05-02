@@ -31,9 +31,10 @@ public class ImportSpecBuilder {
 	}
 
 	private String findAlias(ProgramSet progset, DStructType structType) {
-		int i = progset.outputTypes.indexOf(structType);
-		if (i >= 0) {
-			return progset.outputAliases.get(i);
+		for(ProgramSet.OutputSpec ospec: progset.outputSpecs) {
+			if (ospec.structType == structType) {
+				return ospec.alias;
+			}
 		}
 		return null;
 	}
