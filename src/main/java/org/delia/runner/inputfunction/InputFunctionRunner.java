@@ -67,6 +67,9 @@ public class InputFunctionRunner extends ServiceBase {
 			if (errL.isEmpty()) {
 				dvalL.add(dval);
 			} else {
+				for(DeliaError err: errL) {
+					err.setLineAndPos(lineObj.lineNum, 0);
+				}
 				lineErrorsL.addAll(errL);
 			}
 		}
@@ -74,6 +77,7 @@ public class InputFunctionRunner extends ServiceBase {
 	}
 
 	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
+		int mark = errL.size();
 		StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
 		
 		for(String outputFieldName: data.outputFieldMap.keySet()) {
@@ -107,11 +111,30 @@ public class InputFunctionRunner extends ServiceBase {
 				}
 			}
 			//err
-			errL.addAll(structBuilder.getValidationErrors());
+			DeliaError nodataErr = findNoDataError(structBuilder.getValidationErrors());
+			if (nodataErr != null) {
+				if (errL.size() > mark) {
+					while(errL.size() > mark) {
+						errL.remove(errL.size() - 1);
+					}
+				}
+				errL.add(nodataErr);
+			} else {
+				errL.addAll(structBuilder.getValidationErrors());
+			}
 			return null;
 		} else {
 			return structBuilder.getDValue();
 		}
+	}
+
+	private DeliaError findNoDataError(List<DetailedError> validationErrors) {
+		for(DetailedError err: validationErrors) {
+			if (ErrorType.NODATA.name().equals(err.getId())) {
+				return err;
+			}
+		}
+		return null;
 	}
 
 	private DValue buildScalarValue(Object input, Shape shape, List<DeliaError> errL, TypePair pair, ProcessedInputData data, ImportMetricObserver metricsObserver2) {

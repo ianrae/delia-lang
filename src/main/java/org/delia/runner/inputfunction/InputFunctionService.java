@@ -179,6 +179,7 @@ public class InputFunctionService extends ServiceBase {
 					fnResult.numRowsInserted++;
 					//TODO: queue up a bunch of dvals and then do a batch insert
 					executeInsert(dval, request, fnResult, lineNum, errL);
+					addErrors(errL, fnResult.errors, lineNum);
 				}
 			}
 			
