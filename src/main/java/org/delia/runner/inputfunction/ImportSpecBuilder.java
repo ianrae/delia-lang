@@ -1,5 +1,6 @@
 package org.delia.runner.inputfunction;
 
+import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 
@@ -38,6 +39,14 @@ public class ImportSpecBuilder {
 		}
 		return null;
 	}
+	public ImportSpec findImportSpec(ProgramSet progset, InputFuncMappingExp mapping) {
+		for(ProgramSet.OutputSpec ospec: progset.outputSpecs) {
+			if (ospec.alias.equals(mapping.outputField.val1)) {
+				return ospec.ispec;
+			}
+		}
+		return null;
+	}
 
 	private ProgramSpec findField(ProgramSet progset, String alias, String outputFieldName) {
 		for(String inputField: progset.fieldMap.keySet()) {
@@ -58,6 +67,7 @@ public class ImportSpecBuilder {
 		for(OutputFieldHandle ofh: ispec.ofhList) {
 			if (ofh.fieldName.equals(outputFieldName)) {
 				ofh.ifhIndex = ispec.ifhList.size() - 1;
+				break;
 			}
 		}
 

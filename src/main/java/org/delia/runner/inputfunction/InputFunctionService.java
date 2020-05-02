@@ -121,16 +121,6 @@ public class InputFunctionService extends ServiceBase {
 		}
 		return null;
 	}
-	private HdrInfo createHdrFrom(InputFunctionDefStatementExp inFnExp) {
-		HdrInfo hdr = new HdrInfo();
-		int index = 0;
-		for(Exp exp: inFnExp.bodyExp.statementL) {
-			InputFuncMappingExp mapping = (InputFuncMappingExp) exp;
-			hdr.map.put(index, mapping.getInputField());
-			index++;
-		}
-		return hdr;
-	}
 
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
 		InputFunctionResult fnResult = new InputFunctionResult();
@@ -207,7 +197,7 @@ public class InputFunctionService extends ServiceBase {
 		}
 		
 		if (hdrLineObj == null) {
-			return this.createHdrFrom(request.progset.inFnExp);
+			return createHdrFrom(request.progset);
 		}
 		
 		//build hdr from header row
@@ -235,6 +225,22 @@ public class InputFunctionService extends ServiceBase {
 		
 		return hdr;
 	}
+	private HdrInfo createHdrFrom(ProgramSet progset) {
+		InputFunctionDefStatementExp inFnExp = progset.inFnExp;
+		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
+		HdrInfo hdr = new HdrInfo();
+		int index = 0;
+		for(Exp exp: inFnExp.bodyExp.statementL) {
+			InputFuncMappingExp mapping = (InputFuncMappingExp) exp;
+			hdr.map.put(index, mapping.getInputField());
+			
+			ImportSpec ispec = ispecBuilder.findImportSpec(progset, mapping);
+			ispecBuilder.addInputColumn(ispec, mapping.getInputField(), index, mapping.outputField.val2);
+			index++;
+		}
+		return hdr;
+	}
+
 
 	private List<DValue> processLineObj(InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
 		List<DValue> dvals = null;

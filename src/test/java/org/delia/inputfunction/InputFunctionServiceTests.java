@@ -19,6 +19,7 @@ import org.delia.error.DeliaError;
 import org.delia.log.LogLevel;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
@@ -38,6 +39,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
+		addImportSpec(progset);
 		
 		LineObjIterator lineObjIter = createIter(1, true);
 		InputFunctionRequest request = new InputFunctionRequest();
@@ -59,13 +61,20 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		assertEquals(1L, n);
 	}
 	
+	private void addImportSpec(ProgramSet progset) {
+		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
+		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
+		ospec.ispec = ispecBuilder.buildSpecFor(progset, ospec.structType);
+	}
+
 	@Test
 	public void test2() {
 		createDelia(false);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
-		
+		addImportSpec(progset);
+
 		LineObjIterator lineObjIter = createIter(2, true);
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
@@ -97,7 +106,8 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
-		
+		addImportSpec(progset);
+
 		LineObjIterator lineObjIter = createIter(2,true);
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
@@ -126,7 +136,8 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
-		
+		addImportSpec(progset);
+
 		LineObjIterator lineObjIter = createIter(2,false);
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
