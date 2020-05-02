@@ -4,12 +4,13 @@ import org.delia.type.DStructType;
 import org.delia.type.DValue;
 
 public class OutputFieldHandle {
-	public static final int NUM_METRICS = 5;
-	public static final int INDEX_N = 0;
-	public static final int INDEX_M = 1;
-	public static final int INDEX_I = 2;
-	public static final int INDEX_D = 3;
-	public static final int INDEX_R = 4;
+	public static final int NUM_METRICS = 6;
+	public static final int INDEX_N = 0; //not-in-mapping. struct field not mentioned in input function.
+	public static final int INDEX_M = 1; //missing. input data was null
+	public static final int INDEX_I1 = 2;
+	public static final int INDEX_I2 = 3;
+	public static final int INDEX_D = 4;
+	public static final int INDEX_R = 5;
 
 	public DStructType structType;
 	public String fieldName;

@@ -88,6 +88,20 @@ public class FieldHandleTests  extends NewBDDBase {
 		chkObserver(observer, 2, 0, 2);
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 	}
+	@Test
+	public void testMErrorEmptyString() {
+		createDelia(0);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
+		
+		LineObjIterator lineObjIter = createIter(2, ""); //"" should be treated same as null
+		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
+		chkResult(result, 2, 3, 0);
+		
+		chkObserver(observer, 2, 0, 2);
+		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
+	}
 	
 	@Test
 	public void testIError() {
@@ -103,7 +117,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		chkResult(result, 2, 3, 1);
 		
 		chkObserver(observer, 2, 1, 1);
-		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I]);
+		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
 	}
 
 	

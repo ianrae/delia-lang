@@ -128,7 +128,7 @@ public class InputFunctionRunner extends ServiceBase {
 			if (err.getId().equals("value-builder-failed")) {
 				if (metricsObserver != null) {
 					ImportSpec ispec = findImportSpec(data.structType);
-					metricsObserver.onInvalidError(ispec, pair.name);
+					metricsObserver.onInvalid1Error(ispec, pair.name);
 				}
 				errL.add(err);
 				return null;

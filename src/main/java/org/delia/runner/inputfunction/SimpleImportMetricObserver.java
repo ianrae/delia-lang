@@ -54,11 +54,20 @@ public class SimpleImportMetricObserver implements ImportMetricObserver {
 	}
 
 	@Override
-	public void onInvalidError(ImportSpec ispec, String outputFieldName) {
+	public void onInvalid1Error(ImportSpec ispec, String outputFieldName) {
 		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
 		if (ofh == null) return;
 
-		int k = OutputFieldHandle.INDEX_I;
+		int k = OutputFieldHandle.INDEX_I1;
+		currentRowMetrics[k]++;
+		ofh.arMetrics[k]++;
+	}
+	@Override
+	public void onInvalid2Error(ImportSpec ispec, String outputFieldName) {
+		OutputFieldHandle ofh = findOfh(ispec, outputFieldName);
+		if (ofh == null) return;
+
+		int k = OutputFieldHandle.INDEX_I2;
 		currentRowMetrics[k]++;
 		ofh.arMetrics[k]++;
 	}
