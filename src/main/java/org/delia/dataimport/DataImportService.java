@@ -1,15 +1,21 @@
 package org.delia.dataimport;
 
+import java.util.StringJoiner;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
 import org.delia.runner.inputfunction.ImportMetricObserver;
+import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObjIterator;
+import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
+import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.util.DeliaExceptionHelper;
 
 public class DataImportService extends ServiceBase {
@@ -55,4 +61,45 @@ public class DataImportService extends ServiceBase {
 	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
 		this.metricsObserver = metricsObserver;
 	}
+	
+	public void dumpImportReport(InputFunctionResult result, SimpleImportMetricObserver observer) {
+		int n = result.numRowsProcessed;
+		int failed = result.numRowsInserted;
+		int succeeded = n - failed;
+		String s = String.format("IMPORT %d rows. %d successful, %d failed", n, failed, succeeded);
+		log.log(s);
+		
+		for(OutputSpec ospec : result.progset.outputSpecs) {
+			ImportSpec ispec = ospec.ispec;
+			log.log("%15s         N   M  I1  I2   D   R", ospec.structType.getName());
+			StringJoiner joiner = new StringJoiner(",");
+			for(OutputFieldHandle ofh: ispec.ofhList) {
+				joiner = new StringJoiner(",");
+				for(int x: ofh.arMetrics) {
+					joiner.add(String.format("%3d", x));
+				}
+				String ss = String.format("%15s (%2d): %s", ofh.fieldName, ofh.fieldIndex, joiner.toString());
+				log.log(ss);
+			}
+			
+			//totals
+			int[] totals = new int[OutputFieldHandle.NUM_METRICS];
+			for(OutputFieldHandle ofh: ispec.ofhList) {
+				for(int k = 0; k < OutputFieldHandle.NUM_METRICS; k++) {
+					int count = ofh.arMetrics[k];
+					totals[k] += count;
+				}
+			}
+			joiner = new StringJoiner(",");
+			for(int i = 0; i < totals.length; i++) {
+				joiner.add(String.format("%3d", totals[i]));
+			}
+				
+			String ss = String.format("%15s     : %s", "totals", joiner.toString());
+			log.log(ss);
+		}
+		
+		
+	}
+	
 }

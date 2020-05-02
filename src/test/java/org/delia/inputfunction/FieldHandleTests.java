@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
@@ -29,6 +30,7 @@ import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
+import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
@@ -117,8 +119,15 @@ public class FieldHandleTests  extends NewBDDBase {
 		chkResult(result, 2, 3, 1);
 		
 		chkObserver(observer, 2, 1, 1);
+		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
+		dumpImportReport(result, observer);
 	}
+	private void dumpImportReport(InputFunctionResult result, SimpleImportMetricObserver observer) {
+		DataImportService dataImportSvc = new DataImportService(delia, session, 999);
+		dataImportSvc.dumpImportReport(result, observer);
+	}
+
 	@Test
 	public void testI2Error() {
 		createDelia(2);
