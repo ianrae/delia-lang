@@ -179,7 +179,7 @@ public class InputFunctionRunner extends ServiceBase {
 			if (spec.prog != null) {
 				TLangRunner tlangRunner = new TLangRunnerImpl(factorySvc, registry);
 				tlangRunner.setVarEvaluator(varEvaluator);
-				DValue initialValue = scalarBuilder.buildString(value);
+				DValue initialValue = value == null ? null : scalarBuilder.buildString(value);
 				varEvaluator.setValueVar(initialValue);
 				tlangRunner.setInputMap(inputData);
 				
