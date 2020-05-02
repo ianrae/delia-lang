@@ -287,10 +287,26 @@ public class InputFunctionService extends ServiceBase {
 				}
 			}
 		} catch (DeliaException e) {
+			DeliaError err = e.getLastError();
+			if (err.getId() != null && err.getId().startsWith("rule-")) {
+				if (metricsObserver != null) {
+					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
+					metricsObserver.onInvalid1Error(ispec, "xxx");
+				}
+			}
+			
 			addError(e, errL, lineNum);
 		}
 		request.session.setInsertPrebuiltValueIterator(null);
 	}		
+	private ImportSpec findImportSpec(InputFunctionRequest request, DStructType structType) {
+		for(ProgramSet.OutputSpec ospec: request.progset.outputSpecs) {
+			if (ospec.structType == structType) {
+				return ospec.ispec;
+			}
+		}
+		return null;
+	}
 	
 	private void addError(DeliaError err, List<DeliaError> errL, int lineNum) {
 		err.setLineAndPos(lineNum, 0);

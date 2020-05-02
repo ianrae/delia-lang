@@ -103,7 +103,6 @@ public class FieldHandleTests  extends NewBDDBase {
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 	}
 	
-	
 	@Test
 	public void testIError() {
 		createDelia(0);
@@ -119,6 +118,21 @@ public class FieldHandleTests  extends NewBDDBase {
 		
 		chkObserver(observer, 2, 1, 1);
 		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
+	}
+	@Test
+	public void testI2Error() {
+		createDelia(2);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
+		
+		LineObjIterator lineObjIter = createIter(2);
+		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
+		chkResult(result, 2, 3, 2);
+		
+		chkObserver(observer, 2, 0, 2);
+		assertEquals(0, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
+		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I2]);
 	}
 
 	
@@ -180,8 +194,9 @@ public class FieldHandleTests  extends NewBDDBase {
 		this.session = delia.beginSession(src);
 	}
 	private String buildCustomerSrc(int which) {
-		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
-		if (which == 0) {
+		String rule = which == 2 ? "name.len() > 4" : "";
+		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rule);
+		if (which == 0 || which == 2) {
 			src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, ";
 			src += " NAME -> c.name using { if missing return null} }";
 		} else if (which == 1) {
