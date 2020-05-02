@@ -3,11 +3,14 @@ package org.delia.dataimport;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
+import org.delia.runner.inputfunction.ImportSpec;
+import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.ProgramSet;
+import org.delia.type.DStructType;
 import org.delia.util.DeliaExceptionHelper;
 
 public class DataImportService extends ServiceBase {
@@ -29,6 +32,13 @@ public class DataImportService extends ServiceBase {
 		if (progset == null) {
 			DeliaExceptionHelper.throwError("cant-find-user-fn", "Can't find input fn '%s'", inputFnName);
 		}
+		
+		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
+		for(DStructType structType: progset.outputTypes) {
+			ImportSpec ispec = ispecBuilder.buildSpecFor(progset, structType);
+			progset.importSpecs.add(ispec);
+		}
+		
 		InputFunctionRequest request = new InputFunctionRequest();
 		request.delia = delia;
 		request.progset = progset;

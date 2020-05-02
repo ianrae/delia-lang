@@ -13,5 +13,6 @@ public class ProgramSet {
 	public HdrInfo hdr;
 	public List<DStructType> outputTypes = new ArrayList<>();
 	public List<String> outputAliases = new ArrayList<>(); //parallel to outputTypes
+	public List<ImportSpec> importSpecs = new ArrayList<>(); //parallel to outputTypes
 	public InputFunctionDefStatementExp inFnExp;
 }
