@@ -47,7 +47,7 @@ public class RelationOneRule extends DRuleBase {
 			if (mustHaveFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' one -  a foreign key value must be specified.", key);
-				ctx.addError(this, msg);
+				ctx.addError(this, msg, oper1);
 				return false;
 			}
 			return true; 
@@ -66,7 +66,7 @@ public class RelationOneRule extends DRuleBase {
 			if (CollectionUtils.isEmpty(qrespFetch.dvalList)) {
 				String key = drel.getForeignKey().asString();
 				String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-				ctx.addError(this, msg);
+				ctx.addError(this, msg, oper1);
 				return false;
 			}
 			

@@ -132,7 +132,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		
 		chkObserver(observer, 2, 0, 2);
 		assertEquals(0, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
-		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I2]);
+		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_I2]);
 	}
 
 	

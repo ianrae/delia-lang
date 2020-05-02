@@ -23,7 +23,7 @@ public class MaxLenRule extends DRuleBase {
 			if (s.length() > maxlen) {
 				String s1 = StringUtil.atMostChars(s, 80);
 				String msg = String.format("string longer than %d: '%s'", maxlen, s1);
-				ctx.addError(this, msg);
+				ctx.addError(this, msg, oper1);
 				return false;
 			}
 			return true;

@@ -51,7 +51,7 @@ public class SampleRule extends DRuleBase {
 				String s1 = String.format("%s", obj1);
 				String s2 = String.format("%s", obj2);
 				String msg = String.format("rulefail '%s' in '%s'", s1, s2);
-				ctx.addError(this, msg);
+				ctx.addError(this, msg, oper1, oper2);
 			}
 			return b;
 		}

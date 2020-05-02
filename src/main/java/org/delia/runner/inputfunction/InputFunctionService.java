@@ -16,6 +16,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.LogLevel;
@@ -289,9 +290,10 @@ public class InputFunctionService extends ServiceBase {
 		} catch (DeliaException e) {
 			DeliaError err = e.getLastError();
 			if (err.getId() != null && err.getId().startsWith("rule-")) {
-				if (metricsObserver != null) {
+				if (metricsObserver != null && err instanceof DetailedError) {
+					DetailedError derr = (DetailedError) err;
 					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
-					metricsObserver.onInvalid1Error(ispec, "xxx");
+					metricsObserver.onInvalid2Error(ispec, derr.getFieldName());
 				}
 			}
 			
