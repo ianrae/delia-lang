@@ -13,6 +13,7 @@ import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.ErrorType;
+import org.delia.runner.DeliaException;
 import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
@@ -89,7 +90,7 @@ public class InputFunctionRunner extends ServiceBase {
 			DValue inner = null;
 			DType dtype = pair.type;
 			Shape shape = dtype.getShape();
-			inner = dvalConverter.buildFromObject(input, shape, scalarBuilder);
+			inner = buildScalarValue(input, shape, errL, pair, data, metricsObserver); 
 			if (input != null && inner == null) {
 				//err not supported
 				String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
@@ -116,6 +117,31 @@ public class InputFunctionRunner extends ServiceBase {
 		} else {
 			return structBuilder.getDValue();
 		}
+	}
+
+	private DValue buildScalarValue(Object input, Shape shape, List<DeliaError> errL, TypePair pair, ProcessedInputData data, ImportMetricObserver metricsObserver2) {
+		DValue inner = null;
+		try {
+			inner = dvalConverter.buildFromObject(input, shape, scalarBuilder);
+		} catch (DeliaException e) {
+			DeliaError err = e.getLastError();
+			if (err.getId().equals("value-builder-failed")) {
+				if (metricsObserver != null) {
+					ImportSpec ispec = findImportSpec(data.structType);
+					metricsObserver.onInvalidError(ispec, pair.name);
+				}
+				errL.add(err);
+				return null;
+			} else {
+				throw e;
+			}
+		}
+		if (input != null && inner == null) {
+			//err not supported
+			String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
+			errL.add(new DeliaError("unsupported-input-field-type", msg));
+		}
+		return inner;
 	}
 
 	private List<ProcessedInputData> runTLang(Map<String, Object> inputData) {
