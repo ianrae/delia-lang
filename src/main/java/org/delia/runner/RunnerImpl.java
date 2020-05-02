@@ -18,6 +18,7 @@ import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.compiler.ast.UserFnCallExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
@@ -187,6 +188,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				executeInsertStatement((InsertStatementExp)exp, res);
 			} else if (exp instanceof UpdateStatementExp) {
 				executeUpdateStatement((UpdateStatementExp)exp, res);
+			} else if (exp instanceof UpsertStatementExp) {
+				executeUpsertStatement((UpsertStatementExp)exp, res);
 			} else if (exp instanceof DeleteStatementExp) {
 				executeDeleteStatement((DeleteStatementExp)exp, res);
 			} else if (exp instanceof UserFunctionDefStatementExp) {
@@ -288,6 +291,59 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
 				int numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
+				
+				res.ok = true;
+				res.shape = Shape.INTEGER;
+				res.val = numRowsAffected;
+			} catch (DBException e) {
+				res.errors.add(e.getLastError());
+				res.ok = false;
+				return;
+			}
+		}
+		private void executeUpsertStatement(UpsertStatementExp exp, ResultValue res) {
+			//find DType for typename Actor
+			DType dtype = registry.getType(exp.getTypeName());
+			if (failIfNull(dtype, exp.typeName, res)) {
+				return;
+			} else if (failIfNotStruct(dtype, exp.typeName, res)) {
+				return;
+			}
+			
+			if (dtype == null) {
+				addError(res, "type.not.found", String.format("can't find type '%s'", exp.getTypeName()));
+				return;
+			}
+			
+			//get list of changed fields
+			ConversionResult cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
+			if (cres.dval == null) {
+				res.errors.addAll(cres.localET.getErrors());
+				res.ok = false;
+				return;
+			} else {
+				//validate the fields of the partial DValue
+				ValidationRuleRunner ruleRunner = createValidationRunner();
+				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
+					ruleRunner.propogateErrors(res);
+				}
+				
+				//then validate the affected rules (of the struct)
+				//We determine the rules dependent on each field in partial dval
+				//and execute those rules only
+				if (! ruleRunner.validateDependentRules(cres.dval)) {
+					ruleRunner.propogateErrors(res);
+				}
+
+				if (!res.errors.isEmpty()) {
+					res.ok = false;
+					return;
+				}
+			}
+			
+			try {
+				QuerySpec spec = resolveFilterVars(exp.queryExp);
+				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap);
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;

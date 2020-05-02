@@ -69,7 +69,7 @@ public class CrudParser extends ParserBase {
 				(Token tok, QueryExp queryExp, DsonExp dsonExp) -> new UpdateStatementExp(99, queryExp, dsonExp));
 	}
 	public static Parser<UpsertStatementExp> upsertStatement() {
-		return Parsers.sequence(term("update"), QueryParser.partialQuery(), dsonObj(), 
+		return Parsers.sequence(term("upsert"), QueryParser.partialQuery(), dsonObj(), 
 				(Token tok, QueryExp queryExp, DsonExp dsonExp) -> new UpsertStatementExp(99, queryExp, dsonExp));
 	}
 	public static Parser<DeleteStatementExp> deleteStatement() {
