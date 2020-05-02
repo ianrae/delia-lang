@@ -24,6 +24,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
 import org.delia.rule.rules.RelationManyRule;
@@ -203,7 +204,9 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 			QueryContext qtx = new QueryContext();
 			QueryResponse qresp = executeQuery(spec, qtx, dbctx);
 			if (qresp.ok && !qresp.emptyResults()) {
-				DeliaError err = et.add("duplicate-unique-value", String.format("%s. row with unique field '%s' = '%s' already exists", structType.getName(), uniqueField, inner.asString()));
+				DetailedError err = new DetailedError("duplicate-unique-value", String.format("%s. row with unique field '%s' = '%s' already exists", structType.getName(), uniqueField, inner.asString()));
+				err.setFieldName(uniqueField);
+				et.add(err);
 				throw new DBException(err);
 			}
 		}

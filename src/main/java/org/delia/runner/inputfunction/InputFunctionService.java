@@ -289,11 +289,18 @@ public class InputFunctionService extends ServiceBase {
 			}
 		} catch (DeliaException e) {
 			DeliaError err = e.getLastError();
-			if (err.getId() != null && err.getId().startsWith("rule-")) {
+			if (errIdIStartsWith(err, "rule-")) {
 				if (metricsObserver != null && err instanceof DetailedError) {
 					DetailedError derr = (DetailedError) err;
 					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
 					metricsObserver.onInvalid2Error(ispec, derr.getFieldName());
+				}
+			} else if (errIdIs(err, "duplicate-unique-value")) {
+				if (metricsObserver != null && err instanceof DetailedError) {
+					DetailedError derr = (DetailedError) err;
+					//TODO this will fails for h2 and postgres. fix them!
+					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
+					metricsObserver.onDuplicateError(ispec, derr.getFieldName());
 				}
 			}
 			
@@ -301,6 +308,20 @@ public class InputFunctionService extends ServiceBase {
 		}
 		request.session.setInsertPrebuiltValueIterator(null);
 	}		
+	private boolean errIdIs(DeliaError err, String target) {
+		if (err.getId() != null && err.getId().equals(target)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean errIdIStartsWith(DeliaError err, String target) {
+		if (err.getId() != null && err.getId().startsWith(target)) {
+			return true;
+		}
+		return false;
+	}
+
 	private ImportSpec findImportSpec(InputFunctionRequest request, DStructType structType) {
 		for(ProgramSet.OutputSpec ospec: request.progset.outputSpecs) {
 			if (ospec.structType == structType) {

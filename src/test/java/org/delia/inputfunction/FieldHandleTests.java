@@ -61,18 +61,18 @@ public class FieldHandleTests  extends NewBDDBase {
 		ispecBuilder.addInputColumn(ispec, "ID", 11, "id");
 		assertEquals(0, ofh.ifhIndex);
 	}
-	
+
 	@Test
 	public void testNError() {
 		createDelia(1);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		ProgramSet progset = buildProgSet(inputFnSvc, observer, 2); 
-		
+
 		LineObjIterator lineObjIter = createIter(2);
 		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
 		chkResult(result, 2, 2, 0);
-		
+
 		chkObserver(observer, 2, 0, 2);
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_N]);
 	}
@@ -82,11 +82,11 @@ public class FieldHandleTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
-		
+
 		LineObjIterator lineObjIter = createIter(2, null); //no bob
 		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
 		chkResult(result, 2, 3, 0);
-		
+
 		chkObserver(observer, 2, 0, 2);
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 	}
@@ -96,28 +96,28 @@ public class FieldHandleTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
-		
+
 		LineObjIterator lineObjIter = createIter(2, ""); //"" should be treated same as null
 		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
 		chkResult(result, 2, 3, 0);
-		
+
 		chkObserver(observer, 2, 0, 2);
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 	}
-	
+
 	@Test
 	public void testIError() {
 		createDelia(0);
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
-		
+
 		LineObjIterator lineObjIter = createIter(2);
 		LineObj line1 = currentLineObjL.get(0);
 		line1.elements[1] = "notanint";
 		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
 		chkResult(result, 2, 3, 1);
-		
+
 		chkObserver(observer, 2, 1, 1);
 		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
 		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
@@ -134,17 +134,33 @@ public class FieldHandleTests  extends NewBDDBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
-		
+
 		LineObjIterator lineObjIter = createIter(2);
 		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
 		chkResult(result, 2, 3, 2);
-		
+
 		chkObserver(observer, 2, 0, 2);
 		assertEquals(0, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
 		assertEquals(2, observer.currentRowMetrics[OutputFieldHandle.INDEX_I2]);
 	}
 
-	
+	@Test
+	public void testIDError() {
+		createDelia(3);
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
+
+		LineObjIterator lineObjIter = createIter(2);
+		InputFunctionResult result = runImport(inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
+		chkResult(result, 2, 3, 2);
+
+		chkObserver(observer, 2, 1, 1);
+		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_D]);
+		dumpImportReport(result, observer);
+	}
+
+
 	private ProgramSet buildProgSet(InputFunctionService inputFnSvc, SimpleImportMetricObserver observer, int expectedSize) {
 		inputFnSvc.setMetricsObserver(observer);
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
@@ -203,13 +219,21 @@ public class FieldHandleTests  extends NewBDDBase {
 		this.session = delia.beginSession(src);
 	}
 	private String buildCustomerSrc(int which) {
+
 		String rule = which == 2 ? "name.len() > 4" : "";
-		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rule);
-		if (which == 0 || which == 2) {
+		String src = "";
+		if (which == 3) {
+			src = String.format(" type Customer struct {id int primaryKey, wid int unique, name string } %s end", rule);
+		} else 
+		{
+			src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rule);
+		}
+
+		if (which == 1) {
+			src += " input function foo(Customer c) { ID -> c.id, NAME -> c.name}";
+		} else {
 			src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, ";
 			src += " NAME -> c.name using { if missing return null} }";
-		} else if (which == 1) {
-			src += " input function foo(Customer c) { ID -> c.id, NAME -> c.name}";
 		}
 
 		return src;
