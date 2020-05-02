@@ -70,7 +70,7 @@ public class InputFunctionRunner extends ServiceBase {
 	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
 		StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
 		
-		for(String outputFieldName: data.map.keySet()) {
+		for(String outputFieldName: data.outputFieldMap.keySet()) {
 			TypePair pair = DValueHelper.findField(data.structType, outputFieldName);
 			if (pair == null) {
 				String msg = String.format("%s.%s - field not found. bad mapping", data.structType.getName(), outputFieldName);
@@ -78,7 +78,7 @@ public class InputFunctionRunner extends ServiceBase {
 				return null;
 			}
 			
-			Object input = data.map.get(pair.name);
+			Object input = data.outputFieldMap.get(pair.name);
 			
 			DValue inner = null;
 			DType dtype = pair.type;
@@ -125,7 +125,7 @@ public class InputFunctionRunner extends ServiceBase {
 				continue;
 			}
 			if (!spec.outputField.val1.equals(alias)) {
-				continue;
+				continue; //for a different output type
 			}
 			
 			String value;
@@ -157,12 +157,12 @@ public class InputFunctionRunner extends ServiceBase {
 				value = finalValue.asString();
 				if (res.failFlag) {
 					haltNowFlag = true;
-					data.map.put(outPair.argName(), value); //fieldname might be different
+					data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
 					return data;
 				}
 			}
 			
-			data.map.put(outPair.argName(), value); //fieldname might be different
+			data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
 		}
 		return data;
 	}

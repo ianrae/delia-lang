@@ -7,5 +7,5 @@ import org.delia.type.DStructType;
 
 public class ProcessedInputData {
 	public DStructType structType;
-	public Map<String,Object> map = new HashMap<>();
+	public Map<String,Object> outputFieldMap = new HashMap<>(); //outfieldName,String
 }

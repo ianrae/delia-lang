@@ -151,7 +151,6 @@ public class InputFunctionService extends ServiceBase {
 				break;
 			}
 			
-			
 			//log.logDebug("line %d:", lineNum);
 			fnResult.numRowsProcessed++;
 			LineObj lineObj = lineObjIter.next();
