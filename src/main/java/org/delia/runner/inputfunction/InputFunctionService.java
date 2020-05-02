@@ -67,6 +67,7 @@ public class InputFunctionService extends ServiceBase {
 			if (mappingExp.isSyntheticInputField()) {
 				infield = generateSyntheticFieldName(progset.fieldMap);
 				spec.syntheticValue = buildSyntheticValue(mappingExp, scalarBuilder);
+				progset.syntheticMap.put(spec.syntheticValue, infield);
 			} else {
 				infield = mappingExp.getInputField();
 			}

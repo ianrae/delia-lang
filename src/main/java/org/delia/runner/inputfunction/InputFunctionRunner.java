@@ -188,15 +188,13 @@ public class InputFunctionRunner extends ServiceBase {
 		for(OutputSpec ospec: progset.outputSpecs) {
 			ImportSpec ispec = ospec.ispec;
 			for(OutputFieldHandle ofh: ispec.ofhList) {
-				if (ofh.syntheticValue != null) {
-					String inputField = progset.syntheticMap.get(ofh.syntheticValue);
-					inputData.put(inputField, ofh.syntheticValue);
-				} else if (ofh.ifhIndex >= 0) {
+				if (ofh.ifhIndex >= 0) {
 					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
 					inputData.put(ifh.columnName, inputValue);
 				} else {
-					DeliaExceptionHelper.throwError("bad-ofh-index", "bad ofh index");
+					String inputField = progset.syntheticMap.get(ofh.syntheticValue);
+					inputData.put(inputField, ofh.syntheticValue);
 				}
 			}
 		}
