@@ -25,6 +25,13 @@ public class DValueHelper {
 			return pair.name;
 		}
 	}
+	
+	public static DValue findPrimaryKeyValue(DValue dval) {
+		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+		DValue inner = dval.asStruct().getField(keyPair.name);
+		return inner;
+	}
+	
 	//TODO: support composite keys later
 	public static TypePair findPrimaryKeyFieldPair(DType inner) {
 		if (! inner.isStructShape()) {
