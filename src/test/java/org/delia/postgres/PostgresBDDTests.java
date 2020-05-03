@@ -104,6 +104,9 @@ public class PostgresBDDTests extends NewBDDBase {
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 4);
 		runR1000File("t0-upsert-no-update.txt", 2);
+		runR1000File("t0-upsert-mm-id.txt", 2);
+		runR1000File("t0-upsert-mm-all.txt", 1);
+		runR1000File("t0-upsert-mm-other.txt", 1);
 	}
 	
 	@Test
@@ -280,7 +283,7 @@ public class PostgresBDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -289,7 +292,8 @@ public class PostgresBDDTests extends NewBDDBase {
 //		runR1000File("t0-upsert.txt", 4);
 //		runR1000File("t0-upsert-no-update.txt", 2);
 //		runR1000File("t0-upsert-mm-id.txt", 2);
-		runR1000File("t0-upsert-mm-all.txt", 2);
+//		runR1000File("t0-upsert-mm-all.txt", 1);
+//		runR1000File("t0-upsert-mm-other.txt", 1);
 	}
 	
 	//---

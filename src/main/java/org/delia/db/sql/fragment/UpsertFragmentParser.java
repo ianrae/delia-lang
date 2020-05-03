@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.compiler.ast.BooleanExp;
+import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
@@ -76,6 +78,12 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(partialVal.getType());
 		DValue inner = DValueHelper.findPrimaryKeyValue(partialVal);
 		if (inner == null) {
+			if (spec.queryExp.filter.cond instanceof BooleanExp) {
+				DeliaExceptionHelper.throwError("upsert-filter-error", "[true] not supported");
+			} else if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
+				DeliaExceptionHelper.throwError("upsert-filter-error", "only primary key filters are supported");
+			}
+			
 			FilterEvaluator evaluator = spec.evaluator;
 			DValueExConverter dvalConverter = new DValueExConverter(factorySvc, registry);
 			String keyField = evaluator.getRawValue(); //we assume primary key. eg Customer[55]

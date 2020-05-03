@@ -1,6 +1,6 @@
 # CRUD update tests
 
-FEATURE: CRUD update - many-to-many scenario 1 - all
+FEATURE: CRUD update - many-to-many scenario 3 - arbitrary query
 background:
 	type Customer struct {id int unique, wid int, relation addr Address optional many } end
 	type Address struct {id int unique, z int, relation cust Customer optional many } end
@@ -10,9 +10,12 @@ background:
 	insert Address {id: 101, z:6, cust: [55,56] }
 thenType: struct
 
+
 ---
 title: update without relation query back
 when:
-  upsert Customer[true] {wid: 333}
+  upsert Customer[wid == 33] {wid: 333}
+  let x = Customer[55].fks()
 then:
 ERROR: upsert-filter-error
+

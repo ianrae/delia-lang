@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.compiler.ast.BooleanExp;
+import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -18,6 +20,7 @@ import org.delia.runner.FilterEvaluator;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Performs update
@@ -45,6 +48,11 @@ public class MemUpsert extends ServiceBase {
 		if (dvalList.size() > 1) {
 			DeliaError err = et.add("upsert-unique-violation", String.format("upsert filter must specify one row (at most). %d rows matched for type '%s'", dvalList.size(), typeName));
 			throw new DBException(err);
+		}
+		if (spec.queryExp.filter.cond instanceof BooleanExp) {
+			DeliaExceptionHelper.throwError("upsert-filter-error", "[true] not supported");
+		} else if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
+			DeliaExceptionHelper.throwError("upsert-filter-error", "only primary key filters are supported");
 		}
 
 		if (CollectionUtils.isEmpty(dvalList)) {
