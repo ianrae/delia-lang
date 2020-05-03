@@ -335,7 +335,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 		}		
 	}
-	private void buildUpdateByIdOnly(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
+	protected void buildUpdateByIdOnly(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName,
 			String assocField2, List<OpFragment> oplist, SqlStatement statement) {
 		
@@ -353,7 +353,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			cloneParams(statement, clonedL, extra);
 		}
 	}
-	private void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
+	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
 			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 
