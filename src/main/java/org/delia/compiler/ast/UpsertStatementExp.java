@@ -4,12 +4,14 @@ public class UpsertStatementExp extends CrudExp {
 	public String typeName;
 	public DsonExp dsonExp;
 	public QueryExp queryExp;
+	public OptionExp optionExp; //can be null
 
-	public UpsertStatementExp(int pos, QueryExp queryExp, DsonExp dsonExp) {
+	public UpsertStatementExp(int pos, QueryExp queryExp, DsonExp dsonExp, OptionExp optionExp) {
 		super(pos);
 		this.queryExp = queryExp;
 		this.typeName = queryExp.typeName;
 		this.dsonExp = dsonExp;
+		this.optionExp = optionExp;
 	}
 	
 	public String getTypeName() {

@@ -102,6 +102,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 4);
+		runR1000File("t0-upsert-no-update.txt", 2);
 	}
 	
 	@Test

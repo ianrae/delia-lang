@@ -6,9 +6,11 @@ import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.LetStatementExp;
+import org.delia.compiler.ast.OptionExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.StructFieldExp;
 import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.db.memdb.filter.OP;
@@ -37,9 +39,20 @@ public class Pass2Compiler extends CompilerPassBase {
 			} else if (exp instanceof ConfigureStatementExp) {
 				ConfigureStatementExp typeExp = (ConfigureStatementExp) exp;
 				checkConfigureStatement(results, typeExp);
+			} else if (exp instanceof UpsertStatementExp) {
+				UpsertStatementExp upExp = (UpsertStatementExp) exp;
+				checkUpsertStatement(results, upExp);
 			}
 		}
 		return results;
+	}
+
+	private void checkUpsertStatement(CompilerResults results, UpsertStatementExp upExp) {
+		OptionExp optionExp = upExp.optionExp;
+		if (optionExp != null && !optionExp.strValue().equals("noUpdate")) {
+			String msg = String.format("upsert: unknown option '%s'", optionExp.strValue());
+			addError(results, "configure-unknown-var", msg, upExp);
+		}
 	}
 
 	private void checkConfigureStatement(CompilerResults results, ConfigureStatementExp configExp) {
@@ -50,7 +63,6 @@ public class Pass2Compiler extends CompilerPassBase {
 		if (! b) {
 			String msg = String.format("configure: unknown variable '%s'", configExp.varName);
 			addError(results, "configure-unknown-var", msg, configExp);
-			
 		}
 	}
 
