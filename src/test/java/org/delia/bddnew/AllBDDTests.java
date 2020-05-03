@@ -75,6 +75,7 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
+		runR700File("t0-insert-serial.txt", 1);
 	}
 	
 	@Test
@@ -288,9 +289,8 @@ public class AllBDDTests extends NewBDDBase {
 		enableMigration = true;
 
 //		runR1350File("t0-filter-op-relation.txt", 13);
-//		runR900File("t0-update-mm-all.txt", 4);
-//		runR1550File("t0-queryfn-oneone-childa.txt", 6);
-		runR1000File("t0-upsert.txt", 4);
+		runR700File("t0-insert-serial.txt", 1);
+//		runR300File("t0-int.txt", 10);
 	}
 	
 	//---

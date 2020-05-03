@@ -60,6 +60,7 @@ import org.delia.valuebuilder.ScalarValueBuilder;
  */
 public class RunnerImpl extends ServiceBase implements Runner {
 		public static final String DOLLAR_DOLLAR = "$$";
+		public static final String VAR_SERIAL = "_serial";
 		private Map<String,ResultValue> varMap = new HashMap<>(); //ok for thread-safety
 		protected DTypeRegistry registry;
 		private DBInterface dbInterface;
@@ -429,6 +430,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					ctx.extractGeneratedKeys = true;
 					ctx.genKeytype = DValueHelper.findPrimaryKeyFieldPair(cres.dval.getType()).type;
 					DValue generatedId = dbexecutor.executeInsert(cres.dval, ctx);
+					assignSerialVar(generatedId);
 					boolean sprigFlag = sprigSvc.haveEnabledFor(typeName);
 					if (sprigFlag) {
 						sprigSvc.rememberSynthId(typeName, cres.dval, generatedId, cres.extraMap);
@@ -691,6 +693,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			res.varName = varName;
 			varMap.put(varName, res);
 			varMap.put(DOLLAR_DOLLAR, res);
+		}
+		private void assignSerialVar(DValue generatedId) {
+			ResultValue res = new ResultValue();
+			res.ok = true;
+			res.shape = generatedId.getType().getShape();
+			res.val = generatedId;
+			res.varName = VAR_SERIAL;
+			varMap.put(VAR_SERIAL, res);
 		}
 
 		private VarRef resolveScalarVarReference(QueryExp queryExp) {
