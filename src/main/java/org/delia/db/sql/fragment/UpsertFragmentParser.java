@@ -83,10 +83,22 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 			String keyField = evaluator.getRawValue(); //we assume primary key. eg Customer[55]
 			inner = dvalConverter.buildFromObject(keyField, keyPair.type);
 		}
-		String sql = String.format(" KEY(%s)", keyPair.name);
+		String sql = String.format(" KEY(%s, wid)", keyPair.name);
 		updateFrag.keyFrag =  new RawFragment(sql);
 		updateFrag.keyFieldName = keyPair.name;
 		updateFrag.statement.paramL.add(inner);
+	}
+	
+	public DValue getPrimaryKeyValue(QuerySpec spec, DValue partialVal) {
+		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(partialVal.getType());
+		DValue inner = DValueHelper.findPrimaryKeyValue(partialVal);
+		if (inner == null) {
+			FilterEvaluator evaluator = spec.evaluator;
+			DValueExConverter dvalConverter = new DValueExConverter(factorySvc, registry);
+			String keyField = evaluator.getRawValue(); //we assume primary key. eg Customer[55]
+			inner = dvalConverter.buildFromObject(keyField, keyPair.type);
+		}
+		return inner; 
 	}
 
 	protected void generateSetFields(QuerySpec spec, DStructType structType, UpsertStatementFragment updateFrag,

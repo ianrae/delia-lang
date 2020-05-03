@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
@@ -13,6 +14,7 @@ import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
+import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
@@ -39,6 +41,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -262,13 +265,33 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public int executeUpsert(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx) {
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
-		//TODO implement this!!
+		
 		if (useFragmentParser) {
 			log.log("FRAG PARSER UPSERT....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
 			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc);
+			
+			//hack hack hack TODO:improve this
+			//this works but is slow, and has race conditions if other thread does insert
+			//between the time we call executeQuery and do the update.
+			
+			if (noUpdateFlag) {
+				QueryBuilderService queryBuilder = factorySvc.getQueryBuilderService();
+				DValue keyVal = parser.getPrimaryKeyValue(spec, dval);
+				QueryExp queryExp = queryBuilder.createPrimaryKeyQuery(spec.queryExp.typeName, keyVal);
+				QuerySpec query = queryBuilder.buildSpec(queryExp, new DoNothingVarEvaluator());
+				QueryContext qtx = new QueryContext();
+				QueryResponse qresp = executeQuery(query, qtx, dbctx);
+				if (!qresp.emptyResults()) {
+					return 0;
+				}
+			}
+			
+			
+			
+			
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);
