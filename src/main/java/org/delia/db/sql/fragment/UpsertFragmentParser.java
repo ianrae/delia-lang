@@ -10,7 +10,9 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.dval.DValueExConverter;
 import org.delia.relation.RelationInfo;
+import org.delia.runner.FilterEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
@@ -28,24 +30,28 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		super(factorySvc, fpSvc);
 	}
 
+	//MERGE INTO Flight as a (id,wid) KEY(id) VALUES(?,?)  -- (55,22)
 	public UpsertStatementFragment parseUpsert(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap) {
-		UpsertStatementFragment selectFrag = new UpsertStatementFragment();
+		UpsertStatementFragment upsertFrag = new UpsertStatementFragment();
 
 		Map<String, DRelation> mmMap = new HashMap<>();
 
 		//init tbl
 		DStructType structType = getMainType(spec); 
-		TableFragment tblFrag = createTable(structType, selectFrag);
-		selectFrag.tblFrag = tblFrag;
+		TableFragment tblFrag = createTable(structType, upsertFrag);
+		upsertFrag.tblFrag = tblFrag;
 
-		generateSetFields(spec, structType, selectFrag, partialVal, mmMap);
-		initWhere(spec, structType, selectFrag);
-		generateKey(selectFrag, partialVal);
+		generateKey(spec, upsertFrag, partialVal);
+		generateSetFields(spec, structType, upsertFrag, partialVal, mmMap);
+		initWhere(spec, structType, upsertFrag);
+		//remove last
+		int n = upsertFrag.statement.paramL.size();
+		upsertFrag.statement.paramL.remove(n - 1);
 		//no min,max,etc in UPDATE
 
 		//generateUpdateFns(spec, structType, selectFrag);
 
-		fixupForParentFields(structType, selectFrag);
+		fixupForParentFields(structType, upsertFrag);
 		//			if (needJoin(spec, structType, selectFrag, details)) {
 		//				//used saved join if we have one
 		//				if (savedJoinedFrag == null) {
@@ -56,10 +62,10 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		//			}
 
 		if (! useAliases) {
-			removeAllAliases(selectFrag);
+			removeAllAliases(upsertFrag);
 		}
 
-		return selectFrag;
+		return upsertFrag;
 	}
 
 	/**
@@ -82,10 +88,19 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		}
 	}
 	
-	private void generateKey(UpsertStatementFragment updateFrag, DValue partialVal) {
+	private void generateKey(QuerySpec spec, UpsertStatementFragment updateFrag, DValue partialVal) {
+		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(partialVal.getType());
 		DValue inner = DValueHelper.findPrimaryKeyValue(partialVal);
-		String sql = String.format(" KEY(%s)", inner.asString());
+		if (inner == null) {
+			FilterEvaluator evaluator = spec.evaluator;
+			DValueExConverter dvalConverter = new DValueExConverter(factorySvc, registry);
+			String keyField = evaluator.getRawValue(); //we assume primary key. eg Customer[55]
+			inner = dvalConverter.buildFromObject(keyField, keyPair.type);
+		}
+		String sql = String.format(" KEY(%s)", keyPair.name);
 		updateFrag.keyFrag =  new RawFragment(sql);
+		updateFrag.keyFieldName = keyPair.name;
+		updateFrag.statement.paramL.add(inner);
 	}
 
 	private void generateSetFields(QuerySpec spec, DStructType structType, UpsertStatementFragment updateFrag,
@@ -172,19 +187,19 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 			updateFrag.statement.sql = ""; //nothing to do
 			return stgroup;
 		}
-
+		
 		SqlStatement mainStatement = updateFrag.statement;
 		mainStatement.sql = updateFrag.render();
-		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
+//		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
 		
-		List<StatementFragmentBase> allL = new ArrayList<>();
-		mainStatement.paramL.clear();
+//		List<StatementFragmentBase> allL = new ArrayList<>();
+//		mainStatement.paramL.clear();
 		stgroup.add(updateFrag.statement);
 		
-		if (mainStatement.paramL.isEmpty()) {
-			mainStatement.paramL.addAll(save);
-			return stgroup; //no inner frags
-		}
+//		if (mainStatement.paramL.isEmpty()) {
+//			mainStatement.paramL.addAll(save);
+//			return stgroup; //no inner frags
+//		}
 		
 		return stgroup;
 	}
