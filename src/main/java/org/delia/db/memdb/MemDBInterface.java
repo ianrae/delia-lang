@@ -21,6 +21,7 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.memdb.MemDBInterface.Stuff;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
@@ -105,37 +106,12 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		if (tbl == null) {
 			tbl = handleUnknownTable(typeName, dbctx);
 		}
-
-		DValue generatedId = addSerialValuesIfNeeded(dval, tbl, dbctx);
-		checkUniqueness(dval, tbl, typeName, null, false, dbctx);
-
-		tbl.rowL.add(dval);
-		return generatedId;
+		
+		Stuff stuff = findOrCreateStuff(dbctx);
+		MemInsert memInsert = new MemInsert(this.factorySvc);
+		return memInsert.doExecuteInsert(tbl, dval, ctx, dbctx, this, stuff);
 	}
 
-	private DValue addSerialValuesIfNeeded(DValue dval, MemDBTable tbl, DBAccessContext dbctx) {
-		if (!dval.getType().isStructShape()) {
-			return null;
-		}
-		DValue generatedId = null;
-		DStructType structType = (DStructType) dval.getType();
-		for(TypePair pair: structType.getAllFields()) {
-			if (structType.fieldIsSerial(pair.name)) {
-				if (dval.asStruct().getField(pair.name) != null) {
-					DeliaError err = et.add("serial-value-cannot-be-provided", String.format("serial field '%s' must not have a value specified", pair.name));
-					throw new DBException(err);
-				}
-
-				Stuff stuff = findOrCreateStuff(dbctx);
-
-				DValue serialVal = stuff.serialProvider.generateSerialValue(structType, pair);
-				dval.asMap().put(pair.name, serialVal);
-				generatedId = serialVal;
-				log.logDebug("serial id generated: %s", serialVal.asString());
-			}
-		}
-		return generatedId;
-	}
 
 	/**
 	 * Ugly. we need a serial provider per registry (really per runner i thinkg)
@@ -470,7 +446,8 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	private int doExecuteUpsert(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		RowSelector selector = createSelector(spec, dbctx); //may throw
 		MemUpsert memUpdate = new MemUpsert(factorySvc);
-		return memUpdate.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, dbctx, selector, this);
+		Stuff stuff = findOrCreateStuff(dbctx);
+		return memUpdate.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, dbctx, selector, this, stuff);
 	}
 
 
