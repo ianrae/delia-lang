@@ -27,10 +27,12 @@ public class PostgresUpsertFragmentParser extends UpsertFragmentParser {
 		ON CONFLICT (name) DO UPDATE 
 	  SET email = EXCLUDED.email || ';' || customers.email;
 	 */
-	public UpsertStatementFragment parseUpsert(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap) {
+	@Override
+	public UpsertStatementFragment parseUpsert(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
 		UpsertStatementFragment upsertFrag = new UpsertStatementFragment();
 		upsertFrag.sqlCmd = "INSERT INTO";
 		upsertFrag.addOnConflictPhrase = true;
+		upsertFrag.noUpdateFlag = true;
 		this.useAliases = false;
 		Map<String, DRelation> mmMap = new HashMap<>();
 
@@ -59,7 +61,9 @@ public class PostgresUpsertFragmentParser extends UpsertFragmentParser {
 		}
 
 		//add params for the UPDATE SET.. part
-		cloneParams(upsertFrag.statement, 0, upsertFrag.fieldL.size());
+		if (! noUpdateFlag) {
+			cloneParams(upsertFrag.statement, 0, upsertFrag.fieldL.size());
+		}
 		return upsertFrag;
 	}
 	

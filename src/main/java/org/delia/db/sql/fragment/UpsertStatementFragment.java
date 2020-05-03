@@ -13,6 +13,7 @@ public class UpsertStatementFragment extends SelectStatementFragment {
 	public RawFragment keyFrag;
 	public String keyFieldName;
 	public boolean addOnConflictPhrase; //for postgres
+	public boolean noUpdateFlag;
 
 	@Override
 	public String render() {
@@ -36,6 +37,11 @@ public class UpsertStatementFragment extends SelectStatementFragment {
 
 	//		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 	private void addOnConflictPhrase(StrCreator sc) {
+		if (noUpdateFlag) {
+			sc.o(" ON CONFLICT (%s) DO NOTHING", keyFieldName);
+			return;
+		}
+		
 		sc.o(" ON CONFLICT (%s) DO UPDATE", keyFieldName);
 		sc.o(" SET ");
 		int index = 0;
