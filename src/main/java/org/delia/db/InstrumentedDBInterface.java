@@ -43,9 +43,9 @@ public class InstrumentedDBInterface implements DBInterface {
 		return actualInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
 	}
 	@Override
-	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx) {
 		this.upsertCount++;
-		return actualInterface.executeUpdate(spec, dvalFull, assocCrudMap, dbctx);
+		return actualInterface.executeUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag, dbctx);
 	}
 
 	@Override

@@ -344,7 +344,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap);
+				boolean noUpdateFlag = exp.optionExp != null;
+				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;

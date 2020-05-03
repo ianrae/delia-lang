@@ -34,8 +34,8 @@ public class MemDBExecutor implements DBExecutor {
 		return dbInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
 	}
 	@Override
-	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap) {
-		return dbInterface.executeUpsert(spec, dvalFull, assocCrudMap, dbctx);
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
+		return dbInterface.executeUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag, dbctx);
 	}
 
 	@Override

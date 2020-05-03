@@ -33,7 +33,7 @@ public class MemUpsert extends ServiceBase {
 		super(factorySvc);
 	}
 
-	public int doExecuteUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, DBAccessContext dbctx, RowSelector selector, 
+	public int doExecuteUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx, RowSelector selector, 
 				MemDBInterface memDBInterface, Stuff stuff) {
 		MemDBTable tbl = selector.getTbl();
 		List<DValue> dvalList = selector.match(tbl.rowL);

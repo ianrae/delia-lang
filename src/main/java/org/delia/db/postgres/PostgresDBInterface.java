@@ -241,7 +241,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		return updateCount;
 	}
 	@Override
-	public int executeUpsert(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
+	public int executeUpsert(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx) {
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		//TODO implement this!!
@@ -253,7 +253,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
-			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap);
+			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);
 			stgroup = parser.renderUpsertGroup(selectFrag);
 //			s = selectFrag.statement;
 		} else {

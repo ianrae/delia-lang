@@ -7,11 +7,21 @@ background:
 thenType: struct
 
 ---
-title: insert
+title: upsert
 thenType: int
 expectDVal:false
 when:
   upsert -noUpdate Flight[55] {wid: 22}
 then:
 1
+
+---
+title: upsert
+thenType: int
+expectDVal:false
+when:
+  insert Flight {id:55, wid: 22}
+  upsert -noUpdate Flight[55] {wid: 23}
+then:
+0
 

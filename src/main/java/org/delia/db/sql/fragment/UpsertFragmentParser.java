@@ -29,7 +29,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 	}
 
 	//MERGE INTO Flight as a (id,wid) KEY(id) VALUES(?,?)  -- (55,22)
-	public UpsertStatementFragment parseUpsert(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap) {
+	public UpsertStatementFragment parseUpsert(QuerySpec spec, QueryDetails details, DValue partialVal, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
 		UpsertStatementFragment upsertFrag = new UpsertStatementFragment();
 
 		Map<String, DRelation> mmMap = new HashMap<>();
