@@ -279,7 +279,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
+		testIndexToRun = 0;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -287,8 +287,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 		
 //		runR900File("t0-update-mm-other-othertbl.txt", 2);
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
-//		runR1000File("t0-upsert.txt", 4);
-		runR1000File("t0-upsert-no-update.txt", 2);
+		runR1000File("t0-upsert.txt", 4);
+//		runR1000File("t0-upsert-no-update.txt", 2);
 	}
 	
 	//---
