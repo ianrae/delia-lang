@@ -100,7 +100,7 @@ public class AllBDDTests extends NewBDDBase {
 
 	@Test
 	public void testR1000() {
-		runR1000File("t0-upsert.txt", 0);
+		runR1000File("t0-upsert.txt", 4);
 	}
 	
 	@Test
@@ -290,6 +290,7 @@ public class AllBDDTests extends NewBDDBase {
 //		runR1350File("t0-filter-op-relation.txt", 13);
 //		runR900File("t0-update-mm-all.txt", 4);
 //		runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1000File("t0-upsert.txt", 4);
 	}
 	
 	//---
