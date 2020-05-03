@@ -27,7 +27,7 @@ import org.delia.type.DValue;
 import org.delia.typebuilder.FakeTypeCreator;
 import org.delia.util.StringUtil;
 
-public class SchemaMigrator extends ServiceBase {
+public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
@@ -55,6 +55,7 @@ public class SchemaMigrator extends ServiceBase {
 		this.optimizer = new MigrationOptimizer(factorySvc, dbInterface, registry, varEvaluator);
 	}
 	
+	@Override
 	public void close() {
 		try {
 			dbexecutor.close();
