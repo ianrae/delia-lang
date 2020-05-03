@@ -1,14 +1,12 @@
 package org.delia.db.postgres;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.sql.fragment.FragmentParserService;
-import org.delia.db.sql.fragment.OpFragment;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.UpsertFragmentParser;
 import org.delia.db.sql.fragment.UpsertStatementFragment;

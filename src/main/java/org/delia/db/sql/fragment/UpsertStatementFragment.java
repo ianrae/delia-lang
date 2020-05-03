@@ -10,7 +10,6 @@ public class UpsertStatementFragment extends SelectStatementFragment {
 
 	public String sqlCmd = "MERGE INTO";
 	public List<String> setValuesL = new ArrayList<>();
-	//		public boolean doUpdateLast = false;
 	public RawFragment keyFrag;
 	public String keyFieldName;
 	public boolean addOnConflictPhrase; //for postgres
@@ -19,7 +18,6 @@ public class UpsertStatementFragment extends SelectStatementFragment {
 	public String render() {
 		StrCreator sc = new StrCreator();
 		sc.o(sqlCmd);
-		//renderEarly(sc);
 		sc.o(" %s", tblFrag.render());
 
 		renderColumnNames(sc);

@@ -47,17 +47,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		upsertFrag.statement.paramL.remove(n - 1);
 		//no min,max,etc in UPDATE
 
-		//generateUpdateFns(spec, structType, selectFrag);
-
 		fixupForParentFields(structType, upsertFrag);
-		//			if (needJoin(spec, structType, selectFrag, details)) {
-		//				//used saved join if we have one
-		//				if (savedJoinedFrag == null) {
-		//					addJoins(spec, structType, selectFrag, details);
-		//				} else {
-		//					selectFrag.joinFrag = savedJoinedFrag;
-		//				}
-		//			}
 
 		if (! useAliases) {
 			removeAllAliases(upsertFrag);
@@ -74,9 +64,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		for(FieldFragment ff: selectFrag.fieldL) {
 			ff.alias = null;
 		}
-		//			public List<SqlFragment> earlyL = new ArrayList<>();
 		selectFrag.tblFrag.alias = null;
-		//			public JoinFragment joinFrag; //TODO later a list
 		for(SqlFragment ff: selectFrag.whereL) {
 			if (ff instanceof OpFragment) {
 				OpFragment opff = (OpFragment) ff;
@@ -161,14 +149,6 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		return false;
 	}
 	
-	protected void generateUpsertFns(QuerySpec spec, DStructType structType, UpsertStatementFragment selectFrag) {
-		//orderby supported only by MySQL which delia does not support
-		//			this.doOrderByIfPresent(spec, structType, selectFrag);
-		this.doLimitIfPresent(spec, structType, selectFrag);
-		//			this.doOffsetIfPresent(spec, structType, selectFrag);
-	}
-
-
 	public String renderUpsert(UpsertStatementFragment selectFrag) {
 		if(selectFrag.setValuesL.isEmpty()) {
 			selectFrag.statement.sql = ""; //nothing to do
@@ -188,16 +168,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		
 		SqlStatement mainStatement = updateFrag.statement;
 		mainStatement.sql = updateFrag.render();
-//		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
-		
-//		List<StatementFragmentBase> allL = new ArrayList<>();
-//		mainStatement.paramL.clear();
 		stgroup.add(updateFrag.statement);
-		
-//		if (mainStatement.paramL.isEmpty()) {
-//			mainStatement.paramL.addAll(save);
-//			return stgroup; //no inner frags
-//		}
 		
 		return stgroup;
 	}
