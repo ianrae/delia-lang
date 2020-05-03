@@ -64,19 +64,22 @@ public class H2TestCleaner {
 	}
 	
 	public void deleteTables(FactoryService factorySvc, DBInterface innerInterface, String tables) {
-		DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null));
-		boolean b = innerInterface.isSQLLoggingEnabled();
-		innerInterface.enableSQLLogging(false);
+		try(DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null))) {
+			boolean b = innerInterface.isSQLLoggingEnabled();
+			innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
-		Log log = factorySvc.getLog();
-		
-		log.log("--delete TABLES -- ");
-		String[] ar = tables.split(",");
-		for(String tbl: ar) {
-			tbl = adjustTblName(tbl);
-			log.log("delete table: %s", tbl);
-			safeDeleteTable(executor, tbl);
+			Log log = factorySvc.getLog();
 			
+			log.log("--delete TABLES -- ");
+			String[] ar = tables.split(",");
+			for(String tbl: ar) {
+				tbl = adjustTblName(tbl);
+				log.log("delete table: %s", tbl);
+				safeDeleteTable(executor, tbl);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
