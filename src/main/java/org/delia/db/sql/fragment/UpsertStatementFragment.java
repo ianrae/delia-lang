@@ -13,6 +13,7 @@ public class UpsertStatementFragment extends SelectStatementFragment {
 	//		public boolean doUpdateLast = false;
 	public RawFragment keyFrag;
 	public String keyFieldName;
+	public boolean addOnConflictPhrase; //for postgres
 
 	@Override
 	public String render() {
@@ -28,9 +29,26 @@ public class UpsertStatementFragment extends SelectStatementFragment {
 		}
 		renderUpdateFields(sc);
 
-		renderIfPresent(sc, limitFrag);
+		if (addOnConflictPhrase) {
+			addOnConflictPhrase(sc);
+		}
 
 		return sc.str;
+	}
+
+	//		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
+	private void addOnConflictPhrase(StrCreator sc) {
+		sc.o(" ON CONFLICT (%s) DO UPDATE", keyFieldName);
+		sc.o(" SET ");
+		int index = 0;
+		ListWalker<FieldFragment> walker = new ListWalker<>(fieldL);
+		while(walker.hasNext()) {
+			FieldFragment ff = walker.next();
+			String value = setValuesL.get(index);
+			sc.o("%s = %s", renderSetField(ff), value);
+			walker.addIfNotLast(sc, ", ");
+			index++;
+		}
 	}
 
 	private void renderColumnNames(StrCreator sc) {
