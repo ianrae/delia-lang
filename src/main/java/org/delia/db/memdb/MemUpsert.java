@@ -12,15 +12,12 @@ import org.delia.db.DBException;
 import org.delia.db.InsertContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.memdb.MemDBInterface.Stuff;
-import org.delia.dval.DValueConverterService;
 import org.delia.dval.DValueExConverter;
 import org.delia.error.DeliaError;
 import org.delia.runner.FilterEvaluator;
-import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * Performs update
@@ -92,20 +89,17 @@ public class MemUpsert extends ServiceBase {
 
 	private void addPrimaryKey(QuerySpec spec, DValue dvalFull, RowSelector selector, DBAccessContext dbctx) {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dvalFull.getType());
-		FilterEvaluator evaluator = spec.evaluator;
-		
-		DValueExConverter dvalConverter = new DValueExConverter(factorySvc, dbctx.registry);
-		if (selector instanceof PrimaryKeyRowSelector) {
-			PrimaryKeyRowSelector priselector = (PrimaryKeyRowSelector) selector;
-			String keyField = evaluator.getRawValue();
-			DValue inner = dvalConverter.buildFromObject(keyField, keyPair.type);
-			
-			Map<String, DValue> map = dvalFull.asMap();
-			map.put(keyPair.name, inner);
+		if (dvalFull.asStruct().getField(keyPair.name) != null) {
+			return; //already has primary key
 		}
-		// TODO Auto-generated method stub
 		
+		FilterEvaluator evaluator = spec.evaluator;
+		DValueExConverter dvalConverter = new DValueExConverter(factorySvc, dbctx.registry);
+		String keyField = evaluator.getRawValue(); //we assume primary key. eg Customer[55]
+		DValue inner = dvalConverter.buildFromObject(keyField, keyPair.type);
+
+		Map<String, DValue> map = dvalFull.asMap();
+		map.put(keyPair.name, inner);
 	}
-	
 	
 }

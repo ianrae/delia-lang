@@ -1,8 +1,7 @@
 package org.delia.mem;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.sort.topo.TopoTestBase;
@@ -13,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class MemUpsertTests extends TopoTestBase {
-	
 	
 	@Test(expected=DeliaException.class)
 	public void testSerial() {
@@ -30,9 +28,59 @@ public class MemUpsertTests extends TopoTestBase {
 	@Test
 	public void testPrimaryKey() {
 		createCustomer();
+		//this is the normal way. use primary key filter
+		ResultValue res = execStatement("upsert Customer[55] {wid:44}");
+		assertEquals(true, res.ok);
+		assertEquals(0, res.val); //0 means we inserted
+
+		res = this.execStatement("let x = Customer[true]");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(55, dval.asStruct().getField("id").asInt());
+		assertEquals(44, dval.asStruct().getField("wid").asInt());
+	}
+	
+	@Test
+	public void testOtherUniqueFilter() {
+		createCustomer();
+		//alternative way. put primary key in fields and then can use any filter
+		//that matches 0 or 1 records
+		ResultValue res = execStatement("upsert Customer[wid==19] {id:55, wid:44}");
+		assertEquals(true, res.ok);
+		assertEquals(0, res.val); //0 means we inserted
 		
-//		execStatement("upsert Customer[55] {id:55, wid:44}");
-		execStatement("upsert Customer[55] {wid:44}");
+		res = this.execStatement("let x = Customer[true]");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(55, dval.asStruct().getField("id").asInt());
+		assertEquals(44, dval.asStruct().getField("wid").asInt());
+	}
+	
+	@Test
+	public void testUpdate() {
+		createCustomer();
+		execStatement("insert Customer {id:55, wid:44}");
+		execStatement("insert Customer {id:56, wid:44}");
+		
+		ResultValue res = execStatement("upsert Customer[55] {wid:444}");
+		assertEquals(true, res.ok);
+		assertEquals(1, res.val); //1 means we updated
+		
+		res = this.execStatement("let x = Customer[55]");
+		assertEquals(true, res.ok);
+		DValue dval = res.getAsDValue();
+		assertEquals(55, dval.asStruct().getField("id").asInt());
+		assertEquals(444, dval.asStruct().getField("wid").asInt());
+	}
+	
+	
+	@Test(expected=DeliaException.class)
+	public void testNonUniqueFilter() {
+		createCustomer();
+		execStatement("insert Customer {id:55, wid:44}");
+		execStatement("insert Customer {id:56, wid:44}");
+		
+		execStatement("upsert Customer[wid==44] {id:55, wid:44}");
 		ResultValue res = this.execStatement("let x = Customer[true]");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
