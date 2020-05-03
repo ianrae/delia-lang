@@ -29,6 +29,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
@@ -171,8 +172,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					try {
 						dbexecutor.close();
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						DBHelper.handleCloseFailure(e);
 					}
 				}
 			}

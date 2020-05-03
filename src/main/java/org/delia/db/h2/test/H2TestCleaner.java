@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
@@ -54,11 +55,8 @@ public class H2TestCleaner {
 
 			String tbl = SchemaMigrator.SCHEMA_TABLE;
 			safeDeleteTable(executor, tbl.toLowerCase());
-		} catch(IOException e) {
-			
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			DBHelper.handleCloseFailure(e1);
 		}
 		innerInterface.enableSQLLogging(b);
 	}
