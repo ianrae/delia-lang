@@ -28,10 +28,11 @@ public class MemUpsertTests extends TopoTestBase {
 	}
 	
 	@Test
-	public void test() {
+	public void testPrimaryKey() {
 		createCustomer();
 		
-		execStatement("upsert Customer[55] {id:55, wid:44}");
+//		execStatement("upsert Customer[55] {id:55, wid:44}");
+		execStatement("upsert Customer[55] {wid:44}");
 		ResultValue res = this.execStatement("let x = Customer[true]");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();

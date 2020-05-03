@@ -78,5 +78,10 @@ public class FilterEvaluator extends ServiceBase {
 		}
 		return false;
 	}
+	
+	public String getRawValue() {
+		String target = queryExp.filter.cond.strValue();
+		return target;
+	}
 
 }

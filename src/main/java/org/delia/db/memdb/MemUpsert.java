@@ -12,9 +12,15 @@ import org.delia.db.DBException;
 import org.delia.db.InsertContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.memdb.MemDBInterface.Stuff;
+import org.delia.dval.DValueConverterService;
+import org.delia.dval.DValueExConverter;
 import org.delia.error.DeliaError;
+import org.delia.runner.FilterEvaluator;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * Performs update
@@ -28,7 +34,6 @@ public class MemUpsert extends ServiceBase {
 
 	public MemUpsert(FactoryService factorySvc) {
 		super(factorySvc);
-		this.fmtSvc = factorySvc.getDateFormatService();
 	}
 
 	public int doExecuteUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, DBAccessContext dbctx, RowSelector selector, 
@@ -46,7 +51,9 @@ public class MemUpsert extends ServiceBase {
 		}
 
 		if (CollectionUtils.isEmpty(dvalList)) {
-			//nothing to do
+			//add primary key to dvalFull
+			addPrimaryKey(spec, dvalFull, selector, dbctx);
+			
 			MemInsert memInsert = new MemInsert(factorySvc);
 			InsertContext ctx = new InsertContext(); //upsert not supported for serial primaryKey
 			memInsert.doExecuteInsert(tbl, dvalFull, ctx, dbctx, memDBInterface, stuff);
@@ -81,6 +88,23 @@ public class MemUpsert extends ServiceBase {
 			}
 		}
 		return numRowsAffected;
+	}
+
+	private void addPrimaryKey(QuerySpec spec, DValue dvalFull, RowSelector selector, DBAccessContext dbctx) {
+		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dvalFull.getType());
+		FilterEvaluator evaluator = spec.evaluator;
+		
+		DValueExConverter dvalConverter = new DValueExConverter(factorySvc, dbctx.registry);
+		if (selector instanceof PrimaryKeyRowSelector) {
+			PrimaryKeyRowSelector priselector = (PrimaryKeyRowSelector) selector;
+			String keyField = evaluator.getRawValue();
+			DValue inner = dvalConverter.buildFromObject(keyField, keyPair.type);
+			
+			Map<String, DValue> map = dvalFull.asMap();
+			map.put(keyPair.name, inner);
+		}
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

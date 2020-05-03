@@ -26,7 +26,6 @@ public class DValueConverterService extends ServiceBase {
 	}
 
 	public DValue buildFromObject(Object input, Shape shape, ScalarValueBuilder builder) {
-
 		DValue inner = null;
 		switch(shape) {
 		case INTEGER:
