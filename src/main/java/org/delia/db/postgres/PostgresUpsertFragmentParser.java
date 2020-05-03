@@ -33,7 +33,7 @@ public class PostgresUpsertFragmentParser extends UpsertFragmentParser {
 		UpsertStatementFragment upsertFrag = new UpsertStatementFragment();
 		upsertFrag.sqlCmd = "INSERT INTO";
 		upsertFrag.addOnConflictPhrase = true;
-		upsertFrag.noUpdateFlag = true;
+		upsertFrag.noUpdateFlag = noUpdateFlag;
 		this.useAliases = false;
 		Map<String, DRelation> mmMap = new HashMap<>();
 

@@ -48,7 +48,6 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 
 		fixupForParentFields(structType, upsertFrag);
 		
-		
 		return upsertFrag;
 	}
 
@@ -81,7 +80,7 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 			String keyField = evaluator.getRawValue(); //we assume primary key. eg Customer[55]
 			inner = dvalConverter.buildFromObject(keyField, keyPair.type);
 		}
-		String sql = String.format(" KEY(%s, wid)", keyPair.name);
+		String sql = String.format(" KEY(%s)", keyPair.name);
 		updateFrag.keyFrag =  new RawFragment(sql);
 		updateFrag.keyFieldName = keyPair.name;
 		updateFrag.statement.paramL.add(inner);
