@@ -80,7 +80,7 @@ public class DataImportService extends ServiceBase {
 				for(int x: ofh.arMetrics) {
 					joiner.add(String.format("%3d", x));
 				}
-				String ss = String.format("%15s (%2d): %s", ofh.fieldName, ofh.fieldIndex, joiner.toString());
+				String ss = String.format("%15s [%2d]: %s", ofh.fieldName, ofh.fieldIndex, joiner.toString());
 				log.log(ss);
 			}
 			
@@ -116,7 +116,6 @@ public class DataImportService extends ServiceBase {
 				log.log("  line %d: %s - %s", err.getLineNum(), fieldName, msg);
 			}
 		}
-		
 		
 	}
 	

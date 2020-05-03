@@ -56,7 +56,11 @@ public class SchemaMigrator extends ServiceBase {
 	}
 	
 	public void close() {
-		dbexecutor.close();
+		try {
+			dbexecutor.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean createSchemaTableIfNeeded() {

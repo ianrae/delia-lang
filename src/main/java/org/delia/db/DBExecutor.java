@@ -11,7 +11,7 @@ import org.delia.type.DValue;
  * @author Ian Rae
  *
  */
-public interface DBExecutor {
+public interface DBExecutor extends AutoCloseable {
 	
 	DValue executeInsert(DValue dval, InsertContext ctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
@@ -21,7 +21,6 @@ public interface DBExecutor {
 
 	boolean execTableDetect(String tableName);
 	boolean execFieldDetect(String tableName, String fieldName);
-	void close();
 
 	//schema actions
 	void createTable(String tableName);

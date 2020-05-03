@@ -53,6 +53,7 @@ public class MemDBExecutor implements DBExecutor {
 		return dbInterface.doesTableExist(tableName, dbctx);
 	}
 
+	//close is from AutoClosable
 	@Override
 	public void close() {
 //		conn.close(); no conn with mem db

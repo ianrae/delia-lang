@@ -168,7 +168,12 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				}
 			} finally {
 				if (dbexecutor != null) {
-					dbexecutor.close();
+					try {
+						dbexecutor.close();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			return res;

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
@@ -30,7 +29,6 @@ import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
-import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
