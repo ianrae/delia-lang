@@ -271,7 +271,8 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc);
+		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			
 			//hack hack hack TODO:improve this
 			//this works but is slow, and has race conditions if other thread does insert
@@ -288,9 +289,6 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 					return 0;
 				}
 			}
-			
-			
-			
 			
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();

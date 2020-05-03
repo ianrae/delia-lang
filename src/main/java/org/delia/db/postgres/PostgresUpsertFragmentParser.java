@@ -6,6 +6,7 @@ import java.util.Map;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.UpsertFragmentParser;
@@ -18,8 +19,8 @@ import org.delia.type.DValue;
 //single use!!!
 public class PostgresUpsertFragmentParser extends UpsertFragmentParser {
 
-	public PostgresUpsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc) {
-		super(factorySvc, fpSvc);
+	public PostgresUpsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, AssocTableReplacer assocTblReplacer) {
+		super(factorySvc, fpSvc, assocTblReplacer);
 	}
 
 	/**
@@ -44,7 +45,7 @@ public class PostgresUpsertFragmentParser extends UpsertFragmentParser {
 		generateKey(spec, upsertFrag, partialVal);
 		upsertFrag.keyFrag = null;
 		
-		generateSetFields(spec, structType, upsertFrag, partialVal, mmMap);
+		generateSetFieldsUpsert(spec, structType, upsertFrag, partialVal, mmMap);
 		initWhere(spec, structType, upsertFrag);
 		//remove last
 		int n = upsertFrag.statement.paramL.size();

@@ -1,15 +1,12 @@
 package org.delia.db.sql.fragment;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;
 
-public class UpsertStatementFragment extends SelectStatementFragment {
+public class UpsertStatementFragment extends UpdateStatementFragment {
 
 	public String sqlCmd = "MERGE INTO";
-	public List<String> setValuesL = new ArrayList<>();
 	public RawFragment keyFrag;
 	public String keyFieldName;
 	public boolean addOnConflictPhrase; //for postgres

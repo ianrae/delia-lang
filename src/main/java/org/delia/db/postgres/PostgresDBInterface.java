@@ -250,7 +250,8 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc);
+			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
+			PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);

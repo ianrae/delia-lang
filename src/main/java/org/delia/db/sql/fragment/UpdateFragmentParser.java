@@ -26,8 +26,8 @@ import org.delia.util.DeliaExceptionHelper;
 //single use!!!
 public class UpdateFragmentParser extends SelectFragmentParser {
 
-	private boolean useAliases = true;
-	private AssocTableReplacer assocTblReplacer;
+	protected boolean useAliases = true;
+	protected AssocTableReplacer assocTblReplacer;
 
 	public UpdateFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, AssocTableReplacer assocTblReplacer) {
 		super(factorySvc, fpSvc);
@@ -76,7 +76,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	 * Postgres doesn't like alias in UPDATE statements
 	 * @param selectFrag
 	 */
-	private void removeAllAliases(UpdateStatementFragment selectFrag) {
+	protected void removeAllAliases(UpdateStatementFragment selectFrag) {
 		for(FieldFragment ff: selectFrag.fieldL) {
 			ff.alias = null;
 		}
@@ -143,7 +143,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			index++;
 		}
 	}
-	private boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
+	protected boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
 		//key goes in child only
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
 		if (info != null && !info.isParent) {
@@ -151,7 +151,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 		return false;
 	}
-	private void generateAssocUpdateIfNeeded(QuerySpec spec, DStructType structType,
+	protected void generateAssocUpdateIfNeeded(QuerySpec spec, DStructType structType,
 			UpdateStatementFragment selectFrag, Map<String, DRelation> mmMap, Map<String, String> assocCrudMap) {
 		if (mmMap.isEmpty()) {
 			return;
@@ -414,40 +414,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	}
 
 
-	protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {
-		if (needJoinBase(spec, structType, selectFrag, details)) {
-			return true;
-		}
-
-		//			if (selectFrag.joinFrag == null) {
-		//				return false;
-		//			}
-		//
-		//			String alias = savedJoinedFrag.joinTblFrag.alias;
-		//
-		//			boolean mentioned = false;
-		//			if (selectFrag.orderByFrag != null) {
-		//				if (alias.equals(selectFrag.orderByFrag.alias)) {
-		//					mentioned = true;
-		//				}
-		//				for(OrderByFragment obff: selectFrag.orderByFrag.additionalL) {
-		//					if (alias.equals(obff.alias)) {
-		//						mentioned = true;
-		//						break;
-		//					}
-		//				}
-		//			}
-		//
-		//
-		//			if (mentioned) {
-		//				log.log("need join..");
-		//				return true;
-		//			}
-		return false;
-	}
-
-
-	public void generateUpdateFns(QuerySpec spec, DStructType structType, UpdateStatementFragment selectFrag) {
+	private void generateUpdateFns(QuerySpec spec, DStructType structType, UpdateStatementFragment selectFrag) {
 		//orderby supported only by MySQL which delia does not support
 		//			this.doOrderByIfPresent(spec, structType, selectFrag);
 		this.doLimitIfPresent(spec, structType, selectFrag);
@@ -531,7 +498,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		return stgroup;
 	}
 
-	private void initMainParams(SqlStatement mainStatement, List<DValue> saveL, List<StatementFragmentBase> allL, StatementFragmentBase innerFrag) {
+	protected void initMainParams(SqlStatement mainStatement, List<DValue> saveL, List<StatementFragmentBase> allL, StatementFragmentBase innerFrag) {
 		if (innerFrag != null) {
 			allL.add(innerFrag);
 		}
@@ -548,7 +515,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 	}
 
-	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag, List<DValue> paramL, List<StatementFragmentBase> allL) {
+	protected void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag, List<DValue> paramL, List<StatementFragmentBase> allL) {
 		int nextStartIndex = 0;
 		int k = 0;
 		for(StatementFragmentBase sfb: allL) {
