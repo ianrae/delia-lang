@@ -12,6 +12,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
@@ -60,7 +61,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		try {
 			dbexecutor.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			DBHelper.handleCloseFailure(e);
 		}
 	}
 

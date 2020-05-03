@@ -76,8 +76,7 @@ public class H2TestCleaner {
 				safeDeleteTable(executor, tbl);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			DBHelper.handleCloseFailure(e);
 		}
 	}
 
