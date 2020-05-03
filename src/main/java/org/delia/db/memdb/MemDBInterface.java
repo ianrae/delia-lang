@@ -445,6 +445,11 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 	private int doExecuteUpsert(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		RowSelector selector = createSelector(spec, dbctx); //may throw
+		if (selector instanceof AllRowSelector) {
+			DeliaError err = et.add("upsert-unique-violation", String.format("upsert filter must specify one row (at most), for type '%s'", spec.queryExp.typeName));
+			throw new DBException(err);
+		}
+		
 		MemUpsert memUpdate = new MemUpsert(factorySvc);
 		Stuff stuff = findOrCreateStuff(dbctx);
 		return memUpdate.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, dbctx, selector, this, stuff);

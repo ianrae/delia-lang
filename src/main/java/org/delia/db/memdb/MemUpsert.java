@@ -37,14 +37,18 @@ public class MemUpsert extends ServiceBase {
 		List<DValue> dvalList = selector.match(tbl.rowL);
 		String typeName = spec.queryExp.getTypeName();
 		if (selector.wasError()) {
-			DeliaError err = et.add("row-selector-error", String.format("xrow selector failed for type '%s'", typeName));
+			DeliaError err = et.add("row-selector-error", String.format("row selector failed for type '%s'", typeName));
+			throw new DBException(err);
+		}
+		if (dvalList.size() > 1) {
+			DeliaError err = et.add("upsert-unique-violation", String.format("upsert filter must specify one row (at most). %d rows matched for type '%s'", dvalList.size(), typeName));
 			throw new DBException(err);
 		}
 
 		if (CollectionUtils.isEmpty(dvalList)) {
 			//nothing to do
 			MemInsert memInsert = new MemInsert(factorySvc);
-			InsertContext ctx = new InsertContext(); //fix!!
+			InsertContext ctx = new InsertContext(); //upsert not supported for serial primaryKey
 			memInsert.doExecuteInsert(tbl, dvalFull, ctx, dbctx, memDBInterface, stuff);
 			return 0;
 		}
