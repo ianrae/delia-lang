@@ -102,7 +102,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Test
 	public void testR1000() {
-		runR1000File("t0-upsert.txt", 0);
+		runR1000File("t0-upsert.txt", 4);
 	}
 	
 	@Test
@@ -279,17 +279,13 @@ public class PostgresBDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+		testIndexToRun = 0;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
-		runR900File("t0-update-mm-all.txt", 4);
-//		runR900File("t0-update-mm-all-othertbl.txt", 2);
-//		runR900File("t0-update-mm-id.txt", 4);
-//		runR900File("t0-update-mm-id-othertbl.txt", 2);
-//		runR900File("t0-update-mm-other.txt", 4);
 //		runR900File("t0-update-mm-other-othertbl.txt", 2);
+		runR1000File("t0-upsert.txt", 4);
 	}
 	
 	//---
@@ -300,7 +296,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Before
 	public void init() {
-		this.disableAllSlowTests = true;
+//		this.disableAllSlowTests = true;
 		disableAllSlowTestsIfNeeded();
 	}
 	@After

@@ -13,7 +13,7 @@ expectDVal:false
 when:
   upsert Flight[55] {wid: 22}
 then:
-0
+1
 
 ---
 title: insert+query

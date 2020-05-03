@@ -54,7 +54,7 @@ public class MemUpsert extends ServiceBase {
 			MemInsert memInsert = new MemInsert(factorySvc);
 			InsertContext ctx = new InsertContext(); //upsert not supported for serial primaryKey
 			memInsert.doExecuteInsert(tbl, dvalFull, ctx, dbctx, memDBInterface, stuff);
-			return 0;
+			return 1;
 		}
 
 		//TODO: also need to validate with list. eq if two rows are setting same value

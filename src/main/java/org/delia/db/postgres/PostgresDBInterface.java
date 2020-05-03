@@ -27,6 +27,8 @@ import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
+import org.delia.db.sql.fragment.UpsertFragmentParser;
+import org.delia.db.sql.fragment.UpsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
@@ -243,26 +245,22 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	public int executeUpsert(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
-		
+		//TODO implement this!!
 		if (useFragmentParser) {
 			log.log("FRAG PARSER UPSERT....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
-			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
-			parser.useAliases(false);
 			QueryDetails details = new QueryDetails();
-			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
-			stgroup = parser.renderUpdateGroup(selectFrag);
+			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap);
+			stgroup = parser.renderUpsertGroup(selectFrag);
+//			s = selectFrag.statement;
 		} else {
-			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
-			stgroup = new SqlStatementGroup();
-			stgroup.add(statement);
+			//not supported
+			stgroup = null;
 		}
-		
 		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
 		}
@@ -272,8 +270,9 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		int updateCount = 0;
 		try {
 			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
-			updateCount = findUpdateCount("update", updateCountL, stgroup);
+			
+			SqlStatement singleStatement = stgroup.statementL.get(0);
+			updateCount = conn.execUpdateStatement(singleStatement, sqlctx);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}
