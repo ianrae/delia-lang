@@ -417,20 +417,25 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	@Override
 	public void enumerateAllTables(Log logToUse) {
 		DBAccessContext dbctx = new DBAccessContext(null, null);
-		H2DBExecutor exec = (H2DBExecutor) this.createExector(dbctx);
-		
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_TABLES);
-		exec.close();
+		try(H2DBExecutor exec = (H2DBExecutor) this.createExector(dbctx)) {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_TABLES);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	@Override
 	public void enumerateAllConstraints(Log logToUse) {
 		DBAccessContext dbctx = new DBAccessContext(null, null);
-		H2DBExecutor exec = (H2DBExecutor) this.createExector(dbctx);
 		
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_CONSTRAINTS);
-		exec.close();
+		try(H2DBExecutor exec = (H2DBExecutor) this.createExector(dbctx)) {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_CONSTRAINTS);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

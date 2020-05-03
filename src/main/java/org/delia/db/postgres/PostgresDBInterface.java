@@ -364,20 +364,25 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	@Override
 	public void enumerateAllTables(Log logToUse) {
 		DBAccessContext dbctx = new DBAccessContext(null, null);
-		PostgresDBExecutor exec = (PostgresDBExecutor) this.createExector(dbctx);
-		
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_TABLES);
-		exec.close();
+		try(PostgresDBExecutor exec = (PostgresDBExecutor) this.createExector(dbctx)) {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_TABLES);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	@Override
 	public void enumerateAllConstraints(Log logToUse) {
 		DBAccessContext dbctx = new DBAccessContext(null, null);
-		PostgresDBExecutor exec = (PostgresDBExecutor) this.createExector(dbctx);
+		try(PostgresDBExecutor exec = (PostgresDBExecutor) this.createExector(dbctx)) {
+			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+			exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_CONSTRAINTS);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-		exec.getConn().enumerateDBSchema(sqlgen, logToUse, DBListingType.ALL_CONSTRAINTS);
-		exec.close();
 	}
 	@Override
 	public void performTypeReplacement(TypeReplaceSpec spec) {
