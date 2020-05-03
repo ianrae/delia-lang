@@ -27,7 +27,6 @@ import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
-import org.delia.db.sql.fragment.UpsertFragmentParser;
 import org.delia.db.sql.fragment.UpsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.FKSqlGenerator;
@@ -251,7 +250,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
-			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc);
+			PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
 			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap);

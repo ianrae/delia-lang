@@ -1,8 +1,6 @@
 package org.delia.db.sql.fragment;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
@@ -24,7 +22,7 @@ import org.delia.util.DeliaExceptionHelper;
 //single use!!!
 public class UpsertFragmentParser extends SelectFragmentParser {
 
-	private boolean useAliases = true;
+	protected boolean useAliases = true;
 
 	public UpsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc) {
 		super(factorySvc, fpSvc);
@@ -72,7 +70,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 	 * Postgres doesn't like alias in UPDATE statements
 	 * @param selectFrag
 	 */
-	private void removeAllAliases(UpsertStatementFragment selectFrag) {
+	protected void removeAllAliases(UpsertStatementFragment selectFrag) {
 		for(FieldFragment ff: selectFrag.fieldL) {
 			ff.alias = null;
 		}
@@ -88,7 +86,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		}
 	}
 	
-	private void generateKey(QuerySpec spec, UpsertStatementFragment updateFrag, DValue partialVal) {
+	protected void generateKey(QuerySpec spec, UpsertStatementFragment updateFrag, DValue partialVal) {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(partialVal.getType());
 		DValue inner = DValueHelper.findPrimaryKeyValue(partialVal);
 		if (inner == null) {
@@ -103,7 +101,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		updateFrag.statement.paramL.add(inner);
 	}
 
-	private void generateSetFields(QuerySpec spec, DStructType structType, UpsertStatementFragment updateFrag,
+	protected void generateSetFields(QuerySpec spec, DStructType structType, UpsertStatementFragment updateFrag,
 			DValue partialVal, Map<String, DRelation> mmMap) {
 		//we assume partialVal same type as structType!! (or maybe a base class)
 
@@ -154,7 +152,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 			index++;
 		}
 	}
-	private boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
+	protected boolean shouldGenerateFKConstraint(TypePair pair, DStructType dtype) {
 		//key goes in child only
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
 		if (info != null && !info.isParent) {
@@ -163,7 +161,7 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 		return false;
 	}
 	
-	private void generateUpsertFns(QuerySpec spec, DStructType structType, UpsertStatementFragment selectFrag) {
+	protected void generateUpsertFns(QuerySpec spec, DStructType structType, UpsertStatementFragment selectFrag) {
 		//orderby supported only by MySQL which delia does not support
 		//			this.doOrderByIfPresent(spec, structType, selectFrag);
 		this.doLimitIfPresent(spec, structType, selectFrag);
@@ -202,50 +200,6 @@ public class UpsertFragmentParser extends SelectFragmentParser {
 //		}
 		
 		return stgroup;
-	}
-
-	private void initMainParams(SqlStatement mainStatement, List<DValue> saveL, List<StatementFragmentBase> allL, StatementFragmentBase innerFrag) {
-		if (innerFrag != null) {
-			allL.add(innerFrag);
-		}
-		
-		if (! mainStatement.paramL.isEmpty()) {
-			return;
-		}
-		
-		if (innerFrag != null) {
-			for(int i = 0; i < innerFrag.paramStartIndex; i++) {
-				DValue dval = saveL.get(i);
-				mainStatement.paramL.add(dval);
-			}
-		}
-	}
-
-	private void addIfNotNull(SqlStatementGroup stgroup, StatementFragmentBase innerFrag, List<DValue> paramL, List<StatementFragmentBase> allL) {
-		int nextStartIndex = 0;
-		int k = 0;
-		for(StatementFragmentBase sfb: allL) {
-			if (sfb == innerFrag) {
-				if (k < allL.size() - 1) {
-					nextStartIndex = allL.get(k+1).paramStartIndex;
-				} else {
-					nextStartIndex = Integer.MAX_VALUE;
-				}
-			}
-			k++;
-		}
-		
-		if (innerFrag != null) {
-			SqlStatement stat = innerFrag.statement;
-			stat.sql = innerFrag.render();
-			//we are copying more than needed, but that's ok
-			int n = nextStartIndex < paramL.size() ? nextStartIndex : paramL.size();
-			for(int i = innerFrag.paramStartIndex; i < n; i++) {
-				DValue dval = paramL.get(i);
-				stat.paramL.add(dval);
-			}
-			stgroup.add(stat);
-		}
 	}
 
 	public void useAliases(boolean b) {
