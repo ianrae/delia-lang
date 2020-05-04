@@ -1,6 +1,6 @@
-# CRUD update tests
+# CRUD upsert tests
 
-FEATURE: CRUD update - many-to-many scenario 1 - all
+FEATURE: CRUD upsert - many-to-many scenario 1 - all
 background:
 	type Customer struct {id int unique, wid int, relation addr Address optional many } end
 	type Address struct {id int unique, z int, relation cust Customer optional many } end
@@ -11,8 +11,8 @@ background:
 thenType: struct
 
 ---
-title: update without relation query back
+title: upsert without relation query back
 when:
   upsert Customer[true] {wid: 333}
 then:
-ERROR: upsert-filter-error
+ERROR: upsert-unique-violation

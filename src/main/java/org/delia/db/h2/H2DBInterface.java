@@ -310,7 +310,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 			
 			List<Integer > updateCountL = conn.execUpdateStatementGroup(stgroup, sqlctx);
-			updateCount = findUpdateCount("update", updateCountL, stgroup);
+			updateCount = findUpdateCount("merge", updateCountL, stgroup);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}

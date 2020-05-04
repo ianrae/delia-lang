@@ -103,7 +103,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 4);
 		runR1000File("t0-upsert-no-update.txt", 2);
-		runR1000File("t0-upsert-mm-id.txt", 2);
+		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-all.txt", 1);
 		runR1000File("t0-upsert-mm-other.txt", 1);
 	}
@@ -288,10 +288,8 @@ public class NewBDDH2Tests extends NewBDDBase {
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-//		runR900File("t0-update-mm-other-othertbl.txt", 2);
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
 		runR1000File("t0-upsert.txt", 4);
-		runR1000File("t0-upsert-no-update.txt", 2);
 	}
 	
 	//---

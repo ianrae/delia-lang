@@ -103,7 +103,7 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 4);
 		runR1000File("t0-upsert-no-update.txt", 2);
-		runR1000File("t0-upsert-mm-id.txt", 2);
+		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-all.txt", 1);
 		runR1000File("t0-upsert-mm-other.txt", 1);
 	}
@@ -296,7 +296,8 @@ public class AllBDDTests extends NewBDDBase {
 //		runR700File("t0-insert-serial.txt", 1);
 //		runR300File("t0-int.txt", 10);
 //		runR1000File("t0-upsert.txt", 4);
-		runR1000File("t0-upsert-no-update.txt", 4);
+		runR1000File("t0-upsert-mm-all.txt", 1);
+//		runR1000File("t0-upsert-mm-other.txt", 1);
 	}
 	
 	//---
