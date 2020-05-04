@@ -51,6 +51,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
@@ -330,16 +331,36 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			} else {
 				//validate the fields of the partial DValue
 				ValidationRuleRunner ruleRunner = createValidationRunner();
-				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
+				ruleRunner.enableRelationModifier(true);
+				ruleRunner.enableInsertFlag(true);
+				ConfigureService configSvc = factorySvc.getConfigureService();
+				
+				//upsert doesn't have primary key in field set, so temporarily add it
+				//so we can run validation 
+				PrimaryKeyHelperService pkSvc = new PrimaryKeyHelperService(factorySvc, registry);
+				QuerySpec spec = resolveFilterVars(exp.queryExp);
+				boolean addedPK = pkSvc.addPrimaryKeyIfMissing(spec, cres.dval);
+
+				ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
+				if (! ruleRunner.validateDVal(cres.dval)) {
 					ruleRunner.propogateErrors(res);
 				}
 				
-				//then validate the affected rules (of the struct)
-				//We determine the rules dependent on each field in partial dval
-				//and execute those rules only
-				if (! ruleRunner.validateDependentRules(cres.dval)) {
-					ruleRunner.propogateErrors(res);
+				if (addedPK) {
+					pkSvc.removePrimayKey(cres.dval);
 				}
+				
+				
+//				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
+//					ruleRunner.propogateErrors(res);
+//				}
+//				
+//				//then validate the affected rules (of the struct)
+//				//We determine the rules dependent on each field in partial dval
+//				//and execute those rules only
+//				if (! ruleRunner.validateDependentRules(cres.dval)) {
+//					ruleRunner.propogateErrors(res);
+//				}
 
 				if (!res.errors.isEmpty()) {
 					res.ok = false;
