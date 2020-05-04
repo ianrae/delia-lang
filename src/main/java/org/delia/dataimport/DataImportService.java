@@ -13,6 +13,7 @@ import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
+import org.delia.runner.inputfunction.InputFunctionServiceOptions;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
@@ -34,9 +35,11 @@ public class DataImportService extends ServiceBase {
 		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
 	}
 
-	public InputFunctionResult importIntoDatabase(String inputFnName, LineObjIterator lineObjIter) {
+	public InputFunctionResult executeImport(String inputFnName, LineObjIterator lineObjIter, ImportLevel importLevel) {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		inputFnSvc.setMetricsObserver(metricsObserver);
+		initImportLevel(inputFnSvc, importLevel);
+		
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
 		if (progset == null) {
 			DeliaExceptionHelper.throwError("cant-find-user-fn", "Can't find input fn '%s'", inputFnName);
@@ -54,6 +57,19 @@ public class DataImportService extends ServiceBase {
 		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		return result;
+	}
+
+	private void initImportLevel(InputFunctionService inputFnSvc, ImportLevel importLevel) {
+		InputFunctionServiceOptions options = inputFnSvc.getOptions();
+		
+		switch(importLevel) 
+		{
+		case ONE:
+			options.ignoreRelationErrors = true;
+			break;
+		default:
+			break;
+		}
 	}
 
 	public ImportMetricObserver getMetricsObserver() {

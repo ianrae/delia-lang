@@ -17,6 +17,7 @@ import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
+import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
@@ -54,7 +55,7 @@ public class DataImportGroupTests  extends NewBDDBase {
 			for(GroupPair pair: groupL) {
 				DataImportService importSvc = new DataImportService(session, stopAfterErrorThreshold);
 
-				InputFunctionResult result = importSvc.importIntoDatabase(pair.inputFnName, pair.iter);
+				InputFunctionResult result = importSvc.executeImport(pair.inputFnName, pair.iter, ImportLevel.ONE);
 				resultL.add(result);
 			}
 			

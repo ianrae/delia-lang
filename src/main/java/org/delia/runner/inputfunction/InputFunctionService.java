@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.delia.api.DeliaSession;
-import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
@@ -39,6 +38,7 @@ public class InputFunctionService extends ServiceBase {
 	private Random rand = new Random();
 	private DValueConverterService dvalConverter;
 	private ImportMetricObserver metricsObserver;
+	private InputFunctionServiceOptions options = new InputFunctionServiceOptions();
 
 	public InputFunctionService(FactoryService factorySvc) {
 		super(factorySvc);
@@ -358,5 +358,13 @@ public class InputFunctionService extends ServiceBase {
 
 	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
 		this.metricsObserver = metricsObserver;
+	}
+
+	public InputFunctionServiceOptions getOptions() {
+		return options;
+	}
+
+	public void setOptions(InputFunctionServiceOptions options) {
+		this.options = options;
 	}
 }

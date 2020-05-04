@@ -17,6 +17,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.core.ServiceBase;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
+import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
@@ -193,7 +194,7 @@ public class ImportToolTests  extends NewBDDBase {
 		CSVFileLoader loader = new CSVFileLoader(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
-		InputFunctionResult result = importSvc.importIntoDatabase("category", loader);
+		InputFunctionResult result = importSvc.executeImport("category", loader, ImportLevel.ONE);
 		importSvc.dumpImportReport(result, observer);
 	}
 	
@@ -234,7 +235,7 @@ public class ImportToolTests  extends NewBDDBase {
 		CSVFileLoader loader = new CSVFileLoader(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
-		InputFunctionResult result = importSvc.importIntoDatabase("product", loader);
+		InputFunctionResult result = importSvc.executeImport("product", loader, ImportLevel.ONE);
 		importSvc.dumpImportReport(result, observer);
 	}
 	
