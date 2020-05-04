@@ -26,4 +26,9 @@ public class LineObjIteratorImpl implements LineObjIterator {
 	public int getNumHdrRows() {
 		return 0;
 	}
+
+	@Override
+	public String getFileName() {
+		return "in-memory";
+	}
 }

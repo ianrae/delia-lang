@@ -70,6 +70,7 @@ public class DataImportService extends ServiceBase {
 		request.session = session;
 		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
+		result.filename = lineObjIter.getFileName();
 		return result;
 	}
 
@@ -96,11 +97,11 @@ public class DataImportService extends ServiceBase {
 	
 	public void dumpImportReport(InputFunctionResult result, SimpleImportMetricObserver observer) {
 		int n = result.numRowsProcessed;
-		int succeeded = result.numRowsInserted;
+		int succeeded = result.numRowsInserted - result.numFailedRowInserts;
 		int failed = n - succeeded;
 		String alert = failed == 0 ? "  ***SUCCESS***" : String.format("(%d errorrs)", result.errors.size());
 		log.log("");
-		String s = String.format("IMPORT %d rows. %d successful, %d failed        %s", n, failed, succeeded, alert);
+		String s = String.format("IMPORT %d rows. %d successful, %d failed        %s  %s", n, succeeded, failed, alert, result.filename);
 		log.log(s);
 		
 		for(OutputSpec ospec : result.progset.outputSpecs) {

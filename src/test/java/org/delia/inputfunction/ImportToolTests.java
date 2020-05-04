@@ -293,7 +293,7 @@ public class ImportToolTests  extends NewBDDBase {
 		CSVFileLoader loader = new CSVFileLoader(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
-		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.ONE);
+		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.TWO);
 		for(InputFunctionResult result: resultL) {
 			importSvc.dumpImportReport(result, observer);
 		}

@@ -289,6 +289,7 @@ public class InputFunctionService extends ServiceBase {
 				}
 			}
 		} catch (DeliaException e) {
+			fnResult.numFailedRowInserts++;
 			DeliaError err = e.getLastError();
 			boolean addErrorFlag = true;
 			
