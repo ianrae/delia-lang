@@ -43,12 +43,9 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 
 		generateKey(spec, upsertFrag, partialVal);
 		generateSetFieldsUpsert(spec, structType, upsertFrag, partialVal, mmMap);
-		logParams("a", upsertFrag);
-		List<DValue> tmpL = new ArrayList<>(upsertFrag.statement.paramL);
-//		upsertFrag.statement.paramL.clear();
+//		logParams("a", upsertFrag);
 		int nn = upsertFrag.statement.paramL.size();
 		
-		logParams("a1", upsertFrag);
 		initWhere(spec, structType, upsertFrag);
 		generateAssocUpdateIfNeeded(spec, structType, upsertFrag, mmMap, assocCrudMap);
 		if (upsertFrag.statement.paramL.size() > nn) {
@@ -60,17 +57,8 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 				upsertFrag.assocMergeIntoFrag.paramStartIndex--;
 			}
 		}
-		logParams("a2", upsertFrag);
-//		//remove last
-//		int n = upsertFrag.statement.paramL.size();
-//		upsertFrag.statement.paramL.remove(n - 1);
-
-		logParams("a3", upsertFrag);
-//		upsertFrag.statement.paramL.addAll(tmpL);
-		logParams("a4", upsertFrag);
 
 		fixupForParentFields(structType, upsertFrag);
-		
 		
 		return upsertFrag;
 	}
