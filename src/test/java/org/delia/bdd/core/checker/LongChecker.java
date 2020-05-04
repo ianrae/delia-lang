@@ -1,22 +1,22 @@
-package org.delia.bddnew.core.checker;
+package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.bddnew.core.ThenValue;
+import org.delia.bdd.core.ThenValue;
 import org.delia.log.Log;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 
-public class BoolChecker extends ValueCheckerBase {
+public class LongChecker extends ValueCheckerBase {
 	@Override
 	public void chkShape(BDDResult bddres) {
-		assertEquals(Shape.BOOLEAN, bddres.res.shape);
+		assertEquals(Shape.LONG, bddres.res.shape);
 	}
 
 	@Override
 	public boolean compareObj(ThenValue thenVal, DValue dval, Log log) {
-		Boolean expected = Boolean.parseBoolean(thenVal.expected);
-		Boolean s = dval.asBoolean();
+		Long expected = Long.parseLong(thenVal.expected);
+		Long s = dval.asLong();
 		if (expected == null && s == null) {
 			return true;
 		} else if (!expected.equals(s)) {

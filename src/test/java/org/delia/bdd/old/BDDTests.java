@@ -1,4 +1,4 @@
-package org.delia.bdd;
+package org.delia.bdd.old;
 
 import org.junit.Before;
 import org.junit.Test;

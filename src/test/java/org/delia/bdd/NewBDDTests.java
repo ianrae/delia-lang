@@ -1,14 +1,14 @@
-package org.delia.bddnew;
+package org.delia.bdd;
 
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.bddnew.core.BDDParser;
-import org.delia.bddnew.core.BDDTest;
-import org.delia.bddnew.core.BDDTestRunner;
-import org.delia.bddnew.core.BDDTester;
+import org.delia.bdd.core.BDDParser;
+import org.delia.bdd.core.BDDTest;
+import org.delia.bdd.core.BDDTestRunner;
+import org.delia.bdd.core.BDDTester;
 import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.util.TextFileReader;

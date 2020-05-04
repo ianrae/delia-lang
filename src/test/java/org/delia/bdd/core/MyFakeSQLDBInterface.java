@@ -1,4 +1,4 @@
-package org.delia.bddnew.core;
+package org.delia.bdd.core;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterfaceInternal;

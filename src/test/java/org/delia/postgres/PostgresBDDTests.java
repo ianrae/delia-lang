@@ -1,8 +1,8 @@
 package org.delia.postgres;
 
-import org.delia.bddnew.NewBDDBase;
-import org.delia.bddnew.core.BDDTester2;
-import org.delia.bddnew.core.MyFakeSQLDBInterface;
+import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.core.BDDTester2;
+import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.junit.After;

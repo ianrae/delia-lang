@@ -1,4 +1,4 @@
-package org.delia.bddnew;
+package org.delia.bdd;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,10 +10,10 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.delia.base.UnitTestLog;
-import org.delia.bddnew.core.BDDParser;
-import org.delia.bddnew.core.BDDTest;
-import org.delia.bddnew.core.BDDTestRunner;
-import org.delia.bddnew.core.DBInterfaceCreator;
+import org.delia.bdd.core.BDDParser;
+import org.delia.bdd.core.BDDTest;
+import org.delia.bdd.core.BDDTestRunner;
+import org.delia.bdd.core.DBInterfaceCreator;
 import org.delia.db.DBInterface;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;

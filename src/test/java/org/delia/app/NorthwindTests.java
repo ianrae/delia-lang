@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.api.Delia;
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.builder.ConnectionBuilder;

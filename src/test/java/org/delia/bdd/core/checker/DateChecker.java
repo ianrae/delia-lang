@@ -1,11 +1,11 @@
-package org.delia.bddnew.core.checker;
+package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.delia.bddnew.core.ThenValue;
+import org.delia.bdd.core.ThenValue;
 import org.delia.core.DateFormatService;
 import org.delia.core.DateFormatServiceImpl;
 import org.delia.core.TimeZoneService;

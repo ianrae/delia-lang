@@ -1,4 +1,4 @@
-package org.delia.bdd;
+package org.delia.bdd.old;
 
 import static org.junit.Assert.assertEquals;
 

@@ -1,11 +1,11 @@
-package org.delia.bddnew.core.checker;
+package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.delia.bddnew.core.ThenValue;
+import org.delia.bdd.core.ThenValue;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.log.Log;

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.delia.api.Delia;
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;

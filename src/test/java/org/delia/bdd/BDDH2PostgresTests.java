@@ -1,3 +1,4 @@
+package org.delia.bdd;
 //package org.delia.bddnew;
 //
 //import org.delia.bddnew.core.BDDTester2;

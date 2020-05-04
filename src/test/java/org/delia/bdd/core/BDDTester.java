@@ -1,9 +1,9 @@
-package org.delia.bddnew.core;
+package org.delia.bdd.core;
 
 import static org.junit.Assert.assertEquals;
 
 import org.delia.base.UnitTestLog;
-import org.delia.bdd.BDDQueryHelper;
+import org.delia.bdd.old.BDDQueryHelper;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.db.DBType;
 import org.delia.h2.DeliaInitializer;

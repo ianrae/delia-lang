@@ -1,8 +1,8 @@
-package org.delia.bddnew.core.checker;
+package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.bddnew.core.ThenValue;
+import org.delia.bdd.core.ThenValue;
 import org.delia.log.Log;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
