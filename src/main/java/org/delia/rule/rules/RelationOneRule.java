@@ -83,16 +83,14 @@ public class RelationOneRule extends DRuleBase {
 		
 		//next ensure this is only foreign key of that value
 		if (!otherSideIsMany) {
-			qrespFetch = ctx.getFetchRunner().queryOwningType(owningType, oper1.getSubject(), drel);
-			if (!qrespFetch.ok) {
+			boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
+			if (!exists) {
 //			qresResult.err = qrespFetch.err;
 			} else {
-				if (!CollectionUtils.isEmpty(qrespFetch.dvalList)) {
-					String key = drel.getForeignKey().asString();
-					String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
-					addDetailedError(ctx, msg, getSubject());
-					return false;
-				}
+				String key = drel.getForeignKey().asString();
+				String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
+				addDetailedError(ctx, msg, getSubject());
+				return false;
 			}
 		}
 

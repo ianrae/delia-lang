@@ -3,6 +3,7 @@ package org.delia.runner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -73,18 +74,6 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		}
 	}
 	private QueryExp buildOwningTypeQuery(DStructType owningType, String fieldName, DRelation drel) {
-//		Integer foreignKey = drel.getForeignKey().asInt();
-//		
-//		//Address[cust=value]
-//		IdentExp op1 = new IdentExp(fieldName);
-//		IntegerExp op2 = new IntegerExp(foreignKey);
-//		FilterOpExp filterOp0 = new FilterOpExp(99, op1, new StringExp("=="), op2);
-//		FilterOpFullExp filterOp = new FilterOpFullExp(99, filterOp0);
-//		
-//		//TODO string keys later
-//		FilterExp filter = new FilterExp(99, filterOp);
-//		QueryExp exp = new QueryExp(0, new IdentExp(owningType.getName()), filter, null);
-		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp = builderSvc.createEqQuery(owningType.getName(), fieldName, drel.getForeignKey());
 		
@@ -92,7 +81,7 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 	}
 
 	@Override
-	public QueryResponse queryOwningType(DStructType owningType, String fieldName, DRelation drel) {
+	public boolean queryFKExists(DStructType owningType, String fieldName, DRelation drel) {
 		QueryExp queryExp = buildOwningTypeQuery(owningType, fieldName, drel);
 		//TODO resolve vars such as foo(id)
 		QuerySpec spec = new QuerySpec();
@@ -101,11 +90,15 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		spec.evaluator.init(spec.queryExp);
 		QueryContext qtx = new QueryContext();
 		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
-		return qresp;
+		
+		if (!qresp.ok) {
+			return false;
+		} else {
+			return !CollectionUtils.isEmpty(qresp.dvalList);
+		}
 	}
 
-	@Override
-	public QueryResponse load(String typeName, String fieldName, DValue keyVal) {
+	private QueryResponse load(String typeName, String fieldName, DValue keyVal) {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp queryExp = builderSvc.createEqQuery(typeName, fieldName, keyVal);
 		
