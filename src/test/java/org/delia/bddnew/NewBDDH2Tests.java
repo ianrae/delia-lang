@@ -101,7 +101,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Test
 	public void testR1000() {
-		runR1000File("t0-upsert.txt", 4);
+		runR1000File("t0-upsert.txt", 5);
 		runR1000File("t0-upsert-no-update.txt", 2);
 		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
@@ -290,10 +290,9 @@ public class NewBDDH2Tests extends NewBDDBase {
 		cleanTables = true;
 		
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
-//		runR1000File("t0-upsert.txt", 4);
 //		runR1000File("t0-upsert-mm-id.txt", 4);
-		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
 //		runR900File("t0-update-mm-id.txt", 4);
+		runR1000File("t0-upsert.txt", 5);
 	}
 	
 	//---
@@ -304,7 +303,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Before
 	public void init() {
-//		this.disableAllSlowTests = true;
+		this.disableAllSlowTests = true;
 		disableAllSlowTestsIfNeeded();
 	}
 	@After

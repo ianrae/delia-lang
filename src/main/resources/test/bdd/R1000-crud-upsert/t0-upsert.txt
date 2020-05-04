@@ -48,3 +48,12 @@ value:a:Flight {
  vwid:23
 }
 
+---
+title: non-primary key filter
+when:
+  insert Flight {id:55, wid: 22}
+  upsert Flight[id>50] {wid: 23}
+  let x = Flight[55]
+then:
+ERROR: upsert-filter-error
+

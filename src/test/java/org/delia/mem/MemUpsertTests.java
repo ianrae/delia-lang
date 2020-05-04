@@ -31,7 +31,7 @@ public class MemUpsertTests extends TopoTestBase {
 		//this is the normal way. use primary key filter
 		ResultValue res = execStatement("upsert Customer[55] {wid:44}");
 		assertEquals(true, res.ok);
-		assertEquals(0, res.val); //0 means we inserted
+		assertEquals(1, res.val); 
 
 		res = this.execStatement("let x = Customer[true]");
 		assertEquals(true, res.ok);
@@ -40,14 +40,14 @@ public class MemUpsertTests extends TopoTestBase {
 		assertEquals(44, dval.asStruct().getField("wid").asInt());
 	}
 	
-	@Test
+	@Test(expected=DeliaException.class)
 	public void testOtherUniqueFilter() {
 		createCustomer();
 		//alternative way. put primary key in fields and then can use any filter
 		//that matches 0 or 1 records
 		ResultValue res = execStatement("upsert Customer[wid==19] {id:55, wid:44}");
 		assertEquals(true, res.ok);
-		assertEquals(0, res.val); //0 means we inserted
+		assertEquals(1, res.val); 
 		
 		res = this.execStatement("let x = Customer[true]");
 		assertEquals(true, res.ok);
