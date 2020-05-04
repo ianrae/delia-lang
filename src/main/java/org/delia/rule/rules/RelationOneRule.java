@@ -189,7 +189,8 @@ public class RelationOneRule extends DRuleBase {
 		if (farInfo == null) {
 			return;
 		}
-		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
+//		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
+		QueryResponse qresp = fetchRunner.loadFKOnly(info.farType.getName(), farInfo.fieldName, keyVal);
 		if (!qresp.ok) {
 			return; //!!
 		}
@@ -197,12 +198,10 @@ public class RelationOneRule extends DRuleBase {
 			return;
 		}
 		
-		DValue otherSide = qresp.getOne();
-		pair = DValueHelper.findPrimaryKeyFieldPair(otherSide.getType());
-		DValue otherSideKeyVal = otherSide.asStruct().getField(pair.name);
+		DValue otherSideKeyVal = qresp.getOne();
 		
 		DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
-		String typeName = otherSide.getType().getName();
+		String typeName = info.farType.getName();
 		RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
 		builder.buildFromString(otherSideKeyVal.asString());
 		boolean b = builder.finish();
