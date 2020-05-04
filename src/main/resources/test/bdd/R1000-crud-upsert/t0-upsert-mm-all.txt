@@ -15,4 +15,4 @@ title: upsert without relation query back
 when:
   upsert Customer[true] {wid: 333}
 then:
-ERROR: upsert-unique-violation
+ERROR: upsert-filter-error

@@ -44,26 +44,30 @@ public class PostgresUpsertFragmentParser extends UpsertFragmentParser {
 
 		generateKey(spec, upsertFrag, partialVal);
 		upsertFrag.keyFrag = null;
-		
 		generateSetFieldsUpsert(spec, structType, upsertFrag, partialVal, mmMap);
-		initWhere(spec, structType, upsertFrag);
-		//remove last
-		int n = upsertFrag.statement.paramL.size();
-		upsertFrag.statement.paramL.remove(n - 1);
-		//no min,max,etc in UPDATE
-		
-		//		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
+		//add params for the UPDATE SET.. part
+		if (! noUpdateFlag) {
+			cloneParams(upsertFrag.statement, 0, upsertFrag.fieldL.size());
+		}
 
+		int nn = upsertFrag.statement.paramL.size();
+		
+		initWhere(spec, structType, upsertFrag);
+		generateAssocUpdateIfNeeded(spec, structType, upsertFrag, mmMap, assocCrudMap);
+		if (upsertFrag.statement.paramL.size() > nn) {
+			upsertFrag.statement.paramL.remove(nn);
+			if (upsertFrag.assocDeleteFrag != null) {
+				upsertFrag.assocDeleteFrag.paramStartIndex--;
+			}
+			if (upsertFrag.assocMergeIntoFrag != null) {
+				upsertFrag.assocMergeIntoFrag.paramStartIndex--;
+			}
+		}
 
 		fixupForParentFields(structType, upsertFrag);
 
 		if (! useAliases) {
 			removeAllAliases(upsertFrag);
-		}
-
-		//add params for the UPDATE SET.. part
-		if (! noUpdateFlag) {
-			cloneParams(upsertFrag.statement, 0, upsertFrag.fieldL.size());
 		}
 		return upsertFrag;
 	}
