@@ -27,9 +27,9 @@ public class DataImportService extends ServiceBase {
 	private int stopAfterErrorThreshold;
 	private ImportMetricObserver metricsObserver;
 
-	public DataImportService(Delia delia, DeliaSession session, int stopAfterErrorThreshold) {
-		super(delia.getFactoryService());
-		this.delia = delia;
+	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
+		super(session.getDelia().getFactoryService());
+		this.delia = session.getDelia();
 		this.session = session;
 		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
 	}

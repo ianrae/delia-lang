@@ -92,7 +92,7 @@ public class ImportLevelTests  extends NewBDDBase {
 		return src;
 	}
 	private void dumpImportReport(Delia delia, InputFunctionResult result, SimpleImportMetricObserver observer) {
-		DataImportService dataImportSvc = new DataImportService(delia, session, 999);
+		DataImportService dataImportSvc = new DataImportService(session, 999);
 		dataImportSvc.dumpImportReport(result, observer);
 	}
 

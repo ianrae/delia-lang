@@ -15,7 +15,12 @@ public class DeliaSessionImpl implements DeliaSession {
 	//only set in beginExecution, not in continueExecution
 	public List<Exp> expL; //for getting at parse results. TODO: need a flag that disables this to save memory
 	private DValueIterator insertPrebuiltValueIterator;
+	private Delia delia;
 						
+	
+	public DeliaSessionImpl(Delia delia) {
+		this.delia = delia;
+	}
 
 	@Override
 	public boolean ok() {
@@ -40,6 +45,11 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public DValueIterator getInsertPrebuiltValueIterator() {
 		return insertPrebuiltValueIterator;
+	}
+
+	@Override
+	public Delia getDelia() {
+		return delia;
 	}
 	
 }

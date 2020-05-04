@@ -122,7 +122,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		dumpImportReport(result, observer);
 	}
 	private void dumpImportReport(InputFunctionResult result, SimpleImportMetricObserver observer) {
-		DataImportService dataImportSvc = new DataImportService(delia, session, 999);
+		DataImportService dataImportSvc = new DataImportService(session, 999);
 		dataImportSvc.dumpImportReport(result, observer);
 	}
 
@@ -265,7 +265,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		return buildAndRun(lineObjIter, expectedNumRows);
 	}
 	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedNumRows) {
-		DataImportService importSvc = new DataImportService(delia, session, 0);
+		DataImportService importSvc = new DataImportService(session, 0);
 
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());
@@ -275,7 +275,7 @@ public class FieldHandleTests  extends NewBDDBase {
 		return result;
 	}
 	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
-		DataImportService importSvc = new DataImportService(delia, session, 0);
+		DataImportService importSvc = new DataImportService(session, 0);
 
 		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
 		assertEquals(0, result.errors.size());

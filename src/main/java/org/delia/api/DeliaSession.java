@@ -17,5 +17,6 @@ public interface DeliaSession {
 	ResultValue getFinalResult();
 	ExecutionState getExecutionContext();
 	void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator); 
-	DValueIterator getInsertPrebuiltValueIterator(); 
+	DValueIterator getInsertPrebuiltValueIterator();
+	Delia getDelia();
 }

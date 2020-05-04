@@ -114,7 +114,7 @@ public class DeliaImpl implements Delia {
 		execTypes(mainRunner, expL);
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan);
 		if (migrationPlanRes != null) {
-			DeliaSessionImpl session = new DeliaSessionImpl();
+			DeliaSessionImpl session = new DeliaSessionImpl(this);
 			session.execCtx = mainRunner.getExecutionState();
 			session.ok = true;
 			session.res = migrationPlanRes;
@@ -124,7 +124,7 @@ public class DeliaImpl implements Delia {
 
 		ResultValue res = doExecute(mainRunner, expL);
 
-		DeliaSessionImpl session = new DeliaSessionImpl();
+		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();
 		session.ok = true;
 		session.res = res;

@@ -52,7 +52,7 @@ public class DataImportGroupTests  extends NewBDDBase {
 			List<InputFunctionResult> resultL = new ArrayList<>();
 			
 			for(GroupPair pair: groupL) {
-				DataImportService importSvc = new DataImportService(delia, session, stopAfterErrorThreshold);
+				DataImportService importSvc = new DataImportService(session, stopAfterErrorThreshold);
 
 				InputFunctionResult result = importSvc.importIntoDatabase(pair.inputFnName, pair.iter);
 				resultL.add(result);
