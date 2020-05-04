@@ -117,7 +117,7 @@ public class ImportToolTests  extends NewBDDBase {
 				index++;
 			}
 			
-			sc.o("}");
+			sc.o("} end");
 			
 			return sc.str;
 		}
@@ -197,9 +197,8 @@ public class ImportToolTests  extends NewBDDBase {
 		importSvc.dumpImportReport(result, observer);
 	}
 	
-	
 	@Test
-	public void testTool1Product() {
+	public void testTool1ProductSource() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		String src = createCategorySrc(false);
@@ -210,46 +209,36 @@ public class ImportToolTests  extends NewBDDBase {
 		String s = tool.generateDeliaStructSourceCode("Product", path, false);
 		log.log("here:");
 		log.log(s);
-		
-		
-//		String s = tool.generateInputFunctionSourceCode("Product", path);
-//		log.log("here:");
-//		log.log(s);
-		
-//		log.log("add to session..");
-//		ResultValue res = delia.continueExecution(s, session);
-//		assertEquals(true, res.ok);
-//		
-//		DataImportService importSvc = new DataImportService(session, 10);
-//		CSVFileLoader loader = new CSVFileLoader(path);
-//		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-//		importSvc.setMetricsObserver(observer);
-//		InputFunctionResult result = importSvc.importIntoDatabase("category", loader);
-//		importSvc.dumpImportReport(result, observer);
+		log.log("");
 	}
 	
 	@Test
-	public void testLevel1() {
+	public void testTool1Product() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		String src = createCustomerSrc(0);
+		String src = createCategorySrc(false);
+		src += " " + createProductSrc();
 		buildSrc(delia, src);
-
-		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		
+		ImportToool tool = new ImportToool(session);
+		String path = BASE_DIR + "products.csv";
+		String s = tool.generateInputFunctionSourceCode("Product", path);
+		log.log("here:");
+		log.log(s);
+		
+		log.log("add to session..");
+		ResultValue res = delia.continueExecution(s, session);
+		assertEquals(true, res.ok);
+		
+		DataImportService importSvc = new DataImportService(session, 10);
+		CSVFileLoader loader = new CSVFileLoader(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-		ProgramSet progset = buildProgSet(inputFnSvc, observer, 3); 
-
-		LineObjIterator lineObjIter = createIter(2);
-		LineObj line1 = currentLineObjL.get(0);
-		line1.elements[1] = "notanint";
-		InputFunctionResult result = runImport(delia, inputFnSvc, progset, lineObjIter); //inputFnSvc.process(request, lineObjIter);
-		chkResult(result, 2, 3, 1);
-
-		chkObserver(observer, 2, 1, 1);
-		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_M]);
-		assertEquals(1, observer.currentRowMetrics[OutputFieldHandle.INDEX_I1]);
-		dumpImportReport(delia, result, observer);
+		importSvc.setMetricsObserver(observer);
+		InputFunctionResult result = importSvc.importIntoDatabase("product", loader);
+		importSvc.dumpImportReport(result, observer);
 	}
+	
+	
 	
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
@@ -308,7 +297,8 @@ public class ImportToolTests  extends NewBDDBase {
 	}
 	
 	String createProductSrc() {
-		String src = "type Product struct {    productID int,    productName string,    supplierID int,    categoryID int,    quantityPerUnit string,    unitPrice string,    unitsInStock int,    unitsOnOrder int,    reorderLevel int,    discontinued int}";
+		String src = "type Product struct {    productID int primaryKey,    productName string,    supplierID int, relation categoryID Category optional one,    quantityPerUnit string,    unitPrice string,   ";
+		src += "unitsInStock int,    unitsOnOrder int,    reorderLevel int,    discontinued int} end";
 		return src;
 	}
 	

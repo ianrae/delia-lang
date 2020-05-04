@@ -13,20 +13,26 @@ import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.ErrorType;
+import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DeliaException;
 import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.tlang.runner.TLangRunnerImpl;
 import org.delia.tlang.runner.TLangVarEvaluator;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.RelationValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
@@ -94,7 +100,11 @@ public class InputFunctionRunner extends ServiceBase {
 			DValue inner = null;
 			DType dtype = pair.type;
 			Shape shape = dtype.getShape();
-			inner = buildScalarValue(input, shape, errL, pair, data, metricsObserver); 
+			if (Shape.STRUCT.equals(shape)) {
+				inner = buildRelationFKValue(input, errL, pair, data, metricsObserver);
+			} else {
+				inner = buildScalarValue(input, shape, errL, pair, data, metricsObserver); 
+			}
 			structBuilder.addField(pair.name, inner);
 		}			
 		
@@ -126,6 +136,37 @@ public class InputFunctionRunner extends ServiceBase {
 		} else {
 			return structBuilder.getDValue();
 		}
+	}
+
+	private DValue buildRelationFKValue(Object input, List<DeliaError> errL, TypePair pair, ProcessedInputData data,
+			ImportMetricObserver metricsObserver) {
+		TypePair fkPair = null;
+		RelationOneRule oneRule = DRuleHelper.findOneRule(data.structType, pair.name);
+		if (oneRule != null) {
+			fkPair = DValueHelper.findPrimaryKeyFieldPair(oneRule.relInfo.farType);
+		} else {
+			RelationManyRule manyRule = DRuleHelper.findManyRule(data.structType, pair.name);
+			if (manyRule != null) {
+				fkPair = DValueHelper.findPrimaryKeyFieldPair(manyRule.relInfo.farType);
+			}
+		}
+		
+		if (fkPair == null) {
+			DeliaExceptionHelper.throwError("bad-relation", "Type %s.%s can find relation info", data.structType.getName(), pair.name);
+		}
+		
+		
+		DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
+		RelationValueBuilder relBuilder = new RelationValueBuilder(relType, fkPair.type.getName(), registry);
+		
+		String inputStr = input == null ? null : input.toString();
+		relBuilder.buildFromString(inputStr);
+		if (!relBuilder.finish()) {
+			
+		}
+		DValue inner = relBuilder.getDValue();
+//		DValue inner = buildScalarValue(input, fkPair.type.getShape(), errL, pair, data, metricsObserver); 
+		return inner;
 	}
 
 	private DeliaError findNoDataError(List<DetailedError> validationErrors) {
