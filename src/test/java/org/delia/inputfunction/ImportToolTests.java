@@ -3,8 +3,11 @@ package org.delia.inputfunction;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
@@ -12,10 +15,14 @@ import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
+import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.StrCreator;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
@@ -27,11 +34,171 @@ import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.type.DStructType;
+import org.delia.type.DType;
+import org.delia.type.TypePair;
+import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.StringUtil;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImportLevelTests  extends NewBDDBase {
+public class ImportToolTests  extends NewBDDBase {
+	
+	public static class ImportToool extends ServiceBase {
 
+		private DeliaSession session;
+
+		public ImportToool(DeliaSession session) {
+			super(session.getDelia().getFactoryService());
+			this.session = session;
+		}
+		
+		public String generateInputFunctionSourceCode(String typeName, String path) {
+			DType dtype = session.getExecutionContext().registry.getType(typeName);
+			if (dtype == null || ! dtype.isStructShape()) {
+				DeliaExceptionHelper.throwError("cant-find-type", "Can't find type '%s'", typeName);
+			}
+			DStructType structType = (DStructType) dtype;
+			
+			CSVFileLoader loader = new CSVFileLoader(path);
+			
+			StrCreator sc = new StrCreator();
+			String fnName = StringUtil.lowify(typeName);
+			sc.o("input function %s(%s o) {\n", fnName, typeName);
+			
+			List<String> columns = readHeaderColumns(loader);
+//			List<String> save = new ArrayList<>(columns);
+			Map<String,String> usedMap = new HashMap<>();
+			for(TypePair pair: structType.getAllFields()) {
+				String column = findColumn(pair, columns);
+				if (column != null) {
+					sc.o("  %s -> o.%s using { trim() }\n", column, pair.name);
+					columns.remove(column);
+					usedMap.put(pair.name, "");
+				}
+			}
+			
+			//for remaining columns
+			for(String col: columns) {
+				sc.o("  %s -> ? using { trim() }\n", col);
+				
+			}
+			
+			boolean b = false;
+			for(TypePair pair: structType.getAllFields()) {
+				if (! usedMap.containsKey(pair.name)) {
+					if (!b) {
+						b = true;
+						sc.o("//unused fields:\n");
+					}
+					sc.o(" %s\n", pair.name);
+				}
+			}
+			sc.o("}");
+			
+			return sc.str;
+		}
+
+		private String findColumn(TypePair pair, List<String> columns) {
+			for(String col: columns) {
+				if (pair.name.equalsIgnoreCase(col)) {
+					return col;
+				}
+			}
+			return null;
+		}
+
+		private List<String> readHeaderColumns(CSVFileLoader loader) {
+			LineObj hdrLineObj = null; //TODO support more than one later
+			int numToIgnore = loader.getNumHdrRows();
+			while (numToIgnore-- > 0) {
+				if (!loader.hasNext()) {
+					return null; //empty file
+				}
+				hdrLineObj = loader.next();
+			}
+			
+			List<String> columns = new ArrayList<>();
+			for(String col: hdrLineObj.elements) {
+				columns.add(col.trim());
+			}
+			return columns;
+		}
+		
+		public String detectType(String input) {
+			if (StringUtils.isEmpty(input)) {
+				return "string";
+			}
+			
+			if (tryBoolean(input)) {
+				return "boolean";
+			} else if (tryLong(input)) {
+				if (tryInt(input)) {
+					return "int";
+				}
+				return "long";
+			} else if (tryInt(input)) {
+				return "int";
+			} else {
+				return "string";
+			}
+		}
+		
+		private boolean tryInt(String input) {
+			return isIntValue(input);
+		}
+
+		private boolean tryLong(String input) {
+			return isLongValue(input);
+		}
+
+		private boolean tryBoolean(String input) {
+			return isBooleanValue(input);
+		}
+		public static boolean isIntValue(String input) {
+			boolean match = false;
+			try {
+				Integer n = Integer.parseInt(input);
+				match = true;
+			} catch (NumberFormatException e) {
+			}
+			return match;
+		}
+
+		public static boolean isLongValue(String input) {
+			boolean match = false;
+			try {
+				Long n = Long.parseLong(input);
+				match = true;
+			} catch (NumberFormatException e) {
+			}
+			return match;
+		}
+
+		public static boolean isBooleanValue(String input) {
+			String str = input.toLowerCase();
+			if (str.equals("true") || str.equals("false")) {
+				return true;
+			}
+			return false;
+		}
+	}
+	
+	
+	@Test
+	public void testTool1() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		buildSrc(delia, 0);
+		
+		ImportToool tool = new ImportToool(session);
+		String path = BASE_DIR + "categories.csv";
+		String s = tool.generateInputFunctionSourceCode("Customer", path);
+		log.log("here:");
+		log.log(s);
+		
+	}
+	
 	@Test
 	public void testLevel1() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
