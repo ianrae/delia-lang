@@ -126,3 +126,15 @@ value:a:Customer {
  vid:55
  vaddr:{100} 
 }
+
+---
+title: upsert TODO: fix. perhaps move populate-other-side logic from insert to query...
+when:
+  upsert Address[100] { cust: 55 }
+  let x = Customer[addr <= 100].fks()
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+

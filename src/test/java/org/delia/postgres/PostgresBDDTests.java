@@ -133,7 +133,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1350File("t0-filter-op-boolean.txt", 6);
 		runR1350File("t0-filter-op-string.txt", 13);
 		runR1350File("t0-filter-op-date.txt", 13);
-		runR1350File("t0-filter-op-relation.txt", 13);
+		runR1350File("t0-filter-op-relation.txt", 14);
 		runR1350File("t0-filter-and-or.txt", 7);
 		runR1350File("t0-filter-in.txt", 3);
 		runR1350File("t0-filter-like.txt", 6);
