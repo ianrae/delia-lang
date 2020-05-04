@@ -140,32 +140,33 @@ public class InputFunctionRunner extends ServiceBase {
 
 	private DValue buildRelationFKValue(Object input, List<DeliaError> errL, TypePair pair, ProcessedInputData data,
 			ImportMetricObserver metricsObserver) {
-		TypePair fkPair = null;
+		DType fkType = null;
 		RelationOneRule oneRule = DRuleHelper.findOneRule(data.structType, pair.name);
 		if (oneRule != null) {
-			fkPair = DValueHelper.findPrimaryKeyFieldPair(oneRule.relInfo.farType);
+			fkType = oneRule.relInfo.farType;
 		} else {
 			RelationManyRule manyRule = DRuleHelper.findManyRule(data.structType, pair.name);
 			if (manyRule != null) {
-				fkPair = DValueHelper.findPrimaryKeyFieldPair(manyRule.relInfo.farType);
+				fkType = manyRule.relInfo.farType;
 			}
 		}
 		
-		if (fkPair == null) {
+		if (fkType == null) {
 			DeliaExceptionHelper.throwError("bad-relation", "Type %s.%s can find relation info", data.structType.getName(), pair.name);
 		}
 		
-		
 		DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
-		RelationValueBuilder relBuilder = new RelationValueBuilder(relType, fkPair.type.getName(), registry);
+		RelationValueBuilder relBuilder = new RelationValueBuilder(relType, fkType, registry);
 		
 		String inputStr = input == null ? null : input.toString();
 		relBuilder.buildFromString(inputStr);
 		if (!relBuilder.finish()) {
-			
+			if (metricsObserver != null) {
+				ImportSpec ispec = findImportSpec(data.structType);
+				metricsObserver.onInvalid1Error(ispec, pair.name);
+			}
 		}
 		DValue inner = relBuilder.getDValue();
-//		DValue inner = buildScalarValue(input, fkPair.type.getShape(), errL, pair, data, metricsObserver); 
 		return inner;
 	}
 
