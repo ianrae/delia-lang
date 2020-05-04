@@ -282,14 +282,15 @@ public class NewBDDH2Tests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
+		testIndexToRun = 3;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
 //		runR1550File("t0-queryfn-manymany-right.txt", 6);
-		runR1000File("t0-upsert.txt", 4);
+//		runR1000File("t0-upsert.txt", 4);
+		runR1000File("t0-upsert-mm-id.txt", 4);
 	}
 	
 	//---

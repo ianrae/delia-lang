@@ -161,7 +161,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, fieldName);
 			if (ruleMany != null) {
 				RelationInfo info = ruleMany.relInfo;
-				String assocAction = assocCrudMap.get(fieldName);
+				String assocAction = assocCrudMap == null ? null: assocCrudMap.get(fieldName);
 				if (assocAction == null) {
 					selectFrag.assocUpdateFrag = new UpdateStatementFragment();
 					genAssocField(selectFrag, selectFrag.assocUpdateFrag, structType, mmMap, fieldName, info, selectFrag.whereL, 
