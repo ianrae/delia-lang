@@ -115,16 +115,17 @@ public class InputFunctionService extends ServiceBase {
 			DeliaExceptionHelper.throwError("no-session", "session is null. You need to call beginSession");
 		}
 		
-		DeliaSessionImpl sessionimpl = (DeliaSessionImpl) session;
-		for(Exp exp: sessionimpl.expL) {
-			if (exp instanceof InputFunctionDefStatementExp) {
-				InputFunctionDefStatementExp infnExp = (InputFunctionDefStatementExp) exp;
-				if (infnExp.funcName.equals(inputFnName)) {
-					return infnExp;
-				}
-			}
-		}
-		return null;
+		InputFunctionDefStatementExp infnExp = session.getExecutionContext().inputFnMap.get(inputFnName);
+		return infnExp;
+//		for(Exp exp: sessionimpl.expL) {
+//			if (exp instanceof InputFunctionDefStatementExp) {
+//				InputFunctionDefStatementExp infnExp = (InputFunctionDefStatementExp) exp;
+//				if (infnExp.funcName.equals(inputFnName)) {
+//					return infnExp;
+//				}
+//			}
+//		}
+//		return null;
 	}
 
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {

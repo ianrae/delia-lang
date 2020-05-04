@@ -15,7 +15,6 @@ import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
@@ -24,6 +23,7 @@ import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.StrCreator;
 import org.delia.log.LogLevel;
+import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -189,21 +189,33 @@ public class ImportToolTests  extends NewBDDBase {
 	public void testTool1() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		buildSrc(delia, 0);
+		String src = createCategorySrc(false);
+		buildSrc(delia, src);
 		
 		ImportToool tool = new ImportToool(session);
 		String path = BASE_DIR + "categories.csv";
-		String s = tool.generateInputFunctionSourceCode("Customer", path);
+		String s = tool.generateInputFunctionSourceCode("Category", path);
 		log.log("here:");
 		log.log(s);
 		
+		log.log("add to session..");
+		ResultValue res = delia.continueExecution(s, session);
+		assertEquals(true, res.ok);
+		
+		DataImportService importSvc = new DataImportService(session, 10);
+		CSVFileLoader loader = new CSVFileLoader(path);
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		importSvc.setMetricsObserver(observer);
+		InputFunctionResult result = importSvc.importIntoDatabase("category", loader);
+		importSvc.dumpImportReport(result, observer);
 	}
 	
 	@Test
 	public void testLevel1() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		buildSrc(delia, 0);
+		String src = createCustomerSrc(0);
+		buildSrc(delia, src);
 
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
@@ -233,8 +245,8 @@ public class ImportToolTests  extends NewBDDBase {
 	@Before
 	public void init() {
 	}
-	private void buildSrc(Delia delia, int which) {
-		String src = createCustomerSrc(which);
+	private void buildSrc(Delia delia, String src) {
+//		String src = createCustomerSrc(which);
 		delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
@@ -259,6 +271,26 @@ public class ImportToolTests  extends NewBDDBase {
 
 		return src;
 	}
+	private String createCategorySrc(boolean inOrder) {
+		if (inOrder) {
+			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+			//categoryID,categoryName,description,picture
+			src += String.format(" \ninput function foo(Category c) { categoryID -> c.categoryID, categoryName -> c.categoryName, description -> c.description, picture -> c.picture } ");
+			src += String.format(" \nlet var1 = 55");
+
+			return src;
+		} else {
+			String src = String.format(" type Category struct { categoryID int primaryKey, categoryName string, description string, picture string} end");
+			//categoryID,categoryName,description,picture
+			src += String.format(" \ninput function foo(Category c) { categoryName -> c.categoryName, description -> c.description, picture -> c.picture, categoryID -> c.categoryID } ");
+			src += String.format(" \nlet var1 = 55");
+
+			return src;
+		}
+	}
+	
+	
+	
 	private void dumpImportReport(Delia delia, InputFunctionResult result, SimpleImportMetricObserver observer) {
 		DataImportService dataImportSvc = new DataImportService(session, 999);
 		dataImportSvc.dumpImportReport(result, observer);

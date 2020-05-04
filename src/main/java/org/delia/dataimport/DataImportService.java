@@ -68,7 +68,8 @@ public class DataImportService extends ServiceBase {
 		int n = result.numRowsProcessed;
 		int failed = result.numRowsInserted;
 		int succeeded = n - failed;
-		String s = String.format("IMPORT %d rows. %d successful, %d failed", n, failed, succeeded);
+		String alert = failed == 0 ? "  *SUCCESS*" : "";
+		String s = String.format("IMPORT %d rows. %d successful, %d failed %s", n, failed, succeeded, alert);
 		log.log(s);
 		
 		for(OutputSpec ospec : result.progset.outputSpecs) {
