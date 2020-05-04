@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
@@ -23,6 +22,7 @@ import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;
+import org.delia.dval.TypeDetector;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
@@ -94,21 +94,27 @@ public class ImportToolTests  extends NewBDDBase {
 			return sc.str;
 		}
 		
-		public String generateDeliaStructSourceCode(String typeName, String path) {
+		public String generateDeliaStructSourceCode(String typeName, String path, boolean addLineFeed) {
 			CSVFileLoader loader = new CSVFileLoader(path);
 			
 			StrCreator sc = new StrCreator();
-			sc.o("type %s struct {\n", StringUtil.uppify(typeName));
+			String lf = addLineFeed ? "\n" : "";
+			sc.o("type %s struct {%s", StringUtil.uppify(typeName), lf);
 			
 			//TODO: detect type
 			List<String> columns = readHeaderColumns(loader);
-			ListWalker<String> listWalker = new ListWalker<>(columns);
-			while(listWalker.hasNext()) {
-				String s = listWalker.next();
-				sc.o("    %s string", s);
-				if (!listWalker.addIfNotLast(sc, ",\n")) {
-					sc.o("\n");
+			List<String> types = this.detectColumnTypes(loader, 5);
+			
+			ListWalker<String> walker = new ListWalker<>(columns);
+			int index = 0;
+			while(walker.hasNext()) {
+				String s = walker.next();
+				String type = types.get(index);
+				sc.o("    %s %s", s, type);
+				if (!walker.addIfNotLast(sc, "," + lf)) {
+					sc.o(lf);
 				}
+				index++;
 			}
 			
 			sc.o("}");
@@ -151,62 +157,17 @@ public class ImportToolTests  extends NewBDDBase {
 			return columns;
 		}
 		
-		public String detectType(String input) {
-			if (StringUtils.isEmpty(input)) {
-				return "string";
-			}
+		private List<String> detectColumnTypes(CSVFileLoader loader, int numRowsToRead) {
+			List<String> types = new ArrayList<>();
 			
-			if (tryBoolean(input)) {
-				return "boolean";
-			} else if (tryLong(input)) {
-				if (tryInt(input)) {
-					return "int";
+			while(loader.hasNext()) {
+				LineObj lineObj = loader.next();
+				for(String col: lineObj.elements) {
+					String type = TypeDetector.detectType(col);
+					types.add(type);
 				}
-				return "long";
-			} else if (tryInt(input)) {
-				return "int";
-			} else {
-				return "string";
 			}
-		}
-		
-		private boolean tryInt(String input) {
-			return isIntValue(input);
-		}
-
-		private boolean tryLong(String input) {
-			return isLongValue(input);
-		}
-
-		private boolean tryBoolean(String input) {
-			return isBooleanValue(input);
-		}
-		public static boolean isIntValue(String input) {
-			boolean match = false;
-			try {
-				Integer n = Integer.parseInt(input);
-				match = true;
-			} catch (NumberFormatException e) {
-			}
-			return match;
-		}
-
-		public static boolean isLongValue(String input) {
-			boolean match = false;
-			try {
-				Long n = Long.parseLong(input);
-				match = true;
-			} catch (NumberFormatException e) {
-			}
-			return match;
-		}
-
-		public static boolean isBooleanValue(String input) {
-			String str = input.toLowerCase();
-			if (str.equals("true") || str.equals("false")) {
-				return true;
-			}
-			return false;
+			return types;
 		}
 	}
 	
@@ -246,7 +207,7 @@ public class ImportToolTests  extends NewBDDBase {
 		
 		ImportToool tool = new ImportToool(session);
 		String path = BASE_DIR + "products.csv";
-		String s = tool.generateDeliaStructSourceCode("Product", path);
+		String s = tool.generateDeliaStructSourceCode("Product", path, false);
 		log.log("here:");
 		log.log(s);
 		
@@ -344,6 +305,11 @@ public class ImportToolTests  extends NewBDDBase {
 
 			return src;
 		}
+	}
+	
+	String createProductSrc() {
+		String src = "type Product struct {    productID int,    productName string,    supplierID int,    categoryID int,    quantityPerUnit string,    unitPrice string,    unitsInStock int,    unitsOnOrder int,    reorderLevel int,    discontinued int}";
+		return src;
 	}
 	
 	
