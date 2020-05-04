@@ -14,6 +14,7 @@ import org.delia.bddnew.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
@@ -26,6 +27,7 @@ import org.delia.db.sql.table.ListWalker;
 import org.delia.dval.TypeDetector;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
+import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -33,7 +35,6 @@ import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
-import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.type.DStructType;
@@ -45,6 +46,26 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ImportToolTests  extends NewBDDBase {
+	
+	public static class ImportGroupBuilder extends ServiceBase {
+		private List<GroupPair> groupL = new ArrayList<>();
+
+		public ImportGroupBuilder(FactoryService factorySvc) {
+			super(factorySvc);
+		}
+		
+		public void addImport(String inputFunctionName, LineObjIterator iter) {
+			GroupPair pair = new GroupPair();
+			pair.inputFnName = inputFunctionName;
+			pair.iter = iter;
+			this.groupL.add(pair);
+		}
+
+		public List<GroupPair> getGroupL() {
+			return groupL;
+		}
+	}
+	
 	
 	public static class ImportToool extends ServiceBase {
 
@@ -239,6 +260,45 @@ public class ImportToolTests  extends NewBDDBase {
 		importSvc.dumpImportReport(result, observer);
 	}
 	
+	@Test
+	public void testLevel2() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		String src = createCategorySrc(false);
+		src += " " + createProductSrc();
+		buildSrc(delia, src);
+		
+		ImportToool tool = new ImportToool(session);
+		String path = BASE_DIR + "products.csv";
+		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
+		log.log("here:");
+		log.log(prodSrc);
+		
+		String path2 = BASE_DIR + "categories.csv";
+		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
+		log.log("here:");
+		log.log(catSrc);
+		
+		String newSrc = prodSrc + " " + catSrc;
+		
+		log.log("add to session..");
+		ResultValue res = delia.continueExecution(newSrc, session);
+		assertEquals(true, res.ok);
+		
+		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
+		groupBuilder.addImport("category", new CSVFileLoader(path2));
+		groupBuilder.addImport("product", new CSVFileLoader(path));
+		
+		DataImportService importSvc = new DataImportService(session, 10);
+		CSVFileLoader loader = new CSVFileLoader(path);
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		importSvc.setMetricsObserver(observer);
+		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.ONE);
+		for(InputFunctionResult result: resultL) {
+			importSvc.dumpImportReport(result, observer);
+		}
+	}
+
 	
 	
 	// --

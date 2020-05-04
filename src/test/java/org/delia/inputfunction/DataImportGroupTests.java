@@ -22,6 +22,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
+import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.junit.Before;
@@ -30,11 +31,6 @@ import org.junit.Test;
 public class DataImportGroupTests  extends NewBDDBase {
 	
 	public static class ImportGroupService extends ServiceBase {
-		
-		public static class GroupPair {
-			public String inputFnName;
-			public LineObjIterator iter;
-		}
 		
 		private List<GroupPair> groupL = new ArrayList<>();
 

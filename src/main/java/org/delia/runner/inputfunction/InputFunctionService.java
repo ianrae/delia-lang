@@ -290,7 +290,10 @@ public class InputFunctionService extends ServiceBase {
 			}
 		} catch (DeliaException e) {
 			DeliaError err = e.getLastError();
+			boolean addErrorFlag = true;
+			
 			if (errIdIStartsWith(err, "rule-")) {
+				addErrorFlag = !options.ignoreRelationErrors;
 				if (metricsObserver != null && err instanceof DetailedError) {
 					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
 					if (err.getId().equals("rule-relationOne") || err.getId().equals("rule-relationOne")) {
@@ -310,7 +313,9 @@ public class InputFunctionService extends ServiceBase {
 				}
 			}
 			
-			addError(e, errL, lineNum);
+			if (addErrorFlag) {
+				addError(e, errL, lineNum);
+			}
 		}
 		request.session.setInsertPrebuiltValueIterator(null);
 	}		

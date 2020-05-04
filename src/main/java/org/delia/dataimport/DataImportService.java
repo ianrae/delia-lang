@@ -1,5 +1,7 @@
 package org.delia.dataimport;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.api.Delia;
@@ -7,6 +9,7 @@ import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
+import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
@@ -33,6 +36,17 @@ public class DataImportService extends ServiceBase {
 		this.delia = session.getDelia();
 		this.session = session;
 		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
+	}
+	
+	public List<InputFunctionResult> executeImportGroup(List<GroupPair> groupL, ImportLevel importLevel) {
+		List<InputFunctionResult> resultL = new ArrayList<>();
+		
+		for(GroupPair pair: groupL) {
+			InputFunctionResult result = executeImport(pair.inputFnName, pair.iter, importLevel);
+			resultL.add(result);
+		}
+		
+		return resultL;
 	}
 
 	public InputFunctionResult executeImport(String inputFnName, LineObjIterator lineObjIter, ImportLevel importLevel) {
