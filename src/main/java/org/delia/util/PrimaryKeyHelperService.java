@@ -27,6 +27,12 @@ public class PrimaryKeyHelperService extends ServiceBase {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(partialVal.getType());
 		DValue inner = DValueHelper.findPrimaryKeyValue(partialVal);
 		if (inner == null) {
+			if (spec.queryExp.filter.cond instanceof BooleanExp) {
+				DeliaExceptionHelper.throwError("upsert-filter-error", "[true] not supported");
+			} else if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
+				DeliaExceptionHelper.throwError("upsert-filter-error", "only primary key filters are supported");
+			}
+			
 			FilterEvaluator evaluator = spec.evaluator;
 
 			DValueExConverter dvalConverter = new DValueExConverter(factorySvc, registry);

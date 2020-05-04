@@ -17,7 +17,7 @@ public class MemUpsertTests extends TopoTestBase {
 	public void testSerial() {
 		createCustomerTypeWithSerial();
 		
-		execStatement("upsert Customer {wid:44}");
+		execStatement("upsert Customer[1] {wid:44}");
 		ResultValue res = this.execStatement("let x = Customer[true]");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();

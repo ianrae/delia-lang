@@ -1,7 +1,7 @@
 package org.delia.runner;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
@@ -10,7 +10,6 @@ import org.delia.db.DBExecutor;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -18,7 +17,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.valuebuilder.RelationValueBuilder;
 
 public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 
@@ -130,13 +128,19 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 			return qresp;
 		}
 		
-		DValue otherSide = qresp.getOne();
-		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(otherSide.getType());
-		DValue otherSideKeyVal = otherSide.asStruct().getField(pair.name);
+		List<DValue> newList = new ArrayList<>();
+		TypePair pair = null;
+		for(DValue otherSide: qresp.dvalList) {
+			if (pair == null) {
+				pair = DValueHelper.findPrimaryKeyFieldPair(otherSide.getType());
+			}
+			DValue otherSideKeyVal = otherSide.asStruct().getField(pair.name);
+			newList.add(otherSideKeyVal);
+		}
 		
 		qresp = new QueryResponse();
 		qresp.ok = true;
-		qresp.dvalList = Collections.singletonList(otherSideKeyVal);
+		qresp.dvalList = newList;
 		return qresp;
 	}
 }

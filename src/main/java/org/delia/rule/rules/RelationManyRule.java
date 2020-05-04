@@ -174,7 +174,8 @@ public class RelationManyRule extends DRuleBase {
 		
 		RelationInfo farInfo = DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
 		
-		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
+//		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
+		QueryResponse qresp = fetchRunner.loadFKOnly(info.farType.getName(), farInfo.fieldName, keyVal);
 		if (!qresp.ok) {
 			return; //!!
 		}
@@ -182,13 +183,7 @@ public class RelationManyRule extends DRuleBase {
 			return;
 		}
 		
-		pair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-		List<DValue> keylist = new ArrayList<>();
-		for(DValue tmp: qresp.dvalList) {
-			DValue otherSideKeyVal = tmp.asStruct().getField(pair.name);
-			keylist.add(otherSideKeyVal);
-		}
-		
+		List<DValue> keylist = qresp.dvalList;
 		DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
 		String typeName = info.farType.getName();
 		RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
