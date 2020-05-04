@@ -9,7 +9,6 @@ import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
@@ -35,7 +34,10 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
 /**
- * Represents db access to a single db (conn)
+ * Represents db access to a single database.
+ * A DBInterface is a long-lived object and is generally created once
+ * per application (per database).
+ * 
  * @author Ian Rae
  *
  */

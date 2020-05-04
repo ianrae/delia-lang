@@ -89,7 +89,6 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			String typeName = dval.getType().getName();
 			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
 			stgroup = parser.renderInsertGroup(selectFrag);
-//			s = selectFrag.statement;
 		} else {
 			InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
 			SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
@@ -101,7 +100,6 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		try {
 			sqlctx.getGeneratedKeys = ctx.extractGeneratedKeys;
-//			int n = conn.executeInsertStatement(statement, sqlctx); 
 			List<Integer > updateCountL = conn.execInsertStatementGroup(stgroup, sqlctx);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
@@ -117,7 +115,6 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		}
 		return genVal;
 	}
-//	static int countdownHack = 2;
 
 	@Override
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
@@ -168,7 +165,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	private void fixupForExist(QuerySpec spec, List<DValue> dvalList, SelectFuncHelper sfhelper, DBAccessContext dbctx) {
 		if (sfhelper.isExistsPresent(spec)) {
 			valueHelper.fixupForExist(dvalList, dbctx);
-			DValue dval = dvalList.get(0);
+//			DValue dval = dvalList.get(0);
 		}
 	}
 
