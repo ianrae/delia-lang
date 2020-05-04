@@ -66,10 +66,11 @@ public class DataImportService extends ServiceBase {
 	
 	public void dumpImportReport(InputFunctionResult result, SimpleImportMetricObserver observer) {
 		int n = result.numRowsProcessed;
-		int failed = result.numRowsInserted;
-		int succeeded = n - failed;
-		String alert = failed == 0 ? "  *SUCCESS*" : "";
-		String s = String.format("IMPORT %d rows. %d successful, %d failed %s", n, failed, succeeded, alert);
+		int succeeded = result.numRowsInserted;
+		int failed = n - succeeded;
+		String alert = failed == 0 ? "  ***SUCCESS***" : String.format("(%d errorrs)", result.errors.size());
+		log.log("");
+		String s = String.format("IMPORT %d rows. %d successful, %d failed        %s", n, failed, succeeded, alert);
 		log.log(s);
 		
 		for(OutputSpec ospec : result.progset.outputSpecs) {

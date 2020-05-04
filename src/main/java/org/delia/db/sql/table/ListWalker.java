@@ -26,12 +26,13 @@ public class ListWalker<T> implements Iterator<T> {
 		return con;
 	}
 
-	public void addIfNotLast(StrCreator sc, String... args) {
+	public boolean addIfNotLast(StrCreator sc, String... args) {
 		if (! hasNext()) {
-			return;
+			return false;
 		}
 		for(String s: args) {
 			sc.o(s);
 		}
+		return true;
 	}
 }

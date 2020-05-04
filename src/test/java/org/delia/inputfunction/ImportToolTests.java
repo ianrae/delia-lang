@@ -22,6 +22,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.table.ListWalker;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
@@ -54,12 +55,7 @@ public class ImportToolTests  extends NewBDDBase {
 		}
 		
 		public String generateInputFunctionSourceCode(String typeName, String path) {
-			DType dtype = session.getExecutionContext().registry.getType(typeName);
-			if (dtype == null || ! dtype.isStructShape()) {
-				DeliaExceptionHelper.throwError("cant-find-type", "Can't find type '%s'", typeName);
-			}
-			DStructType structType = (DStructType) dtype;
-			
+			DStructType structType = (DStructType) getType(typeName); 
 			CSVFileLoader loader = new CSVFileLoader(path);
 			
 			StrCreator sc = new StrCreator();
@@ -81,7 +77,6 @@ public class ImportToolTests  extends NewBDDBase {
 			//for remaining columns
 			for(String col: columns) {
 				sc.o("  %s -> ? using { trim() }\n", col);
-				
 			}
 			
 			boolean b = false;
@@ -97,6 +92,37 @@ public class ImportToolTests  extends NewBDDBase {
 			sc.o("}");
 			
 			return sc.str;
+		}
+		
+		public String generateDeliaStructSourceCode(String typeName, String path) {
+			CSVFileLoader loader = new CSVFileLoader(path);
+			
+			StrCreator sc = new StrCreator();
+			sc.o("type %s struct {\n", StringUtil.uppify(typeName));
+			
+			//TODO: detect type
+			List<String> columns = readHeaderColumns(loader);
+			ListWalker<String> listWalker = new ListWalker<>(columns);
+			while(listWalker.hasNext()) {
+				String s = listWalker.next();
+				sc.o("    %s string", s);
+				if (!listWalker.addIfNotLast(sc, ",\n")) {
+					sc.o("\n");
+				}
+			}
+			
+			sc.o("}");
+			
+			return sc.str;
+		}
+
+		private DStructType getType(String typeName) {
+			DType dtype = session.getExecutionContext().registry.getType(typeName);
+			if (dtype == null || ! dtype.isStructShape()) {
+				DeliaExceptionHelper.throwError("cant-find-type", "Can't find type '%s'", typeName);
+			}
+			DStructType structType = (DStructType) dtype;
+			return structType;
 		}
 
 		private String findColumn(TypePair pair, List<String> columns) {
@@ -186,7 +212,7 @@ public class ImportToolTests  extends NewBDDBase {
 	
 	
 	@Test
-	public void testTool1() {
+	public void testTool1Category() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		String src = createCategorySrc(false);
@@ -208,6 +234,37 @@ public class ImportToolTests  extends NewBDDBase {
 		importSvc.setMetricsObserver(observer);
 		InputFunctionResult result = importSvc.importIntoDatabase("category", loader);
 		importSvc.dumpImportReport(result, observer);
+	}
+	
+	
+	@Test
+	public void testTool1Product() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		String src = createCategorySrc(false);
+		buildSrc(delia, src);
+		
+		ImportToool tool = new ImportToool(session);
+		String path = BASE_DIR + "products.csv";
+		String s = tool.generateDeliaStructSourceCode("Product", path);
+		log.log("here:");
+		log.log(s);
+		
+		
+//		String s = tool.generateInputFunctionSourceCode("Product", path);
+//		log.log("here:");
+//		log.log(s);
+		
+//		log.log("add to session..");
+//		ResultValue res = delia.continueExecution(s, session);
+//		assertEquals(true, res.ok);
+//		
+//		DataImportService importSvc = new DataImportService(session, 10);
+//		CSVFileLoader loader = new CSVFileLoader(path);
+//		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+//		importSvc.setMetricsObserver(observer);
+//		InputFunctionResult result = importSvc.importIntoDatabase("category", loader);
+//		importSvc.dumpImportReport(result, observer);
 	}
 	
 	@Test
