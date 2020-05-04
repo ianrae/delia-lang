@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.FilterOpFullExp;
@@ -42,16 +43,44 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 
 		generateKey(spec, upsertFrag, partialVal);
 		generateSetFieldsUpsert(spec, structType, upsertFrag, partialVal, mmMap);
+		logParams("a", upsertFrag);
+		List<DValue> tmpL = new ArrayList<>(upsertFrag.statement.paramL);
+//		upsertFrag.statement.paramL.clear();
+		int nn = upsertFrag.statement.paramL.size();
+		
+		logParams("a1", upsertFrag);
 		initWhere(spec, structType, upsertFrag);
 		generateAssocUpdateIfNeeded(spec, structType, upsertFrag, mmMap, assocCrudMap);
-		//remove last
-		int n = upsertFrag.statement.paramL.size();
-		upsertFrag.statement.paramL.remove(n - 1);
-		//no min,max,etc in UPDATE
+		if (upsertFrag.statement.paramL.size() > nn) {
+			upsertFrag.statement.paramL.remove(nn);
+			if (upsertFrag.assocDeleteFrag != null) {
+				upsertFrag.assocDeleteFrag.paramStartIndex--;
+			}
+			if (upsertFrag.assocMergeIntoFrag != null) {
+				upsertFrag.assocMergeIntoFrag.paramStartIndex--;
+			}
+		}
+		logParams("a2", upsertFrag);
+//		//remove last
+//		int n = upsertFrag.statement.paramL.size();
+//		upsertFrag.statement.paramL.remove(n - 1);
+
+		logParams("a3", upsertFrag);
+//		upsertFrag.statement.paramL.addAll(tmpL);
+		logParams("a4", upsertFrag);
 
 		fixupForParentFields(structType, upsertFrag);
 		
+		
 		return upsertFrag;
+	}
+
+	private void logParams(String title, UpsertStatementFragment upsertFrag) {
+		StringJoiner joiner = new StringJoiner(",");
+		for(DValue dval: upsertFrag.statement.paramL) {
+			joiner.add(dval.asString());
+		}
+		log.log("%s: %s", title, joiner.toString());
 	}
 
 	/**
@@ -196,7 +225,7 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 		stgroup.add(updateFrag.statement);
 		initMainParams(mainStatement, save, allL, updateFrag.assocUpdateFrag);
 		initMainParams(mainStatement, save, allL, updateFrag.assocDeleteFrag);
-		initMainParams(mainStatement, save, allL, updateFrag.assocMergeInfoFrag);
+		initMainParams(mainStatement, save, allL, updateFrag.assocMergeIntoFrag);
 		
 		if (mainStatement.paramL.isEmpty()) {
 			mainStatement.paramL.addAll(save);
@@ -205,7 +234,7 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 		
 		addIfNotNull(stgroup, updateFrag.assocUpdateFrag, save, allL);
 		addIfNotNull(stgroup, updateFrag.assocDeleteFrag, save, allL);
-		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, allL);
+		addIfNotNull(stgroup, updateFrag.assocMergeIntoFrag, save, allL);
 		
 		if (updateFrag.doUpdateLast) {
 			SqlStatement stat = stgroup.statementL.remove(0); //move first to last

@@ -460,7 +460,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		stgroup.add(updateFrag.statement);
 		initMainParams(mainStatement, save, allL, updateFrag.assocUpdateFrag);
 		initMainParams(mainStatement, save, allL, updateFrag.assocDeleteFrag);
-		initMainParams(mainStatement, save, allL, updateFrag.assocMergeInfoFrag);
+		initMainParams(mainStatement, save, allL, updateFrag.assocMergeIntoFrag);
 		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
 			initMainParams(mainStatement, save, allL, insFrag);
 		}
@@ -478,7 +478,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		
 		addIfNotNull(stgroup, updateFrag.assocUpdateFrag, save, allL);
 		addIfNotNull(stgroup, updateFrag.assocDeleteFrag, save, allL);
-		addIfNotNull(stgroup, updateFrag.assocMergeInfoFrag, save, allL);
+		addIfNotNull(stgroup, updateFrag.assocMergeIntoFrag, save, allL);
 		for(InsertStatementFragment insFrag: updateFrag.assocCrudInsertL) {
 			addIfNotNull(stgroup, insFrag, save, allL);
 		}

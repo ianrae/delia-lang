@@ -83,7 +83,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		
 		if (useFragmentParser) {
-			log.log("FRAG PARSER UPDATE....................");
+			log.log("FRAG PARSER INSERT....................");
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null);
 			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
 			String typeName = dval.getType().getName();
@@ -125,7 +125,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		SqlStatement statement;
 		
 		if (useFragmentParser) {
-			log.log("FRAG PARSEr....................");
+			log.log("FRAG PARSER-QUERY....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
