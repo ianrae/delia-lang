@@ -297,8 +297,9 @@ public class InputFunctionService extends ServiceBase {
 		gen.includeVPrefix = false;
 		DeliaGeneratePhase phase = request.session.getExecutionContext().generator;
 		boolean b = phase.generateValue(gen, dval, "a");
-		String s = StringUtil.flatten(gen.outputL);
-		return s;
+		String s = StringUtil.flattenNoComma(gen.outputL);
+		int pos = s.indexOf('{');
+		return s.substring(pos);
 	}
 
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {

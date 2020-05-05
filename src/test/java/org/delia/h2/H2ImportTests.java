@@ -47,7 +47,7 @@ public class H2ImportTests  extends NewBDDBase {
 		
 		ExternalDataLoader externalLoader = createExternalLoader();
 		CSVImportService.Options options = new CSVImportService.Options();
-		options.numRowsToImport = 3;
+//		options.numRowsToImport = 3;
 		options.logDetails = true;
 		List<InputFunctionResult> resultL = csvSvc.dryRunLevel3(groupList, deliaSrc, externalLoader, options);
 		csvSvc.dumpReports(resultL);

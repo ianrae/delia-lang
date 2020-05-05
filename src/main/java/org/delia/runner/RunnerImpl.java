@@ -519,6 +519,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
 			ConversionResult cres = new ConversionResult();
 			cres.localET = new SimpleErrorTracker(log);
+			if (insertPrebuiltValueIterator != null) {
+				cres.dval = insertPrebuiltValueIterator.next();
+				return cres;
+			}
+			
 			DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, this, sprigSvc);
 			cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
 			return cres;

@@ -48,6 +48,13 @@ public class StringUtil {
 		}
 		return joiner.toString();
 	}
+	public static String flattenNoComma(List<String> list) {
+		StringJoiner joiner = new StringJoiner(" ");
+		for(String s: list) {
+			joiner.add(s.trim());
+		}
+		return joiner.toString();
+	}
 	
 	public static String convertToSingleString(List<String> list) {
 		StringJoiner joiner = new StringJoiner("\n");
