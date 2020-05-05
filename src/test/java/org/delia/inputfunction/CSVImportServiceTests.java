@@ -2,6 +2,7 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
@@ -25,6 +26,7 @@ import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ExternalDataLoader;
+import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
@@ -33,6 +35,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class CSVImportServiceTests  extends NewBDDBase {
+	
+	public static class ImportGroupSpec {
+		public String csvPath;
+		public String typeName;
+		public String inputFnName;
+	}
 	
 	public static class CSVImportService  {
 
@@ -56,8 +64,33 @@ public class CSVImportServiceTests  extends NewBDDBase {
 			return result;
 		}
 		
+		public List<InputFunctionResult> importLevel2(List<ImportGroupSpec> groupList, String deliaSrc) {
+			ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+			Delia delia = DeliaBuilder.withConnection(info).build();
+			this.session = delia.beginSession(deliaSrc);
+			
+			importSvc = new DataImportService(session, 10);
+			List<GroupPair> groupL = new ArrayList<>();
+			for(ImportGroupSpec spec: groupList) {
+				CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+				GroupPair pair = new GroupPair();
+				pair.inputFnName = spec.inputFnName;
+				pair.iter = loader;
+				groupL.add(pair);
+			}
+			this.observer = new SimpleImportMetricObserver();
+			importSvc.setMetricsObserver(observer);
+			List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupL, ImportLevel.TWO);
+			return resultL;
+		}
+		
 		public void dumpReport(InputFunctionResult result) {
 			importSvc.dumpImportReport(result, observer);
+		}
+		public void dumpReports(List<InputFunctionResult> resultL) {
+			for(InputFunctionResult result: resultL) {
+				importSvc.dumpImportReport(result, observer);
+			}
 		}
 		
 	}
@@ -89,156 +122,117 @@ public class CSVImportServiceTests  extends NewBDDBase {
 	}
 	
 	@Test
-	public void testTool1Product() {
-		Delia delia = initDelia(); 
-		
-		ImportToool tool = new ImportToool(session);
-		String path = BASE_DIR + "products.csv";
-		String s = tool.generateInputFunctionSourceCode("Product", path);
-		log.log("here:");
-		log.log(s);
-		
-		log.log("add to session..");
-		ResultValue res = delia.continueExecution(s, session);
-		assertEquals(true, res.ok);
-		
-		DataImportService importSvc = new DataImportService(session, 10);
-		CSVFileLoader loader = new CSVFileLoader(path);
-		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-		importSvc.setMetricsObserver(observer);
-		InputFunctionResult result = importSvc.executeImport("product", loader, ImportLevel.ONE);
-		importSvc.dumpImportReport(result, observer);
-	}
-	
-	private Delia initDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		String src = createCategorySrc(false);
-		src += " " + createProductSrc();
-		buildSrc(delia, src);
-		return delia;
-	}
-
-	@Test
 	public void testLevel2() {
-		Delia delia = initDelia(); 
-		
-		ImportToool tool = new ImportToool(session);
 		String path = BASE_DIR + "products.csv";
-		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
-		log.log("here:");
-		log.log(prodSrc);
-		
 		String path2 = BASE_DIR + "categories.csv";
-		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
-		log.log("here:");
-		log.log(catSrc);
 		
-		String newSrc = prodSrc + " " + catSrc;
+		List<ImportGroupSpec> groupList = new ArrayList<>();
+		ImportGroupSpec gspec = new ImportGroupSpec();
+		gspec.csvPath = path;
+		gspec.inputFnName = "category";
+		gspec.typeName = "Category";
+		groupList.add(gspec);
+		gspec = new ImportGroupSpec();
+		gspec.csvPath = path2;
+		gspec.inputFnName = "product";
+		gspec.typeName = "Product";
+		groupList.add(gspec);
 		
-		log.log("add to session..");
-		ResultValue res = delia.continueExecution(newSrc, session);
-		assertEquals(true, res.ok);
+		String srcPath = IMPORT_DIR + "product-and-category.txt";
+		TextFileReader reader = new TextFileReader();
+		String deliaSrc = reader.readFileAsSingleString(srcPath);
 		
-		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
-		groupBuilder.addImport("category", new CSVFileLoader(path2));
-		groupBuilder.addImport("product", new CSVFileLoader(path));
+		CSVImportService csvSvc = new CSVImportService();
 		
-		DataImportService importSvc = new DataImportService(session, 10);
-		CSVFileLoader loader = new CSVFileLoader(path);
-		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-		importSvc.setMetricsObserver(observer);
-		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.TWO);
-		for(InputFunctionResult result: resultL) {
-			importSvc.dumpImportReport(result, observer);
-		}
+		List<InputFunctionResult> resultL = csvSvc.importLevel2(groupList, deliaSrc);
+		csvSvc.dumpReports(resultL);
 	}
 	
-	@Test
-	public void testLevel3() {
-		Delia delia = initDelia(); 
-		
-		ImportToool tool = new ImportToool(session);
-		String path = BASE_DIR + "products.csv";
-		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
-		log.log("here:");
-		log.log(prodSrc);
-		
-		String path2 = BASE_DIR + "categories.csv";
-		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
-		log.log("here:");
-		log.log(catSrc);
-		
-		String newSrc = prodSrc + " " + catSrc;
-		
-		log.log("add to session..");
-		ResultValue res = delia.continueExecution(newSrc, session);
-		assertEquals(true, res.ok);
-		
-		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
-		groupBuilder.addImport("category", new CSVFileLoader(path2));
-		groupBuilder.addImport("product", new CSVFileLoader(path));
-		
-		DataImportService importSvc = new DataImportService(session, 10);
-		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-		importSvc.setMetricsObserver(observer);
-		
-		ExternalDataLoader externalLoader = createExternalLoader();
-		importSvc.setExternalDataLoader(externalLoader);
-		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.THREE);
-		for(InputFunctionResult result: resultL) {
-			importSvc.dumpImportReport(result, observer);
-		}
-	}
-
-	private ExternalDataLoader createExternalLoader() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia externalDelia = DeliaBuilder.withConnection(info).build();
-		
-		String src = createCategorySrc(false);
-		src += " " + createProductSrc();
-		src += "\n" + "insert Category {categoryID:992, categoryName: 'ext1', description:'ext-desc', picture:'p'}";
-		DeliaSession externalSession = externalDelia.beginSession(src);
-		
-		ExternalDataLoader externalLoader = new ExternalDataLoaderImpl(externalDelia.getFactoryService(), externalSession);
-		return externalLoader;
-	}
-	
-	
-	@Test
-	public void testLevel4() {
-		Delia delia = initDelia(); 
-		
-		ImportToool tool = new ImportToool(session);
-		String path = BASE_DIR + "products.csv";
-		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
-		log.log("here:");
-		log.log(prodSrc);
-		
-		String path2 = BASE_DIR + "categories.csv";
-		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
-		log.log("here:");
-		log.log(catSrc);
-		
-		String newSrc = prodSrc + " " + catSrc;
-		
-		log.log("add to session..");
-		ResultValue res = delia.continueExecution(newSrc, session);
-		assertEquals(true, res.ok);
-		
-		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
-		groupBuilder.addImport("category", new CSVFileLoader(path2));
-		groupBuilder.addImport("product", new CSVFileLoader(path));
-		
-		DataImportService importSvc = new DataImportService(session, 10);
-		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
-		importSvc.setMetricsObserver(observer);
-		
-		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.FOUR);
-		for(InputFunctionResult result: resultL) {
-			importSvc.dumpImportReport(result, observer);
-		}
-	}
+//	@Test
+//	public void testLevel3() {
+//		Delia delia = initDelia(); 
+//		
+//		ImportToool tool = new ImportToool(session);
+//		String path = BASE_DIR + "products.csv";
+//		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
+//		log.log("here:");
+//		log.log(prodSrc);
+//		
+//		String path2 = BASE_DIR + "categories.csv";
+//		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
+//		log.log("here:");
+//		log.log(catSrc);
+//		
+//		String newSrc = prodSrc + " " + catSrc;
+//		
+//		log.log("add to session..");
+//		ResultValue res = delia.continueExecution(newSrc, session);
+//		assertEquals(true, res.ok);
+//		
+//		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
+//		groupBuilder.addImport("category", new CSVFileLoader(path2));
+//		groupBuilder.addImport("product", new CSVFileLoader(path));
+//		
+//		DataImportService importSvc = new DataImportService(session, 10);
+//		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+//		importSvc.setMetricsObserver(observer);
+//		
+//		ExternalDataLoader externalLoader = createExternalLoader();
+//		importSvc.setExternalDataLoader(externalLoader);
+//		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.THREE);
+//		for(InputFunctionResult result: resultL) {
+//			importSvc.dumpImportReport(result, observer);
+//		}
+//	}
+//
+//	private ExternalDataLoader createExternalLoader() {
+//		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+//		Delia externalDelia = DeliaBuilder.withConnection(info).build();
+//		
+//		String src = createCategorySrc(false);
+//		src += " " + createProductSrc();
+//		src += "\n" + "insert Category {categoryID:992, categoryName: 'ext1', description:'ext-desc', picture:'p'}";
+//		DeliaSession externalSession = externalDelia.beginSession(src);
+//		
+//		ExternalDataLoader externalLoader = new ExternalDataLoaderImpl(externalDelia.getFactoryService(), externalSession);
+//		return externalLoader;
+//	}
+//	
+//	
+//	@Test
+//	public void testLevel4() {
+//		Delia delia = initDelia(); 
+//		
+//		ImportToool tool = new ImportToool(session);
+//		String path = BASE_DIR + "products.csv";
+//		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
+//		log.log("here:");
+//		log.log(prodSrc);
+//		
+//		String path2 = BASE_DIR + "categories.csv";
+//		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
+//		log.log("here:");
+//		log.log(catSrc);
+//		
+//		String newSrc = prodSrc + " " + catSrc;
+//		
+//		log.log("add to session..");
+//		ResultValue res = delia.continueExecution(newSrc, session);
+//		assertEquals(true, res.ok);
+//		
+//		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
+//		groupBuilder.addImport("category", new CSVFileLoader(path2));
+//		groupBuilder.addImport("product", new CSVFileLoader(path));
+//		
+//		DataImportService importSvc = new DataImportService(session, 10);
+//		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+//		importSvc.setMetricsObserver(observer);
+//		
+//		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.FOUR);
+//		for(InputFunctionResult result: resultL) {
+//			importSvc.dumpImportReport(result, observer);
+//		}
+//	}
 
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
