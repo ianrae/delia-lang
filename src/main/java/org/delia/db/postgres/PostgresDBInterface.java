@@ -29,7 +29,6 @@ import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.UpsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
-import org.delia.db.sql.prepared.FKSqlGenerator;
 import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
@@ -100,14 +99,13 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		}
 		return genVal;
 	}
-//	static int countdownHack = 2;
 
 	@Override
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
 		if (useFragmentParser) {
-			log.log("FRAG PARSEr....................");
+//			log.log("FRAG PARSEr....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
@@ -117,9 +115,10 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			parser.renderSelect(selectFrag);
 			statement = selectFrag.statement;
 		} else if (qtx.loadFKs) {
-			createTableCreator(dbctx);
-			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
-			statement = smartgen.generateFKsQuery(spec, details);
+//			createTableCreator(dbctx);
+//			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
+//			statement = smartgen.generateFKsQuery(spec, details);
+			statement = null;
 		} else {
 			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
 			statement = sqlgen.generateQuery(spec);
@@ -173,7 +172,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	public void executeDelete(QuerySpec spec, DBAccessContext dbctx) {
 		SqlStatement statement;
 		if (useFragmentParser) {
-			log.log("FRAG PARSER DELETE....................");
+//			log.log("FRAG PARSER DELETE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
@@ -184,8 +183,9 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			parser.renderDelete(selectFrag);
 			statement = selectFrag.statement;
 		} else {
-			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-			statement = sqlgen.generateDelete(spec);
+//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+//			statement = sqlgen.generateDelete(spec);
+			statement = null;
 		}
 		logSql(statement);
 		createTableCreator(dbctx);
@@ -205,7 +205,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		createTableCreator(dbctx);
 		
 		if (useFragmentParser) {
-			log.log("FRAG PARSER UPDATE....................");
+//			log.log("FRAG PARSER UPDATE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
@@ -217,10 +217,11 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
 			stgroup = parser.renderUpdateGroup(selectFrag);
 		} else {
-			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
-			stgroup = new SqlStatementGroup();
-			stgroup.add(statement);
+//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+//			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
+//			stgroup = new SqlStatementGroup();
+//			stgroup.add(statement);
+			stgroup = null;
 		}
 		
 		if (stgroup.statementL.isEmpty()) {
@@ -246,7 +247,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		createTableCreator(dbctx);
 		//TODO implement this!!
 		if (useFragmentParser) {
-			log.log("FRAG PARSER UPSERT....................");
+//			log.log("FRAG PARSER UPSERT....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
 			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
