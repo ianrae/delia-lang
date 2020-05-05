@@ -10,13 +10,10 @@ import java.util.StringJoiner;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.sql.ConnectionFactory;
-import org.delia.db.sql.prepared.FKSqlGenerator;
-import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
@@ -269,9 +266,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		}
 		return tableCreator;
 	}
-	protected FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx) {
-		return sqlHelperFactory.createFKSqlGen(tblinfoL, dbctx, createExistService(dbctx));
-	}
+//	protected FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx) {
+//		return sqlHelperFactory.createFKSqlGen(tblinfoL, dbctx, createExistService(dbctx));
+//	}
 	
 	@Override
 	public boolean isSQLLoggingEnabled() {

@@ -31,7 +31,6 @@ import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.UpsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
-import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;

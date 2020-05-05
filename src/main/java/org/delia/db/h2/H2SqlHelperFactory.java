@@ -1,7 +1,5 @@
 package org.delia.db.h2;
 
-import java.util.List;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -14,14 +12,11 @@ import org.delia.db.ValueHelper;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
-import org.delia.db.sql.prepared.FKSqlGenerator;
-import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.WhereClauseGenerator;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.db.sql.where.SqlWhereConverter;
 
 public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory {
@@ -67,11 +62,11 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 		return nameFormatter;
 	}
 	
-	@Override
-	public FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc) {
-		FKSqlGenerator sqlgen = new FKSqlGenerator(factorySvc, dbctx.registry, tblinfoL, this, dbctx.varEvaluator, existSvc);
-		return sqlgen;
-	}
+//	@Override
+//	public FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc) {
+//		FKSqlGenerator sqlgen = new FKSqlGenerator(factorySvc, dbctx.registry, tblinfoL, this, dbctx.varEvaluator, existSvc);
+//		return sqlgen;
+//	}
 	
 	@Override
 	public SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx) {
