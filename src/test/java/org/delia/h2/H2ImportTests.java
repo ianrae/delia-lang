@@ -1,4 +1,4 @@
-package org.delia.inputfunction;
+package org.delia.h2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,57 +22,8 @@ import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CSVImportServiceTests  extends NewBDDBase {
+public class H2ImportTests  extends NewBDDBase {
 	
-	@Test
-	public void testLevel1Category() {
-		String srcPath = IMPORT_DIR + "product-and-category.txt";
-		TextFileReader reader = new TextFileReader();
-		String deliaSrc = reader.readFileAsSingleString(srcPath);
-		
-		CSVImportService csvSvc = new CSVImportService();
-		
-		String csvPath = BASE_DIR + "categories.csv";
-		InputFunctionResult result = csvSvc.dryRunLevel1(csvPath, deliaSrc, "Category", "category");
-		csvSvc.dumpReport(result);
-	}
-	
-	@Test
-	public void testLevel1Product() {
-		String srcPath = IMPORT_DIR + "product-and-category.txt";
-		TextFileReader reader = new TextFileReader();
-		String deliaSrc = reader.readFileAsSingleString(srcPath);
-		
-		CSVImportService csvSvc = new CSVImportService();
-		
-		String csvPath = BASE_DIR + "products.csv";
-		InputFunctionResult result = csvSvc.dryRunLevel1(csvPath, deliaSrc, "Product", "product");
-		csvSvc.dumpReport(result);
-	}
-	
-	@Test
-	public void testLevel2() {
-		List<ImportGroupSpec> groupList = new ArrayList<>();
-		ImportGroupSpec gspec = new ImportGroupSpec();
-		gspec.csvPath = BASE_DIR + "categories.csv";
-		gspec.inputFnName = "category";
-		gspec.typeName = "Category";
-		groupList.add(gspec);
-		gspec = new ImportGroupSpec();
-		gspec.csvPath = BASE_DIR + "products.csv";
-		gspec.inputFnName = "product";
-		gspec.typeName = "Product";
-		groupList.add(gspec);
-		
-		String srcPath = IMPORT_DIR + "product-and-category.txt";
-		TextFileReader reader = new TextFileReader();
-		String deliaSrc = reader.readFileAsSingleString(srcPath);
-		
-		CSVImportService csvSvc = new CSVImportService();
-		
-		List<InputFunctionResult> resultL = csvSvc.dryRunLevel2(groupList, deliaSrc);
-		csvSvc.dumpReports(resultL);
-	}
 	
 	@Test
 	public void testLevel3() {
@@ -100,13 +51,15 @@ public class CSVImportServiceTests  extends NewBDDBase {
 	}
 	
 	private ExternalDataLoader createExternalLoader() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB()).build();
 		Delia externalDelia = DeliaBuilder.withConnection(info).build();
 		
 		String srcPath = IMPORT_DIR + "product-and-category.txt";
 		TextFileReader reader = new TextFileReader();
 		String deliaSrc = reader.readFileAsSingleString(srcPath);
-		deliaSrc += "\n" + "insert Category {categoryID:992, categoryName: 'ext1', description:'ext-desc', picture:'p'}";
+		
+//		deliaSrc += "\n" + "insert Category {categoryID:992, categoryName: 'ext1', description:'ext-desc', picture:'p'}";
+		deliaSrc += "\n" + "upsert Category[992] {categoryName: 'ext1', description:'ext-desc', picture:'p'}";
 		DeliaSession externalSession = externalDelia.beginSession(deliaSrc);
 		
 		ExternalDataLoader externalLoader = new ExternalDataLoaderImpl(externalDelia.getFactoryService(), externalSession);
@@ -133,8 +86,8 @@ public class CSVImportServiceTests  extends NewBDDBase {
 		
 		CSVImportService csvSvc = new CSVImportService();
 		
-		//mem in this test but would normally be a real database
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		//h2
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB()).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		
 		List<InputFunctionResult> resultL = csvSvc.importIntoDatabase(groupList, deliaSrc, delia);

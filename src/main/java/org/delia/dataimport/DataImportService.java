@@ -104,7 +104,7 @@ public class DataImportService extends ServiceBase {
 		int n = result.numRowsProcessed;
 		int succeeded = result.numRowsInserted - result.numFailedRowInserts;
 		int failed = n - succeeded;
-		String alert = failed == 0 ? "  ***SUCCESS***" : String.format("(%d errorrs)", result.errors.size());
+		String alert = failed == 0 ? "  ***SUCCESS***" : String.format("(%d errors)", result.errors.size());
 		log.log("");
 		String s = String.format("IMPORT %d rows. %d successful, %d failed        %s  %s", n, succeeded, failed, alert, result.filename);
 		log.log(s);
