@@ -27,14 +27,14 @@ input function category(Category o) {
   picture -> o.picture using { trim() }
 }
 input function product(Product o) {
-  productID -> o.productID using { trim() }
+  productID -> o.productID using {  }
   productName -> o.productName using { trim() }
-  supplierID -> o.supplierID using { trim() }
-  categoryID -> o.categoryID using { trim() }
+  supplierID -> o.supplierID using {  }
+  categoryID -> o.categoryID using {  }
   quantityPerUnit -> o.quantityPerUnit using { trim() }
-  unitPrice -> o.unitPrice using { trim() }
-  unitsInStock -> o.unitsInStock using { trim() }
-  unitsOnOrder -> o.unitsOnOrder using { trim() }
-  reorderLevel -> o.reorderLevel using { trim() }
-  discontinued -> o.discontinued using { trim() }
+  unitPrice -> o.unitPrice using {  }
+  unitsInStock -> o.unitsInStock using {  }
+  unitsOnOrder -> o.unitsOnOrder using {  }
+  reorderLevel -> o.reorderLevel using {  }
+  discontinued -> o.discontinued using {  }
 }

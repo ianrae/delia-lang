@@ -1,5 +1,7 @@
 package org.delia.runner.inputfunction;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,11 +9,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.StringJoiner;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
+import org.delia.compiler.generate.DeliaGeneratePhase;
+import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
@@ -33,6 +38,7 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.StringUtil;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class InputFunctionService extends ServiceBase {
@@ -158,7 +164,7 @@ public class InputFunctionService extends ServiceBase {
 			LineObj lineObj = lineObjIter.next();
 
 			List<DeliaError> errL = new ArrayList<>();
-			List<DValue> dvals = processLineObj(inFuncRunner, hdr, lineObj, errL); //one row
+			List<DValue> dvals = processLineObj(request, inFuncRunner, hdr, lineObj, errL); //one row
 			if (! errL.isEmpty()) {
 				log.logError("failed!");
 				addErrors(errL, fnResult.errors, lineNum);
@@ -261,7 +267,7 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 
-	private List<DValue> processLineObj(InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
+	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
 		List<DValue> dvals = null;
 		try {
 			dvals = inFuncRunner.process(hdr, lineObj, errL);
@@ -275,9 +281,24 @@ public class InputFunctionService extends ServiceBase {
 				joiner.add(el);
 			}
 			log.log("detail: %s", joiner.toString());
+			if (CollectionUtils.isNotEmpty(dvals)) {
+				for(DValue dval: dvals) {
+					String s2 = generateFromDVal(request, dval);
+					log.log("      : %s", s2);
+				}
+			}
 		}
 		
 		return dvals;
+	}
+	
+	private String generateFromDVal(InputFunctionRequest request, DValue dval) {
+		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.includeVPrefix = false;
+		DeliaGeneratePhase phase = request.session.getExecutionContext().generator;
+		boolean b = phase.generateValue(gen, dval, "a");
+		String s = StringUtil.flatten(gen.outputL);
+		return s;
 	}
 
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
