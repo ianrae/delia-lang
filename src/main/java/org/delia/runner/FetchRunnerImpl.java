@@ -33,7 +33,7 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 	}
 	
 	@Override
-	public QueryResponse load(DRelation drel, String targetFieldName) {
+	public QueryResponse load(DRelation drel) {
 		QueryExp queryExp = buildQuery(drel);
 		//TODO resolve vars such as foo(id)
 		QuerySpec spec = new QuerySpec();

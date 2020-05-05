@@ -57,7 +57,7 @@ public class RelationManyRule extends DRuleBase {
 		}
 
 		//first ensure foreign key points to existing record
-		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel, oper1.getSubject());
+		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 		if (!qrespFetch.ok) {
 			//			qresResult.err = qrespFetch.err;
 		} else {
