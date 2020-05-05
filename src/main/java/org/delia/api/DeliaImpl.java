@@ -88,7 +88,6 @@ public class DeliaImpl implements Delia {
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
 		}
-//		runner.setInsertPrebuiltValueIterator(dbsess == null ? null: dbsess.getInsertPrebuiltValueIterator());
 		boolean b; 
 		if (dbsess == null) {
 			b = runner.init(null); 

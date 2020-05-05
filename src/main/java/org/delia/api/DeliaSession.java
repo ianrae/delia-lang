@@ -1,6 +1,5 @@
 package org.delia.api;
 
-import org.delia.runner.DValueIterator;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 /**
@@ -18,7 +17,5 @@ public interface DeliaSession {
 	ExecutionState getExecutionContext();
 	void setRunnerIntiliazer(RunnerInitializer runnerInitializer);
 	RunnerInitializer getRunnerIntiliazer();
-//	void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator); 
-//	DValueIterator getInsertPrebuiltValueIterator();
 	Delia getDelia();
 }

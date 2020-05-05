@@ -37,16 +37,6 @@ public class DeliaSessionImpl implements DeliaSession {
 		return execCtx;
 	}
 
-//	@Override
-//	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
-//		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
-//	}
-//
-//	@Override
-//	public DValueIterator getInsertPrebuiltValueIterator() {
-//		return insertPrebuiltValueIterator;
-//	}
-
 	@Override
 	public Delia getDelia() {
 		return delia;
@@ -61,11 +51,5 @@ public class DeliaSessionImpl implements DeliaSession {
 	public RunnerInitializer getRunnerIntiliazer() {
 		return runnerInitializer;
 	}
-
-//	@Override
-//	public DValueIterator getInsertPrebuiltValueIterator() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 	
 }

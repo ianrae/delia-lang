@@ -72,7 +72,7 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		//pass in the already build dval runner.setAlreadyBuiltDVal()
 		
 		DValueIterator iter = new DValueIterator(dvals);
-		ImportRunnerInitializer initializer = new ImportRunnerInitializer(iter);
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(delia.getFactoryService(), iter, session);
 		session.setRunnerIntiliazer(initializer);
 		String s = String.format("insert Customer {}");
 		ResultValue res = delia.continueExecution(s, session);

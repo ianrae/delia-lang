@@ -75,6 +75,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private ScalarBuilder scalarBuilder;
 		private SprigService sprigSvc;
 		private DValueIterator insertPrebuiltValueIterator;
+		private FetchRunner prebuiltFetchRunnerToUse;
 
 		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
 			super(factorySvc);
@@ -157,7 +158,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExector(dbctx);
-			this.fetchRunner = dbexecutor.createFetchRunner(factorySvc);
+			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
 			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 
 			try {
@@ -868,5 +869,13 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 		public Map<String, InputFunctionDefStatementExp> getInputFnMap() {
 			return inputFnMap;
+		}
+		@Override
+		public FetchRunner getPrebuiltFetchRunnerToUse() {
+			return prebuiltFetchRunnerToUse;
+		}
+		@Override
+		public void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse) {
+			this.prebuiltFetchRunnerToUse = prebuiltFetchRunnerToUse;
 		}
 	}

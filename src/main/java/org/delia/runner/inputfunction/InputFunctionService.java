@@ -14,6 +14,8 @@ import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBAccessContext;
+import org.delia.db.DBExecutor;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
@@ -276,10 +278,7 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
-		DValueIterator iter = new DValueIterator(dval);
-		ImportRunnerInitializer initializer = new ImportRunnerInitializer(iter);
-//		request.session.setInsertPrebuiltValueIterator(iter);
-		request.session.setRunnerIntiliazer(initializer);
+		addRunnerInitializer(request, dval);
 		String typeName = dval.getType().getName();
 		String s = String.format("insert %s {}", typeName);
 		
@@ -326,6 +325,12 @@ public class InputFunctionService extends ServiceBase {
 		request.session.setRunnerIntiliazer(null);
 	}	
 	
+	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {
+		DValueIterator iter = new DValueIterator(dval);
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session);
+		request.session.setRunnerIntiliazer(initializer);
+	}
+
 	private boolean errIdIs(DeliaError err, String target) {
 		if (err.getId() != null && err.getId().equals(target)) {
 			return true;
