@@ -25,6 +25,7 @@ import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.HdrInfo;
+import org.delia.runner.inputfunction.ImportRunnerInitializer;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRunner;
@@ -71,11 +72,12 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		//pass in the already build dval runner.setAlreadyBuiltDVal()
 		
 		DValueIterator iter = new DValueIterator(dvals);
-		session.setInsertPrebuiltValueIterator(iter);
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(iter);
+		session.setRunnerIntiliazer(initializer);
 		String s = String.format("insert Customer {}");
 		ResultValue res = delia.continueExecution(s, session);
 		assertEquals(true, res.ok);
-		session.setInsertPrebuiltValueIterator(null);
+		session.setRunnerIntiliazer(null);
 		
 		DeliaDao dao = new DeliaDao(delia, session);
 		res = dao.queryByPrimaryKey("Customer", "1");

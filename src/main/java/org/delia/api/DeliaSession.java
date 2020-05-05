@@ -16,7 +16,9 @@ public interface DeliaSession {
 	boolean ok();
 	ResultValue getFinalResult();
 	ExecutionState getExecutionContext();
-	void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator); 
-	DValueIterator getInsertPrebuiltValueIterator();
+	void setRunnerIntiliazer(RunnerInitializer runnerInitializer);
+	RunnerInitializer getRunnerIntiliazer();
+//	void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator); 
+//	DValueIterator getInsertPrebuiltValueIterator();
 	Delia getDelia();
 }

@@ -3,7 +3,6 @@ package org.delia.api;
 import java.util.List;
 
 import org.delia.compiler.ast.Exp;
-import org.delia.runner.DValueIterator;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 
@@ -14,7 +13,8 @@ public class DeliaSessionImpl implements DeliaSession {
 	
 	//only set in beginExecution, not in continueExecution
 	public List<Exp> expL; //for getting at parse results. TODO: need a flag that disables this to save memory
-	private DValueIterator insertPrebuiltValueIterator;
+//	private DValueIterator insertPrebuiltValueIterator;
+	private RunnerInitializer runnerInitializer;
 	private Delia delia;
 						
 	
@@ -37,19 +37,35 @@ public class DeliaSessionImpl implements DeliaSession {
 		return execCtx;
 	}
 
-	@Override
-	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
-		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
-	}
-
-	@Override
-	public DValueIterator getInsertPrebuiltValueIterator() {
-		return insertPrebuiltValueIterator;
-	}
+//	@Override
+//	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
+//		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
+//	}
+//
+//	@Override
+//	public DValueIterator getInsertPrebuiltValueIterator() {
+//		return insertPrebuiltValueIterator;
+//	}
 
 	@Override
 	public Delia getDelia() {
 		return delia;
 	}
+
+	@Override
+	public void setRunnerIntiliazer(RunnerInitializer runnerInitializer) {
+		this.runnerInitializer = runnerInitializer;
+	}
+
+	@Override
+	public RunnerInitializer getRunnerIntiliazer() {
+		return runnerInitializer;
+	}
+
+//	@Override
+//	public DValueIterator getInsertPrebuiltValueIterator() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 	
 }

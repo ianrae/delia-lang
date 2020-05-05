@@ -28,14 +28,9 @@ import org.delia.dval.TypeDetector;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.GroupPair;
-import org.delia.runner.inputfunction.ImportSpecBuilder;
-import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
-import org.delia.runner.inputfunction.InputFunctionService;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
-import org.delia.runner.inputfunction.LineObjIteratorImpl;
-import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -304,10 +299,7 @@ public class ImportToolTests  extends NewBDDBase {
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 
-	//	private DeliaDao dao;
 	private DeliaSession session;
-//	private int numExpectedColumnsProcessed;
-	private List<LineObj> currentLineObjL;
 
 
 	@Before
@@ -364,66 +356,11 @@ public class ImportToolTests  extends NewBDDBase {
 	}
 	
 	
-	
-	private void dumpImportReport(Delia delia, InputFunctionResult result, SimpleImportMetricObserver observer) {
-		DataImportService dataImportSvc = new DataImportService(session, 999);
-		dataImportSvc.dumpImportReport(result, observer);
-	}
-
-
-	private ProgramSet buildProgSet(InputFunctionService inputFnSvc, SimpleImportMetricObserver observer, int expectedSize) {
-		inputFnSvc.setMetricsObserver(observer);
-		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
-		assertEquals(expectedSize, progset.fieldMap.size());
-		addImportSpec(progset);
-		return progset;
-	}
-
-	private void chkObserver(SimpleImportMetricObserver observer, int i, int j, int k) {
-		assertEquals(i, observer.rowCounter);
-		assertEquals(j, observer.successfulRowCounter);
-		assertEquals(k, observer.failedRowCounter);
-	}
-
-	private void chkResult(InputFunctionResult result, int i, int j, int k) {
-		assertEquals(i, result.numRowsProcessed);
-		assertEquals(j, result.numColumnsProcessedPerRow);
-		assertEquals(k, result.numRowsInserted);
-		assertEquals(false, result.wasHalted);
-	}
-
-	private InputFunctionResult runImport(Delia delia, InputFunctionService inputFnSvc, ProgramSet progset, LineObjIterator lineObjIter) {
-		InputFunctionRequest request = new InputFunctionRequest();
-		request.delia = delia;
-		request.progset = progset;
-		request.session = session;
-		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
-		return result;
-	}
-
-	private void addImportSpec(ProgramSet progset) {
-		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
-		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
-		ospec.ispec = ispecBuilder.buildSpecFor(progset, ospec.structType);
-	}
-
-
 	@Override
 	public DBInterface createForTest() {
 		return new MemDBInterface();
 	}
 
-	private LineObjIterator createIter(int n) {
-		return createIter(n, "bob");
-	}
-	private LineObjIterator createIter(int n, String nameStr) {
-		List<LineObj> list = new ArrayList<>();
-		currentLineObjL = list;
-		for(int i = 0; i < n; i++) {
-			list.add(this.createLineObj(i + 1, nameStr));
-		}
-		return new LineObjIteratorImpl(list);
-	}
 	private LineObj createLineObj(int id, String nameStr) {
 		String[] ar = { "", "33", "bob" };
 		ar[0] = String.format("%d", id);
