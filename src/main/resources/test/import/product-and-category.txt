@@ -1,0 +1,38 @@
+type Category struct { 
+ categoryID int primaryKey, 
+ categoryName string, description string, picture string} 
+end 
+
+let var1 = 55 
+
+type Product struct { 
+productID int primaryKey,    
+productName string,    
+supplierID int, 
+relation categoryID Category optional one,    
+quantityPerUnit string,    
+unitPrice string,   
+unitsInStock int,    
+unitsOnOrder int,    
+reorderLevel int,    
+discontinued int} 
+end
+
+input function category(Category o) {
+  categoryID -> o.categoryID using { trim() }
+  categoryName -> o.categoryName using { trim() }
+  description -> o.description using { trim() }
+  picture -> o.picture using { trim() }
+}
+input function product(Product o) {
+  productID -> o.productID using { trim() }
+  productName -> o.productName using { trim() }
+  supplierID -> o.supplierID using { trim() }
+  categoryID -> o.categoryID using { trim() }
+  quantityPerUnit -> o.quantityPerUnit using { trim() }
+  unitPrice -> o.unitPrice using { trim() }
+  unitsInStock -> o.unitsInStock using { trim() }
+  unitsOnOrder -> o.unitsOnOrder using { trim() }
+  reorderLevel -> o.reorderLevel using { trim() }
+  discontinued -> o.discontinued using { trim() }
+}
