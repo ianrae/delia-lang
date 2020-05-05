@@ -53,6 +53,16 @@ public class FetchRunnerFacade implements FetchRunner {
 	public boolean queryFKExists(DRelation drel) {
 		log.logDebug("bbbbbbbbbbFRFFFFFFFFFFFFFFF1");
 		boolean exists = inner.queryFKExists(drel);
+		
+		if (! exists && externalLoader != null) {
+			QueryResponse qresp = externalLoader.queryFKsExist(drel);
+			if (qresp != null && ! qresp.ok) {
+				//log errors
+				return false;
+			}
+			return CollectionUtils.isNotEmpty(qresp.dvalList);
+		}
+		
 		return exists;
 	}
 

@@ -71,8 +71,18 @@ public class ImportToolTests  extends NewBDDBase {
 
 		@Override
 		public QueryResponse queryFKsExist(DRelation drel) {
-			// TODO Auto-generated method stub
-			return null;
+			QuerySpec spec = buildQuery(drel);
+			
+			QueryResponse qresp = null;
+			QueryContext qtx = new QueryContext();
+			DBAccessContext dbctx = new DBAccessContext(externalRegistry, varEvaluator);
+			try(DBExecutor dbexecutor = externalDBInterface.createExector(dbctx)) {
+				qresp = dbexecutor.executeQuery(spec, qtx);
+			} catch (Exception e) {
+				DBHelper.handleCloseFailure(e);
+			}
+
+			return qresp;
 		}
 
 		@Override
@@ -405,6 +415,7 @@ public class ImportToolTests  extends NewBDDBase {
 		
 		String src = createCategorySrc(false);
 		src += " " + createProductSrc();
+		src += "\n" + "insert Category {categoryID:992, categoryName: 'ext1', description:'ext-desc', picture:'p'}";
 		DeliaSession externalSession = externalDelia.beginSession(src);
 		
 		ExternalDataLoader externalLoader = new MyExternalDataLoader(externalDelia.getFactoryService(), externalSession);
