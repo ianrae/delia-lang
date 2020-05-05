@@ -3,11 +3,14 @@ package org.delia.db.h2;
 import java.sql.ResultSet;
 import java.util.Map;
 
+import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.runner.FetchRunner;
+import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
 
@@ -117,5 +120,10 @@ public class H2DBExecutor implements DBExecutor {
 	public ResultSet executeRawQuery(String sql) {
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		return conn.execRawQuery(sql);
+	}
+
+	@Override
+	public FetchRunner createFetchRunner(FactoryService factorySvc) {
+		return new FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
 	}
 }

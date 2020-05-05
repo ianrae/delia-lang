@@ -68,7 +68,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private DBInterface dbInterface;
 		private DBExecutor dbexecutor;
 		private QueryFuncOrFieldRunner qffRunner;
-		protected FetchRunnerImpl fetchRunner;
+		protected FetchRunner fetchRunner;
 		private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,String> activeUserFnMap = new HashMap<>(); //what's executing.  //ok for thread-safety
@@ -157,7 +157,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExector(dbctx);
-			this.fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, registry, this);
+			this.fetchRunner = dbexecutor.createFetchRunner(factorySvc);
 			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 
 			try {

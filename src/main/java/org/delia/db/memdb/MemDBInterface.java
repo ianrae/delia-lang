@@ -21,7 +21,6 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.memdb.MemDBInterface.Stuff;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
@@ -281,7 +280,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 
 	private void addAnyFKs(DValue dval, DBAccessContext dbctx) {
 		DBExecutor dbexecutor = this.createExector(dbctx); //TODO handle close later
-		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, dbctx.registry, dbctx.varEvaluator);
+		FetchRunner fetchRunner = dbexecutor.createFetchRunner(factorySvc);
 		ValidationRuleRunner ruleRunner = new ValidationRuleRunner(factorySvc, this.getCapabilities(), fetchRunner);
 		ruleRunner.enableRelationModifier(true);
 		ruleRunner.setPopulateFKsFlag(true);

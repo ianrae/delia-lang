@@ -2,7 +2,11 @@ package org.delia.db;
 
 import java.util.Map;
 
+import org.delia.core.FactoryService;
+import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
+import org.delia.runner.VarEvaluator;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
 /**
@@ -21,6 +25,9 @@ public interface DBExecutor extends AutoCloseable {
 
 	boolean execTableDetect(String tableName);
 	boolean execFieldDetect(String tableName, String fieldName);
+	
+	FetchRunner createFetchRunner(FactoryService factorySvc);
+	
 
 	//schema actions
 	void createTable(String tableName);
