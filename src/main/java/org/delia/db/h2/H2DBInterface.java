@@ -136,8 +136,9 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 //			statement = smartgen.generateFKsQuery(spec, details);
 			statement = null;
 		} else {
-			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-			statement = sqlgen.generateQuery(spec);
+//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
+//			statement = sqlgen.generateQuery(spec);
+			statement = null;
 		}
 		
 		logSql(statement);
