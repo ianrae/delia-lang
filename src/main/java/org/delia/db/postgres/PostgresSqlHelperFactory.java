@@ -51,12 +51,12 @@ public class PostgresSqlHelperFactory extends H2SqlHelperFactory {
 		SelectFuncHelper sfhelper = new PostgresSelectFuncHelper(factorySvc, dbctx.registry);
 		return sfhelper;
 	}
-	@Override
-	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
-		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
-		InsertStatementGenerator sqlgen = new PostgresInsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter, existSvc);
-		return sqlgen;
-	}
+//	@Override
+//	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
+//		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
+//		InsertStatementGenerator sqlgen = new PostgresInsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter, existSvc);
+//		return sqlgen;
+//	}
 	@Override
 	public TableCreator createTableCreator(DBAccessContext dbctx) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 

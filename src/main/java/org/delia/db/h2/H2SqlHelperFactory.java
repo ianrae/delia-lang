@@ -54,12 +54,12 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 		PreparedStatementGenerator sqlgen = new PreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator, existSvc);
 		return sqlgen;
 	}
-	@Override
-	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
-		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
-		InsertStatementGenerator sqlgen = new InsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter, existSvc);
-		return sqlgen;
-	}
+//	@Override
+//	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
+//		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
+//		InsertStatementGenerator sqlgen = new InsertStatementGenerator(factorySvc, dbctx.registry, nameFormatter, existSvc);
+//		return sqlgen;
+//	}
 	
 	@Override
 	public SqlNameFormatter createNameFormatter(DBAccessContext dbctx) {

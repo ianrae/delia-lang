@@ -21,7 +21,7 @@ public interface SqlHelperFactory {
 	FieldGenFactory createFieldGenFactory();
 	DBErrorConverter createErrorConverter();
 	PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx);
-	InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc);
+//	InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc);
 	SqlNameFormatter createNameFormatter(DBAccessContext dbctx);
 	FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc);
 	SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx);

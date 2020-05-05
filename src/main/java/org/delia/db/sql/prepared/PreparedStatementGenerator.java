@@ -125,41 +125,41 @@ public class PreparedStatementGenerator extends ServiceBase {
 	}
 	
 	//--------------
-	public SqlStatement generateUpdate(DValue dval, List<TableInfo> tblInfoL, QuerySpec spec) {
-		Map<String,DRelation> map = new HashMap<>(); //ok to not use ConcurrentHashMap here
-		SqlStatement statement = new SqlStatement();
-		String sql = doGenerateUpdate(dval, map, statement);
-		if (sql.isEmpty()) {
-			statement.sql = "";
-			return statement;
-		}
-//		sql += doGenerateAssocInsertIfNeeded(dval, tblInfoL, map);
-		
-		SqlStatement st2 = generateQuery(spec);
-		statement.paramL.addAll(st2.paramL);
-		int pos = st2.sql.indexOf("WHERE ");
-		if (pos > 0) {
-			String query = st2.sql.substring(pos);
-			statement.sql = String.format("%s %s", sql, query);
-		} else {
-			statement.sql = sql;
-		}
-		return statement;
-	}		
-	protected String doGenerateUpdate(DValue dval, Map<String, DRelation> map, SqlStatement statement) {
-//		UPDATE table_name
-//		SET column1 = value1, column2 = value2, ...
-//		WHERE condition;		
-		
-		DStructType dtype = (DStructType) dval.getType();
-		StrCreator sc = new StrCreator();
-		sc.o("UPDATE %s SET ", tblName(dtype));
-		
-		InsertStatementGenerator insgen = new InsertStatementGenerator(factorySvc, registry, nameFormatter, existSvc);
-//		InsertStatementGenerator insgen = sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
-		String s = insgen.generateUpdateBody(sc, dval, map, statement);
-		return s;
-	}
+//	public SqlStatement generateUpdate(DValue dval, List<TableInfo> tblInfoL, QuerySpec spec) {
+//		Map<String,DRelation> map = new HashMap<>(); //ok to not use ConcurrentHashMap here
+//		SqlStatement statement = new SqlStatement();
+//		String sql = doGenerateUpdate(dval, map, statement);
+//		if (sql.isEmpty()) {
+//			statement.sql = "";
+//			return statement;
+//		}
+////		sql += doGenerateAssocInsertIfNeeded(dval, tblInfoL, map);
+//		
+//		SqlStatement st2 = generateQuery(spec);
+//		statement.paramL.addAll(st2.paramL);
+//		int pos = st2.sql.indexOf("WHERE ");
+//		if (pos > 0) {
+//			String query = st2.sql.substring(pos);
+//			statement.sql = String.format("%s %s", sql, query);
+//		} else {
+//			statement.sql = sql;
+//		}
+//		return statement;
+//	}		
+//	protected String doGenerateUpdate(DValue dval, Map<String, DRelation> map, SqlStatement statement) {
+////		UPDATE table_name
+////		SET column1 = value1, column2 = value2, ...
+////		WHERE condition;		
+//		
+//		DStructType dtype = (DStructType) dval.getType();
+//		StrCreator sc = new StrCreator();
+//		sc.o("UPDATE %s SET ", tblName(dtype));
+//		
+//		InsertStatementGenerator insgen = new InsertStatementGenerator(factorySvc, registry, nameFormatter, existSvc);
+////		InsertStatementGenerator insgen = sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
+//		String s = insgen.generateUpdateBody(sc, dval, map, statement);
+//		return s;
+//	}
 	protected String tblName(DType dtype) {
 		return nameFormatter.convert(dtype);
 	}

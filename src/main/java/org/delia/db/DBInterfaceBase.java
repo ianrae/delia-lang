@@ -254,10 +254,10 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	protected PreparedStatementGenerator createPrepSqlGen(DBAccessContext dbctx) {
 		return sqlHelperFactory.createPrepSqlGen(createExistService(dbctx), dbctx);
 	}
-	protected InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
-		TableExistenceService existSvc = createExistService(dbctx);
-		return sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
-	}
+//	protected InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
+//		TableExistenceService existSvc = createExistService(dbctx);
+//		return sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
+//	}
 	protected TableExistenceService createExistService(DBAccessContext dbctx) {
 		TableExistenceService existSvc = new TableExistenceServiceImpl(this, dbctx);
 		return existSvc;
