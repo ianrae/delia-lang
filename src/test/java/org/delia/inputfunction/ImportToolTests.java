@@ -388,15 +388,27 @@ public class ImportToolTests  extends NewBDDBase {
 		groupBuilder.addImport("product", new CSVFileLoader(path));
 		
 		DataImportService importSvc = new DataImportService(session, 10);
-		CSVFileLoader loader = new CSVFileLoader(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
-		ExternalDataLoader externalLoader = null;
+		
+		ExternalDataLoader externalLoader = createExternalLoader();
 		importSvc.setExternalDataLoader(externalLoader);
-		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.TWO);
+		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.THREE);
 		for(InputFunctionResult result: resultL) {
 			importSvc.dumpImportReport(result, observer);
 		}
+	}
+
+	private ExternalDataLoader createExternalLoader() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia externalDelia = DeliaBuilder.withConnection(info).build();
+		
+		String src = createCategorySrc(false);
+		src += " " + createProductSrc();
+		DeliaSession externalSession = externalDelia.beginSession(src);
+		
+		ExternalDataLoader externalLoader = new MyExternalDataLoader(externalDelia.getFactoryService(), externalSession);
+		return externalLoader;
 	}
 
 	// --
