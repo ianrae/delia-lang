@@ -33,16 +33,18 @@ public class DataImportService extends ServiceBase {
 	private ImportMetricObserver metricsObserver;
 	private ExternalDataLoader externalLoader;
 	private int numRowsToImport;
+	private boolean logDetails;
 
 	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
-		this(session, Integer.MAX_VALUE, stopAfterErrorThreshold);
+		this(session, Integer.MAX_VALUE, stopAfterErrorThreshold, false);
 	}
-	public DataImportService(DeliaSession session, int numRowsToImport, int stopAfterErrorThreshold) {
+	public DataImportService(DeliaSession session, int numRowsToImport, int stopAfterErrorThreshold, boolean logDetails) {
 		super(session.getDelia().getFactoryService());
 		this.delia = session.getDelia();
 		this.session = session;
 		this.numRowsToImport = numRowsToImport;
 		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
+		this.logDetails = logDetails;
 	}
 	
 	public List<InputFunctionResult> executeImportGroup(List<GroupPair> groupL, ImportLevel importLevel) {
@@ -60,6 +62,7 @@ public class DataImportService extends ServiceBase {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		inputFnSvc.setMetricsObserver(metricsObserver);
 		inputFnSvc.getOptions().numRowsToImport = this.numRowsToImport;
+		inputFnSvc.getOptions().logDetails = logDetails;
 		initImportLevel(inputFnSvc, importLevel);
 		
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.StringJoiner;
 
 import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.Exp;
@@ -267,6 +268,15 @@ public class InputFunctionService extends ServiceBase {
 		} catch (DeliaException e) {
 			addError(e, errL, lineObj.lineNum);
 		}
+		
+		if (options.logDetails) {
+			StringJoiner joiner = new StringJoiner(",");
+			for(String el: lineObj.elements) {
+				joiner.add(el);
+			}
+			log.log("detail: %s", joiner.toString());
+		}
+		
 		return dvals;
 	}
 
