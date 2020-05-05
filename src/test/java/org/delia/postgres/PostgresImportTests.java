@@ -1,4 +1,4 @@
-package org.delia.h2;
+package org.delia.postgres;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +17,14 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.h2.H2ConnectionHelper;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
 
-public class H2ImportTests  extends NewBDDBase {
+public class PostgresImportTests  extends NewBDDBase {
 	
 	
 	@Test
@@ -70,10 +71,10 @@ public class H2ImportTests  extends NewBDDBase {
 	}
 	
 	@Test
-	public void testLevel4Preparatin() {
+	public void testLevel4Preparation() {
 		Delia delia = createDelia();
 		
-		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
+		H2TestCleaner cleaner = new H2TestCleaner(DBType.POSTGRES);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
 		cleaner.deleteTables(delia.getFactoryService(), delia.getDBInterface(), "Category,Product");
 	}
@@ -105,11 +106,13 @@ public class H2ImportTests  extends NewBDDBase {
 		csvSvc.dumpReports(resultL);
 	}
 	
+	
 	private Delia createDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB()).build();
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.POSTGRES).connectionString(PostgresConnectionHelper.getTestDB()).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return delia;
 	}
+
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 	public final String IMPORT_DIR = "src/main/resources/test/import/";

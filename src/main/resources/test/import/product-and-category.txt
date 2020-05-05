@@ -2,7 +2,9 @@ type Category struct {
  categoryID int primaryKey, 
  categoryName string, 
  description string, 
- picture string} 
+ picture string,
+ relation products Product optional many,    
+ } 
 end 
 
 let var1 = 55 

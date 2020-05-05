@@ -1,6 +1,5 @@
 package org.delia.db.h2.test;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -12,7 +11,6 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
 import org.delia.db.h2.H2DBExecutor;
-import org.delia.db.h2.H2DBInterface;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
 

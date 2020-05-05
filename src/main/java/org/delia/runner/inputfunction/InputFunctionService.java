@@ -309,6 +309,8 @@ public class InputFunctionService extends ServiceBase {
 		String src;
 		if (useUpsert) {
 			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			dval.asMap().remove(pair.name);
 			src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
 		} else {
 			src = String.format("insert %s {}", typeName);
