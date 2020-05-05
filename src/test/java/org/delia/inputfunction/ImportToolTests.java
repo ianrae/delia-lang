@@ -27,6 +27,7 @@ import org.delia.db.sql.table.ListWalker;
 import org.delia.dval.TypeDetector;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
+import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
@@ -295,7 +296,47 @@ public class ImportToolTests  extends NewBDDBase {
 	}
 
 	
-	
+	@Test
+	public void testLevel3() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		String src = createCategorySrc(false);
+		src += " " + createProductSrc();
+		buildSrc(delia, src);
+		
+		ImportToool tool = new ImportToool(session);
+		String path = BASE_DIR + "products.csv";
+		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
+		log.log("here:");
+		log.log(prodSrc);
+		
+		String path2 = BASE_DIR + "categories.csv";
+		String catSrc = tool.generateInputFunctionSourceCode("Category", path2);
+		log.log("here:");
+		log.log(catSrc);
+		
+		String newSrc = prodSrc + " " + catSrc;
+		
+		log.log("add to session..");
+		ResultValue res = delia.continueExecution(newSrc, session);
+		assertEquals(true, res.ok);
+		
+		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
+		groupBuilder.addImport("category", new CSVFileLoader(path2));
+		groupBuilder.addImport("product", new CSVFileLoader(path));
+		
+		DataImportService importSvc = new DataImportService(session, 10);
+		CSVFileLoader loader = new CSVFileLoader(path);
+		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
+		importSvc.setMetricsObserver(observer);
+		ExternalDataLoader externalLoader = null;
+		importSvc.setExternalDataLoader(externalLoader);
+		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.TWO);
+		for(InputFunctionResult result: resultL) {
+			importSvc.dumpImportReport(result, observer);
+		}
+	}
+
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 

@@ -327,7 +327,7 @@ public class InputFunctionService extends ServiceBase {
 	
 	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {
 		DValueIterator iter = new DValueIterator(dval);
-		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session);
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session, options);
 		request.session.setRunnerIntiliazer(initializer);
 	}
 

@@ -9,6 +9,7 @@ import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
+import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpec;
@@ -30,6 +31,7 @@ public class DataImportService extends ServiceBase {
 	private DeliaSession session;
 	private int stopAfterErrorThreshold;
 	private ImportMetricObserver metricsObserver;
+	private ExternalDataLoader externalLoader;
 
 	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
 		super(session.getDelia().getFactoryService());
@@ -81,6 +83,9 @@ public class DataImportService extends ServiceBase {
 		{
 		case ONE:
 			options.ignoreRelationErrors = true;
+			break;
+		case THREE:
+			options.externalLoader = this.externalLoader;
 			break;
 		default:
 			break;
@@ -150,6 +155,10 @@ public class DataImportService extends ServiceBase {
 			}
 		}
 		
+	}
+
+	public void setExternalDataLoader(ExternalDataLoader externalLoader) {
+		this.externalLoader = externalLoader;
 	}
 	
 }
