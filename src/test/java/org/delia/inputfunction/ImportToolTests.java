@@ -14,18 +14,27 @@ import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
+import org.delia.db.DBAccessContext;
+import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.QueryBuilderService;
+import org.delia.db.QueryContext;
+import org.delia.db.QuerySpec;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.dval.TypeDetector;
 import org.delia.log.LogLevel;
+import org.delia.runner.DoNothingVarEvaluator;
+import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
@@ -33,8 +42,10 @@ import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringUtil;
@@ -42,6 +53,57 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ImportToolTests  extends NewBDDBase {
+	
+	public static class MyExternalDataLoader extends ServiceBase implements ExternalDataLoader {
+
+		private DeliaSession externalSession;
+		private DTypeRegistry externalRegistry;
+		private DBInterface externalDBInterface;
+		private DoNothingVarEvaluator varEvaluator;
+
+		public MyExternalDataLoader(FactoryService factorySvc, DeliaSession externalSession) {
+			super(factorySvc);
+			this.externalSession = externalSession;
+			this.externalRegistry = externalSession.getExecutionContext().registry;
+			this.externalDBInterface = externalSession.getDelia().getDBInterface();
+			this.varEvaluator = new DoNothingVarEvaluator(); //TODO fix later. what should we use?
+		}
+
+		@Override
+		public QueryResponse queryFKsExist(DRelation drel) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public QueryResponse queryObjects(DRelation drel) {
+			QuerySpec spec = buildQuery(drel);
+			
+			QueryResponse qresp = null;
+			QueryContext qtx = new QueryContext();
+			DBAccessContext dbctx = new DBAccessContext(externalRegistry, varEvaluator);
+			try(DBExecutor dbexecutor = externalDBInterface.createExector(dbctx)) {
+				qresp = dbexecutor.executeQuery(spec, qtx);
+			} catch (Exception e) {
+				DBHelper.handleCloseFailure(e);
+			}
+
+			return qresp;
+		}
+		
+		private QuerySpec buildQuery(DRelation drel) {
+			QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+			QueryExp exp;
+			if (drel.isMultipleKey()) {
+				DType relType = externalRegistry.getType(drel.getTypeName());
+				exp = builderSvc.createInQuery(drel.getTypeName(), drel.getMultipleKeys(), relType);
+			} else {
+				exp = builderSvc.createPrimaryKeyQuery(drel.getTypeName(), drel.getForeignKey());
+			}
+			QuerySpec spec = builderSvc.buildSpec(exp, varEvaluator);
+			return spec;
+		}
+	}
 	
 	public static class ImportGroupBuilder extends ServiceBase {
 		private List<GroupPair> groupL = new ArrayList<>();

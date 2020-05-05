@@ -29,7 +29,7 @@ public class FetchRunnerFacade implements FetchRunner {
 		if (!qresp.ok) {
 			return qresp;
 		} else if (externalLoader != null && CollectionUtils.isEmpty(qresp.dvalList)) {
-			qresp = externalLoader.queryFKsExist(drel);
+			qresp = externalLoader.queryObjects(drel);
 			log.logDebug("aaaaaaaaaaaFRFFFFFFFFFFFFFFF1");
 			return qresp;
 		} else {

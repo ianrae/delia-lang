@@ -6,4 +6,5 @@ import org.delia.type.DRelation;
 public interface ExternalDataLoader {
 	
 	public QueryResponse queryFKsExist(DRelation drel);
+	public QueryResponse queryObjects(DRelation drel);
 }
