@@ -2,7 +2,6 @@ package org.delia.rule.rules;
 
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.delia.error.DetailedError;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRuleBase;
@@ -59,26 +58,24 @@ public class RelationOneRule extends DRuleBase {
 		}
 		
 		//first ensure foreign key points to existing record
-		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
+//		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
+		boolean fkObjectExists = ctx.getFetchRunner().queryFKExists(drel);
 		boolean otherSideIsMany = false;
-		if (!qrespFetch.ok) {
-//			qresResult.err = qrespFetch.err;
+		if (! fkObjectExists) {
+			String key = drel.getForeignKey().asString();
+			String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
+			addDetailedError(ctx, msg, getSubject());
+			return false;
 		} else {
-			if (CollectionUtils.isEmpty(qrespFetch.dvalList)) {
-				String key = drel.getForeignKey().asString();
-				String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-				addDetailedError(ctx, msg, getSubject());
-				return false;
-			}
-			
 			boolean bb = ctx.isPopulateFKsFlag();
 			if (!bb) {
 				return true;
 			}
 			
 			if (ctx.isEnableRelationModifierFlag()) {
-				//TODO: use queryFKExists above (for perf during import)
+				//Note: we use queryFKExists above (for perf during import)
 				//then if needed use load here to get entire object
+				QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 				otherSideIsMany = populateOtherSideOfRelation(dval, ctx, qrespFetch, otherSideIsMany);
 			}
 		}

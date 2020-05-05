@@ -49,4 +49,11 @@ public class FetchRunnerFacade implements FetchRunner {
 		return inner.loadFKOnly(typeName, fieldName, keyVal);
 	}
 
+	@Override
+	public boolean queryFKExists(DRelation drel) {
+		log.logDebug("bbbbbbbbbbFRFFFFFFFFFFFFFFF1");
+		boolean exists = inner.queryFKExists(drel);
+		return exists;
+	}
+
 }

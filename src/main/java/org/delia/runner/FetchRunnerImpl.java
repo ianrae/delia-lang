@@ -45,6 +45,18 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		return qresp;
 	}
 
+	@Override
+	public boolean queryFKExists(DRelation drel) {
+		QueryResponse qresp = load(drel);
+		if (!qresp.ok) {
+			return false;
+		} else if (CollectionUtils.isEmpty(qresp.dvalList)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	private QueryExp buildQuery(DRelation drel) {
 		if (drel.isMultipleKey()) {
 			//TODO fix this. hack hack hack it is WRONG
