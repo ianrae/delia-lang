@@ -14,7 +14,6 @@ import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
-import org.delia.db.sql.prepared.WhereClauseGenerator;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.db.sql.where.SqlWhereConverter;
@@ -91,10 +90,10 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	public SqlWhereConverter createSqlWhereConverter(DBAccessContext dbctx, QueryTypeDetector queryDetectorSvc) {
 		return new SqlWhereConverter(factorySvc, dbctx.registry, queryDetectorSvc);
 	}
-
-	@Override
-	public WhereClauseGenerator createPWhereGen(DBAccessContext dbctx) {
-		return new WhereClauseGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-	}
+//
+//	@Override
+//	public WhereClauseGenerator createPWhereGen(DBAccessContext dbctx) {
+//		return new WhereClauseGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+//	}
 	
 }

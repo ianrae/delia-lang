@@ -121,68 +121,68 @@ public class SelectFuncHelper extends ServiceBase {
 		String s = String.format(" LIMIT %d", n);
 		sc.o(s);
 	}
-	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName, String alias) {
-		QuerySpec spec = doLastFixup(specOriginal, typeName, alias, true);
-		QueryFuncExp limitFn = this.findFn(spec, "limit");
-		if (limitFn != null) {
-			spec.queryExp.qfelist.remove(limitFn);
-		}
-		
-		QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("limit"), null, false);
-		qfexp1.argL.add(new IntegerExp(1));
-
-		spec.queryExp.qfelist.add(qfexp1);
-		return spec;
-	}
-	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias) {
-		return doLastFixup(specOriginal, typeName, alias, false);
-	}
-	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias, boolean asc) {
-		DType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		QueryFieldExp possibleFieldExp = findFieldUsingFn(specOriginal, "last");
-		TypePair pair;
-		if (possibleFieldExp == null) {
-			pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
-		} else {
-			pair = DValueHelper.findField(dtype, possibleFieldExp.funcName);
-		}
-		
-		
-		if (pair == null) { 
-			DeliaExceptionHelper.throwError("last-requires-sortable-field", "last() requires an orderBy() function or a primary key in type '%s'", typeName);
-			return null;
-		} else {
-			QuerySpec spec = makeCopy(specOriginal);
-			QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("orderBy"), null, false);
-			String s = alias == null ? pair.name : String.format("%s.%s", alias, pair.name);
-			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(s));
-			qfexp1.argL.add(qfe);
-			if (! asc) {
-				IdentExp exp1 = new IdentExp("desc");
-				qfexp1.argL.add(exp1);
-			}
-			
-			QueryFuncExp qfexpAlreadyInList = findFn(spec, "last");
-			int index = 0;
-			boolean done = false;
-			for(QueryFuncExp qfexp: spec.queryExp.qfelist) {
-				if (index < spec.queryExp.qfelist.size() - 1) {
-					if (qfexp == qfexpAlreadyInList) {
-						//insert before
-						spec.queryExp.qfelist.add(index, qfexp1);
-						done = true;
-						break;
-					}
-				}
-				index++;
-			}
-			
-			if (! done) {
-				spec.queryExp.qfelist.add(qfexp1);
-			}
-			return spec;
-		}
-	}
+//	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName, String alias) {
+//		QuerySpec spec = doLastFixup(specOriginal, typeName, alias, true);
+//		QueryFuncExp limitFn = this.findFn(spec, "limit");
+//		if (limitFn != null) {
+//			spec.queryExp.qfelist.remove(limitFn);
+//		}
+//		
+//		QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("limit"), null, false);
+//		qfexp1.argL.add(new IntegerExp(1));
+//
+//		spec.queryExp.qfelist.add(qfexp1);
+//		return spec;
+//	}
+//	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias) {
+//		return doLastFixup(specOriginal, typeName, alias, false);
+//	}
+//	public QuerySpec doLastFixup(QuerySpec specOriginal, String typeName, String alias, boolean asc) {
+//		DType dtype = registry.findTypeOrSchemaVersionType(typeName);
+//		QueryFieldExp possibleFieldExp = findFieldUsingFn(specOriginal, "last");
+//		TypePair pair;
+//		if (possibleFieldExp == null) {
+//			pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+//		} else {
+//			pair = DValueHelper.findField(dtype, possibleFieldExp.funcName);
+//		}
+//		
+//		
+//		if (pair == null) { 
+//			DeliaExceptionHelper.throwError("last-requires-sortable-field", "last() requires an orderBy() function or a primary key in type '%s'", typeName);
+//			return null;
+//		} else {
+//			QuerySpec spec = makeCopy(specOriginal);
+//			QueryFuncExp qfexp1 = new QueryFuncExp(99, new IdentExp("orderBy"), null, false);
+//			String s = alias == null ? pair.name : String.format("%s.%s", alias, pair.name);
+//			QueryFieldExp qfe = new QueryFieldExp(99, new IdentExp(s));
+//			qfexp1.argL.add(qfe);
+//			if (! asc) {
+//				IdentExp exp1 = new IdentExp("desc");
+//				qfexp1.argL.add(exp1);
+//			}
+//			
+//			QueryFuncExp qfexpAlreadyInList = findFn(spec, "last");
+//			int index = 0;
+//			boolean done = false;
+//			for(QueryFuncExp qfexp: spec.queryExp.qfelist) {
+//				if (index < spec.queryExp.qfelist.size() - 1) {
+//					if (qfexp == qfexpAlreadyInList) {
+//						//insert before
+//						spec.queryExp.qfelist.add(index, qfexp1);
+//						done = true;
+//						break;
+//					}
+//				}
+//				index++;
+//			}
+//			
+//			if (! done) {
+//				spec.queryExp.qfelist.add(qfexp1);
+//			}
+//			return spec;
+//		}
+//	}
 	protected QuerySpec makeCopy(QuerySpec spec) {
 		QuerySpec copy = new QuerySpec();
 		copy.evaluator = spec.evaluator;

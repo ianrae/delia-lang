@@ -1,10 +1,5 @@
 package org.delia.db.sql.prepared;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -14,18 +9,14 @@ import org.delia.db.TableExistenceService;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.VarEvaluator;
-import org.delia.type.DRelation;
-import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 
 public class PreparedStatementGenerator extends ServiceBase {
 	protected DTypeRegistry registry;
 	protected SqlNameFormatter nameFormatter;
-	protected WhereClauseGenerator pwheregen;
+//	protected WhereClauseGenerator pwheregen;
 	protected SelectFuncHelper selectFnHelper;
 	protected SqlHelperFactory sqlHelperFactory;
 	private VarEvaluator varEvaluator;
@@ -41,68 +32,68 @@ public class PreparedStatementGenerator extends ServiceBase {
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		this.nameFormatter = sqlHelperFactory.createNameFormatter(dbctx);
-		this.pwheregen = sqlHelperFactory.createPWhereGen(dbctx);
+//		this.pwheregen = sqlHelperFactory.createPWhereGen(dbctx);
 		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
 	}
 
-	public SqlStatement generateQuery(QuerySpec spec) {
-		StrCreator sc = new StrCreator();
-		QueryExp exp = spec.queryExp;
-		String typeName = exp.getTypeName();
-		//TODO: for now we implement exist using count(*). improve later
-		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
-			sc.o("SELECT COUNT(*) FROM %s", typeName);
-		} else if (selectFnHelper.isMinPresent(spec)) {
-			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
-			sc.o("SELECT MIN(%s) FROM %s", fieldName, typeName);
-		} else if (selectFnHelper.isMaxPresent(spec)) {
-			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
-			sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
-		} else if (selectFnHelper.isFirstPresent(spec)) {
-			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
-			if (fieldName == null) {
-				sc.o("SELECT TOP 1 * FROM %s", typeName);
-			} else {
-				sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
-			}
-		} else if (selectFnHelper.isLastPresent(spec)) {
-			spec = doSelectLast(sc, spec, typeName);
-		} else {
-			sc.o("SELECT * FROM %s", typeName);
-		}
-		SqlStatement statement = new SqlStatement();
-
-		statement = pwheregen.generateAWhere(spec);
-		sc.o(statement.sql);
-		
-		generateQueryFns(sc, spec, typeName);
-		
-		sc.o(";");
-		statement.sql = sc.str;
-		return statement;
-	}
-	
-	/**
-	 * must copy queryspec since we modify it.
-	 * @param sc output writer
-	 * @param spec query
-	 * @param typeName type being queried
-	 * @return adjusted query spec
-	 */
-	protected QuerySpec doSelectLast(StrCreator sc, QuerySpec spec, String typeName) {
-		String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
-		if (fieldName == null) {
-			sc.o("SELECT TOP 1 * FROM %s", typeName);
-		} else {
-			sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
-		}
-		
-		if (selectFnHelper.isOrderByPresent(spec)) {
-			return spec;
-		}
-
-		return selectFnHelper.doLastFixup(spec, typeName, null);
-	}
+//	public SqlStatement generateQuery(QuerySpec spec) {
+//		StrCreator sc = new StrCreator();
+//		QueryExp exp = spec.queryExp;
+//		String typeName = exp.getTypeName();
+//		//TODO: for now we implement exist using count(*). improve later
+//		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
+//			sc.o("SELECT COUNT(*) FROM %s", typeName);
+//		} else if (selectFnHelper.isMinPresent(spec)) {
+//			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "min");
+//			sc.o("SELECT MIN(%s) FROM %s", fieldName, typeName);
+//		} else if (selectFnHelper.isMaxPresent(spec)) {
+//			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "max");
+//			sc.o("SELECT MAX(%s) FROM %s", fieldName, typeName);
+//		} else if (selectFnHelper.isFirstPresent(spec)) {
+//			String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "first");
+//			if (fieldName == null) {
+//				sc.o("SELECT TOP 1 * FROM %s", typeName);
+//			} else {
+//				sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+//			}
+//		} else if (selectFnHelper.isLastPresent(spec)) {
+//			spec = doSelectLast(sc, spec, typeName);
+//		} else {
+//			sc.o("SELECT * FROM %s", typeName);
+//		}
+//		SqlStatement statement = new SqlStatement();
+//
+//		statement = pwheregen.generateAWhere(spec);
+//		sc.o(statement.sql);
+//		
+//		generateQueryFns(sc, spec, typeName);
+//		
+//		sc.o(";");
+//		statement.sql = sc.str;
+//		return statement;
+//	}
+//	
+//	/**
+//	 * must copy queryspec since we modify it.
+//	 * @param sc output writer
+//	 * @param spec query
+//	 * @param typeName type being queried
+//	 * @return adjusted query spec
+//	 */
+//	protected QuerySpec doSelectLast(StrCreator sc, QuerySpec spec, String typeName) {
+//		String fieldName = selectFnHelper.findFieldNameUsingFn(spec, "last");
+//		if (fieldName == null) {
+//			sc.o("SELECT TOP 1 * FROM %s", typeName);
+//		} else {
+//			sc.o("SELECT TOP 1 %s FROM %s", fieldName, typeName);
+//		}
+//		
+//		if (selectFnHelper.isOrderByPresent(spec)) {
+//			return spec;
+//		}
+//
+//		return selectFnHelper.doLastFixup(spec, typeName, null);
+//	}
 
 	public void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
 		this.selectFnHelper.doOrderByIfPresent(sc, spec, typeName);
@@ -110,16 +101,16 @@ public class PreparedStatementGenerator extends ServiceBase {
 		this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);
 	}
 
-	public SqlStatement generateDelete(QuerySpec spec) {
-		StrCreator sc = new StrCreator();
-		sc.o("DELETE FROM %s", tblName(spec.queryExp.getTypeName()));
-		SqlStatement statement = pwheregen.generateAWhere(spec);
-		sc.o(statement.sql);
-		sc.o(";");
-		
-		statement.sql = sc.str;
-		return statement;
-	}
+//	public SqlStatement generateDelete(QuerySpec spec) {
+//		StrCreator sc = new StrCreator();
+//		sc.o("DELETE FROM %s", tblName(spec.queryExp.getTypeName()));
+//		SqlStatement statement = pwheregen.generateAWhere(spec);
+//		sc.o(statement.sql);
+//		sc.o(";");
+//		
+//		statement.sql = sc.str;
+//		return statement;
+//	}
 	protected String tblName(String typeName) {
 		return nameFormatter.convert(typeName);
 	}
