@@ -1,6 +1,8 @@
 type Category struct { 
  categoryID int primaryKey, 
- categoryName string, description string, picture string} 
+ categoryName string, 
+ description string, 
+ picture string} 
 end 
 
 let var1 = 55 

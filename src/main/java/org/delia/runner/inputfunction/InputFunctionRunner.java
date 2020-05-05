@@ -252,7 +252,7 @@ public class InputFunctionRunner extends ServiceBase {
 				if (!res.ok) {
 					log.log("ltang failed!");
 				}
-				log.log("trail: %s", tlangRunner.getTrail());
+				log.logDebug("trail: %s", tlangRunner.getTrail());
 				
 				DValue finalValue = (DValue) res.val;
 				value = finalValue == null ? null : finalValue.asString();

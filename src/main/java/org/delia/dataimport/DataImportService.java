@@ -32,11 +32,16 @@ public class DataImportService extends ServiceBase {
 	private int stopAfterErrorThreshold;
 	private ImportMetricObserver metricsObserver;
 	private ExternalDataLoader externalLoader;
+	private int numRowsToImport;
 
 	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
+		this(session, Integer.MAX_VALUE, stopAfterErrorThreshold);
+	}
+	public DataImportService(DeliaSession session, int numRowsToImport, int stopAfterErrorThreshold) {
 		super(session.getDelia().getFactoryService());
 		this.delia = session.getDelia();
 		this.session = session;
+		this.numRowsToImport = numRowsToImport;
 		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
 	}
 	
@@ -54,6 +59,7 @@ public class DataImportService extends ServiceBase {
 	public InputFunctionResult executeImport(String inputFnName, LineObjIterator lineObjIter, ImportLevel importLevel) {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		inputFnSvc.setMetricsObserver(metricsObserver);
+		inputFnSvc.getOptions().numRowsToImport = this.numRowsToImport;
 		initImportLevel(inputFnSvc, importLevel);
 		
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);

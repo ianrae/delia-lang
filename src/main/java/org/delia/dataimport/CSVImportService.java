@@ -15,6 +15,10 @@ import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 
 public class CSVImportService  {
+	
+	public static class Options {
+		public int numRowsToImport = Integer.MAX_VALUE;
+	}
 
 	private DeliaSession session;
 	private SimpleImportMetricObserver observer;
@@ -22,13 +26,32 @@ public class CSVImportService  {
 
 	public CSVImportService() {
 	}
-	
+
 	public InputFunctionResult dryRunLevel1(String csvPath, String deliaSrc, String typeName, String inputFunctionName) {
+		Options options = new Options();
+		return dryRunLevel1(csvPath, deliaSrc, typeName, inputFunctionName, options);
+	}
+	public List<InputFunctionResult> dryRunLevel2(List<ImportGroupSpec> groupList, String deliaSrc) {
+		Options options = new Options();
+		return this.dryRunLevel2(groupList, deliaSrc, options);
+	}
+	public List<InputFunctionResult> dryRunLevel3(List<ImportGroupSpec> groupList, String deliaSrc,
+			ExternalDataLoader externalLoader) {
+		Options options = new Options();
+		return this.dryRunLevel3(groupList, deliaSrc, externalLoader, options);
+	}
+	public List<InputFunctionResult> importIntoDatabase(List<ImportGroupSpec> groupList, String deliaSrc, Delia delia) {
+		Options options = new Options();
+		return this.importIntoDatabase(groupList, deliaSrc, delia, options);
+	}
+
+	public InputFunctionResult dryRunLevel1(String csvPath, String deliaSrc, String typeName, 
+				String inputFunctionName, Options options) {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		this.session = delia.beginSession(deliaSrc);
 		
-		importSvc = new DataImportService(session, 10);
+		importSvc = createDataImportService(options); 
 		CSVFileLoader loader = new CSVFileLoader(csvPath);
 		this.observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
@@ -36,12 +59,17 @@ public class CSVImportService  {
 		return result;
 	}
 	
-	public List<InputFunctionResult> dryRunLevel2(List<ImportGroupSpec> groupList, String deliaSrc) {
+	private DataImportService createDataImportService(Options options) {
+		importSvc = new DataImportService(session, options.numRowsToImport, 10);
+		return importSvc;
+	}
+
+	public List<InputFunctionResult> dryRunLevel2(List<ImportGroupSpec> groupList, String deliaSrc, Options options) {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		this.session = delia.beginSession(deliaSrc);
 		
-		importSvc = new DataImportService(session, 10);
+		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
 			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
@@ -66,12 +94,12 @@ public class CSVImportService  {
 	}
 
 	public List<InputFunctionResult> dryRunLevel3(List<ImportGroupSpec> groupList, String deliaSrc,
-			ExternalDataLoader externalLoader) {
+			ExternalDataLoader externalLoader, Options options) {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		this.session = delia.beginSession(deliaSrc);
 		
-		importSvc = new DataImportService(session, 10);
+		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
 			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
@@ -87,10 +115,10 @@ public class CSVImportService  {
 		return resultL;
 	}
 
-	public List<InputFunctionResult> importIntoDatabase(List<ImportGroupSpec> groupList, String deliaSrc, Delia delia) {
+	public List<InputFunctionResult> importIntoDatabase(List<ImportGroupSpec> groupList, String deliaSrc, Delia delia, Options options) {
 		this.session = delia.beginSession(deliaSrc);
 		
-		importSvc = new DataImportService(session, 10);
+		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
 			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);

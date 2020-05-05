@@ -117,15 +117,6 @@ public class InputFunctionService extends ServiceBase {
 		
 		InputFunctionDefStatementExp infnExp = session.getExecutionContext().inputFnMap.get(inputFnName);
 		return infnExp;
-//		for(Exp exp: sessionimpl.expL) {
-//			if (exp instanceof InputFunctionDefStatementExp) {
-//				InputFunctionDefStatementExp infnExp = (InputFunctionDefStatementExp) exp;
-//				if (infnExp.funcName.equals(inputFnName)) {
-//					return infnExp;
-//				}
-//			}
-//		}
-//		return null;
 	}
 
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
@@ -151,6 +142,12 @@ public class InputFunctionService extends ServiceBase {
 				log.log("halting -- more than %d errors", request.stopAfterErrorThreshold);
 				break;
 			}
+			
+			if (lineNum > options.numRowsToImport) {
+				log.log("halting -- stopping at %d lines", options.numRowsToImport);
+				break;
+			}
+			
 			if (metricsObserver != null) {
 				metricsObserver.onRowStart(request.progset, lineNum);
 			}
@@ -276,11 +273,18 @@ public class InputFunctionService extends ServiceBase {
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
 		addRunnerInitializer(request, dval);
 		String typeName = dval.getType().getName();
-		String s = String.format("insert %s {}", typeName);
+		boolean useUpsert = true;
+		String src;
+		if (useUpsert) {
+			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);
+			src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
+		} else {
+			src = String.format("insert %s {}", typeName);
+		}
 		
 		ResultValue res;
 		try {
-			res = request.delia.continueExecution(s, request.session);
+			res = request.delia.continueExecution(src, request.session);
 			if (! res.ok) {
 				//err
 				for(DeliaError err: res.errors) {
