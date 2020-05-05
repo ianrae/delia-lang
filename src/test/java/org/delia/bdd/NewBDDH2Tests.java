@@ -76,6 +76,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
+		runR700File("t0-insert-serial.txt", 1);
 	}
 	
 	@Test
@@ -303,7 +304,7 @@ public class NewBDDH2Tests extends NewBDDBase {
 	
 	@Before
 	public void init() {
-		this.disableAllSlowTests = true;
+//		this.disableAllSlowTests = true;
 		disableAllSlowTestsIfNeeded();
 	}
 	@After

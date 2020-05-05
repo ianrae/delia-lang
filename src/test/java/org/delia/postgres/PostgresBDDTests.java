@@ -77,6 +77,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
+		runR700File("t0-insert-serial.txt", 1);
 	}
 	
 	@Test

@@ -23,6 +23,8 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.FragmentParserService;
+import org.delia.db.sql.fragment.InsertFragmentParser;
+import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
@@ -72,19 +74,32 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx) {
-		createTableCreator(dbctx);
-
-		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
-		InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
 		//TODO: we shouldn't keep tableCreator.alreadyCreatedL around. it becomes out of date 
 		//after schema migrations. should only use it during initial table creation.
+		createTableCreator(dbctx);
+		SqlStatementGroup stgroup;
+		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		
-		SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
-		logSql(statement);
+		if (useFragmentParser) {
+//			log.log("FRAG PARSER INSERT....................");
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null);
+			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
+			String typeName = dval.getType().getName();
+			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
+			stgroup = parser.renderInsertGroup(selectFrag);
+		} else {
+//			InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
+//			SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
+//			stgroup = new SqlStatementGroup();
+//			stgroup.statementL.add(statement);
+			stgroup = null;
+		}		
+		
+		logStatementGroup(stgroup);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		try {
 			sqlctx.getGeneratedKeys = ctx.extractGeneratedKeys;
-			int n = conn.executeInsertStatement(statement, sqlctx); 
+			List<Integer > updateCountL = conn.execInsertStatementGroup(stgroup, sqlctx);
 		} catch (DBValidationException e) {
 			convertAndRethrow(e, dbctx);
 		}
