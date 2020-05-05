@@ -155,6 +155,15 @@ public class DataImportService extends ServiceBase {
 			}
 		}
 		
+		if (! observer.externalLoadMap.isEmpty()) {
+			StringJoiner joiner = new StringJoiner(",");
+			for(String typeName: observer.externalLoadMap.keySet()) {
+				Integer count = observer.externalLoadMap.get(typeName);
+				joiner.add(String.format("%s: %d", typeName, count));
+			}
+			log.log("Externally loaded records:- %s", joiner.toString());
+		}
+		
 	}
 
 	public void setExternalDataLoader(ExternalDataLoader externalLoader) {

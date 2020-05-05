@@ -16,12 +16,16 @@ public class ImportRunnerInitializer implements RunnerInitializer {
 	private DeliaSession session;
 	private FactoryService factorySvc;
 	private ExternalDataLoader externalLoader;
+	private ImportSpec ispec;
+	private ImportMetricObserver metricsObserver;
 	
-	public ImportRunnerInitializer(FactoryService factoryService, DValueIterator iter, DeliaSession session, InputFunctionServiceOptions options) {
+	public ImportRunnerInitializer(FactoryService factoryService, DValueIterator iter, DeliaSession session, InputFunctionServiceOptions options, ImportSpec ispec, ImportMetricObserver metricsObserver) {
 		this.factorySvc = factoryService;
 		this.iter = iter;
 		this.session = session;
 		this.externalLoader = options.externalLoader;
+		this.ispec = ispec;
+		this.metricsObserver = metricsObserver;
 	}
 	
 	@Override
@@ -31,7 +35,7 @@ public class ImportRunnerInitializer implements RunnerInitializer {
 		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, runner);
 		DBExecutor tmpExecutor = session.getDelia().getDBInterface().createExector(dbctx);
 		FetchRunner fr = tmpExecutor.createFetchRunner(factorySvc);
-		FetchRunnerFacade frfacade = new FetchRunnerFacade(factorySvc, fr, externalLoader);
+		FetchRunnerFacade frfacade = new FetchRunnerFacade(factorySvc, fr, externalLoader, ispec, metricsObserver);
 		runner.setPrebuiltFetchRunnerToUse(frfacade);
 		
 		try {

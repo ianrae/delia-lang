@@ -10,4 +10,6 @@ public interface ImportMetricObserver {
 	void onInvalid2Error(ImportSpec ispec, String outputFieldName);
 	void onDuplicateError(ImportSpec ispec, String outputFieldName);
 	void onRelationError(ImportSpec ispec, String outputFieldName);
+	
+	void onLoadedExternally(ImportSpec ispec, int size);
 }

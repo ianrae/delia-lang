@@ -7,15 +7,12 @@ import java.util.Map;
 import java.util.Random;
 
 import org.delia.api.DeliaSession;
-import org.delia.api.RunnerInitializer;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
@@ -25,7 +22,6 @@ import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
-import org.delia.runner.Runner;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
@@ -327,7 +323,8 @@ public class InputFunctionService extends ServiceBase {
 	
 	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {
 		DValueIterator iter = new DValueIterator(dval);
-		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session, options);
+		ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session, options, ispec, metricsObserver);
 		request.session.setRunnerIntiliazer(initializer);
 	}
 

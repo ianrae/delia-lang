@@ -1,10 +1,14 @@
 package org.delia.runner.inputfunction;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public class SimpleImportMetricObserver implements ImportMetricObserver {
 	public int rowCounter; //num rows attempted
 	public int failedRowCounter;
 	public int successfulRowCounter;
 	public int[] currentRowMetrics = new int[OutputFieldHandle.NUM_METRICS];
+	public Map<String,Integer> externalLoadMap = new TreeMap<>();
 
 	@Override
 	public void onRowStart(ProgramSet progsec, int rowNum) {
@@ -101,5 +105,13 @@ public class SimpleImportMetricObserver implements ImportMetricObserver {
 		return null;
 	}
 
-	
+	@Override
+	public void onLoadedExternally(ImportSpec ispec, int size) {
+		String typeName = ispec.structType.getName();
+		Integer n = externalLoadMap.get(typeName);
+		if (n == null) {
+			n = 0;
+		}
+		externalLoadMap.put(typeName, n + size);
+	}
 }

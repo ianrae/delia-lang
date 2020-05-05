@@ -14,11 +14,15 @@ public class FetchRunnerFacade implements FetchRunner {
 	private FetchRunner inner;
 	private Log log;
 	private ExternalDataLoader externalLoader;
+	private ImportMetricObserver metricsObserver;
+	private ImportSpec ispec;
 
-	public FetchRunnerFacade(FactoryService factorySvc, FetchRunner fr, ExternalDataLoader externalLoader) {
+	public FetchRunnerFacade(FactoryService factorySvc, FetchRunner fr, ExternalDataLoader externalLoader, ImportSpec ispec, ImportMetricObserver metricsObserver) {
 		this.inner = fr;
 		this.log = factorySvc.getLog();
 		this.externalLoader = externalLoader;
+		this.ispec = ispec;
+		this.metricsObserver = metricsObserver;
 	}
 
 	@Override
@@ -60,7 +64,11 @@ public class FetchRunnerFacade implements FetchRunner {
 				//log errors
 				return false;
 			}
-			return CollectionUtils.isNotEmpty(qresp.dvalList);
+			exists = CollectionUtils.isNotEmpty(qresp.dvalList);
+			if (exists) {
+				metricsObserver.onLoadedExternally(ispec, qresp.dvalList.size());
+			}
+			return exists;
 		}
 		
 		return exists;

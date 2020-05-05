@@ -33,6 +33,7 @@ import org.delia.runner.inputfunction.InputFunctionServiceOptions;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.ProgramSpec;
+import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
@@ -74,7 +75,9 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		
 		DValueIterator iter = new DValueIterator(dvals);
 		InputFunctionServiceOptions options = new InputFunctionServiceOptions();
-		ImportRunnerInitializer initializer = new ImportRunnerInitializer(delia.getFactoryService(), iter, session, options);
+		ImportSpec ispec = progset.outputSpecs.get(0).ispec;
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(delia.getFactoryService(), iter, session, options, 
+						ispec, new SimpleImportMetricObserver());
 		session.setRunnerIntiliazer(initializer);
 		String s = String.format("insert Customer {}");
 		ResultValue res = delia.continueExecution(s, session);
