@@ -1,5 +1,8 @@
 package org.delia.typebuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.delia.compiler.ast.StructFieldExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
@@ -10,7 +13,10 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.OrderedMap;
+import org.delia.type.PrimaryKey;
 import org.delia.type.Shape;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 public class TypeBuilder extends ServiceBase {
 
@@ -81,7 +87,38 @@ public class TypeBuilder extends ServiceBase {
 //	      return dtype;
 //	    }
 		
-		return new DStructType(Shape.STRUCT, typeName, baseType, omap);
+		List<TypePair> possibleL = new ArrayList<>();
+		TypePair pair = baseType == null ? null : DValueHelper.findPrimaryKeyFieldPair(baseType);
+		if (pair != null) {
+			possibleL.add(pair);
+		}
+		
+		for(String fieldName: omap.orderedList) {
+			if (omap.isPrimaryKey(typeName)) {
+				pair = new TypePair(fieldName, omap.map.get(fieldName));
+				possibleL.add(pair);
+			}
+		}
+		
+		//if haven't found anything, we'll consider unique fields
+		if (possibleL.isEmpty()) {
+			for(String fieldName: omap.orderedList) {
+				if (omap.isUnique(typeName)) {
+					pair = new TypePair(fieldName, omap.map.get(fieldName));
+					possibleL.add(pair);
+				}
+			}
+		}
+		
+		PrimaryKey prikey;
+		if (possibleL.isEmpty()) {
+			prikey = null;
+		} else if (possibleL.size() == 1) {
+			prikey = new PrimaryKey(possibleL.get(0));
+		} else {
+			prikey = new PrimaryKey(possibleL);
+		}
+		return new DStructType(Shape.STRUCT, typeName, baseType, omap, prikey);
 	}
 
 	private DType createScalarType(TypeStatementExp typeStatementExp) {

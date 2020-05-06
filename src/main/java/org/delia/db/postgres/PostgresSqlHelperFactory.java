@@ -8,7 +8,6 @@ import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
-import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
 
