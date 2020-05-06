@@ -40,7 +40,8 @@ public class ImportToool extends ServiceBase {
 			for(TypePair pair: structType.getAllFields()) {
 				String column = findColumn(pair, columns);
 				if (column != null) {
-					sc.o("  %s -> o.%s using { trim() }\n", column, pair.name);
+					String tlang = pair.type.getName().equalsIgnoreCase("STRING_SHAPE") ? "trim()" : "";
+					sc.o("  %s -> o.%s using { %s }\n", column, pair.name, tlang);
 					columns.remove(column);
 					usedMap.put(pair.name, "");
 				}

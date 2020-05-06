@@ -1,0 +1,25 @@
+type Film struct {
+ id long primaryKey,
+ title string,
+ releaseDate date 
+ } 
+end 
+
+type Actor struct { 
+actorId string primaryKey,
+firstName string,
+lastName string    
+} 
+end
+
+input function film(Film o) {
+  id -> o.id using {  }
+  title -> o.title using { trim() }
+  releaseDate -> o.releaseDate using {  }
+}
+
+input function actor(Actor o) {
+  actorID -> o.actorId using { trim() }
+  firstName -> o.firstName using { trim() }
+  lastName -> o.lastName using { trim() }
+}
