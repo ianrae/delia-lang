@@ -26,3 +26,8 @@ input function actor(Actor o) {
   lastName -> o.lastName using { trim() }
 }
 
+input function actorfilms(Film f, Actor a) {
+    actorID -> f[filmID].actors  
+    filmID -> a[actorID].films 
+}
+

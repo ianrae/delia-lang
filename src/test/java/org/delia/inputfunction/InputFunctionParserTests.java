@@ -58,6 +58,20 @@ public class InputFunctionParserTests  extends NewBDDBase {
 		TLangBodyExp texp = chkFnStatement(infnExp, 1, "f2", "c", "z").tlangBody;
 		assertEquals(null, texp);
 	}
+	
+	@Test
+	public void test2Via() {
+		String src = "input function foo(Customer c, Address a) { field -> c[z].firstName }";
+		InputFunctionDefStatementExp infnExp = parse(src);
+		assertEquals("foo", infnExp.funcName);
+		assertEquals(2, infnExp.argsL.size());
+		chkArg(infnExp, 0, "Customer", "c");
+		chkArg(infnExp, 1, "Address", "a");
+		
+		assertEquals(1, infnExp.bodyExp.statementL.size());
+		InputFuncMappingExp mappingExp = chkFnStatement(infnExp, 0, "field", "c", "firstName");
+		assertEquals("z", mappingExp.outputViaTargetExp.strValue());
+	}
 
 	@Test
 	public void testTLang() {

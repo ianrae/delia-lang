@@ -2,6 +2,7 @@ package org.delia.compiler.ast.inputfunction;
 
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.ExpBase;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
@@ -10,12 +11,14 @@ import org.delia.compiler.astx.XNAFSingleExp;
 public class InputFuncMappingExp extends ExpBase {
 	public Exp inputField;
 	public IdentPairExp outputField;
+	public IdentExp outputViaTargetExp; //via. [filmId]. normally null
 	public TLangBodyExp tlangBody;
 
-	public InputFuncMappingExp(int pos, Exp inputExp, IdentPairExp outputExp, TLangBodyExp tlangBody) {
+	public InputFuncMappingExp(int pos, Exp inputExp, OutputTargetExp outputExp, TLangBodyExp tlangBody) {
 		super(pos);
 		this.inputField = inputExp;
-		this.outputField = outputExp;
+		this.outputField = outputExp.outputExp;
+		this.outputViaTargetExp = outputExp.targetExp;
 		this.tlangBody = tlangBody;
 	}
 

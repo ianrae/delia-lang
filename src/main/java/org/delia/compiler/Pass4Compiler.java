@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.compiler.ast.DsonFieldExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -75,6 +76,11 @@ public class Pass4Compiler extends CompilerPassBase {
 				}
 			}
 			
+			if (mappingExp.outputViaTargetExp != null) {
+				checkVia(mappingExp.outputViaTargetExp, funcExp, results);
+			}
+			
+			
 			String typeName = null;
 			for(IdentPairExp pairExp: funcExp.argsL) {
 				if (pairExp.val2.equals(alias)) {
@@ -106,6 +112,22 @@ public class Pass4Compiler extends CompilerPassBase {
 					results.errors.add(err);
 				}
 			}
+		}
+	}
+
+	private void checkVia(IdentExp outputViaTargetExp, InputFunctionDefStatementExp funcExp, CompilerResults results) {
+		boolean found = false;
+		for(InputFuncMappingExp mappingExp: funcExp.getMappings()) {
+			String fieldName = mappingExp.outputField.argName();
+			if (outputViaTargetExp.strValue().equals(fieldName)) {
+				found = true;
+			}
+		}	
+		if (! found) {
+			String msg = String.format("input function '%s': via [%s] references unknown input field", funcExp.funcName, outputViaTargetExp.strValue());
+			DeliaError err = createError("input-function-unknown-via", msg, funcExp);
+			results.errors.add(err);
+
 		}
 	}
 

@@ -85,6 +85,7 @@ public class InputFunctionService extends ServiceBase {
 
 			spec.inputField = mappingExp.getInputField();
 			spec.outputField = mappingExp.outputField;
+			spec.viaPK = mappingExp.outputViaTargetExp == null ? null: mappingExp.outputViaTargetExp.strValue();
 			spec.prog = program;
 			progset.fieldMap.put(infield, spec);
 		}
