@@ -98,6 +98,13 @@ public class FilmAndActorTests  extends NewBDDBase {
 		for(DValue dval: res.getAsDValueList()) {
 			dumpDVal("A3 ", session, dval);
 		}
+		
+		log.log("and now distinct2...");
+		query = "Actor[true].fetch('films').actors.distinct()";
+		res = session.getDelia().continueExecution(query, session);
+		for(DValue dval: res.getAsDValueList()) {
+			dumpDVal("A3 ", session, dval);
+		}
 	}
 	
 	private String dumpDVal(String title, DeliaSession session, DValue dval) {
