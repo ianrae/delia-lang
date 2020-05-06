@@ -177,9 +177,10 @@ public class InputFunctionService extends ServiceBase {
 			LineObj lineObj = lineObjIter.next();
 
 			List<DeliaError> errL = new ArrayList<>();
-			List<ViaPendingInfo> viaPendingL = new ArrayList<>();
+			ViaLineInfo viaLineInfo = new ViaLineInfo();
+			viaLineInfo.viaL = viaL;
 			
-			List<DValue> dvals = processLineObj(request, inFuncRunner, hdr, lineObj, errL, viaL, viaPendingL); //one row
+			List<DValue> dvals = processLineObj(request, inFuncRunner, hdr, lineObj, errL, viaLineInfo); //one row
 			if (! errL.isEmpty()) {
 				log.logError("failed!");
 				addErrors(errL, fnResult.errors, lineNum);
@@ -203,8 +204,8 @@ public class InputFunctionService extends ServiceBase {
 					addErrors(errL, fnResult.errors, lineNum);
 				}
 				
-				for(ViaPendingInfo vpi: viaPendingL) {
-					viaSvc.executeInsert(vpi, request, fnResult, lineNum, viaL, errL);
+				if (viaLineInfo.hasRows()) {
+					viaSvc.executeInsert(viaLineInfo, request, fnResult, lineNum, errL);
 				}
 			}
 			
@@ -286,10 +287,10 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 
-	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL, List<ViaInfo> viaL, List<ViaPendingInfo> viaPendingL) {
+	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL, ViaLineInfo viaLineInfo) {
 		List<DValue> dvals = null;
 		try {
-			dvals = inFuncRunner.process(hdr, lineObj, errL, viaL, viaPendingL);
+			dvals = inFuncRunner.process(hdr, lineObj, errL, viaLineInfo);
 		} catch (DeliaException e) {
 			addError(e, errL, lineObj.lineNum);
 		}

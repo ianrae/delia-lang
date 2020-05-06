@@ -49,19 +49,19 @@ public class ViaService extends ServiceBase {
 		return viaL;
 	}
 
-	public void executeInsert(ViaPendingInfo vpi, InputFunctionRequest request, InputFunctionResult fnResult,
-			int lineNum, List<ViaInfo> viaL, List<DeliaError> errL) {
-		// TODO Auto-generated method stub
-		log.log("vv: %s: %s", vpi.outputFieldName, vpi.processedInputValue);
-		for(ViaInfo info: viaL) {
-			if (vpi.outputFieldName.equals(info.spec.outputField.val2)) {
-				log.log("SD");
-			}
-		}
+	public void executeInsert(ViaLineInfo viaLineInfo, InputFunctionRequest request, InputFunctionResult fnResult,
+			int lineNum, List<DeliaError> errL) {
+//		// TODO Auto-generated method stub
+//		log.log("vv: %s: %s", viaLineInfo..outputFieldName, vpi.processedInputValue);
+//		for(ViaInfo info: viaL) {
+//			if (vpi.outputFieldName.equals(info.spec.outputField.val2)) {
+//				log.log("SD");
+//			}
+//		}
 	}
 
-	public ViaInfo findMatch(List<ViaInfo> viaL, String outputFieldName) {
-		for(ViaInfo viaInfo: viaL) {
+	public ViaInfo findMatch(ViaLineInfo viaLineInfo, String outputFieldName) {
+		for(ViaInfo viaInfo: viaLineInfo.viaL) {
 			if (outputFieldName.equals(viaInfo.spec.outputField.val2)) {
 				return viaInfo;
 			}

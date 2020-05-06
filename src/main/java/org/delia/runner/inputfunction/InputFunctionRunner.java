@@ -57,12 +57,13 @@ public class InputFunctionRunner extends ServiceBase {
 		this.viaSvc = viaSvc;
 	}
 	
-	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL, List<ViaInfo> viaL, List<ViaPendingInfo> viaPendingL) {
+	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL, ViaLineInfo viaLineInfo) {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
 		//map of inputField,raw value
 		Map<String,Object> inputData = createInputMap(hdr, lineObj);
+		viaLineInfo.inputData = inputData;
 		//it can produce multiple if input function has multiple args (Customer c, Address a)
 		List<ProcessedInputData> processedDataL = runTLang(inputData);
 		if (haltNowFlag) {
@@ -71,7 +72,7 @@ public class InputFunctionRunner extends ServiceBase {
 
 		for(ProcessedInputData data: processedDataL) {
 			List<DeliaError> errL = new ArrayList<>();
-			DValue dval = buildFromData(data, errL, viaL, viaPendingL, lineObj);
+			DValue dval = buildFromData(data, errL, viaLineInfo, lineObj);
 			
 			if (dval == null) {
 				continue;
@@ -89,7 +90,7 @@ public class InputFunctionRunner extends ServiceBase {
 		return dvalL;
 	}
 
-	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, List<ViaInfo> viaL, List<ViaPendingInfo> viaPendingL, LineObj lineObj) {
+	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, ViaLineInfo viaLineInfo, LineObj lineObj) {
 		int mark = errL.size();
 		StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
 		
@@ -106,9 +107,9 @@ public class InputFunctionRunner extends ServiceBase {
 			Object input = pvalue.obj;
 			if (pvalue.isVia) {
 				viaCount++;
-				ViaInfo viaInfo = viaSvc.findMatch(viaL, outputFieldName);
-				ViaPendingInfo vpi = new ViaPendingInfo(data.structType, outputFieldName, input, lineObj);
-				viaPendingL.add(vpi);
+				ViaInfo viaInfo = viaSvc.findMatch(viaLineInfo, outputFieldName);
+				ViaPendingInfo vpi = new ViaPendingInfo(data.structType, outputFieldName, input, viaInfo);
+				viaLineInfo.viaPendingL.add(vpi);
 			}
 			log.logDebug("field: %s = %s", outputFieldName, input);
 			

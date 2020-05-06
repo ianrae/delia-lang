@@ -34,9 +34,8 @@ import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.ProgramSpec;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
-import org.delia.runner.inputfunction.ViaPendingInfo;
+import org.delia.runner.inputfunction.ViaLineInfo;
 import org.delia.runner.inputfunction.ViaService;
-import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
@@ -67,9 +66,7 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		
 		inFuncRunner.setProgramSet(progset);
 		List<DeliaError> lineErrL = new ArrayList<>();
-		List<ViaPendingInfo> viaPendingL = new ArrayList<>();
-		List<ViaInfo> viaL = new ArrayList<>();
-		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL, viaL, viaPendingL);
+		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL, new ViaLineInfo());
 		chkNoErrors(lineErrL);
 		chkNoErrors(localET.getErrors());
 		assertEquals(1, dvals.size());
