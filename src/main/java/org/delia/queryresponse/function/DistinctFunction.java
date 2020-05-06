@@ -39,8 +39,8 @@ public class DistinctFunction extends QueryResponseFunctionBase {
 		}
 		
 		List<DValue> newlist = new ArrayList<>();
-		
-		if (dvalList.get(0).getType().isShape(Shape.RELATION)) {
+		DValue firstVal = dvalList.get(0);
+		if (firstVal.getType().isShape(Shape.RELATION)) {
 			//build list of distinct fk values, using map
 			List<DValue> distinctFKList = new ArrayList<>();
 			Map<String,DValue> map = new HashMap<>();

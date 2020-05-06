@@ -148,7 +148,8 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR1500() {
 		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-distinct.txt", 0);
+		runR1500File("t0-queryfn-distinct.txt", 3);
+		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 		runR1500File("t0-queryfn-flatten.txt", 0);
 		runR1500File("t0-queryfn-count.txt", 2);
 		runR1500File("t0-queryfn-exist.txt", 2);
@@ -296,7 +297,9 @@ public class AllBDDTests extends NewBDDBase {
 //		runR1350File("t0-filter-op-relation.txt", 13);
 //		runR1000File("t0-upsert-mm-other.txt", 1);
 //		runR1550File("t0-queryfn-oneone-parent.txt", 6);
-		runR950File("t0-crud-assoc-insert.txt", 6);
+//		runR950File("t0-crud-assoc-insert.txt", 6);
+//		runR1500File("t0-queryfn-distinct.txt", 3);
+		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 	}
 	
 	//---
