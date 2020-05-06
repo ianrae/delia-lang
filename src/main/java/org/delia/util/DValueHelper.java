@@ -146,6 +146,17 @@ public class DValueHelper {
 	 * @return new value
 	 */
 	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal) {
+		return mergeOne(dvalPartial, existingDVal, null);
+	}	
+	
+	/**
+	 * Return a new DValue that combines dvalPartial into existingDVal
+	 * @param dvalPartial  value contains some of the type's fields
+	 * @param existingDVal DValue that we are merging into
+	 * @param skipMap fields to skip. ie. to not merge
+	 * @return new value
+	 */
+	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal, Map<String,String> skipMap) {
 	    Map<String,DValue> srcMap = new HashMap<>(dvalPartial.asMap()); //make a copy
 	    Map<String,DValue> existingMap = existingDVal.asMap();
 	    
@@ -153,8 +164,12 @@ public class DValueHelper {
 	    
 	    //merge or copy fields in existingDVal
 	    for(String fieldName: existingMap.keySet()) {
+	    	boolean skip = skipMap != null && skipMap.containsKey(fieldName);
+	    	
 			DValue inner;
-			if (srcMap.containsKey(fieldName)) {
+			if (skip) {
+				inner = existingMap.get(fieldName);
+			} else if (srcMap.containsKey(fieldName)) {
 				inner = srcMap.get(fieldName);
 				srcMap.remove(fieldName);
 			} else {
@@ -166,6 +181,10 @@ public class DValueHelper {
 	    
 	    //add fields in dvalPartial but not in existingDVal (ie. are null in existingDVal)
 	    for(String fieldName: srcMap.keySet()) {
+	    	boolean skip = skipMap != null && skipMap.containsKey(fieldName);
+	    	if (skip) {
+	    		continue;
+	    	}
 			DValue inner = srcMap.get(fieldName);
 			DValue clone = cloneField(inner);
 			newMap.put(fieldName, clone);

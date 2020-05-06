@@ -288,16 +288,15 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 13;
+		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 
 //		runR1350File("t0-filter-op-relation.txt", 13);
 //		runR1000File("t0-upsert-mm-other.txt", 1);
-//		runR1000File("t0-upsert-mm-all.txt", 1);
-//		runR1350File("t0-filter-op-relation.txt", 14);
-		runR1550File("t0-queryfn-oneone-parent.txt", 6);
+//		runR1550File("t0-queryfn-oneone-parent.txt", 6);
+		runR950File("t0-crud-assoc-insert.txt", 0);
 	}
 	
 	//---

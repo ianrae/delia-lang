@@ -330,6 +330,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				res.ok = false;
 				return;
 			} else {
+				cres.assocCrudMap = null; //clear. not supported for upsert
+				
 				//validate the fields of the partial DValue
 				ValidationRuleRunner ruleRunner = createValidationRunner();
 				ruleRunner.enableRelationModifier(true);
@@ -526,6 +528,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, this, sprigSvc);
 			cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
+			cres.assocCrudMap = converter.getAssocCrudMap();
 			return cres;
 		}
 

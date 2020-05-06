@@ -11,6 +11,7 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.QuerySpec;
 import org.delia.error.DeliaError;
+import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
 
@@ -59,7 +60,10 @@ public class MemUpdate extends ServiceBase {
 			//replace it in tbl
 			for(DValue tmp: dvalList) {
 				if (tmp == dd) {
-					DValue clone = DValueHelper.mergeOne(dvalUpdate, tmp);
+					DValue clone = DValueHelper.mergeOne(dvalUpdate, tmp, assocCrudMap);
+					if (assocCrudMap != null) {
+						doAssocCrud(dvalUpdate, clone, assocCrudMap);
+					}
 					dvalList.remove(tmp);
 					tbl.rowL.set(i, clone);
 					break;
@@ -71,6 +75,45 @@ public class MemUpdate extends ServiceBase {
 			}
 		}
 		return numRowsAffected;
+	}
+
+	private void doAssocCrud(DValue dvalUpdate, DValue clone, Map<String, String> assocCrudMap) {
+		for(String fieldName: assocCrudMap.keySet()) {
+			DRelation drelSrc = dvalUpdate.asStruct().getField(fieldName).asRelation();
+			DRelation drelDest = dvalUpdate.asStruct().getField(fieldName).asRelation();
+			
+			String action = assocCrudMap.get(fieldName);
+			switch(action) {
+			case "insert":
+				drelDest.getMultipleKeys().addAll(drelSrc.getMultipleKeys());
+			break;
+			case "update":
+				doUpdate(drelSrc, drelDest);
+			break;
+			case "delete":
+			{
+				for(DValue fk: drelSrc.getMultipleKeys()) {
+					DValue srcFK = findIn(drelDest);
+					if (srcFK != null) {
+						drelSrc.getMultipleKeys().remove(srcFK);
+					}
+				}
+			}
+			break;
+			default:
+			break;
+			}
+		}
+	}
+
+	private DValue findIn(DRelation drelDest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private void doUpdate(DRelation drelSrc, DRelation drelDest) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
