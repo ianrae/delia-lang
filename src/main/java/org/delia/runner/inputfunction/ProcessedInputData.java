@@ -14,6 +14,11 @@ public class ProcessedInputData {
 			this.obj = obj;
 			this.isVia = isVia;
 		}
+
+		@Override
+		public String toString() {
+			return obj == null ? "" : obj.toString();
+		}
 	}
 	public DStructType structType;
 	public Map<String,ProcessedValue> outputFieldMap = new HashMap<>(); //outfieldName,String

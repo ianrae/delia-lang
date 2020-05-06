@@ -27,6 +27,7 @@ import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
@@ -137,7 +138,8 @@ public class InputFunctionService extends ServiceBase {
 		ErrorTracker localET = new SimpleErrorTracker(log);
 		TLangVarEvaluator varEvaluator = new TLangVarEvaluator(request.session.getExecutionContext());
 		
-		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, localET, varEvaluator);
+		InputFunctionRunner inFuncRunner = new InputFunctionRunner(factorySvc, request.session.getExecutionContext().registry, 
+						localET, varEvaluator, viaSvc);
 		inFuncRunner.setProgramSet(request.progset);
 		inFuncRunner.setMetricsObserver(metricsObserver);
 		
@@ -148,7 +150,9 @@ public class InputFunctionService extends ServiceBase {
 		fnResult.progset = request.progset;
 		
 		List<ViaService.ViaInfo> viaL = viaSvc.detectVias(request);
-		log.log("VIA: %d", viaL.size());
+		if (! viaL.isEmpty()) {
+			log.log("vias detected: %d", viaL.size());
+		}
 		
 		// - the main loop -- reads csv file line by line
 		TypePair keyPair = null;
@@ -173,7 +177,9 @@ public class InputFunctionService extends ServiceBase {
 			LineObj lineObj = lineObjIter.next();
 
 			List<DeliaError> errL = new ArrayList<>();
-			List<DValue> dvals = processLineObj(request, inFuncRunner, hdr, lineObj, errL); //one row
+			List<ViaPendingInfo> viaPendingL = new ArrayList<>();
+			
+			List<DValue> dvals = processLineObj(request, inFuncRunner, hdr, lineObj, errL, viaL, viaPendingL); //one row
 			if (! errL.isEmpty()) {
 				log.logError("failed!");
 				addErrors(errL, fnResult.errors, lineNum);
@@ -195,6 +201,10 @@ public class InputFunctionService extends ServiceBase {
 					//TODO: queue up a bunch of dvals and then do a batch insert
 					executeInsert(dval, request, fnResult, lineNum, errL);
 					addErrors(errL, fnResult.errors, lineNum);
+				}
+				
+				for(ViaPendingInfo vpi: viaPendingL) {
+					viaSvc.executeInsert(vpi, request, fnResult, lineNum, viaL, errL);
 				}
 			}
 			
@@ -276,11 +286,10 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 
-	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
+	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL, List<ViaInfo> viaL, List<ViaPendingInfo> viaPendingL) {
 		List<DValue> dvals = null;
-		List<ViaPendingInfo> viaPendingL = new ArrayList<>();
 		try {
-			dvals = inFuncRunner.process(hdr, lineObj, errL, viaPendingL);
+			dvals = inFuncRunner.process(hdr, lineObj, errL, viaL, viaPendingL);
 		} catch (DeliaException e) {
 			addError(e, errL, lineObj.lineNum);
 		}

@@ -17,6 +17,7 @@ import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DeliaException;
 import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
+import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.tlang.runner.TLangRunnerImpl;
@@ -44,17 +45,19 @@ public class InputFunctionRunner extends ServiceBase {
 	private boolean haltNowFlag;
 	private DValueConverterService dvalConverter;
 	private ImportMetricObserver metricsObserver;
+	private ViaService viaSvc;
 
-	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator) {
+	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator, ViaService viaSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		this.et = localET;
 		this.varEvaluator = varEvaluator;
 		this.dvalConverter = new DValueConverterService(factorySvc);
+		this.viaSvc = viaSvc;
 	}
 	
-	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL, List<ViaPendingInfo> viaPendingL) {
+	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL, List<ViaInfo> viaL, List<ViaPendingInfo> viaPendingL) {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
@@ -68,7 +71,7 @@ public class InputFunctionRunner extends ServiceBase {
 
 		for(ProcessedInputData data: processedDataL) {
 			List<DeliaError> errL = new ArrayList<>();
-			DValue dval = buildFromData(data, errL, viaPendingL);
+			DValue dval = buildFromData(data, errL, viaL, viaPendingL, lineObj);
 			
 			if (dval == null) {
 				continue;
@@ -86,7 +89,7 @@ public class InputFunctionRunner extends ServiceBase {
 		return dvalL;
 	}
 
-	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, List<ViaPendingInfo> viaPendingL) {
+	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, List<ViaInfo> viaL, List<ViaPendingInfo> viaPendingL, LineObj lineObj) {
 		int mark = errL.size();
 		StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
 		
@@ -103,7 +106,8 @@ public class InputFunctionRunner extends ServiceBase {
 			Object input = pvalue.obj;
 			if (pvalue.isVia) {
 				viaCount++;
-				ViaPendingInfo vpi = new ViaPendingInfo(data.structType, outputFieldName, input);
+				ViaInfo viaInfo = viaSvc.findMatch(viaL, outputFieldName);
+				ViaPendingInfo vpi = new ViaPendingInfo(data.structType, outputFieldName, input, lineObj);
 				viaPendingL.add(vpi);
 			}
 			log.logDebug("field: %s = %s", outputFieldName, input);

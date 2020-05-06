@@ -35,6 +35,8 @@ import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.ProgramSpec;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.runner.inputfunction.ViaPendingInfo;
+import org.delia.runner.inputfunction.ViaService;
+import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
@@ -66,7 +68,8 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		inFuncRunner.setProgramSet(progset);
 		List<DeliaError> lineErrL = new ArrayList<>();
 		List<ViaPendingInfo> viaPendingL = new ArrayList<>();
-		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL, viaPendingL);
+		List<ViaInfo> viaL = new ArrayList<>();
+		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL, viaL, viaPendingL);
 		chkNoErrors(lineErrL);
 		chkNoErrors(localET.getErrors());
 		assertEquals(1, dvals.size());
@@ -164,7 +167,8 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 	private InputFunctionRunner createXConv() {
 		localET = new SimpleErrorTracker(delia.getLog());
 		TLangVarEvaluator varEvaluator = new TLangVarEvaluator(session.getExecutionContext());
-		return new InputFunctionRunner(delia.getFactoryService(), registry, localET, varEvaluator);
+		ViaService viaSvc = new ViaService(delia.getFactoryService());
+		return new InputFunctionRunner(delia.getFactoryService(), registry, localET, varEvaluator, viaSvc);
 	}
 
 

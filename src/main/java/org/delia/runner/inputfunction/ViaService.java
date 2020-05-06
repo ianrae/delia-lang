@@ -7,6 +7,8 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
+import org.delia.error.DeliaError;
+import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.type.DValue;
 
 
@@ -45,6 +47,26 @@ public class ViaService extends ServiceBase {
 		}
 		
 		return viaL;
+	}
+
+	public void executeInsert(ViaPendingInfo vpi, InputFunctionRequest request, InputFunctionResult fnResult,
+			int lineNum, List<ViaInfo> viaL, List<DeliaError> errL) {
+		// TODO Auto-generated method stub
+		log.log("vv: %s: %s", vpi.outputFieldName, vpi.processedInputValue);
+		for(ViaInfo info: viaL) {
+			if (vpi.outputFieldName.equals(info.spec.outputField.val2)) {
+				log.log("SD");
+			}
+		}
+	}
+
+	public ViaInfo findMatch(List<ViaInfo> viaL, String outputFieldName) {
+		for(ViaInfo viaInfo: viaL) {
+			if (outputFieldName.equals(viaInfo.spec.outputField.val2)) {
+				return viaInfo;
+			}
+		}
+		return null;
 	}
 
 }
