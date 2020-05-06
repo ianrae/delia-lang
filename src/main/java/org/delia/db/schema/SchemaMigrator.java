@@ -12,6 +12,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
@@ -27,7 +28,7 @@ import org.delia.type.DValue;
 import org.delia.typebuilder.FakeTypeCreator;
 import org.delia.util.StringUtil;
 
-public class SchemaMigrator extends ServiceBase {
+public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
@@ -55,8 +56,13 @@ public class SchemaMigrator extends ServiceBase {
 		this.optimizer = new MigrationOptimizer(factorySvc, dbInterface, registry, varEvaluator);
 	}
 	
+	@Override
 	public void close() {
-		dbexecutor.close();
+		try {
+			dbexecutor.close();
+		} catch (Exception e) {
+			DBHelper.handleCloseFailure(e);
+		}
 	}
 
 	public boolean createSchemaTableIfNeeded() {

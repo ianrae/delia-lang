@@ -6,8 +6,8 @@ import java.io.File;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
-import org.delia.bddnew.NewBDDBase.BDDGroup;
-import org.delia.bddnew.NewBDDBase.FileHelper;
+import org.delia.bdd.NewBDDBase.BDDGroup;
+import org.delia.bdd.NewBDDBase.FileHelper;
 import org.junit.Test;
 
 public class OtherTests {

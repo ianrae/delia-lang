@@ -1,5 +1,7 @@
 package org.delia.dataimport;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.api.Delia;
@@ -7,12 +9,15 @@ import org.delia.api.DeliaSession;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
+import org.delia.runner.inputfunction.ExternalDataLoader;
+import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
+import org.delia.runner.inputfunction.InputFunctionServiceOptions;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
@@ -26,17 +31,42 @@ public class DataImportService extends ServiceBase {
 	private DeliaSession session;
 	private int stopAfterErrorThreshold;
 	private ImportMetricObserver metricsObserver;
+	private ExternalDataLoader externalLoader;
+	private int numRowsToImport;
+	private boolean logDetails;
+	private boolean useInsertStatement;
 
-	public DataImportService(Delia delia, DeliaSession session, int stopAfterErrorThreshold) {
-		super(delia.getFactoryService());
-		this.delia = delia;
+	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
+		this(session, Integer.MAX_VALUE, stopAfterErrorThreshold, false);
+	}
+	public DataImportService(DeliaSession session, int numRowsToImport, int stopAfterErrorThreshold, boolean logDetails) {
+		super(session.getDelia().getFactoryService());
+		this.delia = session.getDelia();
 		this.session = session;
+		this.numRowsToImport = numRowsToImport;
 		this.stopAfterErrorThreshold = stopAfterErrorThreshold;
+		this.logDetails = logDetails;
+	}
+	
+	public List<InputFunctionResult> executeImportGroup(List<GroupPair> groupL, ImportLevel importLevel) {
+		List<InputFunctionResult> resultL = new ArrayList<>();
+		
+		for(GroupPair pair: groupL) {
+			InputFunctionResult result = executeImport(pair.inputFnName, pair.iter, importLevel);
+			resultL.add(result);
+		}
+		
+		return resultL;
 	}
 
-	public InputFunctionResult importIntoDatabase(String inputFnName, LineObjIterator lineObjIter) {
+	public InputFunctionResult executeImport(String inputFnName, LineObjIterator lineObjIter, ImportLevel importLevel) {
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		inputFnSvc.setMetricsObserver(metricsObserver);
+		inputFnSvc.getOptions().numRowsToImport = this.numRowsToImport;
+		inputFnSvc.getOptions().logDetails = logDetails;
+		inputFnSvc.getOptions().useInsertStatement = useInsertStatement;
+		initImportLevel(inputFnSvc, importLevel);
+		
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
 		if (progset == null) {
 			DeliaExceptionHelper.throwError("cant-find-user-fn", "Can't find input fn '%s'", inputFnName);
@@ -53,7 +83,24 @@ public class DataImportService extends ServiceBase {
 		request.session = session;
 		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
+		result.filename = lineObjIter.getFileName();
 		return result;
+	}
+
+	private void initImportLevel(InputFunctionService inputFnSvc, ImportLevel importLevel) {
+		InputFunctionServiceOptions options = inputFnSvc.getOptions();
+		
+		switch(importLevel) 
+		{
+		case ONE:
+			options.ignoreRelationErrors = true;
+			break;
+		case THREE:
+			options.externalLoader = this.externalLoader;
+			break;
+		default:
+			break;
+		}
 	}
 
 	public ImportMetricObserver getMetricsObserver() {
@@ -66,9 +113,11 @@ public class DataImportService extends ServiceBase {
 	
 	public void dumpImportReport(InputFunctionResult result, SimpleImportMetricObserver observer) {
 		int n = result.numRowsProcessed;
-		int failed = result.numRowsInserted;
-		int succeeded = n - failed;
-		String s = String.format("IMPORT %d rows. %d successful, %d failed", n, failed, succeeded);
+		int succeeded = result.numRowsInserted - result.numFailedRowInserts;
+		int failed = n - succeeded;
+		String alert = failed == 0 ? "  ***SUCCESS***" : String.format("(%d errors)", result.errors.size());
+		log.log("");
+		String s = String.format("IMPORT %d rows. %d successful, %d failed        %s  %s", n, succeeded, failed, alert, result.filename);
 		log.log(s);
 		
 		for(OutputSpec ospec : result.progset.outputSpecs) {
@@ -80,7 +129,7 @@ public class DataImportService extends ServiceBase {
 				for(int x: ofh.arMetrics) {
 					joiner.add(String.format("%3d", x));
 				}
-				String ss = String.format("%15s (%2d): %s", ofh.fieldName, ofh.fieldIndex, joiner.toString());
+				String ss = String.format("%15s [%2d]: %s", ofh.fieldName, ofh.fieldIndex, joiner.toString());
 				log.log(ss);
 			}
 			
@@ -117,7 +166,22 @@ public class DataImportService extends ServiceBase {
 			}
 		}
 		
+		if (! observer.externalLoadMap.isEmpty()) {
+			StringJoiner joiner = new StringJoiner(",");
+			for(String typeName: observer.externalLoadMap.keySet()) {
+				Integer count = observer.externalLoadMap.get(typeName);
+				joiner.add(String.format("%s: %d", typeName, count));
+			}
+			log.log("Externally loaded records:- %s", joiner.toString());
+		}
 		
+	}
+
+	public void setExternalDataLoader(ExternalDataLoader externalLoader) {
+		this.externalLoader = externalLoader;
+	}
+	public void setUseInsertStatement(boolean useInsertStatement) {
+		this.useInsertStatement = useInsertStatement;
 	}
 	
 }

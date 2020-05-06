@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.delia.base.UnitTestLog;
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.db.DBInterface;

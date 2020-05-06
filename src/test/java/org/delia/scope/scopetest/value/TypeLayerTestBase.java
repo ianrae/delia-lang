@@ -48,7 +48,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 		chkResOK(res);
 	}
 	protected void createStructType(String type, String rule) {
-		String sid = addIdFlag ? String.format(" id int unique") : "";
+		String sid = addIdFlag ? String.format(" id int primaryKey") : "";
 		String src = String.format("type C struct { %s field1 %s } %s end", sid, type, rule);
 		ResultValue res = execTypeStatement(src);
 		chkResOK(res);

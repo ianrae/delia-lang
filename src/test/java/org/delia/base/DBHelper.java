@@ -8,5 +8,4 @@ public class DBHelper {
 	public static void createTable(DBInterface dbInterface, String tableName) {
 		dbInterface.createTable(tableName, null);
 	}
-	
 }

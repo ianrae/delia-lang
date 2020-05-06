@@ -8,11 +8,12 @@ public class DStructType extends DType {
     private OrderedMap orderedMap;
 	//!! add String naturalKeyField, for db query. eg. 'code'
     private List<TypePair> allFields; //lazy-created
-
+    private PrimaryKey primaryKey; //can be null
 	
-	public DStructType(Shape shape, String name, DType baseType, OrderedMap orderedMap) {
+	public DStructType(Shape shape, String name, DType baseType, OrderedMap orderedMap, PrimaryKey primaryKey) {
 		super(shape, name, baseType);
 		this.orderedMap = orderedMap;
+		this.primaryKey = primaryKey;
 	}
 	
 	public boolean fieldIsOptional(String fieldname) {
@@ -150,6 +151,10 @@ public class DStructType extends DType {
 				pair.type = spec.newType;
 			}
 		}
+	}
+
+	public PrimaryKey getPrimaryKey() {
+		return primaryKey;
 	}
 
 }

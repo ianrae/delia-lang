@@ -13,9 +13,11 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.ListExp;
+import org.delia.compiler.ast.OptionExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 
 /**
  * Parser for insert,update,and delete statements
@@ -58,6 +60,12 @@ public class CrudParser extends ParserBase {
 					}
 				});
 	}
+	
+	public static Parser<OptionExp> statementOption() {
+		return Parsers.sequence(term("-"), ident(), 
+				(Token tok, IdentExp option) -> new OptionExp(tok.index(), option));
+		
+	}
 
 	public static Parser<InsertStatementExp> insertStatement() {
 		return Parsers.sequence(term("insert"), ident(), dsonObj(), 
@@ -67,6 +75,10 @@ public class CrudParser extends ParserBase {
 		return Parsers.sequence(term("update"), QueryParser.partialQuery(), dsonObj(), 
 				(Token tok, QueryExp queryExp, DsonExp dsonExp) -> new UpdateStatementExp(99, queryExp, dsonExp));
 	}
+	public static Parser<UpsertStatementExp> upsertStatement() {
+		return Parsers.sequence(term("upsert"), statementOption().optional(), QueryParser.partialQuery(), dsonObj(), 
+				(Token tok, OptionExp optExp, QueryExp queryExp, DsonExp dsonExp) -> new UpsertStatementExp(99, queryExp, dsonExp, optExp));
+	}
 	public static Parser<DeleteStatementExp> deleteStatement() {
 		return Parsers.sequence(term("delete"), QueryParser.partialQuery(), 
 				(Token tok, QueryExp queryExp) -> new DeleteStatementExp(99, queryExp.typeName, queryExp));
@@ -75,6 +87,7 @@ public class CrudParser extends ParserBase {
 	public static Parser<CrudExp> allCrudStatements() {
 		return Parsers.or(insertStatement(),
 				updateStatement(),
+				upsertStatement(),
 				deleteStatement());
 	}
 }

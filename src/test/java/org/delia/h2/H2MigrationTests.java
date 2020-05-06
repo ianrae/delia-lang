@@ -242,10 +242,13 @@ public class H2MigrationTests extends TopoTestBase {
 	}
 	private void chkTblExists(String tableName, boolean expected) {
 		DBAccessContext dbctx = new DBAccessContext(sess.getExecutionContext().registry, new DoNothingVarEvaluator());
-		DBExecutor dbexecutor = dbInterface.createExector(dbctx);
+		try(DBExecutor dbexecutor = dbInterface.createExector(dbctx)) {
+			boolean b = dbexecutor.execTableDetect(tableName);
+			assertEquals(expected, b);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		boolean b = dbexecutor.execTableDetect(tableName);
-		assertEquals(expected, b);
-		dbexecutor.close();
 	}
 }

@@ -84,7 +84,10 @@ public class DeliaImpl implements Delia {
 	protected Runner createRunner(DeliaSession dbsess) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		Runner runner = new RunnerImpl(factorySvc, dbInterface);
-		runner.setInsertPrebuiltValueIterator(dbsess == null ? null: dbsess.getInsertPrebuiltValueIterator());
+		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
+		if (runnerInitializer != null) {
+			runnerInitializer.initialize(runner);
+		}
 		boolean b; 
 		if (dbsess == null) {
 			b = runner.init(null); 
@@ -114,7 +117,7 @@ public class DeliaImpl implements Delia {
 		execTypes(mainRunner, expL);
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan);
 		if (migrationPlanRes != null) {
-			DeliaSessionImpl session = new DeliaSessionImpl();
+			DeliaSessionImpl session = new DeliaSessionImpl(this);
 			session.execCtx = mainRunner.getExecutionState();
 			session.ok = true;
 			session.res = migrationPlanRes;
@@ -124,7 +127,7 @@ public class DeliaImpl implements Delia {
 
 		ResultValue res = doExecute(mainRunner, expL);
 
-		DeliaSessionImpl session = new DeliaSessionImpl();
+		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();
 		session.ok = true;
 		session.res = res;

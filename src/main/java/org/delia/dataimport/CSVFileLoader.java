@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.util.DeliaExceptionHelper;
@@ -99,5 +100,10 @@ public class CSVFileLoader implements LineObjIterator {
 	@Override
 	public int getNumHdrRows() {
 		return numHdrRows;
+	}
+
+	@Override
+	public String getFileName() {
+		return FilenameUtils.getName(path);
 	}
 }

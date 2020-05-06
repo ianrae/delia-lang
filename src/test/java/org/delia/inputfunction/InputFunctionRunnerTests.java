@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -25,12 +25,15 @@ import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.HdrInfo;
+import org.delia.runner.inputfunction.ImportRunnerInitializer;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRunner;
+import org.delia.runner.inputfunction.InputFunctionServiceOptions;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.ProgramSpec;
+import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
@@ -71,11 +74,15 @@ public class InputFunctionRunnerTests  extends NewBDDBase {
 		//pass in the already build dval runner.setAlreadyBuiltDVal()
 		
 		DValueIterator iter = new DValueIterator(dvals);
-		session.setInsertPrebuiltValueIterator(iter);
+		InputFunctionServiceOptions options = new InputFunctionServiceOptions();
+		ImportSpec ispec = progset.outputSpecs.get(0).ispec;
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(delia.getFactoryService(), iter, session, options, 
+						ispec, new SimpleImportMetricObserver());
+		session.setRunnerIntiliazer(initializer);
 		String s = String.format("insert Customer {}");
 		ResultValue res = delia.continueExecution(s, session);
 		assertEquals(true, res.ok);
-		session.setInsertPrebuiltValueIterator(null);
+		session.setRunnerIntiliazer(null);
 		
 		DeliaDao dao = new DeliaDao(delia, session);
 		res = dao.queryByPrimaryKey("Customer", "1");

@@ -12,7 +12,7 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 		public List<String> setValuesL = new ArrayList<>();
 		public UpdateStatementFragment assocUpdateFrag; //TODO later support multiple
 		public DeleteStatementFragment assocDeleteFrag; //TODO later support multiple
-		public MergeIntoStatementFragment assocMergeInfoFrag; //TODO later support multiple
+		public MergeIntoStatementFragment assocMergeIntoFrag; //TODO later support multiple
 		public boolean doUpdateLast = false;
 		public List<InsertStatementFragment> assocCrudInsertL = new ArrayList<>();
 		public List<DeleteStatementFragment> assocCrudDeleteL = new ArrayList<>();

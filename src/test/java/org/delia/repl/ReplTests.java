@@ -2,7 +2,7 @@ package org.delia.repl;
 
 import java.io.IOException;
 
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.db.DBInterface;

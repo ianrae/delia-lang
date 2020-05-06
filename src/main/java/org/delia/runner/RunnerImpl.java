@@ -18,6 +18,7 @@ import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.compiler.ast.UserFnCallExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
@@ -28,6 +29,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
@@ -49,6 +51,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
@@ -59,18 +62,20 @@ import org.delia.valuebuilder.ScalarValueBuilder;
  */
 public class RunnerImpl extends ServiceBase implements Runner {
 		public static final String DOLLAR_DOLLAR = "$$";
+		public static final String VAR_SERIAL = "_serial";
 		private Map<String,ResultValue> varMap = new HashMap<>(); //ok for thread-safety
 		protected DTypeRegistry registry;
 		private DBInterface dbInterface;
 		private DBExecutor dbexecutor;
 		private QueryFuncOrFieldRunner qffRunner;
-		protected FetchRunnerImpl fetchRunner;
+		protected FetchRunner fetchRunner;
 		private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,String> activeUserFnMap = new HashMap<>(); //what's executing.  //ok for thread-safety
 		private ScalarBuilder scalarBuilder;
 		private SprigService sprigSvc;
 		private DValueIterator insertPrebuiltValueIterator;
+		private FetchRunner prebuiltFetchRunnerToUse;
 
 		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
 			super(factorySvc);
@@ -153,7 +158,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExector(dbctx);
-			this.fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, registry, this);
+			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
 			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 
 			try {
@@ -166,7 +171,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				}
 			} finally {
 				if (dbexecutor != null) {
-					dbexecutor.close();
+					try {
+						dbexecutor.close();
+					} catch (Exception e) {
+						DBHelper.handleCloseFailure(e);
+					}
 				}
 			}
 			return res;
@@ -187,6 +196,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				executeInsertStatement((InsertStatementExp)exp, res);
 			} else if (exp instanceof UpdateStatementExp) {
 				executeUpdateStatement((UpdateStatementExp)exp, res);
+			} else if (exp instanceof UpsertStatementExp) {
+				executeUpsertStatement((UpsertStatementExp)exp, res);
 			} else if (exp instanceof DeleteStatementExp) {
 				executeDeleteStatement((DeleteStatementExp)exp, res);
 			} else if (exp instanceof UserFunctionDefStatementExp) {
@@ -298,6 +309,80 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				return;
 			}
 		}
+		private void executeUpsertStatement(UpsertStatementExp exp, ResultValue res) {
+			//find DType for typename Actor
+			DType dtype = registry.getType(exp.getTypeName());
+			if (failIfNull(dtype, exp.typeName, res)) {
+				return;
+			} else if (failIfNotStruct(dtype, exp.typeName, res)) {
+				return;
+			}
+			
+			if (dtype == null) {
+				addError(res, "type.not.found", String.format("can't find type '%s'", exp.getTypeName()));
+				return;
+			}
+			
+			//get list of changed fields
+			ConversionResult cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
+			if (cres.dval == null) {
+				res.errors.addAll(cres.localET.getErrors());
+				res.ok = false;
+				return;
+			} else {
+				//validate the fields of the partial DValue
+				ValidationRuleRunner ruleRunner = createValidationRunner();
+				ruleRunner.enableRelationModifier(true);
+				ruleRunner.enableInsertFlag(true);
+				ConfigureService configSvc = factorySvc.getConfigureService();
+				
+				//upsert doesn't have primary key in field set, so temporarily add it
+				//so we can run validation 
+				PrimaryKeyHelperService pkSvc = new PrimaryKeyHelperService(factorySvc, registry);
+				QuerySpec spec = resolveFilterVars(exp.queryExp);
+				boolean addedPK = pkSvc.addPrimaryKeyIfMissing(spec, cres.dval);
+
+				ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
+				if (! ruleRunner.validateDVal(cres.dval)) {
+					ruleRunner.propogateErrors(res);
+				}
+				
+				if (addedPK) {
+					pkSvc.removePrimayKey(cres.dval);
+				}
+				
+				
+//				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
+//					ruleRunner.propogateErrors(res);
+//				}
+//				
+//				//then validate the affected rules (of the struct)
+//				//We determine the rules dependent on each field in partial dval
+//				//and execute those rules only
+//				if (! ruleRunner.validateDependentRules(cres.dval)) {
+//					ruleRunner.propogateErrors(res);
+//				}
+
+				if (!res.errors.isEmpty()) {
+					res.ok = false;
+					return;
+				}
+			}
+			
+			try {
+				QuerySpec spec = resolveFilterVars(exp.queryExp);
+				boolean noUpdateFlag = exp.optionExp != null;
+				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
+				
+				res.ok = true;
+				res.shape = Shape.INTEGER;
+				res.val = numRowsAffected;
+			} catch (DBException e) {
+				res.errors.add(e.getLastError());
+				res.ok = false;
+				return;
+			}
+		}
 		private void executeDeleteStatement(DeleteStatementExp exp, ResultValue res) {
 			//find DType for typename Actor
 			DType dtype = registry.getType(exp.getTypeName());
@@ -373,6 +458,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					ctx.extractGeneratedKeys = true;
 					ctx.genKeytype = DValueHelper.findPrimaryKeyFieldPair(cres.dval.getType()).type;
 					DValue generatedId = dbexecutor.executeInsert(cres.dval, ctx);
+					assignSerialVar(generatedId);
 					boolean sprigFlag = sprigSvc.haveEnabledFor(typeName);
 					if (sprigFlag) {
 						sprigSvc.rememberSynthId(typeName, cres.dval, generatedId, cres.extraMap);
@@ -433,6 +519,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
 			ConversionResult cres = new ConversionResult();
 			cres.localET = new SimpleErrorTracker(log);
+			if (insertPrebuiltValueIterator != null) {
+				cres.dval = insertPrebuiltValueIterator.next();
+				return cres;
+			}
+			
 			DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, this, sprigSvc);
 			cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
 			return cres;
@@ -636,6 +727,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			varMap.put(varName, res);
 			varMap.put(DOLLAR_DOLLAR, res);
 		}
+		private void assignSerialVar(DValue generatedId) {
+			ResultValue res = new ResultValue();
+			res.ok = true;
+			res.shape = generatedId.getType().getShape();
+			res.val = generatedId;
+			res.varName = VAR_SERIAL;
+			varMap.put(VAR_SERIAL, res);
+		}
 
 		private VarRef resolveScalarVarReference(QueryExp queryExp) {
 			ResultValue res = varMap.get(queryExp.typeName);
@@ -775,5 +874,13 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 		public Map<String, InputFunctionDefStatementExp> getInputFnMap() {
 			return inputFnMap;
+		}
+		@Override
+		public FetchRunner getPrebuiltFetchRunnerToUse() {
+			return prebuiltFetchRunnerToUse;
+		}
+		@Override
+		public void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse) {
+			this.prebuiltFetchRunnerToUse = prebuiltFetchRunnerToUse;
 		}
 	}

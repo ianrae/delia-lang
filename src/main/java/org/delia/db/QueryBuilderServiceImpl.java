@@ -22,6 +22,7 @@ import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -96,8 +97,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public QueryExp createInQuery(String typeName, List<DValue> list, DType relType) {
 		//TODO fix this. hack hack hack it is WRONG
-		String keyFieldName = DValueHelper.findUniqueField(relType);
-		QueryInExp inExp = new QueryInExp(99, new IdentExp(keyFieldName), null);
+		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(relType);
+		QueryInExp inExp = new QueryInExp(99, new IdentExp(keyPair.name), null);
 		FilterOpFullExp fullExp = new FilterOpFullExp(99, inExp);
 		for(DValue dval: list) {
 			//int only for now

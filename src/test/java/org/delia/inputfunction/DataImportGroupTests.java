@@ -8,7 +8,7 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -17,10 +17,12 @@ import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
+import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
+import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.junit.Before;
@@ -29,11 +31,6 @@ import org.junit.Test;
 public class DataImportGroupTests  extends NewBDDBase {
 	
 	public static class ImportGroupService extends ServiceBase {
-		
-		public static class GroupPair {
-			public String inputFnName;
-			public LineObjIterator iter;
-		}
 		
 		private List<GroupPair> groupL = new ArrayList<>();
 
@@ -52,9 +49,9 @@ public class DataImportGroupTests  extends NewBDDBase {
 			List<InputFunctionResult> resultL = new ArrayList<>();
 			
 			for(GroupPair pair: groupL) {
-				DataImportService importSvc = new DataImportService(delia, session, stopAfterErrorThreshold);
+				DataImportService importSvc = new DataImportService(session, stopAfterErrorThreshold);
 
-				InputFunctionResult result = importSvc.importIntoDatabase(pair.inputFnName, pair.iter);
+				InputFunctionResult result = importSvc.executeImport(pair.inputFnName, pair.iter, ImportLevel.ONE);
 				resultL.add(result);
 			}
 			

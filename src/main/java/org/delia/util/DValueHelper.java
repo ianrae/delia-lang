@@ -10,42 +10,51 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.DValueImpl;
+import org.delia.type.PrimaryKey;
+import org.delia.type.PrimaryKeyValue;
 import org.delia.type.TypePair;
 
 public class DValueHelper {
 
-	public static String findUniqueField(DType inner) {
-		if (! inner.isStructShape()) {
+//	public static String findUniqueField(DType inner) {
+//		if (! inner.isStructShape()) {
+//			return null;
+//		}
+//		TypePair pair = findPrimaryKeyFieldPair(inner); 
+//		if (pair == null) {
+//			return null;
+//		} else {
+//			return pair.name;
+//		}
+//	}
+	
+	public static DValue findPrimaryKeyValue(DValue dval) {
+		if (! dval.getType().isStructShape()) {
 			return null;
 		}
-		TypePair pair = findPrimaryKeyFieldPair(inner); 
-		if (pair == null) {
+		DStructType structType = (DStructType) dval.getType();
+		PrimaryKey primaryKey = structType.getPrimaryKey();
+		if (primaryKey == null) {
 			return null;
-		} else {
-			return pair.name;
 		}
+		
+		PrimaryKeyValue pkv = new PrimaryKeyValue(dval);
+		return pkv.getKeyValue();
+//		
+////		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+//		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+//		DValue inner = dval.asStruct().getField(keyPair.name);
+//		return inner;
 	}
+	
 	//TODO: support composite keys later
 	public static TypePair findPrimaryKeyFieldPair(DType inner) {
 		if (! inner.isStructShape()) {
 			return null;
 		}
-		
-		//first, look for primaryKey fields
 		DStructType dtype = (DStructType) inner;
-		for(TypePair pair: dtype.getAllFields()) {
-			if (dtype.fieldIsPrimaryKey(pair.name)) {
-				return pair;
-			}
-		}
-		
-		//otherwise, look for unique fields
-		for(TypePair pair: dtype.getAllFields()) {
-			if (dtype.fieldIsUnique(pair.name) && !dtype.fieldIsOptional(pair.name)) {
-				return pair;
-			}
-		}
-		return null;
+		PrimaryKey prikey = dtype.getPrimaryKey();
+		return prikey == null ? null : prikey.getKey();
 	}
 	public static List<TypePair> findAllUniqueFieldPair(DType inner) {
 		if (! inner.isStructShape()) {
@@ -109,18 +118,18 @@ public class DValueHelper {
 		}
 		return false;
 	}
-	public static DType findUniqueFieldType(DType inner) {
-		if (! inner.isStructShape()) {
-			return null;
-		}
-		
-		TypePair pair = findPrimaryKeyFieldPair(inner); 
-		if (pair == null) {
-			return null;
-		} else {
-			return pair.type;
-		}
-	}
+//	public static DType findUniqueFieldType(DType inner) {
+//		if (! inner.isStructShape()) {
+//			return null;
+//		}
+//		
+//		TypePair pair = findPrimaryKeyFieldPair(inner); 
+//		if (pair == null) {
+//			return null;
+//		} else {
+//			return pair.type;
+//		}
+//	}
 	
 	public static DValue getFieldValue(DValue dval, String fieldName) {
 		if (dval == null || ! dval.getType().isStructShape()) {

@@ -6,7 +6,6 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
-import org.delia.db.DBInterface;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.rule.AlwaysRuleGuard;

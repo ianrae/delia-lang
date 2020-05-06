@@ -25,42 +25,40 @@ public class MigrationService extends ServiceBase {
 	 * @return success flag
 	 */
 	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator) {
-		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);
-
-		migrator.createSchemaTableIfNeeded();
-		boolean b = migrator.dbNeedsMigration();
-		log.logDebug("MIGRATION needed: %b", b);
-		if (b) {
-			MigrationPlan plan = migrator.generateMigrationPlan();
-			if (policy.shouldMigrationOccur(plan)) {
-				boolean performRiskChecks = policy.shouldPerformRiskChecks();
-				b = migrator.performMigrations(performRiskChecks);
-				if (! b) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
+			migrator.createSchemaTableIfNeeded();
+			boolean b = migrator.dbNeedsMigration();
+			log.logDebug("MIGRATION needed: %b", b);
+			if (b) {
+				MigrationPlan plan = migrator.generateMigrationPlan();
+				if (policy.shouldMigrationOccur(plan)) {
+					boolean performRiskChecks = policy.shouldPerformRiskChecks();
+					b = migrator.performMigrations(performRiskChecks);
+					if (! b) {
+						return false;
+					}
+				} else {
+					log.logError("MIGRATION rejected due to policy : %s", policy.getClass().getSimpleName());
+					log.log("=== MIGRATION PLAN ===");
+					for(SchemaType ss: plan.diffL) {
+						log.log(ss.getSummary());
+					}
+					log.log("=== END MIGRATION PLAN ===");
+					migrator.close();
 					return false;
 				}
-			} else {
-				log.logError("MIGRATION rejected due to policy : %s", policy.getClass().getSimpleName());
-				log.log("=== MIGRATION PLAN ===");
-				for(SchemaType ss: plan.diffL) {
-					log.log(ss.getSummary());
-				}
-				log.log("=== END MIGRATION PLAN ===");
-				migrator.close();
-				return false;
 			}
 		}
-		migrator.close();
 		return true;
 	}
 	public MigrationPlan createMigrationPlan(DTypeRegistry registry, VarEvaluator varEvaluator) {
-		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);
-
-		migrator.createSchemaTableIfNeeded();
-		boolean b = migrator.dbNeedsMigration();
-		log.log("MIGRATION PLAN: %b", b);
-		MigrationPlan plan = migrator.generateMigrationPlan();
-		migrator.close();
-		return plan;
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
+			migrator.createSchemaTableIfNeeded();
+			boolean b = migrator.dbNeedsMigration();
+			log.log("MIGRATION PLAN: %b", b);
+			MigrationPlan plan = migrator.generateMigrationPlan();
+			return plan;
+		}
 	}
 	
 	/**
@@ -71,14 +69,13 @@ public class MigrationService extends ServiceBase {
 	 * @return plan
 	 */
 	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator) {
-		SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator);
-
-		migrator.createSchemaTableIfNeeded();
-		boolean b = migrator.dbNeedsMigration();
-		log.log("RUN MIGRATION PLAN: %b", b);
-		plan = migrator.runMigrationPlan(plan);
-		migrator.close();
-		return plan;
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
+			migrator.createSchemaTableIfNeeded();
+			boolean b = migrator.dbNeedsMigration();
+			log.log("RUN MIGRATION PLAN: %b", b);
+			plan = migrator.runMigrationPlan(plan);
+			return plan;
+		}
 	}
 
 	public void initPolicy(boolean useSafeMigrationPolicy, boolean enableAutomaticMigrations) {

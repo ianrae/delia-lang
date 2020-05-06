@@ -26,9 +26,8 @@ public class DBDeleteTableCmd extends CmdBase {
 		Delia delia = runner.getDelia();
 		DBInterface dbInterface = delia.getDBInterface();
 		DBAccessContext dbctx = new DBAccessContext(null, null);
-		DBExecutor exec = dbInterface.createExector(dbctx);
 		
-		try {
+		try(DBExecutor exec = dbInterface.createExector(dbctx)) {
 			String tableName = cmd.arg1;
 			if (exec.execTableDetect(tableName)) {
 				exec.deleteTable(cmd.arg1);
@@ -36,9 +35,11 @@ public class DBDeleteTableCmd extends CmdBase {
 			} else {
 				log("can't find that table: " + tableName);
 			}
-		} finally {
-			exec.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
 		
 		return createEmptyRes();
 	}

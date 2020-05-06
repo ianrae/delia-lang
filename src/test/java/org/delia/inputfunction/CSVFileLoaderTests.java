@@ -8,13 +8,14 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
-import org.delia.bddnew.NewBDDBase;
+import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaDao;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
+import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
@@ -99,9 +100,9 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		return buildAndRun(lineObjIter, expectedNumRows);
 	}
 	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedNumRows) {
-		DataImportService importSvc = new DataImportService(delia, session, 0);
+		DataImportService importSvc = new DataImportService(session, 0);
 
-		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
+		InputFunctionResult result = importSvc.executeImport("foo", lineObjIter, ImportLevel.ONE);
 		assertEquals(0, result.errors.size());
 		assertEquals(expectedNumRows, result.numRowsProcessed);
 		assertEquals(expectedNumRows, result.numRowsInserted);
@@ -109,9 +110,9 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		return result;
 	}
 	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
-		DataImportService importSvc = new DataImportService(delia, session, 0);
+		DataImportService importSvc = new DataImportService(session, 0);
 
-		InputFunctionResult result = importSvc.importIntoDatabase("foo", lineObjIter);
+		InputFunctionResult result = importSvc.executeImport("foo", lineObjIter, ImportLevel.ONE);
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(0, result.numRowsInserted);

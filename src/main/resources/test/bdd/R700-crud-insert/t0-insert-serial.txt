@@ -1,0 +1,15 @@
+# CRUD insert tests
+
+FEATURE: CRUD insert _serial
+background:
+  type Flight struct {id int primaryKey serial, wid int optional }  end
+thenType: struct
+
+---
+title: insert 
+when:
+  insert Flight {wid: 20 }
+  let x = _serial
+then:
+value:a:int:1
+

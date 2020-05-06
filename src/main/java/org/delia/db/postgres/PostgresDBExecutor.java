@@ -2,12 +2,15 @@ package org.delia.db.postgres;
 
 import java.util.Map;
 
+import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.h2.H2DBConnection;
+import org.delia.runner.FetchRunner;
+import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
 
@@ -34,6 +37,10 @@ public class PostgresDBExecutor implements DBExecutor {
 	@Override
 	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
 		return dbInterface.executeUpdate(spec, dvalPartial, assocCrudMap, dbctx);
+	}
+	@Override
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
+		return dbInterface.executeUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag, dbctx);
 	}
 
 	@Override
@@ -100,5 +107,10 @@ public class PostgresDBExecutor implements DBExecutor {
 	@Override
 	public void alterField(String typeName, String fieldName, String deltaFlags) {
 		dbInterface.alterField(typeName, fieldName, deltaFlags, dbctx);
+	}
+
+	@Override
+	public FetchRunner createFetchRunner(FactoryService factorySvc) {
+		return new FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
 	}
 }

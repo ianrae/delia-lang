@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
 import org.delia.db.h2.H2DBExecutor;
-import org.delia.db.h2.H2DBInterface;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
 
@@ -28,48 +28,53 @@ public class H2TestCleaner {
 	public void deleteKnownTables(FactoryService factorySvc, DBInterface innerInterface) {
 		this.dbInterface = innerInterface;
 		this.log = factorySvc.getLog();
-		DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null));
 		boolean b = innerInterface.isSQLLoggingEnabled();
-		innerInterface.enableSQLLogging(false);
-//		System.out.println("dropping...");
-		log.log("CLEAN tables..");
-		safeDeleteTable(executor, "cars");
-		safeDeleteTable(executor, "CustomerAddressAssoc");
-		safeDeleteTable(executor, "AddressCustomerAssoc");
-		safeDeleteTable(executor, "Customer");
-		safeDeleteTable(executor, "CUSTOMERS");
-		safeDeleteTable(executor, "Address");
-		safeDeleteTable(executor, "Customer");
-		safeDeleteTable(executor, "Address");
-		safeDeleteTable(executor, "CustomerAddressAssoc");
-		safeDeleteTable(executor, "AddressCustomerAssoc");
-		safeDeleteTable(executor, "Customer__BAK");
-		safeDeleteTable(executor, "Actor");
-		safeDeleteTable(executor, "Flight");
-		safeDeleteTable(executor, "Flight2");
-		safeDeleteTable(executor, "BASE");
-		safeDeleteTable(executor, "BASE2");
+		
+		try(DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null))) {
+			innerInterface.enableSQLLogging(false);
+//			System.out.println("dropping...");
+			log.log("CLEAN tables..");
+			safeDeleteTable(executor, "cars");
+			safeDeleteTable(executor, "CustomerAddressAssoc");
+			safeDeleteTable(executor, "AddressCustomerAssoc");
+			safeDeleteTable(executor, "Customer");
+			safeDeleteTable(executor, "CUSTOMERS");
+			safeDeleteTable(executor, "Address");
+			safeDeleteTable(executor, "Customer");
+			safeDeleteTable(executor, "Address");
+			safeDeleteTable(executor, "CustomerAddressAssoc");
+			safeDeleteTable(executor, "AddressCustomerAssoc");
+			safeDeleteTable(executor, "Customer__BAK");
+			safeDeleteTable(executor, "Actor");
+			safeDeleteTable(executor, "Flight");
+			safeDeleteTable(executor, "Flight2");
+			safeDeleteTable(executor, "BASE");
+			safeDeleteTable(executor, "BASE2");
 
-		String tbl = SchemaMigrator.SCHEMA_TABLE;
-		safeDeleteTable(executor, tbl.toLowerCase());
-		executor.close();
+			String tbl = SchemaMigrator.SCHEMA_TABLE;
+			safeDeleteTable(executor, tbl.toLowerCase());
+		} catch (Exception e1) {
+			DBHelper.handleCloseFailure(e1);
+		}
 		innerInterface.enableSQLLogging(b);
 	}
 	
 	public void deleteTables(FactoryService factorySvc, DBInterface innerInterface, String tables) {
-		DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null));
-		boolean b = innerInterface.isSQLLoggingEnabled();
-		innerInterface.enableSQLLogging(false);
+		try(DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null))) {
+			boolean b = innerInterface.isSQLLoggingEnabled();
+			innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
-		Log log = factorySvc.getLog();
-		
-		log.log("--delete TABLES -- ");
-		String[] ar = tables.split(",");
-		for(String tbl: ar) {
-			tbl = adjustTblName(tbl);
-			log.log("delete table: %s", tbl);
-			safeDeleteTable(executor, tbl);
+			Log log = factorySvc.getLog();
 			
+			log.log("--delete TABLES -- ");
+			String[] ar = tables.split(",");
+			for(String tbl: ar) {
+				tbl = adjustTblName(tbl);
+				log.log("delete table: %s", tbl);
+				safeDeleteTable(executor, tbl);
+			}
+		} catch (Exception e) {
+			DBHelper.handleCloseFailure(e);
 		}
 	}
 

@@ -3,7 +3,6 @@ package org.delia.api;
 import java.util.List;
 
 import org.delia.compiler.ast.Exp;
-import org.delia.runner.DValueIterator;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 
@@ -14,8 +13,14 @@ public class DeliaSessionImpl implements DeliaSession {
 	
 	//only set in beginExecution, not in continueExecution
 	public List<Exp> expL; //for getting at parse results. TODO: need a flag that disables this to save memory
-	private DValueIterator insertPrebuiltValueIterator;
+//	private DValueIterator insertPrebuiltValueIterator;
+	private RunnerInitializer runnerInitializer;
+	private Delia delia;
 						
+	
+	public DeliaSessionImpl(Delia delia) {
+		this.delia = delia;
+	}
 
 	@Override
 	public boolean ok() {
@@ -33,13 +38,18 @@ public class DeliaSessionImpl implements DeliaSession {
 	}
 
 	@Override
-	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
-		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
+	public Delia getDelia() {
+		return delia;
 	}
 
 	@Override
-	public DValueIterator getInsertPrebuiltValueIterator() {
-		return insertPrebuiltValueIterator;
+	public void setRunnerIntiliazer(RunnerInitializer runnerInitializer) {
+		this.runnerInitializer = runnerInitializer;
+	}
+
+	@Override
+	public RunnerInitializer getRunnerIntiliazer() {
+		return runnerInitializer;
 	}
 	
 }

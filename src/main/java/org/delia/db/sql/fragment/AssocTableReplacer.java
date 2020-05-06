@@ -53,7 +53,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsingAll(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, "");
 
-		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
+		updateFrag.assocMergeIntoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
@@ -145,7 +145,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		//part 2. merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeForIdOnly(assocUpdateFrag, info, assocFieldName, assocField2, sc.str);
 		
-		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
+		updateFrag.assocMergeIntoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
 		int extra = statement.paramL.size() - startingNumParams;
@@ -222,7 +222,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 //	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 		MergeIntoStatementFragment mergeIntoFrag = generateMergeUsing(assocUpdateFrag, info, assocFieldName, assocField2, mainUpdateAlias, subSelectWhere);
 
-		updateFrag.assocMergeInfoFrag = mergeIntoFrag;
+		updateFrag.assocMergeIntoFrag = mergeIntoFrag;
 		
 		mergeIntoFrag.paramStartIndex = statement.paramL.size();
 		List<OpFragment> clonedL2 = WhereListHelper.cloneWhereList(updateFrag.whereL);

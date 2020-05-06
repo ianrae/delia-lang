@@ -2,7 +2,6 @@ package org.delia.rule.rules;
 
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.delia.error.DetailedError;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRuleBase;
@@ -59,40 +58,38 @@ public class RelationOneRule extends DRuleBase {
 		}
 		
 		//first ensure foreign key points to existing record
-		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel, oper1.getSubject());
+//		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
+		boolean fkObjectExists = ctx.getFetchRunner().queryFKExists(drel);
 		boolean otherSideIsMany = false;
-		if (!qrespFetch.ok) {
-//			qresResult.err = qrespFetch.err;
+		if (! fkObjectExists) {
+			String key = drel.getForeignKey().asString();
+			String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
+			addDetailedError(ctx, msg, getSubject());
+			return false;
 		} else {
-			if (CollectionUtils.isEmpty(qrespFetch.dvalList)) {
-				String key = drel.getForeignKey().asString();
-				String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-				addDetailedError(ctx, msg, getSubject());
-				return false;
-			}
-			
 			boolean bb = ctx.isPopulateFKsFlag();
 			if (!bb) {
 				return true;
 			}
 			
 			if (ctx.isEnableRelationModifierFlag()) {
+				//Note: we use queryFKExists above (for perf during import)
+				//then if needed use load here to get entire object
+				QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 				otherSideIsMany = populateOtherSideOfRelation(dval, ctx, qrespFetch, otherSideIsMany);
 			}
 		}
 		
 		//next ensure this is only foreign key of that value
 		if (!otherSideIsMany) {
-			qrespFetch = ctx.getFetchRunner().queryOwningType(owningType, oper1.getSubject(), drel);
-			if (!qrespFetch.ok) {
+			boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
+			if (!exists) {
 //			qresResult.err = qrespFetch.err;
 			} else {
-				if (!CollectionUtils.isEmpty(qrespFetch.dvalList)) {
-					String key = drel.getForeignKey().asString();
-					String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
-					addDetailedError(ctx, msg, getSubject());
-					return false;
-				}
+				String key = drel.getForeignKey().asString();
+				String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
+				addDetailedError(ctx, msg, getSubject());
+				return false;
 			}
 		}
 
@@ -189,7 +186,8 @@ public class RelationOneRule extends DRuleBase {
 		if (farInfo == null) {
 			return;
 		}
-		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
+//		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
+		QueryResponse qresp = fetchRunner.loadFKOnly(info.farType.getName(), farInfo.fieldName, keyVal);
 		if (!qresp.ok) {
 			return; //!!
 		}
@@ -197,12 +195,10 @@ public class RelationOneRule extends DRuleBase {
 			return;
 		}
 		
-		DValue otherSide = qresp.getOne();
-		pair = DValueHelper.findPrimaryKeyFieldPair(otherSide.getType());
-		DValue otherSideKeyVal = otherSide.asStruct().getField(pair.name);
+		DValue otherSideKeyVal = qresp.getOne();
 		
 		DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
-		String typeName = otherSide.getType().getName();
+		String typeName = info.farType.getName();
 		RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
 		builder.buildFromString(otherSideKeyVal.asString());
 		boolean b = builder.finish();

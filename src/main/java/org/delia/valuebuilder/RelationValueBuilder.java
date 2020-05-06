@@ -32,6 +32,20 @@ public class RelationValueBuilder extends DValueBuilder {
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(idType);
 		this.idType = pair.type;
 	}
+	public RelationValueBuilder(DType type, DType farType, DTypeRegistry registry) {
+		if (!type.isShape(Shape.RELATION)) {
+			addWrongTypeError("expecting relation");
+			return;
+		}
+		this.type = type;
+		this.foreignTypeName = farType.getName();
+		this.registry = registry;
+		
+		DType idType = farType;
+		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(idType);
+		this.idType = pair.type;
+	}
+	
 
 	public void buildFromString(String input) {
 		if (input == null) {

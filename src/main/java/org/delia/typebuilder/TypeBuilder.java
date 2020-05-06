@@ -1,5 +1,8 @@
 package org.delia.typebuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.delia.compiler.ast.StructFieldExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
@@ -10,7 +13,9 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.OrderedMap;
+import org.delia.type.PrimaryKey;
 import org.delia.type.Shape;
+import org.delia.type.TypePair;
 
 public class TypeBuilder extends ServiceBase {
 
@@ -81,7 +86,60 @@ public class TypeBuilder extends ServiceBase {
 //	      return dtype;
 //	    }
 		
-		return new DStructType(Shape.STRUCT, typeName, baseType, omap);
+		List<TypePair> possibleL = new ArrayList<>();
+		TypePair pair = baseType == null ? null : findPrimaryKeyFieldPair(baseType);
+		if (pair != null) {
+			possibleL.add(pair);
+		}
+		
+		for(String fieldName: omap.orderedList) {
+			if (omap.isPrimaryKey(fieldName)) {
+				pair = new TypePair(fieldName, omap.map.get(fieldName));
+				possibleL.add(pair);
+			}
+		}
+		
+		//if haven't found anything, we'll consider unique fields
+		if (possibleL.isEmpty()) {
+			for(String fieldName: omap.orderedList) {
+				if (omap.isUnique(fieldName)) {
+					pair = new TypePair(fieldName, omap.map.get(fieldName));
+					possibleL.add(pair);
+				}
+			}
+		}
+		
+		PrimaryKey prikey;
+		if (possibleL.isEmpty()) {
+			prikey = null;
+		} else if (possibleL.size() == 1) {
+			prikey = new PrimaryKey(possibleL.get(0));
+		} else {
+			prikey = new PrimaryKey(possibleL);
+		}
+		return new DStructType(Shape.STRUCT, typeName, baseType, omap, prikey);
+	}
+	
+	private static TypePair findPrimaryKeyFieldPair(DType inner) {
+		if (! inner.isStructShape()) {
+			return null;
+		}
+		
+		//first, look for primaryKey fields
+		DStructType dtype = (DStructType) inner;
+		for(TypePair pair: dtype.getAllFields()) {
+			if (dtype.fieldIsPrimaryKey(pair.name)) {
+				return pair;
+			}
+		}
+		
+		//otherwise, look for unique fields
+		for(TypePair pair: dtype.getAllFields()) {
+			if (dtype.fieldIsUnique(pair.name) && !dtype.fieldIsOptional(pair.name)) {
+				return pair;
+			}
+		}
+		return null;
 	}
 
 	private DType createScalarType(TypeStatementExp typeStatementExp) {

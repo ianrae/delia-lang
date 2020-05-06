@@ -1,10 +1,13 @@
 package org.delia.runner;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBExecutor;
-import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -13,6 +16,8 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 
@@ -28,7 +33,7 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 	}
 	
 	@Override
-	public QueryResponse load(DRelation drel, String targetFieldName) {
+	public QueryResponse load(DRelation drel) {
 		QueryExp queryExp = buildQuery(drel);
 		//TODO resolve vars such as foo(id)
 		QuerySpec spec = new QuerySpec();
@@ -38,6 +43,18 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		QueryContext qtx = new QueryContext();
 		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
 		return qresp;
+	}
+
+	@Override
+	public boolean queryFKExists(DRelation drel) {
+		QueryResponse qresp = load(drel);
+		if (!qresp.ok) {
+			return false;
+		} else if (CollectionUtils.isEmpty(qresp.dvalList)) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	private QueryExp buildQuery(DRelation drel) {
@@ -69,18 +86,6 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		}
 	}
 	private QueryExp buildOwningTypeQuery(DStructType owningType, String fieldName, DRelation drel) {
-//		Integer foreignKey = drel.getForeignKey().asInt();
-//		
-//		//Address[cust=value]
-//		IdentExp op1 = new IdentExp(fieldName);
-//		IntegerExp op2 = new IntegerExp(foreignKey);
-//		FilterOpExp filterOp0 = new FilterOpExp(99, op1, new StringExp("=="), op2);
-//		FilterOpFullExp filterOp = new FilterOpFullExp(99, filterOp0);
-//		
-//		//TODO string keys later
-//		FilterExp filter = new FilterExp(99, filterOp);
-//		QueryExp exp = new QueryExp(0, new IdentExp(owningType.getName()), filter, null);
-		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp = builderSvc.createEqQuery(owningType.getName(), fieldName, drel.getForeignKey());
 		
@@ -88,9 +93,27 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 	}
 
 	@Override
-	public QueryResponse queryOwningType(DStructType owningType, String fieldName, DRelation drel) {
+	public boolean queryFKExists(DStructType owningType, String fieldName, DRelation drel) {
 		QueryExp queryExp = buildOwningTypeQuery(owningType, fieldName, drel);
 		//TODO resolve vars such as foo(id)
+		QuerySpec spec = new QuerySpec();
+		spec.queryExp = queryExp;
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.evaluator.init(spec.queryExp);
+		QueryContext qtx = new QueryContext();
+		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		
+		if (!qresp.ok) {
+			return false;
+		} else {
+			return !CollectionUtils.isEmpty(qresp.dvalList);
+		}
+	}
+
+	private QueryResponse load(String typeName, String fieldName, DValue keyVal) {
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp queryExp = builderSvc.createEqQuery(typeName, fieldName, keyVal);
+		
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
@@ -101,16 +124,28 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 	}
 
 	@Override
-	public QueryResponse load(String typeName, String fieldName, DValue keyVal) {
-		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
-		QueryExp queryExp = builderSvc.createEqQuery(typeName, fieldName, keyVal);
+	public QueryResponse loadFKOnly(String typeName, String fieldName, DValue keyVal) {
+		QueryResponse qresp = load(typeName, fieldName, keyVal);
+		if (!qresp.ok) {
+			return qresp; //!!
+		}
+		if (qresp.emptyResults()) {
+			return qresp;
+		}
 		
-		QuerySpec spec = new QuerySpec();
-		spec.queryExp = queryExp;
-		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
-		spec.evaluator.init(spec.queryExp);
-		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		List<DValue> newList = new ArrayList<>();
+		TypePair pair = null;
+		for(DValue otherSide: qresp.dvalList) {
+			if (pair == null) {
+				pair = DValueHelper.findPrimaryKeyFieldPair(otherSide.getType());
+			}
+			DValue otherSideKeyVal = otherSide.asStruct().getField(pair.name);
+			newList.add(otherSideKeyVal);
+		}
+		
+		qresp = new QueryResponse();
+		qresp.ok = true;
+		qresp.dvalList = newList;
 		return qresp;
 	}
 }

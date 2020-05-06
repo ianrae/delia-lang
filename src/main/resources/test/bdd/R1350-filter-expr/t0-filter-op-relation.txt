@@ -126,3 +126,15 @@ value:a:Customer {
  vid:55
  vaddr:{100} 
 }
+
+---
+title: upsert 
+when:
+  upsert Address[100] { cust: 55 }
+  let x = Customer[addr <= 100].fks()
+then:
+value:a:Customer {
+ vid:55
+ vaddr:{100} 
+}
+

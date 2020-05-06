@@ -100,4 +100,6 @@ public interface Runner extends VarEvaluator {
 	 */
 	void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator);
 	
+	FetchRunner getPrebuiltFetchRunnerToUse();
+	void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse);
 }

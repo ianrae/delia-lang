@@ -9,15 +9,11 @@ import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.ConnectionFactory;
-import org.delia.db.sql.prepared.FKSqlGenerator;
-import org.delia.db.sql.prepared.InsertStatementGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
-import org.delia.db.sql.table.TableInfo;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
@@ -35,7 +31,10 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
 /**
- * Represents db access to a single db (conn)
+ * Represents db access to a single database.
+ * A DBInterface is a long-lived object and is generally created once
+ * per application (per database).
+ * 
  * @author Ian Rae
  *
  */
@@ -252,10 +251,10 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	protected PreparedStatementGenerator createPrepSqlGen(DBAccessContext dbctx) {
 		return sqlHelperFactory.createPrepSqlGen(createExistService(dbctx), dbctx);
 	}
-	protected InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
-		TableExistenceService existSvc = createExistService(dbctx);
-		return sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
-	}
+//	protected InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx) {
+//		TableExistenceService existSvc = createExistService(dbctx);
+//		return sqlHelperFactory.createPrepInsertSqlGen(dbctx, existSvc);
+//	}
 	protected TableExistenceService createExistService(DBAccessContext dbctx) {
 		TableExistenceService existSvc = new TableExistenceServiceImpl(this, dbctx);
 		return existSvc;
@@ -267,9 +266,9 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		}
 		return tableCreator;
 	}
-	protected FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx) {
-		return sqlHelperFactory.createFKSqlGen(tblinfoL, dbctx, createExistService(dbctx));
-	}
+//	protected FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx) {
+//		return sqlHelperFactory.createFKSqlGen(tblinfoL, dbctx, createExistService(dbctx));
+//	}
 	
 	@Override
 	public boolean isSQLLoggingEnabled() {

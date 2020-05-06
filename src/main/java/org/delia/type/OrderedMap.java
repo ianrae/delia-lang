@@ -21,9 +21,9 @@ public class OrderedMap {
     private Map<String,Boolean> primaryKeyMap = new ConcurrentHashMap<>();
     private Map<String,Boolean> serialMap = new ConcurrentHashMap<>();
     
-    public void add(String name, DType type, boolean optional, boolean unique, boolean primaryKey, boolean serial) {
+    public void add(String fieldName, DType type, boolean optional, boolean unique, boolean primaryKey, boolean serial) {
     	//ConcurrentHashMap doesn't allow null key
-    	if (name == null) {
+    	if (fieldName == null) {
     		throw new IllegalArgumentException("OrderedMap doesn't allow null key");
     	}
     	//ConcurrentHashMap doesn't allow null type.
@@ -33,30 +33,30 @@ public class OrderedMap {
     	if (type == null) {
     		return;
     	}
-        map.put(name, type);
-        optionalMap.put(name, optional);
-        uniqueMap.put(name, unique);
-        primaryKeyMap.put(name, primaryKey);
-        serialMap.put(name, serial);
-        orderedList.add(name);
+        map.put(fieldName, type);
+        optionalMap.put(fieldName, optional);
+        uniqueMap.put(fieldName, unique);
+        primaryKeyMap.put(fieldName, primaryKey);
+        serialMap.put(fieldName, serial);
+        orderedList.add(fieldName);
     }
-    public boolean containsKey(String name) {
-        return map.containsKey(name);
+    public boolean containsKey(String fieldName) {
+        return map.containsKey(fieldName);
     }
-    public boolean isOptional(String name) {
-        Boolean bb = optionalMap.get(name);
+    public boolean isOptional(String fieldName) {
+        Boolean bb = optionalMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
-    public boolean isUnique(String name) {
-        Boolean bb = uniqueMap.get(name);
+    public boolean isUnique(String fieldName) {
+        Boolean bb = uniqueMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
-    public boolean isPrimaryKey(String name) {
-        Boolean bb = primaryKeyMap.get(name);
+    public boolean isPrimaryKey(String fieldName) {
+        Boolean bb = primaryKeyMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
-    public boolean isSerial(String name) {
-        Boolean bb = serialMap.get(name);
+    public boolean isSerial(String fieldName) {
+        Boolean bb = serialMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
 	public void performTypeReplacement(TypeReplaceSpec spec) {

@@ -22,6 +22,7 @@ public interface DBInterface {
 	
 	DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap, DBAccessContext dbctx); 
+	int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx); 
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx);
 	void executeDelete(QuerySpec spec, DBAccessContext dbctx);
 

@@ -6,14 +6,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -24,13 +21,11 @@ public class MigrationOptimizer extends ServiceBase {
 
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
-	private DBExecutor dbexecutor;
-	private DBAccessContext dbctx;
+//	private DBAccessContext dbctx;
 
 	public MigrationOptimizer(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
-		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		this.dbexecutor = dbInterface.createExector(dbctx);
+//		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		this.registry = registry;
 	}
 	

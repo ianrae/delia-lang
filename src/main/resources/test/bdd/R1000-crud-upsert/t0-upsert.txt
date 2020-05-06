@@ -7,11 +7,53 @@ background:
 thenType: struct
 
 ---
-SKIP: implement the upsert feature!
+title: insert
 thenType: int
 expectDVal:false
 when:
   upsert Flight[55] {wid: 22}
 then:
 1
+
+---
+title: insert+query
+when:
+  upsert Flight[55] {wid: 22}
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:22
+}
+
+---
+title: update
+thenType: int
+expectDVal:false
+when:
+  insert Flight {id:55, wid: 22}
+  upsert Flight[55] {wid: 23}
+then:
+1
+
+---
+title: update+query
+when:
+  insert Flight {id:55, wid: 22}
+  upsert Flight[55] {wid: 23}
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:23
+}
+
+---
+title: non-primary key filter
+when:
+  insert Flight {id:55, wid: 22}
+  upsert Flight[id>50] {wid: 23}
+  let x = Flight[55]
+then:
+ERROR: upsert-filter-error
 

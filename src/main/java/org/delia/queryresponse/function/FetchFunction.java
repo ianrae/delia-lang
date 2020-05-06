@@ -50,7 +50,7 @@ public class FetchFunction extends QueryResponseFunctionBase {
 			}
 			
 			DRelation drel = inner.asRelation();
-			QueryResponse qrespFetch = fetchRunner.load(drel, targetFieldName);
+			QueryResponse qrespFetch = fetchRunner.load(drel);
 			if (!qrespFetch.ok) {
 				qresResult.ok = false;
 				qresResult.err = qrespFetch.err;

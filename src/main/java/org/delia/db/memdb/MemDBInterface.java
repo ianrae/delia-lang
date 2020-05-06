@@ -105,37 +105,12 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		if (tbl == null) {
 			tbl = handleUnknownTable(typeName, dbctx);
 		}
-
-		DValue generatedId = addSerialValuesIfNeeded(dval, tbl, dbctx);
-		checkUniqueness(dval, tbl, typeName, null, false, dbctx);
-
-		tbl.rowL.add(dval);
-		return generatedId;
+		
+		Stuff stuff = findOrCreateStuff(dbctx);
+		MemInsert memInsert = new MemInsert(this.factorySvc);
+		return memInsert.doExecuteInsert(tbl, dval, ctx, dbctx, this, stuff);
 	}
 
-	private DValue addSerialValuesIfNeeded(DValue dval, MemDBTable tbl, DBAccessContext dbctx) {
-		if (!dval.getType().isStructShape()) {
-			return null;
-		}
-		DValue generatedId = null;
-		DStructType structType = (DStructType) dval.getType();
-		for(TypePair pair: structType.getAllFields()) {
-			if (structType.fieldIsSerial(pair.name)) {
-				if (dval.asStruct().getField(pair.name) != null) {
-					DeliaError err = et.add("serial-value-cannot-be-provided", String.format("serial field '%s' must not have a value specified", pair.name));
-					throw new DBException(err);
-				}
-
-				Stuff stuff = findOrCreateStuff(dbctx);
-
-				DValue serialVal = stuff.serialProvider.generateSerialValue(structType, pair);
-				dval.asMap().put(pair.name, serialVal);
-				generatedId = serialVal;
-				log.logDebug("serial id generated: %s", serialVal.asString());
-			}
-		}
-		return generatedId;
-	}
 
 	/**
 	 * Ugly. we need a serial provider per registry (really per runner i thinkg)
@@ -151,7 +126,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		return stuff;
 	}
 
-	private void checkUniqueness(DValue dval, MemDBTable tbl, String typeName, DValue existing, boolean allowMissing, DBAccessContext dbctx) {
+	void checkUniqueness(DValue dval, MemDBTable tbl, String typeName, DValue existing, boolean allowMissing, DBAccessContext dbctx) {
 		//TODO: later support types without primarykey
 		List<TypePair> candidates = DValueHelper.findAllUniqueFieldPair(dval.getType());
 		if (CollectionUtils.isEmpty(candidates)) {
@@ -305,7 +280,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 
 	private void addAnyFKs(DValue dval, DBAccessContext dbctx) {
 		DBExecutor dbexecutor = this.createExector(dbctx); //TODO handle close later
-		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, dbctx.registry, dbctx.varEvaluator);
+		FetchRunner fetchRunner = dbexecutor.createFetchRunner(factorySvc);
 		ValidationRuleRunner ruleRunner = new ValidationRuleRunner(factorySvc, this.getCapabilities(), fetchRunner);
 		ruleRunner.enableRelationModifier(true);
 		ruleRunner.setPopulateFKsFlag(true);
@@ -448,51 +423,37 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		}
 		return numRowsAffected;
 	}
-
+	
 	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		RowSelector selector = createSelector(spec, dbctx); //may throw
-		MemDBTable tbl = selector.getTbl();
-		List<DValue> dvalList = selector.match(tbl.rowL);
-		String typeName = spec.queryExp.getTypeName();
-		if (selector.wasError()) {
-			DeliaError err = et.add("row-selector-error", String.format("xrow selector failed for type '%s'", typeName));
-			throw new DBException(err);
-		}
+		MemUpdate memUpdate = new MemUpdate(factorySvc);
+		return memUpdate.doExecuteUpdate(spec, dvalUpdate, assocCrudMap, dbctx, selector, this);
+	}
+	@Override
+	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx) {
+		int numRowsAffected = 0;
 
-		if (CollectionUtils.isEmpty(dvalList)) {
-			//nothing to do
-			return 0;
-		}
-
-		//TODO: also need to validate with list. eq if two rows are setting same value
-		for(DValue existing: dvalList) {
-			checkUniqueness(dvalUpdate, tbl, typeName, existing, true, dbctx);
-		}
-
-		//TODO if dvalUpdate contains the primary key then do uniqueness check
-
-		//update one or more matching dvals
-		int numRowsAffected = dvalList.size();
-		for(int i = 0; i < tbl.rowL.size(); i++) {
-			DValue dd = tbl.rowL.get(i);
-			//this is very inefficient if rowL large. TODO fix
-			//if dd is one of the matching rows, then clone it and
-			//replace it in tbl
-			for(DValue tmp: dvalList) {
-				if (tmp == dd) {
-					DValue clone = DValueHelper.mergeOne(dvalUpdate, tmp);
-					dvalList.remove(tmp);
-					tbl.rowL.set(i, clone);
-					break;
-				}
-			}
-
-			if (dvalList.isEmpty()) {
-				break; //no need to keep searching
-			}
+		try {
+			numRowsAffected = doExecuteUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag, dbctx);
+		} catch (InternalException e) {
+			throw new DBException(e.getLastError());
+			//				qresp.ok = false;
+			//				qresp.err = e.getLastError();
 		}
 		return numRowsAffected;
 	}
+	private int doExecuteUpsert(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx) {
+		RowSelector selector = createSelector(spec, dbctx); //may throw
+		if (selector instanceof AllRowSelector) {
+			DeliaError err = et.add("upsert-filter-error", String.format("upsert filter must specify one row (at most), for type '%s'", spec.queryExp.typeName));
+			throw new DBException(err);
+		}
+		
+		MemUpsert memUpdate = new MemUpsert(factorySvc);
+		Stuff stuff = findOrCreateStuff(dbctx);
+		return memUpdate.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, noUpdateFlag, dbctx, selector, this, stuff);
+	}
+
 
 	@Override
 	public boolean isSQLLoggingEnabled() {

@@ -1,0 +1,18 @@
+# CRUD upsert tests
+
+FEATURE: CRUD upsert - many-to-many scenario 1 - all
+background:
+	type Customer struct {id int unique, wid int, relation addr Address optional many } end
+	type Address struct {id int unique, z int, relation cust Customer optional many } end
+	insert Customer {id: 55, wid: 33}
+	insert Customer {id: 56, wid: 34}
+	insert Address {id: 100, z:5, cust: [55,56] }
+	insert Address {id: 101, z:6, cust: [55,56] }
+thenType: struct
+
+---
+title: upsert without relation query back
+when:
+  upsert Customer[true] {wid: 333}
+then:
+ERROR: upsert-filter-error

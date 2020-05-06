@@ -1,17 +1,21 @@
 package org.delia.runner.inputfunction;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.StringJoiner;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.api.DeliaSession;
-import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
+import org.delia.compiler.generate.DeliaGeneratePhase;
+import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
@@ -33,12 +37,14 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.StringUtil;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class InputFunctionService extends ServiceBase {
 	private Random rand = new Random();
 	private DValueConverterService dvalConverter;
 	private ImportMetricObserver metricsObserver;
+	private InputFunctionServiceOptions options = new InputFunctionServiceOptions();
 
 	public InputFunctionService(FactoryService factorySvc) {
 		super(factorySvc);
@@ -115,16 +121,8 @@ public class InputFunctionService extends ServiceBase {
 			DeliaExceptionHelper.throwError("no-session", "session is null. You need to call beginSession");
 		}
 		
-		DeliaSessionImpl sessionimpl = (DeliaSessionImpl) session;
-		for(Exp exp: sessionimpl.expL) {
-			if (exp instanceof InputFunctionDefStatementExp) {
-				InputFunctionDefStatementExp infnExp = (InputFunctionDefStatementExp) exp;
-				if (infnExp.funcName.equals(inputFnName)) {
-					return infnExp;
-				}
-			}
-		}
-		return null;
+		InputFunctionDefStatementExp infnExp = session.getExecutionContext().inputFnMap.get(inputFnName);
+		return infnExp;
 	}
 
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
@@ -150,6 +148,12 @@ public class InputFunctionService extends ServiceBase {
 				log.log("halting -- more than %d errors", request.stopAfterErrorThreshold);
 				break;
 			}
+			
+			if (lineNum > options.numRowsToImport) {
+				log.log("halting -- stopping at %d lines", options.numRowsToImport);
+				break;
+			}
+			
 			if (metricsObserver != null) {
 				metricsObserver.onRowStart(request.progset, lineNum);
 			}
@@ -159,7 +163,7 @@ public class InputFunctionService extends ServiceBase {
 			LineObj lineObj = lineObjIter.next();
 
 			List<DeliaError> errL = new ArrayList<>();
-			List<DValue> dvals = processLineObj(inFuncRunner, hdr, lineObj, errL); //one row
+			List<DValue> dvals = processLineObj(request, inFuncRunner, hdr, lineObj, errL); //one row
 			if (! errL.isEmpty()) {
 				log.logError("failed!");
 				addErrors(errL, fnResult.errors, lineNum);
@@ -262,25 +266,58 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 
-	private List<DValue> processLineObj(InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
+	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
 		List<DValue> dvals = null;
 		try {
 			dvals = inFuncRunner.process(hdr, lineObj, errL);
 		} catch (DeliaException e) {
 			addError(e, errL, lineObj.lineNum);
 		}
+		
+		if (options.logDetails) {
+			StringJoiner joiner = new StringJoiner(",");
+			for(String el: lineObj.elements) {
+				joiner.add(el);
+			}
+			log.log("detail: %s", joiner.toString());
+			if (CollectionUtils.isNotEmpty(dvals)) {
+				for(DValue dval: dvals) {
+					String s2 = generateFromDVal(request, dval);
+					log.log("      : %s", s2);
+				}
+			}
+		}
+		
 		return dvals;
+	}
+	
+	private String generateFromDVal(InputFunctionRequest request, DValue dval) {
+		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.includeVPrefix = false;
+		DeliaGeneratePhase phase = request.session.getExecutionContext().generator;
+		boolean b = phase.generateValue(gen, dval, "a");
+		String s = StringUtil.flattenNoComma(gen.outputL);
+		int pos = s.indexOf('{');
+		return s.substring(pos);
 	}
 
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
-		DValueIterator iter = new DValueIterator(dval);
-		request.session.setInsertPrebuiltValueIterator(iter);
+		addRunnerInitializer(request, dval);
 		String typeName = dval.getType().getName();
-		String s = String.format("insert %s {}", typeName);
+		boolean useUpsert = !options.useInsertStatement;
+		String src;
+		if (useUpsert) {
+			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			dval.asMap().remove(pair.name);
+			src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
+		} else {
+			src = String.format("insert %s {}", typeName);
+		}
 		
 		ResultValue res;
 		try {
-			res = request.delia.continueExecution(s, request.session);
+			res = request.delia.continueExecution(src, request.session);
 			if (! res.ok) {
 				//err
 				for(DeliaError err: res.errors) {
@@ -288,8 +325,12 @@ public class InputFunctionService extends ServiceBase {
 				}
 			}
 		} catch (DeliaException e) {
+			fnResult.numFailedRowInserts++;
 			DeliaError err = e.getLastError();
+			boolean addErrorFlag = true;
+			
 			if (errIdIStartsWith(err, "rule-")) {
+				addErrorFlag = !options.ignoreRelationErrors;
 				if (metricsObserver != null && err instanceof DetailedError) {
 					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
 					if (err.getId().equals("rule-relationOne") || err.getId().equals("rule-relationOne")) {
@@ -309,10 +350,21 @@ public class InputFunctionService extends ServiceBase {
 				}
 			}
 			
-			addError(e, errL, lineNum);
+			if (addErrorFlag) {
+				addError(e, errL, lineNum);
+			}
 		}
-		request.session.setInsertPrebuiltValueIterator(null);
-	}		
+		
+		request.session.setRunnerIntiliazer(null);
+	}	
+	
+	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {
+		DValueIterator iter = new DValueIterator(dval);
+		ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
+		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session, options, ispec, metricsObserver);
+		request.session.setRunnerIntiliazer(initializer);
+	}
+
 	private boolean errIdIs(DeliaError err, String target) {
 		if (err.getId() != null && err.getId().equals(target)) {
 			return true;
@@ -357,5 +409,13 @@ public class InputFunctionService extends ServiceBase {
 
 	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
 		this.metricsObserver = metricsObserver;
+	}
+
+	public InputFunctionServiceOptions getOptions() {
+		return options;
+	}
+
+	public void setOptions(InputFunctionServiceOptions options) {
+		this.options = options;
 	}
 }

@@ -2,7 +2,11 @@ package org.delia.db;
 
 import java.util.Map;
 
+import org.delia.core.FactoryService;
+import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
+import org.delia.runner.VarEvaluator;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
 /**
@@ -11,16 +15,19 @@ import org.delia.type.DValue;
  * @author Ian Rae
  *
  */
-public interface DBExecutor {
+public interface DBExecutor extends AutoCloseable {
 	
 	DValue executeInsert(DValue dval, InsertContext ctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
+	int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag); 
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx);
 	void executeDelete(QuerySpec spec);
 
 	boolean execTableDetect(String tableName);
 	boolean execFieldDetect(String tableName, String fieldName);
-	void close();
+	
+	FetchRunner createFetchRunner(FactoryService factorySvc);
+	
 
 	//schema actions
 	void createTable(String tableName);

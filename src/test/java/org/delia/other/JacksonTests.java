@@ -32,7 +32,7 @@ public class JacksonTests {
             this.age = age;
         }
     }
-    @Test
+//    @Test
     public void test() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 //        MyValue value = mapper.readValue("{\"name\":\"Bob\", \"age\":13}", MyValue.class);  
@@ -43,7 +43,7 @@ public class JacksonTests {
     }
     
     
-    @Test
+//    @Test
     public void testMap() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         
