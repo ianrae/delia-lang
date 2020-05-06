@@ -140,4 +140,8 @@ public class CSVImportService  {
 		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupL, ImportLevel.FOUR);
 		return resultL;
 	}
+
+	public DeliaSession getSession() {
+		return session;
+	}
 }

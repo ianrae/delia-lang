@@ -10,6 +10,8 @@ import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.generate.DeliaGeneratePhase;
+import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.dataimport.ImportToool;
@@ -17,7 +19,11 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
+import org.delia.runner.ResultValue;
+import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
+import org.delia.type.DValue;
+import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +79,33 @@ public class FilmAndActorTests  extends NewBDDBase {
 		options.logDetails = true;
 		List<InputFunctionResult> resultL = csvSvc.dryRunLevel2(groupList, deliaSrc, options);
 		csvSvc.dumpReports(resultL);
+		
+		log.log("objects...");
+		DeliaSession session = csvSvc.getSession();
+		String query = "Film[true]";
+		ResultValue res = session.getDelia().continueExecution(query, session);
+		for(DValue dval: res.getAsDValueList()) {
+			dumpDVal(session, dval);
+		}
+		
+		query = "Actor[true]";
+		res = session.getDelia().continueExecution(query, session);
+		for(DValue dval: res.getAsDValueList()) {
+			dumpDVal(session, dval);
+		}
 	}
+	
+	private String dumpDVal(DeliaSession session, DValue dval) {
+		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.includeVPrefix = false;
+		DeliaGeneratePhase phase = session.getExecutionContext().generator;
+		boolean b = phase.generateValue(gen, dval, "a");
+		String s = StringUtil.flattenNoComma(gen.outputL);
+		int pos = s.indexOf('{');
+		log.log(s.substring(pos));
+		return s;
+	}
+	
 	
 	@Test
 	public void testVia() {
