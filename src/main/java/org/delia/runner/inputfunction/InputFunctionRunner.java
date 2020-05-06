@@ -13,7 +13,6 @@ import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.ErrorType;
-import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DeliaException;
@@ -59,8 +58,9 @@ public class InputFunctionRunner extends ServiceBase {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
+		//map of inputField,raw value
 		Map<String,Object> inputData = createInputMap(hdr, lineObj);
-		//it can produce multiple
+		//it can produce multiple if input function has multiple args (Customer c, Address a)
 		List<ProcessedInputData> processedDataL = runTLang(inputData);
 		if (haltNowFlag) {
 			return dvalL;
@@ -94,7 +94,8 @@ public class InputFunctionRunner extends ServiceBase {
 				return null;
 			}
 			
-			Object input = data.outputFieldMap.get(pair.name);
+			ProcessedInputData.ProcessedValue pvalue = data.outputFieldMap.get(pair.name);
+			Object input = pvalue.obj;
 			log.logDebug("field: %s = %s", outputFieldName, input);
 			
 			DValue inner = null;
@@ -229,6 +230,8 @@ public class InputFunctionRunner extends ServiceBase {
 				continue; //for a different output type
 			}
 			
+			boolean isVia = spec.viaPK != null;
+			
 			String value;
 			Object obj = inputData.get(inputField);
 			if (obj instanceof DValue) {
@@ -258,12 +261,14 @@ public class InputFunctionRunner extends ServiceBase {
 				value = finalValue == null ? null : finalValue.asString();
 				if (res.failFlag) {
 					haltNowFlag = true;
-					data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
+					ProcessedInputData.ProcessedValue pvalue = new ProcessedInputData.ProcessedValue(value, isVia);
+					data.outputFieldMap.put(outPair.argName(), pvalue); //fieldname might be different
 					return data;
 				}
 			}
 			
-			data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
+			ProcessedInputData.ProcessedValue pvalue = new ProcessedInputData.ProcessedValue(value, isVia);
+			data.outputFieldMap.put(outPair.argName(), pvalue); //fieldname might be different
 		}
 		return data;
 	}

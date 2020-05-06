@@ -43,7 +43,7 @@ public class FilmAndActorTests  extends NewBDDBase {
 	}
 	
 	@Test
-	public void testLevel3() {
+	public void testLevel2() {
 		List<ImportGroupSpec> groupList = new ArrayList<>();
 		ImportGroupSpec gspec = new ImportGroupSpec();
 		gspec.csvPath = BASE_DIR + "film.csv";
@@ -68,6 +68,24 @@ public class FilmAndActorTests  extends NewBDDBase {
 		List<InputFunctionResult> resultL = csvSvc.dryRunLevel2(groupList, deliaSrc, options);
 		csvSvc.dumpReports(resultL);
 	}
+	
+	@Test
+	public void testVia() {
+		String csvPath = BASE_DIR + "actor-film.csv";
+		
+		String srcPath = IMPORT_DIR + "film-and-actor.txt";
+		TextFileReader reader = new TextFileReader();
+		String deliaSrc = reader.readFileAsSingleString(srcPath);
+		
+		CSVImportService csvSvc = new CSVImportService();
+		
+		CSVImportService.Options options = new CSVImportService.Options();
+//		options.numRowsToImport = 3;
+		options.logDetails = true;
+		InputFunctionResult result = csvSvc.dryRunLevel1(csvPath, deliaSrc, "Actor", "actorfilms");
+		csvSvc.dumpReport(result);
+	}
+	
 	
 //	private ExternalDataLoader createExternalLoader() {
 //		Delia externalDelia = createDelia();

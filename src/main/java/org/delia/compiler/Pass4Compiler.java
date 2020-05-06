@@ -118,7 +118,7 @@ public class Pass4Compiler extends CompilerPassBase {
 	private void checkVia(IdentExp outputViaTargetExp, InputFunctionDefStatementExp funcExp, CompilerResults results) {
 		boolean found = false;
 		for(InputFuncMappingExp mappingExp: funcExp.getMappings()) {
-			String fieldName = mappingExp.outputField.argName();
+			String fieldName = mappingExp.getInputField();
 			if (outputViaTargetExp.strValue().equals(fieldName)) {
 				found = true;
 			}

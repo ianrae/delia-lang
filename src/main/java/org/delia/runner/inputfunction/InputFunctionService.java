@@ -47,10 +47,12 @@ public class InputFunctionService extends ServiceBase {
 	private DValueConverterService dvalConverter;
 	private ImportMetricObserver metricsObserver;
 	private InputFunctionServiceOptions options = new InputFunctionServiceOptions();
+	private ViaService viaSvc;
 
 	public InputFunctionService(FactoryService factorySvc) {
 		super(factorySvc);
 		this.dvalConverter = new DValueConverterService(factorySvc);
+		this.viaSvc = new ViaService(factorySvc);
 	}
 
 	public ProgramSet buildProgram(String inputFnName, DeliaSession session) {
@@ -128,6 +130,8 @@ public class InputFunctionService extends ServiceBase {
 		return infnExp;
 	}
 
+	//******************
+	// **** main fn ****
 	public InputFunctionResult process(InputFunctionRequest request, LineObjIterator lineObjIter) {
 		InputFunctionResult fnResult = new InputFunctionResult();
 		ErrorTracker localET = new SimpleErrorTracker(log);
@@ -142,6 +146,9 @@ public class InputFunctionService extends ServiceBase {
 		request.progset.hdr = hdr;
 		fnResult.numColumnsProcessedPerRow = request.progset.fieldMap.size();
 		fnResult.progset = request.progset;
+		
+		List<ViaService.ViaInfo> viaL = viaSvc.detectVias(request);
+		log.log("VIA: %d", viaL.size());
 		
 		// - the main loop -- reads csv file line by line
 		TypePair keyPair = null;
