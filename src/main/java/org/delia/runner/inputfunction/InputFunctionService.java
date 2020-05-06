@@ -278,8 +278,9 @@ public class InputFunctionService extends ServiceBase {
 
 	private List<DValue> processLineObj(InputFunctionRequest request, InputFunctionRunner inFuncRunner, HdrInfo hdr, LineObj lineObj, List<DeliaError> errL) {
 		List<DValue> dvals = null;
+		List<ViaPendingInfo> viaPendingL = new ArrayList<>();
 		try {
-			dvals = inFuncRunner.process(hdr, lineObj, errL);
+			dvals = inFuncRunner.process(hdr, lineObj, errL, viaPendingL);
 		} catch (DeliaException e) {
 			addError(e, errL, lineObj.lineNum);
 		}

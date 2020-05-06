@@ -54,7 +54,7 @@ public class InputFunctionRunner extends ServiceBase {
 		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 	
-	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL) {
+	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL, List<ViaPendingInfo> viaPendingL) {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
@@ -68,7 +68,11 @@ public class InputFunctionRunner extends ServiceBase {
 
 		for(ProcessedInputData data: processedDataL) {
 			List<DeliaError> errL = new ArrayList<>();
-			DValue dval = buildFromData(data, errL);
+			DValue dval = buildFromData(data, errL, viaPendingL);
+			
+			if (dval == null) {
+				continue;
+			}
 			
 			if (errL.isEmpty()) {
 				dvalL.add(dval);
@@ -82,10 +86,11 @@ public class InputFunctionRunner extends ServiceBase {
 		return dvalL;
 	}
 
-	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
+	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, List<ViaPendingInfo> viaPendingL) {
 		int mark = errL.size();
 		StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
 		
+		int viaCount = 0;
 		for(String outputFieldName: data.outputFieldMap.keySet()) {
 			TypePair pair = DValueHelper.findField(data.structType, outputFieldName);
 			if (pair == null) {
@@ -96,6 +101,11 @@ public class InputFunctionRunner extends ServiceBase {
 			
 			ProcessedInputData.ProcessedValue pvalue = data.outputFieldMap.get(pair.name);
 			Object input = pvalue.obj;
+			if (pvalue.isVia) {
+				viaCount++;
+				ViaPendingInfo vpi = new ViaPendingInfo(data.structType, outputFieldName, input);
+				viaPendingL.add(vpi);
+			}
 			log.logDebug("field: %s = %s", outputFieldName, input);
 			
 			DValue inner = null;
@@ -107,7 +117,12 @@ public class InputFunctionRunner extends ServiceBase {
 				inner = buildScalarValue(input, shape, errL, pair, data, metricsObserver); 
 			}
 			structBuilder.addField(pair.name, inner);
-		}			
+		}		
+		
+		//if all fields were via, don't build dval
+		if (viaCount == data.outputFieldMap.size()) {
+			return null;
+		}
 		
 		boolean b = structBuilder.finish();
 		if (!b) {
