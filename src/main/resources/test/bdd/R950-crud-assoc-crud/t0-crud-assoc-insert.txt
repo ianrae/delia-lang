@@ -14,7 +14,7 @@ background:
 thenType: struct
 
 ---
-title: update without relation query back
+title: no assoc-crud
 when:
   update Customer[true] {wid: 333}
   let x = Customer[55].fks()
@@ -26,13 +26,26 @@ value:a:Customer {
 }
 
 ---
-title: update insert
+title: assoc-crud insert
 when:
   update Address[100] { insert cust:56}
   let x = Customer[55].fks()
 then:
 value:a:Customer {
  vid:55
- vwid:333
+ vwid:33
  vaddr:{[100,101]}
+}
+
+---
+title: assoc-crud insert2. when rel initially empty
+when:
+  insert Address {id: 102, z:7 }
+  update Address[102] { insert cust:56}
+  let x = Address[102].fks()
+then:
+value:a:Address {
+ vid:102
+ vz:7
+ vcust:{[56]}
 }

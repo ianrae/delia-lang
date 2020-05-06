@@ -11,9 +11,14 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.QuerySpec;
 import org.delia.error.DeliaError;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.RelationValueBuilder;
 
 /**
  * Performs update
@@ -62,7 +67,7 @@ public class MemUpdate extends ServiceBase {
 				if (tmp == dd) {
 					DValue clone = DValueHelper.mergeOne(dvalUpdate, tmp, assocCrudMap);
 					if (assocCrudMap != null) {
-						doAssocCrud(dvalUpdate, clone, assocCrudMap);
+						doAssocCrud(dvalUpdate, clone, assocCrudMap, dbctx);
 					}
 					dvalList.remove(tmp);
 					tbl.rowL.set(i, clone);
@@ -77,10 +82,10 @@ public class MemUpdate extends ServiceBase {
 		return numRowsAffected;
 	}
 
-	private void doAssocCrud(DValue dvalUpdate, DValue clone, Map<String, String> assocCrudMap) {
+	private void doAssocCrud(DValue dvalUpdate, DValue clone, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		for(String fieldName: assocCrudMap.keySet()) {
 			DRelation drelSrc = dvalUpdate.asStruct().getField(fieldName).asRelation();
-			DRelation drelDest = dvalUpdate.asStruct().getField(fieldName).asRelation();
+			DRelation drelDest = getOrCreateRelation(clone, fieldName, dbctx); 
 			
 			String action = assocCrudMap.get(fieldName);
 			switch(action) {
@@ -104,6 +109,33 @@ public class MemUpdate extends ServiceBase {
 			break;
 			}
 		}
+	}
+	
+	private DRelation getOrCreateRelation(DValue clone, String fieldName, DBAccessContext dbctx) {
+		DValue tmp = clone.asStruct().getField(fieldName);
+		if (tmp == null) {
+			return createRelation(clone, fieldName, dbctx);
+		} else {
+			return tmp.asRelation();
+		}
+	}
+
+	//create empty relation
+	private DRelation createRelation(DValue clone, String fieldName, DBAccessContext dbctx) {
+		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
+		DType farEndType = DValueHelper.findFieldType(clone.getType(), fieldName);
+		String typeName = farEndType.getName();
+		RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, dbctx.registry);
+		builder.buildEmptyRelation();
+		boolean b = builder.finish();
+		if (!b) {
+			DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", typeName);
+			return null;
+		} else {
+			DValue dval = builder.getDValue();
+			return dval.asRelation();
+		}
+
 	}
 
 	private DValue findIn(DRelation drelDest) {

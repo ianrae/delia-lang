@@ -1,5 +1,6 @@
 package org.delia.valuebuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -112,6 +113,11 @@ public class RelationValueBuilder extends DValueBuilder {
 			return;
 		}
 
+		DRelation dvalrel = new DRelation(foreignTypeName, elementL);
+		this.newDVal = new DValueImpl(type, dvalrel);
+	}
+	public void buildEmptyRelation() {
+		List<DValue> elementL = new ArrayList<>();
 		DRelation dvalrel = new DRelation(foreignTypeName, elementL);
 		this.newDVal = new DValueImpl(type, dvalrel);
 	}
