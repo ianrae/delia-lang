@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -175,10 +176,8 @@ public class PostgresTests {
 
 	@Before
 	public void init() {
-		
+		//uncomment this to run these tests
+		DBTestHelper.throwIfNoSlowTests();
 	}
 
-	private String fix(String jsonstr) {
-		return jsonstr.replace("'", "\"");
-	}
 }
