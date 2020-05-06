@@ -20,7 +20,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
-import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.LogLevel;
@@ -141,6 +140,7 @@ public class InputFunctionService extends ServiceBase {
 						localET, varEvaluator, viaSvc);
 		inFuncRunner.setProgramSet(request.progset);
 		inFuncRunner.setMetricsObserver(metricsObserver);
+		viaSvc.setMetricsObserver(metricsObserver); //TODO: not thread-safe. viaSvc shared across many csv files
 		
 		//read header
 		HdrInfo hdr = readHeader(request, lineObjIter);
@@ -323,6 +323,7 @@ public class InputFunctionService extends ServiceBase {
 
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
 		addRunnerInitializer(request, dval);
+		InputFunctionErrorHandler errorHandler = new InputFunctionErrorHandler(factorySvc, metricsObserver, options);
 		String typeName = dval.getType().getName();
 		boolean useUpsert = !options.useInsertStatement;
 		String src;
@@ -349,34 +350,7 @@ public class InputFunctionService extends ServiceBase {
 				}
 			}
 		} catch (DeliaException e) {
-			fnResult.numFailedRowInserts++;
-			DeliaError err = e.getLastError();
-			boolean addErrorFlag = true;
-			
-			if (errIdIStartsWith(err, "rule-")) {
-				addErrorFlag = !options.ignoreRelationErrors;
-				if (metricsObserver != null && err instanceof DetailedError) {
-					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
-					if (err.getId().equals("rule-relationOne") || err.getId().equals("rule-relationOne")) {
-						DetailedError derr = (DetailedError) err;
-						metricsObserver.onRelationError(ispec, derr.getFieldName());
-					} else {
-						DetailedError derr = (DetailedError) err;
-						metricsObserver.onInvalid2Error(ispec, derr.getFieldName());
-					}
-				}
-			} else if (errIdIs(err, "duplicate-unique-value")) {
-				if (metricsObserver != null && err instanceof DetailedError) {
-					DetailedError derr = (DetailedError) err;
-					//TODO this will fails for h2 and postgres. fix them!
-					ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
-					metricsObserver.onDuplicateError(ispec, derr.getFieldName());
-				}
-			}
-			
-			if (addErrorFlag) {
-				addError(e, errL, lineNum);
-			}
+			errorHandler.handleException(e, (DStructType) dval.getType(), request, fnResult, lineNum, errL);
 		}
 		
 		request.session.setRunnerIntiliazer(null);
@@ -387,20 +361,6 @@ public class InputFunctionService extends ServiceBase {
 		ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
 		ImportRunnerInitializer initializer = new ImportRunnerInitializer(factorySvc, iter, request.session, options, ispec, metricsObserver);
 		request.session.setRunnerIntiliazer(initializer);
-	}
-
-	private boolean errIdIs(DeliaError err, String target) {
-		if (err.getId() != null && err.getId().equals(target)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean errIdIStartsWith(DeliaError err, String target) {
-		if (err.getId() != null && err.getId().startsWith(target)) {
-			return true;
-		}
-		return false;
 	}
 
 	private ImportSpec findImportSpec(InputFunctionRequest request, DStructType structType) {

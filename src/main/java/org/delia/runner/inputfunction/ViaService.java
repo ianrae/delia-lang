@@ -10,7 +10,6 @@ import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
-import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -24,12 +23,6 @@ public class ViaService extends ServiceBase {
 		String inputField;
 		ProgramSpec spec;
 	}
-	
-	public static class ViaRow {
-		DValue val1;
-		DValue val2;
-	}
-	
 	
 	private DValueConverterService dvalConverter;
 	private ImportMetricObserver metricsObserver;
@@ -71,33 +64,33 @@ public class ViaService extends ServiceBase {
 			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, request.session.getExecutionContext().registry);
 			DValue keyVal = dvalConverter.buildFromObject(x, pair.type.getShape(), builder);
 			
-			executeSql(request, typeName, pair, keyVal, vpi);
+			executeAssocTblInsert(request, fnResult, typeName, pair, keyVal, vpi, lineNum, errL);
 		}
 		
 	}
 
-	private void executeSql(InputFunctionRequest request, String typeName, TypePair pair, DValue keyVal, ViaPendingInfo vpi) {
+	private void executeAssocTblInsert(InputFunctionRequest request, InputFunctionResult fnResult, String typeName, TypePair pair, DValue keyVal, ViaPendingInfo vpi, int lineNum, List<DeliaError> errL) {
 		TypePair relPair = DValueHelper.findField(vpi.structType, vpi.outputFieldName);
 		TypePair relKeyPair = DValueHelper.findPrimaryKeyFieldPair(relPair.type);
 		
 		String addstr = renderx(vpi.processedInputValue, relKeyPair.type); 
 		String keystr = renderx(keyVal.asString(), pair.type);
-		String src = String.format("update %s[%s] { insert %s:[%s]}", typeName, keystr, vpi.outputFieldName, addstr);
+		String src = String.format("update %s[%s] { insert %s:[%s] }", typeName, keystr, vpi.outputFieldName, addstr);
 		log.log(src);
+		InputFunctionErrorHandler errorHandler = new InputFunctionErrorHandler(factorySvc, metricsObserver, options);
 
 		ResultValue res;
 		try {
+			fnResult.numRowsInserted++;
 			res = request.delia.continueExecution(src, request.session);
 			if (! res.ok) {
-//				//err
-//				for(DeliaError err: res.errors) {
-//					addError(err, errL, lineNum);
-//				}
+				//err
+				for(DeliaError err: res.errors) {
+					addError(err, errL, lineNum);
+				}
 			}
 		} catch (DeliaException e) {
-//			fnResult.numFailedRowInserts++;
-//			DeliaError err = e.getLastError();
-//			boolean addErrorFlag = true;
+			errorHandler.handleException(e, vpi.structType, request, fnResult, lineNum, errL);
 		}		
 	}
 
@@ -116,6 +109,19 @@ public class ViaService extends ServiceBase {
 			}
 		}
 		return null;
+	}
+
+	public ImportMetricObserver getMetricsObserver() {
+		return metricsObserver;
+	}
+
+	public void setMetricsObserver(ImportMetricObserver metricsObserver) {
+		this.metricsObserver = metricsObserver;
+	}
+	private void addError(DeliaError err, List<DeliaError> errL, int lineNum) {
+		err.setLineAndPos(lineNum, 0);
+		errL.add(err);
+		log.logError("error: %s", err.toString());
 	}
 
 }

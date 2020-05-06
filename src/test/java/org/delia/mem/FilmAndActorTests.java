@@ -56,6 +56,11 @@ public class FilmAndActorTests  extends NewBDDBase {
 		gspec.inputFnName = "actor";
 		gspec.typeName = "Actor";
 		groupList.add(gspec);
+		gspec = new ImportGroupSpec();
+		gspec.csvPath = BASE_DIR + "actor-film.csv";
+		gspec.inputFnName = "actorfilms";
+		gspec.typeName = "Actor";
+		groupList.add(gspec);
 		
 		String srcPath = IMPORT_DIR + "film-and-actor.txt";
 		TextFileReader reader = new TextFileReader();
