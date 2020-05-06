@@ -101,10 +101,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		QueryInExp inExp = new QueryInExp(99, new IdentExp(keyPair.name), null);
 		FilterOpFullExp fullExp = new FilterOpFullExp(99, inExp);
 		for(DValue dval: list) {
-			//int only for now
-			//TODO support string,long later
-			Integer foreignKey = dval.asInt();
-			IntegerExp exp = new IntegerExp(foreignKey);
+			Exp exp = dvalConverter.createExpFor(dval);
 			inExp.listExp.valueL.add(exp);
 		}
 		FilterExp filter = new FilterExp(99, fullExp); 

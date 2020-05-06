@@ -3,6 +3,7 @@ package org.delia.queryresponse;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.queryresponse.function.CountFunction;
+import org.delia.queryresponse.function.DistinctFunction;
 import org.delia.queryresponse.function.ExistsFunction;
 import org.delia.queryresponse.function.FKsFunction;
 import org.delia.queryresponse.function.FetchFunction;
@@ -31,6 +32,8 @@ public class QueryResponseFunctionFactory extends ServiceBase {
 			return new MaxFunction(registry);
 		case "count":
 			return new CountFunction(registry);
+		case "distinct":
+			return new DistinctFunction(registry);
 		case "exist":
 			return new ExistsFunction(registry);
 		case "fetch":

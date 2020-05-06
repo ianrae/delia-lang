@@ -83,24 +83,31 @@ public class FilmAndActorTests  extends NewBDDBase {
 		String query = "Film[true]";
 		ResultValue res = session.getDelia().continueExecution(query, session);
 		for(DValue dval: res.getAsDValueList()) {
-			dumpDVal(session, dval);
+			dumpDVal("A ",session, dval);
 		}
 		
 		query = "Actor[true]";
 		res = session.getDelia().continueExecution(query, session);
 		for(DValue dval: res.getAsDValueList()) {
-			dumpDVal(session, dval);
+			dumpDVal("A2 ", session, dval);
+		}
+		
+		log.log("and now distinct...");
+		query = "Actor[true].films.distinct()";
+		res = session.getDelia().continueExecution(query, session);
+		for(DValue dval: res.getAsDValueList()) {
+			dumpDVal("A3 ", session, dval);
 		}
 	}
 	
-	private String dumpDVal(DeliaSession session, DValue dval) {
+	private String dumpDVal(String title, DeliaSession session, DValue dval) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
 		gen.includeVPrefix = false;
 		DeliaGeneratePhase phase = session.getExecutionContext().generator;
 		boolean b = phase.generateValue(gen, dval, "a");
 		String s = StringUtil.flattenNoComma(gen.outputL);
 		int pos = s.indexOf('{');
-		log.log(s.substring(pos));
+		log.log(title + s.substring(pos));
 		return s;
 	}
 	
