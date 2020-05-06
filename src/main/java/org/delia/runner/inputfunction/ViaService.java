@@ -51,13 +51,14 @@ public class ViaService extends ServiceBase {
 
 	public void executeInsert(ViaLineInfo viaLineInfo, InputFunctionRequest request, InputFunctionResult fnResult,
 			int lineNum, List<DeliaError> errL) {
-//		// TODO Auto-generated method stub
-//		log.log("vv: %s: %s", viaLineInfo..outputFieldName, vpi.processedInputValue);
-//		for(ViaInfo info: viaL) {
-//			if (vpi.outputFieldName.equals(info.spec.outputField.val2)) {
-//				log.log("SD");
-//			}
-//		}
+		
+		for(ViaPendingInfo vpi: viaLineInfo.viaPendingL) {
+//			String inputField = vpi.viaInfo.inputField;
+//			Object x = viaLineInfo.inputData.get(vpi.outputFieldName);
+			Object x = viaLineInfo.inputData.get(vpi.viaInfo.spec.viaPK);
+			log.log("vv: %s: %s  %s", vpi.outputFieldName, vpi.processedInputValue, x);
+		}
+		
 	}
 
 	public ViaInfo findMatch(ViaLineInfo viaLineInfo, String outputFieldName) {

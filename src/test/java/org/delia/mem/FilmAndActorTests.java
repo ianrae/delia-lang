@@ -16,6 +16,7 @@ import org.delia.dataimport.ImportToool;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
 import org.junit.Before;
@@ -82,7 +83,8 @@ public class FilmAndActorTests  extends NewBDDBase {
 		CSVImportService.Options options = new CSVImportService.Options();
 //		options.numRowsToImport = 3;
 		options.logDetails = true;
-		InputFunctionResult result = csvSvc.dryRunLevel1(csvPath, deliaSrc, "Actor", "actorfilms");
+		options.logLevel = LogLevel.DEBUG;
+		InputFunctionResult result = csvSvc.dryRunLevel1(csvPath, deliaSrc, "Actor", "actorfilms", options);
 		csvSvc.dumpReport(result);
 	}
 	

@@ -74,12 +74,10 @@ public class InputFunctionRunner extends ServiceBase {
 			List<DeliaError> errL = new ArrayList<>();
 			DValue dval = buildFromData(data, errL, viaLineInfo, lineObj);
 			
-			if (dval == null) {
-				continue;
-			}
-			
 			if (errL.isEmpty()) {
-				dvalL.add(dval);
+				if (dval != null) {
+					dvalL.add(dval);
+				}
 			} else {
 				for(DeliaError err: errL) {
 					err.setLineAndPos(lineObj.lineNum, 0);
@@ -125,7 +123,7 @@ public class InputFunctionRunner extends ServiceBase {
 		}		
 		
 		//if all fields were via, don't build dval
-		if (viaCount == data.outputFieldMap.size()) {
+		if (viaCount > 0 && viaCount == data.outputFieldMap.size()) {
 			return null;
 		}
 		

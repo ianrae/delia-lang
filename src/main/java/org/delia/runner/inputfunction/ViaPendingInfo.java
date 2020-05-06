@@ -7,12 +7,12 @@ public class ViaPendingInfo {
 	public DStructType structType;
 	public String outputFieldName;
 	public Object processedInputValue;
-	private ViaInfo viaInfo;
+	public ViaInfo viaInfo;
 	
-	public ViaPendingInfo(DStructType structType, String outputFieldName, Object input, ViaInfo viaInfo) {
+	public ViaPendingInfo(DStructType structType, String outputFieldName, Object input, ViaInfo viaInfox) {
 		this.structType = structType;
 		this.outputFieldName = outputFieldName;
 		this.processedInputValue = input;
-		this.viaInfo = viaInfo;
+		this.viaInfo = viaInfox;
 	}
 }

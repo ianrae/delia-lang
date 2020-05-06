@@ -27,7 +27,6 @@ import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
-import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
