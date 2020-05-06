@@ -9,11 +9,13 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDParser;
 import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.DBInterfaceCreator;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;
@@ -69,7 +71,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected List<String> filesExecutedL = new ArrayList<>();
 	private BDDGroup currentGroup;
 	protected boolean enableAllFileCheck = true;
-	protected boolean disableAllSlowTests = false;
+	protected boolean disableAllSlowTests = DBTestHelper.disableAllSlowTests;
 
 	/**
 	 * When we want to run all unit tests but not have to wait
