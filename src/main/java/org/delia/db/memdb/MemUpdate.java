@@ -84,24 +84,28 @@ public class MemUpdate extends ServiceBase {
 
 	private void doAssocCrud(DValue dvalUpdate, DValue clone, Map<String, String> assocCrudMap, DBAccessContext dbctx) {
 		for(String fieldName: assocCrudMap.keySet()) {
-			DRelation drelSrc = dvalUpdate.asStruct().getField(fieldName).asRelation();
-			DRelation drelDest = getOrCreateRelation(clone, fieldName, dbctx); 
+			DRelation src = dvalUpdate.asStruct().getField(fieldName).asRelation();
+			DRelation dest = getOrCreateRelation(clone, fieldName, dbctx); 
 			
 			String action = assocCrudMap.get(fieldName);
 			switch(action) {
 			case "insert":
-				drelDest.getMultipleKeys().addAll(drelSrc.getMultipleKeys());
+				dest.getMultipleKeys().addAll(src.getMultipleKeys());
 			break;
 			case "update":
-				doUpdate(drelSrc, drelDest);
+				doUpdate(src, dest);
 			break;
 			case "delete":
 			{
-				for(DValue fk: drelSrc.getMultipleKeys()) {
-					DValue srcFK = findIn(drelDest, fk);
+				for(DValue fk: src.getMultipleKeys()) {
+					DValue srcFK = findIn(dest, fk);
 					if (srcFK != null) {
-						drelDest.getMultipleKeys().remove(srcFK);
+						dest.getMultipleKeys().remove(srcFK);
 					}
+				}
+				//empty relation not allowed, so delete entire relation if mepty
+				if (dest.getMultipleKeys().isEmpty()) {
+					clone.asMap().remove(fieldName);
 				}
 			}
 			break;
@@ -114,14 +118,16 @@ public class MemUpdate extends ServiceBase {
 	private DRelation getOrCreateRelation(DValue clone, String fieldName, DBAccessContext dbctx) {
 		DValue tmp = clone.asStruct().getField(fieldName);
 		if (tmp == null) {
-			return createRelation(clone, fieldName, dbctx);
+			DValue dval = createRelation(clone, fieldName, dbctx);
+			clone.asMap().put(fieldName, dval);
+			return dval.asRelation();
 		} else {
 			return tmp.asRelation();
 		}
 	}
 
 	//create empty relation
-	private DRelation createRelation(DValue clone, String fieldName, DBAccessContext dbctx) {
+	private DValue createRelation(DValue clone, String fieldName, DBAccessContext dbctx) {
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
 		DType farEndType = DValueHelper.findFieldType(clone.getType(), fieldName);
 		String typeName = farEndType.getName();
@@ -133,9 +139,8 @@ public class MemUpdate extends ServiceBase {
 			return null;
 		} else {
 			DValue dval = builder.getDValue();
-			return dval.asRelation();
+			return dval;
 		}
-
 	}
 
 	private DValue findIn(DRelation drelDest, DValue target) {

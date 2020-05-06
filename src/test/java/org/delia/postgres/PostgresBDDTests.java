@@ -98,7 +98,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Test
 	public void testR950() {
-		runR950File("t0-crud-assoc-insert.txt", 0);
+		runR950File("t0-crud-assoc-insert.txt", 6);
 	}
 	
 	@Test

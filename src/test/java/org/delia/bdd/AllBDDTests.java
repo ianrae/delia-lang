@@ -96,7 +96,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void testR950() {
-		runR950File("t0-crud-assoc-insert.txt", 0);
+		runR950File("t0-crud-assoc-insert.txt", 6);
 	}
 
 	@Test
@@ -288,7 +288,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 4;
+//		testIndexToRun = 5;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
@@ -296,7 +296,7 @@ public class AllBDDTests extends NewBDDBase {
 //		runR1350File("t0-filter-op-relation.txt", 13);
 //		runR1000File("t0-upsert-mm-other.txt", 1);
 //		runR1550File("t0-queryfn-oneone-parent.txt", 6);
-		runR950File("t0-crud-assoc-insert.txt", 0);
+		runR950File("t0-crud-assoc-insert.txt", 6);
 	}
 	
 	//---

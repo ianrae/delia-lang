@@ -42,7 +42,7 @@ then:
 value:a:Address {
  vid:102
  vz:7
- vcust:{[56]}
+ vcust:{56}
 }
 
 ---
@@ -56,7 +56,7 @@ then:
 value:a:Address {
  vid:100
  vz:5
- vcust:{[57]}
+ vcust:{57}
 }
 
 ---
@@ -69,5 +69,19 @@ then:
 value:a:Address {
  vid:100
  vz:5
- vcust:{[]}
+ vcust:null
 }
+
+---
+title: assoc-crud delete2. when rel initially empty
+when:
+  insert Address {id: 102, z:7 }
+  update Address[102] { delete cust:55}
+  let x = Address[102].fks()
+then:
+value:a:Address {
+ vid:102
+ vz:7
+ vcust:null
+}
+
