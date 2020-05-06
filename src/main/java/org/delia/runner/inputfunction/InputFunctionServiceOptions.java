@@ -5,4 +5,5 @@ public class InputFunctionServiceOptions {
 	public ExternalDataLoader externalLoader;
 	public int numRowsToImport = Integer.MAX_VALUE;
 	public boolean logDetails;
+	public boolean useInsertStatement;
 }

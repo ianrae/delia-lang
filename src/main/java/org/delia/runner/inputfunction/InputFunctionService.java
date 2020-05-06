@@ -1,6 +1,5 @@
 package org.delia.runner.inputfunction;
 
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -305,7 +304,7 @@ public class InputFunctionService extends ServiceBase {
 	private void executeInsert(DValue dval, InputFunctionRequest request, InputFunctionResult fnResult, int lineNum, List<DeliaError> errL) {
 		addRunnerInitializer(request, dval);
 		String typeName = dval.getType().getName();
-		boolean useUpsert = true;
+		boolean useUpsert = !options.useInsertStatement;
 		String src;
 		if (useUpsert) {
 			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);

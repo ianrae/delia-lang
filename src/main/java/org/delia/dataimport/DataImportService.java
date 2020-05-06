@@ -34,6 +34,7 @@ public class DataImportService extends ServiceBase {
 	private ExternalDataLoader externalLoader;
 	private int numRowsToImport;
 	private boolean logDetails;
+	private boolean useInsertStatement;
 
 	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
 		this(session, Integer.MAX_VALUE, stopAfterErrorThreshold, false);
@@ -63,6 +64,7 @@ public class DataImportService extends ServiceBase {
 		inputFnSvc.setMetricsObserver(metricsObserver);
 		inputFnSvc.getOptions().numRowsToImport = this.numRowsToImport;
 		inputFnSvc.getOptions().logDetails = logDetails;
+		inputFnSvc.getOptions().useInsertStatement = useInsertStatement;
 		initImportLevel(inputFnSvc, importLevel);
 		
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
@@ -177,6 +179,9 @@ public class DataImportService extends ServiceBase {
 
 	public void setExternalDataLoader(ExternalDataLoader externalLoader) {
 		this.externalLoader = externalLoader;
+	}
+	public void setUseInsertStatement(boolean useInsertStatement) {
+		this.useInsertStatement = useInsertStatement;
 	}
 	
 }

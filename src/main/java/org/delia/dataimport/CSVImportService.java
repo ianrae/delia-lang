@@ -19,6 +19,7 @@ public class CSVImportService  {
 	public static class Options {
 		public int numRowsToImport = Integer.MAX_VALUE;
 		public boolean logDetails = false;
+		public boolean useInsertStatement;
 	}
 
 	private DeliaSession session;
@@ -62,6 +63,7 @@ public class CSVImportService  {
 	
 	private DataImportService createDataImportService(Options options) {
 		importSvc = new DataImportService(session, options.numRowsToImport, 10, options.logDetails);
+		importSvc.setUseInsertStatement(options.useInsertStatement);
 		return importSvc;
 	}
 

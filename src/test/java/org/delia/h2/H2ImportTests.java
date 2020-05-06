@@ -71,7 +71,7 @@ public class H2ImportTests  extends NewBDDBase {
 	}
 	
 	@Test
-	public void testLevel4Preparatin() {
+	public void testLevel4Preparation() {
 		Delia delia = createDelia();
 		
 		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
@@ -102,7 +102,11 @@ public class H2ImportTests  extends NewBDDBase {
 		//h2
 		Delia delia = createDelia();
 		
-		List<InputFunctionResult> resultL = csvSvc.importIntoDatabase(groupList, deliaSrc, delia);
+		CSVImportService.Options options = new CSVImportService.Options();
+//		options.numRowsToImport = 3;
+//		options.logDetails = true;
+		options.useInsertStatement = true;
+		List<InputFunctionResult> resultL = csvSvc.importIntoDatabase(groupList, deliaSrc, delia, options);
 		csvSvc.dumpReports(resultL);
 	}
 	

@@ -3,7 +3,7 @@ package org.delia.base;
 
 public class DBTestHelper {
 
-	public static final boolean disableAllSlowTests = true;
+	public static final boolean disableAllSlowTests = false;
 	
 	
 	public static void throwIfNoSlowTests() {
