@@ -8,8 +8,15 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
+import org.delia.runner.DeliaException;
+import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ViaService.ViaInfo;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 
 public class ViaService extends ServiceBase {
@@ -53,12 +60,49 @@ public class ViaService extends ServiceBase {
 			int lineNum, List<DeliaError> errL) {
 		
 		for(ViaPendingInfo vpi: viaLineInfo.viaPendingL) {
-//			String inputField = vpi.viaInfo.inputField;
-//			Object x = viaLineInfo.inputData.get(vpi.outputFieldName);
-			Object x = viaLineInfo.inputData.get(vpi.viaInfo.spec.viaPK);
-			log.log("vv: %s: %s  %s", vpi.outputFieldName, vpi.processedInputValue, x);
+			String pkFieldName = vpi.viaInfo.spec.viaPK;
+			Object x = viaLineInfo.inputData.get(pkFieldName);
+			log.log("vv: %s:%s, %s:%s", vpi.outputFieldName, vpi.processedInputValue, pkFieldName,x);
+			
+			//update Film[1] { add actors:'a10'}
+			String typeName = vpi.structType.getName();
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(vpi.structType);
+			
+			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, request.session.getExecutionContext().registry);
+			DValue keyVal = dvalConverter.buildFromObject(x, pair.type.getShape(), builder);
+			
+			TypePair relPair = DValueHelper.findField(vpi.structType, vpi.outputFieldName);
+			TypePair relKeyPair = DValueHelper.findPrimaryKeyFieldPair(relPair.type);
+			
+			String addstr = renderx(vpi.processedInputValue, relKeyPair.type); 
+			String keystr = renderx(keyVal.asString(), pair.type);
+			String src = String.format("update %s[%s] {add %s:%s}", typeName, keystr, vpi.outputFieldName, addstr);
+			log.log(src);
+
+//			ResultValue res;
+//			try {
+//				res = request.delia.continueExecution(src, request.session);
+//				if (! res.ok) {
+//					//err
+//					for(DeliaError err: res.errors) {
+//						addError(err, errL, lineNum);
+//					}
+//				}
+//			} catch (DeliaException e) {
+//				fnResult.numFailedRowInserts++;
+//				DeliaError err = e.getLastError();
+//				boolean addErrorFlag = true;
+//			
 		}
 		
+	}
+
+	private String renderx(Object processedInputValue, DType type) {
+		if (type.isShape(Shape.STRING)) {
+			return String.format("'%s'", processedInputValue);
+		} else { 
+			return processedInputValue.toString();
+		}
 	}
 
 	public ViaInfo findMatch(ViaLineInfo viaLineInfo, String outputFieldName) {

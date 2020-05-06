@@ -83,7 +83,7 @@ public class FilmAndActorTests  extends NewBDDBase {
 		CSVImportService.Options options = new CSVImportService.Options();
 //		options.numRowsToImport = 3;
 		options.logDetails = true;
-		options.logLevel = LogLevel.DEBUG;
+//		options.logLevel = LogLevel.DEBUG;
 		InputFunctionResult result = csvSvc.dryRunLevel1(csvPath, deliaSrc, "Actor", "actorfilms", options);
 		csvSvc.dumpReport(result);
 	}

@@ -198,7 +198,7 @@ public class InputFunctionRunner extends ServiceBase {
 		return null;
 	}
 
-	private DValue buildScalarValue(Object input, Shape shape, List<DeliaError> errL, TypePair pair, ProcessedInputData data, ImportMetricObserver metricsObserver2) {
+	public DValue buildScalarValue(Object input, Shape shape, List<DeliaError> errL, TypePair pair, ProcessedInputData data, ImportMetricObserver metricsObserver2) {
 		DValue inner = null;
 		try {
 			inner = dvalConverter.buildFromObject(input, shape, scalarBuilder);
@@ -319,8 +319,8 @@ public class InputFunctionRunner extends ServiceBase {
 			ImportSpec ispec = ospec.ispec;
 			for(OutputFieldHandle ofh: ispec.ofhList) {
 				if (ofh.ifhIndex >= 0) {
-					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
+					String inputValue = lineObj.elements[ifh.columnIndex];
 					inputData.put(ifh.columnName, inputValue);
 					log.logDebug("input: %d:%s = %s", ifh.columnIndex, ifh.columnName, inputValue);
 				} else if (ofh.syntheticFieldName != null) {
