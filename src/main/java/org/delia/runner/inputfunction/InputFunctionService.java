@@ -34,11 +34,13 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringUtil;
 import org.delia.valuebuilder.ScalarValueBuilder;
+
 
 public class InputFunctionService extends ServiceBase {
 	private Random rand = new Random();
@@ -310,7 +312,11 @@ public class InputFunctionService extends ServiceBase {
 			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 			dval.asMap().remove(pair.name);
-			src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
+			if (pair.type.isShape(Shape.STRING)) {
+				src = String.format("upsert %s['%s'] {}", typeName, primaryKeyVal.asString());
+			} else { 
+				src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
+			}
 		} else {
 			src = String.format("insert %s {}", typeName);
 		}
