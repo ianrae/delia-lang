@@ -205,6 +205,7 @@ public class InputFunctionService extends ServiceBase {
 				
 				if (viaLineInfo.hasRows()) {
 					viaSvc.executeInsert(viaLineInfo, request, fnResult, lineNum, errL);
+					addErrors(errL, fnResult.errors, lineNum);
 				}
 			}
 			

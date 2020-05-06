@@ -10,6 +10,7 @@ import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -58,15 +59,38 @@ public class ViaService extends ServiceBase {
 			log.log("vv: %s:%s, %s:%s", vpi.outputFieldName, vpi.processedInputValue, pkFieldName,x);
 			
 			//update Film[1] { add actors:'a10'}
-			String typeName = vpi.structType.getName();
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(vpi.structType);
-			
 			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, request.session.getExecutionContext().registry);
-			DValue keyVal = dvalConverter.buildFromObject(x, pair.type.getShape(), builder);
+			DValue keyVal = buildScalarValue(request, x, pair.type.getShape(), errL, vpi.structType, pair, builder);
 			
+			String typeName = vpi.structType.getName();
 			executeAssocTblInsert(request, fnResult, typeName, pair, keyVal, vpi, lineNum, errL);
 		}
-		
+	}
+	
+	public DValue buildScalarValue(InputFunctionRequest request, Object input, Shape shape, List<DeliaError> errL, DStructType structType, TypePair pair, ScalarValueBuilder scalarBuilder) {
+		DValue inner = null;
+		try {
+			inner = dvalConverter.buildFromObject(input, shape, scalarBuilder);
+		} catch (DeliaException e) {
+			DeliaError err = e.getLastError();
+			if (err.getId().equals("value-builder-failed")) {
+				if (metricsObserver != null) {
+					ImportSpec ispec = findImportSpec(request, structType);
+					metricsObserver.onInvalid1Error(ispec, pair.name);
+				}
+				errL.add(err);
+				return null;
+			} else {
+				throw e;
+			}
+		}
+		if (input != null && inner == null) {
+			//err not supported
+			String msg = String.format("%s.%s unsupported shape %s", pair.type.getName(), pair.name,shape.name());
+			errL.add(new DeliaError("unsupported-input-field-type", msg));
+		}
+		return inner;
 	}
 
 	private void executeAssocTblInsert(InputFunctionRequest request, InputFunctionResult fnResult, String typeName, TypePair pair, DValue keyVal, ViaPendingInfo vpi, int lineNum, List<DeliaError> errL) {
@@ -75,6 +99,7 @@ public class ViaService extends ServiceBase {
 		
 		String addstr = renderx(vpi.processedInputValue, relKeyPair.type); 
 		String keystr = renderx(keyVal.asString(), pair.type);
+		//use assoc crud
 		String src = String.format("update %s[%s] { insert %s:[%s] }", typeName, keystr, vpi.outputFieldName, addstr);
 		log.log(src);
 		InputFunctionErrorHandler errorHandler = new InputFunctionErrorHandler(factorySvc, metricsObserver, options);
@@ -122,6 +147,14 @@ public class ViaService extends ServiceBase {
 		err.setLineAndPos(lineNum, 0);
 		errL.add(err);
 		log.logError("error: %s", err.toString());
+	}
+	private ImportSpec findImportSpec(InputFunctionRequest request, DStructType structType) {
+		for(ProgramSet.OutputSpec ospec: request.progset.outputSpecs) {
+			if (ospec.structType == structType) {
+				return ospec.ispec;
+			}
+		}
+		return null;
 	}
 
 }
