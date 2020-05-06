@@ -71,30 +71,34 @@ public class ViaService extends ServiceBase {
 			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, request.session.getExecutionContext().registry);
 			DValue keyVal = dvalConverter.buildFromObject(x, pair.type.getShape(), builder);
 			
-			TypePair relPair = DValueHelper.findField(vpi.structType, vpi.outputFieldName);
-			TypePair relKeyPair = DValueHelper.findPrimaryKeyFieldPair(relPair.type);
-			
-			String addstr = renderx(vpi.processedInputValue, relKeyPair.type); 
-			String keystr = renderx(keyVal.asString(), pair.type);
-			String src = String.format("update %s[%s] {add %s:%s}", typeName, keystr, vpi.outputFieldName, addstr);
-			log.log(src);
-
-//			ResultValue res;
-//			try {
-//				res = request.delia.continueExecution(src, request.session);
-//				if (! res.ok) {
-//					//err
-//					for(DeliaError err: res.errors) {
-//						addError(err, errL, lineNum);
-//					}
-//				}
-//			} catch (DeliaException e) {
-//				fnResult.numFailedRowInserts++;
-//				DeliaError err = e.getLastError();
-//				boolean addErrorFlag = true;
-//			
+			executeSql(request, typeName, pair, keyVal, vpi);
 		}
 		
+	}
+
+	private void executeSql(InputFunctionRequest request, String typeName, TypePair pair, DValue keyVal, ViaPendingInfo vpi) {
+		TypePair relPair = DValueHelper.findField(vpi.structType, vpi.outputFieldName);
+		TypePair relKeyPair = DValueHelper.findPrimaryKeyFieldPair(relPair.type);
+		
+		String addstr = renderx(vpi.processedInputValue, relKeyPair.type); 
+		String keystr = renderx(keyVal.asString(), pair.type);
+		String src = String.format("update %s[%s] { insert %s:[%s]}", typeName, keystr, vpi.outputFieldName, addstr);
+		log.log(src);
+
+		ResultValue res;
+		try {
+			res = request.delia.continueExecution(src, request.session);
+			if (! res.ok) {
+//				//err
+//				for(DeliaError err: res.errors) {
+//					addError(err, errL, lineNum);
+//				}
+			}
+		} catch (DeliaException e) {
+//			fnResult.numFailedRowInserts++;
+//			DeliaError err = e.getLastError();
+//			boolean addErrorFlag = true;
+		}		
 	}
 
 	private String renderx(Object processedInputValue, DType type) {
