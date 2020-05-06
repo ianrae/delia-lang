@@ -288,7 +288,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 2;
+		testIndexToRun = 4;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;

@@ -98,9 +98,9 @@ public class MemUpdate extends ServiceBase {
 			case "delete":
 			{
 				for(DValue fk: drelSrc.getMultipleKeys()) {
-					DValue srcFK = findIn(drelDest);
+					DValue srcFK = findIn(drelDest, fk);
 					if (srcFK != null) {
-						drelSrc.getMultipleKeys().remove(srcFK);
+						drelDest.getMultipleKeys().remove(srcFK);
 					}
 				}
 			}
@@ -138,14 +138,30 @@ public class MemUpdate extends ServiceBase {
 
 	}
 
-	private DValue findIn(DRelation drelDest) {
-		// TODO Auto-generated method stub
+	private DValue findIn(DRelation drelDest, DValue target) {
+		String s2 = target.asString();
+		for(DValue dval: drelDest.getMultipleKeys()) {
+			//str compare for now
+			String s1 = dval.asString();
+			if (s1.equals(s2)) {
+				return dval;
+			}
+		}
 		return null;
 	}
 
 	private void doUpdate(DRelation drelSrc, DRelation drelDest) {
-		// TODO Auto-generated method stub
-		
+		//process pairs (old,new)
+		for(int i = 0; i < drelSrc.getMultipleKeys().size(); i += 2) {
+			DValue currentVal = drelSrc.getMultipleKeys().get(i);
+			DValue newVal = drelSrc.getMultipleKeys().get(i+1);
+			
+			DValue existingVal = findIn(drelDest, currentVal);
+			if (existingVal != null) {	
+				drelDest.getMultipleKeys().remove(existingVal);
+				drelDest.getMultipleKeys().add(newVal);
+			}
+		}
 	}
 	
 	
