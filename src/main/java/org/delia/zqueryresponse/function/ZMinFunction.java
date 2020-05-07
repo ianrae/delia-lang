@@ -6,7 +6,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.queryresponse.QueryFuncContext;
-import org.delia.queryresponse.QueryResponseFunctionBase;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
