@@ -41,7 +41,7 @@ public class ZOrderByFunction extends ZQueryResponseFunctionBase {
 				if (valuelist == null) {
 					valuelist = new ArrayList<>();
 				}
-				valuelist.add(inner);
+				valuelist.add(dval);
 				map.put(inner.getObject(), valuelist);
 			}
 		}

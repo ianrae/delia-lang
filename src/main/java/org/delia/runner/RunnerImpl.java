@@ -54,6 +54,8 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zqueryresponse.LetSpanEngine;
+import org.delia.zqueryresponse.LetSpanRunnerImpl;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -68,6 +70,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private DBInterface dbInterface;
 		private DBExecutor dbexecutor;
 		private QueryFuncOrFieldRunner qffRunner;
+		private LetSpanEngine letSpanEngine;
 		protected FetchRunner fetchRunner;
 		private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
@@ -160,6 +163,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			this.dbexecutor = dbInterface.createExector(dbctx);
 			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
 			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
+			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry);
+			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, spanRunner);
 
 			try {
 				for(Exp exp: expL) {
@@ -702,9 +707,20 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			DValue dval = builder.buildInt(tmpExp.strValue());
 			return dval;
 		}
+		
+		private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
+			boolean flag = true;
+			if (flag) {
+				QueryResponse qresp2 = this.letSpanEngine.process(queryExp, qresp);
+				return qresp2;
+			} else {
+				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
+				return qresp2;
+			}
+		}
 		public void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
 			//extract fields or invoke fns (optional)
-			QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
+			QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
 			res.ok = qresp2.ok;
 			res.addIfNotNull(qresp2.err);
 			res.shape = null;
@@ -756,7 +772,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					QueryResponse qresp = (QueryResponse) res.val;
 					//extract fields or invoke fns (optional)
 					qresp.bindFetchFlag = true;
-					QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
+					QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
 					qresp.bindFetchFlag = false;
 					//TODO: propogate errors from qresp2.err
 					if (qresp2.ok) {

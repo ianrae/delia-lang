@@ -289,17 +289,39 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 5;
+		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 
-//		runR1350File("t0-filter-op-relation.txt", 13);
-//		runR1000File("t0-upsert-mm-other.txt", 1);
-//		runR1550File("t0-queryfn-oneone-parent.txt", 6);
-//		runR950File("t0-crud-assoc-insert.txt", 6);
-//		runR1500File("t0-queryfn-distinct.txt", 3);
-		runR1500File("t0-queryfn-distinct-relation.txt", 2);
+//		runR1500File("t0-queryfn-orderby.txt", 4);
+		runR1500File("t0-queryfn-distinct.txt", 3);
+//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
+//		runR1500File("t0-queryfn-flatten.txt", 0);
+//		runR1500File("t0-queryfn-count.txt", 2);
+//		runR1500File("t0-queryfn-exist.txt", 2);
+//		runR1500File("t0-queryfn-first.txt", 2);
+//		runR1500File("t0-queryfn-last.txt", 2);
+//		runR1500File("t0-queryfn-ith.txt", 4);
+//		
+//		runR1500File("t0-queryfn-min.txt", 0);
+//		runR1500File("t0-queryfn-min-int.txt", 4);
+//		runR1500File("t0-queryfn-min-long.txt", 4);
+//		runR1500File("t0-queryfn-min-number.txt", 4);
+//		runR1500File("t0-queryfn-min-bool.txt", 0);
+//		runR1500File("t0-queryfn-min-relation.txt", 0);
+//		runR1500File("t0-queryfn-min-string.txt", 4);
+//		
+//		runR1500File("t0-queryfn-max.txt", 0);
+//		runR1500File("t0-queryfn-max-int.txt", 4);
+//		runR1500File("t0-queryfn-max-long.txt", 4);
+//		runR1500File("t0-queryfn-max-number.txt", 4);
+//		runR1500File("t0-queryfn-max-bool.txt", 0);
+//		runR1500File("t0-queryfn-max-relation.txt", 0);
+//		runR1500File("t0-queryfn-max-string.txt", 4);
+//		runR1500File("t0-queryfn-avg.txt", 0);
+//		runR1500File("t0-queryfn-limit.txt", 5);
+//		runR1500File("t0-queryfn-offset.txt", 5);
 	}
 	
 	//---
