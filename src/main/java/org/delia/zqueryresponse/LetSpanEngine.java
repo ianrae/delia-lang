@@ -32,6 +32,10 @@ public class LetSpanEngine extends ServiceBase {
 	}
 	
 	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial) {
+		if (qrespInitial.emptyResults()) {
+			return qrespInitial;
+		}
+		
 		DValue dval = qrespInitial.getOne();
 		DType dtype = dval.getType();
 		List<LetSpan> spanL = buildSpans(queryExp, dtype);
@@ -121,8 +125,11 @@ public class LetSpanEngine extends ServiceBase {
 		if (qfexp instanceof QueryFieldExp) {
 			QueryFieldExp qff = (QueryFieldExp) qfexp;
 			String fieldName = qff.funcName;
-			DType fieldType = DValueHelper.findFieldType(span.structType, fieldName);
-			DValueHelper.throwIfFieldNotExist("", fieldName, span.structType);
+			if (! span.dtype.isStructShape()) {
+				return null;
+			}
+			DType fieldType = DValueHelper.findFieldType(span.dtype, fieldName);
+			DValueHelper.throwIfFieldNotExist("", fieldName, span.dtype);
 			if (fieldType.isStructShape()) {
 				LetSpan newSpan = new LetSpan(fieldType);
 				newSpan.startsWithScopeChange = true;

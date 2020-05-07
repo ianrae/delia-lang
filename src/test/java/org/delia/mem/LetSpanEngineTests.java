@@ -117,7 +117,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 
 		@Override
 		public QueryResponse executeSpan(LetSpan span) {
-			trail.add(span.structType.getName());
+			trail.add(span.dtype.getName());
 			for(QueryFuncExp qfe: span.qfeL) {
 				String s = qfe.strValue();
 				trail.add(s);

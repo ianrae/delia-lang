@@ -2,7 +2,6 @@ package org.delia.scope.scopetest.letscalar;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.compiler.ast.LetStatementExp;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.ScopeTestBase;
@@ -57,8 +56,8 @@ public class LetParserTests extends ScopeTestBase {
 	private Object runLetStatement(String varName, String type, String valStr) {
 		//use explicit type since otherwise 55 will be seen as int, not long
 		String src = String.format("let %s %s = %s", varName, type == null ? "" : type, valStr);
-		LetStatementExp exp2 = chelper.chkScalarLet(src, type);
-		ResultValue res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chelper.chkScalarLet(src, type);
+		ResultValue res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		Object obj = res.val;
 		return obj;

@@ -41,8 +41,8 @@ public class ConfigureTests extends ScopeTestBase {
 	
 	private Object runConfigureStatement(String varName, String valStr) {
 		String src = String.format("configure %s = %s", varName, valStr);
-		ConfigureStatementExp exp2 = chelper.chkConfingure(src);
-		ResultValue res = runner.executeOneStatement(exp2);
+//		ConfigureStatementExp exp2 = chelper.chkConfingure(src);
+		ResultValue res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		Object obj = res.val;
 		return obj;

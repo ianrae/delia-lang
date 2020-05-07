@@ -98,6 +98,7 @@ public class QueryCountTests extends ScopeTestBase {
 	private void createFlightType(String type, String modifier) {
 		String src = String.format("type Flight struct {field1 %s %s} end", type, modifier);
 		ResultValue res = execTypeStatement(src);
+		baseBeginSession();
 		chkResOK(res);
 	}
 	private QueryResponse execQuery(String letSrc, int expectedSize) {
@@ -145,8 +146,8 @@ public class QueryCountTests extends ScopeTestBase {
 	protected void runLetNull(String valStr) {
 		//use explicit type since otherwise 55 will be seen as int, not long
 		String src = String.format("let a = %s", valStr);
-		LetStatementExp exp2 = chelper.chkScalarLet(src, "queryResponse");
-		ResultValue res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chelper.chkScalarLet(src, "queryResponse");
+		ResultValue res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		DValue dval = (DValue) res.val;
 		assertEquals(null, dval);

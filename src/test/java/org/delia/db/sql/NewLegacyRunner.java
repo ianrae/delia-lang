@@ -7,6 +7,7 @@ import org.delia.api.DeliaSessionImpl;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
@@ -82,6 +83,11 @@ public class NewLegacyRunner {
 		DeliaImpl deliaimpl = (DeliaImpl) delia;
 		Runner runner = deliaimpl.getMostRecentRunner();
 		return runner.getCompileState();
+	}
+	public DeliaGeneratePhase createGenerator() {
+		DeliaImpl deliaimpl = (DeliaImpl) delia;
+		Runner runner = deliaimpl.getMostRecentRunner();
+		return runner.createGenerator();
 	}
 
 }
