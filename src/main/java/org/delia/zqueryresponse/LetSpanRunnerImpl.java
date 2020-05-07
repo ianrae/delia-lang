@@ -35,32 +35,32 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 		
 		QueryResponse qresp = span.qresp;
-		
+		QueryFuncContext ctx = new QueryFuncContext();
+		ctx.scope = new FuncScope(qresp);
+
 		for(int i = 0; i < span.qfeL.size(); i++) {
 			QueryFuncExp qfexp = span.qfeL.get(i);
 			if (qfexp instanceof QueryFieldExp) {
-				qresp = processField(qfexp, qresp);
+				qresp = processField(qfexp, qresp, ctx);
 			} else {
-				qresp = executeFunc(qresp, qfexp, fnFactory);
+				qresp = executeFunc(qresp, qfexp, fnFactory, ctx);
 			}
 		}
 		return qresp;
 	}
-	private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory) {
+	private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory, QueryFuncContext ctx) {
 		String fnName = qfexp.funcName;
 		log.log("qfn: " + fnName);
 		ZQueryResponseFunction func = fnFactory.create(fnName, registry);
 		if (func == null) {
 			DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
 		} else {
-			QueryFuncContext ctx = new QueryFuncContext();
-			ctx.scope = new FuncScope(qresp);
 			qresp = func.process(qfexp, qresp, ctx);
 		}
 		return qresp;
 	}
 
-	private QueryResponse processField(QueryFuncExp qff, QueryResponse qresp) {
+	private QueryResponse processField(QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
 		String fieldName = qff.funcName;
 		log.log("qff: " + fieldName);
 		
@@ -85,6 +85,10 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 					DeliaExceptionHelper.throwError("cannot-access-field-without-fetch", "field '%s' cannot be accessed because fetch() was not called", qff.funcName);
 				} else {
 					newList.addAll(drel.getFetchedItems());
+					QueryResponse newRes = new QueryResponse();
+					newRes.ok = true;
+					newRes.dvalList = newList;
+					ctx.scope.changeScope(newRes);  //new scope
 				}
 			} else {
 				//scalar

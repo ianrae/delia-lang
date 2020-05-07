@@ -3,7 +3,6 @@ package org.delia.zqueryresponse.function;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
@@ -63,14 +62,15 @@ public class ZFetchFunction extends ZQueryResponseFunctionBase {
 //				}
 			}
 		}
-		
-		QueryResponse newRes = new QueryResponse();
-		newRes.ok = true;
-		newRes.dvalList = newScopeList;
-		ctx.scope.changeScope(newRes);
+
+		//no. now the relation field itself does the scope change
+//		QueryResponse newRes = new QueryResponse();
+//		newRes.ok = true;
+//		newRes.dvalList = newScopeList;
+//		ctx.scope.changeScope(newRes);
 		
 		//fetches changes the list. it's not just a hint to load sub-objects
-		qresp.dvalList = newScopeList;
+//		qresp.dvalList = newScopeList;
 		return qresp;
 	}
 
