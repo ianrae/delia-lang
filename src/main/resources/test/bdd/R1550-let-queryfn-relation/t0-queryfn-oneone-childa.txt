@@ -1,5 +1,5 @@
 # let queryfn when relations
-# count, exist, min, max, first, last
+# count, exists, min, max, first, last
 FEATURE: one-to-one child TODO Fix - .addr.id not yet supported
 background:
  configure loadFKs = true
@@ -39,11 +39,11 @@ then:
 value:a:int:100
 
 ---
-title: exist
+title: exists
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.exist()
+  let x = Customer[true].fetch("addr").id.exists()
 then:
 value:a:boolean:true
 
