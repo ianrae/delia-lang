@@ -701,14 +701,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
 //			boolean flag = true;
 //			if (flag) {
-				QueryResponse qresp2 = this.letSpanEngine.process(queryExp, qresp);
+				QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp);
 				return qresp2;
 //			} else {
 //				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
 //				return qresp2;
 //			}
 		}
-		public void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
+		private void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
 			//extract fields or invoke fns (optional)
 			QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
 			res.ok = qresp2.ok;
@@ -722,7 +722,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				if (! ruleRunner.validateDVals(qresp.dvalList)) {
 					ruleRunner.propogateErrors(res);
 				}
-			}
+			}                              
 		}
 
 		private void assignVar(LetStatementExp exp, ResultValue res) {
@@ -762,14 +762,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					QueryResponse qresp = (QueryResponse) res.val;
 					//extract fields or invoke fns (optional)
 					qresp.bindFetchFlag = true;
-					QueryResponse qresp2;
-					if (!registry.existsType(queryExp.typeName)) {
-						//TODO are we missing invalid code here if typename really doesn't exist
-						qresp2 = new QueryResponse();
-						qresp2.ok = true;
-					} else {
-						qresp2 = runLetSpanEngine(queryExp, qresp);
-					}
+					QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp);
 					qresp.bindFetchFlag = false;
 					//TODO: propogate errors from qresp2.err
 					if (qresp2.ok) {

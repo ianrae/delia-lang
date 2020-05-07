@@ -286,8 +286,8 @@ public class ScopeTestBase {
 	
 	protected void createActorType() {
 		String src = String.format("type Actor struct {id int unique, dt X, flag boolean} end");
-		TypeStatementExp exp0 = chkType(src, null);
-		ResultValue res = runner.executeOneStatement(exp0);
+//		TypeStatementExp exp0 = chkType(src, null);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 		
 		DBHelper.createTable(dbInterface, "Actor"); //!! fake schema
