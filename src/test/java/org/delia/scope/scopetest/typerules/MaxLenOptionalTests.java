@@ -6,6 +6,7 @@ import org.delia.base.DBHelper;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
@@ -113,14 +114,14 @@ public class MaxLenOptionalTests extends ScopeTestBase {
 	private QueryResponse insertAndQuery(int id, boolean isNull) {
 		String val = isNull ? "null" : "'bob'";
 		String src = String.format("insert Actor {id:%d, firstName:%s, flag:true }", id, val);
-		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.executeOneStatement(exp);
+//		InsertStatementExp exp = chelper.chkInsert(src, null);
+		ResultValue res = runner.continueExecution(src);
 		chkResOK(res);
 		
 		//now query it
 		src = String.format("let a = Actor[%d]", id);
-		LetStatementExp exp2 = chelper.chkQueryLet(src, null);
-		res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chelper.chkQueryLet(src, null);
+		res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = helper.chkResQuery(res, "Actor");
 		return qresp;
@@ -141,11 +142,10 @@ public class MaxLenOptionalTests extends ScopeTestBase {
 		execUpdateFail(src, expectedErrorCount, errId);
 	}
 	
-	private Runner zcreateActorType(String rule) {
+	private NewLegacyRunner zcreateActorType(String rule) {
 		String src = String.format("type Actor struct {id int unique, firstName string optional, flag boolean} firstName.%s end", rule);
-		TypeStatementExp exp0 = chkType(src, null);
-		ResultValue res = runner.executeOneStatement(exp0);
-		chkResOK(res);
+//		TypeStatementExp exp0 = chkType(src, null);
+		runner.begin(src);
 		
 		DBHelper.createTable(dbInterface, "Actor"); //!! fake schema
 		return runner;

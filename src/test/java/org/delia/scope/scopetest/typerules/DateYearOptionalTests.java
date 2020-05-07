@@ -68,14 +68,14 @@ public class DateYearOptionalTests extends ScopeTestBase {
 	private QueryResponse insertAndQuery(int id) {
 //		String src = String.format("insert Actor {id:%d, firstName:'bob', dt:'2011-01-30' }", id);
 		String src = String.format("insert Actor {id:%d, firstName:'bob' }", id);
-		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.executeOneStatement(exp);
+//		InsertStatementExp exp = chelper.chkInsert(src, null);
+		ResultValue res = runner.continueExecution(src);
 		chkResOK(res);
 		
 		//now query it
 		src = String.format("let a = Actor[%d]", id);
-		LetStatementExp exp2 = chelper.chkQueryLet(src, null);
-		res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chelper.chkQueryLet(src, null);
+		res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = helper.chkResQuery(res, "Actor");
 		return qresp;
