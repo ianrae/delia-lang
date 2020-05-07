@@ -40,6 +40,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.StringTrail;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -280,31 +281,22 @@ public class LetSpanEngineTests extends NewBDDBase {
 			this.structType = (DStructType) dtype;
 		}
 	}
+	
+	public interface LetSpanRunner {
+		QueryResponse executeSpan(LetSpan span);
 
-	public static class LetSpanEngine extends ServiceBase {
+	}
+	public static class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
+
 		private DTypeRegistry registry;
 
-		public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry) {
+		public LetSpanRunnerImpl(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
 			this.registry = registry;
 		}
-		
-		public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial) {
-			List<LetSpan> spanL = buildSpans(queryExp);
-			
-			//execute span
-			QueryResponse qresp = qrespInitial;
-			for(LetSpan span: spanL) {
-				span.qresp = qresp;
-				span.qfeL = adjustExecutionOrder(span);
-				qresp = executeSpan(span);
-			}
-			
-			return qresp;
-		}
 
-
-		private QueryResponse executeSpan(LetSpan span) {
+		@Override
+		public QueryResponse executeSpan(LetSpan span) {
 			FetchRunner fetchRunner = null;
 			ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 			
@@ -320,31 +312,20 @@ public class LetSpanEngineTests extends NewBDDBase {
 			}
 			return qresp;
 		}
-		
-		private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
-			FetchRunner fetchRunner = null;
-			ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
-			
-			List<QueryFuncExp> newL = new ArrayList<>();
-			
-			//do orderby,offset,limit
-			for(int passNumber = 1; passNumber <= 3; passNumber++) {
-				List<QueryFuncExp> currentList = getPass(span, passNumber, fnFactory);
-				newL.addAll(currentList);
+		private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory) {
+			String fnName = qfexp.funcName;
+			log.log("qfn: " + fnName);
+			ZQueryResponseFunction func = fnFactory.create(fnName, registry);
+			if (func == null) {
+				DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
+			} else {
+				QueryFuncContext ctx = new QueryFuncContext();
+				qresp = func.process(qfexp, qresp, ctx);
 			}
-			
-			//pass 4. fields and other fns
-			for(int i = 0; i < span.qfeL.size(); i++) {
-				QueryFuncExp qfexp = span.qfeL.get(i);
-				if (newL.contains(qfexp)) {
-					continue;
-				}
-				newL.add(qfexp);
-			}
-			return newL;
+			return qresp;
 		}
-		
-		public QueryResponse processField(QueryFuncExp qff, QueryResponse qresp) {
+
+		private QueryResponse processField(QueryFuncExp qff, QueryResponse qresp) {
 			String fieldName = qff.funcName;
 			log.log("qff: " + fieldName);
 			
@@ -379,17 +360,53 @@ public class LetSpanEngineTests extends NewBDDBase {
 			return qresp;
 		}
 
-		private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory) {
-			String fnName = qfexp.funcName;
-			log.log("qfn: " + fnName);
-			ZQueryResponseFunction func = fnFactory.create(fnName, registry);
-			if (func == null) {
-				DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
-			} else {
-				QueryFuncContext ctx = new QueryFuncContext();
-				qresp = func.process(qfexp, qresp, ctx);
+	}
+
+	public static class LetSpanEngine extends ServiceBase {
+		private DTypeRegistry registry;
+		private LetSpanRunner runner;
+
+		public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry, LetSpanRunner runner) {
+			super(factorySvc);
+			this.registry = registry;
+			this.runner = runner;
+		}
+		
+		public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial) {
+			List<LetSpan> spanL = buildSpans(queryExp);
+			
+			//execute span
+			QueryResponse qresp = qrespInitial;
+			for(LetSpan span: spanL) {
+				span.qresp = qresp;
+				span.qfeL = adjustExecutionOrder(span);
+				qresp = runner.executeSpan(span);
 			}
+			
 			return qresp;
+		}
+		
+		private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
+			FetchRunner fetchRunner = null;
+			ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
+			
+			List<QueryFuncExp> newL = new ArrayList<>();
+			
+			//do orderby,offset,limit
+			for(int passNumber = 1; passNumber <= 3; passNumber++) {
+				List<QueryFuncExp> currentList = getPass(span, passNumber, fnFactory);
+				newL.addAll(currentList);
+			}
+			
+			//pass 4. fields and other fns
+			for(int i = 0; i < span.qfeL.size(); i++) {
+				QueryFuncExp qfexp = span.qfeL.get(i);
+				if (newL.contains(qfexp)) {
+					continue;
+				}
+				newL.add(qfexp);
+			}
+			return newL;
 		}
 
 		private List<QueryFuncExp> getPass(LetSpan span, int passNum, ZQueryResponseFunctionFactory fnFactory) {
@@ -401,7 +418,6 @@ public class LetSpanEngineTests extends NewBDDBase {
 			}
 			return list;
 		}
-
 
 		private List<LetSpan> buildSpans(QueryExp queryExp) {
 			List<LetSpan> spanL = new ArrayList<>();
@@ -424,7 +440,6 @@ public class LetSpanEngineTests extends NewBDDBase {
 			
 			return spanL;
 		}
-
 
 		private LetSpan endsSpan(LetSpan span, QueryFuncExp qfexp) {
 			if (qfexp instanceof QueryFieldExp) {
@@ -457,12 +472,19 @@ public class LetSpanEngineTests extends NewBDDBase {
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 		LetStatementExp letStatement = findLet(sessimpl);
 		
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
+		LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(delia.getFactoryService(), session.getExecutionContext().registry);
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, spanRunner);
 		
 		QueryExp queryExp = (QueryExp) letStatement.value;
 		QueryResponse qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp);
 		
+		MyLetSpanRunner myrunner = new MyLetSpanRunner();
+		letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, myrunner);
+		
+		qresp = (QueryResponse) res.val;
+		qresp = letEngine.process(queryExp, qresp);
+		assertEquals("Flight;orderBy(field1)", myrunner.trail.getTrail());
 	}
 
 	private LetStatementExp findLet(DeliaSession session) {
@@ -475,6 +497,20 @@ public class LetSpanEngineTests extends NewBDDBase {
 		return null;
 	}
 
+	public static class MyLetSpanRunner implements LetSpanRunner {
+
+		private StringTrail trail = new StringTrail();
+
+		@Override
+		public QueryResponse executeSpan(LetSpan span) {
+			trail.add(span.structType.getName());
+			for(QueryFuncExp qfe: span.qfeL) {
+				String s = qfe.strValue();
+				trail.add(s);
+			}
+			return span.qresp;
+		}
+	}
 
 
 	//---
