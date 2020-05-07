@@ -24,6 +24,7 @@ import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
+import org.delia.runner.DeliaException;
 import org.delia.runner.LegacyRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
@@ -123,8 +124,7 @@ public class ScopeTestBase {
 		return execInsertStatement(src, true);
 	}
 	protected ResultValue execInsertStatement(String src, boolean shouldPass) {
-//		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.beginOrContinue(src, shouldPass);
+		ResultValue res = doExecCatchFail(src, shouldPass);
 		if (shouldPass) {
 			chkResOK(res);
 		}
@@ -244,8 +244,27 @@ public class ScopeTestBase {
 	}
 	protected ResultValue execLetStatementScalarFail(String src, String type) {
 //		LetStatementExp exp2 = chelper.chkScalarLet(src, type);
-		ResultValue res = runner.beginOrContinue(src, false);
+		ResultValue res;
+		try {
+			res = runner.beginOrContinue(src, false);
+		} catch (DeliaException e) {
+			res = new ResultValue();
+			res.ok = false;
+			res.errors.add(e.getLastError());
+		}
 		assertEquals(false, res.ok);
+		return res;
+	}
+	protected ResultValue doExecCatchFail(String src, boolean shouldPass) {
+		ResultValue res;
+		try {
+			res = runner.beginOrContinue(src, false);
+		} catch (DeliaException e) {
+			res = new ResultValue();
+			res.ok = false;
+			res.errors.add(e.getLastError());
+		}
+		assertEquals(shouldPass, res.ok);
 		return res;
 	}
 	protected void chkDBCounts(int n1, int n2, int n3, int n4) {

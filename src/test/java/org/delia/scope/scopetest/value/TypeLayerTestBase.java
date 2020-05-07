@@ -36,25 +36,34 @@ public class TypeLayerTestBase extends ScopeTestBase {
 		DBHelper.createTable(dbInterface, "C2"); //!! fake schema
 	}
 
+	String pendingSrc = "";
+	
 	protected void createScalarType(String type, String rule) {
 		String src = String.format("type X %s %s end", type, rule);
-		ResultValue res = execTypeStatement(src);
-		chkResOK(res);
+		pendingSrc += " " + src;
+//		ResultValue res = execTypeStatement(src);
+//		chkResOK(res);
 		chelper = helper.createCompilerHelper();
 		src = String.format(" type X2 X end", type);
-		res = execTypeStatement(src);
-		chkResOK(res);
+		pendingSrc += " " + src;
+		
+//		res = execTypeStatement(src);
+//		chkResOK(res);
 	}
 	protected void createStructType(String type, String rule) {
 		String sid = addIdFlag ? String.format(" id int primaryKey") : "";
 		String src = String.format("type C struct { %s field1 %s } %s end", sid, type, rule);
-//		ResultValue res = execTypeStatement(src);
+		//		ResultValue res = execTypeStatement(src);
 //		chkResOK(res);
 		chelper = helper.createCompilerHelper();
 //		src = String.format("type C2 C { field2 %s } %s end", type, rule);
 		src += String.format(" type C2 C { } end");
-		ResultValue res = execTypeStatement(src);
-		chkResOK(res);
+		pendingSrc += " " + src;
+//		ResultValue res = execTypeStatement(src);
+//		chkResOK(res);
+	}
+	protected void beginSession() {
+		this.runner.begin(pendingSrc);
 	}
 	protected QueryResponse insertAndQuery(String typeName, String valStr, int expectedSize) {
 		String sid = addIdFlag ? String.format(" id:%d", nextId) : "";
