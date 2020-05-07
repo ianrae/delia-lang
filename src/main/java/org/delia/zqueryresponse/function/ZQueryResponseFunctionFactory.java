@@ -39,12 +39,12 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 //				return new LimitFunction(registry);
 			case "offset":
 				return new ZOffsetFunction(registry);
-//			case "first":
-//				return new FirstFunction(registry, true, false);
-//			case "last":
-//				return new FirstFunction(registry, false, false);
-//			case "ith":
-//				return new FirstFunction(registry, false, true);
+			case "first":
+				return new ZFirstFunction(registry, true, false);
+			case "last":
+				return new ZFirstFunction(registry, false, false);
+			case "ith":
+				return new ZFirstFunction(registry, false, true);
 			default:
 			{
 				String msg = String.format("unknown fn: %s", fnName);
