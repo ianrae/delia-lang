@@ -108,28 +108,28 @@ public class FieldUniqueTests extends ScopeTestBase {
 	}
 	
 	//-- number --
-	@Test
-	public void testNumber() {
-		DValue dval = createAndInsert("number", "55");
-		assertEquals(55.0, dval.asNumber(), DELTA);
-	}
-	@Test
-	public void testNumber2() {
-		DValue dval = createAndInsert("number", "55");
-		assertEquals(55.0, dval.asNumber(), DELTA);
-		dval = insertAndQueryEx("56", false, 2);
-		assertEquals(56.0, dval.asNumber(), DELTA);
-	}
-	@Test
-	public void testNumberFail() {
-		DValue dval = createAndInsert("number", "55");
-		assertEquals(55.0, dval.asNumber(), DELTA);
-		insertFail("55", 1, "duplicate-unique-value");
-	}
-	@Test
-	public void testNumberNull() {
-		createAndInsertNull("number", "null");
-	}
+//	@Test
+//	public void testNumber() {
+//		DValue dval = createAndInsert("number", "55");
+//		assertEquals(55.0, dval.asNumber(), DELTA);
+//	}
+//	@Test
+//	public void testNumber2() {
+//		DValue dval = createAndInsert("number", "55");
+//		assertEquals(55.0, dval.asNumber(), DELTA);
+//		dval = insertAndQueryEx("56", false, 2);
+//		assertEquals(56.0, dval.asNumber(), DELTA);
+//	}
+//	@Test
+//	public void testNumberFail() {
+//		DValue dval = createAndInsert("number", "55");
+//		assertEquals(55.0, dval.asNumber(), DELTA);
+//		insertFail("55", 1, "duplicate-unique-value");
+//	}
+//	@Test
+//	public void testNumberNull() {
+//		createAndInsertNull("number", "null");
+//	}
 
 	//-- date --
 	@Test
@@ -187,11 +187,15 @@ public class FieldUniqueTests extends ScopeTestBase {
 
 	private DValue createAndInsert(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
+
 		DValue dval = insertAndQueryEx(valStr, false, 1);
 		return dval;
 	}
 	private DValue createAndInsertNull(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
+
 		insertFail(valStr, 1, "NODATA");
 		return null;
 	}

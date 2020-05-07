@@ -2,6 +2,7 @@ package org.delia.scope.scopetest.typestruct;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
@@ -192,11 +193,11 @@ public class FieldTests extends ScopeTestBase {
 		String src = String.format("type Flight struct {field1 %s} end", type);
 		execTypeStatement(src);
 	}
-	private DValue insertAndQueryEx(Runner runner, String valStr) {
+	private DValue insertAndQueryEx(NewLegacyRunner runner, String valStr) {
 		QueryResponse qresp= insertAndQuery(runner, valStr);
 		return getOne("field1", qresp, false);
 	}
-	private QueryResponse insertAndQuery(Runner runner, String valStr) {
+	private QueryResponse insertAndQuery(NewLegacyRunner runner, String valStr) {
 		String src = String.format("insert Flight {field1:%s}", valStr);
 		execInsertStatement(src);
 		
@@ -207,11 +208,13 @@ public class FieldTests extends ScopeTestBase {
 
 	private DValue createAndInsert(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
 		DValue dval = insertAndQueryEx(runner, valStr);
 		return dval;
 	}
 	private DValue createAndInsertNull(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
 		insertFail(valStr, 1, "NODATA");
 		return null;
 	}

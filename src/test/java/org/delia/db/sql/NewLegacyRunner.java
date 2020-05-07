@@ -3,6 +3,7 @@ package org.delia.db.sql;
 import org.delia.api.Delia;
 import org.delia.api.DeliaImpl;
 import org.delia.api.DeliaSession;
+import org.delia.api.DeliaSessionImpl;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -12,7 +13,9 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.runner.DoNothingVarEvaluator;
+import org.delia.runner.InternalCompileState;
 import org.delia.runner.ResultValue;
+import org.delia.runner.Runner;
 import org.delia.type.DTypeRegistry;
 
 public class NewLegacyRunner {
@@ -74,6 +77,11 @@ public class NewLegacyRunner {
 		} else {
 			return continueExecution(src);
 		}
+	}
+	public InternalCompileState getCompileState() {
+		DeliaImpl deliaimpl = (DeliaImpl) delia;
+		Runner runner = deliaimpl.getMostRecentRunner();
+		return runner.getCompileState();
 	}
 
 }

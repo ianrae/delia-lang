@@ -33,6 +33,7 @@ public class DeliaImpl implements Delia {
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
+	private Runner mostRecentRunner;
 
 	public DeliaImpl(DBInterface dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
@@ -100,6 +101,7 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		dbInterface.init(factorySvc);
+		mostRecentRunner = runner;
 		return runner;
 	}
 
@@ -340,5 +342,9 @@ public class DeliaImpl implements Delia {
 	//for internal use only - unit tests
 	public void setDbInterface(DBInterface dbInterface) {
 		this.dbInterface = dbInterface;
+	}
+
+	public Runner getMostRecentRunner() {
+		return mostRecentRunner;
 	}
 }
