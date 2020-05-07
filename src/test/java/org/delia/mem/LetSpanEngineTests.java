@@ -29,6 +29,7 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.queryresponse.FuncScope;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
@@ -69,11 +70,18 @@ public class LetSpanEngineTests extends NewBDDBase {
 			return nexp.val;
 		}
 		
-		protected void ensureFieldExists(QueryResponse qresp, String fnName, String fieldName) {
-			if (CollectionUtils.isEmpty(qresp.dvalList)) {
+//		protected void ensureFieldExists(QueryResponse qresp, String fnName, String fieldName) {
+//			if (CollectionUtils.isEmpty(qresp.dvalList)) {
+//				return;
+//			}
+//			DValue dval = qresp.dvalList.get(0);
+//			DValueHelper.throwIfFieldNotExist(fnName, fieldName, dval);
+//		}
+		protected void ensureFieldExists(List<DValue> dvalList, String fnName, String fieldName) {
+			if (CollectionUtils.isEmpty(dvalList)) {
 				return;
 			}
-			DValue dval = qresp.dvalList.get(0);
+			DValue dval = dvalList.get(0);
 			DValueHelper.throwIfFieldNotExist(fnName, fieldName, dval);
 		}
 		
@@ -85,7 +93,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 
 		@Override
 		public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
-			List<DValue> dvalList = qresp.dvalList;
+			List<DValue> dvalList = ctx.getDValList(); //use scope
 			if (dvalList == null || dvalList.size() <= 1) {
 				return qresp; //nothing to sort
 			}
@@ -95,7 +103,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 			TreeMap<Object,List<DValue>> map = new TreeMap<>();
 			List<DValue> nulllist = new ArrayList<>();
 
-			ensureFieldExists(qresp, "orderBy", fieldName);
+			ensureFieldExists(dvalList, "orderBy", fieldName);
 			for(DValue dval: dvalList) {
 				DValue inner = dval.asStruct().getField(fieldName);
 				
@@ -149,8 +157,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 
 		@Override
 		public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
-			
-			List<DValue> dvalList = qresp.dvalList;
+			List<DValue> dvalList = ctx.getDValList(); //use scope
 			if (dvalList == null || dvalList.size() <= 1) {
 				return qresp; //nothing to sort
 			}
@@ -158,22 +165,23 @@ public class LetSpanEngineTests extends NewBDDBase {
 			int offset = getIntArg(qfe, ctx);
 			ctx.currentOffset = offset;
 			
+			ctx.offsetLimitDirtyFlag = true;
 			doLimitAndOffset(ctx, qresp);
 			return qresp;
 		}
 		
-		protected boolean canExecuteInGivenOrder(QueryFuncContext ctx) {
-			//Flight[true].offset(1).limit(2) is ok
-			int pos1 = ctx.pendingTrail.getTrail().indexOf("offset");
-			int pos2 = ctx.pendingTrail.getTrail().indexOf("limit");
-			if (pos1 < 0 || pos2 < 0) {
-				return true;
-			} else if (pos1 < pos2) {
-				return true;
-			} else {
-				return false;
-			}
-		}
+//		protected boolean canExecuteInGivenOrder(QueryFuncContext ctx) {
+//			//Flight[true].offset(1).limit(2) is ok
+//			int pos1 = ctx.pendingTrail.getTrail().indexOf("offset");
+//			int pos2 = ctx.pendingTrail.getTrail().indexOf("limit");
+//			if (pos1 < 0 || pos2 < 0) {
+//				return true;
+//			} else if (pos1 < pos2) {
+//				return true;
+//			} else {
+//				return false;
+//			}
+//		}
 
 		protected void doLimitAndOffset(QueryFuncContext ctx, QueryResponse qresp) {
 			int offset = ctx.currentOffset;
@@ -320,6 +328,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 				DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
 			} else {
 				QueryFuncContext ctx = new QueryFuncContext();
+				ctx.scope = new FuncScope(qresp);
 				qresp = func.process(qfexp, qresp, ctx);
 			}
 			return qresp;
@@ -485,6 +494,42 @@ public class LetSpanEngineTests extends NewBDDBase {
 		qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp);
 		assertEquals("Flight;orderBy(field1)", myrunner.trail.getTrail());
+	}
+	
+	@Test
+	public void test1() {
+//		chkRun("let x = Flight[true]", "");
+//		chkRun("let x = Flight[true].orderBy('field1')", "Flight;orderBy(field1)");
+//		
+//		chkRun("let x = Flight[true].orderBy('field1').field2", "Flight;orderBy(field1);field2");
+		chkRun("let x = Flight[true].field2.orderBy('field1')", "Flight;orderBy(field1);field2");
+//		chkRun("let x = Flight[true].orderBy('field1')", "Flight;orderBy(field1)");
+	}
+	
+	
+
+	private void chkRun(String src, String expected) {
+		String initialSrc = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(initialSrc);
+		assertEquals(true, b);
+
+		Delia delia = dao.getDelia();
+		DeliaSession session = dao.getMostRecentSession();
+		ResultValue res = delia.continueExecution(src, session);
+		
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		LetStatementExp letStatement = findLet(sessimpl);
+		
+		QueryExp queryExp = (QueryExp) letStatement.value;
+		QueryResponse qresp = (QueryResponse) res.val;
+		
+		MyLetSpanRunner myrunner = new MyLetSpanRunner();
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, myrunner);
+		
+		qresp = (QueryResponse) res.val;
+		qresp = letEngine.process(queryExp, qresp);
+		assertEquals(expected, myrunner.trail.getTrail());
 	}
 
 	private LetStatementExp findLet(DeliaSession session) {
