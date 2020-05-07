@@ -71,8 +71,8 @@ public class TypeDao {
 		return innerDao.getDbInterface();
 	}
 
-	public DeliaSession getMostRecentSess() {
-		return innerDao.getMostRecentSess();
+	public DeliaSession getMostRecentSession() {
+		return innerDao.getMostRecentSession();
 	}
 
 	public FactoryService getFactorySvc() {

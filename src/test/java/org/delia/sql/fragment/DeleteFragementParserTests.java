@@ -203,7 +203,7 @@ public class DeleteFragementParserTests extends FragmentParserTestBase {
 		this.fragmentParser = createFragmentParser(dao, src); 
 		
 //		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		DeleteStatementExp deletetatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof DeleteStatementExp) {

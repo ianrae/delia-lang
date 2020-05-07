@@ -405,7 +405,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		this.fragmentParser = createFragmentParser(dao, src, tblinfoL); 
 
 		//		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		InsertStatementExp insertStatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof InsertStatementExp) {

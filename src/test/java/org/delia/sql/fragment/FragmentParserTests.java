@@ -337,7 +337,7 @@ public class FragmentParserTests extends NewBDDBase {
 		this.fragmentParser = createFragmentParser(dao, src); 
 		
 //		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		LetStatementExp letStatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof LetStatementExp) {

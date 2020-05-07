@@ -312,7 +312,7 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 		this.fragmentParser = createFragmentParser(dao, src, tblinfoL); 
 		
 		//		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		UpdateStatementExp updateStatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof UpdateStatementExp) {
