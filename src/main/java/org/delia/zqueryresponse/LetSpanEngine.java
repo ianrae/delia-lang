@@ -19,14 +19,14 @@ public class LetSpanEngine extends ServiceBase {
 	private DTypeRegistry registry;
 	private LetSpanRunner runner;
 	private ZQueryResponseFunctionFactory fnFactory;
+	private FetchRunner fetchRunner;
 
-	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry, LetSpanRunner runner) {
+	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry, FetchRunner fetchRunner, LetSpanRunner runner) {
 		super(factorySvc);
 		this.registry = registry;
+		this.fetchRunner = fetchRunner;
 		this.runner = runner;
 		
-		FetchRunner fetchRunner = null;  //TODO: fix
-
 		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 	}
 	
@@ -45,8 +45,6 @@ public class LetSpanEngine extends ServiceBase {
 	}
 	
 	private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
-		FetchRunner fetchRunner = null;
-		
 		List<QueryFuncExp> newL = new ArrayList<>();
 		
 		//do orderby,offset,limit

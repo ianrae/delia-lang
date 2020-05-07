@@ -18,6 +18,7 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.util.StringTrail;
@@ -47,15 +48,16 @@ public class LetSpanEngineTests extends NewBDDBase {
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 		LetStatementExp letStatement = findLet(sessimpl);
 		
-		LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(delia.getFactoryService(), session.getExecutionContext().registry);
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, spanRunner);
+		LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(delia.getFactoryService(), session.getExecutionContext().registry, null);
+		FetchRunner fetchRunner = null;
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner, spanRunner);
 		
 		QueryExp queryExp = (QueryExp) letStatement.value;
 		QueryResponse qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp);
 		
 		MyLetSpanRunner myrunner = new MyLetSpanRunner();
-		letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, myrunner);
+		letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner, myrunner);
 		
 		qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp);
@@ -91,7 +93,8 @@ public class LetSpanEngineTests extends NewBDDBase {
 		QueryResponse qresp = (QueryResponse) res.val;
 		
 		MyLetSpanRunner myrunner = new MyLetSpanRunner();
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, myrunner);
+		FetchRunner fetchRunner = null;
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner, myrunner);
 		
 		qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp);

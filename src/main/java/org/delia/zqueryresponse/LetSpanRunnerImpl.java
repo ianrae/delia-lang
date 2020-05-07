@@ -21,15 +21,16 @@ import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
 public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 
 	private DTypeRegistry registry;
+	private FetchRunner fetchRunner;
 
-	public LetSpanRunnerImpl(FactoryService factorySvc, DTypeRegistry registry) {
+	public LetSpanRunnerImpl(FactoryService factorySvc, DTypeRegistry registry, FetchRunner fetchRunner) {
 		super(factorySvc);
 		this.registry = registry;
+		this.fetchRunner = fetchRunner;
 	}
 
 	@Override
 	public QueryResponse executeSpan(LetSpan span) {
-		FetchRunner fetchRunner = null;
 		ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 		
 		QueryResponse qresp = span.qresp;

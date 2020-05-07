@@ -163,8 +163,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			this.dbexecutor = dbInterface.createExector(dbctx);
 			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
 			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
-			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry);
-			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, spanRunner);
+			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
+			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner, spanRunner);
 
 			try {
 				for(Exp exp: expL) {

@@ -29,8 +29,8 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 				return new ZDistinctFunction(registry);
 			case "exists":
 				return new ZExistsFunction(registry);
-//			case "fetch":
-//				return new FetchFunction(registry, fetchRunner);
+			case "fetch":
+				return new ZFetchFunction(registry, fetchRunner);
 			case "fks":
 				return new ZFKsFunction(registry, factorySvc.getConfigureService());
 			case "orderBy":
