@@ -7,9 +7,7 @@ import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.error.DeliaError;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.ValueException;
 import org.delia.scope.scopetest.ScopeTestBase;
-import org.delia.type.BuiltInTypes;
 import org.delia.type.DValue;
 
 public class TypeLayerTestBase extends ScopeTestBase {
@@ -50,12 +48,12 @@ public class TypeLayerTestBase extends ScopeTestBase {
 	protected void createStructType(String type, String rule) {
 		String sid = addIdFlag ? String.format(" id int primaryKey") : "";
 		String src = String.format("type C struct { %s field1 %s } %s end", sid, type, rule);
-		ResultValue res = execTypeStatement(src);
-		chkResOK(res);
+//		ResultValue res = execTypeStatement(src);
+//		chkResOK(res);
 		chelper = helper.createCompilerHelper();
 //		src = String.format("type C2 C { field2 %s } %s end", type, rule);
-		src = String.format("type C2 C { } end");
-		res = execTypeStatement(src);
+		src += String.format(" type C2 C { } end");
+		ResultValue res = execTypeStatement(src);
 		chkResOK(res);
 	}
 	protected QueryResponse insertAndQuery(String typeName, String valStr, int expectedSize) {
@@ -208,7 +206,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 		}
 		String src = String.format("delete %s", typeName);
 		DeleteStatementExp exp = (DeleteStatementExp) chelper.parseOne(src);
-		ResultValue res = runner.executeOneStatement(exp);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 	}
 

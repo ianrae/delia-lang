@@ -110,8 +110,8 @@ public class ScopeTestBase {
 	}
 	
 	protected ResultValue execTypeStatement(String src) {
-		TypeStatementExp exp0 = chkType(src, null);
-		ResultValue res = runner.executeOneStatement(exp0);
+//		TypeStatementExp exp0 = chkType(src, null);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 		return res;
 	}

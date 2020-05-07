@@ -762,7 +762,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					QueryResponse qresp = (QueryResponse) res.val;
 					//extract fields or invoke fns (optional)
 					qresp.bindFetchFlag = true;
-					QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
+					QueryResponse qresp2;
+					if (!registry.existsType(queryExp.typeName)) {
+						//TODO are we missing invalid code here if typename really doesn't exist
+						qresp2 = new QueryResponse();
+						qresp2.ok = true;
+					} else {
+						qresp2 = runLetSpanEngine(queryExp, qresp);
+					}
 					qresp.bindFetchFlag = false;
 					//TODO: propogate errors from qresp2.err
 					if (qresp2.ok) {

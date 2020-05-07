@@ -6,7 +6,6 @@ import org.delia.api.DeliaSession;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
@@ -19,26 +18,31 @@ import org.delia.type.DTypeRegistry;
 public class NewLegacyRunner {
 	private Delia delia;
 	private DeliaSession session = null;
+	private Log log;
 
 	public NewLegacyRunner(Log log) {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).log(log).build();
 		this.delia = delia;
+		this.log = delia.getLog();
 	}
 	public NewLegacyRunner(Delia delia) {
 		this.delia = delia;
+		this.log = delia.getLog();
 	}
 	
 	public DeliaSession begin(String src) {
+		log.log("NLR: %s", src);
 		session = delia.beginSession(src);
 		return session;
 	}
 
-	public ResultValue executeOneStatement(TypeStatementExp exp0) {
-		String src = exp0.strValue(); //TODO this may not be correct
-		return continueExecution(src);
-	}
+//	public ResultValue executeOneStatement(TypeStatementExp exp0) {
+//		String src = exp0.strValue(); //  xxxTODxO this may not be correct
+//		return continueExecution(src);
+//	}
 	public ResultValue continueExecution(String src){
+		log.log("NLRc: %s", src);
 		ResultValue res = delia.continueExecution(src, session);
 		return res;
 	}
@@ -63,12 +67,12 @@ public class NewLegacyRunner {
 	}
 	public ResultValue beginOrContinue(String src, boolean shouldPass) {
 		if (session == null) {
-			session = delia.beginSession(src);
+			begin(src);
 			ResultValue res = new ResultValue();
 			res.ok = shouldPass; //hack
 			return res;
 		} else {
-			return delia.continueExecution(src, session);
+			return continueExecution(src);
 		}
 	}
 
