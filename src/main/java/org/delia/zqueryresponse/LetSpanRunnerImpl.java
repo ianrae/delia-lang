@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
+import org.delia.compiler.ast.StringExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.queryresponse.FuncScope;
@@ -23,17 +25,17 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 
 	private DTypeRegistry registry;
 	private FetchRunner fetchRunner;
+	private ZQueryResponseFunctionFactory fnFactory;
 
 	public LetSpanRunnerImpl(FactoryService factorySvc, DTypeRegistry registry, FetchRunner fetchRunner) {
 		super(factorySvc);
 		this.registry = registry;
-		this.fetchRunner = fetchRunner;
+		this.fetchRunner = fetchRunner;		
+		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 	}
 
 	@Override
 	public QueryResponse executeSpan(LetSpan span) {
-		ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
-		
 		QueryResponse qresp = span.qresp;
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
@@ -67,6 +69,13 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		if (CollectionUtils.isEmpty(qresp.dvalList)) {
 			return qresp; //nothing to do
 		}
+		
+		//span may start with a relation field (eg .addr)
+		DValue firstRel = firstValueIsRelation(qff, qresp, ctx);
+		if (firstRel != null) {
+			qresp = doImplicitFetchIfNeeded(firstRel, qff, qresp, ctx);
+			return qresp;
+		}
 
 		List<DValue> newList = new ArrayList<>();
 		boolean checkFieldExists = true;
@@ -80,16 +89,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 				DValue inner = dval.asStruct().getField(qff.funcName);
 				newList.add(inner);
 			} else if (dval.getType().isRelationShape()) {
-				DRelation drel = dval.asRelation();
-				if (drel.getFetchedItems() == null) {
-					DeliaExceptionHelper.throwError("cannot-access-field-without-fetch", "field '%s' cannot be accessed because fetch() was not called", qff.funcName);
-				} else {
-					newList.addAll(drel.getFetchedItems());
-					QueryResponse newRes = new QueryResponse();
-					newRes.ok = true;
-					newRes.dvalList = newList;
-					ctx.scope.changeScope(newRes);  //new scope
-				}
+				DeliaExceptionHelper.throwError("let-unexpected-relation", "why this %s", fieldName);
 			} else {
 				//scalar
 				newList.add(dval);
@@ -99,4 +99,35 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		return qresp;
 	}
 
+	private DValue firstValueIsRelation(QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
+		String fieldName = qff.funcName;
+		DValue dval = qresp.dvalList.get(0);
+		DValue inner = dval.asStruct().getField(fieldName);
+		
+		if (inner != null && inner.getType().isRelationShape()) {
+			return inner;
+		}
+		return null;
+	}
+	
+	private QueryResponse doImplicitFetchIfNeeded(DValue firstRel, QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
+		if (firstRel != null && firstRel.getType().isRelationShape()) {
+			QueryFuncExp qfe = new QueryFuncExp(99, new IdentExp("fetch"), null, true);
+			qfe.argL.add(new StringExp(qff.funcName));
+			qresp = executeFunc(qresp, qfe, fnFactory, ctx);
+			
+			DRelation drel = firstRel.asRelation();
+			List<DValue> newList = new ArrayList<>();
+			newList.addAll(drel.getFetchedItems());
+			QueryResponse newRes = new QueryResponse();
+			newRes.ok = true;
+			newRes.dvalList = newList;
+			ctx.scope.changeScope(newRes);  //new scope
+			
+			qresp.dvalList = newList;
+			return qresp;
+		} else {
+			return qresp;
+		}
+	}
 }

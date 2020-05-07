@@ -82,7 +82,10 @@ public class LetSpanEngine extends ServiceBase {
 			
 			LetSpan possibleNewSpan = endsSpan(span, qfexp);
 			if (possibleNewSpan != null) {
-				spanL.add(span);
+				if (! span.qfeL.isEmpty()) {
+					spanL.add(span);
+				}
+				
 				span = possibleNewSpan;
 				span.qfeL.add(qfexp);
 			} else {
