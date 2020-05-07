@@ -19,6 +19,7 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test1Scalar() {
 		createScalarType("date", "");
+		beginSession();
 		
 		//primitive - implicit not supported. seen as string
 		
@@ -34,6 +35,7 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRulePass() {
 		createScalarType("date", "< date('1999')");
+		beginSession();
 		
 		//TODO: run all rules types - pos and neg tests
 		
@@ -48,7 +50,8 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRuleFail() {
 		createScalarType("date", "> date('1999')");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//primitive types - can't have rules
@@ -64,7 +67,8 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("date", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldDate(actualStr, actualDateVal);
@@ -78,7 +82,8 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructLet() {
 		createStructType("date", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldDate(actualStr, actualDateVal);
@@ -92,7 +97,8 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("date", "field1 > date('1999')");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -109,7 +115,8 @@ public class DateTests extends TypeLayerTestBase {
 	@Test
 	public void test5LetScalar() {
 		createScalarType("date", "");
-		
+		beginSession();
+
 		//X
 		chkDate(actualStr, "X", actualDateVal);
 		chkDate("null", "X",  null);
@@ -136,6 +143,8 @@ public class DateTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("date", "");
 		createStructType("date", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -155,6 +164,8 @@ public class DateTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("date", "");
 		createStructType("date", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -168,6 +179,8 @@ public class DateTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("date", "");
 		createStructType("date", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -182,6 +195,8 @@ public class DateTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("date", "");
 		createStructType("date", "");
+		beginSession();
+
 		do3Lets();
 
 		//C

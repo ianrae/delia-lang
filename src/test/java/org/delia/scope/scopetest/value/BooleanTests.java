@@ -13,7 +13,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test1Scalar() {
 		createScalarType("boolean", "");
-		
+		beginSession();
+
 		//string
 		chkBoolean(actualBooleanVal.toString(), actualBooleanVal);
 		chkBoolean("true", true);
@@ -34,7 +35,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRulePass() {
 		createScalarType("boolean", "== true");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//string
@@ -54,7 +56,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRuleFail() {
 		createScalarType("boolean", "== true");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//primitive types - can't have rules
@@ -73,7 +76,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("boolean", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldBoolean("true", true);
@@ -89,7 +93,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructLet() {
 		createStructType("boolean", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldBoolean("true", true);
@@ -103,7 +108,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("boolean", "field1 == true");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -120,7 +126,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	@Test
 	public void test5LetScalar() {
 		createScalarType("boolean", "");
-		
+		beginSession();
+
 		//boolean
 		chkBoolean("true", true);
 		chkBoolean("false", false);
@@ -155,6 +162,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("boolean", "");
 		createStructType("boolean", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -175,6 +184,8 @@ public class BooleanTests extends TypeLayerTestBase {
 	public void test6Insert2() {
 		createScalarType("boolean", "");
 		createStructType("boolean", "");
+		beginSession();
+
 		chkBoolean(actualBooleanVal.toString(), actualBooleanVal);
 
 		//C
@@ -189,6 +200,8 @@ public class BooleanTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("boolean", "");
 		createStructType("boolean", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -202,6 +215,8 @@ public class BooleanTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("boolean", "");
 		createStructType("boolean", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -216,6 +231,8 @@ public class BooleanTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("boolean", "");
 		createStructType("boolean", "");
+		beginSession();
+
 		do3Lets();
 
 		//C

@@ -26,7 +26,8 @@ public class BooleanOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("boolean optional", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldBoolean("true", true);
@@ -42,7 +43,8 @@ public class BooleanOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("boolean optional", "field1 == true");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -65,6 +67,8 @@ public class BooleanOptionalTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("boolean", "");
 		createStructType("boolean optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -87,6 +91,8 @@ public class BooleanOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("boolean", "");
 		createStructType("boolean optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -101,6 +107,8 @@ public class BooleanOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("boolean", "");
 		createStructType("boolean optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -115,6 +123,8 @@ public class BooleanOptionalTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("boolean", "");
 		createStructType("boolean optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C

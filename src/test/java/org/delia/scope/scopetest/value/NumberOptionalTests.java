@@ -30,7 +30,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("number optional", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldNumber("114.0", 114.0);
@@ -46,7 +47,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("number optional", "field1 < 10");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -69,6 +71,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("number", "");
 		createStructType("number optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -91,6 +95,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("number", "");
 		createStructType("number optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -105,6 +111,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("number", "");
 		createStructType("number optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -119,6 +127,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("number", "");
 		createStructType("number optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -143,6 +153,8 @@ public class NumberOptionalTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		chkNumber(actualNumberVal.toString(), actualNumberVal);
 
 		//C

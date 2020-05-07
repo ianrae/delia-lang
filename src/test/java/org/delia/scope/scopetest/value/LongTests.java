@@ -84,7 +84,7 @@ public class LongTests extends TypeLayerTestBase {
 
 		//C
 		typeNameToUse = "C";
-		chkFieldLong("11r4", 114L);
+		chkFieldLong("114", 114L);
 		chkFieldLong("0", 0L);
 		chkFieldInsertParseFail("null");
 

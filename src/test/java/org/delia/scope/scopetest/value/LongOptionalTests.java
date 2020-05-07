@@ -26,7 +26,8 @@ public class LongOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("long optional", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldLong("114", 114L);
@@ -42,7 +43,8 @@ public class LongOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("long optional", "field1 < 10");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -65,6 +67,8 @@ public class LongOptionalTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("long", "");
 		createStructType("long optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -87,6 +91,8 @@ public class LongOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("long", "");
 		createStructType("long optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -101,6 +107,8 @@ public class LongOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("long", "");
 		createStructType("long optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -115,6 +123,8 @@ public class LongOptionalTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("long", "");
 		createStructType("long optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C

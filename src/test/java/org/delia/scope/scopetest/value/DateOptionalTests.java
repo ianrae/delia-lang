@@ -31,7 +31,8 @@ public class DateOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("date optional", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldDate(actualStr, actualDateVal);
@@ -45,7 +46,8 @@ public class DateOptionalTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("date optional", "field1 > date('1999')");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -68,6 +70,8 @@ public class DateOptionalTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("date", "");
 		createStructType("date optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -88,6 +92,8 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("date", "");
 		createStructType("date optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -102,6 +108,8 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("date", "");
 		createStructType("date optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -116,6 +124,8 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("date", "");
 		createStructType("date optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C

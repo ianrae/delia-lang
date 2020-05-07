@@ -132,7 +132,7 @@ public class ScopeTestBase {
 	}
 	protected ResultValue execInsertFail(String src, int expectedErrorCount, String errId) {
 //		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.beginOrContinue(src, false);
+		ResultValue res = this.doExecCatchFail(src, false);
 		assertEquals(false, res.ok);
 		assertEquals(expectedErrorCount, res.errors.size());
 		//get last error
@@ -142,7 +142,7 @@ public class ScopeTestBase {
 	}
 	protected ResultValue execInsertFail2(String src, int expectedErrorCount, String errId, String errId2) {
 //		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.beginOrContinue(src, false);
+		ResultValue res = this.doExecCatchFail(src, false);
 		assertEquals(false, res.ok);
 		assertEquals(expectedErrorCount, res.errors.size());
 		//get first error
@@ -162,7 +162,7 @@ public class ScopeTestBase {
 	}
 	protected ResultValue execUpdateFail(String src, int expectedErrorCount, String errId) {
 //		UpdateStatementExp exp = chelper.chkUpdate(src, null);
-		ResultValue res = runner.beginOrContinue(src, false);
+		ResultValue res = this.doExecCatchFail(src, false);
 		assertEquals(false, res.ok);
 		assertEquals(expectedErrorCount, res.errors.size());
 		//get last error
@@ -178,7 +178,7 @@ public class ScopeTestBase {
 	}
 	protected ResultValue execDeleteFail(String src, int expectedErrorCount, String errId) {
 //		DeleteStatementExp exp = chelper.chkDelete(src, null);
-		ResultValue res = runner.beginOrContinue(src, false);
+		ResultValue res = this.doExecCatchFail(src, false);
 		assertEquals(false, res.ok);
 		assertEquals(expectedErrorCount, res.errors.size());
 		//get last error
