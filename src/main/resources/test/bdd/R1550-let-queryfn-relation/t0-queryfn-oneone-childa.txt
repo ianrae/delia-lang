@@ -17,14 +17,14 @@ given:
 when:
   let x = Customer[true].addr.id.max()
 then:
-ERROR:cannot-access-field-without-fetch
+value:a:int:100
 
 ---
 title: max with fetch
 given:
  insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.max()
+  let x = Customer[true].addr.id.max()
 then:
 value:a:int:100
 
@@ -34,7 +34,7 @@ title: min
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.min()
+  let x = Customer[true].addr.id.min()
 then:
 value:a:int:100
 
@@ -43,7 +43,7 @@ title: exists
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.exists()
+  let x = Customer[true].addr.id.exists()
 then:
 value:a:boolean:true
 
@@ -52,7 +52,7 @@ title: count
 given:
   insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.count()
+  let x = Customer[true].addr.id.count()
 then:
 value:a:long:1
 
@@ -61,7 +61,7 @@ title: first
 given:
  insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.first()
+  let x = Customer[true].addr.id.first()
 then:
 value:a:int:100
 
@@ -70,6 +70,6 @@ title: last
 given:
  insert Address {id:100, cust:55}
 when:
-  let x = Customer[true].fetch("addr").id.last()
+  let x = Customer[true].addr.id.last()
 then:
 value:a:int:100

@@ -136,7 +136,11 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 			
 			List<DValue> newList = new ArrayList<>();
 			for(DValue dval: qresp.dvalList) {
-				DRelation drel = dval.asStruct().getField(fieldName).asRelation();
+				DValue inner = dval.asStruct().getField(fieldName);
+				if (inner == null) {
+					continue;
+				}
+				DRelation drel = inner.asRelation();
 				newList.addAll(drel.getFetchedItems());
 			}
 			QueryResponse newRes = new QueryResponse();
