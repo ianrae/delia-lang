@@ -337,4 +337,8 @@ public class DeliaImpl implements Delia {
 	public DBInterface getDBInterface() {
 		return dbInterface;
 	}
+	//for internal use only - unit tests
+	public void setDbInterface(DBInterface dbInterface) {
+		this.dbInterface = dbInterface;
+	}
 }
