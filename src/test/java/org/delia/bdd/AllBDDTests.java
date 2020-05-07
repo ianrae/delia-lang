@@ -305,14 +305,14 @@ public class AllBDDTests extends NewBDDBase {
 //		runR1500File("t0-queryfn-last.txt", 2);
 //		runR1500File("t0-queryfn-ith.txt", 4);
 //		
-		runR1500File("t0-queryfn-min.txt", 0);
-//		runR1500File("t0-queryfn-min-int.txt", 4);
-//		runR1500File("t0-queryfn-min-long.txt", 4);
-//		runR1500File("t0-queryfn-min-number.txt", 4);
-//		runR1500File("t0-queryfn-min-bool.txt", 0);
-//		runR1500File("t0-queryfn-min-relation.txt", 0);
-//		runR1500File("t0-queryfn-min-string.txt", 4);
-//		
+//		runR1500File("t0-queryfn-min.txt", 0);
+		runR1500File("t0-queryfn-min-int.txt", 4);
+		runR1500File("t0-queryfn-min-long.txt", 4);
+		runR1500File("t0-queryfn-min-number.txt", 4);
+		runR1500File("t0-queryfn-min-bool.txt", 0);
+		runR1500File("t0-queryfn-min-relation.txt", 0);
+		runR1500File("t0-queryfn-min-string.txt", 4);
+		
 //		runR1500File("t0-queryfn-max.txt", 0);
 //		runR1500File("t0-queryfn-max-int.txt", 4);
 //		runR1500File("t0-queryfn-max-long.txt", 4);

@@ -104,6 +104,7 @@ public class LetSpanEngine extends ServiceBase {
 			QueryFieldExp qff = (QueryFieldExp) qfexp;
 			String fieldName = qff.funcName;
 			DType fieldType = DValueHelper.findFieldType(span.structType, fieldName);
+			DValueHelper.throwIfFieldNotExist("", fieldName, span.structType);
 			if (fieldType.isStructShape()) {
 				LetSpan newSpan = new LetSpan(fieldType);
 				return newSpan;

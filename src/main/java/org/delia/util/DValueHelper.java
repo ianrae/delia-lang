@@ -227,11 +227,16 @@ public class DValueHelper {
 	}
 
 	public static void throwIfFieldNotExist(String msgPrefix, String fieldName, DValue dval) {
-		if (dval == null || !dval.getType().isStructShape()) {
+		if (dval != null) {
+			throwIfFieldNotExist(msgPrefix, fieldName, dval.getType());
+		}
+	}
+	public static void throwIfFieldNotExist(String msgPrefix, String fieldName, DType dtype) {
+		if (dtype == null || !dtype.isStructShape()) {
 			return;
 		}
-		DStructType dtype = (DStructType) dval.getType();
-		if (! fieldExists(dtype, fieldName)) {
+		DStructType structType = (DStructType) dtype;
+		if (! fieldExists(structType, fieldName)) {
 			DeliaExceptionHelper.throwError("unknown-field", "%s - can't find field '%s' in type '%s'", msgPrefix, fieldName, dtype.getName());
 		}
 	}

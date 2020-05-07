@@ -19,8 +19,8 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 
 		public ZQueryResponseFunction create(String fnName, DTypeRegistry registry) {
 			switch(fnName) {
-//			case "min":
-//				return new MinFunction(registry);
+			case "min":
+				return new ZMinFunction(registry);
 //			case "max":
 //				return new MaxFunction(registry);
 			case "count":
