@@ -21,8 +21,8 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 			switch(fnName) {
 			case "min":
 				return new ZMinFunction(registry);
-//			case "max":
-//				return new MaxFunction(registry);
+			case "max":
+				return new ZMaxFunction(registry);
 			case "count":
 				return new ZCountFunction(registry);
 			case "distinct":
@@ -35,8 +35,8 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 				return new ZFKsFunction(registry, factorySvc.getConfigureService());
 			case "orderBy":
 				return new ZOrderByFunction(registry);
-//			case "limit":
-//				return new LimitFunction(registry);
+			case "limit":
+				return new ZLimitFunction(registry);
 			case "offset":
 				return new ZOffsetFunction(registry);
 			case "first":

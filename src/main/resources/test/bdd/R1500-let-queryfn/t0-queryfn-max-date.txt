@@ -1,0 +1,47 @@
+# queryfn tests
+
+FEATURE: queryfn-max-date
+background:
+  type Flight struct {id int unique, wid date optional }  end
+thenType: struct
+
+---
+title: max
+given:
+  insert Flight {id: 55, wid: 'bet' }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[true].wid.max()
+then:
+value:a:string:'bet'
+
+---
+title: max empty
+given:
+  insert Flight {id: 55, wid: 'bet' }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[id=100].wid.max()
+then:
+null
+
+---
+title: null
+#we ignore null values
+given:
+  insert Flight {id: 55 }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[true].wid.max()
+then:
+value:a:string:'bat'
+
+---
+title: bad field name
+given:
+  insert Flight {id: 55, wid: 'bet' }
+  insert Flight {id: 56, wid: 'bat' }
+when:
+  let x = Flight[true].zzz.max()
+then:
+ERROR: unknown-field
