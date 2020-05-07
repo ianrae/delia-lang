@@ -5,11 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.db.DBAccessContext;
 import org.delia.queryresponse.QueryFuncContext;
-import org.delia.queryresponse.QueryResponseFunctionBase;
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;

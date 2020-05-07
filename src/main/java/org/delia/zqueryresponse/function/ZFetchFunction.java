@@ -3,6 +3,7 @@ package org.delia.zqueryresponse.function;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
@@ -23,7 +24,6 @@ public class ZFetchFunction extends ZQueryResponseFunctionBase {
 
 	@Override
 	public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
-//		QueryFuncExp qfe = ctx.qfexp;
 		String targetFieldName = getStringArg(qfe, ctx); 
 
 		//find type of targetFieldName. Address

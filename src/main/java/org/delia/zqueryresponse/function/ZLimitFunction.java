@@ -2,6 +2,7 @@ package org.delia.zqueryresponse.function;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
@@ -16,7 +17,7 @@ public class ZLimitFunction extends ZOffsetFunction {
 	@Override
 	public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
 		List<DValue> dvalList = qresp.dvalList;
-		if (dvalList == null || dvalList.size() <= 1) {
+		if (CollectionUtils.isEmpty(dvalList)) {
 			return qresp; //nothing to sort
 		}
 		

@@ -289,7 +289,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
+//		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
@@ -297,11 +297,11 @@ public class AllBDDTests extends NewBDDBase {
 //		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 //		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 //		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		runR1550File("t0-queryfn-oneone-childa.txt", 7);
-//		runR1550File("t0-queryfn-onemany-parent.txt", 6);
-//		runR1550File("t0-queryfn-onemany-child.txt", 6);
-//		runR1550File("t0-queryfn-manymany-left.txt", 6);
-//		runR1550File("t0-queryfn-manymany-right.txt", 6);
+//		runR1550File("t0-queryfn-oneone-childa.txt", 7);
+		runR1550File("t0-queryfn-onemany-parent.txt", 6);
+		runR1550File("t0-queryfn-onemany-child.txt", 6);
+		runR1550File("t0-queryfn-manymany-left.txt", 6);
+		runR1550File("t0-queryfn-manymany-right.txt", 6);
 
 	}
 	

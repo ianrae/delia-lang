@@ -3,6 +3,7 @@ package org.delia.zqueryresponse;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
@@ -63,7 +64,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		String fieldName = qff.funcName;
 		log.log("qff: " + fieldName);
 		
-		if (qresp.dvalList == null || qresp.dvalList.size() <= 1) {
+		if (CollectionUtils.isEmpty(qresp.dvalList)) {
 			return qresp; //nothing to do
 		}
 
