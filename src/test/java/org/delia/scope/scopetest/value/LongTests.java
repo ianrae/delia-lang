@@ -2,8 +2,6 @@ package org.delia.scope.scopetest.value;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Date;
-
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DValue;

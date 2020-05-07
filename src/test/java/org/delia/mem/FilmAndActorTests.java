@@ -149,8 +149,6 @@ public class FilmAndActorTests  extends NewBDDBase {
 
 	@Before
 	public void init() {
-		//uncomment this to run these tests
-		DBTestHelper.throwIfNoSlowTests();
 	}
 	
 	@Override
