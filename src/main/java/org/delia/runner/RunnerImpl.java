@@ -39,7 +39,6 @@ import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.queryresponse.QueryFuncContext;
-import org.delia.queryresponse.function.QueryFuncOrFieldRunner;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.sprig.SprigVarEvaluator;
@@ -69,7 +68,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		protected DTypeRegistry registry;
 		private DBInterface dbInterface;
 		private DBExecutor dbexecutor;
-		private QueryFuncOrFieldRunner qffRunner;
+//		private QueryFuncOrFieldRunner qffRunner;
 		private LetSpanEngine letSpanEngine;
 		protected FetchRunner fetchRunner;
 		private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
@@ -162,7 +161,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExector(dbctx);
 			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
-			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
+//			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
 			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner, spanRunner);
 
@@ -538,16 +537,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-//			if (exp.varName.equals(DOLLAR_DOLLAR)) {
-//				ResultValue previousRes = varMap.get(DOLLAR_DOLLAR);
-//				if (previousRes == null) {
-//					DeliaError err = et.add("dollar-dollar-not-set", "There is no previous statement. Cannot use $$");
-//					throw new DeliaException(err);
-//				}
-//				res.copyFrom(previousRes);
-//				return res;
-//			}
-			
 			if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
 				return invokeUserFunc(exp, res);
 			}
@@ -615,11 +604,12 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		
 		private QueryContext buildQueryContext(QuerySpec spec) {
 			QueryFuncContext ctx = new QueryFuncContext();
-			this.qffRunner.buildPendingTrail(ctx, spec.queryExp);
+//			this.qffRunner.buildPendingTrail(ctx, spec.queryExp);
 			
 			QueryContext qtx = new QueryContext();
 			//TODO: fix buglet that is other fn contains 'fks' this won't work
-			qtx.loadFKs = ctx.pendingTrail.getTrail().contains("fks");
+//			qtx.loadFKs = ctx.pendingTrail.getTrail().contains("fks");
+			qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
 			if (!qtx.loadFKs) {
 				ConfigureService configSvc = factorySvc.getConfigureService();
 				qtx.loadFKs = configSvc.isPopulateFKsFlag();
@@ -709,14 +699,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 		
 		private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
-			boolean flag = true;
-			if (flag) {
+//			boolean flag = true;
+//			if (flag) {
 				QueryResponse qresp2 = this.letSpanEngine.process(queryExp, qresp);
 				return qresp2;
-			} else {
-				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
-				return qresp2;
-			}
+//			} else {
+//				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
+//				return qresp2;
+//			}
 		}
 		public void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
 			//extract fields or invoke fns (optional)

@@ -13,7 +13,7 @@ public class QueryFuncContext {
 	public int currentPgSize = Integer.MAX_VALUE; //all
 	public int currentOffset = 0;
 	public boolean offsetLimitDirtyFlag = true;
-	public StringTrail pendingTrail;
+//	public StringTrail pendingTrail = new StringTrail();
 	public FuncScope scope = null; 
 
 	public QueryFuncExp qfexp;

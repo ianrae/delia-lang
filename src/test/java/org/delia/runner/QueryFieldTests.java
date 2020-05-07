@@ -10,7 +10,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
-import org.delia.queryresponse.function.QueryFuncOrFieldRunner;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,14 +56,13 @@ public class QueryFieldTests extends RunnerTestBase {
 	
 	// --
 	//private Runner runner;
-	private QueryFuncOrFieldRunner qffRunner;
 	
 	@Before
 	public void init() {
 		initRunner();
 		FactoryService factorySvc = new FactoryServiceImpl(log, et);
 		FetchRunner fetchRunner = createFetchRunner();
-		qffRunner = new QueryFuncOrFieldRunner(factorySvc, runner.getRegistry(), fetchRunner, dbInterface.getCapabilities());
+//		qffRunner = new QueryFuncOrFieldRunner(factorySvc, runner.getRegistry(), fetchRunner, dbInterface.getCapabilities());
 	}
 	private FetchRunner createFetchRunner() {
 		DBAccessContext dbctx = new DBAccessContext(runner);

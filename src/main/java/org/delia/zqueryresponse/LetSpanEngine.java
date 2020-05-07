@@ -114,4 +114,16 @@ public class LetSpanEngine extends ServiceBase {
 		}
 		return null;
 	}
+
+	public boolean containsFKs(QueryExp queryExp) {
+		for(int i = 0; i < queryExp.qfelist.size(); i++) {
+			QueryFuncExp qfexp = queryExp.qfelist.get(i);
+			if (qfexp instanceof QueryFieldExp) {    
+			} else if (qfexp.funcName.equals("fks")) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }
