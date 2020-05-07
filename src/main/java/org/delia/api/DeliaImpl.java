@@ -297,10 +297,10 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ResultValue continueExecution(String src, DeliaSession dbsess) {
+	public ResultValue continueExecution(String src, DeliaSession session) {
 		DeliaCompiler compiler = createCompiler();
-		List<Exp> extL = compiler.parse(src);
-		for(Exp exp: extL) {
+		List<Exp> expL = compiler.parse(src);
+		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {
 				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
 				DeliaError err = new DeliaError("type-statement-not-allowed", msg, null);
@@ -308,9 +308,13 @@ public class DeliaImpl implements Delia {
 			}
 		}
 
-		Runner runner = createRunner(dbsess);
-		ResultValue res = doExecute(runner, extL);
-
+		Runner runner = createRunner(session);
+		ResultValue res = doExecute(runner, expL);
+		
+		if (session instanceof DeliaSessionImpl) {
+			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+			sessimpl.mostRecentContinueExpL = expL;
+		}
 		return res;
 	}
 

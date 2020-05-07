@@ -11,12 +11,15 @@ import java.util.TreeMap;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.api.Delia;
+import org.delia.api.DeliaSession;
+import org.delia.api.DeliaSessionImpl;
 import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
+import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
@@ -270,7 +273,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 	
 	public static class LetSpan {
 		public DStructType structType;
-		public List<QueryFuncExp> qfeL;
+		public List<QueryFuncExp> qfeL = new ArrayList<>();
 		public QueryResponse qresp;
 		
 		public LetSpan(DType dtype) {
@@ -293,6 +296,7 @@ public class LetSpanEngineTests extends NewBDDBase {
 			QueryResponse qresp = qrespInitial;
 			for(LetSpan span: spanL) {
 				span.qresp = qresp;
+				span.qfeL = adjustExecutionOrder(span);
 				qresp = executeSpan(span);
 			}
 			
@@ -305,22 +309,9 @@ public class LetSpanEngineTests extends NewBDDBase {
 			ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 			
 			QueryResponse qresp = span.qresp;
-			List<QueryFuncExp> alreadyDoneL = new ArrayList<>();
 			
-			//do orderby,offset,limit
-			for(int passNumber = 1; passNumber <= 3; passNumber++) {
-				List<QueryFuncExp> currentList = getPass(span, passNumber, fnFactory);
-				qresp = executeList(span, currentList, fnFactory);
-				alreadyDoneL.addAll(currentList);
-			}
-			
-			//pass 4. fields and other fns
 			for(int i = 0; i < span.qfeL.size(); i++) {
 				QueryFuncExp qfexp = span.qfeL.get(i);
-				if (alreadyDoneL.contains(qfexp)) {
-					continue;
-				}
-				
 				if (qfexp instanceof QueryFieldExp) {
 					qresp = processField(qfexp, qresp);
 				} else {
@@ -328,6 +319,29 @@ public class LetSpanEngineTests extends NewBDDBase {
 				}
 			}
 			return qresp;
+		}
+		
+		private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
+			FetchRunner fetchRunner = null;
+			ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
+			
+			List<QueryFuncExp> newL = new ArrayList<>();
+			
+			//do orderby,offset,limit
+			for(int passNumber = 1; passNumber <= 3; passNumber++) {
+				List<QueryFuncExp> currentList = getPass(span, passNumber, fnFactory);
+				newL.addAll(currentList);
+			}
+			
+			//pass 4. fields and other fns
+			for(int i = 0; i < span.qfeL.size(); i++) {
+				QueryFuncExp qfexp = span.qfeL.get(i);
+				if (newL.contains(qfexp)) {
+					continue;
+				}
+				newL.add(qfexp);
+			}
+			return newL;
 		}
 		
 		public QueryResponse processField(QueryFuncExp qff, QueryResponse qresp) {
@@ -362,17 +376,6 @@ public class LetSpanEngineTests extends NewBDDBase {
 				}
 			}
 			qresp.dvalList = newList;
-			return qresp;
-		}
-
-		private QueryResponse executeList(LetSpan span, List<QueryFuncExp> currentList, ZQueryResponseFunctionFactory fnFactory) {
-			QueryResponse qresp = span.qresp;
-			for(QueryFuncExp qfexp: currentList) {
-				if (qfexp instanceof QueryFieldExp) {
-				} else {
-					qresp = executeFunc(qresp, qfexp, fnFactory);
-				}
-			}
 			return qresp;
 		}
 
@@ -448,7 +451,28 @@ public class LetSpanEngineTests extends NewBDDBase {
 		Delia delia = dao.getDelia();
 		src = "let x = Flight[true].orderBy('field1')";
 		
-		ResultValue res = delia.continueExecution(src, dao.getMostRecentSession());
+		DeliaSession session = dao.getMostRecentSession();
+		ResultValue res = delia.continueExecution(src, session);
+		
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		LetStatementExp letStatement = findLet(sessimpl);
+		
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
+		
+		QueryExp queryExp = (QueryExp) letStatement.value;
+		QueryResponse qresp = (QueryResponse) res.val;
+		qresp = letEngine.process(queryExp, qresp);
+		
+	}
+
+	private LetStatementExp findLet(DeliaSession session) {
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		for(Exp exp: sessimpl.mostRecentContinueExpL) {
+			if (exp instanceof LetStatementExp) {
+				return (LetStatementExp) exp;
+			}
+		}
+		return null;
 	}
 
 
