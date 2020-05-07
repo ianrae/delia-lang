@@ -294,11 +294,7 @@ public class AllBDDTests extends NewBDDBase {
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-		runR1600File("t0-fetch.txt", 3);
-		runR1600File("t0-fetch-field.txt", 6);
-//		runR1600File("t0-fetch-fk.txt", 0);
-		runR1600File("t0-fetch-fks.txt", 4);
-//		runR1600File("t0-fetch-all.txt", 0);
+		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 
 	}
 	

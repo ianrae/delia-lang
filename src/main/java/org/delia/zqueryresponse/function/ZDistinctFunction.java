@@ -26,7 +26,7 @@ public class ZDistinctFunction extends ZQueryResponseFunctionBase {
 
 	@Override
 	public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
-		List<DValue> dvalList = ctx.getDValList(); //use scope
+		List<DValue> dvalList = qresp.dvalList;
 		if (dvalList == null || dvalList.size() <= 1) {
 			return qresp; //nothing to sort
 		}

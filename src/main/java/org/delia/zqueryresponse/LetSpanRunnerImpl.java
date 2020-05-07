@@ -108,7 +108,8 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		if (!span.startsWithScopeChange) {
 			return null;
 		}
-		
+		span.startsWithScopeChange = false;
+
 		DValue dval = qresp.dvalList.get(0);
 		if (dval == null) {
 			List<DValue> newList = new ArrayList<>();
@@ -126,14 +127,18 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 	}
 	
 	private QueryResponse doImplicitFetchIfNeeded(DValue firstRel, QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
+		String fieldName = qff.funcName;
+		
 		if (firstRel != null && firstRel.getType().isRelationShape()) {
 			QueryFuncExp qfe = new QueryFuncExp(99, new IdentExp("fetch"), null, true);
 			qfe.argL.add(new StringExp(qff.funcName));
 			qresp = executeFunc(qresp, qfe, fnFactory, ctx);
 			
-			DRelation drel = firstRel.asRelation();
 			List<DValue> newList = new ArrayList<>();
-			newList.addAll(drel.getFetchedItems());
+			for(DValue dval: qresp.dvalList) {
+				DRelation drel = dval.asStruct().getField(fieldName).asRelation();
+				newList.addAll(drel.getFetchedItems());
+			}
 			QueryResponse newRes = new QueryResponse();
 			newRes.ok = true;
 			newRes.dvalList = newList;
