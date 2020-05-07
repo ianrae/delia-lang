@@ -12,6 +12,7 @@ public class LetSpan {
 	public DStructType structType;
 	public List<QueryFuncExp> qfeL = new ArrayList<>();
 	public QueryResponse qresp;
+	public boolean startsWithScopeChange;
 	
 	public LetSpan(DType dtype) {
 		this.structType = (DStructType) dtype;

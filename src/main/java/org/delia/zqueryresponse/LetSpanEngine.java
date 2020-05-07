@@ -108,6 +108,7 @@ public class LetSpanEngine extends ServiceBase {
 			DValueHelper.throwIfFieldNotExist("", fieldName, span.structType);
 			if (fieldType.isStructShape()) {
 				LetSpan newSpan = new LetSpan(fieldType);
+				newSpan.startsWithScopeChange = true;
 				return newSpan;
 			}
 		}

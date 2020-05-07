@@ -15,8 +15,10 @@ import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DRelation;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
@@ -43,7 +45,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		for(int i = 0; i < span.qfeL.size(); i++) {
 			QueryFuncExp qfexp = span.qfeL.get(i);
 			if (qfexp instanceof QueryFieldExp) {
-				qresp = processField(qfexp, qresp, ctx);
+				qresp = processField(span, qfexp, qresp, ctx);
 			} else {
 				qresp = executeFunc(qresp, qfexp, fnFactory, ctx);
 			}
@@ -62,7 +64,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		return qresp;
 	}
 
-	private QueryResponse processField(QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
+	private QueryResponse processField(LetSpan span, QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
 		String fieldName = qff.funcName;
 		log.log("qff: " + fieldName);
 		
@@ -71,7 +73,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		}
 		
 		//span may start with a relation field (eg .addr)
-		DValue firstRel = firstValueIsRelation(qff, qresp, ctx);
+		DValue firstRel = firstValueIsRelation(span, qff, qresp, ctx);
 		if (firstRel != null) {
 			qresp = doImplicitFetchIfNeeded(firstRel, qff, qresp, ctx);
 			return qresp;
@@ -80,7 +82,9 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		List<DValue> newList = new ArrayList<>();
 		boolean checkFieldExists = true;
 		for(DValue dval: qresp.dvalList) {
-			if (dval.getType().isStructShape()) {
+			if (dval == null) {
+				newList.add(null);
+			} else if (dval.getType().isStructShape()) {
 				if (checkFieldExists) {
 					checkFieldExists = false;
 					DValueHelper.throwIfFieldNotExist("", fieldName, dval);
@@ -99,15 +103,26 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		return qresp;
 	}
 
-	private DValue firstValueIsRelation(QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
+	private DValue firstValueIsRelation(LetSpan span, QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
 		String fieldName = qff.funcName;
-		DValue dval = qresp.dvalList.get(0);
-		DValue inner = dval.asStruct().getField(fieldName);
-		
-		if (inner != null && inner.getType().isRelationShape()) {
-			return inner;
+		if (!span.startsWithScopeChange) {
+			return null;
 		}
-		return null;
+		
+		DValue dval = qresp.dvalList.get(0);
+		if (dval == null) {
+			List<DValue> newList = new ArrayList<>();
+			QueryResponse newRes = new QueryResponse();
+			newRes.ok = true;
+			newRes.dvalList = newList;
+			ctx.scope.changeScope(newRes);  //new scope (empty)
+			
+			qresp.dvalList = newList;
+			return null;
+		}
+		
+		DValue inner = dval.asStruct().getField(fieldName); 
+		return inner;
 	}
 	
 	private QueryResponse doImplicitFetchIfNeeded(DValue firstRel, QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
