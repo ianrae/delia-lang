@@ -110,12 +110,31 @@ public class ScopeTestBase {
 		System.out.println(s);
 	}
 	
+	protected String basePendingSrc = "";
 	protected ResultValue execTypeStatement(String src) {
 //		TypeStatementExp exp0 = chkType(src, null);
-		ResultValue res = runner.beginOrContinue(src, true);
+		basePendingSrc += " " + src;
+//		ResultValue res = runner.beginOrContinue(src, true);
+		ResultValue res = new ResultValue();
+		res.ok = true;
 		chkResOK(res);
 		return res;
 	}
+	protected void baseBeginSession() {
+		baseBeginSession(true);
+	}
+	protected void baseBeginSession(boolean shouldPass) {
+		boolean ok = false;
+		try {
+			this.runner.begin(basePendingSrc);
+			ok = true;
+		} catch (DeliaException e) {
+			log.log(e.getMessage());
+		}
+		assertEquals(shouldPass, ok);
+	}
+
+	
 	protected DeliaError getLastError(ResultValue res) {
 		DeliaError err = res.errors.get(res.errors.size() - 1);
 		return err;
