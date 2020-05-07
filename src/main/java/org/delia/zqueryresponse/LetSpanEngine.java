@@ -18,11 +18,16 @@ import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
 public class LetSpanEngine extends ServiceBase {
 	private DTypeRegistry registry;
 	private LetSpanRunner runner;
+	private ZQueryResponseFunctionFactory fnFactory;
 
 	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry, LetSpanRunner runner) {
 		super(factorySvc);
 		this.registry = registry;
 		this.runner = runner;
+		
+		FetchRunner fetchRunner = null;  //TODO: fix
+
+		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 	}
 	
 	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial) {
@@ -41,7 +46,6 @@ public class LetSpanEngine extends ServiceBase {
 	
 	private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
 		FetchRunner fetchRunner = null;
-		ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 		
 		List<QueryFuncExp> newL = new ArrayList<>();
 		
@@ -82,6 +86,7 @@ public class LetSpanEngine extends ServiceBase {
 			if (possibleNewSpan != null) {
 				spanL.add(span);
 				span = possibleNewSpan;
+				span.qfeL.add(qfexp);
 			} else {
 				span.qfeL.add(qfexp);
 			}

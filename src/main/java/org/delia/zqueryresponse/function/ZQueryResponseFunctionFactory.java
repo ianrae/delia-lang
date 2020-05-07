@@ -31,8 +31,8 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 //				return new ExistsFunction(registry);
 //			case "fetch":
 //				return new FetchFunction(registry, fetchRunner);
-//			case "fks":
-//				return new FKsFunction(registry, factorySvc.getConfigureService());
+			case "fks":
+				return new ZFKsFunction(registry, factorySvc.getConfigureService());
 			case "orderBy":
 				return new ZOrderByFunction(registry);
 //			case "limit":
@@ -55,7 +55,7 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 		}
 
 		public boolean isPassFunction(int passNumber, String fnName) {
-			String[] arPass1Fn = { "orderBy", "distinct"};
+			String[] arPass1Fn = { "orderBy"};
 			String[] arPass2Fn = { "offset" };
 			String[] arPass3Fn = { "limit" };
 			
