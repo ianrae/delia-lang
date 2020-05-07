@@ -1,5 +1,6 @@
 package org.delia.zqueryresponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -11,6 +12,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFunction {
 
@@ -44,6 +46,38 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 			}
 			DValue dval = dvalList.get(0);
 			DValueHelper.throwIfFieldNotExist(fnName, fieldName, dval);
+		}
+		
+		protected void setSingletonResult(QueryResponse qresp, DValue dval) {
+			qresp.dvalList = new ArrayList<>();
+			qresp.dvalList.add(dval);
+			//TODO: should we create a new qresp obj??
+		}
+		
+		protected DValue buildIntVal(int max) {
+			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
+			DValue dval = builder.buildInt(max);
+			return dval;
+		}
+		protected DValue buildLongVal(long max) {
+			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
+			DValue dval = builder.buildLong(max);
+			return dval;
+		}
+		protected DValue buildNumberVal(double max) {
+			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
+			DValue dval = builder.buildNumber(max);
+			return dval;
+		}
+		protected DValue buildBoolVal(boolean b) {
+			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
+			DValue dval = builder.buildBoolean(b);
+			return dval;
+		}
+		protected DValue buildStringVal(String s) {
+			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
+			DValue dval = builder.buildString(s);
+			return dval;
 		}
 		
 	}

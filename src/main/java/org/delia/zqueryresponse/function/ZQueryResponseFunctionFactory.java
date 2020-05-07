@@ -23,12 +23,12 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 //				return new MinFunction(registry);
 //			case "max":
 //				return new MaxFunction(registry);
-//			case "count":
-//				return new CountFunction(registry);
+			case "count":
+				return new ZCountFunction(registry);
 			case "distinct":
 				return new ZDistinctFunction(registry);
-//			case "exist":
-//				return new ExistsFunction(registry);
+			case "exists":
+				return new ZExistsFunction(registry);
 //			case "fetch":
 //				return new FetchFunction(registry, fetchRunner);
 			case "fks":
