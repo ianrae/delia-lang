@@ -27,10 +27,10 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.queryresponse.QueryFuncContext;
-import org.delia.queryresponse.QueryResponseFunctionBase;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -244,9 +244,25 @@ public class LetSpanEngineTests extends NewBDDBase {
 			}
 		}
 
-		public boolean isPass1Function(String fnName) {
-			String[] arPass1Fn = { "orderBy", "limit", "offset" };
-			List<String> list = Arrays.asList(arPass1Fn);
+		public boolean isPassFunction(int passNumber, String fnName) {
+			String[] arPass1Fn = { "orderBy"};
+			String[] arPass2Fn = { "offset" };
+			String[] arPass3Fn = { "limit" };
+			
+			List<String> list = null;
+			switch(passNumber) {
+			case 1:
+				list = Arrays.asList(arPass1Fn);
+				break;
+			case 2:
+				list = Arrays.asList(arPass2Fn);
+				break;
+			case 3:
+				list = Arrays.asList(arPass3Fn);
+				break;
+			default:
+				break;
+			}
 			return list.contains(fnName);
 		}
 	}	
@@ -263,15 +279,12 @@ public class LetSpanEngineTests extends NewBDDBase {
 	}
 
 	public static class LetSpanEngine extends ServiceBase {
-
 		private DTypeRegistry registry;
-
 
 		public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
 			this.registry = registry;
 		}
-
 		
 		public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial) {
 			List<LetSpan> spanL = buildSpans(queryExp);
@@ -292,25 +305,98 @@ public class LetSpanEngineTests extends NewBDDBase {
 			ZQueryResponseFunctionFactory fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
 			
 			QueryResponse qresp = span.qresp;
+			List<QueryFuncExp> alreadyDoneL = new ArrayList<>();
+			
+			//do orderby,offset,limit
+			for(int passNumber = 1; passNumber <= 3; passNumber++) {
+				List<QueryFuncExp> currentList = getPass(span, passNumber, fnFactory);
+				qresp = executeList(span, currentList, fnFactory);
+				alreadyDoneL.addAll(currentList);
+			}
+			
+			//pass 4. fields and other fns
 			for(int i = 0; i < span.qfeL.size(); i++) {
 				QueryFuncExp qfexp = span.qfeL.get(i);
+				if (alreadyDoneL.contains(qfexp)) {
+					continue;
+				}
+				
 				if (qfexp instanceof QueryFieldExp) {
+					qresp = processField(qfexp, qresp);
 				} else {
-					String fnName = qfexp.funcName;
-					log.log("qfn: " + fnName);
-					if (fnFactory.isPass1Function(fnName)) {
-						ZQueryResponseFunction func = fnFactory.create(fnName, registry);
-						if (func == null) {
-							DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
-						} else {
-							QueryFuncContext ctx = new QueryFuncContext();
-							qresp = func.process(qfexp, qresp, ctx);
-						}
-
-					}
+					qresp = executeFunc(qresp, qfexp, fnFactory);
 				}
 			}
 			return qresp;
+		}
+		
+		public QueryResponse processField(QueryFuncExp qff, QueryResponse qresp) {
+			String fieldName = qff.funcName;
+			log.log("qff: " + fieldName);
+			
+			if (qresp.dvalList == null || qresp.dvalList.size() <= 1) {
+				return qresp; //nothing to do
+			}
+
+			List<DValue> newList = new ArrayList<>();
+			boolean checkFieldExists = true;
+			for(DValue dval: qresp.dvalList) {
+				if (dval.getType().isStructShape()) {
+					if (checkFieldExists) {
+						checkFieldExists = false;
+						DValueHelper.throwIfFieldNotExist("", fieldName, dval);
+					}
+
+					DValue inner = dval.asStruct().getField(qff.funcName);
+					newList.add(inner);
+				} else if (dval.getType().isRelationShape()) {
+					DRelation drel = dval.asRelation();
+					if (drel.getFetchedItems() == null) {
+						DeliaExceptionHelper.throwError("cannot-access-field-without-fetch", "field '%s' cannot be accessed because fetch() was not called", qff.funcName);
+					} else {
+						newList.addAll(drel.getFetchedItems());
+					}
+				} else {
+					//scalar
+					newList.add(dval);
+				}
+			}
+			qresp.dvalList = newList;
+			return qresp;
+		}
+
+		private QueryResponse executeList(LetSpan span, List<QueryFuncExp> currentList, ZQueryResponseFunctionFactory fnFactory) {
+			QueryResponse qresp = span.qresp;
+			for(QueryFuncExp qfexp: currentList) {
+				if (qfexp instanceof QueryFieldExp) {
+				} else {
+					qresp = executeFunc(qresp, qfexp, fnFactory);
+				}
+			}
+			return qresp;
+		}
+
+		private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory) {
+			String fnName = qfexp.funcName;
+			log.log("qfn: " + fnName);
+			ZQueryResponseFunction func = fnFactory.create(fnName, registry);
+			if (func == null) {
+				DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
+			} else {
+				QueryFuncContext ctx = new QueryFuncContext();
+				qresp = func.process(qfexp, qresp, ctx);
+			}
+			return qresp;
+		}
+
+		private List<QueryFuncExp> getPass(LetSpan span, int passNum, ZQueryResponseFunctionFactory fnFactory) {
+			List<QueryFuncExp> list = new ArrayList<>();
+			for(QueryFuncExp qfe: span.qfeL) {
+				if (fnFactory.isPassFunction(passNum, qfe.funcName)) {
+					list.add(qfe);
+				}
+			}
+			return list;
 		}
 
 
@@ -360,6 +446,8 @@ public class LetSpanEngineTests extends NewBDDBase {
 		assertEquals(true, b);
 
 		Delia delia = dao.getDelia();
+		src = "let x = Flight[true].orderBy('field1')";
+		
 		ResultValue res = delia.continueExecution(src, dao.getMostRecentSession());
 	}
 
