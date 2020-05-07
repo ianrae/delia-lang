@@ -144,6 +144,8 @@ public class InsertTests extends ScopeTestBase {
 	private void createFlightType(String type, String modifier) {
 		String src = String.format("type Flight struct {field1 %s %s} end", type, modifier);
 		this.execTypeStatement(src);
+		baseBeginSession();
+
 	}
 	private DValue insertAndQueryEx(String valStr, boolean expectNull, int expectedSize) {
 		QueryResponse qresp= insertAndQuery(valStr, expectedSize);
