@@ -21,12 +21,22 @@ public class ExistsFunction extends QueryResponseFunctionBase {
 			return qresp; //db already did it 
 		}
 		
-		boolean b = !isEmpty(ctx);
+		boolean b = !isEmpty(qresp);
 		DValue dval = buildBoolVal(b);
 		setSingletonResult(qresp, dval);
 		return qresp; 
 	}
 	
+	private boolean isEmpty(QueryResponse qresp) {
+		List<DValue> dvalList = qresp.dvalList;
+		
+		if (CollectionUtils.isEmpty(dvalList)) {
+			return true;
+		}
+		//TODO: we need to concern ourselves with null values??
+		return false;
+	}
+
 	private boolean isEmpty(QueryFuncContext ctx) {
 		List<DValue> dvalList = ctx.getDValList();
 		

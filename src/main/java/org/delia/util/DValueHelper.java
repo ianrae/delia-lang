@@ -200,7 +200,7 @@ public class DValueHelper {
 		DValueImpl clone;
 		if (inner.getObject() instanceof DRelation) {
 			DRelation rel = (DRelation) inner.getObject();
-			DRelation copy = new DRelation(rel.getTypeName(), rel.getForeignKey());
+			DRelation copy = new DRelation(rel.getTypeName(), rel.getMultipleKeys());
 			clone = new DValueImpl(inner.getType(), copy);
 		} else {
 			Object obj = inner.getObject();

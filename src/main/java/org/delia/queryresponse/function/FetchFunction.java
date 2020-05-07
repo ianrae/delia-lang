@@ -70,10 +70,8 @@ public class FetchFunction extends QueryResponseFunctionBase {
 		newRes.dvalList = newScopeList;
 		ctx.scope.changeScope(newRes);
 		
-		//for now fetch just loads fetches values into the drel
-		//return the original QueryResponse
-		//TODO: later need to implement new scope after a fetch
-//		return qresResult;
+		//fetches changes the list. it's not just a hint to load sub-objects
+		qresp.dvalList = newScopeList;
 		return qresp;
 	}
 

@@ -105,6 +105,15 @@ public class FilmAndActor2Tests  extends NewBDDBase {
 		for(DValue dval: res.getAsDValueList()) {
 			dumpDVal("A3 ", session, dval);
 		}
+		
+		//let x = Film[releaseDate='2019'].actors.orderBy('oscarsWon").limit(10).distinct()
+		log.log("and now distinct3...");
+		query = "Film[true].fetch('actors').orderBy('lastName').limit(3)";
+		res = session.getDelia().continueExecution(query, session);
+		for(DValue dval: res.getAsDValueList()) {
+			dumpDVal("A3 ", session, dval);
+		}
+
 	}
 	
 	private String dumpDVal(String title, DeliaSession session, DValue dval) {

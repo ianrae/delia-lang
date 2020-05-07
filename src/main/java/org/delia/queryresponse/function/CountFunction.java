@@ -21,7 +21,8 @@ public class CountFunction extends QueryResponseFunctionBase {
 			return qresp; //db already did it 
 		}
 		
-		List<DValue> dvalList = ctx.getDValList();
+//		List<DValue> dvalList = ctx.getDValList();
+		List<DValue> dvalList = qresp.dvalList;
 		if (CollectionUtils.isEmpty(dvalList)) {
 			DValue dval = buildLongVal(0);
 			setSingletonResult(qresp, dval);
