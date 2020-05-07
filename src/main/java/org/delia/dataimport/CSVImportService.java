@@ -15,6 +15,8 @@ import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 
+import sun.rmi.runtime.Log;
+
 public class CSVImportService  {
 	
 	public static class Options {

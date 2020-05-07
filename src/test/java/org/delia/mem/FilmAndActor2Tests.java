@@ -26,11 +26,11 @@ import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FilmAndActorTests  extends NewBDDBase {
+public class FilmAndActor2Tests  extends NewBDDBase {
 	
 	@Test
 	public void testTool() {
-		String srcPath = IMPORT_DIR + "film-and-actor.txt";
+		String srcPath = IMPORT_DIR + "film-and-actor2.txt";
 		TextFileReader reader = new TextFileReader();
 		String deliaSrc = reader.readFileAsSingleString(srcPath);
 		
@@ -66,7 +66,7 @@ public class FilmAndActorTests  extends NewBDDBase {
 		gspec.typeName = "Actor";
 		groupList.add(gspec);
 		
-		String srcPath = IMPORT_DIR + "film-and-actor.txt";
+		String srcPath = IMPORT_DIR + "film-and-actor2.txt";
 		TextFileReader reader = new TextFileReader();
 		String deliaSrc = reader.readFileAsSingleString(srcPath);
 		
@@ -123,7 +123,7 @@ public class FilmAndActorTests  extends NewBDDBase {
 	public void testVia() {
 		String csvPath = BASE_DIR + "actor-film.csv";
 		
-		String srcPath = IMPORT_DIR + "film-and-actor.txt";
+		String srcPath = IMPORT_DIR + "film-and-actor2.txt";
 		TextFileReader reader = new TextFileReader();
 		String deliaSrc = reader.readFileAsSingleString(srcPath);
 		
@@ -144,7 +144,7 @@ public class FilmAndActorTests  extends NewBDDBase {
 		return delia;
 	}
 	// --
-	private final String BASE_DIR = "src/main/resources/test/film/";
+	private final String BASE_DIR = "src/main/resources/test/film2/";
 	public final String IMPORT_DIR = "src/main/resources/test/import/";
 
 	@Before
