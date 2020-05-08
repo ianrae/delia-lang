@@ -1,4 +1,4 @@
-package org.delia.mem;
+package org.delia.db.hls;
 
 
 import static org.junit.Assert.assertEquals;
@@ -272,6 +272,14 @@ public class HLSTests extends NewBDDBase {
 				return hlstatement;
 			}
 			
+			//for some reason Customer[55].addr puts addr in span1.
+			if (spanL.size() == 1) {
+				LetSpan span1 = fixup(spanL.get(0));
+				if (span1 != null) {
+					spanL.add(0, span1); //insert as new first span
+				}
+			}
+			
 			int i = 0;
 			for(LetSpan span: spanL) {
 				HLSQuerySpan hsltat = generateSpan(i, span);
@@ -281,6 +289,26 @@ public class HLSTests extends NewBDDBase {
 			return hlstatement;
 		}
 		
+
+		public LetSpan fixup(LetSpan span) {
+			HLSQuerySpan hlstat = new HLSQuerySpan();
+			hlstat.fromType = determineFromType(0);
+			hlstat.mtEl = new MTElement(hlstat.fromType);
+			hlstat.resultType = determineResultType(0);
+			hlstat.filEl = null;
+			
+			TypePair rfieldPair = findLastRField(0);
+			if (rfieldPair != null) {
+				LetSpan span1 = new LetSpan(mainStructType);
+				QueryFuncExp rqfe = findRFieldQFE(span, mainStructType);
+//				span.qfeL.remove(rqfe);
+//				span1.qfeL.add(rqfe);
+				span1.qresp = span.qresp;
+//				span.startsWithScopeChange = true;
+				return span1;
+			}
+			return null;
+		}		
 		
 		public HLSQuerySpan generateSpan(int i, LetSpan span) {
 			HLSQuerySpan hlstat = new HLSQuerySpan();
@@ -553,6 +581,18 @@ public class HLSTests extends NewBDDBase {
 			}
 			return null;
 		}
+		private QueryFuncExp findRFieldQFE(LetSpan span, DStructType currentType) {
+			for(QueryFuncExp qfe: span.qfeL) {
+				if (qfe instanceof QueryFieldExp) {
+					String fieldName = qfe.funcName;
+					TypePair pair = DValueHelper.findField(currentType, fieldName);
+					if (pair != null && pair.type.isStructShape()) {
+						return qfe;
+					}
+				}
+			}
+			return null;
+		}
 		
 
 		
@@ -597,9 +637,7 @@ public class HLSTests extends NewBDDBase {
 	@Test
 	public void testOneRelation() {
 		useCustomerSrc = true;
-		chk("let x = Customer[true].addr", "{Address->Address,MT:Address,[true],R:addr,()}");
-		
-		
+		chk("let x = Customer[true].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
 		
 		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
 		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
@@ -611,6 +649,14 @@ public class HLSTests extends NewBDDBase {
 		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
 		
 		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
+		
+		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
+		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
+		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
+		
+		chk("let x = Customer[true].addr.orderBy('id')", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),OLO:id,null,null}");
+		chk("let x = Customer[true].orderBy('id').addr", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,()}");
+		chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
 	}
 	
 	
@@ -621,9 +667,11 @@ public class HLSTests extends NewBDDBase {
 		useCustomerSrc = true;
 //		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
 //		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
-//		chk("let x = Customer[true].addr.fks()", "{Address->Address,MT:Address,[true],R:addr,(),SUB:true}");
-		chk("let x = Customer[true].fks().addr", "{Address->Address,MT:Address,[true],R:addr,(),SUB:true}");
+		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
+//		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
+//		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
 		
+		chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
 	}
 	
 
