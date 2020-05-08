@@ -65,6 +65,7 @@ public class ScopeTestBase {
 
 	protected DValue runIt(String type, String valStr) {
 //		Runner runner = initRunner();
+		runner.begin("");
 		DValue dval = (DValue) runScalarLet(runner, valStr, type);
 		chkValid(dval);
 		return dval;

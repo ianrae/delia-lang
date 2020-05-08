@@ -15,7 +15,8 @@ public class ScalarTypeDefinitionTests extends ScopeTestBase {
 	}
 	@Test(expected=DeliaException.class)
 	public void testReservedWordFail() {
-		createScalarSomeType("int", "int"); 
+		createScalarSomeTypeRaw("int", "int"); 
+		this.runner.begin(basePendingSrc);
 	}
 	
 	@Test
@@ -42,9 +43,15 @@ public class ScalarTypeDefinitionTests extends ScopeTestBase {
 	private void createScalarSomeType(String type, String baseType) {
 		String src = String.format("type %s %s end", type, baseType);
 		this.execTypeStatement(src);
+		baseBeginSession();
+	}
+	private void createScalarSomeTypeRaw(String type, String baseType) {
+		String src = String.format("type %s %s end", type, baseType);
+		this.execTypeStatement(src);
 	}
 	private void createGradeType(String type) {
 		String src = String.format("type Grade %s end", type);
 		this.execTypeStatement(src);
+		baseBeginSession();
 	}
 }

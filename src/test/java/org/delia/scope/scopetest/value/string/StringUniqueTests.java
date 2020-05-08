@@ -15,6 +15,7 @@ public class StringUniqueTests extends StringTestBase {
 	public void test6Insert() {
 		createScalarType("string", "");
 		createStructType("string unique", "");
+		beginSession();
 
 		//C
 		typeNameToUse = "C";
@@ -25,6 +26,8 @@ public class StringUniqueTests extends StringTestBase {
 	public void test6InsertFail() {
 		createScalarType("string", "");
 		createStructType("string unique", "");
+		beginSession();
+
 		deleteBeforeInsertFlag = false;
 		//C
 		typeNameToUse = "C";
@@ -37,6 +40,7 @@ public class StringUniqueTests extends StringTestBase {
 		addIdFlag = true;
 		createScalarType("string", "");
 		createStructType("string unique", "");
+		beginSession();
 		deleteBeforeInsertFlag = false;
 
 		//C

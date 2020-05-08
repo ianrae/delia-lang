@@ -36,7 +36,7 @@ public class LetSpanEngine extends ServiceBase {
 			return qrespInitial;
 		}
 		
-		DValue dval = qrespInitial.getOne();
+		DValue dval = qrespInitial.dvalList.get(0);
 		DType dtype = dval.getType();
 		List<LetSpan> spanL = buildSpans(queryExp, dtype);
 		

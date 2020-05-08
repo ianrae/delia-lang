@@ -1,5 +1,7 @@
 package org.delia.runner;
 
+import static org.junit.Assert.assertEquals;
+
 import org.delia.base.DBHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.compiler.ast.DeleteStatementExp;
@@ -9,7 +11,9 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
+import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -23,23 +27,20 @@ public class RunnerTestBase {
 	
 	// --
 	//private Runner runner;
-	protected MemDBInterface dbInterface;
+	protected DBInterface dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper;
-	protected Runner runner;
+	protected NewLegacyRunner runner;
 	protected Log log;
 	protected ErrorTracker et;
 	protected FactoryService factorySvc = new FactoryServiceImpl(log, et);
 	
-	protected Runner initRunner()  {
+	protected NewLegacyRunner initRunner()  {
 		log = new UnitTestLog();
 		et = new SimpleErrorTracker(log);
-		dbInterface = new MemDBInterface();
-		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 		
-		factorySvc = new FactoryServiceImpl(log, et);
-		runner = helper.create(factorySvc, dbInterface);
-		chelper = helper.createCompilerHelper();
+		runner = new NewLegacyRunner(log);
+		dbInterface = runner.getDelia().getDBInterface();
 		return runner;
 	}
 	
@@ -74,14 +75,25 @@ public class RunnerTestBase {
 		return chelper.chkUpdate(input, output);
 	}
 	
-	protected Runner createBasicActorType() {
+	protected NewLegacyRunner createBasicActorType() {
 		String src = String.format("type Actor struct {id int unique, firstName string} end");
-		TypeStatementExp exp0 = chelper.chkType(src, null);
-		ResultValue res = runner.executeOneStatement(exp0);
-		chkResOK(res);
+//		TypeStatementExp exp0 = chelper.chkType(src, null);
+		 runner.begin(src);
 		
 		DBHelper.createTable(dbInterface, "Actor"); //!! fake schema
 		return runner;
 	}
-	
+	protected ResultValue doExecCatchFail(String src, boolean shouldPass) {
+		ResultValue res;
+		try {
+			res = runner.beginOrContinue(src, false);
+		} catch (DeliaException e) {
+			res = new ResultValue();
+			res.ok = false;
+			res.errors.add(e.getLastError());
+		}
+		assertEquals(shouldPass, res.ok);
+		return res;
+	}
+
 }

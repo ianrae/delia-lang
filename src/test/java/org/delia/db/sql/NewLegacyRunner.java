@@ -89,5 +89,10 @@ public class NewLegacyRunner {
 		Runner runner = deliaimpl.getMostRecentRunner();
 		return runner.createGenerator();
 	}
+	public Runner getDeliaRunner() {
+		DeliaImpl deliaimpl = (DeliaImpl) delia;
+		Runner runner = deliaimpl.getMostRecentRunner();
+		return runner;
+	}
 
 }

@@ -10,6 +10,7 @@ public class IntegerUniqueTests extends IntegerTestBase {
 	public void test6Insert() {
 		createScalarType("int", "");
 		createStructType("int unique", "");
+		beginSession();
 
 		//C
 		typeNameToUse = "C";
@@ -20,6 +21,8 @@ public class IntegerUniqueTests extends IntegerTestBase {
 	public void test6InsertFail() {
 		createScalarType("int", "");
 		createStructType("int unique", "");
+		beginSession();
+
 		deleteBeforeInsertFlag = false;
 		//C
 		typeNameToUse = "C";
@@ -32,6 +35,8 @@ public class IntegerUniqueTests extends IntegerTestBase {
 		addIdFlag = true;
 		createScalarType("int", "");
 		createStructType("int unique", "");
+		beginSession();
+
 		deleteBeforeInsertFlag = false;
 
 		//C
