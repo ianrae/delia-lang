@@ -20,9 +20,9 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 		public ZQueryResponseFunction create(String fnName, DTypeRegistry registry) {
 			switch(fnName) {
 			case "min":
-				return new ZMinFunction(registry);
+				return new ZMinFunction(factorySvc, registry);
 			case "max":
-				return new ZMaxFunction(registry);
+				return new ZMaxFunction(factorySvc, registry);
 			case "count":
 				return new ZCountFunction(registry);
 			case "distinct":

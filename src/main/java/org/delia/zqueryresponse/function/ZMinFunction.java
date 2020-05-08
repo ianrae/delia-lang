@@ -1,10 +1,12 @@
 package org.delia.zqueryresponse.function;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
+import org.delia.core.FactoryService;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
@@ -14,8 +16,11 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.zqueryresponse.ZQueryResponseFunctionBase;
 
 public class ZMinFunction extends ZQueryResponseFunctionBase {
-	public ZMinFunction(DTypeRegistry registry) {
+	private FactoryService factorySvc;
+
+	public ZMinFunction(FactoryService factorySvc, DTypeRegistry registry) {
 		super(registry);
+		this.factorySvc = factorySvc;
 	}
 
 	@Override
@@ -40,6 +45,8 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 			return processNumber(qresp, dvalList);
 		case STRING:
 			return processString(qresp, dvalList);
+		case DATE:
+			return processDate(qresp, dvalList);
 		default:
 			DeliaExceptionHelper.throwError("unsupported-min-type", "min() doesn't support type '%s'", shape);
 		}
@@ -110,6 +117,25 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 		}
 		
 		DValue dval = buildStringVal(min);
+		setSingletonResult(qresp, dval);
+		return qresp;
+	}
+	private QueryResponse processDate(QueryResponse qresp, List<DValue> dvalList) {
+		Date min = new Date(Long.MAX_VALUE); //max possible string
+		for(DValue dval: dvalList) {
+			if (dval == null) {
+				continue;
+			}
+			Date k = dval.asDate();
+			
+			if (min == null) {
+				min = k;
+			} else if (k.compareTo(min) < 0) {
+				min = k;
+			}
+		}
+		
+		DValue dval = buildDateVal(min, factorySvc);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}

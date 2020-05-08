@@ -165,7 +165,9 @@ public class AllBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-min-bool.txt", 0);
 		runR1500File("t0-queryfn-min-relation.txt", 0);
 		runR1500File("t0-queryfn-min-string.txt", 4);
-		
+		runR1500File("t0-queryfn-min-date.txt", 4);
+		runR1500File("t0-queryfn-max-date.txt", 4);
+
 		runR1500File("t0-queryfn-max.txt", 0);
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
@@ -290,13 +292,14 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 0;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
 //		runR1550File("t0-queryfn-oneone-childa.txt", 7);
-		runR1500File("t0-queryfn-orderby-2span.txt", 2);
+		runR1500File("t0-queryfn-max-date.txt", 4);
+		runR1500File("t0-queryfn-min-date.txt", 4);
 
 	}
 	

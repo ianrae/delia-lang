@@ -8,18 +8,18 @@ thenType: struct
 ---
 title: max
 given:
-  insert Flight {id: 55, wid: 'bet' }
-  insert Flight {id: 56, wid: 'bat' }
+  insert Flight {id: 55, wid: '2018' }
+  insert Flight {id: 56, wid: '2015' }
 when:
   let x = Flight[true].wid.max()
 then:
-value:a:string:'bet'
+value:a:date:2018-01-01T00:00:00.000+0000
 
 ---
 title: max empty
 given:
-  insert Flight {id: 55, wid: 'bet' }
-  insert Flight {id: 56, wid: 'bat' }
+  insert Flight {id: 55, wid: '2018' }
+  insert Flight {id: 56, wid: '2015' }
 when:
   let x = Flight[id=100].wid.max()
 then:
@@ -30,17 +30,17 @@ title: null
 #we ignore null values
 given:
   insert Flight {id: 55 }
-  insert Flight {id: 56, wid: 'bat' }
+  insert Flight {id: 56, wid: '2015' }
 when:
   let x = Flight[true].wid.max()
 then:
-value:a:string:'bat'
+value:a:date:2015-01-01T00:00:00.000+0000
 
 ---
 title: bad field name
 given:
-  insert Flight {id: 55, wid: 'bet' }
-  insert Flight {id: 56, wid: 'bat' }
+  insert Flight {id: 55, wid: '2018' }
+  insert Flight {id: 56, wid: '2015' }
 when:
   let x = Flight[true].zzz.max()
 then:

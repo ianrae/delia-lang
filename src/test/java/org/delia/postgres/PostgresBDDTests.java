@@ -167,7 +167,9 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-min-bool.txt", 0);
 		runR1500File("t0-queryfn-min-relation.txt", 0);
 		runR1500File("t0-queryfn-min-string.txt", 4);
-		
+		runR1500File("t0-queryfn-min-date.txt", 4);
+		runR1500File("t0-queryfn-max-date.txt", 4);
+
 		runR1500File("t0-queryfn-max.txt", 0);
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);

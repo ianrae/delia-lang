@@ -1,12 +1,14 @@
 package org.delia.zqueryresponse;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryFuncExp;
+import org.delia.core.FactoryService;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
@@ -77,6 +79,11 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 		protected DValue buildStringVal(String s) {
 			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
 			DValue dval = builder.buildString(s);
+			return dval;
+		}
+		protected DValue buildDateVal(Date dt, FactoryService factorySvc) {
+			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, registry);
+			DValue dval = builder.buildDate(dt);
 			return dval;
 		}
 		
