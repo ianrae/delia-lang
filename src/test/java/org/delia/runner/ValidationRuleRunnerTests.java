@@ -29,6 +29,7 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 	@Test
 	public void testScalarString() {
 		initRunner();
+		runner.begin("");
 		assertEquals(1,1);
 		DValue dval = createStringDVal("abc");
 		
@@ -43,6 +44,7 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 	@Test
 	public void testStructString() {
 		initRunner();
+		runner.begin("");
 		assertEquals(1,1);
 		DValue dval = CustomerHelper.createCustomer();
 		
@@ -100,9 +102,10 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 	}
 
 	private FetchRunner createFetchRunner() {
-		DBAccessContext dbctx = new DBAccessContext(runner);
+		DBAccessContext dbctx = runner.createDBAccessContext();
 		DBExecutor dbexecutor = dbInterface.createExector(dbctx);
-		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), runner);
+		Runner run = runner.getDeliaRunner();
+		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), run);
 		return fetchRunner;
 	}
 

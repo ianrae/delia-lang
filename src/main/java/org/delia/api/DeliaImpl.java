@@ -300,7 +300,9 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public ResultValue continueExecution(String src, DeliaSession session) {
-		DeliaCompiler compiler = createCompiler();
+		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
+
+		DeliaCompiler compiler = doCreateCompiler(execCtx);
 		List<Exp> expL = compiler.parse(src);
 		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {

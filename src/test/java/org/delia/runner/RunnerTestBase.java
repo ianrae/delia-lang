@@ -23,8 +23,8 @@ import org.delia.runner.Runner;
 
 
 public class RunnerTestBase {
-	
-	
+
+
 	// --
 	//private Runner runner;
 	protected DBInterface dbInterface;
@@ -34,16 +34,16 @@ public class RunnerTestBase {
 	protected Log log;
 	protected ErrorTracker et;
 	protected FactoryService factorySvc = new FactoryServiceImpl(log, et);
-	
+
 	protected NewLegacyRunner initRunner()  {
 		log = new UnitTestLog();
 		et = new SimpleErrorTracker(log);
-		
+
 		runner = new NewLegacyRunner(log);
 		dbInterface = runner.getDelia().getDBInterface();
 		return runner;
 	}
-	
+
 	protected LetStatementExp chkString(String input, String output) {
 		return chelper.chkString(input, output);
 	}
@@ -74,12 +74,12 @@ public class RunnerTestBase {
 	protected UpdateStatementExp chkUpdate(String input, String output) {
 		return chelper.chkUpdate(input, output);
 	}
-	
+
 	protected NewLegacyRunner createBasicActorType() {
 		String src = String.format("type Actor struct {id int unique, firstName string} end");
-//		TypeStatementExp exp0 = chelper.chkType(src, null);
-		 runner.begin(src);
-		
+		//		TypeStatementExp exp0 = chelper.chkType(src, null);
+		runner.begin(src);
+
 		DBHelper.createTable(dbInterface, "Actor"); //!! fake schema
 		return runner;
 	}
