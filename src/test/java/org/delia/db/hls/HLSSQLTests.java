@@ -65,8 +65,38 @@ public class HLSSQLTests extends HLSTests {
 			genFields(sc, hlspan);
 			sc.out("FROM %s", hlspan.mtEl.getTypeName());
 			genWhere(sc, hlspan);
+			
+			genOLO(sc, hlspan);
 
 			return sc.sql();
+		}
+
+		private void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
+			boolean needLimit1 = hlspan.hasFunction("exists");
+			
+			if (hlspan.oloEl == null) {
+				if (needLimit1) {
+					sc.out("LIMIT 1");
+				}
+				return;
+			}
+			
+			if (hlspan.oloEl.orderBy != null) {
+				sc.out("ORDER BY %s", hlspan.oloEl.orderBy);
+			}
+			
+			if (hlspan.oloEl.limit != null) {
+				sc.out("LIMIT %s", hlspan.oloEl.limit.toString());
+			} else if (needLimit1) {
+				sc.out("LIMIT 1");
+			}
+			
+			if (hlspan.oloEl.offset != null) {
+				sc.out("OFFSET %s", hlspan.oloEl.offset.toString());
+			}
+			
+			// TODO Auto-generated method stub
+			
 		}
 
 		private void genWhere(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -102,10 +132,25 @@ public class HLSSQLTests extends HLSTests {
 				if (hlspan.hasFunction("count")) {
 					String s = String.format("COUNT(%s)", fieldName);
 					fieldL.add(s);
+				} else if (hlspan.hasFunction("min")) {
+					String s = String.format("MIN(%s)", fieldName);
+					fieldL.add(s);
+				} else if (hlspan.hasFunction("max")) {
+					String s = String.format("MAX(%s)", fieldName);
+					fieldL.add(s);
+				} else if (hlspan.hasFunction("distinct")) {
+					String s = String.format("DISTINCT(%s)", fieldName);
+					fieldL.add(s);
+				} else if (hlspan.hasFunction("exists")) {
+					String s = String.format("COUNT(%s)", fieldName);
+					fieldL.add(s);
 				} else {
 					fieldL.add(fieldName);
 				}
 			} else if (hlspan.hasFunction("count")) {
+				String s = String.format("COUNT(*)");
+				fieldL.add(s);
+			} else if (hlspan.hasFunction("exists")) {
 				String s = String.format("COUNT(*)");
 				fieldL.add(s);
 			}
@@ -138,22 +183,14 @@ public class HLSSQLTests extends HLSTests {
 			sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight WHERE ID=55");
 			sqlchk("let x = Flight[true]", "SELECT * FROM Flight");
 
-			
-//			chk("let x = Flight[true]", "{Flight->Flight,MT:Flight,[true],()}");
-//			chk("let x = Flight[55]", "{Flight->Flight,MT:Flight,[55],()}");
-//			
-//			chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
-//	//		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
-//			chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
-//			chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
-//			chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
-//			chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
-//			
-//			chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
-//			chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
-//			chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
-//			chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
-//			chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
+			sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight WHERE ID=55");
+			sqlchk("let x = Flight[55].field1.min()", "SELECT MIN(field1) FROM Flight WHERE ID=55");
+			sqlchk("let x = Flight[55].field1.orderBy('field2')", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2");
+			sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2 OFFSET 3");
+			sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2 LIMIT 5 OFFSET 3");
+			sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight WHERE ID=55");
+			sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight WHERE ID=55");
+
 		}
 		
 	//	@Test
@@ -200,17 +237,11 @@ public class HLSSQLTests extends HLSTests {
 	@Test
 	public void testDebug() {
 
-		sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight WHERE ID=55");
-////		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
-//		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
-//		chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
-//		chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
-//		chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
+//		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2 LIMIT 5 OFFSET 3");
 //		
-//		chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
-//		chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
-//		chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
-//		chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
+//		sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight WHERE ID=55");
+//		sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight WHERE ID=55");
+		sqlchk("let x = Flight[55].field1.exists()", "SELECT COUNT(field1) FROM Flight WHERE ID=55 LIMIT 1");
 //		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
 
 		
