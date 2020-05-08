@@ -30,6 +30,7 @@ import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -83,7 +84,10 @@ public class HLSTests extends NewBDDBase {
 
 		@Override
 		public String toString() {
-			return "FIL:" + queryExp.strValue();
+			String s = queryExp.toString();
+			int pos = s.indexOf('[');
+			s = pos < 0 ? s : s.substring(pos);
+			return "FIL:" + s;
 		}
 		
 	}
@@ -174,8 +178,8 @@ public class HLSTests extends NewBDDBase {
 		@Override
 		public String toString() {
 			StringJoiner joiner = new StringJoiner(",");
-			joiner.add("{");
-			String ss = String.format("%s->%s", fromType.getName(), resultType.getName());
+			String s4 = BuiltInTypes.convertDTypeNameToDeliaName(resultType.getName());
+			String ss = String.format("%s->%s", fromType.getName(), s4);
 			joiner.add(ss);
 			
 			if (mtEl != null) {
@@ -190,13 +194,12 @@ public class HLSTests extends NewBDDBase {
 			if (fEl != null) {
 				joiner.add(fEl.toString());
 			}
-			joiner.add("[");
 			StringJoiner subJ = new StringJoiner(",");
 			for(GElement gel: gElList) {
 				subJ.add(gel.toString());
 			}
-			joiner.add(subJ.toString());
-			joiner.add("]");
+			String s3 = String.format("[%s]", subJ.toString());
+			joiner.add(s3);
 			
 			if (subEl != null) {
 				joiner.add(subEl.toString());
@@ -204,8 +207,9 @@ public class HLSTests extends NewBDDBase {
 			if (oloEl != null) {
 				joiner.add(oloEl.toString());
 			}
-			joiner.add("}");
-			return joiner.toString();
+			
+			String s = String.format("{%s}", joiner.toString());
+			return s;
 		}
 	}
 
@@ -268,12 +272,12 @@ public class HLSTests extends NewBDDBase {
 			hlstat.fromType = determineFromType(i);
 			hlstat.mtEl = new MTElement(hlstat.fromType);
 			hlstat.resultType = determineResultType(i);
+			hlstat.filEl = (i > 0) ? null : new FILElement(queryExp);
 			
 			if (spanL.isEmpty()) {
 				return hlstat;
 			}
 			
-			hlstat.filEl = (i > 0) ? null : new FILElement(queryExp);
 			
 			TypePair rfieldPair = findLastRField(i);
 			if (rfieldPair != null) {
@@ -515,21 +519,40 @@ public class HLSTests extends NewBDDBase {
 		
 		
 	}
+	
+	
 	@Test
 	public void test1() {
-		QueryExp queryExp = compileQuery("let x = Flight[true]");
+		chk("let x = Flight[true]", "{Flight->Flight,MT:Flight,FIL:[true],[]}");
+		chk("let x = Flight[55]", "{Flight->Flight,MT:Flight,FIL:[55],[]}");
+		
+		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,FIL:[55].field1,[]}");
+//		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
+	}
+	
+	@Test
+	public void testDebug() {
+		
+		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,FIL:[55].field1,[]}");
+	}
+	
+
+	private void chk(String src, String expected) {
+		QueryExp queryExp = compileQuery(src);
 		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, null, null);
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
-		
 		
 		HLSEngine hlsEngine = new HLSEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
 		assertEquals(1, hls.hlspanL.size());
 		HLSQuerySpan hlspan = hls.hlspanL.get(0);
-		assertEquals("Flight", hlspan.mtEl.getTypeName());
+//		assertEquals("Flight", hlspan.mtEl.getTypeName());
+		String hlstr = hls.toString();
+		log.log(hlstr);
+		assertEquals(expected, hlstr);
 	}
-	
-	
+
+
 
 	private QueryExp compileQuery(String src) {
 		String initialSrc = buildSrc();
