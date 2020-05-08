@@ -94,5 +94,15 @@ public class NewLegacyRunner {
 		Runner runner = deliaimpl.getMostRecentRunner();
 		return runner;
 	}
+	public boolean exists(String varName) {
+		DeliaImpl deliaimpl = (DeliaImpl) delia;
+		Runner runner = deliaimpl.getMostRecentRunner();
+		return runner.exists(varName);
+	}
+	public ResultValue getVar(String varName) {
+		DeliaImpl deliaimpl = (DeliaImpl) delia;
+		Runner runner = deliaimpl.getMostRecentRunner();
+		return runner.getVar(varName);
+	}
 
 }
