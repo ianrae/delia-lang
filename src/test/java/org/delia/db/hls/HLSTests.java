@@ -229,6 +229,19 @@ public class HLSTests extends NewBDDBase {
 			String s = String.format("{%s}", joiner.toString());
 			return s;
 		}
+
+		public boolean hasFunction(String fnName) {
+			if (gElList == null) {
+				return false;
+			}
+			
+			for(GElement gel: gElList) {
+				if (gel.qfe.funcName.equals(fnName)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	public static class HLSQueryStatement implements HLSElement {

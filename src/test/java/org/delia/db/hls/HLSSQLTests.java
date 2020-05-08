@@ -75,9 +75,22 @@ public class HLSSQLTests extends HLSTests {
 
 		private void genFields(StrCreator sc, HLSQuerySpan hlspan) {
 			List<String> fieldL = new ArrayList<>();
+			
+			if (hlspan.hasFunction("first")) {
+				sc.o("TOP 1 ");
+			}
 
 			if (hlspan.fEl != null) {
-				fieldL.add(hlspan.fEl.getFieldName());
+				String fieldName = hlspan.fEl.getFieldName();
+				if (hlspan.hasFunction("count")) {
+					String s = String.format("COUNT(%s)", fieldName);
+					fieldL.add(s);
+				} else {
+					fieldL.add(fieldName);
+				}
+			} else if (hlspan.hasFunction("count")) {
+				String s = String.format("COUNT(*)");
+				fieldL.add(s);
 			}
 
 			if (fieldL.isEmpty()) {
@@ -164,7 +177,9 @@ public class HLSSQLTests extends HLSTests {
 	@Test
 	public void testDebug() {
 
-		sqlchk("let x = Flight[55]", "SELECT * FROM Flight WHERE ID=55");
+//		sqlchk("let x = Flight[55]", "SELECT * FROM Flight WHERE ID=55");
+//		sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight WHERE ID=55");
+		sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight WHERE ID=55");
 
 		useCustomerSrc = true;
 		//		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
