@@ -42,6 +42,8 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 			return processLong(qresp, dvalList);
 		case NUMBER:
 			return processNumber(qresp, dvalList);
+		case BOOLEAN:
+			return processBoolean(qresp, dvalList);
 		case STRING:
 			return processString(qresp, dvalList);
 		case DATE:
@@ -97,6 +99,22 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 		}
 		
 		DValue dval = buildNumberVal(max);
+		setSingletonResult(qresp, dval);
+		return qresp;
+	}
+	private QueryResponse processBoolean(QueryResponse qresp, List<DValue> dvalList) {
+		Boolean max = false;
+		for(DValue dval: dvalList) {
+			if (dval == null) {
+				continue;
+			}
+			Boolean k = dval.asBoolean(); 
+			if (k.compareTo(max) > 0) {
+				max = k;
+			}
+		}
+		
+		DValue dval = buildBoolVal(max);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}

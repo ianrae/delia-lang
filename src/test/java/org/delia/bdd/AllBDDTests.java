@@ -162,7 +162,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-min-int.txt", 4);
 		runR1500File("t0-queryfn-min-long.txt", 4);
 		runR1500File("t0-queryfn-min-number.txt", 4);
-		runR1500File("t0-queryfn-min-bool.txt", 0);
+		runR1500File("t0-queryfn-min-bool.txt", 4);
 		runR1500File("t0-queryfn-min-relation.txt", 0);
 		runR1500File("t0-queryfn-min-string.txt", 4);
 		runR1500File("t0-queryfn-min-date.txt", 4);
@@ -172,7 +172,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
 		runR1500File("t0-queryfn-max-number.txt", 4);
-		runR1500File("t0-queryfn-max-bool.txt", 0);
+		runR1500File("t0-queryfn-max-bool.txt", 4);
 		runR1500File("t0-queryfn-max-relation.txt", 0);
 		runR1500File("t0-queryfn-max-string.txt", 4);
 		runR1500File("t0-queryfn-avg.txt", 0);
@@ -298,8 +298,9 @@ public class AllBDDTests extends NewBDDBase {
 		enableMigration = true;
 		
 //		runR1550File("t0-queryfn-oneone-childa.txt", 7);
-		runR1500File("t0-queryfn-max-date.txt", 4);
-		runR1500File("t0-queryfn-min-date.txt", 4);
+//		runR1500File("t0-queryfn-max-bool.txt", 4);
+		runR1500File("t0-queryfn-min-bool.txt", 4);
+//		runR1500File("t0-queryfn-min-date.txt", 4);
 
 	}
 	

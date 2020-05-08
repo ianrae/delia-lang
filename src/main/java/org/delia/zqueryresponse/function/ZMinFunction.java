@@ -43,6 +43,8 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 			return processLong(qresp, dvalList);
 		case NUMBER:
 			return processNumber(qresp, dvalList);
+		case BOOLEAN:
+			return processBoolean(qresp, dvalList);
 		case STRING:
 			return processString(qresp, dvalList);
 		case DATE:
@@ -98,6 +100,22 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 		}
 		
 		DValue dval = buildNumberVal(min);
+		setSingletonResult(qresp, dval);
+		return qresp;
+	}
+	private QueryResponse processBoolean(QueryResponse qresp, List<DValue> dvalList) {
+		Boolean min = true;
+		for(DValue dval: dvalList) {
+			if (dval == null) {
+				continue;
+			}
+			Boolean k = dval.asBoolean();
+			if (k.compareTo(min) < 0) {
+				min = k;
+			}
+		}
+		
+		DValue dval = buildBoolVal(min);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
