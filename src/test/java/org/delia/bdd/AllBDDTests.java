@@ -289,12 +289,13 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
 //		runR1550File("t0-queryfn-oneone-childa.txt", 7);
+		runR1500File("t0-queryfn-orderby-2span.txt", 6);
 
 	}
 	

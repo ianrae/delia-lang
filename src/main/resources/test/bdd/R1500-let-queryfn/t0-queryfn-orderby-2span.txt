@@ -1,0 +1,52 @@
+# let queryfn when relations
+# count, exists, min, max, first, last
+FEATURE: many-to-many parent
+background:
+ configure loadFKs = true
+ type Customer struct {id int unique, x int, relation addr Address many optional  } end
+ type Address struct {id int unique, y int, relation cust Customer many optional } end
+  insert Customer {id: 55, x:10 }
+  insert Customer {id: 56, x:11 }
+  insert Address {id: 100, y:20, cust:55 }
+  insert Address {id: 101, y:21, cust:[55,56] }
+ 
+thenType: struct
+
+---
+title: 1 orderby
+given:
+when:
+  let x = Customer[true].orderBy('x', desc)
+then:
+value:a:Customer {
+vid:56
+vx:11
+vaddr:{101}
+}
+value:a:Customer {
+vid:55
+vx:10
+vaddr:{[100,101]}
+}
+
+---
+title: 2 orderby
+given:
+when:
+  let x = Customer[true].orderBy('x', desc).addr.orderBy('y')
+then:
+value:a:Address {
+vid:100
+vy:20
+vcust:{55}
+}
+value:a:Address {
+vid:101
+vy:21
+vcust:{[55,56]}
+}
+value:a:Address {
+vid:101
+vy:21
+vcust:{[55,56]}
+}
