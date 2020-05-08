@@ -68,6 +68,16 @@ public class LetSpanEngine extends ServiceBase {
 	private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
 		List<QueryFuncExp> newL = new ArrayList<>();
 		
+		if (span.startsWithScopeChange) {
+			for(int i = 0; i < span.qfeL.size(); i++) {
+				QueryFuncExp qfexp = span.qfeL.get(i);
+				if (qfexp instanceof QueryFieldExp) {
+					newL.add(qfexp);
+					break;
+				}
+			}
+		}
+		
 		//do orderby,offset,limit
 		for(int passNumber = 1; passNumber <= 3; passNumber++) {
 			List<QueryFuncExp> currentList = getPass(span, passNumber, fnFactory);
