@@ -7,8 +7,10 @@ background:
  type Address struct {id int unique, y int, relation cust Customer many optional } end
   insert Customer {id: 55, x:10 }
   insert Customer {id: 56, x:11 }
+  insert Customer {id: 57, x:12 }
   insert Address {id: 100, y:20, cust:55 }
-  insert Address {id: 101, y:21, cust:[55,56] }
+  insert Address {id: 101, y:21, cust:[55,56,57] }
+  insert Address {id: 102, y:22, cust:[55,56] }
  
 thenType: struct
 
@@ -19,21 +21,26 @@ when:
   let x = Customer[true].orderBy('x', desc)
 then:
 value:a:Customer {
+vid:57
+vx:12
+vaddr:{101}
+}
+value:a:Customer {
 vid:56
 vx:11
-vaddr:{101}
+vaddr:{[101,102]}
 }
 value:a:Customer {
 vid:55
 vx:10
-vaddr:{[100,101]}
+vaddr:{[100,101,102]}
 }
 
 ---
 title: 2 orderby
 given:
 when:
-  let x = Customer[true].orderBy('x', desc).addr.orderBy('y')
+  let x = Customer[true].orderBy('x', asc).limit(1).addr.orderBy('y')
 then:
 value:a:Address {
 vid:100
@@ -43,10 +50,10 @@ vcust:{55}
 value:a:Address {
 vid:101
 vy:21
-vcust:{[55,56]}
+vcust:{[55,56,57]}
 }
 value:a:Address {
-vid:101
-vy:21
+vid:102
+vy:22
 vcust:{[55,56]}
 }
