@@ -90,7 +90,7 @@ public class HLSTests extends NewBDDBase {
 			pos = s.indexOf(']');
 			s = pos < 0 ? s : s.substring(0, pos+1);
 			
-			return "FIL:" + s;
+			return "" + s;
 		}
 		
 	}
@@ -161,7 +161,11 @@ public class HLSTests extends NewBDDBase {
 			for(String s: fksL) {
 				joiner.add(s);
 			}
-			String s = String.format("SUB:%b,%s", allFKs, joiner.toString());
+			String s2 = String.format(",%s", joiner.toString());
+			if (s2.equals(",")) {
+				s2 = "";
+			}
+			String s = String.format("SUB:%b%s", allFKs, s2);
 			return s;
 		}
 	}
@@ -288,7 +292,7 @@ public class HLSTests extends NewBDDBase {
 			}
 			
 			TypePair fieldPair = findLastField(i);
-			if (rfieldPair != null) {
+			if (fieldPair != null) {
 				hlstat.fEl = new FElement(fieldPair);
 			}
 			
@@ -527,18 +531,59 @@ public class HLSTests extends NewBDDBase {
 	
 	
 	@Test
-	public void test1() {
-		chk("let x = Flight[true]", "{Flight->Flight,MT:Flight,FIL:[true],[]}");
-		chk("let x = Flight[55]", "{Flight->Flight,MT:Flight,FIL:[55],[]}");
+	public void testOneSpanNoSub() {
+		chk("let x = Flight[true]", "{Flight->Flight,MT:Flight,[true],()}");
+		chk("let x = Flight[55]", "{Flight->Flight,MT:Flight,[55],()}");
 		
-		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,FIL:[55].field1,[]}");
+		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
 //		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
+		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
+		chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
+		chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
+		chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
+		
+		chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
+		chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
+		chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
+		chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
+		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
+	}
+	
+	@Test
+	public void testOneSpanSub() {
+		useCustomerSrc = true;
+		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
+		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(fetch),SUB:false,addr}");
+		
+		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(fetch,first),SUB:false,addr}");
+		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(fetch),SUB:false,addr,OLO:id,null,null}");
+
+		//this one doesn't need to do fetch since just getting x
+		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,(fetch),SUB:false,addr}");
+
+		
+//		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
+////		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
+//		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
+//		chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
+//		chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
+//		chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
+//		
+//		chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
+//		chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
+//		chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
+//		chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
+//		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
 	}
 	
 	@Test
 	public void testDebug() {
-//		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,FIL:[55].field1,[]}");
-		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,FIL:[55].field1,(min)}");
+//		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
+		
+		useCustomerSrc = true;
+//		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
+		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,(fetch),SUB:false,addr}");
+		
 	}
 	
 
@@ -561,7 +606,7 @@ public class HLSTests extends NewBDDBase {
 
 
 	private QueryExp compileQuery(String src) {
-		String initialSrc = buildSrc();
+		String initialSrc = (useCustomerSrc) ? buildCustomerSrc() : buildSrc();
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
@@ -614,6 +659,7 @@ public class HLSTests extends NewBDDBase {
 	//---
 	private Delia delia;
 	private DeliaSession session;
+	private boolean useCustomerSrc = false;
 	
 	@Before
 	public void init() {
@@ -630,6 +676,11 @@ public class HLSTests extends NewBDDBase {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
+		return src;
+	}
+	private String buildCustomerSrc() {
+		String src = " type Customer struct {id int unique, x int, relation addr Address many optional  } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer  many optional } end";
 		return src;
 	}
 
