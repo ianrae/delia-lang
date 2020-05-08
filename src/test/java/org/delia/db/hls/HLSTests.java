@@ -233,6 +233,7 @@ public class HLSTests extends NewBDDBase {
 
 	public static class HLSQueryStatement implements HLSElement {
 		public List<HLSQuerySpan> hlspanL = new ArrayList<>();
+		public QueryExp queryExp;
 		
 		public HLSQuerySpan getMainHLSSpan() {
 			return hlspanL.get(0);
@@ -269,6 +270,8 @@ public class HLSTests extends NewBDDBase {
 			this.mainStructType = (DStructType) registry.getType(queryExp.typeName);
 			
 			HLSQueryStatement hlstatement = new HLSQueryStatement();
+			hlstatement.queryExp = queryExp;
+			
 			if (spanL.isEmpty()) {
 				HLSQuerySpan hsltat = generateSpan(0, null);
 				hlstatement.hlspanL.add(hsltat);
