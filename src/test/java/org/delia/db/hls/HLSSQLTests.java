@@ -1,7 +1,7 @@
 package org.delia.db.hls;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSTests.HLSQueryStatement;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.StrCreator;
@@ -27,6 +26,24 @@ import org.junit.Test;
  *
  */
 public class HLSSQLTests extends HLSTests {
+	
+	public static class SQLCreator {
+		private StrCreator sc = new StrCreator();
+		private boolean isPrevious = false;
+		
+		public String out(String fmt, String...args) {
+			if (isPrevious) {
+				sc.o(" ");
+			}
+			String s = sc.o(fmt, args);
+			isPrevious = true;
+			return s;
+		}
+		
+		public String sql() {
+			return sc.str;
+		}
+	}
 
 	public static class HLSSQLGenerator extends ServiceBase {
 
@@ -42,22 +59,22 @@ public class HLSSQLTests extends HLSTests {
 			this.queryExp = hls.queryExp;
 
 			HLSQuerySpan hlspan = hls.getMainHLSSpan();
-			StrCreator sc = new StrCreator();
+			SQLCreator sc = new SQLCreator();
 			//SELECT .. from .. ..join.. ..where.. ..order..
-			sc.o("SELECT ");
+			sc.out("SELECT");
 			genFields(sc, hlspan);
-			sc.o(" FROM %s", hlspan.mtEl.getTypeName());
+			sc.out("FROM %s", hlspan.mtEl.getTypeName());
 			genWhere(sc, hlspan);
 
-			return sc.str;
+			return sc.sql();
 		}
 
-		private void genWhere(StrCreator sc, HLSQuerySpan hlspan) {
+		private void genWhere(SQLCreator sc, HLSQuerySpan hlspan) {
 			QuerySpec spec = new QuerySpec();
 			spec.queryExp = queryExp;
 			QueryType queryType = queryTypeDetector.detectQueryType(spec);
 
-			String s = "";
+			String s = null;
 			switch(queryType) {
 			case ALL_ROWS:
 				break;
@@ -69,15 +86,15 @@ public class HLSSQLTests extends HLSTests {
 			}
 
 			if (s != null) {
-				sc.o(" WHERE ID=%s", s);
+				sc.out("WHERE ID=%s", s);
 			}
 		}
 
-		private void genFields(StrCreator sc, HLSQuerySpan hlspan) {
+		private void genFields(SQLCreator sc, HLSQuerySpan hlspan) {
 			List<String> fieldL = new ArrayList<>();
 			
 			if (hlspan.hasFunction("first")) {
-				sc.o("TOP 1 ");
+				sc.out("TOP 1");
 			}
 
 			if (hlspan.fEl != null) {
@@ -101,7 +118,7 @@ public class HLSSQLTests extends HLSTests {
 			for(String s: fieldL) {
 				joiner.add(s);
 			}
-			sc.o(joiner.toString());
+			sc.out(joiner.toString());
 		}
 
 		public void setRegistry(DTypeRegistry registry) {
@@ -114,25 +131,31 @@ public class HLSSQLTests extends HLSTests {
 
 
 
-	//	@Test
-	//	public void testOneSpanNoSub() {
-	//		chk("let x = Flight[true]", "{Flight->Flight,MT:Flight,[true],()}");
-	//		chk("let x = Flight[55]", "{Flight->Flight,MT:Flight,[55],()}");
-	//		
-	//		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
-	////		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
-	//		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
-	//		chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
-	//		chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
-	//		chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
-	//		
-	//		chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
-	//		chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
-	//		chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
-	//		chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
-	//		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
-	//	}
-	//	
+		@Test
+		public void testOneSpanNoSub() {
+			sqlchk("let x = Flight[55]", "SELECT * FROM Flight WHERE ID=55");
+			sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight WHERE ID=55");
+			sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight WHERE ID=55");
+			sqlchk("let x = Flight[true]", "SELECT * FROM Flight");
+
+			
+//			chk("let x = Flight[true]", "{Flight->Flight,MT:Flight,[true],()}");
+//			chk("let x = Flight[55]", "{Flight->Flight,MT:Flight,[55],()}");
+//			
+//			chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
+//	//		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
+//			chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
+//			chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
+//			chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
+//			chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
+//			
+//			chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
+//			chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
+//			chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
+//			chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
+//			chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
+		}
+		
 	//	@Test
 	//	public void testOneSpanSub() {
 	//		useCustomerSrc = true;
@@ -177,16 +200,22 @@ public class HLSSQLTests extends HLSTests {
 	@Test
 	public void testDebug() {
 
-//		sqlchk("let x = Flight[55]", "SELECT * FROM Flight WHERE ID=55");
-//		sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight WHERE ID=55");
-		sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight WHERE ID=55");
+		sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight WHERE ID=55");
+////		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
+//		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
+//		chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
+//		chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
+//		chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
+//		
+//		chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
+//		chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
+//		chk("let x = Flight[55].field1.distinct()", "{Flight->int,MT:Flight,[55],F:field1,(distinct)}");
+//		chk("let x = Flight[55].field1.exists()", "{Flight->boolean,MT:Flight,[55],F:field1,(exists)}");
+//		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
 
+		
+		
 		useCustomerSrc = true;
-		//		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
-		//		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
-		//		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
-		//		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
-		//		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
 
 		//		chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
 	}
