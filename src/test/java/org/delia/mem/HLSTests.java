@@ -87,6 +87,9 @@ public class HLSTests extends NewBDDBase {
 			String s = queryExp.toString();
 			int pos = s.indexOf('[');
 			s = pos < 0 ? s : s.substring(pos);
+			pos = s.indexOf(']');
+			s = pos < 0 ? s : s.substring(0, pos+1);
+			
 			return "FIL:" + s;
 		}
 		
@@ -139,7 +142,7 @@ public class HLSTests extends NewBDDBase {
 
 		@Override
 		public String toString() {
-			String s = String.format("G:%s", qfe.funcName);
+			String s = String.format("%s", qfe.funcName);
 			return s;
 		}
 		
@@ -198,7 +201,7 @@ public class HLSTests extends NewBDDBase {
 			for(GElement gel: gElList) {
 				subJ.add(gel.toString());
 			}
-			String s3 = String.format("[%s]", subJ.toString());
+			String s3 = String.format("(%s)", subJ.toString());
 			joiner.add(s3);
 			
 			if (subEl != null) {
@@ -478,10 +481,12 @@ public class HLSTests extends NewBDDBase {
 
 		private DType findGType(LetSpan span, DStructType currentType) {
 			DType gtype = null;
+			QueryFuncExp currentField = null;
 			for(QueryFuncExp qfe: span.qfeL) {
 				if (qfe instanceof QueryFieldExp) {
+					currentField = qfe;
 				} else {
-					DType dtype = fnFactory.getResultType(qfe, currentType, registry);
+					DType dtype = fnFactory.getResultType(qfe, currentType, currentField, registry);
 					if (dtype != null) {
 						gtype = dtype;
 					}
@@ -532,12 +537,13 @@ public class HLSTests extends NewBDDBase {
 	
 	@Test
 	public void testDebug() {
-		
-		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,FIL:[55].field1,[]}");
+//		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,FIL:[55].field1,[]}");
+		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,FIL:[55].field1,(min)}");
 	}
 	
 
 	private void chk(String src, String expected) {
+		log.log(src);
 		QueryExp queryExp = compileQuery(src);
 		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, null, null);
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);

@@ -82,12 +82,12 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 		return list.contains(fnName);
 	}
 
-	public DType getResultType(QueryFuncExp qfe, DStructType structType, DTypeRegistry registry) {
+	public DType getResultType(QueryFuncExp qfe, DStructType structType, QueryFuncExp currentField, DTypeRegistry registry) {
 		switch(qfe.funcName) {
 		case "min":
-			return getTypeOfArg(qfe, structType, registry);
+			return getTypeOfQFE(qfe, structType, currentField, registry);
 		case "max":
-			return getTypeOfArg(qfe, structType, registry);
+			return getTypeOfQFE(qfe, structType, currentField, registry);
 		case "count":
 			return registry.getType(BuiltInTypes.LONG_SHAPE);
 		case "distinct":
@@ -113,6 +113,11 @@ public class ZQueryResponseFunctionFactory extends ServiceBase {
 		}
 	}
 
+	private DType getTypeOfQFE(QueryFuncExp qfe, DStructType structType, QueryFuncExp currentField, DTypeRegistry registry) {
+		String fieldName = currentField.funcName;
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		return pair.type;
+	}
 	private DType getTypeOfArg(QueryFuncExp qfe, DStructType structType, DTypeRegistry registry) {
 		String fieldName = qfe.argL.get(0).strValue();
 		TypePair pair = DValueHelper.findField(structType, fieldName);
