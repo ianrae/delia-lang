@@ -1,10 +1,5 @@
 package org.delia.scope.scopetest.value.string;
 
-import static org.junit.Assert.assertEquals;
-
-import org.delia.runner.QueryResponse;
-import org.delia.scope.scopetest.value.TypeLayerTestBase;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 

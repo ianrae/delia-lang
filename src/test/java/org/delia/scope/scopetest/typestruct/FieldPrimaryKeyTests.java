@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.ValueException;
 import org.delia.scope.scopetest.ScopeTestBase;
 import org.delia.type.DValue;
 import org.junit.Before;
