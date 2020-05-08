@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
@@ -66,7 +67,12 @@ public class HLSTests extends NewBDDBase {
 		public Object getTypeName() {
 			return structType.getName();
 		}
-		
+
+		@Override
+		public String toString() {
+			String s = String.format("MT:%s", structType.getName());
+			return s;
+		}
 	}
 	public static class FILElement implements HLSElement {
 		public QueryExp queryExp;
@@ -74,18 +80,35 @@ public class HLSTests extends NewBDDBase {
 		public FILElement(QueryExp queryExp) {
 			this.queryExp = queryExp;
 		}
+
+		@Override
+		public String toString() {
+			return "FIL:" + queryExp.strValue();
+		}
 		
 	}
 	public static class OLOElement implements HLSElement {
 		public String orderBy; //may be null
 		public Integer limit; //may be null
 		public Integer offset; //may be null
+
+		@Override
+		public String toString() {
+			String s = String.format("OLO:%s,%d,%d", orderBy, limit, offset);
+			return s;
+		}
 	}
 	public static class FElement implements HLSElement {
 		public TypePair fieldPair;
 
 		public FElement(TypePair fieldPair) {
 			this.fieldPair = fieldPair;
+		}
+
+		@Override
+		public String toString() {
+			String s = String.format("F:%s", fieldPair.name);
+			return s;
 		}
 		
 	}
@@ -95,6 +118,12 @@ public class HLSTests extends NewBDDBase {
 		public RElement(TypePair rfieldPair) {
 			this.rfieldPair = rfieldPair;
 		}
+
+		@Override
+		public String toString() {
+			String s = String.format("R:%s", rfieldPair.name);
+			return s;
+		}
 		
 	}
 	public static class GElement implements HLSElement {
@@ -103,12 +132,31 @@ public class HLSTests extends NewBDDBase {
 		public GElement(QueryFuncExp qfe) {
 			this.qfe = qfe;
 		}
+
+		@Override
+		public String toString() {
+			String s = String.format("G:%s", qfe.funcName);
+			return s;
+		}
 		
 	}
 	public static class SUBElement implements HLSElement {
 		public List<String> fetchL = new ArrayList<>();
 		public List<String> fksL = new ArrayList<>();
 		public boolean allFKs = false;
+
+		@Override
+		public String toString() {
+			StringJoiner joiner = new StringJoiner(",");
+			for(String s: fetchL) {
+				joiner.add(s);
+			}
+			for(String s: fksL) {
+				joiner.add(s);
+			}
+			String s = String.format("SUB:%b,%s", allFKs, joiner.toString());
+			return s;
+		}
 	}
 	
 	public static class HLSQuerySpan implements HLSElement {
@@ -123,6 +171,42 @@ public class HLSTests extends NewBDDBase {
 		public SUBElement subEl;
 		public OLOElement oloEl;
 		
+		@Override
+		public String toString() {
+			StringJoiner joiner = new StringJoiner(",");
+			joiner.add("{");
+			String ss = String.format("%s->%s", fromType.getName(), resultType.getName());
+			joiner.add(ss);
+			
+			if (mtEl != null) {
+				joiner.add(mtEl.toString());
+			}
+			if (filEl != null) {
+				joiner.add(filEl.toString());
+			}
+			if (rEl != null) {
+				joiner.add(rEl.toString());
+			}
+			if (fEl != null) {
+				joiner.add(fEl.toString());
+			}
+			joiner.add("[");
+			StringJoiner subJ = new StringJoiner(",");
+			for(GElement gel: gElList) {
+				subJ.add(gel.toString());
+			}
+			joiner.add(subJ.toString());
+			joiner.add("]");
+			
+			if (subEl != null) {
+				joiner.add(subEl.toString());
+			}
+			if (oloEl != null) {
+				joiner.add(oloEl.toString());
+			}
+			joiner.add("}");
+			return joiner.toString();
+		}
 	}
 
 	public static class HLSQueryStatement implements HLSElement {
@@ -130,6 +214,15 @@ public class HLSTests extends NewBDDBase {
 		
 		public HLSQuerySpan getMainHLSSpan() {
 			return hlspanL.get(0);
+		}
+
+		@Override
+		public String toString() {
+			StringJoiner joiner = new StringJoiner(",");
+			for(HLSQuerySpan hlspan: hlspanL) {
+				joiner.add(hlspan.toString());
+			}
+			return joiner.toString();
 		}
 	}
 	
@@ -207,6 +300,8 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
 				
 				for(QueryFuncExp qfe: span.qfeL) {
@@ -237,7 +332,10 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
+				
 				for(QueryFuncExp qfe: span.qfeL) {
 					if (qfe instanceof QueryFieldExp) {
 					} else if (qfe.funcName.equals("fetch")){
@@ -259,7 +357,10 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
+				
 				for(QueryFuncExp qfe: span.qfeL) {
 					if (qfe instanceof QueryFieldExp) {
 					} else if (! isOLOFn(qfe)){
@@ -285,7 +386,10 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
+				
 				TypePair fieldPair = findFField(span, currentType);
 				if (fieldPair != null) {
 					lastField = fieldPair;
@@ -301,7 +405,10 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
+				
 				TypePair rfieldPair = findRField(span, currentType);
 				if (rfieldPair != null) {
 					currentType = (DStructType) rfieldPair.type;
@@ -318,7 +425,10 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
+				
 				TypePair rfieldPair = findRField(span, currentType);
 				if (rfieldPair != null) {
 					currentType = (DStructType) rfieldPair.type;
@@ -337,7 +447,10 @@ public class HLSTests extends NewBDDBase {
 			for(LetSpan span: spanL) {
 				if (i < iStart) {
 					continue;
+				} else if (i > iStart) {
+					break;
 				}
+				
 				TypePair rfieldPair = findRField(span, currentType);
 				if (rfieldPair != null) {
 					currentType = (DStructType) rfieldPair.type;
@@ -410,8 +523,10 @@ public class HLSTests extends NewBDDBase {
 		
 		
 		HLSEngine hlsEngine = new HLSEngine(delia.getFactoryService(), session.getExecutionContext().registry);
-		HLSQuerySpan hls = hlsEngine.generate(queryExp, spanL);
-		assertEquals("Flight", hls.mtEl.getTypeName());
+		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
+		assertEquals(1, hls.hlspanL.size());
+		HLSQuerySpan hlspan = hls.hlspanL.get(0);
+		assertEquals("Flight", hlspan.mtEl.getTypeName());
 	}
 	
 	
