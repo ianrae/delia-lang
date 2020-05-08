@@ -33,7 +33,7 @@ public class PreparedStatementGenerator extends ServiceBase {
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		this.nameFormatter = sqlHelperFactory.createNameFormatter(dbctx);
 //		this.pwheregen = sqlHelperFactory.createPWhereGen(dbctx);
-		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
+		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx,null); //TODO: do we need spanhelper here?
 	}
 
 //	public SqlStatement generateQuery(QuerySpec spec) {

@@ -18,6 +18,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.AssocTableReplacer;
@@ -150,8 +151,8 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		//TODO: do we need to catch and interpret execptions here??
 
 		QueryResponse qresp = new QueryResponse();
-		
-		SelectFuncHelper sfhelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
+		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
+		SelectFuncHelper sfhelper = sqlHelperFactory.createSelectFuncHelper(dbctx, spanHelper);
 		DType selectResultType = sfhelper.getSelectResultType(spec);
 		if (selectResultType.isScalarShape()) {
 			qresp.dvalList = buildScalarResult(rs, selectResultType, details, dbctx);

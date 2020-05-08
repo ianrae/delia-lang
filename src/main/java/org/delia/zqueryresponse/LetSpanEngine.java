@@ -67,6 +67,9 @@ public class LetSpanEngine extends ServiceBase {
 	public List<LetSpan> buildAllSpans(QueryExp queryExp) {
 		DType dtype = registry.getType(queryExp.typeName);
 		List<LetSpan> spanL = buildSpans(queryExp, dtype);
+		for(LetSpan span: spanL) {
+			span.qfeL = adjustExecutionOrder(span);
+		}
 		return spanL;
 	}
 	

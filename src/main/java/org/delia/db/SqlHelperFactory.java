@@ -19,7 +19,7 @@ public interface SqlHelperFactory {
 //	InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc);
 	SqlNameFormatter createNameFormatter(DBAccessContext dbctx);
 //	FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc);
-	SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx);
+	SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx, SpanHelper spanHelper);
 	TableCreator createTableCreator(DBAccessContext dbctx);
 	QueryTypeDetector createQueryTypeDetector(DBAccessContext dbctx);
 	SqlWhereConverter createSqlWhereConverter(DBAccessContext dbctx, QueryTypeDetector queryDetectorSvc);

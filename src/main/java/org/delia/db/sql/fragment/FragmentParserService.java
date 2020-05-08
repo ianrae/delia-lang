@@ -46,7 +46,7 @@ public class FragmentParserService extends ServiceBase {
 		this.spanHelper = spanL == null ? null : new SpanHelper(spanL);
 
 		
-		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
+		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
 		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
 	}
 
@@ -60,11 +60,11 @@ public class FragmentParserService extends ServiceBase {
 	}
 
 	public FKHelper createFKHelper() {
-		return new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc);
+		return new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc, spanHelper);
 	}
 
 	public SelectFuncHelper createSelectFuncHelper() {
-		return new SelectFuncHelper(factorySvc, registry);
+		return new SelectFuncHelper(factorySvc, registry, spanHelper);
 	}
 
 }

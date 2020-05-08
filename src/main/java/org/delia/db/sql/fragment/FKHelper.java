@@ -10,12 +10,12 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.db.sql.where.SqlWhereConverter;
@@ -46,12 +46,14 @@ public class FKHelper extends ServiceBase {
 //	private SqlHelperFactory sqlHelperFactory;
 	private SelectFuncHelper selectFnHelper;
 	private TableFragmentMaker tableFragmentMaker;
+	private SpanHelper spanHelper;
 
 	public FKHelper(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
-			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc) {
+			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc, SpanHelper spanHelper) {
 		super(factorySvc);
 		this.registry = registry;
 		this.tblinfoL = tblinfoL;
+		this.spanHelper = spanHelper;
 //		this.sqlHelperFactory = sqlHelperFactory;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
@@ -59,7 +61,7 @@ public class FKHelper extends ServiceBase {
 		this.queryDetectorSvc = sqlHelperFactory.createQueryTypeDetector(dbctx);
 		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc);
 //		this.sqlgen = sqlHelperFactory.createPrepSqlGen(existSvc, dbctx);
-		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
+		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx, spanHelper);
 //		this.pwheregen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 	}
 
