@@ -100,7 +100,7 @@ public class FilmAndActor2Tests  extends NewBDDBase {
 		}
 		
 		log.log("and now distinct2...");
-		query = "Actor[true].fetch('films').actors.distinct()";
+		query = "Actor[true].films.actors.distinct()";
 		res = session.getDelia().continueExecution(query, session);
 		for(DValue dval: res.getAsDValueList()) {
 			dumpDVal("A3 ", session, dval);
@@ -108,7 +108,7 @@ public class FilmAndActor2Tests  extends NewBDDBase {
 		
 		//let x = Film[releaseDate='2019'].actors.orderBy('oscarsWon").limit(10).distinct()
 		log.log("and now distinct3...");
-		query = "Film[true].fetch('actors').orderBy('lastName').limit(3)";
+		query = "Film[true].actors.orderBy('lastName').limit(3)";
 		res = session.getDelia().continueExecution(query, session);
 		for(DValue dval: res.getAsDValueList()) {
 			dumpDVal("A3 ", session, dval);

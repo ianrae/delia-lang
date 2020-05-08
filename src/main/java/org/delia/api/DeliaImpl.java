@@ -301,6 +301,10 @@ public class DeliaImpl implements Delia {
 	@Override
 	public ResultValue continueExecution(String src, DeliaSession session) {
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
+		if (execCtx != null) {
+			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
+			execCtx.delcaredVarMap.remove(RunnerImpl.VAR_SERIAL);
+		}
 
 		DeliaCompiler compiler = doCreateCompiler(execCtx);
 		List<Exp> expL = compiler.parse(src);

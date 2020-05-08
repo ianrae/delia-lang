@@ -41,8 +41,10 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		QueryResponse qresp = span.qresp;
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
+		
 		log.log("span:%d", span.qfeL.size());
 		for(int i = 0; i < span.qfeL.size(); i++) {
+			log.log("spantype:%s", span.dtype.getName());
 			QueryFuncExp qfexp = span.qfeL.get(i);
 //			ctx.pendingTrail.add(qfexp.funcName);
 			

@@ -87,6 +87,7 @@ public class ValueBuilderServiceTests extends ScopeTestBase {
 	@Before
 	public void init() {
 		runner = initRunner();
+		runner.begin("");
 		builder = createSvc();
 	}
 	
