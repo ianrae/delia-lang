@@ -176,7 +176,7 @@ public class DeleteFragementParserTests extends FragmentParserTestBase {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
 		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		return parser;

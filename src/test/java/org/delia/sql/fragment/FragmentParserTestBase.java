@@ -15,12 +15,18 @@ import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.fragment.DeleteFragmentParser;
+import org.delia.db.sql.fragment.FragmentParserService;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.SimpleErrorTracker;
@@ -35,12 +41,9 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.junit.Before;
 
 
 public class FragmentParserTestBase extends NewBDDBase {
-
-
 
 	//---
 	protected Delia delia;
@@ -150,4 +153,13 @@ public class FragmentParserTestBase extends NewBDDBase {
 			assertEquals(args[i++].intValue(), k.intValue());
 		}
 	}
+	
+	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaDao dao) {
+		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		List<TableInfo> tblinfoL = new ArrayList<>();		
+		DBAccessContext dbctx = new DBAccessContext(runner);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
+		return fpSvc;
+	}
+
 }

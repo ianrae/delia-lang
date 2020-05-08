@@ -414,16 +414,10 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 
 		return parser;
 	}
-	private UpdateFragmentParser createParser(DeliaDao dao) {
-		List<TableInfo> tblinfoL = createTblInfoL(); 
-		return createParser(dao, tblinfoL);
-	}
 	private UpdateFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		DBAccessContext dbctx = new DBAccessContext(runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao);
 	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
