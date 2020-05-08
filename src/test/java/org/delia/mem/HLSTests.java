@@ -37,6 +37,7 @@ import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
 import org.delia.zqueryresponse.LetSpanRunner;
 import org.delia.zqueryresponse.LetSpanRunnerImpl;
+import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -108,17 +109,15 @@ public class HLSTests extends NewBDDBase {
 		private List<LetSpan> spanL;
 		private DTypeRegistry registry;
 		private DStructType mainStructType;
+		private ZQueryResponseFunctionFactory fnFactory;
 
 		public HLSEngine(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
 			this.registry = registry;
+			this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null);
 		}
 		
 		public HLSQueryStatement generate(QueryExp queryExp, List<LetSpan> spanL) {
-			if (spanL.isEmpty()) {
-				return null;
-			}
-			
 			this.queryExp = queryExp;
 			this.spanL = spanL;
 			this.mainStructType = (DStructType) registry.getType(queryExp.typeName);
@@ -127,15 +126,16 @@ public class HLSTests extends NewBDDBase {
 			HLSQueryStatement hlstat = new HLSQueryStatement();
 			hlstat.fromType = determineFromType();
 			hlstat.mtEl = new MTElement(hlstat.fromType);
+			hlstat.resultType = determineResultType();
 			
-			return null;
+			if (spanL.isEmpty()) {
+				return hlstat;
+			}
+			
+			return hlstat;
 		}
 
 		private DStructType determineFromType() {
-			if (spanL.size() == 1) {
-				return mainStructType;
-			}
-			
 			DStructType currentType = mainStructType;
 			for(LetSpan span: spanL) {
 				TypePair rfieldPair = findRField(span, currentType);
@@ -147,6 +147,59 @@ public class HLSTests extends NewBDDBase {
 			return currentType;
 		}
 
+		private DType determineResultType() {
+			DStructType currentType = mainStructType;
+			DType resultType = currentType;
+			
+			for(LetSpan span: spanL) {
+				TypePair rfieldPair = findRField(span, currentType);
+				if (rfieldPair != null) {
+					currentType = (DStructType) rfieldPair.type;
+					resultType = currentType;
+				}
+				
+				TypePair fieldPair = findFField(span, currentType);
+				if (fieldPair != null) {
+					resultType = fieldPair.type;
+				}
+				
+				DType gtype = findGType(span, currentType);
+				if (gtype != null) {
+					resultType = gtype;
+				}
+				
+			}
+			
+			return resultType;
+		}
+
+		private DType findGType(LetSpan span, DStructType currentType) {
+			DType gtype = null;
+			for(QueryFuncExp qfe: span.qfeL) {
+				if (qfe instanceof QueryFieldExp) {
+				} else {
+					String funcName = qfe.funcName;
+					DType dtype = fnFactory.getResultType(qfe, currentType, registry);
+					if (dtype != null) {
+						gtype = dtype;
+					}
+				}
+			}
+			return gtype;
+		}
+
+		private TypePair findFField(LetSpan span, DStructType currentType) {
+			for(QueryFuncExp qfe: span.qfeL) {
+				if (qfe instanceof QueryFieldExp) {
+					String fieldName = qfe.funcName;
+					TypePair pair = DValueHelper.findField(currentType, fieldName);
+					if (!pair.type.isStructShape()) {
+						return pair;
+					}
+				}
+			}
+			return null;
+		}
 		private TypePair findRField(LetSpan span, DStructType currentType) {
 			for(QueryFuncExp qfe: span.qfeL) {
 				if (qfe instanceof QueryFieldExp) {
@@ -160,6 +213,7 @@ public class HLSTests extends NewBDDBase {
 			return null;
 		}
 		
+
 		
 		
 	}
