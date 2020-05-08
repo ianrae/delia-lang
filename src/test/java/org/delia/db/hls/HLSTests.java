@@ -65,7 +65,7 @@ public class HLSTests extends NewBDDBase {
 			this.structType = fromType;
 		}
 
-		public Object getTypeName() {
+		public String getTypeName() {
 			return structType.getName();
 		}
 
@@ -112,6 +112,9 @@ public class HLSTests extends NewBDDBase {
 			this.fieldPair = fieldPair;
 		}
 
+		public String getFieldName() {
+			return fieldPair.name;
+		}
 		@Override
 		public String toString() {
 			String s = String.format("F:%s", fieldPair.name);
@@ -675,7 +678,19 @@ public class HLSTests extends NewBDDBase {
 	}
 	
 
-	private void chk(String src, String expected) {
+	protected void chk(String src, String expected) {
+		HLSQueryStatement hls = buildHLS(src);
+		
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			String hlstr = hlspan.toString();
+			log.log(hlstr);
+		}
+//		assertEquals(1, hls.hlspanL.size());
+		String hlstr = hls.toString();
+		assertEquals(expected, hlstr);
+	}
+
+	protected HLSQueryStatement buildHLS(String src) {
 		log.log(src);
 		QueryExp queryExp = compileQuery(src);
 		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, null, null);
@@ -688,11 +703,8 @@ public class HLSTests extends NewBDDBase {
 			String hlstr = hlspan.toString();
 			log.log(hlstr);
 		}
-//		assertEquals(1, hls.hlspanL.size());
-		String hlstr = hls.toString();
-		assertEquals(expected, hlstr);
+		return hls;
 	}
-
 
 
 	private QueryExp compileQuery(String src) {
@@ -747,9 +759,9 @@ public class HLSTests extends NewBDDBase {
 
 
 	//---
-	private Delia delia;
-	private DeliaSession session;
-	private boolean useCustomerSrc = false;
+	protected Delia delia;
+	protected DeliaSession session;
+	protected boolean useCustomerSrc = false;
 	
 	@Before
 	public void init() {
