@@ -21,6 +21,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.junit.Test;
 
@@ -32,6 +33,61 @@ import org.junit.Test;
  *
  */
 public class HLSSQLTests extends HLSTests {
+	
+	public static class SqlJoinHelper {
+		public void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
+			List<TypePair> joinL = genJoinList(hlspan);
+			
+			//do the joins
+			for(TypePair pair: joinL) {
+				DStructType pairType = (DStructType) pair.type;
+				PrimaryKey pk = pairType.getPrimaryKey();
+				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey();
+				String s = String.format("JOIN %s ON %s=%s", pair.type, mainPk.getFieldName(), pk.getFieldName());
+				sc.out(s);
+			}
+		}
+		
+		private List<TypePair> genJoinList(HLSQuerySpan hlspan) {
+			List<TypePair> joinL = new ArrayList<>();
+			
+			boolean needJoin = hlspan.subEl != null;
+			if (! needJoin) {
+				return joinL;
+			}
+			
+			if (hlspan.subEl.allFKs) {
+				for(TypePair pair: hlspan.fromType.getAllFields()) {
+					if (pair.type.isStructShape()) {
+						joinL.add(pair);
+					}
+				}
+			}
+			
+			for (String fieldName: hlspan.subEl.fetchL) {
+				if (joinL.contains(fieldName)) {
+					continue;
+				}
+				TypePair pair = DValueHelper.findField(hlspan.fromType, fieldName);
+				joinL.add(pair);
+			}
+			
+			//TODO: later to fk(field)
+			return joinL;
+		}
+
+		public void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+			List<TypePair> joinL = genJoinList(hlspan);
+
+			for(TypePair pair: joinL) {
+				if (pair.type.isStructShape()) {
+					DStructType pairType = (DStructType) pair.type;
+					PrimaryKey pk = pairType.getPrimaryKey();
+					fieldL.add(pk.getFieldName());
+				}
+			}
+		}
+	}
 	
 	public static class SQLCreator {
 		private StrCreator sc = new StrCreator();
@@ -79,39 +135,12 @@ public class HLSSQLTests extends HLSTests {
 		}
 
 		private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
-			boolean needJoin = hlspan.subEl != null;
-			if (! needJoin) {
-				return;
-			}
-			
-			if (hlspan.subEl.allFKs) {
-				for(TypePair pair: hlspan.fromType.getAllFields()) {
-					if (pair.type.isStructShape()) {
-						DStructType pairType = (DStructType) pair.type;
-						PrimaryKey pk = pairType.getPrimaryKey();
-						PrimaryKey mainPk = hlspan.fromType.getPrimaryKey();
-						String s = String.format("JOIN %s ON %s=%s", pair.type, mainPk.getFieldName(), pk.getFieldName());
-						sc.out(s);
-					}
-				}
-				
-			}
+			SqlJoinHelper joinHelper = new SqlJoinHelper();
+			joinHelper.genJoin(sc, hlspan);
 		}
 		private void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
-			boolean needJoin = hlspan.subEl != null;
-			if (! needJoin) {
-				return;
-			}
-			
-			if (hlspan.subEl.allFKs) {
-				for(TypePair pair: hlspan.fromType.getAllFields()) {
-					if (pair.type.isStructShape()) {
-						DStructType pairType = (DStructType) pair.type;
-						PrimaryKey pk = pairType.getPrimaryKey();
-						fieldL.add(pk.getFieldName());
-					}
-				}
-			}
+			SqlJoinHelper joinHelper = new SqlJoinHelper();
+			joinHelper.addFKofJoins(hlspan, fieldL);
 		}
 
 
@@ -305,8 +334,8 @@ public class HLSSQLTests extends HLSTests {
 
 		useCustomerSrc = true;
 
-		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer JOIN Address ON id=id WHERE ID=55");
-		//		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
+//		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer JOIN Address ON id=id WHERE ID=55");
+		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y,cust FROM Customer JOIN Address ON id=id WHERE ID=55");
 		//		
 		//		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
 		//		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
