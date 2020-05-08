@@ -2,7 +2,6 @@ package org.delia.scope.scopetest.relation;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.junit.Before;

@@ -3,9 +3,6 @@ package org.delia.scope.scopetest.typerules;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.base.DBHelper;
-import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.compiler.ast.LetStatementExp;
-import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.ScopeTestBase;

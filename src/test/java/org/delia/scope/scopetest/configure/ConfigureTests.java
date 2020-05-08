@@ -2,7 +2,6 @@ package org.delia.scope.scopetest.configure;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.ScopeTestBase;

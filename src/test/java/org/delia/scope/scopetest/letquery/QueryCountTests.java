@@ -2,10 +2,8 @@ package org.delia.scope.scopetest.letquery;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.compiler.ast.LetStatementExp;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.RunnerImpl;
 import org.delia.scope.scopetest.ScopeTestBase;
 import org.delia.type.DValue;
 import org.delia.type.Shape;

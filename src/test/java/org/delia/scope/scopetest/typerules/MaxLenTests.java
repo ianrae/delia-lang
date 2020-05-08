@@ -7,7 +7,6 @@ import org.delia.compiler.ast.LetStatementExp;
 import org.delia.db.sql.NewLegacyRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.Runner;
 import org.delia.scope.scopetest.ScopeTestBase;
 import org.delia.type.DValue;
 import org.junit.Before;
