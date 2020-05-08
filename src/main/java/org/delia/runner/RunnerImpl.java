@@ -607,6 +607,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 //			this.qffRunner.buildPendingTrail(ctx, spec.queryExp);
 			
 			QueryContext qtx = new QueryContext();
+			qtx.letSpanEngine = letSpanEngine;
 			//TODO: fix buglet that is other fn contains 'fks' this won't work
 //			qtx.loadFKs = ctx.pendingTrail.getTrail().contains("fks");
 			qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);

@@ -3,7 +3,9 @@ package org.delia.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.StringJoiner;
 
@@ -27,9 +29,11 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
+import org.delia.zqueryresponse.LetSpan;
 
 /**
  * Represents db access to a single database.
@@ -199,18 +203,24 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		List<DValue> list = new ArrayList<>();
 		int i = 0;
 		List<DValue> subL = new ArrayList<>();
+		Map<Object,String> alreadyHandledL = new HashMap<>();
 		for(DValue dval: rawList) {
 			DValue keyVal = DValueHelper.findPrimaryKeyValue(dval);
+			if (alreadyHandledL.containsKey(keyVal.getObject())) {
+				continue;
+			}
+			
 			fillSubL(rawList, keyVal, dval, subL); //other values with same primary key
 			if (subL.isEmpty()) {
 				list.add(dval);
 			} else {
+				alreadyHandledL.put(keyVal.getObject(), "");
 				List<DValue> toMergeL = new ArrayList<>();
 				for(DValue subVal: subL) {
 					DValue inner = subVal.asStruct().getField(details.mergeOnField);
 					if (inner != null) {
 						DRelation drel = inner.asRelation();
-						toMergeL.add(drel.getForeignKey());
+						toMergeL.addAll(drel.getMultipleKeys());
 					}
 				}
 				//and add back into dval
@@ -382,5 +392,15 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		}
 		return foundResult;
 	}
-	
+	protected void failIfMultiSpan(QuerySpec spec, QueryContext qtx) {
+		if (qtx.letSpanEngine == null) return;
+		
+		List<LetSpan> spanL = qtx.letSpanEngine.buildAllSpans(spec.queryExp);
+		if (spanL.size() > 1) {
+			String msg = "Query of '%s' contains %d spans. Only one span supported in current version";
+			DeliaExceptionHelper.throwError("db-multiple-spans-not-supported", msg, spec.queryExp.typeName, spanL.size());
+		}
+	}
+
+
 }

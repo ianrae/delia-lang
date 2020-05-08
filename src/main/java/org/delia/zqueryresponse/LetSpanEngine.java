@@ -64,6 +64,11 @@ public class LetSpanEngine extends ServiceBase {
 		
 		return qresp;
 	}
+	public List<LetSpan> buildAllSpans(QueryExp queryExp) {
+		DType dtype = registry.getType(queryExp.typeName);
+		List<LetSpan> spanL = buildSpans(queryExp, dtype);
+		return spanL;
+	}
 	
 	private List<QueryFuncExp> adjustExecutionOrder(LetSpan span) {
 		List<QueryFuncExp> newL = new ArrayList<>();

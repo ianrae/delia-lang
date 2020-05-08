@@ -37,7 +37,8 @@ vaddr:{[100,101,102]}
 }
 
 ---
-title: 2 orderby
+SKIP: 2 orderby
+#db-multiple-spans-not-supported
 given:
 when:
   let x = Customer[true].orderBy('x', asc).limit(1).addr.orderBy('y')

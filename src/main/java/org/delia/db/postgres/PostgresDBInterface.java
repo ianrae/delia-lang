@@ -43,6 +43,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zqueryresponse.LetSpan;
 
 
 /**
@@ -116,6 +117,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	@Override
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
+		failIfMultiSpan(spec, qtx);
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
 		if (useFragmentParser) {

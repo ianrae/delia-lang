@@ -1,5 +1,7 @@
 package org.delia.db;
 
+import org.delia.zqueryresponse.LetSpanEngine;
+
 /**
  * Additional parameters for DBInterface.executeQuery.
  * 
@@ -9,4 +11,5 @@ package org.delia.db;
 public class QueryContext { 
 	public boolean loadFKs;
 	public boolean pruneParentRelationFlag;
+	public LetSpanEngine letSpanEngine;
 }
