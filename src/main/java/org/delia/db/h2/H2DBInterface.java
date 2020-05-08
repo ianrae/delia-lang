@@ -46,6 +46,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zqueryresponse.LetSpan;
 
 
 /**
@@ -82,7 +83,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		
 		if (useFragmentParser) {
 //			log.log("FRAG PARSER INSERT....................");
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
 			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
 			String typeName = dval.getType().getName();
 			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
@@ -117,6 +118,8 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 
 	@Override
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
+		List<LetSpan> spanL = buildSpans(spec, qtx);
+		failIfMultiSpan(spec, qtx, spanL);
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
 		
@@ -124,7 +127,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 //			log.log("FRAG PARSER-QUERY....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
 			SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
@@ -194,7 +197,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 //			log.log("FRAG PARSER DELETE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
@@ -228,7 +231,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 //			log.log("FRAG PARSER UPDATE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
 			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
@@ -270,7 +273,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 //			log.log("FRAG PARSER UPSERT....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
 			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			

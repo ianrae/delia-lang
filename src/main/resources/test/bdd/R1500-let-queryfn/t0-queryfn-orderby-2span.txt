@@ -16,6 +16,7 @@ thenType: struct
 
 ---
 title: 1 orderby
+#TODO: fix. fetch should be retrieving all of Address not just pk
 given:
 when:
   let x = Customer[true].fetch('addr').orderBy('x', desc)

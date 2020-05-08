@@ -392,14 +392,19 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		}
 		return foundResult;
 	}
-	protected void failIfMultiSpan(QuerySpec spec, QueryContext qtx) {
+	protected void failIfMultiSpan(QuerySpec spec, QueryContext qtx, List<LetSpan> spanL) {
 		if (qtx.letSpanEngine == null) return;
 		
-		List<LetSpan> spanL = qtx.letSpanEngine.buildAllSpans(spec.queryExp);
 		if (spanL.size() > 1) {
 			String msg = "Query of '%s' contains %d spans. Only one span supported in current version";
 			DeliaExceptionHelper.throwError("db-multiple-spans-not-supported", msg, spec.queryExp.typeName, spanL.size());
 		}
+	}
+	protected List<LetSpan> buildSpans(QuerySpec spec, QueryContext qtx) {
+		if (qtx.letSpanEngine == null) return null;
+		
+		List<LetSpan> spanL = qtx.letSpanEngine.buildAllSpans(spec.queryExp);
+		return spanL;
 	}
 
 

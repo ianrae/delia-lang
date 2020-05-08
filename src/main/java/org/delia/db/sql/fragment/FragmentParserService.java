@@ -6,6 +6,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
+import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryTypeDetector;
@@ -13,6 +14,7 @@ import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zqueryresponse.LetSpan;
 
 public class FragmentParserService extends ServiceBase {
 	public int nextAliasIndex = 0;
@@ -28,9 +30,10 @@ public class FragmentParserService extends ServiceBase {
 	public DBInterface dbInterface;
 	public DBAccessContext dbctx;
 	public SqlHelperFactory sqlHelperFactory;
+	public SpanHelper spanHelper;
 	
 	public FragmentParserService(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
-			DBInterface dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen) {
+			DBInterface dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -40,6 +43,8 @@ public class FragmentParserService extends ServiceBase {
 		this.dbctx = dbctx;
 		this.sqlHelperFactory = sqlHelperFactory;
 		this.whereGen = whereGen; 
+		this.spanHelper = spanL == null ? null : new SpanHelper(spanL);
+
 		
 		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry);
 		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
