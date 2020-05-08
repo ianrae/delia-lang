@@ -15,12 +15,9 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.SqlHelperFactory;
-import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -475,27 +472,16 @@ public class AssocCrudTests extends FragmentParserTestBase {
 
 		return parser;
 	}
-	private UpdateFragmentParser createParser(DeliaDao dao) {
-		List<TableInfo> tblinfoL = createTblInfoL(); 
-		return createParser(dao, tblinfoL);
-	}
 	private UpdateFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		DBAccessContext dbctx = new DBAccessContext(runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
+		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}
 
-	private void runAndChk(UpdateStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.renderSelect(selectFrag);
-		log.log(sql);
-		assertEquals(expected, sql);
-	}
 	private void runAndChkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
 		SqlStatementGroup stgroup = fragmentParser.renderUpdateGroup(selectFrag);
 		currentGroup = stgroup;
@@ -547,10 +533,6 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		return selectFrag;
 	}
 
-	private UpdateStatementExp buildFromSrc(String src) {
-		List<TableInfo> tblinfoL = this.createTblInfoL();
-		return buildFromSrc(src, tblinfoL);
-	}
 	private UpdateStatementExp buildFromSrc(String src, List<TableInfo> tblinfoL) {
 		DeliaDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();

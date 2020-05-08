@@ -14,11 +14,8 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBAccessContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.SqlHelperFactory;
-import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
@@ -417,7 +414,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 	private UpdateFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao);
+		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;

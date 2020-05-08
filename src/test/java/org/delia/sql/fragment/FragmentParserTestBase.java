@@ -154,9 +154,11 @@ public class FragmentParserTestBase extends NewBDDBase {
 		}
 	}
 	
-	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaDao dao) {
+	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaDao dao, List<TableInfo> tblinfoL) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
-		List<TableInfo> tblinfoL = new ArrayList<>();		
+		if (tblinfoL == null) {
+			tblinfoL = new ArrayList<>();		
+		}
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
 		return fpSvc;
