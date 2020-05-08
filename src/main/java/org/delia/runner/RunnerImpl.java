@@ -699,6 +699,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 		
 		private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
+			if (dbInterface.getCapabilities().supportsOffsetAndLimit()) {
+				return qresp; //don't need span engine. db does it.
+			}
 //			boolean flag = true;
 //			if (flag) {
 				QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp);

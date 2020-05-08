@@ -18,7 +18,7 @@ thenType: struct
 title: 1 orderby
 given:
 when:
-  let x = Customer[true].orderBy('x', desc)
+  let x = Customer[true].fetch('addr').orderBy('x', desc)
 then:
 value:a:Customer {
 vid:57

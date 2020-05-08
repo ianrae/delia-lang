@@ -296,6 +296,7 @@ public class FKHelper extends ServiceBase {
 		String assocField2 = actualTblName1.equalsIgnoreCase(tbl.name) ? "leftv" : "rightv";
 		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag, adjustment);
 		details.mergeRows = true;
+		details.isManyToMany = true;
 		details.mergeOnField = otherRule.relInfo.fieldName;
 	}
 

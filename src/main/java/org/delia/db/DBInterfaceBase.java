@@ -26,6 +26,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
@@ -107,7 +108,11 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		try {
 			list = doBuildDValueList(rs, dtype, dbctx);
 			if (details.mergeRows) {
-				list = mergeRows(list, dtype, details);
+				if (details.isManyToMany) {
+					list = mergeRowsManyToMany(list, dtype, details);
+				} else {
+					list = mergeRowsOneToMany(list, dtype, details);
+				}
 			}
 		} catch (ValueException e) {
 			//				e.printStackTrace();
@@ -150,7 +155,7 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	 * @param details query details
 	 * @return merged rows
 	 */
-	protected List<DValue> mergeRows(List<DValue> rawList, DStructType dtype, QueryDetails details) {
+	protected List<DValue> mergeRowsOneToMany(List<DValue> rawList, DStructType dtype, QueryDetails details) {
 		List<DValue> list = new ArrayList<>();
 		List<DValue> foreignKeyL = new ArrayList<>();
 		DValue firstVal = null;
@@ -181,6 +186,62 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		}
 
 		return list;
+	}
+	/**
+	 * On a Many-to-many relation our query returns multiple rows in order to get all
+	 * the 'many' ids. Merge into a single row.
+	 * @param rawList list of dvalues to merge
+	 * @param dtype of values
+	 * @param details query details
+	 * @return merged rows
+	 */
+	protected List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details) {
+		List<DValue> list = new ArrayList<>();
+		int i = 0;
+		List<DValue> subL = new ArrayList<>();
+		for(DValue dval: rawList) {
+			DValue keyVal = DValueHelper.findPrimaryKeyValue(dval);
+			fillSubL(rawList, keyVal, dval, subL); //other values with same primary key
+			if (subL.isEmpty()) {
+				list.add(dval);
+			} else {
+				List<DValue> toMergeL = new ArrayList<>();
+				for(DValue subVal: subL) {
+					DValue inner = subVal.asStruct().getField(details.mergeOnField);
+					if (inner != null) {
+						DRelation drel = inner.asRelation();
+						toMergeL.add(drel.getForeignKey());
+					}
+				}
+				//and add back into dval
+				DValue inner2 = dval.asStruct().getField(details.mergeOnField);
+				if (inner2 == null) {
+					//fix later!! TODO
+				}
+				DRelation drel2 = inner2.asRelation();
+				drel2.getMultipleKeys().addAll(toMergeL);
+				list.add(dval);
+			}
+			
+			i++;
+		}
+
+		return list;
+	}
+
+	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
+		subL.clear();
+		String s2 = targetKeyVal.asString();
+		for(DValue tmp: rawList) {
+			if (tmp == skip) {
+				continue;
+			}
+			DValue keyVal = DValueHelper.findPrimaryKeyValue(tmp);
+			String s1 = keyVal.asString(); //TODO: need better way to compare dval
+			if (s1.equals(s2)) {
+				subL.add(tmp);
+			}
+		}
 	}
 
 	protected List<DValue> doBuildDValueList(ResultSet rs, DStructType dtype, DBAccessContext dbctx) throws Exception {

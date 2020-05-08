@@ -289,17 +289,13 @@ public class PostgresBDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
+		testIndexToRun = 0;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
 //		runR900File("t0-update-mm-other-othertbl.txt", 2);
-		runR1000File("t0-upsert-no-update.txt", 2);
-		runR1000File("t0-upsert-mm-id.txt", 4);
-		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
-		runR1000File("t0-upsert-mm-all.txt", 1);
-		runR1000File("t0-upsert-mm-other.txt", 1);
+		runR1500File("t0-queryfn-orderby-2span.txt", 2);
 	}
 	
 	//---
