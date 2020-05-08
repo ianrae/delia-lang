@@ -69,8 +69,7 @@ public class HLSTests extends NewBDDBase {
 		
 	}
 	public static class FILElement implements HLSElement {
-
-		private QueryExp queryExp;
+		public QueryExp queryExp;
 
 		public FILElement(QueryExp queryExp) {
 			this.queryExp = queryExp;
@@ -83,8 +82,7 @@ public class HLSTests extends NewBDDBase {
 		public Integer offset; //may be null
 	}
 	public static class FElement implements HLSElement {
-
-		private TypePair fieldPair;
+		public TypePair fieldPair;
 
 		public FElement(TypePair fieldPair) {
 			this.fieldPair = fieldPair;
@@ -92,7 +90,7 @@ public class HLSTests extends NewBDDBase {
 		
 	}
 	public static class RElement implements HLSElement {
-		private TypePair rfieldPair;
+		public TypePair rfieldPair;
 
 		public RElement(TypePair rfieldPair) {
 			this.rfieldPair = rfieldPair;
@@ -100,8 +98,7 @@ public class HLSTests extends NewBDDBase {
 		
 	}
 	public static class GElement implements HLSElement {
-
-		private QueryFuncExp qfe;
+		public QueryFuncExp qfe;
 
 		public GElement(QueryFuncExp qfe) {
 			this.qfe = qfe;
@@ -114,7 +111,7 @@ public class HLSTests extends NewBDDBase {
 		public boolean allFKs = false;
 	}
 	
-	public static class HLSQueryStatement implements HLSElement {
+	public static class HLSQuerySpan implements HLSElement {
 		public DStructType fromType;
 		public DType resultType;
 		
@@ -128,7 +125,13 @@ public class HLSTests extends NewBDDBase {
 		
 	}
 
-	
+	public static class HLSQueryStatement implements HLSElement {
+		public List<HLSQuerySpan> hlspanL = new ArrayList<>();
+		
+		public HLSQuerySpan getMainHLSSpan() {
+			return hlspanL.get(0);
+		}
+	}
 	
 	
 	public static class HLSEngine extends ServiceBase {
@@ -145,46 +148,67 @@ public class HLSTests extends NewBDDBase {
 			this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null);
 		}
 		
-		public HLSQueryStatement generate(QueryExp queryExp, List<LetSpan> spanL) {
+		public HLSQueryStatement generateStatement(QueryExp queryExp, List<LetSpan> spanL) {
 			this.queryExp = queryExp;
 			this.spanL = spanL;
 			this.mainStructType = (DStructType) registry.getType(queryExp.typeName);
-
 			
-			HLSQueryStatement hlstat = new HLSQueryStatement();
-			hlstat.fromType = determineFromType();
+			HLSQueryStatement hlstatement = new HLSQueryStatement();
+			if (spanL.isEmpty()) {
+				HLSQuerySpan hsltat = generateSpan(0, null);
+				hlstatement.hlspanL.add(hsltat);
+				return hlstatement;
+			}
+			
+			int i = 0;
+			for(LetSpan span: spanL) {
+				HLSQuerySpan hsltat = generateSpan(i, span);
+				hlstatement.hlspanL.add(hsltat);
+				i++;
+			}
+			return hlstatement;
+		}
+		
+		
+		public HLSQuerySpan generateSpan(int i, LetSpan span) {
+			HLSQuerySpan hlstat = new HLSQuerySpan();
+			hlstat.fromType = determineFromType(i);
 			hlstat.mtEl = new MTElement(hlstat.fromType);
-			hlstat.resultType = determineResultType();
+			hlstat.resultType = determineResultType(i);
 			
 			if (spanL.isEmpty()) {
 				return hlstat;
 			}
 			
-			hlstat.filEl = new FILElement(queryExp);
+			hlstat.filEl = (i > 0) ? null : new FILElement(queryExp);
 			
-			TypePair rfieldPair = findLastRField();
+			TypePair rfieldPair = findLastRField(i);
 			if (rfieldPair != null) {
 				hlstat.rEl = new RElement(rfieldPair);
 			}
 			
-			TypePair fieldPair = findLastField();
+			TypePair fieldPair = findLastField(i);
 			if (rfieldPair != null) {
 				hlstat.fEl = new FElement(fieldPair);
 			}
 			
-			fillGElements(hlstat.gElList);
+			fillGElements(i, hlstat.gElList);
 
-			hlstat.subEl = buildSubEl();
-			hlstat.oloEl = buildOLO();
+			hlstat.subEl = buildSubEl(i);
+			hlstat.oloEl = buildOLO(i);
 			
 			return hlstat;
 		}
 
-		private OLOElement buildOLO() {
+		private OLOElement buildOLO(int iStart) {
 			OLOElement oloel = new OLOElement();
 			boolean found = false;
-			//TODO: fix. not correct to combine across all spans
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
+				
 				for(QueryFuncExp qfe: span.qfeL) {
 					if (qfe instanceof QueryFieldExp) {
 					} else if (qfe.funcName.equals("orderBy")){
@@ -201,15 +225,19 @@ public class HLSTests extends NewBDDBase {
 						found = true;
 					}
 				}
+				i++;
 			}
 			return found ? oloel : null;
 		}
 
-		private SUBElement buildSubEl() {
+		private SUBElement buildSubEl(int iStart) {
 			SUBElement subel = new SUBElement();
 			boolean found = false;
-			//TODO: fix. not correct to combine across all spans
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
 				for(QueryFuncExp qfe: span.qfeL) {
 					if (qfe instanceof QueryFieldExp) {
 					} else if (qfe.funcName.equals("fetch")){
@@ -221,13 +249,17 @@ public class HLSTests extends NewBDDBase {
 						found = true;
 					}
 				}
+				i++;
 			}
 			return found ? subel : null;
 		}
 
-		private void fillGElements(List<GElement> gElList) {
-			//TODO: fix. not correct to combine across all spans
+		private void fillGElements(int iStart, List<GElement> gElList) {
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
 				for(QueryFuncExp qfe: span.qfeL) {
 					if (qfe instanceof QueryFieldExp) {
 					} else if (! isOLOFn(qfe)){
@@ -235,6 +267,7 @@ public class HLSTests extends NewBDDBase {
 						gElList.add(gel);
 					}
 				}
+				i++;
 			}
 		}
 
@@ -245,47 +278,66 @@ public class HLSTests extends NewBDDBase {
 			return oloList.contains(fnName);
 		}
 
-		private TypePair findLastField() {
+		private TypePair findLastField(int iStart) {
 			DStructType currentType = mainStructType;
 			TypePair lastField = null;
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
 				TypePair fieldPair = findFField(span, currentType);
 				if (fieldPair != null) {
 					lastField = fieldPair;
 				}
+				i++;
 			}
 			return lastField;
 		}
-		private TypePair findLastRField() {
+		private TypePair findLastRField(int iStart) {
 			DStructType currentType = mainStructType;
 			TypePair lastRField = null;
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
 				TypePair rfieldPair = findRField(span, currentType);
 				if (rfieldPair != null) {
 					currentType = (DStructType) rfieldPair.type;
 					lastRField = rfieldPair;
 				}
+				i++;
 			}
 			return lastRField;
 		}
 
-		private DStructType determineFromType() {
+		private DStructType determineFromType(int iStart) {
 			DStructType currentType = mainStructType;
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
 				TypePair rfieldPair = findRField(span, currentType);
 				if (rfieldPair != null) {
 					currentType = (DStructType) rfieldPair.type;
 				}
+				i++;
 			}
 			
 			return currentType;
 		}
 
-		private DType determineResultType() {
+		private DType determineResultType(int iStart) {
 			DStructType currentType = mainStructType;
 			DType resultType = currentType;
 			
+			int i = 0;
 			for(LetSpan span: spanL) {
+				if (i < iStart) {
+					continue;
+				}
 				TypePair rfieldPair = findRField(span, currentType);
 				if (rfieldPair != null) {
 					currentType = (DStructType) rfieldPair.type;
@@ -301,7 +353,7 @@ public class HLSTests extends NewBDDBase {
 				if (gtype != null) {
 					resultType = gtype;
 				}
-				
+				i++;
 			}
 			
 			return resultType;
@@ -358,7 +410,7 @@ public class HLSTests extends NewBDDBase {
 		
 		
 		HLSEngine hlsEngine = new HLSEngine(delia.getFactoryService(), session.getExecutionContext().registry);
-		HLSQueryStatement hls = hlsEngine.generate(queryExp, spanL);
+		HLSQuerySpan hls = hlsEngine.generate(queryExp, spanL);
 		assertEquals("Flight", hls.mtEl.getTypeName());
 	}
 	
