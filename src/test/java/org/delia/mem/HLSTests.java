@@ -151,6 +151,10 @@ public class HLSTests extends NewBDDBase {
 		public List<String> fetchL = new ArrayList<>();
 		public List<String> fksL = new ArrayList<>();
 		public boolean allFKs = false;
+		
+		public boolean containsFetch() {
+			return !fetchL.isEmpty();
+		}
 
 		@Override
 		public String toString() {
@@ -167,6 +171,10 @@ public class HLSTests extends NewBDDBase {
 			}
 			String s = String.format("SUB:%b%s", allFKs, s2);
 			return s;
+		}
+
+		public boolean isEmpty() {
+			return fetchL.isEmpty() && fksL.isEmpty() && !allFKs;
 		}
 	}
 	
@@ -285,7 +293,6 @@ public class HLSTests extends NewBDDBase {
 				return hlstat;
 			}
 			
-			
 			TypePair rfieldPair = findLastRField(i);
 			if (rfieldPair != null) {
 				hlstat.rEl = new RElement(rfieldPair);
@@ -300,6 +307,16 @@ public class HLSTests extends NewBDDBase {
 
 			hlstat.subEl = buildSubEl(i);
 			hlstat.oloEl = buildOLO(i);
+			
+			//adjustments
+			if (hlstat.fEl != null && hlstat.subEl != null) {
+				if (hlstat.subEl.containsFetch()) {
+					hlstat.subEl.fetchL.clear(); //fetch not needed
+					if (hlstat.subEl.isEmpty()) {
+						hlstat.subEl = null; //remove completely
+					}
+				}
+			}
 			
 			return hlstat;
 		}
@@ -374,7 +391,7 @@ public class HLSTests extends NewBDDBase {
 				
 				for(QueryFuncExp qfe: span.qfeL) {
 					if (qfe instanceof QueryFieldExp) {
-					} else if (! isOLOFn(qfe)){
+					} else if (! isOLOFn(qfe) && !isSUBFn(qfe)){
 						GElement gel = new GElement(qfe);
 						gElList.add(gel);
 					}
@@ -386,6 +403,12 @@ public class HLSTests extends NewBDDBase {
 		private boolean isOLOFn(QueryFuncExp qfe) {
 			String fnName = qfe.funcName;
 			String[] ar = {"orderBy", "limit", "offset"};
+			List<String> oloList = Arrays.asList(ar);
+			return oloList.contains(fnName);
+		}
+		private boolean isSUBFn(QueryFuncExp qfe) {
+			String fnName = qfe.funcName;
+			String[] ar = {"fetch", "fks"};
 			List<String> oloList = Arrays.asList(ar);
 			return oloList.contains(fnName);
 		}
@@ -552,14 +575,16 @@ public class HLSTests extends NewBDDBase {
 	@Test
 	public void testOneSpanSub() {
 		useCustomerSrc = true;
-		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
-		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(fetch),SUB:false,addr}");
+		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
+		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
 		
-		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(fetch,first),SUB:false,addr}");
-		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(fetch),SUB:false,addr,OLO:id,null,null}");
+		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
+		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
 
 		//this one doesn't need to do fetch since just getting x
-		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,(fetch),SUB:false,addr}");
+		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
+		
+		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
 
 		
 //		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
@@ -582,7 +607,7 @@ public class HLSTests extends NewBDDBase {
 		
 		useCustomerSrc = true;
 //		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
-		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,(fetch),SUB:false,addr}");
+		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
 		
 	}
 	
