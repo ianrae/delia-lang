@@ -15,7 +15,6 @@ import org.delia.bdd.core.BDDParser;
 import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.DBInterfaceCreator;
-import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;

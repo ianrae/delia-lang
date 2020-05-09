@@ -13,4 +13,5 @@ public class DeliaOptions {
 	public boolean enableExecution = true;
 	public boolean useSafeMigrationPolicy = true;
 	public boolean enableAutomaticMigrations = true;
+	public boolean useHLS = false;
 }

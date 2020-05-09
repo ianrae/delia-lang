@@ -143,7 +143,7 @@ public class LetStatementRunner extends ServiceBase {
 		QuerySpec spec = resolveFilterVars(queryExp);
 		QueryContext qtx = buildQueryContext(spec);
 		
-		boolean flag = false;
+		boolean flag = mgr != null;
 		QueryResponse qresp;
 		if (flag) {
 			spec.queryExp = queryExp;

@@ -100,7 +100,7 @@ public class HLSManagerTests extends HLSTestBase {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
-		HLSManager mgr = new HLSManager(delia, session.getExecutionContext().registry);
+		HLSManager mgr = new HLSManager(delia, session.getExecutionContext().registry, session);
 		mgr.setGenerateSQLforMemFlag(generateSQLforMemFlag);
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
