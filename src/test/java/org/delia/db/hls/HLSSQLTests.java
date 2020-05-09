@@ -57,7 +57,7 @@ public class HLSSQLTests extends HLSTestBase {
 					bHasFK = relinfoA.isParent;
 					break;
 				case ONE_TO_MANY:
-					bHasFK = true;
+					bHasFK = relinfoA.isParent;
 					break;
 				case MANY_TO_MANY:
 					break;
@@ -66,7 +66,7 @@ public class HLSSQLTests extends HLSTestBase {
 				String s;
 				if (bHasFK) {
 					DStructType pairType = (DStructType) pair.type; //Address
-					RelationInfo relinfoB = DRuleHelper.findOtherSideOne(pairType, hlspan.fromType);
+					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
 					PrimaryKey pk = pairType.getPrimaryKey();
 //					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
@@ -76,7 +76,7 @@ public class HLSSQLTests extends HLSTestBase {
 					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				} else {
 					DStructType pairType = (DStructType) pair.type; //Address
-					RelationInfo relinfoB = DRuleHelper.findOtherSideOne(pairType, hlspan.fromType);
+					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
 					PrimaryKey pk = pairType.getPrimaryKey();
 //					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
@@ -88,6 +88,20 @@ public class HLSSQLTests extends HLSTestBase {
 				
 				sc.out(s);
 			}
+		}
+
+		private RelationInfo findOtherSide(DStructType pairType, DStructType fromType) {
+			RelationInfo relinfo = DRuleHelper.findOtherSideOne(pairType, fromType);
+			if (relinfo != null) {
+				return relinfo;
+			}
+
+			relinfo = DRuleHelper.findOtherSideMany(pairType, fromType);
+			if (relinfo != null) {
+				return relinfo;
+			}
+			//err!!
+			return null;
 		}
 
 		private List<TypePair> genJoinList(HLSQuerySpan hlspan) {
