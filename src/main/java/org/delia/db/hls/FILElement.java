@@ -8,6 +8,10 @@ public class FILElement implements HLSElement {
 	public FILElement(QueryExp queryExp) {
 		this.queryExp = queryExp;
 	}
+	
+	public boolean isAll() {
+		return queryExp.filter.cond.equals("true");
+	}
 
 	@Override
 	public String toString() {

@@ -20,6 +20,8 @@ public class HLSQuerySpan implements HLSElement {
 	public SUBElement subEl;
 	public OLOElement oloEl;
 	
+	public boolean doubleFlip = false;
+	
 	@Override
 	public String toString() {
 		StringJoiner joiner = new StringJoiner(",");

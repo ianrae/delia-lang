@@ -38,7 +38,7 @@ public class HLSSQLTests extends HLSTestBase {
 		public boolean flip = false;
 		
 		public String getTableFor(DStructType type1, DStructType type2) {
-			return flip ? "AddressCustomerAssoc" : "CustomerAddressAssoc";
+			return flip ? "AddressCustomerAssoc" : "CustomerAddressAssoc"; //type1 on left
 		}
 		public boolean isFlipped() {
 			return flip;
@@ -70,7 +70,7 @@ public class HLSSQLTests extends HLSTestBase {
 					bHasFK = relinfoA.isParent;
 					break;
 				case MANY_TO_MANY:
-					doManyToMany(sc, hlspan, pair, relinfoA, true);
+					doManyToMany(sc, hlspan, pair, relinfoA);
 					return;
 				}
 				
@@ -101,12 +101,12 @@ public class HLSSQLTests extends HLSTestBase {
 			}
 		}
 
-		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA, boolean doubleFlip) {
+		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			boolean flipLeftRight = assocTblMgr.isFlipped();
-			if (!doubleFlip) {
+			if (hlspan.doubleFlip) {
 				flipLeftRight = !flipLeftRight;
 			}
 			
@@ -291,7 +291,7 @@ public class HLSSQLTests extends HLSTestBase {
 						RelationInfo relinfoA = DRuleHelper.findMatchingRuleInfo(hlspan1.fromType, pair);
 						if (RelationCardinality.MANY_TO_MANY.equals(relinfoA.cardinality)) {
 							TypePair tmp = new TypePair("xx", relinfoA.farType);
-							doManyToMany(sc, hlspan1, tmp, relinfoA, false);
+							doManyToMany(sc, hlspan1, tmp, relinfoA);
 							
 							joinL.add(pair);
 						}
@@ -324,11 +324,25 @@ public class HLSSQLTests extends HLSTestBase {
 			if (hls.hlspanL.size() == 1) {
 				return processOneStatement(hls.getMainHLSSpan(), false);
 			} else if (hls.hlspanL.size() == 2) {
-				String sql = processOneStatement(hls.hlspanL.get(1), true);
-				String secondaryJoin = generateSecondaryJoin(hls.hlspanL.get(1), hls.hlspanL.get(0));
 				
-				String ss = String.format("%s %s", sql, secondaryJoin);
-				return ss;
+				HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
+				if (hlspan1.filEl.isAll()) {
+					SUBElement subEl = new SUBElement();
+					subEl.allFKs = true;
+					hlspan1.subEl = subEl;
+					hlspan1.doubleFlip = true;
+					//1 - Address, 2 - Customer
+					
+					String sql = processOneStatement(hlspan1, false);
+					return sql;
+				} else {
+					return "sss";
+				}
+//				String sql = processOneStatement(hlspan1, false);
+//				String secondaryJoin = ""; //generateSecondaryJoin(hlspan1, hls.hlspanL.get(0));
+//				
+//				String ss = String.format("%s %s", sql, secondaryJoin);
+//				return ss;
 			} else {
 				return null; //not supported
 			}
