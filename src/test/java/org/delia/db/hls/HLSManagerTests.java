@@ -20,12 +20,17 @@ import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.log.Log;
+import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
+import org.delia.util.DRuleHelper;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
 import org.junit.Before;
@@ -76,7 +81,7 @@ public class HLSManagerTests extends HLSTestBase {
 			//{Address->Address,MT:Address,[cust in [55,56],()}
 			
 			String ss = hlspan1.fromType.getName();
-			String s3 = "cust"; //fix!!
+			String field2 = determineRelField(hlspan1, hlspan2);//"cust"; //fix!!
 			StringJoiner joiner = new StringJoiner(",");
 			for(DValue dval: qresp.dvalList) {
 				if (dval != null && dval.getType().isStructShape()) {
@@ -87,7 +92,7 @@ public class HLSManagerTests extends HLSTestBase {
 					joiner.add(pkvalue.asString());
 				}
 			}
-			String deliaSrc = String.format("%s[%s in [%s]]", ss, s3, joiner.toString());
+			String deliaSrc = String.format("%s[%s in [%s]]", ss, field2, joiner.toString());
 			log.log(deliaSrc);
 			DeliaImpl deliaimpl = (DeliaImpl) session.getDelia();
 			List<Exp> expL = deliaimpl.continueCompile(deliaSrc, session);
@@ -102,7 +107,49 @@ public class HLSManagerTests extends HLSTestBase {
 			QueryResponse qresp2 = dbexecutor.executeHLSQuery(clone, sql, qtx);
 			log.log("%b", qresp2.ok);
 			
+			//merge results from qresp2 into qresp
+			String field1 = hlspan1.rEl.rfieldPair.name;
+			for(DValue dval: qresp.dvalList) {
+				//dval is a customer. find address in qresp2 whose .cust is pk of dval
+				DValue inner = findIn(dval, qresp2, field2);
+				if (inner != null) {
+					dval.asMap().put(field1, inner);
+				}
+			}
+			
 			return qresp;
+		}
+
+		private DValue findIn(DValue dval, QueryResponse qresp2, String targetField) {
+			DStructType structType = (DStructType) dval.getType();
+			PrimaryKey pk = structType.getPrimaryKey(); 
+			Object obj1 = dval.asStruct().getField(pk.getFieldName()).getObject();
+			
+			for(DValue x: qresp2.dvalList) {
+				DValue inner = x.asStruct().getField(targetField);
+				if (inner != null) {
+					DRelation drel = inner.asRelation();
+					Object obj2 = drel.getForeignKey().getObject();
+					if (obj1.equals(obj2)) {
+						return x;
+					}
+				}
+			}
+			
+			return null;
+		}
+
+		private String determineRelField(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2) {
+			String field1 = hlspan1.rEl.rfieldPair.name;
+			RelationOneRule ruleOne = DRuleHelper.findOneRule(hlspan2.fromType, field1);
+			if (ruleOne != null) {
+				RelationInfo relinfo = DRuleHelper.findOtherSideOne(ruleOne.relInfo.farType, hlspan1.fromType);
+				return relinfo.fieldName;
+			} else {
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(hlspan2.fromType, field1);
+				RelationInfo relinfo = DRuleHelper.findOtherSideMany(ruleMany.relInfo.farType, hlspan2.fromType);
+				return relinfo.fieldName;
+			}
 		}
 
 		private LetStatementExp findLetStatement(List<Exp> expL) {
@@ -304,6 +351,15 @@ public class HLSManagerTests extends HLSTestBase {
 		
 		List<DValue> list = qresp.dvalList;
 		assertEquals(2, list.size());
+		DValue dval = list.get(0);
+		assertEquals(55, dval.asStruct().getField("cid").asInt());
+		DValue inner = dval.asStruct().getField("addr");
+		assertEquals(100, inner.asStruct().getField("id").asInt());
+		
+		dval = list.get(1);
+		assertEquals(56, dval.asStruct().getField("cid").asInt());
+		inner = dval.asStruct().getField("addr");
+		assertEquals(null, inner);
 	}	
 	
 
