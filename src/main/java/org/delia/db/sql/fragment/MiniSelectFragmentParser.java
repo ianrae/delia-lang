@@ -6,7 +6,14 @@ import org.delia.db.QuerySpec;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 
-//single use!!!
+/**
+ * A mini version of SelectFragmentParser, for use by HLS
+ * -single use!
+ * 
+ * 
+ * @author Ian Rae
+ *
+ */
 public class MiniSelectFragmentParser extends MiniFragmentParserBase {
 
 	public MiniSelectFragmentParser(FactoryService factorySvc, DTypeRegistry registry, WhereFragmentGenerator whereGen) {

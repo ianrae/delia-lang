@@ -10,6 +10,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
+import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
@@ -23,11 +24,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private AliasAllocator aliasAlloc = new AliasAllocator();
 	private SqlJoinHelper joinHelper;
 	private AssocTblManager assocTblMgr;
+	private MiniSelectFragmentParser miniSelectParser;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr);
 		this.assocTblMgr = assocTblMgr;
+		this.miniSelectParser = miniSelectParser;
 	}
 
 	@Override

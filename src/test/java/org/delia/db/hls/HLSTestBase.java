@@ -20,8 +20,11 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.db.sql.fragment.MiniSelectFragmentParser;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
+import org.delia.type.DTypeRegistry;
 import org.delia.util.StringTrail;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
@@ -176,6 +179,15 @@ public class HLSTestBase extends NewBDDBase {
 	@Override
 	public DBInterface createForTest() {
 		return new MemDBInterface();
+	}
+	
+	protected HLSSQLGenerator createGen() {
+		DTypeRegistry registry = session.getExecutionContext().registry;
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null);
+		MiniSelectFragmentParser mini = new MiniSelectFragmentParser(delia.getFactoryService(), registry, whereGen);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini);
+		gen.setRegistry(session.getExecutionContext().registry);
+		return gen;
 	}
 
 }

@@ -75,9 +75,8 @@ public class HLSSQL11Tests extends HLSTestBase {
 	}
 
 	private void sqlchk(String src, String sqlExpected) {
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr);
 		HLSQueryStatement hls = buildHLS(src);
-		gen.setRegistry(session.getExecutionContext().registry);
+		HLSSQLGenerator gen = createGen();
 		String sql = gen.buildSQL(hls);
 		log.log("sql: " + sql);
 		assertEquals(sqlExpected, sql);
