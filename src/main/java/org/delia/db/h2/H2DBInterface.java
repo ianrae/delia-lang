@@ -453,7 +453,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		
 		SqlStatement statement = new SqlStatement();
 		statement.sql = sql;
-		//TODO: fill in params
+		statement.paramL = hls.getMainHLSSpan().paramL; //TODO fix for multiple
 		
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);
