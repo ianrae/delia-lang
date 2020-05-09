@@ -19,6 +19,7 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.hls.HLSSQLTests.AssocTblManager;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
@@ -117,6 +118,9 @@ public class HLSTestBase extends NewBDDBase {
 	protected boolean useCustomer11OtherWaySrc = false;
 	protected boolean useCustomer1NSrc = false;
 	protected boolean useCustomer1NOtherWaySrc = false;
+	
+	//---
+	protected AssocTblManager assocTblMgr = new AssocTblManager();
 	
 	protected DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();

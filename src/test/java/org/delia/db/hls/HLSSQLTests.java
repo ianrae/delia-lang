@@ -36,13 +36,23 @@ import org.junit.Test;
  *
  */
 public class HLSSQLTests extends HLSTestBase {
+	
+	public static class AssocTblManager {
+		public boolean flip = false;
+		
+		public String getTableFor(DStructType type1, DStructType type2) {
+			return flip ? "AddressCustomerAssoc" : "CustomerAddressAssoc";
+		}
+	}
+	
 
 	public static class SqlJoinHelper {
-		
 		private AliasAllocator aliasAlloc;
+		private AssocTblManager assocTblMgr;
 		
-		public SqlJoinHelper(AliasAllocator aliasAlloc) {
+		public SqlJoinHelper(AliasAllocator aliasAlloc, AssocTblManager assocTblMgr) {
 			this.aliasAlloc = aliasAlloc;
+			this.assocTblMgr = assocTblMgr;
 		}
 
 		public void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -60,7 +70,8 @@ public class HLSSQLTests extends HLSTestBase {
 					bHasFK = relinfoA.isParent;
 					break;
 				case MANY_TO_MANY:
-					break;
+					doManyToMany(sc, hlspan, pair, relinfoA);
+					return;
 				}
 				
 				String s;
@@ -88,6 +99,30 @@ public class HLSSQLTests extends HLSTestBase {
 				
 				sc.out(s);
 			}
+		}
+
+		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
+			String s;
+			boolean flipLeftRight = false;
+			if (flipLeftRight) {
+				String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
+				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
+				String on1 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //a.id
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rightv"); //b.cust
+				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+			} else {
+				DStructType pairType = (DStructType) pair.type; //Address
+				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
+				// SELECT a.x,c.leftv FROM Customer as a zzLEFT JOIN AddressCustomerAssoc as c ON a.id=c.rightv
+				
+				String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
+				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
+				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rightv"); //a.id
+				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+			}
+			
+			sc.out(s);
 		}
 
 		private RelationInfo findOtherSide(DStructType pairType, DStructType fromType) {
@@ -153,14 +188,30 @@ public class HLSSQLTests extends HLSTestBase {
 			List<TypePair> joinL = genFKJoinList(hlspan);
 
 			for(TypePair pair: joinL) {
-				if (pair.type.isStructShape()) {
-					DStructType pairType = (DStructType) pair.type;
-					PrimaryKey pk = pairType.getPrimaryKey();
-//					fieldL.add(pk.getFieldName());
-					fieldL.add(aliasAlloc.buildAlias(pairType, pk.getFieldName()));
+				DStructType pairType = (DStructType) pair.type;
+				PrimaryKey pk = pairType.getPrimaryKey();
+				
+				RelationInfo relinfoA = DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
+				switch(relinfoA.cardinality) {
+				case ONE_TO_ONE:
+				case ONE_TO_MANY:
+					break;
+				case MANY_TO_MANY:
+					doManyToManyAddFKofJoins(hlspan, fieldL, pair, relinfoA);
+					return;
 				}
+				
+				//					fieldL.add(pk.getFieldName());
+				fieldL.add(aliasAlloc.buildAlias(pairType, pk.getFieldName()));
 			}
 		}
+		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<String> fieldL, TypePair pair,
+				RelationInfo relinfoA) {
+			// TODO Auto-generated method stub
+			//fieldL.add(aliasAlloc.buildAlias(pairType, pk.getFieldName()));
+			
+		}
+
 		public void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
 			List<TypePair> joinL = genFullJoinList(hlspan);
 
@@ -184,22 +235,22 @@ public class HLSSQLTests extends HLSTestBase {
 	
 	public static class AliasAllocator {
 		protected int nextAliasIndex = 0;
-		private Map<DStructType,String> aliasMap = new HashMap<>();
+		private Map<String,String> aliasMap = new HashMap<>(); //typeName,alias
 		
 		public AliasAllocator() {
 		}
 		
-		public void createAlias(DStructType structType) {
+		public void createAlias(String name) {
 			char ch = (char) ('a' + nextAliasIndex++);
 			String s = String.format("%c", ch);
-			aliasMap.put(structType, s);
+			aliasMap.put(name, s);
 		}
 
 		public String findOrCreateFor(DStructType structType) {
-			if (! aliasMap.containsKey(structType)) {
-				createAlias(structType);
+			if (! aliasMap.containsKey(structType.getName())) {
+				createAlias(structType.getName());
 			}
-			return aliasMap.get(structType);
+			return aliasMap.get(structType.getName());
 		}
 		public String buildTblAlias(DStructType structType) {
 			String alias = findOrCreateFor(structType);
@@ -216,7 +267,24 @@ public class HLSSQLTests extends HLSTestBase {
 			String s = String.format("%s.%s", alias, fieldName);
 			return s;
 		}
-
+		
+		//----
+		public String findOrCreateForAssoc(String tblName) {
+			if (! aliasMap.containsKey(tblName)) {
+				createAlias(tblName);
+			}
+			return aliasMap.get(tblName);
+		}
+		public String buildTblAliasAssoc(String tblName) {
+			String alias = findOrCreateForAssoc(tblName);
+			String s = String.format("%s as %s", tblName, alias);
+			return s;
+		}
+		public String buildAliasAssoc(String tblName, String fieldName) {
+			String alias = findOrCreateForAssoc(tblName);
+			String s = String.format("%s.%s", alias, fieldName);
+			return s;
+		}
 
 	}
 	
@@ -247,10 +315,9 @@ public class HLSSQLTests extends HLSTestBase {
 		private AliasAllocator aliasAlloc = new AliasAllocator();
 		private SqlJoinHelper joinHelper;
 
-		public HLSSQLGenerator(FactoryService factorySvc) {
+		public HLSSQLGenerator(FactoryService factorySvc, AssocTblManager assocTblMgr) {
 			super(factorySvc);
-			this.joinHelper = new SqlJoinHelper(aliasAlloc);
-
+			this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr);
 		}
 
 		public String buildSQL(HLSQueryStatement hls) {
@@ -480,8 +547,7 @@ public class HLSSQLTests extends HLSTestBase {
 		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
 
-	//---
-	
+
 	@Before
 	public void init() {
 		createDao();
@@ -490,7 +556,7 @@ public class HLSSQLTests extends HLSTestBase {
 
 
 	private void sqlchk(String src, String sqlExpected) {
-		HLSSQLGenerator gen = new HLSSQLGenerator(delia.getFactoryService());
+		HLSSQLGenerator gen = new HLSSQLGenerator(delia.getFactoryService(), assocTblMgr);
 		HLSQueryStatement hls = buildHLS(src);
 		gen.setRegistry(session.getExecutionContext().registry);
 		String sql = gen.buildSQL(hls);
