@@ -534,12 +534,13 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomerSrc = true;
+		assocTblMgr.flip = false;
 		sqlchk("let x = Customer[55].fks()", 					"SELECT a.id,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.leftv WHERE a.ID=55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv");
-		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
+		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv ORDER BY a.id");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.leftv");
 	}
 
 	//	@Test
@@ -583,12 +584,36 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testDebugSQL() {
 		useCustomerSrc = true;
 		assocTblMgr.flip = false;
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.id,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.leftv WHERE a.ID=55");
-//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
-//		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
-//		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
-//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-//		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
+		
+		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv 
+		sqlchk("let x = Customer[true].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
+
+		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55 
+		sqlchk("let x = Customer[55].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
+
+		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv LEFT JOIN Customer as c WHERE b.leftv=c.id AND c.x > 10 
+		sqlchk("let x = Customer[x > 10].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
+		
+		//		
+		//		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
+		//		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
+		//		
+		//		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
+		//		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
+		//
+		//		//this one doesn't need to do fetch since just getting x
+		//		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
+		//		
+		//		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
+		//		
+		//		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
+		//		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
+		//		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
+		//		
+		//		chk("let x = Customer[true].addr.orderBy('id')", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),OLO:id,null,null}");
+		//		chk("let x = Customer[true].orderBy('id').addr", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,()}");
+		//		chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
+		
 	}
 
 
