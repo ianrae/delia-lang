@@ -3,7 +3,6 @@ package org.delia.db.hls;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.db.hls.HLSSQLTests.HLSSQLGenerator;
 import org.junit.Before;
 import org.junit.Test;
 

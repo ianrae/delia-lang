@@ -19,7 +19,6 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.hls.HLSSQLTests.AssocTblManager;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
