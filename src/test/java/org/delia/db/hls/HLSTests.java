@@ -38,7 +38,7 @@ public class HLSTests extends HLSTestBase {
 	
 	@Test
 	public void testOneSpanSub() {
-		useCustomerSrc = true;
+		useCustomerManyToManySrc = true;
 		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
 		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
 		
@@ -53,7 +53,7 @@ public class HLSTests extends HLSTestBase {
 	
 	@Test
 	public void testOneRelation() {
-		useCustomerSrc = true;
+		useCustomerManyToManySrc = true;
 		chk("let x = Customer[true].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
 		
 		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
@@ -81,7 +81,7 @@ public class HLSTests extends HLSTestBase {
 	public void testDebug() {
 //		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
 		
-		useCustomerSrc = true;
+		useCustomerManyToManySrc = true;
 //		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
 //		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
 		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");

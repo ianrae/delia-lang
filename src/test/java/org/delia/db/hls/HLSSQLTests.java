@@ -564,7 +564,7 @@ public class HLSSQLTests extends HLSTestBase {
 
 	@Test
 	public void testOneSpanSubSQL() {
-		useCustomerSrc = true;
+		useCustomerManyToManySrc = true;
 		assocTblMgr.flip = false;
 		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid=55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
@@ -576,7 +576,7 @@ public class HLSSQLTests extends HLSTestBase {
 
 		@Test
 		public void testOneRelationSQL() {
-			useCustomerSrc = true;
+			useCustomerManyToManySrc = true;
 			
 			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv 
 			sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
@@ -598,7 +598,7 @@ public class HLSSQLTests extends HLSTestBase {
 
 	@Test
 	public void testAssocTableFlip() {
-		useCustomerSrc = true;
+		useCustomerManyToManySrc = true;
 		assocTblMgr.flip = true;
 		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv");
 		
@@ -610,7 +610,7 @@ public class HLSSQLTests extends HLSTestBase {
 	
 	@Test
 	public void testDebugSQL() {
-		useCustomerSrc = true;
+		useCustomerManyToManySrc = true;
 		assocTblMgr.flip = false;
 		
 //		sqlchk("let x = Customer[true].fks()", "SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");

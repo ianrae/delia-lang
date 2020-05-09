@@ -20,7 +20,7 @@ public class HLSSQL11OtherWayTests extends HLSTestBase {
 	public void testOneSpanSubSQL() {
 		useCustomer11OtherWaySrc = true;
 		//TODO: don't actually need both a.addr and b.id. they are the same value
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id WHERE a.ID=55");
+		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id WHERE a.cid=55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id ORDER BY a.id");

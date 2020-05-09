@@ -19,7 +19,7 @@ public class HLSSQL1NTests extends HLSTestBase {
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomer1NSrc = true;
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.ID=55");
+		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.cid=55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust ORDER BY a.id");

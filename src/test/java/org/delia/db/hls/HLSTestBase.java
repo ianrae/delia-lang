@@ -55,7 +55,7 @@ public class HLSTestBase extends NewBDDBase {
 
 	protected QueryExp compileQuery(String src) {
 		String initialSrc;
-		if  (useCustomerSrc) {
+		if  (useCustomerManyToManySrc) {
 			initialSrc = buildCustomerSrc();
 		} else if (useCustomer11Src) {
 			initialSrc = buildCustomer11Src();
@@ -114,7 +114,7 @@ public class HLSTestBase extends NewBDDBase {
 	//---
 	protected Delia delia;
 	protected DeliaSession session;
-	protected boolean useCustomerSrc = false;
+	protected boolean useCustomerManyToManySrc = false;
 	protected boolean useCustomer11Src = false;
 	protected boolean useCustomer11OtherWaySrc = false;
 	protected boolean useCustomer1NSrc = false;
