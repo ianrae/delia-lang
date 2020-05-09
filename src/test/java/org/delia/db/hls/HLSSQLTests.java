@@ -81,9 +81,9 @@ public class HLSSQLTests extends HLSTestBase {
 //					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
 					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
-					String on1 = aliasAlloc.buildAlias(hlspan.fromType, pk.getKey()); //a.id
-					String on2 = aliasAlloc.buildAlias(pairType, relinfoB.fieldName); //b.cust
-					s = String.format("xJOIN %s ON %s=%s", tbl1, on1, on2);
+					String on1 = aliasAlloc.buildAlias(hlspan.fromType, relinfoA.fieldName); //a.addr
+					String on2 = aliasAlloc.buildAlias(pairType, pk.getKey()); //b.id
+					s = String.format("JOIN %s ON %s=%s", tbl1, on1, on2);
 				}
 				
 				sc.out(s);

@@ -19,12 +19,13 @@ public class HSQL11OtherWayTests extends HLSTestBase {
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomer11OtherWaySrc = true;
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.cust WHERE a.ID=55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a JOIN Address as b ON a.id=b.cust");
-		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y,b.cust FROM Customer as a JOIN Address as b ON a.id=b.cust");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a JOIN Address as b ON a.id=b.cust ORDER BY a.id");
+		//TODO: don't actually need both a.addr and b.id. they are the same value
+		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id FROM Customer as a JOIN Address as b ON a.addr=b.id WHERE a.ID=55");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a JOIN Address as b ON a.addr=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,a.addr,b.id,b.y FROM Customer as a JOIN Address as b ON a.addr=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a JOIN Address as b ON a.addr=b.id ORDER BY a.id");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.cust");
+		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.addr=b.id");
 	}
 
 	//	@Test
@@ -65,7 +66,7 @@ public class HSQL11OtherWayTests extends HLSTestBase {
 		//		//this one doesn't need to do fetch since just getting x
 //		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer");
 		//		
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.cust");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.addr=b.id");
 	}
 
 	//---
