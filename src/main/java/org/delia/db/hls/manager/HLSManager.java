@@ -18,7 +18,10 @@ import org.delia.db.hls.HLSSQLGenerator;
 import org.delia.db.hls.HLSSQLGeneratorImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
+import org.delia.db.sql.fragment.MiniSelectFragmentParser;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.runner.QueryResponse;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
@@ -41,14 +44,19 @@ public class HLSManager extends ServiceBase {
 	private HLSStragey defaultStrategy = new StandardHLSStragey();
 	private boolean generateSQLforMemFlag;
 	private Delia delia;
+	private VarEvaluator varEvaluator;
+	private MiniSelectFragmentParser miniSelectParser;
 
-	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session) {
+	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
 		this.session = session;
 		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
 		this.assocTblMgr = new AssocTblManager();
+		this.varEvaluator = varEvaluator;
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
@@ -71,7 +79,7 @@ public class HLSManager extends ServiceBase {
 	private HLSSQLGenerator chooseGenerator() {
 		//later we will have dbspecific ones
 
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, this.assocTblMgr);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr);
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{

@@ -102,7 +102,7 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		
-		HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess);
+		HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
 		if (deliaOptions.useHLS) {
 			runner.setHLSManager(mgr);
 		}

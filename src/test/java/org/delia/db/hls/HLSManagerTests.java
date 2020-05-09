@@ -12,7 +12,9 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerResult;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -100,7 +102,8 @@ public class HLSManagerTests extends HLSTestBase {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
-		HLSManager mgr = new HLSManager(delia, session.getExecutionContext().registry, session);
+		VarEvaluator varEvaluator = new DoNothingVarEvaluator();
+		HLSManager mgr = new HLSManager(delia, session.getExecutionContext().registry, session, varEvaluator);
 		mgr.setGenerateSQLforMemFlag(generateSQLforMemFlag);
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
