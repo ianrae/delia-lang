@@ -1,7 +1,9 @@
 package org.delia.db.hls;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +15,10 @@ import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
+import org.delia.db.sql.fragment.OpFragment;
 import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.fragment.SqlFragment;
+import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
@@ -161,6 +166,31 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		QueryDetails details = new QueryDetails();
 		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
+		
+		Map<String,String> aliasAdjustmentMap = new HashMap<>();
+		for(String x: selectFrag.aliasMap.keySet()) {
+			TableFragment tblfrag = selectFrag.aliasMap.get(x);
+			if (tblfrag.structType != null) {
+				String alias = this.aliasAlloc.findOrCreateFor(tblfrag.structType);
+				aliasAdjustmentMap.put(tblfrag.alias,  alias);
+			} else {
+				String alias = this.aliasAlloc.buildTblAliasAssoc(tblfrag.name);
+				aliasAdjustmentMap.put(tblfrag.alias,  alias);
+			}
+		}
+		
+		//now do adjustment
+		for(SqlFragment z: selectFrag.whereL) {
+			OpFragment op = (OpFragment) z;
+			if (op.left != null) {
+				op.left.alias = aliasAdjustmentMap.get(op.left.alias);
+			}
+			if (op.right != null) {
+				op.right.alias = aliasAdjustmentMap.get(op.right.alias);
+			}
+		}
+		
+		
 		String whereSql = miniSelectParser.renderSelect(selectFrag);
 		
 		if (!selectFrag.whereL.isEmpty()) {
