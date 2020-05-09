@@ -4,9 +4,13 @@ package org.delia.db.hls;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.StringJoiner;
 
+import org.delia.api.DeliaImpl;
+import org.delia.api.DeliaSession;
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
@@ -15,10 +19,13 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
+import org.delia.log.Log;
 import org.delia.runner.QueryResponse;
+import org.delia.runner.ResultValue;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.util.DeliaExceptionHelper;
+import org.delia.type.PrimaryKey;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
 import org.junit.Before;
@@ -50,9 +57,16 @@ public class HLSManagerTests extends HLSTestBase {
 	//normally we just call db directly. one 'let' statement = one call to db
 	public static class DoubleHLSStragey implements HLSStragey {
 
+		private DeliaSession session;
+		private Log log;
+
+		public DoubleHLSStragey(DeliaSession session) {
+			this.session = session;
+			this.log = session.getDelia().getLog();
+		}
+
 		@Override
 		public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor) {
-			
 			HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
 			HLSQuerySpan hlspan2 = hls.hlspanL.get(0); //Customer
 			QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
@@ -61,15 +75,43 @@ public class HLSManagerTests extends HLSTestBase {
 			HLSQueryStatement clone = new HLSQueryStatement();
 			//{Address->Address,MT:Address,[cust in [55,56],()}
 			
+			String ss = hlspan1.fromType.getName();
+			String s3 = "cust"; //fix!!
+			StringJoiner joiner = new StringJoiner(",");
+			for(DValue dval: qresp.dvalList) {
+				if (dval != null && dval.getType().isStructShape()) {
+					DStructType structType = (DStructType) dval.getType();
+					PrimaryKey pk = structType.getPrimaryKey(); 
+					
+					DValue pkvalue = dval.asStruct().getField(pk.getFieldName());
+					joiner.add(pkvalue.asString());
+				}
+			}
+			String deliaSrc = String.format("%s[%s in [%s]]", ss, s3, joiner.toString());
+			log.log(deliaSrc);
+			DeliaImpl deliaimpl = (DeliaImpl) session.getDelia();
+			List<Exp> expL = deliaimpl.continueCompile(deliaSrc, session);
+			LetStatementExp exp = findLetStatement(expL);
+			
 			//src = "let x = Address[cust in [55,56]]
 			
 			clone.hlspanL.add(hlspan1);
-			clone.queryExp = hls.queryExp;
-			clone.querySpec = hls.querySpec;
+			clone.queryExp = (QueryExp) exp.value;
+			clone.querySpec = new QuerySpec();
+			clone.querySpec.queryExp = clone.queryExp;
 			QueryResponse qresp2 = dbexecutor.executeHLSQuery(clone, sql, qtx);
-			
+			log.log("%b", qresp2.ok);
 			
 			return qresp;
+		}
+
+		private LetStatementExp findLetStatement(List<Exp> expL) {
+			for(Exp exp: expL) {
+				if (exp instanceof LetStatementExp) {
+					return (LetStatementExp) exp;
+				}
+			}
+			return null;
 		}
 		
 	}
@@ -127,16 +169,18 @@ public class HLSManagerTests extends HLSTestBase {
 	 */
 	public static class HLSManager extends ServiceBase {
 
+		private DeliaSession session;
 		private DBInterface dbInterface;
 		private DTypeRegistry registry;
 		private AssocTblManager assocTblMgr;
 		private HLSStragey defaultStrategy = new StandardHLSStragey();
 		private boolean generateSQLforMemFlag;
 
-		public HLSManager(FactoryService factorySvc, DTypeRegistry registry, DBInterface dbInterface) {
-			super(factorySvc);
-			this.dbInterface= dbInterface;
-			this.registry = registry;
+		public HLSManager(DeliaSession session) {
+			super(session.getDelia().getFactoryService());
+			this.session = session;
+			this.dbInterface= session.getDelia().getDBInterface();
+			this.registry = session.getExecutionContext().registry;
 			this.assocTblMgr = new AssocTblManager();
 		}
 		
@@ -180,7 +224,7 @@ public class HLSManagerTests extends HLSTestBase {
 
 		private HLSStragey chooseStrategy(HLSQueryStatement hls) {
 			if (needDoubleStrategy(hls)) {
-				return new DoubleHLSStragey();
+				return new DoubleHLSStragey(session);
 			}
 			return defaultStrategy;
 		}
@@ -300,7 +344,7 @@ public class HLSManagerTests extends HLSTestBase {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
-		HLSManager mgr = new HLSManager(delia.getFactoryService(), session.getExecutionContext().registry, delia.getDBInterface());
+		HLSManager mgr = new HLSManager(session);
 		mgr.setGenerateSQLforMemFlag(generateSQLforMemFlag);
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;

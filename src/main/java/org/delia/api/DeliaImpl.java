@@ -325,6 +325,26 @@ public class DeliaImpl implements Delia {
 		}
 		return res;
 	}
+	
+	public List<Exp>  continueCompile(String src, DeliaSession session) {
+		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
+		if (execCtx != null) {
+			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
+			execCtx.delcaredVarMap.remove(RunnerImpl.VAR_SERIAL);
+		}
+
+		DeliaCompiler compiler = doCreateCompiler(execCtx);
+		List<Exp> expL = compiler.parse(src);
+		for(Exp exp: expL) {
+			if (exp instanceof TypeStatementExp) {
+				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
+				DeliaError err = new DeliaError("type-statement-not-allowed", msg, null);
+				throw new DeliaException(err);
+			}
+		}
+		return expL;
+	}
+	
 
 	@Override
 	public Log getLog() {

@@ -4,6 +4,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.ListExp;
 import org.delia.compiler.ast.QueryInExp;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 
@@ -78,7 +79,13 @@ public class InEvaluator implements OpEvaluator {
 		return false;
 	}
 	private boolean doIsEqualTo(DValue dval, Object target) {
-		String tmp = dval.asString();
+		String tmp;
+		if (dval.getType().isRelationShape()) {
+			DRelation drel = dval.asRelation();
+			tmp = drel.getForeignKey().asString(); //TODO later support multiple keys
+		} else {
+			tmp = dval.asString();
+		}
 		if(tmp != null && tmp.equals(target)) {
 			return true;
 		}
