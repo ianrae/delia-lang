@@ -167,6 +167,11 @@ public class HLSSQLTests extends HLSTests {
 			String s = String.format("%s.%s", alias, pair.name);
 			return s;
 		}
+		public String buildAlias(DStructType pairType, String fieldName) {
+			String alias = findOrCreateFor(pairType);
+			String s = String.format("%s.%s", alias, fieldName);
+			return s;
+		}
 
 
 	}
@@ -227,6 +232,9 @@ public class HLSSQLTests extends HLSTests {
 		private String buildAlias(DStructType pairType, TypePair pair) {
 			return aliasAlloc.buildAlias(pairType, pair);
 		}
+		private String buildAlias(DStructType pairType, String fieldName) {
+			return aliasAlloc.buildAlias(pairType, fieldName);
+		}
 
 		private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 			joinHelper.genJoin(sc, hlspan);
@@ -250,7 +258,8 @@ public class HLSSQLTests extends HLSTests {
 			}
 
 			if (hlspan.oloEl.orderBy != null) {
-				sc.out("ORDER BY %s", hlspan.oloEl.orderBy);
+				String ss = buildAlias(hlspan.fromType, hlspan.oloEl.orderBy);
+				sc.out("ORDER BY %s",ss);
 			}
 
 			if (hlspan.oloEl.limit != null) {
@@ -262,9 +271,6 @@ public class HLSSQLTests extends HLSTests {
 			if (hlspan.oloEl.offset != null) {
 				sc.out("OFFSET %s", hlspan.oloEl.offset.toString());
 			}
-
-			// TODO Auto-generated method stub
-
 		}
 
 		private void genWhere(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -284,7 +290,7 @@ public class HLSSQLTests extends HLSTests {
 			}
 
 			if (s != null) {
-				sc.out("WHERE ID=%s", s);
+				sc.out("WHERE %s=%s", buildAlias(hlspan.fromType, "ID"), s);
 			}
 		}
 
@@ -360,29 +366,29 @@ public class HLSSQLTests extends HLSTests {
 
 	@Test
 	public void testOneSpanNoSubSQL() {
-		sqlchk("let x = Flight[55]", "SELECT * FROM Flight as a WHERE ID=55");
-		sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight as a WHERE ID=55");
-		sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55]", "SELECT * FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight as a WHERE a.ID=55");
 		sqlchk("let x = Flight[true]", "SELECT * FROM Flight as a");
 
-		sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight as a WHERE ID=55");
-		sqlchk("let x = Flight[55].field1.min()", "SELECT MIN(field1) FROM Flight as a WHERE ID=55");
-		sqlchk("let x = Flight[55].field1.orderBy('field2')", "SELECT field1 FROM Flight as a WHERE ID=55 ORDER BY field2");
-		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT field1 FROM Flight as a WHERE ID=55 ORDER BY field2 OFFSET 3");
-		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight as a WHERE ID=55 ORDER BY field2 LIMIT 5 OFFSET 3");
-		sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight as a WHERE ID=55");
-		sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight as a WHERE ID=55");
-		sqlchk("let x = Flight[55].field1.exists()", "SELECT COUNT(field1) FROM Flight as a WHERE ID=55 LIMIT 1");
+		sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.min()", "SELECT MIN(field1) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.orderBy('field2')", "SELECT field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2");
+		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2 OFFSET 3");
+		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2 LIMIT 5 OFFSET 3");
+		sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.exists()", "SELECT COUNT(field1) FROM Flight as a WHERE a.ID=55 LIMIT 1");
 
 	}
 
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomerSrc = true;
-		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer as a JOIN Address as b ON a.id=b.id WHERE ID=55");
+		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer as a JOIN Address as b ON a.id=b.id WHERE a.ID=55");
 		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').first()", "SELECT TOP 1 id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY id");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
 		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer as a");
 		sqlchk("let x = Customer[true].x.fks()", "SELECT x,id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
