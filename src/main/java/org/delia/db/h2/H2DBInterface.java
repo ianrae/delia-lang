@@ -20,6 +20,7 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
+import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.sql.ConnectionFactory;
@@ -453,7 +454,9 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		
 		SqlStatement statement = new SqlStatement();
 		statement.sql = sql;
-		statement.paramL = hls.getMainHLSSpan().paramL; //TODO fix for multiple
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			statement.paramL.addAll(hlspan.paramL);
+		}
 		
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);

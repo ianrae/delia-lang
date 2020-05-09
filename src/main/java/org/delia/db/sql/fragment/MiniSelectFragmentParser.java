@@ -21,6 +21,8 @@ public class MiniSelectFragmentParser extends MiniFragmentParserBase {
 	}
 
 	public SelectStatementFragment parseSelect(QuerySpec spec, QueryDetails details) {
+		whereGen.tableFragmentMaker = this;
+		
 		SelectStatementFragment selectFrag = new SelectStatementFragment();
 
 		//init tbl

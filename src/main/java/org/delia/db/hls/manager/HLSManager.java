@@ -57,6 +57,8 @@ public class HLSManager extends ServiceBase {
 		this.varEvaluator = varEvaluator;
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
+		whereGen.tableFragmentMaker = miniSelectParser;
+
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {

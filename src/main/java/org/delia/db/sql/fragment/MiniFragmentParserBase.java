@@ -13,7 +13,7 @@ import org.delia.type.DTypeRegistry;
 		private int nextAliasIndex = 0;
 		private QueryTypeDetector queryDetectorSvc;
 		private DTypeRegistry registry;
-		private WhereFragmentGenerator whereGen;
+		protected WhereFragmentGenerator whereGen;
 		
 		public MiniFragmentParserBase(FactoryService factorySvc, DTypeRegistry registry, WhereFragmentGenerator whereGen) {
 			super(factorySvc);

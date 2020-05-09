@@ -22,6 +22,8 @@ public class HLSSQL11Tests extends HLSTestBase {
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust ORDER BY a.id");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
 		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
+		
+		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.addr < ?", "111");
 	}
 
 	//	@Test
@@ -54,17 +56,8 @@ public class HLSSQL11Tests extends HLSTestBase {
 	public void testDebugSQL() {
 		useCustomer11Src = true;
 
-		//		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer LEFT JOIN Address ON id=id WHERE ID=55");
-//		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer LEFT JOIN Address ON id=id");
-//		sqlchk("let x = Customer[true].fetch('addr').first()", "SELECT TOP 1 id,x,id,y FROM Customer LEFT JOIN Address ON id=id");
-//		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer LEFT JOIN Address ON id=id ORDER BY id");
-		//
-		//		//this one doesn't need to do fetch since just getting x
-//		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer");
-		//		
-//		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
-//		sqlchkP("let x = Customer[59].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.cid = ?", "59");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
+//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
+		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.addr < ?", "111");
 	}
 
 	//---
