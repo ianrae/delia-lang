@@ -1,9 +1,7 @@
 package org.delia.runner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.Exp;
@@ -12,7 +10,6 @@ import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UserFnCallExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
-import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -23,7 +20,6 @@ import org.delia.db.QuerySpec;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.QueryFuncContext;
-import org.delia.sprig.SprigService;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -38,22 +34,17 @@ import org.delia.zqueryresponse.LetSpanRunnerImpl;
  * @author Ian Rae
  *
  */
-public class ZLetStatementRunner extends ServiceBase {
+public class LetStatementRunner extends ServiceBase {
 
-//	private Map<String,ResultValue> varMap = new HashMap<>(); //ok for thread-safety
 	private DTypeRegistry registry;
 	private DBInterface dbInterface;
 	private DBExecutor dbexecutor;
-//	//		private QueryFuncOrFieldRunner qffRunner;
 	private LetSpanEngine letSpanEngine;
 	private FetchRunner fetchRunner;
-//	private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
-//	private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
-//	private Map<String,String> activeUserFnMap = new HashMap<>(); //what's executing.  //ok for thread-safety
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
 
-	public ZLetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, DBExecutor dbexecutor, DTypeRegistry registry, 
+	public LetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, DBExecutor dbexecutor, DTypeRegistry registry, 
 			FetchRunner fetchRunner, RunnerImpl runner) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
@@ -173,7 +164,7 @@ public class ZLetStatementRunner extends ServiceBase {
 	}
 	private ResultValue invokeUserFunc(LetStatementExp exp, ResultValue resParam) {
 		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface);
-		ExecutionState execState = innerRunner.getExecutionState();
+		ExecutionState execState = runner.getExecutionState();
 		execState.varMap.clear(); //user fn has its own variables
 
 		boolean b = innerRunner.init(execState);

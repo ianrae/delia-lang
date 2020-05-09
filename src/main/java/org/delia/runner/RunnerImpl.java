@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.DsonExp;
@@ -14,12 +13,10 @@ import org.delia.compiler.ast.EndSourceStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
-import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
-import org.delia.compiler.ast.UserFnCallExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
@@ -33,12 +30,10 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
-import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
-import org.delia.queryresponse.QueryFuncContext;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.sprig.SprigVarEvaluator;
@@ -52,9 +47,6 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
-import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zqueryresponse.LetSpanEngine;
-import org.delia.zqueryresponse.LetSpanRunnerImpl;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -68,17 +60,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		protected DTypeRegistry registry;
 		private DBInterface dbInterface;
 		private DBExecutor dbexecutor;
-//		private QueryFuncOrFieldRunner qffRunner;
-//		private LetSpanEngine letSpanEngine;
 		protected FetchRunner fetchRunner;
 		Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
 		Map<String,String> activeUserFnMap = new HashMap<>(); //what's executing.  //ok for thread-safety
-		private ScalarBuilder scalarBuilder;
 		private SprigService sprigSvc;
 		private DValueIterator insertPrebuiltValueIterator;
 		private FetchRunner prebuiltFetchRunnerToUse;
-		private ZLetStatementRunner letStatementRunner;
+		private LetStatementRunner letStatementRunner;
 		
 		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
 			super(factorySvc);
@@ -145,7 +134,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				this.sprigSvc = ctx.sprigSvc;
 			}
 			
-			this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 			return true;
 		}
 		
@@ -537,93 +525,10 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new ZLetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, this);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, this);
 			return letStatementRunner.executeLetStatement(exp, res);
-//			if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
-//				return invokeUserFunc(exp, res);
-//			}
-//			
-//			if (exp.value instanceof QueryExp) {
-//				QueryExp queryExp = (QueryExp) exp.value;
-//				VarRef varRef = resolveScalarVarReference(queryExp);
-//				if (varRef != null) {
-//					res.ok = true;
-//					res.shape = varRef.dval == null ? varRef.nullShape : varRef.dval.getType().getShape();
-//					res.val = varRef.dval;
-//					if (varRef.qresp != null) {
-//						res.val = varRef.qresp;
-//					}
-//					
-//					assignVar(exp, res);
-//					return res;
-//				}
-//			}
-//			
-//			if (exp.isType(LetStatementExp.QUERY_RESPONSE_TYPE)) {
-//				QueryExp queryExp = (QueryExp) exp.value;
-//				VarRef varRef = resolveVarReference(queryExp);
-//				if (varRef != null) {
-//					res.ok = true;
-//					res.shape = null;
-//					varRef.qresp.bindFetchFlag = true;
-//					runQueryFnsIfNeeded(queryExp, varRef.qresp, res);
-//					varRef.qresp.bindFetchFlag = false; //reset
-//
-//					assignVar(exp, res);
-//					return res;
-//				}
-//				
-//				if (queryExp.filter != null && queryExp.filter.cond instanceof NullExp) {
-//					DeliaError err = et.add("null-filter-not-allowed", "[null] is not allowed");
-//					throw new DeliaException(err);
-//				}
-//				
-//				QuerySpec spec = resolveFilterVars(queryExp);
-//				QueryContext qtx = buildQueryContext(spec);
-//				QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
-//				res.ok = qresp.ok;
-//				res.addIfNotNull(qresp.err);
-//				res.shape = null;
-//				res.val = qresp;
-//				
-//				if (qresp.ok) {
-//					runQueryFnsIfNeeded(queryExp, qresp, res);
-//				}
-//				
-//				assignVar(exp, res);
-//				return res; //!!fill in rest
-//			}
-//			
-//			res.val = toObject(exp.value, exp, res);
-//			if (exp.typeName != null){
-//				res.shape = toShape(exp.typeName, res.val);
-//			}
-//			res.ok = res.errors.isEmpty();
-//	
-//			assignVar(exp, res);
-//			return res;
 		}
 		
-//		private QueryContext buildQueryContext(QuerySpec spec) {
-//			QueryFuncContext ctx = new QueryFuncContext();
-////			this.qffRunner.buildPendingTrail(ctx, spec.queryExp);
-//			
-//			QueryContext qtx = new QueryContext();
-//			qtx.letSpanEngine = letSpanEngine;
-//			//TODO: fix buglet that is other fn contains 'fks' this won't work
-////			qtx.loadFKs = ctx.pendingTrail.getTrail().contains("fks");
-//			qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
-//			if (!qtx.loadFKs) {
-//				ConfigureService configSvc = factorySvc.getConfigureService();
-//				qtx.loadFKs = configSvc.isPopulateFKsFlag();
-//			}
-//			
-//			if (! qtx.loadFKs) {
-//				qtx.pruneParentRelationFlag = true;
-//			}
-//			
-//			return qtx;
-//		}
 		private QuerySpec resolveFilterVars(QueryExp queryExp) {
 			QuerySpec spec = new QuerySpec();
 			spec.queryExp = queryExp;
@@ -631,117 +536,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			spec.evaluator.init(queryExp);
 			return spec;
 		}
-//		private ResultValue invokeUserFunc(LetStatementExp exp, ResultValue resParam) {
-//			RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface);
-//			ExecutionState execState = getExecutionState();
-//			execState.varMap.clear(); //user fn has its own variables
-//	
-//			boolean b = innerRunner.init(execState);
-//			if (!b) {
-//				//err
-//				return resParam;
-//			}
-//			
-//			UserFnCallExp callExp = (UserFnCallExp) exp.value;
-//			
-//			UserFunctionDefStatementExp userFnExp = this.userFnMap.get(callExp.funcName);
-//			if (userFnExp == null) {
-//				//error
-//				return resParam;
-//			}
-//			
-//			//avoid stack overflow. fn can't call itself
-//			if (activeUserFnMap.containsKey(userFnExp.funcName)) {
-//				DeliaError err = et.add("user-func-self-invoke", "A user function may not invoke itself - function %s", userFnExp.funcName);
-//				throw new DeliaException(err);
-//			}
-//			
-//			//set fns args as local vars
-//			int i = 0;
-//			for (Exp argExp: userFnExp.argsL) {
-//				String argName = argExp.strValue();
-//				Exp tmpExp = callExp.argL.get(i);
-//				//hack hack hack - rewrite all this!!
-//				ResultValue tmpRes = new ResultValue();
-//				tmpRes.ok = true;
-//				tmpRes.shape = Shape.INTEGER;
-//				QueryResponse qr = new QueryResponse();
-//				qr.dvalList = new ArrayList<>();
-//				qr.dvalList.add(createDValFrom(tmpExp));
-//				tmpRes.val = qr;
-//				innerRunner.varMap.put(argName, tmpRes);
-//				i++;
-//			}
-//			
-//			ResultValue finalRes = null;
-//			ResultValue tmpres = innerRunner.executeProgram(userFnExp.bodyExp.statementL);
-//			//stop on error
-//			if (! tmpres.ok) {
-//				resParam.ok = false;
-//				resParam.errors.addAll(tmpres.errors);
-//				return resParam;
-//			}
-//			finalRes = tmpres;
-//			
-//			if (finalRes != null) {
-//				assignVar(exp, finalRes);
-//			}
-//			
-//			resParam.errors = finalRes.errors;
-//			resParam.ok = finalRes.ok;
-//			resParam.shape = finalRes.shape;
-//			resParam.val = finalRes.val;
-//			
-//			return resParam; 
-//		}
-//
-//		private DValue createDValFrom(Exp tmpExp) {
-//			ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
-//			DValue dval = builder.buildInt(tmpExp.strValue());
-//			return dval;
-//		}
-//		
-//		private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
-//			if (dbInterface.getCapabilities().supportsOffsetAndLimit()) {
-//				return qresp; //don't need span engine. db does it.
-//			}
-////			boolean flag = true;
-////			if (flag) {
-//				QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp);
-//				return qresp2;
-////			} else {
-////				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
-////				return qresp2;
-////			}
-//		}
-//		private void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
-//			//extract fields or invoke fns (optional)
-//			QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
-//			res.ok = qresp2.ok;
-//			res.addIfNotNull(qresp2.err);
-//			res.shape = null;
-//			res.val = qresp2;
-//			
-//			//validate (assume that we don't fully trust db storage - someone may have tampered with data)
-//			if (qresp2.ok && CollectionUtils.isNotEmpty(qresp2.dvalList)) {
-//				ValidationRuleRunner ruleRunner = createValidationRunner();
-//				if (! ruleRunner.validateDVals(qresp.dvalList)) {
-//					ruleRunner.propogateErrors(res);
-//				}
-//			}                              
-//		}
-//
-//		private void assignVar(LetStatementExp exp, ResultValue res) {
-//			String varName = exp.varName;
-//			if (! varName.equals(DOLLAR_DOLLAR) && exists(varName)) {
-//				addError(res, "var-already-exists", String.format("variable '%s' already exists. Cannot re-assign", varName));
-//				return;
-//			}
-//			
-//			res.varName = varName;
-//			varMap.put(varName, res);
-//			varMap.put(DOLLAR_DOLLAR, res);
-//		}
 		private void assignSerialVar(DValue generatedId) {
 			ResultValue res = new ResultValue();
 			res.ok = true;
@@ -751,87 +545,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			varMap.put(VAR_SERIAL, res);
 		}
 
-//		private VarRef resolveScalarVarReference(QueryExp queryExp) {
-//			ResultValue res = varMap.get(queryExp.typeName);
-//			if (res == null) {
-//				return null;
-//			}
-//			
-//			VarRef varRef = new VarRef();
-//			varRef.varRef = queryExp.typeName;
-//			
-//			if (res.val instanceof DValue) {
-//				varRef.dval = (DValue) res.val;
-//				return varRef;
-//			} else {
-//				if (res.val instanceof QueryResponse) {
-//					QueryResponse qresp = (QueryResponse) res.val;
-//					//extract fields or invoke fns (optional)
-//					qresp.bindFetchFlag = true;
-//					QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp);
-//					qresp.bindFetchFlag = false;
-//					//TODO: propogate errors from qresp2.err
-//					if (qresp2.ok) {
-//						if (qresp2.dvalList == null) {
-//							varRef.dval = null;
-//							return varRef;
-//						}
-//						varRef.qresp = qresp2;
-//						return varRef;
-//					}
-//				} else if (res.val == null) { //handle null values
-//					varRef.dval = null;
-//					varRef.nullShape = res.shape;
-//					return varRef;
-//				}
-//			}
-//			return null;
-//		}
-		private VarRef resolveVarReference(QueryExp queryExp) {
-			ResultValue res = varMap.get(queryExp.typeName);
-			if (res == null) {
-				return null;
-			}
-			
-			VarRef varRef = new VarRef();
-			varRef.varRef = queryExp.typeName;
-			
-			QueryResponse qresp = (QueryResponse) res.val;
-			varRef.qresp = qresp;
-			return varRef;
-		}
-
-		private DValue toObject(Exp valueExp, LetStatementExp exp, ResultValue res) {
-			int numErr = et.errorCount();
-			DValue dval = scalarBuilder.buildDValue(valueExp, exp.isTypeExplicit ? exp.typeName : null);
-			if (et.errorCount() != numErr) {
-				SimpleErrorTracker set = (SimpleErrorTracker) et; //hack hack hack
-				List<DeliaError> list = set.getErrorsSinceMark(numErr);
-				res.errors.addAll(list);
-			}
-			if (dval != null) {
-				ValidationRuleRunner ruleRunner = createValidationRunner();
-				if (! ruleRunner.validateDVal(dval)) {
-					ruleRunner.propogateErrors(res);
-				}
-				
-			}
-			return dval;
-		}
-
-		private Shape toShape(String typeName, Object val) {
-			Shape shape = Shape.createFromDeliaType(typeName);
-			if (shape != null) {
-				return shape;
-			}
-			if (val instanceof DValue) {
-				DValue dval = (DValue) val;
-				return dval.getType().getShape();
-			} else {
-				DType dtype = registry.getType(typeName);
-				return dtype == null ? null : dtype.getShape();
-			}
-		}
 		
 		@Override
 		public boolean exists(String varName) {
