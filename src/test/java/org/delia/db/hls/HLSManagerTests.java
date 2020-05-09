@@ -3,7 +3,10 @@ package org.delia.db.hls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import org.delia.api.DeliaImpl;
@@ -107,18 +110,56 @@ public class HLSManagerTests extends HLSTestBase {
 			QueryResponse qresp2 = dbexecutor.executeHLSQuery(clone, sql, qtx);
 			log.log("%b", qresp2.ok);
 			
-			//merge results from qresp2 into qresp
-			String field1 = hlspan1.rEl.rfieldPair.name;
+			//actually MEM already has address.cust as DRelation
+			//we just need to fill in fetched items
+			//merge results from qresp into qresp2 (add Customer to Address.cust)
+			String field1 = hlspan1.rEl.rfieldPair.name; //.addr
+			Map<DValue,DValue> todoMap = new HashMap<>();
 			for(DValue dval: qresp.dvalList) {
 				//dval is a customer. find address in qresp2 whose .cust is pk of dval
-				DValue inner = findIn(dval, qresp2, field2);
+				DValue inner = findIn(dval, qresp2, field2); //inner is address
 				if (inner != null) {
-					dval.asMap().put(field1, inner);
+//					inner.asMap().put(field2, dval);
+					todoMap.put(inner, dval); //TODO won't work for M:1 or M:N fix!!
 				}
 			}
 			
-			return qresp;
+			for(DValue inner: todoMap.keySet()) {
+				DValue innerInner = inner.asStruct().getField(field2); //cust
+				DRelation drel = innerInner.asRelation();
+				List<DValue> fetchedL = drel.haveFetched() ? drel.getFetchedItems() : new ArrayList<>();
+				
+				DValue dval = todoMap.get(inner);
+				fetchedL.add(dval);
+				drel.setFetchedItems(fetchedL);
+			}
+			
+			return qresp2;
 		}
+		
+		private String generateInQuery(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2, QueryResponse qresp) {
+			//and again with span1
+			HLSQueryStatement clone = new HLSQueryStatement();
+			//{Address->Address,MT:Address,[cust in [55,56],()}
+			
+			String ss = hlspan1.fromType.getName();
+			String field2 = determineRelField(hlspan1, hlspan2);//"cust"; //fix!!
+			StringJoiner joiner = new StringJoiner(",");
+			for(DValue dval: qresp.dvalList) {
+				if (dval != null && dval.getType().isStructShape()) {
+					DStructType structType = (DStructType) dval.getType();
+					PrimaryKey pk = structType.getPrimaryKey(); 
+					
+					DValue pkvalue = dval.asStruct().getField(pk.getFieldName());
+					joiner.add(pkvalue.asString());
+				}
+			}
+			String deliaSrc = String.format("%s[%s in [%s]]", ss, field2, joiner.toString());
+			log.log(deliaSrc);
+			return deliaSrc;
+		}
+		
+		
 
 		private DValue findIn(DValue dval, QueryResponse qresp2, String targetField) {
 			DStructType structType = (DStructType) dval.getType();
@@ -240,9 +281,8 @@ public class HLSManagerTests extends HLSTestBase {
 			String sql = sqlGenerator.buildSQL(hls);
 			
 			HLSStragey strategy = chooseStrategy(hls);
-			strategy.execute(hls, sql, qtx, dbexecutor);
+			QueryResponse qresp = strategy.execute(hls, sql, qtx, dbexecutor);
 
-			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
 			HLSManagerResult result = new HLSManagerResult();
 			result.qresp = qresp;
 			result.sql = sql;
@@ -352,14 +392,18 @@ public class HLSManagerTests extends HLSTestBase {
 		List<DValue> list = qresp.dvalList;
 		assertEquals(2, list.size());
 		DValue dval = list.get(0);
-		assertEquals(55, dval.asStruct().getField("cid").asInt());
-		DValue inner = dval.asStruct().getField("addr");
-		assertEquals(100, inner.asStruct().getField("id").asInt());
+		assertEquals(100, dval.asStruct().getField("id").asInt());
+		DValue inner = dval.asStruct().getField("cust");
+		DRelation drel = inner.asRelation();
+		assertEquals(55, drel.getForeignKey().asInt());
+		assertEquals(true, drel.haveFetched());
 		
 		dval = list.get(1);
-		assertEquals(56, dval.asStruct().getField("cid").asInt());
-		inner = dval.asStruct().getField("addr");
-		assertEquals(null, inner);
+		assertEquals(101, dval.asStruct().getField("id").asInt());
+		inner = dval.asStruct().getField("cust");
+		drel = inner.asRelation();
+		assertEquals(55, drel.getForeignKey().asInt());
+		assertEquals(false, drel.haveFetched());
 	}	
 	
 
