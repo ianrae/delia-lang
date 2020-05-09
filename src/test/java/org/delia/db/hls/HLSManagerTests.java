@@ -15,6 +15,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
 import org.junit.Before;
@@ -50,6 +51,42 @@ public class HLSManagerTests extends HLSTestBase {
 	}
 	
 	/**
+	 * MEM doesn't need sql. Only for some unit tests.
+	 * @author Ian Rae
+	 *
+	 */
+	public static class DoNothingSQLGenerator implements HLSSQLGenerator {
+		private HLSSQLGenerator inner; //may be null
+
+		public DoNothingSQLGenerator(HLSSQLGenerator inner) {
+			this.inner = inner;
+		}
+		@Override
+		public String buildSQL(HLSQueryStatement hls) {
+			if (inner != null) {
+				return inner.buildSQL(hls);
+			}
+			return null;
+		}
+
+		@Override
+		public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
+			if (inner != null) {
+				return inner.processOneStatement(hlspan, forceAllFields);
+			}
+			return null;
+		}
+
+		@Override
+		public void setRegistry(DTypeRegistry registry) {
+			if (inner != null) {
+				inner.setRegistry(registry);
+			}
+		}
+		
+	}
+	
+	/**
 	 * Facade between Delia Runner and the db. Allows us to have different strategies
 	 * for executing 'let' statement queries.
 	 * Normally each query turns into a single SQL call to DBInterface,
@@ -64,6 +101,7 @@ public class HLSManagerTests extends HLSTestBase {
 		private DTypeRegistry registry;
 		private AssocTblManager assocTblMgr;
 		private HLSStragey defaultStrategy = new StandardHLSStragey();
+		private boolean generateSQLforMemFlag;
 
 		public HLSManager(FactoryService factorySvc, DTypeRegistry registry, DBInterface dbInterface) {
 			super(factorySvc);
@@ -74,6 +112,7 @@ public class HLSManagerTests extends HLSTestBase {
 		
 		public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
 			HLSQueryStatement hls = buildHLS(spec.queryExp);
+			hls.querySpec = spec;
 			
 			HLSSQLGenerator sqlGenerator = chooseGenerator();
 			sqlGenerator.setRegistry(registry);
@@ -91,7 +130,22 @@ public class HLSManagerTests extends HLSTestBase {
 		
 		private HLSSQLGenerator chooseGenerator() {
 			//later we will have dbspecific ones
-			return new HLSSQLGeneratorImpl(factorySvc, this.assocTblMgr);
+
+			HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, this.assocTblMgr);
+			switch(dbInterface.getDBType()) {
+			case MEM:
+			{
+				if (generateSQLforMemFlag) {
+					return new DoNothingSQLGenerator(gen);
+				} else {
+					return new DoNothingSQLGenerator(null);
+				}
+			}
+			case H2:
+			case POSTGRES:
+			default:
+				return gen;
+			}
 		}
 
 		private HLSStragey chooseStrategy(HLSQueryStatement hls) {
@@ -112,12 +166,12 @@ public class HLSManagerTests extends HLSTestBase {
 			return hls;
 		}
 		
-		public String generateSQL(HLSQueryStatement hls) {
-//			HLSSQLGenerator gen = new HLSSQLGenerator(factorySvc, assocTblMgr);
-//			gen.setRegistry(registry);
-//			String sql = gen.buildSQL(hls);
-//			log.log("sql: " + sql);
-			return null;
+		public boolean isGenerateSQLforMemFlag() {
+			return generateSQLforMemFlag;
+		}
+
+		public void setGenerateSQLforMemFlag(boolean generateSQLforMemFlag) {
+			this.generateSQLforMemFlag = generateSQLforMemFlag;
 		}
 		
 		
@@ -127,7 +181,9 @@ public class HLSManagerTests extends HLSTestBase {
 	
 	@Test
 	public void test1() {
-		sqlchk("let x = Flight[true]", "SELECT * FROM Flight as a");
+		QueryResponse qresp = sqlchk("let x = Flight[true]", "SELECT * FROM Flight as a");
+		List<DValue> list = qresp.dvalList;
+		assertEquals(2, list.size());
 	}	
 	
 	
@@ -226,12 +282,12 @@ public class HLSManagerTests extends HLSTestBase {
 
 
 
-	private void sqlchk(String src, String sqlExpected) {
+	private QueryResponse sqlchk(String src, String sqlExpected) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
 		HLSManager mgr = new HLSManager(delia.getFactoryService(), session.getExecutionContext().registry, delia.getDBInterface());
-		
+		mgr.setGenerateSQLforMemFlag(true);
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
 		QueryContext qtx = new QueryContext();
@@ -239,6 +295,7 @@ public class HLSManagerTests extends HLSTestBase {
 		DBExecutor dbexecutor = delia.getDBInterface().createExector(dbctx);
 		HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
 		assertEquals(sqlExpected, result.sql);
+		return result.qresp;
 	}
 
 
