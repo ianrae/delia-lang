@@ -1,8 +1,6 @@
 package org.delia.db.hls;
 
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +17,7 @@ public class HLSSQL11OtherWayTests extends HLSTestBase {
 	public void testOneSpanSubSQL() {
 		useCustomer11OtherWaySrc = true;
 		//TODO: don't actually need both a.addr and b.id. they are the same value
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id WHERE a.cid=55");
+		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id WHERE a.cid = ?", "55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id ORDER BY a.id");
@@ -76,10 +74,9 @@ public class HLSSQL11OtherWayTests extends HLSTestBase {
 	}
 
 	private void sqlchk(String src, String sqlExpected) {
-		HLSQueryStatement hls = buildHLS(src);
-		HLSSQLGenerator gen = createGen();
-		String sql = gen.buildSQL(hls);
-		log.log("sql: " + sql);
-		assertEquals(sqlExpected, sql);
+		sqlchkP(src, sqlExpected, null);
+	}
+	private void sqlchkP(String src, String sqlExpected, String param1) {
+		doSqlchkP(src, sqlExpected, param1);
 	}
 }

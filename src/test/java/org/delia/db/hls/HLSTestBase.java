@@ -25,6 +25,7 @@ import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.util.StringTrail;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
@@ -188,6 +189,23 @@ public class HLSTestBase extends NewBDDBase {
 		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null);
 		gen.setRegistry(session.getExecutionContext().registry);
 		return gen;
+	}
+	
+	protected void doSqlchkP(String src, String sqlExpected, String param1) {
+		HLSQueryStatement hls = buildHLS(src);
+		HLSSQLGenerator gen = createGen();
+		String sql = gen.buildSQL(hls);
+		log.log("sql: " + sql);
+		assertEquals(sqlExpected, sql);
+		
+		HLSQuerySpan hlspan = hls.getMainHLSSpan();
+		if (param1 != null) {
+			assertEquals(1, hlspan.paramL.size());
+			DValue dval = hlspan.paramL.get(0);
+			assertEquals(param1, dval.asString());
+		} else {
+			assertEquals(0, hlspan.paramL.size());
+		}
 	}
 
 }

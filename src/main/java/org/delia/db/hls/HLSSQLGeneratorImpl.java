@@ -162,10 +162,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		QueryDetails details = new QueryDetails();
 		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
 		String whereSql = miniSelectParser.renderSelect(selectFrag);
-		SqlStatement statement = selectFrag.statement;
-		hlspan.paramL = statement.paramL;
-		whereSql = StringUtils.substringAfter(whereSql, "WHERE ").trim();
-		sc.out("WHERE %s", whereSql);
+		
+		if (!selectFrag.whereL.isEmpty()) {
+			SqlStatement statement = selectFrag.statement;
+			hlspan.paramL = statement.paramL;
+			whereSql = StringUtils.substringAfter(whereSql, "WHERE ").trim();
+			sc.out("WHERE %s", whereSql);
+		}
 	}
 	
 	private QueryType detectQueryType(HLSQuerySpan hlspan) {
