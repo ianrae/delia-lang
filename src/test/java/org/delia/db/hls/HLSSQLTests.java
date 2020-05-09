@@ -25,6 +25,7 @@ import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -34,7 +35,7 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class HLSSQLTests extends HLSTests {
+public class HLSSQLTests extends HLSTestBase {
 
 	public static class SqlJoinHelper {
 		
@@ -437,6 +438,12 @@ public class HLSSQLTests extends HLSTests {
 		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
 
+	//---
+	
+	@Before
+	public void init() {
+		createDao();
+	}
 
 
 
