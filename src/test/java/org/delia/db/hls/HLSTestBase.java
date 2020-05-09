@@ -37,8 +37,8 @@ import org.delia.zqueryresponse.LetSpanRunner;
 public class HLSTestBase extends NewBDDBase {
 	
 	protected HLSQueryStatement buildHLS(String src) {
-		log.log(src);
 		QueryExp queryExp = compileQuery(src);
+		log.log(src);
 		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, null, null);
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 		
@@ -68,6 +68,7 @@ public class HLSTestBase extends NewBDDBase {
 		} else {
 			initialSrc = buildSrc();
 		}
+		log.log("initial: " + initialSrc);
 		
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(initialSrc);
@@ -135,7 +136,7 @@ public class HLSTestBase extends NewBDDBase {
 		return src;
 	}
 	protected String buildCustomerSrc() {
-		String src = " type Customer struct {id int unique, x int, relation addr Address many optional  } end";
+		String src = " type Customer struct {cid int unique, x int, relation addr Address many optional  } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  many optional } end";
 		return src;
 	}

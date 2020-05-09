@@ -10,7 +10,8 @@ public class FILElement implements HLSElement {
 	}
 	
 	public boolean isAll() {
-		return queryExp.filter.cond.equals("true");
+		String s = queryExp.filter.cond.strValue();
+		return s.equals("true");
 	}
 
 	@Override
