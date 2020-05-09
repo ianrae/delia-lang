@@ -295,11 +295,13 @@ public class H2BDDTests extends NewBDDBase {
 		cleanTables = true;
 		
 //		runR1700File("t0-let-field-single.txt", 3);
-		runR1600File("t0-fetch.txt", 3);
+//		runR1600File("t0-fetch.txt", 3);
 //		runR1500File("t0-queryfn-distinct.txt", 3);
 //		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 //		runR1500File("t0-queryfn-orderby-2span.txt", 2);
 //		runR2100File("t0-migration3c.txt", 2);
+		runR1350File("t0-filter-in.txt", 3);
+
 	}
 	
 	//---

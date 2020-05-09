@@ -210,12 +210,17 @@ public class BDDTester2 {
 	private int nextVarNum = 1;
 	private DeliaSession mostRecentSess;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
+	public static boolean useHLS = false;
 
 	private ResultValue runDelia(String src) {
 		client.getOptions().disableSQLLoggingDuringSchemaMigration = disableSQLLoggingDuringSchemaMigration;
 		if (!currentTest.useSafeMigrationPolicy) {
 			client.getOptions().useSafeMigrationPolicy = false;
 		}
+		if (useHLS) {
+			client.getOptions().useHLS = true;
+		}
+		
 		ResultValue res = client.beginExecution(src);
 		assertEquals(true, res.ok);
 		this.mostRecentSess = client.getSession();

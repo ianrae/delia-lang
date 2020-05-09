@@ -309,6 +309,7 @@ public class AllBDDTests extends NewBDDBase {
 
 	@Before
 	public void init() {
+		BDDTester2.useHLS = true;
 	}
 	@After
 	public void shutdown() {

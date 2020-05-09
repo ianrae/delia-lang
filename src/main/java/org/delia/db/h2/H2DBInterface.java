@@ -21,6 +21,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
@@ -448,8 +449,32 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
-		// TODO Auto-generated method stub
-		return null;
+		logSql(sql);
+		
+		SqlStatement statement = new SqlStatement();
+		statement.sql = sql;
+		//TODO: fill in params
+		
+		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
+		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+		//TODO: do we need to catch and interpret execptions here??
+
+		QueryDetails details = new QueryDetails(); //TODO: fill this properly
+
+		QueryResponse qresp = new QueryResponse();
+		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, dbctx.registry);
+		DType selectResultType = selectHelper.getSelectResultType(hls);
+		if (selectResultType.isScalarShape()) {
+			qresp.dvalList = buildScalarResult(rs, selectResultType, details, dbctx);
+//			fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+			qresp.ok = true;
+		} else {
+			String typeName = hls.querySpec.queryExp.getTypeName();
+			DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
+			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx);
+			qresp.ok = true;
+		}
+		return qresp;
 	}
 
 }
