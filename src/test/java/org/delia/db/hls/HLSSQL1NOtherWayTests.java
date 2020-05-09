@@ -76,7 +76,7 @@ public class HLSSQL1NOtherWayTests extends HLSTestBase {
 	}
 
 	private void sqlchk(String src, String sqlExpected) {
-		HLSSQLGenerator gen = new HLSSQLGenerator(delia.getFactoryService(), assocTblMgr);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr);
 		HLSQueryStatement hls = buildHLS(src);
 		gen.setRegistry(session.getExecutionContext().registry);
 		String sql = gen.buildSQL(hls);

@@ -28,11 +28,27 @@ import org.junit.Test;
  */
 public class HLSManagerTests extends HLSTestBase {
 	
+	public interface HLSStragey {
+		QueryResponse execute(HLSQueryStatement hls, QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor);
+	}
+	
+	//normally we just call db directly. one 'let' statement = one call to db
+	public static class StandardHLSStragey implements HLSStragey {
+
+		@Override
+		public QueryResponse execute(HLSQueryStatement hls, QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
+			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+			return qresp;
+		}
+		
+	}
+	
 	public static class HLSManager extends ServiceBase {
 
 		private DBInterface dbInterface;
 		private DTypeRegistry registry;
 		private AssocTblManager assocTblMgr;
+		private HLSStragey defaultStrategy = new StandardHLSStragey();
 
 		public HLSManager(FactoryService factorySvc, DTypeRegistry registry, DBInterface dbInterface) {
 			super(factorySvc);
@@ -42,10 +58,21 @@ public class HLSManagerTests extends HLSTestBase {
 		}
 		
 		public QueryResponse execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
+			
+			HLSQueryStatement hls = buildHLS(spec.queryExp);
+			HLSStragey strategy = chooseStrategy(hls);
+			
+//			QueryResponse qresp = strategy.execute(spec, qtx, dbexecutor)
+//			String sql = mgr.generateSQL(hls);
+
 			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
 			return qresp;
 		}
 		
+		private HLSStragey chooseStrategy(HLSQueryStatement hls) {
+			return defaultStrategy;
+		}
+
 		public HLSQueryStatement buildHLS(QueryExp queryExp) {
 			LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry, null, null); //TODO what are these nulls?
 			List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
@@ -61,11 +88,11 @@ public class HLSManagerTests extends HLSTestBase {
 		}
 		
 		public String generateSQL(HLSQueryStatement hls) {
-			HLSSQLGenerator gen = new HLSSQLGenerator(factorySvc, assocTblMgr);
-			gen.setRegistry(registry);
-			String sql = gen.buildSQL(hls);
-			log.log("sql: " + sql);
-			return sql;
+//			HLSSQLGenerator gen = new HLSSQLGenerator(factorySvc, assocTblMgr);
+//			gen.setRegistry(registry);
+//			String sql = gen.buildSQL(hls);
+//			log.log("sql: " + sql);
+			return null;
 		}
 		
 		
