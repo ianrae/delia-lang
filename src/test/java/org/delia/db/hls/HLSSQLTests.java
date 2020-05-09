@@ -73,7 +73,7 @@ public class HLSSQLTests extends HLSTestBase {
 					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 					String on1 = aliasAlloc.buildAlias(hlspan.fromType, pk.getKey()); //a.id
 					String on2 = aliasAlloc.buildAlias(pairType, relinfoB.fieldName); //b.cust
-					s = String.format("JOIN %s ON %s=%s", tbl1, on1, on2);
+					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				} else {
 					DStructType pairType = (DStructType) pair.type; //Address
 					RelationInfo relinfoB = DRuleHelper.findOtherSideOne(pairType, hlspan.fromType);
@@ -83,7 +83,7 @@ public class HLSSQLTests extends HLSTestBase {
 					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 					String on1 = aliasAlloc.buildAlias(hlspan.fromType, relinfoA.fieldName); //a.addr
 					String on2 = aliasAlloc.buildAlias(pairType, pk.getKey()); //b.id
-					s = String.format("JOIN %s ON %s=%s", tbl1, on1, on2);
+					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				}
 				
 				sc.out(s);
