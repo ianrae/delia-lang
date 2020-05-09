@@ -107,22 +107,58 @@ public class HLSSQLTests extends HLSTestBase {
 		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
+			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			boolean flipLeftRight = assocTblMgr.isFlipped();
 			if (flipLeftRight) {
-				String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
 				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rightv"); //a.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			} else {
 				// SELECT a.x,c.leftv FROM Customer as a zzLEFT JOIN AddressCustomerAssoc as c ON a.id=c.rightv
-				String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
 				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //a.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 			
+			sc.out(s);
+			
+			//and now 2nd join of Address table
+			List<TypePair> fullJoinL = genFullJoinList(hlspan);
+			boolean found = false;
+			for(TypePair tt: fullJoinL) {
+				if (tt.name.equals(pair.name) && tt.type.equals(pair.type)) {
+					found = true;
+				}
+			}
+			if (! found) {
+				return;
+			}
+			
+			s = null;
+			
+			if (flipLeftRight) {
+				DStructType pairType = (DStructType) pair.type; //Address
+//				RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
+				PrimaryKey pk = pairType.getPrimaryKey();
+//				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
+				
+				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
+				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rigthv"); //c.rightv
+				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+			} else {
+				DStructType pairType = (DStructType) pair.type; //Address
+//				RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
+				PrimaryKey pk = pairType.getPrimaryKey();
+//				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
+				
+				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
+				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rigthv"); //c.leftv
+				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+			}
 			sc.out(s);
 		}
 
@@ -498,8 +534,8 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomerSrc = true;
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.id,a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id WHERE a.ID=55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[55].fks()", 					"SELECT a.id,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.leftv WHERE a.ID=55");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
@@ -546,11 +582,13 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testDebugSQL() {
 		useCustomerSrc = true;
-		assocTblMgr.flip = true;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.id=b.rightv");
-		
 		assocTblMgr.flip = false;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.leftv");
+		sqlchk("let x = Customer[55].fks()", 					"SELECT a.id,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.leftv WHERE a.ID=55");
+//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.id=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
+//		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
+//		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
+//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
+//		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
 
 
