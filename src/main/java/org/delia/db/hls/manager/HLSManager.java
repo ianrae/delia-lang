@@ -2,7 +2,7 @@ package org.delia.db.hls.manager;
 
 import java.util.List;
 
-import org.delia.api.DeliaSession;
+import org.delia.api.Delia;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBExecutor;
@@ -33,18 +33,20 @@ import org.delia.zqueryresponse.LetSpanEngine;
 	 */
 	public class HLSManager extends ServiceBase {
 
-		private DeliaSession session;
+//		private DeliaSession session;
 		private DBInterface dbInterface;
 		private DTypeRegistry registry;
 		private AssocTblManager assocTblMgr;
 		private HLSStragey defaultStrategy = new StandardHLSStragey();
 		private boolean generateSQLforMemFlag;
+		private Delia delia;
 
-		public HLSManager(DeliaSession session) {
-			super(session.getDelia().getFactoryService());
-			this.session = session;
-			this.dbInterface= session.getDelia().getDBInterface();
-			this.registry = session.getExecutionContext().registry;
+		public HLSManager(Delia delia, DTypeRegistry registry) {
+			super(delia.getFactoryService());
+//			this.session = session;
+			this.delia = delia;
+			this.dbInterface= delia.getDBInterface();
+			this.registry = registry;
 			this.assocTblMgr = new AssocTblManager();
 		}
 		
@@ -87,7 +89,7 @@ import org.delia.zqueryresponse.LetSpanEngine;
 
 		private HLSStragey chooseStrategy(HLSQueryStatement hls) {
 			if (needDoubleStrategy(hls)) {
-				return new DoubleHLSStragey(session);
+				return new DoubleHLSStragey(delia);
 			}
 			return defaultStrategy;
 		}

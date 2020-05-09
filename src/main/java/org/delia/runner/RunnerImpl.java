@@ -31,6 +31,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.manager.HLSManager;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -68,6 +69,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private DValueIterator insertPrebuiltValueIterator;
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
+		private HLSManager mgr;
 		
 		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
 			super(factorySvc);
@@ -525,7 +527,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, this);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, this);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
@@ -610,5 +612,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse) {
 			this.prebuiltFetchRunnerToUse = prebuiltFetchRunnerToUse;
+		}
+		@Override
+		public void setHLSManager(HLSManager mgr) {
+			this.mgr = mgr;
 		}
 	}

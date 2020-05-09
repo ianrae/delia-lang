@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
+import org.delia.db.hls.manager.HLSManager;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -102,4 +103,5 @@ public interface Runner extends VarEvaluator {
 	
 	FetchRunner getPrebuiltFetchRunnerToUse();
 	void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse);
+	void setHLSManager(HLSManager mgr);
 }

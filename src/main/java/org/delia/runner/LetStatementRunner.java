@@ -13,10 +13,13 @@ import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.manager.HLSManager;
+import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.QueryFuncContext;
@@ -43,15 +46,17 @@ public class LetStatementRunner extends ServiceBase {
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
+	private HLSManager mgr;
 
 	public LetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, DBExecutor dbexecutor, DTypeRegistry registry, 
-			FetchRunner fetchRunner, RunnerImpl runner) {
+			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
 		this.dbexecutor = dbexecutor;
+		this.mgr = mgr;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 
 	}
@@ -109,9 +114,8 @@ public class LetStatementRunner extends ServiceBase {
 				throw new DeliaException(err);
 			}
 
-			QuerySpec spec = resolveFilterVars(queryExp);
-			QueryContext qtx = buildQueryContext(spec);
-			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+			//** call the database **
+			QueryResponse qresp = executeDBQuery(queryExp);
 			res.ok = qresp.ok;
 			res.addIfNotNull(qresp.err);
 			res.shape = null;
@@ -133,6 +137,22 @@ public class LetStatementRunner extends ServiceBase {
 
 		assignVar(exp, res);
 		return res;
+	}
+
+	private QueryResponse executeDBQuery(QueryExp queryExp) {
+		QuerySpec spec = resolveFilterVars(queryExp);
+		QueryContext qtx = buildQueryContext(spec);
+		
+		boolean flag = false;
+		QueryResponse qresp;
+		if (flag) {
+			spec.queryExp = queryExp;
+			HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
+			qresp = result.qresp;
+		} else {
+			qresp = dbexecutor.executeQuery(spec, qtx);
+		}
+		return qresp;
 	}
 
 	private QueryContext buildQueryContext(QuerySpec spec) {

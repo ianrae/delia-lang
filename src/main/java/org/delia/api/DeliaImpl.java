@@ -8,6 +8,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
+import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
@@ -100,6 +101,10 @@ public class DeliaImpl implements Delia {
 			DeliaError err = et.add("runner-init-failed", "runner init failed");
 			throw new DeliaException(err);
 		}
+		
+		HLSManager mgr = new HLSManager(this, runner.getRegistry());
+		runner.setHLSManager(mgr);
+		
 		dbInterface.init(factorySvc);
 		mostRecentRunner = runner;
 		return runner;

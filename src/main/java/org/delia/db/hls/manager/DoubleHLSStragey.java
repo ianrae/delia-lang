@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
+import org.delia.api.Delia;
 import org.delia.api.DeliaImpl;
 import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.Exp;
@@ -30,12 +31,13 @@ import org.delia.util.DRuleHelper;
 //normally we just call db directly. one 'let' statement = one call to db
 	public class DoubleHLSStragey implements HLSStragey {
 
-		private DeliaSession session;
+//		private DeliaSession session;
 		private Log log;
+		private Delia delia;
 
-		public DoubleHLSStragey(DeliaSession session) {
-			this.session = session;
-			this.log = session.getDelia().getLog();
+		public DoubleHLSStragey(Delia delia) {
+			this.delia = delia;
+			this.log = delia.getLog();
 		}
 
 		@Override
@@ -110,7 +112,9 @@ import org.delia.util.DRuleHelper;
 		}
 
 		private LetStatementExp compileInQuery(String deliaSrc) {
-			DeliaImpl deliaimpl = (DeliaImpl) session.getDelia();
+			DeliaImpl deliaimpl = (DeliaImpl) delia;
+			
+			DeliaSession session = null; //HOW DO WE GET THIS??
 			List<Exp> expL = deliaimpl.continueCompile(deliaSrc, session);
 			LetStatementExp exp = findLetStatement(expL);
 			return exp;
