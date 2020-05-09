@@ -57,7 +57,7 @@ public class HLSSQL11Tests extends HLSTestBase {
 		useCustomer11Src = true;
 
 //		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
-		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.addr < ?", "111");
+		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE b.id < ?", "111");
 	}
 
 	//---
