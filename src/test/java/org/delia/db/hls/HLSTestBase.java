@@ -123,6 +123,7 @@ public class HLSTestBase extends NewBDDBase {
 	protected boolean useCustomer11OtherWaySrc = false;
 	protected boolean useCustomer1NSrc = false;
 	protected boolean useCustomer1NOtherWaySrc = false;
+	protected boolean insertSomeRecords = false;
 	
 	//---
 	protected AssocTblManager assocTblMgr = new AssocTblManager();
@@ -142,6 +143,13 @@ public class HLSTestBase extends NewBDDBase {
 	protected String buildCustomerSrc() {
 		String src = " type Customer struct {cid int unique, x int, relation addr Address many optional  } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  many optional } end";
+		
+		if (insertSomeRecords) {
+			src += "\n insert Customer {cid:55, x:10}";
+			src += "\n insert Customer {cid:56, x:11}";
+			src += "\n insert Address {id:100, y:20, cust:55}";
+			src += "\n insert Address {id:101, y:20, cust:55}";
+		}
 		return src;
 	}
 	protected String buildCustomer11Src() {

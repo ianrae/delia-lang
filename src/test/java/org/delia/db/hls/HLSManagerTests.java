@@ -13,9 +13,12 @@ import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.sql.QueryType;
+import org.delia.db.sql.QueryTypeDetector;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
 import org.junit.Before;
@@ -39,11 +42,38 @@ public class HLSManagerTests extends HLSTestBase {
 
 		@Override
 		public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor) {
-			QueryResponse qresp = null; //dbexecutor.executeHLSQuery(hls, sql, qtx);
+			QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
+			return qresp;
+		}
+	}
+	
+	//normally we just call db directly. one 'let' statement = one call to db
+	public static class DoubleHLSStragey implements HLSStragey {
+
+		@Override
+		public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor) {
+			
+			HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
+			HLSQuerySpan hlspan2 = hls.hlspanL.get(0); //Customer
+			QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
+			
+			//and again with span1
+			HLSQueryStatement clone = new HLSQueryStatement();
+			//{Address->Address,MT:Address,[cust in [55,56],()}
+			
+			//src = "let x = Address[cust in [55,56]]
+			
+			clone.hlspanL.add(hlspan1);
+			clone.queryExp = hls.queryExp;
+			clone.querySpec = hls.querySpec;
+			QueryResponse qresp2 = dbexecutor.executeHLSQuery(clone, sql, qtx);
+			
+			
 			return qresp;
 		}
 		
 	}
+	
 	
 	public static class HLSManagerResult {
 		public String sql;
@@ -149,8 +179,37 @@ public class HLSManagerTests extends HLSTestBase {
 		}
 
 		private HLSStragey chooseStrategy(HLSQueryStatement hls) {
+			if (needDoubleStrategy(hls)) {
+				return new DoubleHLSStragey();
+			}
 			return defaultStrategy;
 		}
+		
+		private boolean needDoubleStrategy(HLSQueryStatement hls) {
+			if (hls.hlspanL.size() == 2) {
+//				HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
+				HLSQuerySpan hlspan2 = hls.hlspanL.get(0); //Customer
+				
+				QueryType queryType = detectQueryType(hls.queryExp, hlspan2);
+				switch(queryType) {
+				case OP:
+					return true;
+				case ALL_ROWS:
+				case PRIMARY_KEY:
+					default:
+						return false;
+				}
+			} 
+			return false;
+		}
+		private QueryType detectQueryType(QueryExp queryExp, HLSQuerySpan hlspan) {
+			QueryTypeDetector queryTypeDetector = new QueryTypeDetector(factorySvc, registry);
+			QuerySpec spec = new QuerySpec();
+			spec.queryExp = queryExp;
+			QueryType queryType = queryTypeDetector.detectQueryType(spec);
+			return queryType;
+		}
+
 
 		public HLSQueryStatement buildHLS(QueryExp queryExp) {
 			LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry, null, null); //TODO what are these nulls?
@@ -186,70 +245,23 @@ public class HLSManagerTests extends HLSTestBase {
 		assertEquals(2, list.size());
 	}	
 	
+	@Test
+	public void testDoubleStratey() {
+		insertSomeRecords = true;
+		useCustomerManyToManySrc = true;
+		generateSQLforMemFlag = false;
+//		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv 
+//		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
+//		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55 
+//		sqlchk("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55");
+
+		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv LEFT JOIN Customer as c ON b.leftv=c.id AND c.x > 10 
+		QueryResponse qresp = sqlchk("let x = Customer[x >= 10].addr", null);
+		
+		List<DValue> list = qresp.dvalList;
+		assertEquals(2, list.size());
+	}	
 	
-	//	@Test
-	//	public void testOneSpanNoSubSQL() {
-	//		sqlchk("let x = Flight[55]", 			"SELECT * FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[55].count()", 	"SELECT COUNT(*) FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[55].first()", 	"SELECT TOP 1 * FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[true]", 			"SELECT * FROM Flight as a");
-	//
-	//		sqlchk("let x = Flight[55].field1", 						"SELECT a.field1 FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[55].field1.min()", 					"SELECT MIN(a.field1) FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[55].field1.orderBy('field2')", 		"SELECT a.field1 FROM Flight as a WHERE a.id=55 ORDER BY a.field2");
-	//		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT a.field1 FROM Flight as a WHERE a.id=55 ORDER BY a.field2 OFFSET 3");
-	//		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT a.field1 FROM Flight as a WHERE a.id=55 ORDER BY a.field2 LIMIT 5 OFFSET 3");
-	//		sqlchk("let x = Flight[55].field1.count()", 				"SELECT COUNT(a.field1) FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[55].field1.distinct()", 				"SELECT DISTINCT(a.field1) FROM Flight as a WHERE a.id=55");
-	//		sqlchk("let x = Flight[55].field1.exists()", 				"SELECT COUNT(a.field1) FROM Flight as a WHERE a.id=55 LIMIT 1");
-	//
-	//	}
-	//
-	//	@Test
-	//	public void testOneSpanSubSQL() {
-	//		useCustomerManyToManySrc = true;
-	//		assocTblMgr.flip = false;
-	//		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid=55");
-	//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
-	//		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
-	//		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv ORDER BY a.cid");
-	//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-	//		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
-	//	}
-	//
-	//		@Test
-	//		public void testOneRelationSQL() {
-	//			useCustomerManyToManySrc = true;
-	//			
-	//			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv 
-	//			sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
-	//
-	//			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55 
-	//			sqlchk("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55");
-	//
-	//			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv LEFT JOIN Customer as c ON b.leftv=c.id AND c.x > 10 
-	////			sqlchk("let x = Customer[x > 10].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
-	//			
-	////			chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
-	////			chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
-	////			chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
-	////			
-	////			chk("let x = Customer[true].addr.orderBy('id')", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),OLO:id,null,null}");
-	////			chk("let x = Customer[true].orderBy('id').addr", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,()}");
-	////			chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
-	//		}
-	//
-	//	@Test
-	//	public void testAssocTableFlip() {
-	//		useCustomerManyToManySrc = true;
-	//		assocTblMgr.flip = true;
-	//		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv");
-	//		
-	//		assocTblMgr.flip = false;
-	//		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
-	//	}
-	//
-	//	
 
 	@Test
 	public void testDebugSQL() {
@@ -274,7 +286,9 @@ public class HLSManagerTests extends HLSTestBase {
 
 	}
 
-
+	//-------------------------
+	private boolean generateSQLforMemFlag = true;
+	
 	@Before
 	public void init() {
 		createDao();
@@ -287,7 +301,7 @@ public class HLSManagerTests extends HLSTestBase {
 		log.log(src);
 		
 		HLSManager mgr = new HLSManager(delia.getFactoryService(), session.getExecutionContext().registry, delia.getDBInterface());
-		mgr.setGenerateSQLforMemFlag(true);
+		mgr.setGenerateSQLforMemFlag(generateSQLforMemFlag);
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
 		QueryContext qtx = new QueryContext();
