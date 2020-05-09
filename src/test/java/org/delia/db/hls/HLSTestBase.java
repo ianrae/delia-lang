@@ -20,14 +20,12 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.util.StringTrail;
 import org.delia.zqueryresponse.LetSpan;
 import org.delia.zqueryresponse.LetSpanEngine;
 import org.delia.zqueryresponse.LetSpanRunner;
-import org.junit.Before;
 
 /**
  * 
@@ -55,7 +53,15 @@ public class HLSTestBase extends NewBDDBase {
 
 
 	protected QueryExp compileQuery(String src) {
-		String initialSrc = (useCustomerSrc) ? buildCustomerSrc() : buildSrc();
+		String initialSrc;
+		if  (useCustomerSrc) {
+			initialSrc = buildCustomerSrc();
+		} else if (useCustomer11Src) {
+			initialSrc = buildCustomer11Src();
+		} else {
+			initialSrc = buildSrc();
+		}
+		
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
@@ -68,14 +74,6 @@ public class HLSTestBase extends NewBDDBase {
 		LetStatementExp letStatement = findLet(sessimpl);
 		
 		QueryExp queryExp = (QueryExp) letStatement.value;
-		QueryResponse qresp = (QueryResponse) res.val;
-		
-		MyLetSpanRunner myrunner = new MyLetSpanRunner();
-		FetchRunner fetchRunner = null;
-//		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner, myrunner);
-		
-//		qresp = (QueryResponse) res.val;
-//		qresp = letEngine.process(queryExp, qresp);
 		return queryExp;
 	}
 
@@ -109,6 +107,7 @@ public class HLSTestBase extends NewBDDBase {
 	protected Delia delia;
 	protected DeliaSession session;
 	protected boolean useCustomerSrc = false;
+	protected boolean useCustomer11Src = false;
 	
 	protected DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
@@ -125,6 +124,11 @@ public class HLSTestBase extends NewBDDBase {
 	protected String buildCustomerSrc() {
 		String src = " type Customer struct {id int unique, x int, relation addr Address many optional  } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  many optional } end";
+		return src;
+	}
+	protected String buildCustomer11Src() {
+		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional parent  } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer  one optional } end";
 		return src;
 	}
 

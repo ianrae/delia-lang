@@ -102,6 +102,7 @@ public class DRuleHelper {
 		for(DRule rule: otherSide.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
+				//TODO not correct should also check fieldName. may be multiple relations of same type.
 				if (typesAreEqual(rr.relInfo.farType, structType)) {
 					return rr.relInfo;
 				}

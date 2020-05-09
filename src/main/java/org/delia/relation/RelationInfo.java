@@ -11,7 +11,6 @@ public class RelationInfo {
 	public boolean isParent;
 	public boolean isOneWay;
 	
-	
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		if (spec.needsReplacement(this, nearType)) {
 			nearType = (DStructType) spec.newType;

@@ -50,14 +50,34 @@ public class HLSSQLTests extends HLSTestBase {
 
 			//do the joins
 			for(TypePair pair: joinL) {
-				DStructType pairType = (DStructType) pair.type;
-				PrimaryKey pk = pairType.getPrimaryKey();
-				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey();
-				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
-				String on1 = aliasAlloc.buildAlias(hlspan.fromType, mainPk.getKey());
-				String on2 = aliasAlloc.buildAlias(pairType, pk.getKey());
+				boolean bHasFK = false;
+				RelationInfo relinfoA = DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
+				switch(relinfoA.cardinality) {
+				case ONE_TO_ONE:
+					bHasFK = relinfoA.isParent;
+					break;
+				case ONE_TO_MANY:
+					bHasFK = true;
+					break;
+				case MANY_TO_MANY:
+					break;
+				}
 				
-				String s = String.format("JOIN %s ON %s=%s", tbl1, on1, on2);
+				String s;
+				if (bHasFK) {
+					DStructType pairType = (DStructType) pair.type; //Address
+					RelationInfo relinfoB = DRuleHelper.findOtherSideOne(pairType, hlspan.fromType);
+					PrimaryKey pk = pairType.getPrimaryKey();
+//					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
+					
+					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
+					String on1 = aliasAlloc.buildAlias(hlspan.fromType, pk.getKey()); //a.id
+					String on2 = aliasAlloc.buildAlias(pairType, relinfoB.fieldName); //b.cust
+					s = String.format("JOIN %s ON %s=%s", tbl1, on1, on2);
+				} else {
+					s = "ssss";
+				}
+				
 				sc.out(s);
 			}
 		}
