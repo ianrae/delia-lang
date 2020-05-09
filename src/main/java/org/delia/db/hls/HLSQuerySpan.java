@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.DValue;
 
 public class HLSQuerySpan implements HLSElement {
 	public DStructType fromType;
@@ -20,6 +21,7 @@ public class HLSQuerySpan implements HLSElement {
 	public SUBElement subEl;
 	public OLOElement oloEl;
 	
+	public List<DValue> paramL = new ArrayList<>(); //for prepared statement
 	public boolean doubleFlip = false;
 	
 	@Override

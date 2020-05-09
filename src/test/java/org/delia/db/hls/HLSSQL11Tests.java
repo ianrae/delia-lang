@@ -3,6 +3,7 @@ package org.delia.db.hls;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,7 +19,7 @@ public class HLSSQL11Tests extends HLSTestBase {
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomer11Src = true;
-		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.cid=55");
+		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.cid=?", "55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust ORDER BY a.id");
@@ -64,7 +65,8 @@ public class HLSSQL11Tests extends HLSTestBase {
 		//		//this one doesn't need to do fetch since just getting x
 //		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer");
 		//		
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
+//		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust");
+		sqlchkP("let x = Customer[59].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.id=b.cust WHERE a.cid = ?", "59");
 	}
 
 	//---
@@ -75,10 +77,22 @@ public class HLSSQL11Tests extends HLSTestBase {
 	}
 
 	private void sqlchk(String src, String sqlExpected) {
+		sqlchkP(src, sqlExpected, null);
+	}
+	private void sqlchkP(String src, String sqlExpected, String param1) {
 		HLSQueryStatement hls = buildHLS(src);
 		HLSSQLGenerator gen = createGen();
 		String sql = gen.buildSQL(hls);
 		log.log("sql: " + sql);
 		assertEquals(sqlExpected, sql);
+		
+		HLSQuerySpan hlspan = hls.getMainHLSSpan();
+		if (param1 != null) {
+			assertEquals(1, hlspan.paramL.size());
+			DValue dval = hlspan.paramL.get(0);
+			assertEquals(param1, dval.asString());
+		} else {
+			assertEquals(0, hlspan.paramL.size());
+		}
 	}
 }

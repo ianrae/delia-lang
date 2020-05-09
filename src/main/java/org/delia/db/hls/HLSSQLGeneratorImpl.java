@@ -4,33 +4,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
+import org.delia.db.sql.fragment.SelectStatementFragment;
+import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.runner.FilterEvaluator;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
 
-	private DTypeRegistry registry;
+//	private DTypeRegistry registry;
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
 	private AliasAllocator aliasAlloc = new AliasAllocator();
 	private SqlJoinHelper joinHelper;
 	private AssocTblManager assocTblMgr;
 	private MiniSelectFragmentParser miniSelectParser;
+	private VarEvaluator varEvaluator;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr);
 		this.assocTblMgr = assocTblMgr;
 		this.miniSelectParser = miniSelectParser;
+		this.varEvaluator = varEvaluator;
 	}
 
 	@Override
@@ -100,9 +107,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private String buildTblAlias(DStructType structType) {
 		return aliasAlloc.buildTblAlias(structType);
 	}
-	private String buildAlias(DStructType pairType, TypePair pair) {
-		return aliasAlloc.buildAlias(pairType, pair);
-	}
+//	private String buildAlias(DStructType pairType, TypePair pair) {
+//		return aliasAlloc.buildAlias(pairType, pair);
+//	}
 	private String buildAlias(DStructType pairType, String fieldName) {
 		return aliasAlloc.buildAlias(pairType, fieldName);
 	}
@@ -151,23 +158,14 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
-		QueryType queryType = queryTypeDetector.detectQueryType(spec);
-
-		String s = null;
-		switch(queryType) {
-		case ALL_ROWS:
-			break;
-		case PRIMARY_KEY:
-			s = "55";//fix TODO
-			break;
-		case OP:
-			DeliaExceptionHelper.throwError("notyetsupported-hls", "sdfds");
-		}
-
-		if (s != null) {
-			String fake = hlspan.fromType.getName().equals("Customer") ? "cid" : "id";
-			sc.out("WHERE %s=%s", buildAlias(hlspan.fromType, fake), s);
-		}
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		QueryDetails details = new QueryDetails();
+		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
+		String whereSql = miniSelectParser.renderSelect(selectFrag);
+		SqlStatement statement = selectFrag.statement;
+		hlspan.paramL = statement.paramL;
+		whereSql = StringUtils.substringAfter(whereSql, "WHERE ").trim();
+		sc.out("WHERE %s", whereSql);
 	}
 	
 	private QueryType detectQueryType(HLSQuerySpan hlspan) {
@@ -247,7 +245,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	}
 	@Override
 	public void setRegistry(DTypeRegistry registry) {
-		this.registry = registry;
+//		this.registry = registry;
 		this.queryTypeDetector = new QueryTypeDetector(factorySvc, registry);
 	}
 }

@@ -79,7 +79,7 @@ public class HLSManager extends ServiceBase {
 	private HLSSQLGenerator chooseGenerator() {
 		//later we will have dbspecific ones
 
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{
