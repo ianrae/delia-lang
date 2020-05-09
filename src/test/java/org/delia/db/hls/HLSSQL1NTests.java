@@ -14,11 +14,11 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class HSQL11Tests extends HLSTestBase {
+public class HLSSQL1NTests extends HLSTestBase {
 
 	@Test
 	public void testOneSpanSubSQL() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		sqlchk("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.cust WHERE a.ID=55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y,b.cust FROM Customer as a JOIN Address as b ON a.id=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y,b.cust FROM Customer as a JOIN Address as b ON a.id=b.cust");
@@ -55,7 +55,7 @@ public class HSQL11Tests extends HLSTestBase {
 
 	@Test
 	public void testDebugSQL() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 
 		//		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer JOIN Address ON id=id WHERE ID=55");
 //		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer JOIN Address ON id=id");

@@ -60,6 +60,10 @@ public class HLSTestBase extends NewBDDBase {
 			initialSrc = buildCustomer11Src();
 		} else if (useCustomer11OtherWaySrc) {
 			initialSrc = buildCustomer11OtherWasySrc();
+		} else if (useCustomer1NSrc) {
+			initialSrc = buildCustomer1NSrc();
+		} else if (useCustomer1NOtherWaySrc) {
+			initialSrc = buildCustomer1NOtherWaySrc();
 		} else {
 			initialSrc = buildSrc();
 		}
@@ -111,6 +115,8 @@ public class HLSTestBase extends NewBDDBase {
 	protected boolean useCustomerSrc = false;
 	protected boolean useCustomer11Src = false;
 	protected boolean useCustomer11OtherWaySrc = false;
+	protected boolean useCustomer1NSrc = false;
+	protected boolean useCustomer1NOtherWaySrc = false;
 	
 	protected DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
@@ -137,6 +143,16 @@ public class HLSTestBase extends NewBDDBase {
 	protected String buildCustomer11OtherWasySrc() {
 		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional   } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  one optional parent} end";
+		return src;
+	}
+	protected String buildCustomer1NSrc() {
+		String src = " type Customer struct {cid int unique, x int, relation addr Address many optional  } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer  one optional } end";
+		return src;
+	}
+	protected String buildCustomer1NOtherWaySrc() {
+		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional  } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer many optional } end";
 		return src;
 	}
 
