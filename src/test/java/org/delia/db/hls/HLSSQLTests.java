@@ -4,9 +4,7 @@ package org.delia.db.hls;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 import org.delia.compiler.ast.QueryExp;
@@ -15,7 +13,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
-import org.delia.db.sql.StrCreator;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -73,7 +70,7 @@ public class HLSSQLTests extends HLSTestBase {
 					bHasFK = relinfoA.isParent;
 					break;
 				case MANY_TO_MANY:
-					doManyToMany(sc, hlspan, pair, relinfoA);
+					doManyToMany(sc, hlspan, pair, relinfoA, true);
 					return;
 				}
 				
@@ -104,11 +101,15 @@ public class HLSSQLTests extends HLSTestBase {
 			}
 		}
 
-		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
+		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA, boolean doubleFlip) {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			boolean flipLeftRight = assocTblMgr.isFlipped();
+			if (!doubleFlip) {
+				flipLeftRight = !flipLeftRight;
+			}
+			
 			if (flipLeftRight) {
 				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
@@ -220,6 +221,7 @@ public class HLSSQLTests extends HLSTestBase {
 			//TODO: later to fk(field)
 			return joinL;
 		}
+		
 
 		public void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
 			List<TypePair> joinL = genFKJoinList(hlspan);
@@ -268,82 +270,42 @@ public class HLSSQLTests extends HLSTestBase {
 				}
 			}
 		}
+		
+		public List<TypePair> genTwoStatementJoinList(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2, SQLCreator sc) {
+			List<TypePair> joinL = new ArrayList<>();
+
+			boolean needJoin = true; //hlspan.subEl != null;
+			if (! needJoin) {
+				return joinL;
+			}
+
+			
+			//1 is address
+			//2 is customer
+			
+			String targetTypeName = hlspan2.fromType.getName();
+			for(TypePair pair: hlspan1.fromType.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					if (pair.type.getName().equals(targetTypeName)) {
+						
+						RelationInfo relinfoA = DRuleHelper.findMatchingRuleInfo(hlspan1.fromType, pair);
+						if (RelationCardinality.MANY_TO_MANY.equals(relinfoA.cardinality)) {
+							TypePair tmp = new TypePair("xx", relinfoA.farType);
+							doManyToMany(sc, hlspan1, tmp, relinfoA, false);
+							
+							joinL.add(pair);
+						}
+					}
+				}
+			}
+			
+			
+			
+			
+			return joinL;
+		}
 	}
 	
-	public static class AliasAllocator {
-		protected int nextAliasIndex = 0;
-		private Map<String,String> aliasMap = new HashMap<>(); //typeName,alias
-		
-		public AliasAllocator() {
-		}
-		
-		public void createAlias(String name) {
-			char ch = (char) ('a' + nextAliasIndex++);
-			String s = String.format("%c", ch);
-			aliasMap.put(name, s);
-		}
-
-		public String findOrCreateFor(DStructType structType) {
-			if (! aliasMap.containsKey(structType.getName())) {
-				createAlias(structType.getName());
-			}
-			return aliasMap.get(structType.getName());
-		}
-		public String buildTblAlias(DStructType structType) {
-			String alias = findOrCreateFor(structType);
-			String s = String.format("%s as %s", structType.getName(), alias);
-			return s;
-		}
-		public String buildAlias(DStructType pairType, TypePair pair) {
-			String alias = findOrCreateFor(pairType);
-			String s = String.format("%s.%s", alias, pair.name);
-			return s;
-		}
-		public String buildAlias(DStructType pairType, String fieldName) {
-			String alias = findOrCreateFor(pairType);
-			String s = String.format("%s.%s", alias, fieldName);
-			return s;
-		}
-		
-		//----
-		public String findOrCreateForAssoc(String tblName) {
-			if (! aliasMap.containsKey(tblName)) {
-				createAlias(tblName);
-			}
-			return aliasMap.get(tblName);
-		}
-		public String buildTblAliasAssoc(String tblName) {
-			String alias = findOrCreateForAssoc(tblName);
-			String s = String.format("%s as %s", tblName, alias);
-			return s;
-		}
-		public String buildAliasAssoc(String tblName, String fieldName) {
-			String alias = findOrCreateForAssoc(tblName);
-			String s = String.format("%s.%s", alias, fieldName);
-			return s;
-		}
-
-	}
-	
-
-	public static class SQLCreator {
-		private StrCreator sc = new StrCreator();
-		private boolean isPrevious = false;
-
-		public String out(String fmt, String...args) {
-			if (isPrevious) {
-				sc.o(" ");
-			}
-			String s = sc.o(fmt, args);
-			isPrevious = true;
-			return s;
-		}
-
-		public String sql() {
-			return sc.str;
-		}
-	}
-
 	public static class HLSSQLGenerator extends ServiceBase {
 
 		private DTypeRegistry registry;
@@ -359,12 +321,36 @@ public class HLSSQLTests extends HLSTestBase {
 
 		public String buildSQL(HLSQueryStatement hls) {
 			this.queryExp = hls.queryExp;
+			if (hls.hlspanL.size() == 1) {
+				return processOneStatement(hls.getMainHLSSpan(), false);
+			} else if (hls.hlspanL.size() == 2) {
+				String sql = processOneStatement(hls.hlspanL.get(1), true);
+				String secondaryJoin = generateSecondaryJoin(hls.hlspanL.get(1), hls.hlspanL.get(0));
+				
+				String ss = String.format("%s %s", sql, secondaryJoin);
+				return ss;
+			} else {
+				return null; //not supported
+			}
+		}
+		
+		private String generateSecondaryJoin(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2) {
+			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv LEFT JOIN Customer as c WHERE b.leftv=c.id AND c.x > 10 
 
-			HLSQuerySpan hlspan = hls.getMainHLSSpan();
+			SQLCreator sc = new SQLCreator();
+			List<TypePair> joinL = joinHelper.genTwoStatementJoinList(hlspan1, hlspan2, sc);
+			//Address.cust
+			
+			
+			
+			return sc.sql();
+		}
+
+		public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
 			SQLCreator sc = new SQLCreator();
 			//SELECT .. from .. ..join.. ..where.. ..order..
 			sc.out("SELECT");
-			genFields(sc, hlspan);
+			genFields(sc, hlspan, forceAllFields);
 			sc.out("FROM %s", buildTblAlias(hlspan.mtEl.structType));
 			genJoin(sc, hlspan);
 			genWhere(sc, hlspan);
@@ -373,6 +359,7 @@ public class HLSSQLTests extends HLSTestBase {
 
 			return sc.sql();
 		}
+
 
 		private String buildTblAlias(DStructType structType) {
 			return aliasAlloc.buildTblAlias(structType);
@@ -442,7 +429,7 @@ public class HLSSQLTests extends HLSTestBase {
 			}
 		}
 
-		private void genFields(SQLCreator sc, HLSQuerySpan hlspan) {
+		private void genFields(SQLCreator sc, HLSQuerySpan hlspan, boolean forceAllFields) {
 			List<String> fieldL = new ArrayList<>();
 
 			if (hlspan.hasFunction("first")) {
@@ -482,6 +469,10 @@ public class HLSSQLTests extends HLSTestBase {
 				}
 			}
 
+			if (forceAllFields) {
+				addStructFields(hlspan.fromType, fieldL);
+			}
+			
 			boolean needJoin = hlspan.subEl != null;
 			if (needJoin && fieldL.isEmpty()) {
 				addStructFields(hlspan.fromType, fieldL);
@@ -589,10 +580,10 @@ public class HLSSQLTests extends HLSTestBase {
 		sqlchk("let x = Customer[true].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
 
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55 
-		sqlchk("let x = Customer[55].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
+//		sqlchk("let x = Customer[55].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
 
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv LEFT JOIN Customer as c WHERE b.leftv=c.id AND c.x > 10 
-		sqlchk("let x = Customer[x > 10].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
+//		sqlchk("let x = Customer[x > 10].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
 		
 		//		
 		//		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
