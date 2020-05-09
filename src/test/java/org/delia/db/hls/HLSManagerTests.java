@@ -8,6 +8,7 @@ import java.util.List;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;
@@ -29,18 +30,23 @@ import org.junit.Test;
 public class HLSManagerTests extends HLSTestBase {
 	
 	public interface HLSStragey {
-		QueryResponse execute(HLSQueryStatement hls, QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor);
+		QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor);
 	}
 	
 	//normally we just call db directly. one 'let' statement = one call to db
 	public static class StandardHLSStragey implements HLSStragey {
 
 		@Override
-		public QueryResponse execute(HLSQueryStatement hls, QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
-			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor) {
+			QueryResponse qresp = null; //dbexecutor.executeHLSQuery(hls, sql, qtx);
 			return qresp;
 		}
 		
+	}
+	
+	public static class HLSManagerResult {
+		public String sql;
+		public QueryResponse qresp;
 	}
 	
 	public static class HLSManager extends ServiceBase {
@@ -57,18 +63,28 @@ public class HLSManagerTests extends HLSTestBase {
 			this.assocTblMgr = new AssocTblManager();
 		}
 		
-		public QueryResponse execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
-			
+		public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
 			HLSQueryStatement hls = buildHLS(spec.queryExp);
-			HLSStragey strategy = chooseStrategy(hls);
 			
-//			QueryResponse qresp = strategy.execute(spec, qtx, dbexecutor)
-//			String sql = mgr.generateSQL(hls);
+			HLSSQLGenerator sqlGenerator = chooseGenerator();
+			sqlGenerator.setRegistry(registry);
+			String sql = sqlGenerator.buildSQL(hls);
+			
+			HLSStragey strategy = chooseStrategy(hls);
+			strategy.execute(hls, sql, qtx, dbexecutor);
 
 			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
-			return qresp;
+			HLSManagerResult result = new HLSManagerResult();
+			result.qresp = qresp;
+			result.sql = sql;
+			return result;
 		}
 		
+		private HLSSQLGenerator chooseGenerator() {
+			//later we will have dbspecific ones
+			return new HLSSQLGeneratorImpl(factorySvc, this.assocTblMgr);
+		}
+
 		private HLSStragey chooseStrategy(HLSQueryStatement hls) {
 			return defaultStrategy;
 		}
@@ -206,11 +222,14 @@ public class HLSManagerTests extends HLSTestBase {
 		log.log(src);
 		
 		HLSManager mgr = new HLSManager(delia.getFactoryService(), session.getExecutionContext().registry, delia.getDBInterface());
-		HLSQueryStatement hls = mgr.buildHLS(queryExp);
 		
-		String sql = mgr.generateSQL(hls);
-		log.log("sql: " + sql);
-		assertEquals(sqlExpected, sql);
+		QuerySpec spec = new QuerySpec();
+		spec.queryExp = queryExp;
+		QueryContext qtx = new QueryContext();
+		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, null);
+		DBExecutor dbexecutor = delia.getDBInterface().createExector(dbctx);
+		HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
+		assertEquals(sqlExpected, result.sql);
 	}
 
 
