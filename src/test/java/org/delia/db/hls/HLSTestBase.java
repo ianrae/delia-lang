@@ -58,6 +58,8 @@ public class HLSTestBase extends NewBDDBase {
 			initialSrc = buildCustomerSrc();
 		} else if (useCustomer11Src) {
 			initialSrc = buildCustomer11Src();
+		} else if (useCustomer11OtherWaySrc) {
+			initialSrc = buildCustomer11OtherWasySrc();
 		} else {
 			initialSrc = buildSrc();
 		}
@@ -108,6 +110,7 @@ public class HLSTestBase extends NewBDDBase {
 	protected DeliaSession session;
 	protected boolean useCustomerSrc = false;
 	protected boolean useCustomer11Src = false;
+	protected boolean useCustomer11OtherWaySrc = false;
 	
 	protected DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
@@ -129,6 +132,11 @@ public class HLSTestBase extends NewBDDBase {
 	protected String buildCustomer11Src() {
 		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional parent  } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  one optional } end";
+		return src;
+	}
+	protected String buildCustomer11OtherWasySrc() {
+		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional   } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer  one optional parent} end";
 		return src;
 	}
 
