@@ -9,6 +9,7 @@ import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.QueryResponse;
@@ -125,5 +126,10 @@ public class H2DBExecutor implements DBExecutor {
 	@Override
 	public FetchRunner createFetchRunner(FactoryService factorySvc) {
 		return new FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
+	}
+
+	@Override
+	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+		return dbInterface.executeHLSQuery(hls, sql, qtx, dbctx);
 	}
 }

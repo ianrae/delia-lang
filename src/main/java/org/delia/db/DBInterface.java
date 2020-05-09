@@ -3,6 +3,7 @@ package org.delia.db;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
@@ -25,6 +26,8 @@ public interface DBInterface {
 	int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx); 
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx);
 	void executeDelete(QuerySpec spec, DBAccessContext dbctx);
+	
+	QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx);
 
 	boolean isSQLLoggingEnabled();
 	void enableSQLLogging(boolean b);

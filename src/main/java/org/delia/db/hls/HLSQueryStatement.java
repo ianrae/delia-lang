@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.compiler.ast.QueryExp;
+import org.delia.db.QuerySpec;
 
 public class HLSQueryStatement implements HLSElement {
 	public List<HLSQuerySpan> hlspanL = new ArrayList<>();
 	public QueryExp queryExp;
+	public QuerySpec querySpec;
 	
 	public HLSQuerySpan getMainHLSSpan() {
 		return hlspanL.get(0);

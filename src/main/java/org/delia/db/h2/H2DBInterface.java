@@ -20,6 +20,7 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
@@ -443,6 +444,12 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	@Override
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		//nothing to do
+	}
+
+	@Override
+	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

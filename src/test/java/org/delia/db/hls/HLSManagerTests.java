@@ -49,6 +49,15 @@ public class HLSManagerTests extends HLSTestBase {
 		public QueryResponse qresp;
 	}
 	
+	/**
+	 * Facade between Delia Runner and the db. Allows us to have different strategies
+	 * for executing 'let' statement queries.
+	 * Normally each query turns into a single SQL call to DBInterface,
+	 * but some require multiple calls and additional handling.
+	 * This layer selects a strategy object to execute the query and runs it.
+	 * @author Ian Rae
+	 *
+	 */
 	public static class HLSManager extends ServiceBase {
 
 		private DBInterface dbInterface;
