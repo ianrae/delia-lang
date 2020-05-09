@@ -113,7 +113,8 @@ public class HLSSQLTests extends HLSTests {
 				if (pair.type.isStructShape()) {
 					DStructType pairType = (DStructType) pair.type;
 					PrimaryKey pk = pairType.getPrimaryKey();
-					fieldL.add(pk.getFieldName());
+//					fieldL.add(pk.getFieldName());
+					fieldL.add(aliasAlloc.buildAlias(pairType, pk.getFieldName()));
 				}
 			}
 		}
@@ -129,10 +130,10 @@ public class HLSSQLTests extends HLSTests {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 					if (!relinfo.isParent && !RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-						fieldL.add(pair.name);
+						fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
 					}
 				} else {
-					fieldL.add(pair.name);
+					fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
 				}
 			}
 		}
@@ -304,23 +305,24 @@ public class HLSSQLTests extends HLSTests {
 			boolean isJustFieldName = false;
 			if (hlspan.fEl != null) {
 				String fieldName = hlspan.fEl.getFieldName();
+				String aa = buildAlias(hlspan.fromType, fieldName);
 				if (hlspan.hasFunction("count")) {
-					String s = String.format("COUNT(%s)", fieldName);
+					String s = String.format("COUNT(%s)", aa);
 					fieldL.add(s);
 				} else if (hlspan.hasFunction("min")) {
-					String s = String.format("MIN(%s)", fieldName);
+					String s = String.format("MIN(%s)", aa);
 					fieldL.add(s);
 				} else if (hlspan.hasFunction("max")) {
-					String s = String.format("MAX(%s)", fieldName);
+					String s = String.format("MAX(%s)", aa);
 					fieldL.add(s);
 				} else if (hlspan.hasFunction("distinct")) {
-					String s = String.format("DISTINCT(%s)", fieldName);
+					String s = String.format("DISTINCT(%s)", aa);
 					fieldL.add(s);
 				} else if (hlspan.hasFunction("exists")) {
-					String s = String.format("COUNT(%s)", fieldName);
+					String s = String.format("COUNT(%s)", aa);
 					fieldL.add(s);
 				} else {
-					fieldL.add(fieldName);
+					fieldL.add(aa);
 					isJustFieldName = true;
 				}
 			} else  {
@@ -366,31 +368,31 @@ public class HLSSQLTests extends HLSTests {
 
 	@Test
 	public void testOneSpanNoSubSQL() {
-		sqlchk("let x = Flight[55]", "SELECT * FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[true]", "SELECT * FROM Flight as a");
+		sqlchk("let x = Flight[55]", 			"SELECT * FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].count()", 	"SELECT COUNT(*) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].first()", 	"SELECT TOP 1 * FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[true]", 			"SELECT * FROM Flight as a");
 
-		sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[55].field1.min()", "SELECT MIN(field1) FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[55].field1.orderBy('field2')", "SELECT field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2");
-		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2 OFFSET 3");
-		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2 LIMIT 5 OFFSET 3");
-		sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight as a WHERE a.ID=55");
-		sqlchk("let x = Flight[55].field1.exists()", "SELECT COUNT(field1) FROM Flight as a WHERE a.ID=55 LIMIT 1");
+		sqlchk("let x = Flight[55].field1", 						"SELECT a.field1 FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.min()", 					"SELECT MIN(a.field1) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.orderBy('field2')", 		"SELECT a.field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2");
+		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT a.field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2 OFFSET 3");
+		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT a.field1 FROM Flight as a WHERE a.ID=55 ORDER BY a.field2 LIMIT 5 OFFSET 3");
+		sqlchk("let x = Flight[55].field1.count()", 				"SELECT COUNT(a.field1) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.distinct()", 				"SELECT DISTINCT(a.field1) FROM Flight as a WHERE a.ID=55");
+		sqlchk("let x = Flight[55].field1.exists()", 				"SELECT COUNT(a.field1) FROM Flight as a WHERE a.ID=55 LIMIT 1");
 
 	}
 
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomerSrc = true;
-		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer as a JOIN Address as b ON a.id=b.id WHERE a.ID=55");
-		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id");
-		sqlchk("let x = Customer[true].fetch('addr').first()", "SELECT TOP 1 id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
-		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer as a");
-		sqlchk("let x = Customer[true].x.fks()", "SELECT x,id FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[55].fks()", 					"SELECT a.id,a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id WHERE a.ID=55");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT a.id,a.x,b.id,b.y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY a.id");
+		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
+		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
 
 	//	@Test
@@ -432,7 +434,7 @@ public class HLSSQLTests extends HLSTests {
 		//		//this one doesn't need to do fetch since just getting x
 //		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer");
 		//		
-		sqlchk("let x = Customer[true].x.fks()", "SELECT x,id FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
 
 
