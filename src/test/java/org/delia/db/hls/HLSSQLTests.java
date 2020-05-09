@@ -4,7 +4,9 @@ package org.delia.db.hls;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import org.delia.compiler.ast.QueryExp;
@@ -33,37 +35,46 @@ import org.junit.Test;
  *
  */
 public class HLSSQLTests extends HLSTests {
-	
+
 	public static class SqlJoinHelper {
+		
+		private AliasAllocator aliasAlloc;
+		
+		public SqlJoinHelper(AliasAllocator aliasAlloc) {
+			this.aliasAlloc = aliasAlloc;
+		}
+
 		public void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 			List<TypePair> joinL = genJoinList(hlspan);
-			
+
 			//do the joins
 			for(TypePair pair: joinL) {
 				DStructType pairType = (DStructType) pair.type;
 				PrimaryKey pk = pairType.getPrimaryKey();
 				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey();
-				String s = String.format("JOIN %s ON %s=%s", pair.type, mainPk.getFieldName(), pk.getFieldName());
+				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
+				String on1 = aliasAlloc.buildAlias(hlspan.fromType, mainPk.getKey());
+				String on2 = aliasAlloc.buildAlias(pairType, pk.getKey());
+				
+				String s = String.format("JOIN %s ON %s=%s", tbl1, on1, on2);
 				sc.out(s);
 			}
 		}
-		
+
 		private List<TypePair> genJoinList(HLSQuerySpan hlspan) {
+			List<TypePair> joinL = genFullJoinList(hlspan);
+			List<TypePair> join2L = genFKJoinList(hlspan);
+			joinL.addAll(join2L);
+			return joinL;
+		}
+		private List<TypePair> genFullJoinList(HLSQuerySpan hlspan) {
 			List<TypePair> joinL = new ArrayList<>();
-			
+
 			boolean needJoin = hlspan.subEl != null;
 			if (! needJoin) {
 				return joinL;
 			}
-			
-			if (hlspan.subEl.allFKs) {
-				for(TypePair pair: hlspan.fromType.getAllFields()) {
-					if (pair.type.isStructShape()) {
-						joinL.add(pair);
-					}
-				}
-			}
-			
+
 			for (String fieldName: hlspan.subEl.fetchL) {
 				if (joinL.contains(fieldName)) {
 					continue;
@@ -71,13 +82,32 @@ public class HLSSQLTests extends HLSTests {
 				TypePair pair = DValueHelper.findField(hlspan.fromType, fieldName);
 				joinL.add(pair);
 			}
-			
+
+			//TODO: later to fk(field)
+			return joinL;
+		}
+		private List<TypePair> genFKJoinList(HLSQuerySpan hlspan) {
+			List<TypePair> joinL = new ArrayList<>();
+
+			boolean needJoin = hlspan.subEl != null;
+			if (! needJoin) {
+				return joinL;
+			}
+
+			if (hlspan.subEl.allFKs) {
+				for(TypePair pair: hlspan.fromType.getAllFields()) {
+					if (pair.type.isStructShape()) {
+						joinL.add(pair);
+					}
+				}
+			}
+
 			//TODO: later to fk(field)
 			return joinL;
 		}
 
 		public void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
-			List<TypePair> joinL = genJoinList(hlspan);
+			List<TypePair> joinL = genFKJoinList(hlspan);
 
 			for(TypePair pair: joinL) {
 				if (pair.type.isStructShape()) {
@@ -87,12 +117,65 @@ public class HLSSQLTests extends HLSTests {
 				}
 			}
 		}
+		public void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+			List<TypePair> joinL = genFullJoinList(hlspan);
+
+			for(TypePair pair: joinL) {
+				addStructFields((DStructType) pair.type, fieldL);
+			}
+		}
+		public void addStructFields(DStructType fromType, List<String> fieldL) {
+			for(TypePair pair: fromType.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
+					if (!relinfo.isParent && !RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+						fieldL.add(pair.name);
+					}
+				} else {
+					fieldL.add(pair.name);
+				}
+			}
+		}
 	}
 	
+	public static class AliasAllocator {
+		protected int nextAliasIndex = 0;
+		private Map<DStructType,String> aliasMap = new HashMap<>();
+		
+		public AliasAllocator() {
+		}
+		
+		public void createAlias(DStructType structType) {
+			char ch = (char) ('a' + nextAliasIndex++);
+			String s = String.format("%c", ch);
+			aliasMap.put(structType, s);
+		}
+
+		public String findOrCreateFor(DStructType structType) {
+			if (! aliasMap.containsKey(structType)) {
+				createAlias(structType);
+			}
+			return aliasMap.get(structType);
+		}
+		public String buildTblAlias(DStructType structType) {
+			String alias = findOrCreateFor(structType);
+			String s = String.format("%s as %s", structType.getName(), alias);
+			return s;
+		}
+		public String buildAlias(DStructType pairType, TypePair pair) {
+			String alias = findOrCreateFor(pairType);
+			String s = String.format("%s.%s", alias, pair.name);
+			return s;
+		}
+
+
+	}
+	
+
 	public static class SQLCreator {
 		private StrCreator sc = new StrCreator();
 		private boolean isPrevious = false;
-		
+
 		public String out(String fmt, String...args) {
 			if (isPrevious) {
 				sc.o(" ");
@@ -101,7 +184,7 @@ public class HLSSQLTests extends HLSTests {
 			isPrevious = true;
 			return s;
 		}
-		
+
 		public String sql() {
 			return sc.str;
 		}
@@ -112,9 +195,13 @@ public class HLSSQLTests extends HLSTests {
 		private DTypeRegistry registry;
 		private QueryTypeDetector queryTypeDetector;
 		private QueryExp queryExp;
+		private AliasAllocator aliasAlloc = new AliasAllocator();
+		private SqlJoinHelper joinHelper;
 
 		public HLSSQLGenerator(FactoryService factorySvc) {
 			super(factorySvc);
+			this.joinHelper = new SqlJoinHelper(aliasAlloc);
+
 		}
 
 		public String buildSQL(HLSQueryStatement hls) {
@@ -125,51 +212,59 @@ public class HLSSQLTests extends HLSTests {
 			//SELECT .. from .. ..join.. ..where.. ..order..
 			sc.out("SELECT");
 			genFields(sc, hlspan);
-			sc.out("FROM %s", hlspan.mtEl.getTypeName());
+			sc.out("FROM %s", buildTblAlias(hlspan.mtEl.structType));
 			genJoin(sc, hlspan);
 			genWhere(sc, hlspan);
-			
+
 			genOLO(sc, hlspan);
 
 			return sc.sql();
 		}
 
+		private String buildTblAlias(DStructType structType) {
+			return aliasAlloc.buildTblAlias(structType);
+		}
+		private String buildAlias(DStructType pairType, TypePair pair) {
+			return aliasAlloc.buildAlias(pairType, pair);
+		}
+
 		private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
-			SqlJoinHelper joinHelper = new SqlJoinHelper();
 			joinHelper.genJoin(sc, hlspan);
 		}
 		private void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
-			SqlJoinHelper joinHelper = new SqlJoinHelper();
 			joinHelper.addFKofJoins(hlspan, fieldL);
+		}
+		private void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+			joinHelper.addFullofJoins(hlspan, fieldL);
 		}
 
 
 		private void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
 			boolean needLimit1 = hlspan.hasFunction("exists");
-			
+
 			if (hlspan.oloEl == null) {
 				if (needLimit1) {
 					sc.out("LIMIT 1");
 				}
 				return;
 			}
-			
+
 			if (hlspan.oloEl.orderBy != null) {
 				sc.out("ORDER BY %s", hlspan.oloEl.orderBy);
 			}
-			
+
 			if (hlspan.oloEl.limit != null) {
 				sc.out("LIMIT %s", hlspan.oloEl.limit.toString());
 			} else if (needLimit1) {
 				sc.out("LIMIT 1");
 			}
-			
+
 			if (hlspan.oloEl.offset != null) {
 				sc.out("OFFSET %s", hlspan.oloEl.offset.toString());
 			}
-			
+
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		private void genWhere(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -195,11 +290,12 @@ public class HLSSQLTests extends HLSTests {
 
 		private void genFields(SQLCreator sc, HLSQuerySpan hlspan) {
 			List<String> fieldL = new ArrayList<>();
-			
+
 			if (hlspan.hasFunction("first")) {
 				sc.out("TOP 1");
 			}
-			
+
+			boolean isJustFieldName = false;
 			if (hlspan.fEl != null) {
 				String fieldName = hlspan.fEl.getFieldName();
 				if (hlspan.hasFunction("count")) {
@@ -219,6 +315,7 @@ public class HLSSQLTests extends HLSTests {
 					fieldL.add(s);
 				} else {
 					fieldL.add(fieldName);
+					isJustFieldName = true;
 				}
 			} else  {
 				if (hlspan.hasFunction("count")) {
@@ -234,6 +331,9 @@ public class HLSSQLTests extends HLSTests {
 			if (needJoin && fieldL.isEmpty()) {
 				addStructFields(hlspan.fromType, fieldL);
 				addFKofJoins(hlspan, fieldL);
+				addFullofJoins(hlspan, fieldL);
+			} else if (isJustFieldName) {
+				addFKofJoins(hlspan, fieldL);
 			}
 
 			if (fieldL.isEmpty()) {
@@ -248,61 +348,45 @@ public class HLSSQLTests extends HLSTests {
 		}
 
 		private void addStructFields(DStructType fromType, List<String> fieldL) {
-			for(TypePair pair: fromType.getAllFields()) {
-				if (pair.type.isStructShape()) {
-					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-					if (!relinfo.isParent && !RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-						fieldL.add(pair.name);
-					}
-				} else {
-					fieldL.add(pair.name);
-				}
-			}
+			joinHelper.addStructFields(fromType, fieldL);
 		}
 
 		public void setRegistry(DTypeRegistry registry) {
 			this.registry = registry;
 			this.queryTypeDetector = new QueryTypeDetector(factorySvc, registry);
 		}
-
 	}
 
 
+	@Test
+	public void testOneSpanNoSubSQL() {
+		sqlchk("let x = Flight[55]", "SELECT * FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[true]", "SELECT * FROM Flight as a");
 
+		sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55].field1.min()", "SELECT MIN(field1) FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55].field1.orderBy('field2')", "SELECT field1 FROM Flight as a WHERE ID=55 ORDER BY field2");
+		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT field1 FROM Flight as a WHERE ID=55 ORDER BY field2 OFFSET 3");
+		sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight as a WHERE ID=55 ORDER BY field2 LIMIT 5 OFFSET 3");
+		sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight as a WHERE ID=55");
+		sqlchk("let x = Flight[55].field1.exists()", "SELECT COUNT(field1) FROM Flight as a WHERE ID=55 LIMIT 1");
 
-		@Test
-		public void testOneSpanNoSubSQL() {
-			sqlchk("let x = Flight[55]", "SELECT * FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[55].count()", "SELECT COUNT(*) FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[55].first()", "SELECT TOP 1 * FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[true]", "SELECT * FROM Flight");
+	}
 
-			sqlchk("let x = Flight[55].field1", "SELECT field1 FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[55].field1.min()", "SELECT MIN(field1) FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[55].field1.orderBy('field2')", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2");
-			sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3)", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2 OFFSET 3");
-			sqlchk("let x = Flight[55].field1.orderBy('field2').offset(3).limit(5)", "SELECT field1 FROM Flight WHERE ID=55 ORDER BY field2 LIMIT 5 OFFSET 3");
-			sqlchk("let x = Flight[55].field1.count()", "SELECT COUNT(field1) FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[55].field1.distinct()", "SELECT DISTINCT(field1) FROM Flight WHERE ID=55");
-			sqlchk("let x = Flight[55].field1.exists()", "SELECT COUNT(field1) FROM Flight WHERE ID=55 LIMIT 1");
+	@Test
+	public void testOneSpanSubSQL() {
+		useCustomerSrc = true;
+		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer as a JOIN Address as b ON a.id=b.id WHERE ID=55");
+		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').first()", "SELECT TOP 1 id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer as a JOIN Address as b ON a.id=b.id ORDER BY id");
+		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer as a");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT x,id FROM Customer as a JOIN Address as b ON a.id=b.id");
+	}
 
-		}
-		
-		@Test
-		public void testOneSpanSubSQL() {
-			useCustomerSrc = true;
-			sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer JOIN Address ON id=id WHERE ID=55");
-	//		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
-	//		
-	//		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
-	//		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
-	//
-	//		//this one doesn't need to do fetch since just getting x
-	//		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
-	//		
-	//		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
-		}
-		
 	//	@Test
 	//	public void testOneRelationSQL() {
 	//		useCustomerSrc = true;
@@ -334,16 +418,15 @@ public class HLSSQLTests extends HLSTests {
 
 		useCustomerSrc = true;
 
-//		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer JOIN Address ON id=id WHERE ID=55");
-		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y,cust FROM Customer JOIN Address ON id=id WHERE ID=55");
-		//		
-		//		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
-		//		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
+		//		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer JOIN Address ON id=id WHERE ID=55");
+//		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer JOIN Address ON id=id");
+//		sqlchk("let x = Customer[true].fetch('addr').first()", "SELECT TOP 1 id,x,id,y FROM Customer JOIN Address ON id=id");
+//		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer JOIN Address ON id=id ORDER BY id");
 		//
 		//		//this one doesn't need to do fetch since just getting x
-		//		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
+//		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer");
 		//		
-		//		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT x,id FROM Customer as a JOIN Address as b ON a.id=b.id");
 	}
 
 
