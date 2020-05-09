@@ -3,6 +3,19 @@ package org.delia.db.hls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
+import org.delia.compiler.ast.QueryExp;
+import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
+import org.delia.db.DBExecutor;
+import org.delia.db.DBInterface;
+import org.delia.db.QueryContext;
+import org.delia.db.QuerySpec;
+import org.delia.runner.QueryResponse;
+import org.delia.type.DTypeRegistry;
+import org.delia.zqueryresponse.LetSpan;
+import org.delia.zqueryresponse.LetSpanEngine;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,7 +27,58 @@ import org.junit.Test;
  *
  */
 public class HLSManagerTests extends HLSTestBase {
+	
+	public static class HLSManager extends ServiceBase {
 
+		private DBInterface dbInterface;
+		private DTypeRegistry registry;
+		private AssocTblManager assocTblMgr;
+
+		public HLSManager(FactoryService factorySvc, DTypeRegistry registry, DBInterface dbInterface) {
+			super(factorySvc);
+			this.dbInterface= dbInterface;
+			this.registry = registry;
+			this.assocTblMgr = new AssocTblManager();
+		}
+		
+		public QueryResponse execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
+			QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+			return qresp;
+		}
+		
+		public HLSQueryStatement buildHLS(QueryExp queryExp) {
+			LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry, null, null); //TODO what are these nulls?
+			List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
+			
+			HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
+			HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
+			
+			for(HLSQuerySpan hlspan: hls.hlspanL) {
+				String hlstr = hlspan.toString();
+				log.log(hlstr);
+			}
+			return hls;
+		}
+		
+		public String generateSQL(HLSQueryStatement hls) {
+			HLSSQLGenerator gen = new HLSSQLGenerator(factorySvc, assocTblMgr);
+			gen.setRegistry(registry);
+			String sql = gen.buildSQL(hls);
+			log.log("sql: " + sql);
+			return sql;
+		}
+		
+		
+		
+	}
+
+	
+	@Test
+	public void test1() {
+		sqlchk("let x = Flight[true]", "SELECT * FROM Flight as a");
+	}	
+	
+	
 	//	@Test
 	//	public void testOneSpanNoSubSQL() {
 	//		sqlchk("let x = Flight[55]", 			"SELECT * FROM Flight as a WHERE a.id=55");
@@ -111,10 +175,13 @@ public class HLSManagerTests extends HLSTestBase {
 
 
 	private void sqlchk(String src, String sqlExpected) {
-		HLSSQLGenerator gen = new HLSSQLGenerator(delia.getFactoryService(), assocTblMgr);
-		HLSQueryStatement hls = buildHLS(src);
-		gen.setRegistry(session.getExecutionContext().registry);
-		String sql = gen.buildSQL(hls);
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		
+		HLSManager mgr = new HLSManager(delia.getFactoryService(), session.getExecutionContext().registry, delia.getDBInterface());
+		HLSQueryStatement hls = mgr.buildHLS(queryExp);
+		
+		String sql = mgr.generateSQL(hls);
 		log.log("sql: " + sql);
 		assertEquals(sqlExpected, sql);
 	}

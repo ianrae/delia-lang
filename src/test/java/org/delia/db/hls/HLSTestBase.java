@@ -53,6 +53,13 @@ public class HLSTestBase extends NewBDDBase {
 
 
 	protected QueryExp compileQuery(String src) {
+		LetStatementExp letStatement = compileQueryToLetStatement(src);
+		
+		QueryExp queryExp = (QueryExp) letStatement.value;
+		return queryExp;
+	}
+	
+	protected LetStatementExp compileQueryToLetStatement(String src) {
 		String initialSrc;
 		if  (useCustomerManyToManySrc) {
 			initialSrc = buildCustomerSrc();
@@ -79,9 +86,7 @@ public class HLSTestBase extends NewBDDBase {
 		
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 		LetStatementExp letStatement = findLet(sessimpl);
-		
-		QueryExp queryExp = (QueryExp) letStatement.value;
-		return queryExp;
+		return letStatement;
 	}
 
 	protected LetStatementExp findLet(DeliaSession session) {
