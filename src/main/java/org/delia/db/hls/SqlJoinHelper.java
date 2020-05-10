@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.db.QueryDetails;
+import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -16,10 +17,12 @@ import org.delia.util.DValueHelper;
 public class SqlJoinHelper {
 		private AliasAllocator aliasAlloc;
 		private AssocTblManager assocTblMgr;
+		private MiniSelectFragmentParser miniSelectParser;
 		
-		public SqlJoinHelper(AliasAllocator aliasAlloc, AssocTblManager assocTblMgr, Map<String, String> asNameMap) {
+		public SqlJoinHelper(AliasAllocator aliasAlloc, AssocTblManager assocTblMgr, Map<String, String> asNameMap, MiniSelectFragmentParser miniSelectParser) {
 			this.aliasAlloc = aliasAlloc;
 			this.assocTblMgr = assocTblMgr;
+			this.miniSelectParser = miniSelectParser;
 		}
 		
 		public QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -78,7 +81,7 @@ public class SqlJoinHelper {
 		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
-			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
+			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type, miniSelectParser); //"CustomerAddressAssoc"; //TODO fix
 			boolean flipLeftRight = assocTblMgr.isFlipped();
 			if (hlspan.doubleFlip) {
 				flipLeftRight = !flipLeftRight;
@@ -224,7 +227,7 @@ public class SqlJoinHelper {
 		}
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<String> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
-			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
+			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type, miniSelectParser);
 			String fieldName = assocTblMgr.isFlipped() ? "leftv" : "rightv";
 			fieldL.add(aliasAlloc.buildAliasAssoc(assocTbl, fieldName));
 		}

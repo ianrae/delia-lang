@@ -1,11 +1,12 @@
 package org.delia.db.hls;
 
+import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.type.DStructType;
 
 public class AssocTblManager {
 	public boolean flip = false;
 	
-	public String getTableFor(DStructType type1, DStructType type2) {
+	public String getTableFor(DStructType type1, DStructType type2, MiniSelectFragmentParser miniSelectParser) {
 		return flip ? "AddressCustomerAssoc" : "CustomerAddressAssoc"; //type1 on left
 	}
 	public boolean isFlipped() {
