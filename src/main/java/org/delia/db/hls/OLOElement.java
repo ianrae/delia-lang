@@ -4,6 +4,7 @@ public class OLOElement implements HLSElement {
 	public String orderBy; //may be null
 	public Integer limit; //may be null
 	public Integer offset; //may be null
+	public boolean isAsc;
 
 	@Override
 	public String toString() {

@@ -101,6 +101,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	
 	@Override
 	public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
+		if (hlspan.fromType != null) {
+			aliasAlloc.findOrCreateFor(hlspan.fromType);
+		}
 		this.whereClauseHelper.genWhere(hlspan, queryExp); //need this to genereate "as " in fields
 		
 		SQLCreator sc = new SQLCreator();
@@ -160,7 +163,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 		if (hlspan.oloEl.orderBy != null) {
 			String ss = buildAlias(hlspan.fromType, hlspan.oloEl.orderBy);
-			sc.out("ORDER BY %s",ss);
+			String asc = hlspan.oloEl.isAsc ? "" : " desc";
+			sc.out("ORDER BY %s%s",ss, asc);
 		}
 
 		if (hlspan.oloEl.limit != null) {

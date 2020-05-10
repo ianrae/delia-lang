@@ -139,6 +139,7 @@ public class HLSEngine extends ServiceBase {
 					} else if (qfe.funcName.equals("orderBy")){
 						String fieldName = qfe.argL.get(0).strValue();
 						oloel.orderBy = fieldName;
+						oloel.isAsc = qfe.argL.size() == 1 ? true : qfe.argL.get(1).strValue().equals("asc");
 						found = true;
 					} else if (qfe.funcName.equals("limit")){
 						IntegerExp exp = (IntegerExp) qfe.argL.get(0);
