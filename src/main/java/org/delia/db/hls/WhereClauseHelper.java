@@ -70,12 +70,14 @@ public class WhereClauseHelper extends ServiceBase {
 		for(SqlFragment z: selectFrag.whereL) {
 			OpFragment op = (OpFragment) z;
 			if (op.left != null) {
-				remapParentFieldIfNeeded(op.left, selectFrag);
-				op.left.alias = aliasAdjustmentMap.get(op.left.alias);
+				if (!remapParentFieldIfNeeded(op.left, selectFrag, aliasAdjustmentMap)) {
+					op.left.alias = aliasAdjustmentMap.get(op.left.alias);
+				}
 			}
 			if (op.right != null) {
-				remapParentFieldIfNeeded(op.right, selectFrag);
-				op.right.alias = aliasAdjustmentMap.get(op.right.alias);
+				if (!remapParentFieldIfNeeded(op.right, selectFrag, aliasAdjustmentMap)) {
+					op.right.alias = aliasAdjustmentMap.get(op.right.alias);
+				}
 			}
 		}
 		
@@ -90,31 +92,35 @@ public class WhereClauseHelper extends ServiceBase {
 		}
 	}
 	
-	private void remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag) {
+	private boolean remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag, Map<String, String> aliasAdjustmentMap) {
 		if (af instanceof FieldFragment) {
 			FieldFragment ff = (FieldFragment) af;
-			remapParentFieldIfNeeded(ff, af);
+			return remapParentFieldIfNeeded(ff, af, aliasAdjustmentMap);
 		} else {
 			for (FieldFragment ff: selectFrag.hlsRemapList) {
 				if (ff.alias.equals(af.alias) && ff.name.equals(af.name)) {
-					remapParentFieldIfNeeded(ff, af);
+					return remapParentFieldIfNeeded(ff, af, aliasAdjustmentMap);
 				}
 			}
 		}
+		return false;
 	}
-	private void remapParentFieldIfNeeded(FieldFragment ff, AliasedFragment af) {
+	private boolean remapParentFieldIfNeeded(FieldFragment ff, AliasedFragment af, Map<String,String> aliasAdjustmentMap) {
 		TypePair pair = new TypePair(ff.name, ff.fieldType);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(ff.structType, pair);
 		if (relinfo != null && relinfo.isParent) {
 			//TODO need more foolproof way to find other side
 			RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
 			if (otherSide != null) {
-				af.alias = aliasAlloc.findOrCreateFor(relinfo.farType);
+				String tmp = aliasAlloc.findOrCreateFor(relinfo.farType);
+				af.alias = aliasAdjustmentMap.get(tmp);
 				af.name = relinfo.farType.getPrimaryKey().getFieldName();
 				
 				String key = String.format("%s.%s", af.alias, af.name);
 				asNameMap.put(key, otherSide.fieldName);
+				return true;
 			}
 		}
+		return false;
 	}
 }
