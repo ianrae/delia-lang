@@ -17,12 +17,12 @@ import org.delia.util.DValueHelper;
 public class SqlJoinHelper {
 		private AliasAllocator aliasAlloc;
 		private AssocTblManager assocTblMgr;
-		private MiniSelectFragmentParser miniSelectParser;
+//		private MiniSelectFragmentParser miniSelectParser;
 		
 		public SqlJoinHelper(AliasAllocator aliasAlloc, AssocTblManager assocTblMgr, Map<String, String> asNameMap, MiniSelectFragmentParser miniSelectParser) {
 			this.aliasAlloc = aliasAlloc;
 			this.assocTblMgr = assocTblMgr;
-			this.miniSelectParser = miniSelectParser;
+//			this.miniSelectParser = miniSelectParser;
 		}
 		
 		public QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -54,7 +54,7 @@ public class SqlJoinHelper {
 				if (bHasFK) {
 					DStructType pairType = (DStructType) pair.type; //Address
 					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
-					PrimaryKey pk = pairType.getPrimaryKey();
+					PrimaryKey pk = hlspan.fromType.getPrimaryKey();
 //					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
 					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
@@ -63,7 +63,7 @@ public class SqlJoinHelper {
 					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				} else {
 					DStructType pairType = (DStructType) pair.type; //Address
-					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
+//					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
 					PrimaryKey pk = pairType.getPrimaryKey();
 //					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
