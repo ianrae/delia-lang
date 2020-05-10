@@ -297,7 +297,7 @@ public class H2BDDTests extends NewBDDBase {
 //		runR1350File("t0-filter-op-relation.txt", 14);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
 		
-		runR1500File("t0-queryfn-orderby.txt", 4);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 
 	}
 	

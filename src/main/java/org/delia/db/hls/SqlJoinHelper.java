@@ -124,7 +124,7 @@ public class SqlJoinHelper {
 				
 				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rigthv"); //c.rightv
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //c.rightv
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			} else {
 				DStructType pairType = (DStructType) pair.type; //Address
@@ -134,7 +134,7 @@ public class SqlJoinHelper {
 				
 				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rigthv"); //c.leftv
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //c.leftv
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 			sc.out(s);

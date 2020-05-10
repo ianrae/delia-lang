@@ -113,7 +113,7 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 			list = doBuildDValueList(rs, dtype, dbctx);
 			if (details.mergeRows) {
 				if (details.isManyToMany) {
-					list = mergeRowsManyToMany(list, dtype, details);
+					list = mergeRowsManyToMany(list, dtype, details, dbctx);
 				} else {
 					list = mergeRowsOneToMany(list, dtype, details);
 				}
@@ -144,7 +144,7 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 			throw new DBException(err);
 		} catch (Exception e) {
 			//			e.printStackTrace();
-			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
+			DeliaError err = new DeliaError("db-resultset-error2", e.getMessage());
 			throw new DBException(err);
 		}
 		return list;
@@ -197,9 +197,10 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	 * @param rawList list of dvalues to merge
 	 * @param dtype of values
 	 * @param details query details
+	 * @param dbctx 
 	 * @return merged rows
 	 */
-	protected List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details) {
+	protected List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
 		List<DValue> list = new ArrayList<>();
 		int i = 0;
 		List<DValue> subL = new ArrayList<>();
@@ -223,14 +224,28 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 						toMergeL.addAll(drel.getMultipleKeys());
 					}
 				}
-				//and add back into dval
-				DValue inner2 = dval.asStruct().getField(details.mergeOnField);
-				if (inner2 == null) {
-					//fix later!! TODO
+				
+				if (!toMergeL.isEmpty()) {
+					//and add back into dval
+					DValue inner2 = dval.asStruct().getField(details.mergeOnField);
+					if (inner2 == null) {
+						//fix later!! TODO
+						DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
+						TypePair pair = DValueHelper.findField(dval.getType(), details.mergeOnField);
+						RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
+						builder.buildEmptyRelation();
+						boolean b = builder.finish();
+						if (!b) {
+							DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
+						} else {
+							inner2 = builder.getDValue();
+							dval.asMap().put(details.mergeOnField, inner2);
+						}
+					}
+					DRelation drel2 = inner2.asRelation();
+					drel2.getMultipleKeys().addAll(toMergeL);
+					list.add(dval);
 				}
-				DRelation drel2 = inner2.asRelation();
-				drel2.getMultipleKeys().addAll(toMergeL);
-				list.add(dval);
 			}
 			
 			i++;
