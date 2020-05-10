@@ -26,17 +26,18 @@ import org.delia.util.DRuleHelper;
 public class WhereClauseHelper extends ServiceBase {
 
 //	private QueryExp queryExp;
-	private AliasAllocator aliasAlloc = new AliasAllocator();
+	private AliasAllocator aliasAlloc;
 	private MiniSelectFragmentParser miniSelectParser;
 	private VarEvaluator varEvaluator;
-	public String finalWhereSql;
 	public Map<String,String> asNameMap;
 	
-	public WhereClauseHelper(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, Map<String, String> asNameMap) {
+	public WhereClauseHelper(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
+				Map<String, String> asNameMap, AliasAllocator aliasAlloc) {
 		super(factorySvc);
 		this.miniSelectParser = miniSelectParser;
 		this.varEvaluator = varEvaluator;
 		this.asNameMap = asNameMap;
+		this.aliasAlloc = aliasAlloc;
 	}
 
 	public void genWhere(HLSQuerySpan hlspan, QueryExp queryExp) {
@@ -84,12 +85,12 @@ public class WhereClauseHelper extends ServiceBase {
 		
 		String whereSql = miniSelectParser.renderSelect(selectFrag);
 		
-		finalWhereSql = "";
+		hlspan.finalWhereSql = "";
 		if (!selectFrag.whereL.isEmpty()) {
 			SqlStatement statement = selectFrag.statement;
 			hlspan.paramL = statement.paramL;
 			whereSql = StringUtils.substringAfter(whereSql, "WHERE ").trim();
-			finalWhereSql = String.format("WHERE %s", whereSql);
+			hlspan.finalWhereSql = String.format("WHERE %s", whereSql);
 		}
 	}
 	

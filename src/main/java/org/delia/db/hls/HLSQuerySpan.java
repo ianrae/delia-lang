@@ -25,6 +25,7 @@ public class HLSQuerySpan implements HLSElement {
 	public List<DValue> paramL = new ArrayList<>(); //for prepared statement
 	public boolean doubleFlip = false;
 	public QueryDetails details;
+	public String finalWhereSql;
 	
 	@Override
 	public String toString() {

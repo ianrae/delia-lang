@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.delia.db.TableExistenceService;
 import org.delia.type.DStructType;
+import org.delia.util.DeliaExceptionHelper;
 
 public class AssocTblManager {
 	public boolean flip = false;
@@ -35,6 +36,7 @@ public class AssocTblManager {
 			return assocTblName2;
 		}
 		
+		DeliaExceptionHelper.throwError("cant-find-assoc-tbl", "Can't find assoc table: %s or %s", assocTblName1, assocTblName2);
 		return null; //unknown table flip ? "AddressCustomerAssoc" : "CustomerAddressAssoc"; //type1 on left
 	}
 	private String buildName(DStructType type1, DStructType type2) {
@@ -49,12 +51,12 @@ public class AssocTblManager {
 		
 		String assocTblName1 = buildName(type1,type2);
 		if (existsMap.containsKey(assocTblName1)) {
-			return "leftv";
+			return "rightv";
 		}
 		
 		String assocTblName2 = buildName(type2, type1);
 		if (existsMap.containsKey(assocTblName2)) {
-			return "rightv";
+			return "leftv";
 		}
 		
 		return null; //trouble

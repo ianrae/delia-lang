@@ -12,7 +12,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -39,7 +38,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
 		this.assocTblMgr = assocTblMgr;
 		this.miniSelectParser = miniSelectParser;
-		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap);
+		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasAlloc);
 		this.existSvc = existSvc;
 	}
 
@@ -79,14 +78,18 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				hls.details = hlspan1.details;
 				
 				SQLCreator sc = new SQLCreator();
+				whereClauseHelper.genWhere(hlspan2, queryExp); 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
-				String newAlias = "b";
+				
+				String assocTblName = assocTblMgr.getTableFor(hlspan1.fromType, hlspan2.fromType);
+				String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
 				String fff = assocTblMgr.getAssocField(hlspan1.fromType, hlspan2.fromType);
 				String s3 = String.format("%s.%s", newAlias, fff);
 				
 				String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
-				String target = String.format("c.%s", pkField);
+				String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+				String target = String.format("%s.%s", alias2, pkField);
 				s2 = s2.replace(target, s3);		
 				return sql + " " + s2;
 			}
@@ -176,8 +179,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			return;
 		}
 	
-		if (StringUtils.isNotEmpty(whereClauseHelper.finalWhereSql)) {
-			sc.out(whereClauseHelper.finalWhereSql);
+		if (StringUtils.isNotEmpty(hlspan.finalWhereSql)) {
+			sc.out(hlspan.finalWhereSql);
 		}
 	}
 	

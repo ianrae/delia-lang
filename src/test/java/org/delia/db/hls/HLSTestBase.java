@@ -130,6 +130,7 @@ public class HLSTestBase extends NewBDDBase {
 	protected boolean useCustomer1NSrc = false;
 	protected boolean useCustomer1NOtherWaySrc = false;
 	protected boolean insertSomeRecords = false;
+	protected boolean flipAssocTbl = false; //mosts tests assume CustomerAddressAssoc
 	
 	//---
 	protected TableExistenceService existsSvc;
@@ -139,6 +140,11 @@ public class HLSTestBase extends NewBDDBase {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
 		
+		if (flipAssocTbl) {
+			delia.getDBInterface().createTable("AddressCustomerAssoc", null);
+		} else {
+			delia.getDBInterface().createTable("CustomerAddressAssoc", null);
+		}
 		existsSvc = new TableExistenceServiceImpl(delia.getDBInterface(), null); //2nd param not needed for MEM
 		assocTblMgr = new AssocTblManager(existsSvc);
 		return new DeliaDao(delia);
