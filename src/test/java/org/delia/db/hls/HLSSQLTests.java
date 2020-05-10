@@ -38,9 +38,9 @@ public class HLSSQLTests extends HLSTestBase {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = false;
 		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
-		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv ORDER BY a.cid");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
+		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
 		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
 	}
@@ -83,7 +83,8 @@ public class HLSSQLTests extends HLSTestBase {
 		useCustomerManyToManySrc = true;
 //		assocTblMgr.flip = false;
 		
-		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
+//		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
 	}
 
 	@Before

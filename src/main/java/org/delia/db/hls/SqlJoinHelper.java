@@ -134,7 +134,7 @@ public class SqlJoinHelper {
 				
 				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //c.leftv
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rightv"); //c.leftv
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 			sc.out(s);
@@ -240,14 +240,36 @@ public class SqlJoinHelper {
 			List<TypePair> joinL = genFullJoinList(hlspan);
 
 			for(TypePair pair: joinL) {
-				addStructFields((DStructType) pair.type, fieldL);
+				addStructFieldsMM(pair, fieldL);
+			}
+		}
+		public void addStructFieldsMM(TypePair joinType, List<String> fieldL) {
+			DStructType fromType = (DStructType) joinType.type;
+			String pk = fromType.getPrimaryKey().getFieldName();
+			
+			
+			for(TypePair pair: fromType.getAllFields()) {
+				if (pair.name.equals(pk)) {
+					String s = aliasAlloc.buildAlias(fromType, pair.name);
+					s = String.format("%s as %s", s, joinType.name);
+					fieldL.add(s);
+				} else if (pair.type.isStructShape()) {
+					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
+					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					} else if (!relinfo.isParent) {
+						fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
+					}
+				} else {
+					fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
+				}
 			}
 		}
 		public void addStructFields(DStructType fromType, List<String> fieldL) {
 			for(TypePair pair: fromType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-					if (!relinfo.isParent && !RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					} else if (!relinfo.isParent) {
 						fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
 					}
 				} else {
