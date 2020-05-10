@@ -83,9 +83,9 @@ public class SqlJoinHelper {
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			boolean flipLeftRight = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type);
-			if (hlspan.doubleFlip) {
-				flipLeftRight = !flipLeftRight;
-			}
+//			if (hlspan.doubleFlip) {
+//				flipLeftRight = !flipLeftRight;
+//			}
 			
 			if (flipLeftRight) {
 				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);

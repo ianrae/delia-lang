@@ -50,10 +50,10 @@ public class HLSSQLTests extends HLSTestBase {
 			useCustomerManyToManySrc = true;
 			
 			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv 
-			sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
+			sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
 
 			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv=55 
-			sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
+			sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
 
 			//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv LEFT JOIN Customer as c ON b.leftv=c.id AND c.x > 10 
 //			sqlchk("let x = Customer[x > 10].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
@@ -83,12 +83,7 @@ public class HLSSQLTests extends HLSTestBase {
 		useCustomerManyToManySrc = true;
 //		assocTblMgr.flip = false;
 		
-		//TODO: fix WHERE b.leftv = ?"
-		//currently we are generating a.id = ?
-//		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
-//		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
-		this.flipAssocTbl = true;
-		sqlchkP("let x = Customer[55].fks()", "SELECT a.cid,a.x,b.leftv as addr as addr FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv WHERE a.cid = ?", "55");
+		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
 	}
 
 	@Before

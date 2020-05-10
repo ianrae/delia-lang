@@ -61,7 +61,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				SUBElement subEl = new SUBElement();
 				subEl.allFKs = true;
 				hlspan1.subEl = subEl;
-				hlspan1.doubleFlip = true;
+//				hlspan1.doubleFlip = true;
 				//1 - Address, 2 - Customer
 				
 				String sql = processOneStatement(hlspan1, false);
@@ -71,7 +71,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				SUBElement subEl = new SUBElement();
 				subEl.allFKs = true;
 				hlspan1.subEl = subEl;
-				hlspan1.doubleFlip = true;
+//				hlspan1.doubleFlip = true;
 				//1 - Address, 2 - Customer
 				
 				String sql = processOneStatement(hlspan1, false);
