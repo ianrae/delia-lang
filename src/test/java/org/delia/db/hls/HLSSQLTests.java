@@ -36,7 +36,7 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomerManyToManySrc = true;
-		assocTblMgr.flip = false;
+		flipAssocTbl = false;
 		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
@@ -70,10 +70,10 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testAssocTableFlip() {
 		useCustomerManyToManySrc = true;
-		assocTblMgr.flip = true;
+		flipAssocTbl = true;
 		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv");
 		
-		assocTblMgr.flip = false;
+		flipAssocTbl = false;
 		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
 	}
 
@@ -85,7 +85,10 @@ public class HLSSQLTests extends HLSTestBase {
 		
 		//TODO: fix WHERE b.leftv = ?"
 		//currently we are generating a.id = ?
-		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
+//		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
+//		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
+		this.flipAssocTbl = true;
+		sqlchkP("let x = Customer[55].fks()", "SELECT a.cid,a.x,b.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv WHERE a.cid = ?", "55");
 	}
 
 	@Before

@@ -8,7 +8,7 @@ import org.delia.type.DStructType;
 import org.delia.util.DeliaExceptionHelper;
 
 public class AssocTblManager {
-	public boolean flip = false;
+//	public boolean flip = false;
 	private TableExistenceService existSvc;
 	private Map<String,String> existsMap = new HashMap<>();
 	
@@ -43,8 +43,11 @@ public class AssocTblManager {
 		String tblName = String.format("%s%sAssoc", type1.getName(), type2.getName());
 		return tblName;
 	}
-	public boolean isFlipped() {
-		return flip;
+	public boolean isFlipped(DStructType type1, DStructType type2) {
+		String tblName = getTableFor(type1, type2);
+		
+		String assocTblName2 = buildName(type2,type1);
+		return tblName.equals(assocTblName2);
 	}
 	public String getAssocField(DStructType type1, DStructType type2) {
 		getTableFor(type1, type2); //fill in existsMap

@@ -30,16 +30,16 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
 	public Map<String,String> asNameMap = new HashMap<>();
-	private MiniSelectFragmentParser miniSelectParser;
-	private TableExistenceService existSvc;
+//	private MiniSelectFragmentParser miniSelectParser;
+//	private TableExistenceService existSvc;
 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
 		this.assocTblMgr = assocTblMgr;
-		this.miniSelectParser = miniSelectParser;
+//		this.miniSelectParser = miniSelectParser;
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasAlloc);
-		this.existSvc = existSvc;
+//		this.existSvc = existSvc;
 	}
 
 	@Override

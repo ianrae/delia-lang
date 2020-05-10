@@ -82,7 +82,7 @@ public class SqlJoinHelper {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
-			boolean flipLeftRight = assocTblMgr.isFlipped();
+			boolean flipLeftRight = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type);
 			if (hlspan.doubleFlip) {
 				flipLeftRight = !flipLeftRight;
 			}
@@ -228,8 +228,12 @@ public class SqlJoinHelper {
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<String> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
 			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
-			String fieldName = assocTblMgr.isFlipped() ? "leftv" : "rightv";
-			fieldL.add(aliasAlloc.buildAliasAssoc(assocTbl, fieldName));
+			String fieldName = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type) ? "leftv" : "rightv";
+			
+			//b.id as cust
+			String s = aliasAlloc.buildAliasAssoc(assocTbl, fieldName);
+			s = String.format("%s as %s", s, relinfoA.fieldName);
+			fieldL.add(s);
 		}
 
 		public void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
