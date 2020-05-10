@@ -25,24 +25,25 @@ import org.delia.util.DRuleHelper;
 
 public class WhereClauseHelper extends ServiceBase {
 
-	private QueryExp queryExp;
+//	private QueryExp queryExp;
 	private AliasAllocator aliasAlloc = new AliasAllocator();
 	private MiniSelectFragmentParser miniSelectParser;
 	private VarEvaluator varEvaluator;
 	public String finalWhereSql;
-	public Map<String,String> asNameMap = new HashMap<>();
+	public Map<String,String> asNameMap;
 	
-	public WhereClauseHelper(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
+	public WhereClauseHelper(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, Map<String, String> asNameMap) {
 		super(factorySvc);
 		this.miniSelectParser = miniSelectParser;
 		this.varEvaluator = varEvaluator;
+		this.asNameMap = asNameMap;
 	}
 
 	public void genWhere(HLSQuerySpan hlspan, QueryExp queryExp) {
 		if (hlspan.filEl ==  null) {
 			return;
 		}
-		this.queryExp = queryExp;
+//		this.queryExp = queryExp;
 		
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;

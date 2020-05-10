@@ -2,6 +2,7 @@ package org.delia.db.hls;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.db.QueryDetails;
 import org.delia.relation.RelationCardinality;
@@ -16,11 +17,11 @@ public class SqlJoinHelper {
 		private AliasAllocator aliasAlloc;
 		private AssocTblManager assocTblMgr;
 		
-		public SqlJoinHelper(AliasAllocator aliasAlloc, AssocTblManager assocTblMgr) {
+		public SqlJoinHelper(AliasAllocator aliasAlloc, AssocTblManager assocTblMgr, Map<String, String> asNameMap) {
 			this.aliasAlloc = aliasAlloc;
 			this.assocTblMgr = assocTblMgr;
 		}
-
+		
 		public QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 			List<TypePair> joinL = genJoinList(hlspan);
 			QueryDetails details = new QueryDetails();
@@ -214,7 +215,9 @@ public class SqlJoinHelper {
 				}
 				
 				//b.id as cust
-				fieldL.add(aliasAlloc.buildAlias(pairType, pk.getFieldName()));
+				String s = aliasAlloc.buildAlias(pairType, pk.getFieldName());
+				s = String.format("%s as %s", s, relinfoA.fieldName);
+				fieldL.add(s);
 				return true;
 			}
 			return false;

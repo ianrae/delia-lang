@@ -1,7 +1,9 @@
 package org.delia.db.hls;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,12 +28,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private SqlJoinHelper joinHelper;
 	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
+	public Map<String,String> asNameMap = new HashMap<>();
 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
 		super(factorySvc);
-		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr);
+		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap);
 		this.assocTblMgr = assocTblMgr;
-		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
+		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap);
 	}
 
 	@Override
