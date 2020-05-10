@@ -37,12 +37,12 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testOneSpanSubSQL() {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = false;
-		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
+		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rigthv ORDER BY a.cid");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
+		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
 	}
 
 		@Test
@@ -71,10 +71,10 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testAssocTableFlip() {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = true;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv");
 		
 		flipAssocTbl = false;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv");
 	}
 
 	
@@ -88,7 +88,7 @@ public class HLSSQLTests extends HLSTestBase {
 //		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.rightv FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
 //		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv FROM Customer as a LEFT JOIN CustomerAddressAssoc as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
 		this.flipAssocTbl = true;
-		sqlchkP("let x = Customer[55].fks()", "SELECT a.cid,a.x,b.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv WHERE a.cid = ?", "55");
+		sqlchkP("let x = Customer[55].fks()", "SELECT a.cid,a.x,b.leftv as addr as addr FROM Customer as a LEFT JOIN AddressCustomerAssoc as b ON a.cid=b.rightv WHERE a.cid = ?", "55");
 	}
 
 	@Before

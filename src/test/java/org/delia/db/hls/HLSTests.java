@@ -25,9 +25,9 @@ public class HLSTests extends HLSTestBase {
 		chk("let x = Flight[55].field1", "{Flight->int,MT:Flight,[55],F:field1,()}");
 //		chk("let x = Flight[55].field1", "{Flight->Flight,MT:Flight,FIL:Flight[55],[]}");
 		chk("let x = Flight[55].field1.min()", "{Flight->int,MT:Flight,[55],F:field1,(min)}");
-		chk("let x = Flight[55].field1.orderBy('min')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,null}");
-		chk("let x = Flight[55].field1.orderBy('min').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,null,3}");
-		chk("let x = Flight[55].field1.orderBy('min').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:min,5,3}");
+		chk("let x = Flight[55].field1.orderBy('field1')", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:field1,null,null}");
+		chk("let x = Flight[55].field1.orderBy('field1').offset(3)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:field1,null,3}");
+		chk("let x = Flight[55].field1.orderBy('field1').offset(3).limit(5)", "{Flight->int,MT:Flight,[55],F:field1,(),OLO:field1,5,3}");
 		
 		chk("let x = Flight[55].count()", "{Flight->long,MT:Flight,[55],(count)}");
 		chk("let x = Flight[55].field1.count()", "{Flight->long,MT:Flight,[55],F:field1,(count)}");
@@ -43,7 +43,7 @@ public class HLSTests extends HLSTestBase {
 		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
 		
 		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
-		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
+		chk("let x = Customer[true].fetch('addr').orderBy('cid')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:cid,null,null}");
 
 		//this one doesn't need to do fetch since just getting x
 		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
@@ -60,7 +60,7 @@ public class HLSTests extends HLSTestBase {
 		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
 		
 		chk("let x = Customer[true].fetch('addr').first()", "{Customer->Customer,MT:Customer,[true],(first),SUB:false,addr}");
-		chk("let x = Customer[true].fetch('addr').orderBy('id')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:id,null,null}");
+		chk("let x = Customer[true].fetch('addr').orderBy('cid')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr,OLO:cid,null,null}");
 
 		//this one doesn't need to do fetch since just getting x
 		chk("let x = Customer[true].x.fetch('addr')", "{Customer->int,MT:Customer,[true],F:x,()}");
@@ -72,8 +72,8 @@ public class HLSTests extends HLSTestBase {
 		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
 		
 		chk("let x = Customer[true].addr.orderBy('id')", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),OLO:id,null,null}");
-		chk("let x = Customer[true].orderBy('id').addr", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,()}");
-		chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
+		chk("let x = Customer[true].orderBy('cid').addr", "{Customer->Customer,MT:Customer,[true],(),OLO:cid,null,null},{Address->Address,MT:Address,R:addr,()}");
+		chk("let x = Customer[true].orderBy('cid').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:cid,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
 	}
 	
 	
@@ -88,7 +88,7 @@ public class HLSTests extends HLSTestBase {
 //		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
 //		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
 		
-		chk("let x = Customer[true].orderBy('id').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:id,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
+		chk("let x = Customer[true].orderBy('cid').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:cid,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
 	}
 	
 
