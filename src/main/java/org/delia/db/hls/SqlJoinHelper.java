@@ -82,21 +82,16 @@ public class SqlJoinHelper {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
-			boolean flipLeftRight = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type);
+//			boolean flipLeftRight = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type);
 //			if (hlspan.doubleFlip) {
 //				flipLeftRight = !flipLeftRight;
 //			}
 			
-			if (flipLeftRight) {
+			if (true) {
 				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rightv"); //a.id
-				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
-			} else {
-				// SELECT a.x,c.leftv FROM Customer as a zzLEFT JOIN AddressCustomerAssoc as c ON a.id=c.rightv
-				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
-				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //a.id
+				String fff = assocTblMgr.getAssocLeftField(hlspan.fromType, (DStructType) pair.type);
+				String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //a.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 			
@@ -116,27 +111,13 @@ public class SqlJoinHelper {
 			
 			s = null;
 			
-			if (flipLeftRight) {
-				DStructType pairType = (DStructType) pair.type; //Address
-//				RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
-				PrimaryKey pk = pairType.getPrimaryKey();
-//				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
-				
-				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
-				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "leftv"); //c.rightv
-				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
-			} else {
-				DStructType pairType = (DStructType) pair.type; //Address
-//				RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
-				PrimaryKey pk = pairType.getPrimaryKey();
-//				PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
-				
-				String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
-				String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, "rightv"); //c.leftv
-				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
-			}
+			DStructType pairType = (DStructType) pair.type; //Address
+			PrimaryKey pk = pairType.getPrimaryKey();
+			String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
+			String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
+			String fff = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
+			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
+			s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			sc.out(s);
 		}
 
@@ -228,7 +209,8 @@ public class SqlJoinHelper {
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<String> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
 			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
-			String fieldName = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type) ? "leftv" : "rightv";
+//			String fieldName = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type) ? "leftv" : "rightv";
+			String fieldName = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
 			
 			//b.id as cust
 			String s = aliasAlloc.buildAliasAssoc(assocTbl, fieldName);
