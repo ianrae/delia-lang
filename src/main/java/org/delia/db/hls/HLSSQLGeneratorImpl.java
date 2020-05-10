@@ -290,6 +290,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		for(RenderedField rf: fieldL) {
 			joiner.add(rf.field);
 		}
+		hlspan.renderedFieldL = fieldL;
 		sc.out(joiner.toString());
 	}
 

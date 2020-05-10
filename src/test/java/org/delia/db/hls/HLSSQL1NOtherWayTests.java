@@ -19,9 +19,9 @@ public class HLSSQL1NOtherWayTests extends HLSTestBase {
 		useCustomer1NOtherWaySrc = true;
 		//TODO: don't actually need both a.addr and b.id. they are the same value
 		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id WHERE a.cid = ?", "55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
-		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id ORDER BY a.cid");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id ORDER BY a.cid");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
 		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 	}
@@ -57,7 +57,8 @@ public class HLSSQL1NOtherWayTests extends HLSTestBase {
 		useCustomer1NOtherWaySrc = true;
 
 		//TODO: don't actually need both a.addr and b.id. they are the same value
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
+//x		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 	}
 
 	//---
