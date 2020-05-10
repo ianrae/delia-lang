@@ -188,7 +188,7 @@ public class SqlJoinHelper {
 		}
 		
 
-		public void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+		public boolean addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
 			List<TypePair> joinL = genFKJoinList(hlspan);
 
 			for(TypePair pair: joinL) {
@@ -202,12 +202,14 @@ public class SqlJoinHelper {
 					break;
 				case MANY_TO_MANY:
 					doManyToManyAddFKofJoins(hlspan, fieldL, pair, relinfoA);
-					return;
+					return true;
 				}
 				
-				//					fieldL.add(pk.getFieldName());
+				//b.id as cust
 				fieldL.add(aliasAlloc.buildAlias(pairType, pk.getFieldName()));
+				return true;
 			}
+			return false;
 		}
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<String> fieldL, TypePair pair,
 				RelationInfo relinfoA) {

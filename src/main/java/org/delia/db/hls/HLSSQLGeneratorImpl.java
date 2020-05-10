@@ -26,7 +26,6 @@ import org.delia.relation.RelationInfo;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
@@ -42,6 +41,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private AssocTblManager assocTblMgr;
 	private MiniSelectFragmentParser miniSelectParser;
 	private VarEvaluator varEvaluator;
+	private WhereClauseHelper whereClauseHelper;
 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
 		super(factorySvc);
@@ -49,11 +49,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		this.assocTblMgr = assocTblMgr;
 		this.miniSelectParser = miniSelectParser;
 		this.varEvaluator = varEvaluator;
+		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
 	}
 
 	@Override
 	public String buildSQL(HLSQueryStatement hls) {
 		this.queryExp = hls.queryExp;
+		
 		if (hls.hlspanL.size() == 1) {
 			return processOneStatement(hls.getMainHLSSpan(), false);
 		} else if (hls.hlspanL.size() == 2) {
@@ -101,6 +103,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	
 	@Override
 	public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
+		this.whereClauseHelper.genWhere(hlspan, queryExp); //need this to genereate "as " in fields
+		
 		SQLCreator sc = new SQLCreator();
 		//SELECT .. from .. ..join.. ..where.. ..order..
 		sc.out("SELECT");
@@ -129,7 +133,17 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		joinHelper.genJoin(sc, hlspan);
 	}
 	private void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
-		joinHelper.addFKofJoins(hlspan, fieldL);
+		boolean addedOne = joinHelper.addFKofJoins(hlspan, fieldL);
+		if (addedOne) {
+			int n = fieldL.size();
+			String fieldStr = fieldL.get(n - 1).trim();
+			if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
+				String asName = whereClauseHelper.asNameMap.get(fieldStr);
+				fieldStr = String.format("%s as %s", fieldStr, asName);
+				fieldL.remove(n - 1);
+				fieldL.add(fieldStr);
+			}
+		}
 	}
 	private void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
 		joinHelper.addFullofJoins(hlspan, fieldL);
@@ -173,6 +187,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		QueryDetails details = new QueryDetails();
 		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
 		
+		//so selectFrag.whereL has the filter expression
+		//if it contains any parent relation fields (Customer.addr)
+		//we need to change them to other side's pk.
+		//Also need to merge fragment parsers' table aliases with ours.
 		Map<String,String> aliasAdjustmentMap = new HashMap<>();
 		for(String x: selectFrag.aliasMap.keySet()) {
 			TableFragment tblfrag = selectFrag.aliasMap.get(x);
@@ -189,17 +207,11 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		for(SqlFragment z: selectFrag.whereL) {
 			OpFragment op = (OpFragment) z;
 			if (op.left != null) {
-				AliasedFragment replacement = remapParentFieldIfNeeded(op.left, selectFrag);
-				if (replacement != null) {
-					op.left = replacement;
-				}
+				remapParentFieldIfNeeded(op.left, selectFrag);
 				op.left.alias = aliasAdjustmentMap.get(op.left.alias);
 			}
 			if (op.right != null) {
-				AliasedFragment replacement = remapParentFieldIfNeeded(op.left, selectFrag);
-				if (replacement != null) {
-					op.left = replacement;
-				}
+				remapParentFieldIfNeeded(op.right, selectFrag);
 				op.right.alias = aliasAdjustmentMap.get(op.right.alias);
 			}
 		}
@@ -214,35 +226,29 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 	}
 	
-	private AliasedFragment remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag) {
+	private void remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag) {
 		if (af instanceof FieldFragment) {
 			FieldFragment ff = (FieldFragment) af;
-			return xremapParentFieldIfNeeded(ff);
+			remapParentFieldIfNeeded(ff, af);
 		} else {
 			for (FieldFragment ff: selectFrag.hlsRemapList) {
 				if (ff.alias.equals(af.alias) && ff.name.equals(af.name)) {
-					return xremapParentFieldIfNeeded(ff);
+					remapParentFieldIfNeeded(ff, af);
 				}
 			}
 		}
-		return null;
 	}
-	private AliasedFragment xremapParentFieldIfNeeded(FieldFragment ff) {
+	private void remapParentFieldIfNeeded(FieldFragment ff, AliasedFragment af) {
 		TypePair pair = new TypePair(ff.name, ff.fieldType);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(ff.structType, pair);
 		if (relinfo != null && relinfo.isParent) {
 			//TODO need more foolproof way to find other side
 			RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
 			if (otherSide != null) {
-				FieldFragment newff = new FieldFragment();
-				newff.alias = aliasAlloc.findOrCreateFor(relinfo.farType);
-				newff.name = relinfo.farType.getPrimaryKey().getFieldName();
-				newff.fieldType = ff.structType;
-				newff.structType = relinfo.farType;
-				return newff;
+				af.alias = aliasAlloc.findOrCreateFor(relinfo.farType);
+				af.name = relinfo.farType.getPrimaryKey().getFieldName();
 			}
 		}
-		return null;
 	}
 
 	private QueryType detectQueryType(HLSQuerySpan hlspan) {

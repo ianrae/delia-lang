@@ -450,13 +450,12 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
-		logSql(sql);
-		
 		SqlStatement statement = new SqlStatement();
 		statement.sql = sql;
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			statement.paramL.addAll(hlspan.paramL);
 		}
+		logSql(statement);
 		
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);
