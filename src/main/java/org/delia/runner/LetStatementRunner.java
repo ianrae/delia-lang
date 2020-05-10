@@ -13,7 +13,6 @@ import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;

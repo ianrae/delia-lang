@@ -6,8 +6,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
-import org.delia.runner.VarEvaluator;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
 /**
@@ -31,7 +29,7 @@ public interface DBExecutor extends AutoCloseable {
 	boolean execFieldDetect(String tableName, String fieldName);
 	
 	FetchRunner createFetchRunner(FactoryService factorySvc);
-	
+	TableExistenceService createTableExistService();
 
 	//schema actions
 	void createTable(String tableName);

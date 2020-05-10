@@ -8,6 +8,8 @@ import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.runner.FetchRunner;
@@ -117,5 +119,9 @@ public class PostgresDBExecutor implements DBExecutor {
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
 		return dbInterface.executeHLSQuery(hls, sql, qtx, dbctx);
+	}
+	@Override
+	public TableExistenceService createTableExistService() {
+		return new TableExistenceServiceImpl(dbInterface, dbctx);
 	}
 }

@@ -43,13 +43,13 @@ public class HLSManager extends ServiceBase {
 	private DeliaSession session;
 	private DBInterface dbInterface;
 	private DTypeRegistry registry;
-	private AssocTblManager assocTblMgr;
+//	private AssocTblManager assocTblMgr;
 	private HLSStragey defaultStrategy = new StandardHLSStragey();
 	private boolean generateSQLforMemFlag;
 	private Delia delia;
 	private VarEvaluator varEvaluator;
 	private MiniSelectFragmentParser miniSelectParser;
-	private TableExistenceService existSvc;
+//	private TableExistenceService existSvc;
 
 	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
@@ -57,22 +57,17 @@ public class HLSManager extends ServiceBase {
 		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
-		this.assocTblMgr = new AssocTblManager(existSvc);
 		this.varEvaluator = varEvaluator;
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
 		whereGen.tableFragmentMaker = miniSelectParser;
-		
-		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
-		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
-
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
 		HLSQueryStatement hls = buildHLS(spec.queryExp);
 		hls.querySpec = spec;
 
-		HLSSQLGenerator sqlGenerator = chooseGenerator();
+		HLSSQLGenerator sqlGenerator = chooseGenerator(dbexecutor);
 		sqlGenerator.setRegistry(registry);
 		String sql = sqlGenerator.buildSQL(hls);
 
@@ -85,8 +80,11 @@ public class HLSManager extends ServiceBase {
 		return result;
 	}
 
-	private HLSSQLGenerator chooseGenerator() {
+	private HLSSQLGenerator chooseGenerator(DBExecutor dbexecutor) {
 		//later we will have dbspecific ones
+		
+		TableExistenceService existSvc = dbexecutor.createTableExistService();
+		AssocTblManager assocTblMgr = new AssocTblManager(existSvc);
 
 		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, existSvc);
 		switch(dbInterface.getDBType()) {
