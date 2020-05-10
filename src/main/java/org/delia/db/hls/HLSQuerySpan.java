@@ -66,15 +66,20 @@ public class HLSQuerySpan implements HLSElement {
 	}
 
 	public boolean hasFunction(String fnName) {
+		GElement gel = findFunction(fnName);
+		return gel != null;
+	}
+	public GElement findFunction(String fnName) {
 		if (gElList == null) {
-			return false;
+			return null;
 		}
 		
 		for(GElement gel: gElList) {
 			if (gel.qfe.funcName.equals(fnName)) {
-				return true;
+				return gel;
 			}
 		}
-		return false;
+		return null;
 	}
+	
 }

@@ -31,6 +31,7 @@ public class HLSSQLTests extends HLSTestBase {
 		sqlchkP("let x = Flight[55].field1.distinct()", 				"SELECT DISTINCT(a.field1) FROM Flight as a WHERE a.field1 = ?", "55");
 		sqlchkP("let x = Flight[55].field1.exists()", 				"SELECT COUNT(a.field1) FROM Flight as a WHERE a.field1 = ? LIMIT 1", "55");
 
+		sqlchkP("let x = Flight[55].ith(2)", 				"SELECT * FROM Flight as a WHERE a.field1 = ? ORDER BY a.field1 LIMIT 1 OFFSET 2", "55");
 	}
 
 	@Test
@@ -80,11 +81,12 @@ public class HLSSQLTests extends HLSTestBase {
 	
 	@Test
 	public void testDebugSQL() {
-		useCustomerManyToManySrc = true;
+//		useCustomerManyToManySrc = true;
 //		assocTblMgr.flip = false;
 		
 //		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressAssoc as b ON a.id=b.rightv");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
+//		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressAssoc as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
+		sqlchkP("let x = Flight[55].ith(2)", 				"SELECT * FROM Flight as a WHERE a.field1 = ? ORDER BY a.field1 LIMIT 1 OFFSET 2", "55");
 	}
 
 	@Before

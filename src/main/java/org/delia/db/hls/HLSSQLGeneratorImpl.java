@@ -155,6 +155,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
 		boolean needLimit1 = hlspan.hasFunction("exists");
 		boolean hasLast = hlspan.hasFunction("last");
+		boolean hasIth = hlspan.hasFunction("ith");
 
 		if (hlspan.oloEl == null) {
 			if (needLimit1) {
@@ -166,6 +167,16 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				if (pk != null) {
 					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
 					sc.out("ORDER BY %s desc",ss);
+				}
+			}
+			if (hasIth) {
+				GElement gel = hlspan.findFunction("ith");
+				//implicitly add sort by pk (if there is one)
+				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
+				if (pk != null) {
+					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
+					Integer iOffset = gel.getIntArg(0);
+					sc.out("ORDER BY %s LIMIT 1 OFFSET %s",ss, iOffset.toString());
 				}
 			}
 			return;
