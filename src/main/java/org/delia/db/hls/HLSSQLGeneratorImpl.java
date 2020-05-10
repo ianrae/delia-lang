@@ -39,7 +39,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		this.queryExp = hls.queryExp;
 		
 		if (hls.hlspanL.size() == 1) {
-			return processOneStatement(hls.getMainHLSSpan(), false);
+			String sql = processOneStatement(hls.getMainHLSSpan(), false);
+			hls.details = hls.getMainHLSSpan().details;
+			return sql;
 		} else if (hls.hlspanL.size() == 2) {
 			
 			HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
@@ -55,6 +57,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				//1 - Address, 2 - Customer
 				
 				String sql = processOneStatement(hlspan1, false);
+				hls.details = hlspan1.details;
 				return sql;
 			} else if (QueryType.PRIMARY_KEY.equals(queryType)){
 				SUBElement subEl = new SUBElement();
@@ -64,6 +67,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				//1 - Address, 2 - Customer
 				
 				String sql = processOneStatement(hlspan1, false);
+				hls.details = hlspan1.details;
 				
 				SQLCreator sc = new SQLCreator();
 				genWhere(sc, hlspan2);
@@ -112,7 +116,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	}
 
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
-		joinHelper.genJoin(sc, hlspan);
+		hlspan.details = joinHelper.genJoin(sc, hlspan);
 	}
 	private void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
 		boolean addedOne = joinHelper.addFKofJoins(hlspan, fieldL);

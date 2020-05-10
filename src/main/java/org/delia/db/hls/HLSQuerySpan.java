@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.delia.db.QueryDetails;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -23,6 +24,7 @@ public class HLSQuerySpan implements HLSElement {
 	
 	public List<DValue> paramL = new ArrayList<>(); //for prepared statement
 	public boolean doubleFlip = false;
+	public QueryDetails details;
 	
 	@Override
 	public String toString() {

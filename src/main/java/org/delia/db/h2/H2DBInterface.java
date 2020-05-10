@@ -461,7 +461,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);
 		//TODO: do we need to catch and interpret execptions here??
 
-		QueryDetails details = new QueryDetails(); //TODO: fill this properly
+		QueryDetails details = hls.details;
 
 		QueryResponse qresp = new QueryResponse();
 		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, dbctx.registry);

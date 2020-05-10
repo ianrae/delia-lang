@@ -294,11 +294,13 @@ public class H2BDDTests extends NewBDDBase {
 		enableSQLLogging = true;
 		cleanTables = true;
 		
-//		runR1700File("t0-let-field-single.txt", 3);
-//		runR1600File("t0-fetch.txt", 3);
-//		runR1500File("t0-queryfn-distinct.txt", 3);
-		runR1350File("t0-filter-op-relation.txt", 14);
+//		runR1350File("t0-filter-op-relation.txt", 14);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
+//		runR500File("t0-relation-one-to-one.txt", 9);
+//		runR500File("t0-relation-one-to-one-oneway.txt", 8);
+		runR500File("t0-relation-one-to-many.txt", 9);
+//		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR500File("t0-relation.txt", 2);
 
 	}
 	

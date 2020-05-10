@@ -3,6 +3,7 @@ package org.delia.db.hls;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.db.QueryDetails;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -20,9 +21,10 @@ public class SqlJoinHelper {
 			this.assocTblMgr = assocTblMgr;
 		}
 
-		public void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
+		public QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 			List<TypePair> joinL = genJoinList(hlspan);
-
+			QueryDetails details = new QueryDetails();
+			
 			//do the joins
 			for(TypePair pair: joinL) {
 				boolean bHasFK = false;
@@ -33,10 +35,15 @@ public class SqlJoinHelper {
 					break;
 				case ONE_TO_MANY:
 					bHasFK = relinfoA.isParent;
+					details.mergeRows = true;
+					details.mergeOnField = relinfoA.fieldName;
 					break;
 				case MANY_TO_MANY:
+					details.mergeRows = true;
+					details.isManyToMany = true;
+					details.mergeOnField = relinfoA.fieldName;
 					doManyToMany(sc, hlspan, pair, relinfoA);
-					return;
+					return details;
 				}
 				
 				String s;
@@ -64,6 +71,7 @@ public class SqlJoinHelper {
 				
 				sc.out(s);
 			}
+			return details;
 		}
 
 		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
