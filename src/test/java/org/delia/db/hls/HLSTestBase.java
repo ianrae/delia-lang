@@ -204,6 +204,10 @@ public class HLSTestBase extends NewBDDBase {
 	}
 	
 	protected void doSqlchkP(String src, String sqlExpected, String param1) {
+		doSqlchkPR(src, sqlExpected, param1, null);
+	}
+
+	private void doSqlchkPR(String src, String sqlExpected, String param1, String rendered) {
 		HLSQueryStatement hls = buildHLS(src);
 		HLSSQLGenerator gen = createGen();
 		String sql = gen.buildSQL(hls);
@@ -219,5 +223,4 @@ public class HLSTestBase extends NewBDDBase {
 			assertEquals(0, hlspan.paramL.size());
 		}
 	}
-
 }

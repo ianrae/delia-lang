@@ -97,6 +97,10 @@ public class HLSSQLTests extends HLSTestBase {
 		sqlchkP(src, sqlExpected, null);
 	}
 	private void sqlchkP(String src, String sqlExpected, String param1) {
+		sqlchkPR(src, sqlExpected, param1, null);
+	}
+	private void sqlchkPR(String src, String sqlExpected, String param1, String rendered) {
 		doSqlchkP(src, sqlExpected, param1);
+		
 	}
 }
