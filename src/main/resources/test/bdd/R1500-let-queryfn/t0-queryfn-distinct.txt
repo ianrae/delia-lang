@@ -22,13 +22,14 @@ value:a:int:3
 
 ---
 title: with distinct
+#need to sort else the order is undefined
 given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
   insert Flight {id: 57, wid: 4 }
   insert Flight {id: 58, wid: 3 }
 when:
-  let x = Flight[true].wid.distinct()
+  let x = Flight[true].wid.distinct().orderBy('wid',desc)
 then:
 value:a:int:4
 value:a:int:3

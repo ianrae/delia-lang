@@ -18,6 +18,7 @@ import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.PrimaryKey;
 import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
@@ -153,17 +154,30 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	private void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
 		boolean needLimit1 = hlspan.hasFunction("exists");
+		boolean hasLast = hlspan.hasFunction("last");
 
 		if (hlspan.oloEl == null) {
 			if (needLimit1) {
 				sc.out("LIMIT 1");
 			}
+			if (hasLast) {
+				//implicitly add sort by pk (if there is one)
+				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
+				if (pk != null) {
+					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
+					sc.out("ORDER BY %s desc",ss);
+				}
+			}
 			return;
 		}
 
 		if (hlspan.oloEl.orderBy != null) {
+			boolean isAsc = hlspan.oloEl.isAsc;
+			if (hlspan.hasFunction("last")) { //we apply desc sorting
+				isAsc = false;
+			}
+			String asc = isAsc ? "" : " desc";
 			String ss = buildAlias(hlspan.fromType, hlspan.oloEl.orderBy);
-			String asc = hlspan.oloEl.isAsc ? "" : " desc";
 			sc.out("ORDER BY %s%s",ss, asc);
 		}
 
@@ -200,6 +214,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		List<String> fieldL = new ArrayList<>();
 
 		if (hlspan.hasFunction("first")) {
+			sc.out("TOP 1");
+		}
+		if (hlspan.hasFunction("last")) { //we apply desc sorting
 			sc.out("TOP 1");
 		}
 
