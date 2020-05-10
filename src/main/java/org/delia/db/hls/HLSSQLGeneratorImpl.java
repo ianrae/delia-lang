@@ -19,6 +19,7 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.PrimaryKey;
+import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
@@ -134,20 +135,22 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 		hlspan.details = joinHelper.genJoin(sc, hlspan);
 	}
-	private void addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+	private void addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 		boolean addedOne = joinHelper.addFKofJoins(hlspan, fieldL);
 		if (addedOne) {
 			int n = fieldL.size();
-			String fieldStr = fieldL.get(n - 1).trim();
+			RenderedField rf = fieldL.get(n - 1);
+			String fieldStr = rf.field.trim();
 			if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
 				String asName = whereClauseHelper.asNameMap.get(fieldStr);
 				fieldStr = String.format("%s as %s", fieldStr, asName);
-				fieldL.remove(n - 1);
-				fieldL.add(fieldStr);
+//				fieldL.remove(n - 1);
+				rf.field = fieldStr;
+//				fieldL.add(fieldStr);
 			}
 		}
 	}
-	private void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+	private void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 		joinHelper.addFullofJoins(hlspan, fieldL);
 	}
 
@@ -222,7 +225,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	
 
 	private void genFields(SQLCreator sc, HLSQuerySpan hlspan, boolean forceAllFields) {
-		List<String> fieldL = new ArrayList<>();
+		List<RenderedField> fieldL = new ArrayList<>();
 
 		if (hlspan.hasFunction("first")) {
 			sc.out("TOP 1");
@@ -237,30 +240,30 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			String aa = buildAlias(hlspan.fromType, fieldName);
 			if (hlspan.hasFunction("count")) {
 				String s = String.format("COUNT(%s)", aa);
-				fieldL.add(s);
+				addField(fieldL, s);
 			} else if (hlspan.hasFunction("min")) {
 				String s = String.format("MIN(%s)", aa);
-				fieldL.add(s);
+				addField(fieldL, s);
 			} else if (hlspan.hasFunction("max")) {
 				String s = String.format("MAX(%s)", aa);
-				fieldL.add(s);
+				addField(fieldL, s);
 			} else if (hlspan.hasFunction("distinct")) {
 				String s = String.format("DISTINCT(%s)", aa);
-				fieldL.add(s);
+				addField(fieldL, s);
 			} else if (hlspan.hasFunction("exists")) {
 				String s = String.format("COUNT(%s)", aa);
-				fieldL.add(s);
+				addField(fieldL, s);
 			} else {
-				fieldL.add(aa);
+				addField(fieldL, hlspan.fEl.fieldPair);
 				isJustFieldName = true;
 			}
 		} else  {
 			if (hlspan.hasFunction("count")) {
 				String s = String.format("COUNT(*)");
-				fieldL.add(s);
+				addField(fieldL, s);
 			} else if (hlspan.hasFunction("exists")) {
 				String s = String.format("COUNT(*)");
-				fieldL.add(s);
+				addField(fieldL, s);
 			}
 		}
 
@@ -278,17 +281,32 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 
 		if (fieldL.isEmpty()) {
-			fieldL.add("*");
+			RenderedField rf = new RenderedField();
+			rf.field = "*";
+			fieldL.add(rf);
 		}
 
 		StringJoiner joiner = new StringJoiner(",");
-		for(String s: fieldL) {
-			joiner.add(s);
+		for(RenderedField rf: fieldL) {
+			joiner.add(rf.field);
 		}
 		sc.out(joiner.toString());
 	}
 
-	private void addStructFields(DStructType fromType, List<String> fieldL) {
+	private void addField(List<RenderedField> fieldL, TypePair pair) {
+		RenderedField rf = new RenderedField();
+		rf.field = pair.name;
+		rf.pair = pair;
+		fieldL.add(rf);
+	}
+
+	private void addField(List<RenderedField> fieldL, String s) {
+		RenderedField rf = new RenderedField();
+		rf.field = s;
+		fieldL.add(rf);
+	}
+
+	private void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
 		joinHelper.addStructFields(fromType, fieldL);
 	}
 	@Override

@@ -181,7 +181,7 @@ public class SqlJoinHelper {
 		}
 		
 
-		public boolean addFKofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+		public boolean addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 			List<TypePair> joinL = genFKJoinList(hlspan);
 
 			for(TypePair pair: joinL) {
@@ -201,12 +201,14 @@ public class SqlJoinHelper {
 				//b.id as cust
 				String s = aliasAlloc.buildAlias(pairType, pk.getFieldName());
 				s = String.format("%s as %s", s, relinfoA.fieldName);
-				fieldL.add(s);
+//				fieldL.add(s);
+				addField(fieldL, pairType, pk.getKey(), s); 
+			
 				return true;
 			}
 			return false;
 		}
-		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<String> fieldL, TypePair pair,
+		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
 			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
 //			String fieldName = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type) ? "leftv" : "rightv";
@@ -215,17 +217,18 @@ public class SqlJoinHelper {
 			//b.id as cust
 			String s = aliasAlloc.buildAliasAssoc(assocTbl, fieldName);
 			s = String.format("%s as %s", s, relinfoA.fieldName);
-			fieldL.add(s);
+			addField(fieldL, null, fieldName, s).isAssocField = true;
+//			fieldL.add(s);
 		}
 
-		public void addFullofJoins(HLSQuerySpan hlspan, List<String> fieldL) {
+		public void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 			List<TypePair> joinL = genFullJoinList(hlspan);
 
 			for(TypePair pair: joinL) {
 				addStructFieldsMM(pair, fieldL);
 			}
 		}
-		public void addStructFieldsMM(TypePair joinType, List<String> fieldL) {
+		public void addStructFieldsMM(TypePair joinType, List<RenderedField> fieldL) {
 			DStructType fromType = (DStructType) joinType.type;
 			String pk = fromType.getPrimaryKey().getFieldName();
 			
@@ -234,32 +237,51 @@ public class SqlJoinHelper {
 				if (pair.name.equals(pk)) {
 					String s = aliasAlloc.buildAlias(fromType, pair.name);
 					s = String.format("%s as %s", s, joinType.name);
-					fieldL.add(s);
+					addField(fieldL, fromType, pair, s);
+//					fieldL.add(s);
 				} else if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					} else if (!relinfo.isParent) {
-						fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
+						String s = aliasAlloc.buildAlias(fromType, pair.name);
+						addField(fieldL, fromType, pair, s);
 					}
 				} else {
-					fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
+					String s = aliasAlloc.buildAlias(fromType, pair.name);
+					addField(fieldL, fromType, pair, s);
 				}
 			}
 		}
-		public void addStructFields(DStructType fromType, List<String> fieldL) {
+		public void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
 			for(TypePair pair: fromType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					} else if (!relinfo.isParent) {
-						fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
+						addField(fieldL, fromType, pair, aliasAlloc.buildAlias(fromType, pair.name));
+//						fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
 					}
 				} else {
-					fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
+					addField(fieldL, fromType, pair, aliasAlloc.buildAlias(fromType, pair.name));
+//					fieldL.add(aliasAlloc.buildAlias(fromType, pair.name));
 				}
 			}
 		}
 		
+		private void addField(List<RenderedField> fieldL, DStructType fromType, TypePair pair, String s) {
+			RenderedField rf = new RenderedField();
+			rf.pair = pair;
+			rf.field = s;
+			fieldL.add(rf);
+		}
+		private RenderedField addField(List<RenderedField> fieldL, DStructType fromType, String fieldName, String s) {
+			RenderedField rf = new RenderedField();
+			rf.pair = new TypePair(fieldName, null);
+			rf.field = s;
+			fieldL.add(rf);
+			return rf;
+		}
+
 		public List<TypePair> genTwoStatementJoinList(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2, SQLCreator sc) {
 			List<TypePair> joinL = new ArrayList<>();
 
