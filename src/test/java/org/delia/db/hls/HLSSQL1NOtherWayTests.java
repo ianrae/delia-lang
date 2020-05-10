@@ -56,8 +56,8 @@ public class HLSSQL1NOtherWayTests extends HLSTestBase {
 	public void testDebugSQL() {
 		useCustomer1NOtherWaySrc = true;
 
-//		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
-		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,a.addr,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id WHERE a.cid = ?", "55");
+		//TODO: don't actually need both a.addr and b.id. they are the same value
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 	}
 
 	//---
