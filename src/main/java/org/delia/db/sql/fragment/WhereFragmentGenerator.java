@@ -241,6 +241,14 @@ public class WhereFragmentGenerator extends ServiceBase {
 			if (DValueHelper.fieldExists(tbl.structType, possibleFieldName)) {
 				RelationOneRule oneRule = DRuleHelper.findOneRule(tbl.structType, possibleFieldName);
 				if (oneRule != null && oneRule.relInfo.isParent) {
+					
+					//hls needs this
+					FieldFragment ff = new FieldFragment();
+					ff.name = possibleFieldName;
+					ff.structType = tbl.structType;
+					ff.alias = tbl.alias;
+					selectFrag.hlsRemapList.add(ff);
+					
 					DStructType farType = oneRule.relInfo.farType;
 					TableFragment otherTbl = selectFrag.findByTableName(farType.getName());
 					if (otherTbl == null) {
@@ -252,6 +260,15 @@ public class WhereFragmentGenerator extends ServiceBase {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(tbl.structType, possibleFieldName);
 				if (manyRule != null && manyRule.relInfo.isParent) {
 					DStructType farType = manyRule.relInfo.farType;
+					
+					//hls needs this
+					FieldFragment ff = new FieldFragment();
+					ff.name = possibleFieldName;
+					ff.structType = tbl.structType;
+					ff.alias = tbl.alias;
+					selectFrag.hlsRemapList.add(ff);
+					
+					
 					TableFragment otherTbl = selectFrag.findByTableName(farType.getName());
 					if (otherTbl == null) {
 						log.log("implicit(many) fetch %s.%s", farType.getName(), possibleFieldName);
