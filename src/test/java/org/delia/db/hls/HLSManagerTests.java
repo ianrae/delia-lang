@@ -37,7 +37,7 @@ public class HLSManagerTests extends HLSTestBase {
 	}	
 	
 	@Test
-	public void testDoubleStratey() {
+	public void testDoubleStrategy() {
 		insertSomeRecords = true;
 		useCustomerManyToManySrc = true;
 		generateSQLforMemFlag = false;

@@ -65,9 +65,10 @@ public class HLSEngine extends ServiceBase {
 		
 
 		private void chkSpan(HLSQuerySpan hlspan) {
-			if (hlspan.rEl != null) {
-				chkField("R", hlspan, hlspan.rEl.rfieldPair);
-			}
+			//rField may be field from next span. don't check here. TODO add check later
+//			if (hlspan.rEl != null) {
+//				chkField("R", hlspan, hlspan.rEl.rfieldPair);
+//			}
 			if (hlspan.fEl != null) {
 				chkField("F", hlspan, hlspan.fEl.fieldPair);
 			}
