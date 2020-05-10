@@ -55,13 +55,37 @@ public class HLSEngine extends ServiceBase {
 			
 			int i = 0;
 			for(LetSpan span: spanL) {
-				HLSQuerySpan hsltat = generateSpan(i, span);
-				hlstatement.hlspanL.add(hsltat);
+				HLSQuerySpan hlspan = generateSpan(i, span);
+				chkSpan(hlspan);
+				hlstatement.hlspanL.add(hlspan);
 				i++;
 			}
 			return hlstatement;
 		}
 		
+
+		private void chkSpan(HLSQuerySpan hlspan) {
+			if (hlspan.rEl != null) {
+				chkField("R", hlspan, hlspan.rEl.rfieldPair);
+			}
+			if (hlspan.fEl != null) {
+				chkField("F", hlspan, hlspan.fEl.fieldPair);
+			}
+			
+			if (hlspan.subEl != null) {
+				for(String fieldName: hlspan.subEl.fetchL) {
+					DValueHelper.throwIfFieldNotExist("SUB", fieldName, hlspan.fromType);
+				}
+			}
+			
+			if (hlspan.oloEl != null && hlspan.oloEl.orderBy != null) {
+				DValueHelper.throwIfFieldNotExist("OLO", hlspan.oloEl.orderBy, hlspan.fromType);
+			}
+		}
+
+		private void chkField(String prefix, HLSQuerySpan hlspan, TypePair pair) {
+			DValueHelper.throwIfFieldNotExist(prefix, pair.name, hlspan.fromType);
+		}
 
 		public LetSpan fixup(LetSpan span) {
 			HLSQuerySpan hlstat = new HLSQuerySpan();

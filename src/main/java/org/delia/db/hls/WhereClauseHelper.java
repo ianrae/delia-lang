@@ -25,7 +25,6 @@ import org.delia.util.DRuleHelper;
 
 public class WhereClauseHelper extends ServiceBase {
 
-//	private QueryExp queryExp;
 	private AliasAllocator aliasAlloc;
 	private MiniSelectFragmentParser miniSelectParser;
 	private VarEvaluator varEvaluator;
@@ -44,10 +43,9 @@ public class WhereClauseHelper extends ServiceBase {
 		if (hlspan.filEl ==  null) {
 			return;
 		}
-//		this.queryExp = queryExp;
-		
+		//TODO don't need to pass queryExp here!! remove
 		QuerySpec spec = new QuerySpec();
-		spec.queryExp = queryExp;
+		spec.queryExp = hlspan.filEl.queryExp;
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		QueryDetails details = new QueryDetails();
 		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
