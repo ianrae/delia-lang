@@ -11,6 +11,8 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -30,13 +32,15 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private WhereClauseHelper whereClauseHelper;
 	public Map<String,String> asNameMap = new HashMap<>();
 	private MiniSelectFragmentParser miniSelectParser;
+	private TableExistenceService existSvc;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, TableExistenceService existSvc) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
 		this.assocTblMgr = assocTblMgr;
 		this.miniSelectParser = miniSelectParser;
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap);
+		this.existSvc = existSvc;
 	}
 
 	@Override
@@ -78,7 +82,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
 				String newAlias = "b";
-				String fff = assocTblMgr.getAssocField(hlspan2.fromType);
+				String fff = assocTblMgr.getAssocField(hlspan1.fromType, hlspan2.fromType);
 				String s3 = String.format("%s.%s", newAlias, fff);
 				
 				String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();

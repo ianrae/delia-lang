@@ -6,10 +6,13 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.HLSEngine;
 import org.delia.db.hls.HLSQuerySpan;
@@ -46,6 +49,7 @@ public class HLSManager extends ServiceBase {
 	private Delia delia;
 	private VarEvaluator varEvaluator;
 	private MiniSelectFragmentParser miniSelectParser;
+	private TableExistenceService existSvc;
 
 	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
@@ -53,11 +57,14 @@ public class HLSManager extends ServiceBase {
 		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
-		this.assocTblMgr = new AssocTblManager();
+		this.assocTblMgr = new AssocTblManager(existSvc);
 		this.varEvaluator = varEvaluator;
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
 		whereGen.tableFragmentMaker = miniSelectParser;
+		
+		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
+		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
 
 	}
 
@@ -81,7 +88,7 @@ public class HLSManager extends ServiceBase {
 	private HLSSQLGenerator chooseGenerator() {
 		//later we will have dbspecific ones
 
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, existSvc);
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{
