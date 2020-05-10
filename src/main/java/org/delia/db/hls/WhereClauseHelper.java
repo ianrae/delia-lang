@@ -117,7 +117,7 @@ public class WhereClauseHelper extends ServiceBase {
 				af.name = relinfo.farType.getPrimaryKey().getFieldName();
 				
 				String key = String.format("%s.%s", af.alias, af.name);
-				asNameMap.put(key, otherSide.fieldName);
+				asNameMap.put(key, relinfo.fieldName);
 				return true;
 			}
 		}
