@@ -267,7 +267,9 @@ public class ResultSetToDValConverter extends ServiceBase {
 					RenderedField rff =  rfList.get(k);
 					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
 						DValue subDVal= readStructDValueUsingIndex(rs, dbctx, rff, rfList);
-						addAsSubOjbect(dval, subDVal, rff, rfList);
+						if (subDVal != null) {
+							addAsSubOjbect(dval, subDVal, rff, rfList);
+						}
 					}
 				}
 			}
@@ -301,7 +303,8 @@ public class ResultSetToDValConverter extends ServiceBase {
 	private DValue readStructDValueUsingIndex(ResultSet rs, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
 		DStructType dtype = rfTarget.structType;
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
-
+		PrimaryKey pk = dtype.getPrimaryKey();
+		
 		for(RenderedField rff: rfList) {
 			if (rff.structType == rfTarget.structType) {
 				if (rff.pair.type.isStructShape()) {
@@ -316,6 +319,10 @@ public class ResultSetToDValConverter extends ServiceBase {
 					}
 				} else {
 					DValue inner = valueHelper.readFieldByColumnIndex(rff.pair, rs, rff.columnIndex, dbctx);
+					if (inner == null && rff.pair.name.equals(pk.getFieldName())) {
+						//is optional relation and is null
+						return null;
+					}
 					structBuilder.addField(rff.pair.name, inner);
 				}
 			}
