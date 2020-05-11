@@ -238,47 +238,98 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 		
 		int index = 0;
-		while(rs.next()) {
+		while(rs.next()) {  //get row
 			RenderedField rf = rfList == null ? null : rfList.get(index++);
-			StructValueBuilder structBuilder = new StructValueBuilder(dtype);
-			for(TypePair pair: dtype.getAllFields()) {
-//				//key goes in child only
-//				if (DRuleHelper.isParentRelation(dtype, pair)) {
-//					continue;
-//				}
-				
-				if (pair.type.isStructShape()) {
-					//FK only goes in child so it may not be here.
-					//However if .fks() was used then it is
-					if (ResultSetHelper.hasColumn(rs, pair.name)) {
-						DValue inner = createRelation(dtype, pair, rs, dbctx, rf);
-						structBuilder.addField(pair.name, inner);
-					}
-				} else {
-					DValue inner = readField(pair, rs, dbctx);
-					structBuilder.addField(pair.name, inner);
-				}
-				//					log.log(": " + pair.name);
-			}
-			boolean b = structBuilder.finish();
-			if (! b) {
-				DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
-				//TODO: why does the err not have fieldname and typename set? fix.
-				throw new ValueException(err); 
-			}
-			DValue dval = structBuilder.getDValue();
+			
+			DValue dval;
+			RSStuff rsstuff = new RSStuff();
+			dval = readStructDValue(rs, dtype, dbctx, rf, rsstuff);
 			list.add(dval);
+			if (rf != null) {
+				//look for other sub-objects
+				for(int k = rsstuff.numColumnsRead; k < rfList.size(); k++) {
+					RenderedField rff =  rfList.get(k);
+					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
+						dval = readStructDValueUsingIndex(rs, dbctx, rf, k + 1);
+						list.add(dval);
+					}
+				}
+			}
 		}
 
 		return list;
 	}
 	
-	private DValue createRelation(DStructType structType, TypePair targetPair, ResultSet rs, DBAccessContext dbctx, RenderedField rf) throws SQLException {
-		//get as string and let builder convert
-		String s = rs.getString(targetPair.name);
-		if (rs.wasNull()) {
-			return null;
+	private DValue readStructDValueUsingIndex(ResultSet rs, DBAccessContext dbctx, RenderedField rf, int columnIndex) throws SQLException {
+		DStructType dtype = rf.structType;
+		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
+
+		for(TypePair pair: dtype.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				//FK only goes in child so it may not be here.
+				//However if .fks() was used then it is
+				String strValue = rs.getString(columnIndex++);
+				if (rs.wasNull()) {
+					structBuilder.addField(pair.name, null);
+				} else {
+					DValue inner = createRelation(dtype, pair, strValue, dbctx, rf);
+					structBuilder.addField(pair.name, inner);
+				}
+			} else {
+				DValue inner = valueHelper.readFieldByColumnIndex(pair, rs, columnIndex++, dbctx);
+				structBuilder.addField(pair.name, inner);
+			}
 		}
+		boolean b = structBuilder.finish();
+		if (! b) {
+			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
+			//TODO: why does the err not have fieldname and typename set? fix.
+			throw new ValueException(err); 
+		}
+		DValue dval = structBuilder.getDValue();
+		return dval;
+	}
+	
+	public static class RSStuff {
+		public int numColumnsRead;
+	}
+
+	private DValue readStructDValue(ResultSet rs, DStructType dtype, DBAccessContext dbctx, RenderedField rf, RSStuff rsstuff) throws SQLException {
+		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
+		for(TypePair pair: dtype.getAllFields()) {
+			
+			if (pair.type.isStructShape()) {
+				//FK only goes in child so it may not be here.
+				//However if .fks() was used then it is
+				if (ResultSetHelper.hasColumn(rs, pair.name)) {
+					rsstuff.numColumnsRead++;
+					String strValue = rs.getString(pair.name);
+					if (rs.wasNull()) {
+						structBuilder.addField(pair.name, null);
+					} else {
+						DValue inner = createRelation(dtype, pair, strValue, dbctx, rf);
+						structBuilder.addField(pair.name, inner);
+					}
+				}
+			} else {
+				DValue inner = readField(pair, rs, dbctx);
+				structBuilder.addField(pair.name, inner);
+				rsstuff.numColumnsRead++;
+			}
+		}
+		boolean b = structBuilder.finish();
+		if (! b) {
+			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
+			//TODO: why does the err not have fieldname and typename set? fix.
+			throw new ValueException(err); 
+		}
+		DValue dval = structBuilder.getDValue();
+		return dval;
+	}
+
+	private DValue createRelation(DStructType structType, TypePair targetPair, String strValue, DBAccessContext dbctx, RenderedField rf) throws SQLException {
+		//get as string and let builder convert
+		String s = strValue;
 		
 		ScalarValueBuilder xbuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 		DValue keyVal;

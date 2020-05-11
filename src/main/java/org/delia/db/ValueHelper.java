@@ -206,6 +206,69 @@ public class ValueHelper extends ServiceBase {
 		}
 	}
 	
+	public DValue readFieldByColumnIndex(TypePair pair, ResultSet rs, int index, DBAccessContext dbctx) throws SQLException {
+		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
+
+		switch(pair.type.getShape()) {
+		case INTEGER:
+		{
+			Integer x = rs.getInt(index);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildInt(x, pair.type);
+		}
+		case LONG:
+		{
+			Long x = rs.getLong(index);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildLong(x, pair.type);
+		}
+		case NUMBER:
+		{
+			Double x = rs.getDouble(index);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildNumber(x, pair.type);
+		}
+		case DATE:
+		{
+			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
+			TimeZone tz = tzSvc.getDefaultTimeZone();
+			Calendar cal = Calendar.getInstance(tz);
+			Date x = rs.getTimestamp(index, cal);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildDate(x, pair.type);
+			//				DValue tmp = dvalBuilder.buildDate(x, pair.type);;
+			//				this.log.log("x: %s", tmp.asString());
+			//				return tmp;
+		}
+		case BOOLEAN:
+		{
+			Boolean x = rs.getBoolean(index);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildBoolean(x, pair.type);
+		}
+		case STRING:
+		{
+			String s = rs.getString(index);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildString(s, pair.type);
+		}
+		default:
+			return null;
+		}
+	}
+	
 	public DValue readIndexedField(DType type, int rsIndex, ResultSet rs, DBAccessContext dbctx) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 
