@@ -254,7 +254,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				String s = String.format("COUNT(%s)", aa);
 				addField(fieldL, s);
 			} else {
-				addField(fieldL, hlspan.fEl.fieldPair, aa);
+				addField(fieldL, hlspan.fromType, hlspan.fEl.fieldPair, aa);
 				isJustFieldName = true;
 			}
 		} else  {
@@ -294,12 +294,14 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		sc.out(joiner.toString());
 	}
 
-	private void addField(List<RenderedField> fieldL, TypePair pair, String s) {
+	private void addField(List<RenderedField> fieldL, DStructType structType, TypePair pair, String s) {
 		RenderedField rf = new RenderedField();
 		rf.field = s;
 		rf.pair = pair;
+		rf.structType = structType;
 		fieldL.add(rf);
 	}
+
 
 	private void addField(List<RenderedField> fieldL, String s) {
 		RenderedField rf = new RenderedField();

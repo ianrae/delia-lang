@@ -272,12 +272,14 @@ public class SqlJoinHelper {
 			RenderedField rf = new RenderedField();
 			rf.pair = pair;
 			rf.field = s;
+			rf.structType = fromType;
 			fieldL.add(rf);
 		}
 		private RenderedField addField(List<RenderedField> fieldL, DStructType fromType, String fieldName, String s) {
 			RenderedField rf = new RenderedField();
 			rf.pair = new TypePair(fieldName, null);
 			rf.field = s;
+			rf.structType = fromType;
 			fieldL.add(rf);
 			return rf;
 		}

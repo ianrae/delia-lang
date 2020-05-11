@@ -26,4 +26,12 @@ public class HLSQueryStatement implements HLSElement {
 		}
 		return joiner.toString();
 	}
+	
+	public List<RenderedField> getRenderedFields() {
+		List<RenderedField> list = new ArrayList<>();
+		for(HLSQuerySpan hlspan: hlspanL) {
+			list.addAll(hlspan.renderedFieldL);
+		}
+		return list;
+	}
 }
