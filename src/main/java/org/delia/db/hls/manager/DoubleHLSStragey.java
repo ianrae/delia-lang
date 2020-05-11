@@ -17,6 +17,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.dval.DRelationHelper;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
@@ -83,11 +84,8 @@ public class DoubleHLSStragey implements HLSStragey {
 		for(DValue inner: todoMap.keySet()) {
 			DValue innerInner = inner.asStruct().getField(field2); //cust
 			DRelation drel = innerInner.asRelation();
-			List<DValue> fetchedL = drel.haveFetched() ? drel.getFetchedItems() : new ArrayList<>();
-
 			List<DValue> fklist = todoMap.get(inner);
-			fetchedL.addAll(fklist);
-			drel.setFetchedItems(fetchedL);
+			DRelationHelper.addToFetchedItems(drel, fklist);
 		}
 
 		return qresp2;

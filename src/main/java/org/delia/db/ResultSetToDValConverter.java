@@ -14,6 +14,7 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.RenderedField;
 import org.delia.db.hls.RenderedFieldHelper;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.runner.ValueException;
@@ -36,6 +37,10 @@ import org.delia.valuebuilder.StructValueBuilder;
  *
  */
 public class ResultSetToDValConverter extends ServiceBase {
+	static class ColumnReadInfo {
+		public int numColumnsRead;
+	}
+	
 	private ValueHelper valueHelper;
 	private DValueConverterService dvalConverter;
 
@@ -244,10 +249,12 @@ public class ResultSetToDValConverter extends ServiceBase {
 		while(rs.next()) {  //get row
 			RenderedField rf = rfList == null ? null : rfList.get(index++);
 			
-			DValue dval;
-			RSStuff rsstuff = new RSStuff();
-			dval = readStructDValue(rs, dtype, dbctx, rf, rsstuff);
+			//first columns are the main object
+			ColumnReadInfo columnReadInfo = new ColumnReadInfo();
+			DValue dval = readStructDValue(rs, dtype, dbctx, rf, columnReadInfo);
 			list.add(dval);
+			
+			//now read sub-objects (if are any)
 			if (rf != null) {
 				//add column indexes
 				int j = 1;
@@ -255,8 +262,8 @@ public class ResultSetToDValConverter extends ServiceBase {
 					rff.columnIndex = j++;;
 				}
 				
-				//look for other sub-objects
-				for(int k = rsstuff.numColumnsRead; k < rfList.size(); k++) {
+				//look for sub-objects to the right the main object
+				for(int k = columnReadInfo.numColumnsRead; k < rfList.size(); k++) {
 					RenderedField rff =  rfList.get(k);
 					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
 						DValue subDVal= readStructDValueUsingIndex(rs, dbctx, rff, rfList);
@@ -270,21 +277,18 @@ public class ResultSetToDValConverter extends ServiceBase {
 	}
 	
 	private void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
+		//rff is something like b.id as addr
 		String targetAlias = getAlias(rff.field);
+		
+		//TODO: fix for multiple relations. this code only works if Customer has single relation to Address
 		
 		for(RenderedField rf: rfList) {
 			String alias = getAlias(rf.field);
 			if (alias != null && alias.equals(targetAlias)) {
-				log.log("sdf");
 				String fieldName = StringUtils.substringAfter(rf.field, " as ");
 				DValue inner = dval.asStruct().getField(fieldName);
 				DRelation drel = inner.asRelation();
-				List<DValue> fetchedL = drel.getFetchedItems();
-				if (fetchedL == null) {
-					fetchedL = new ArrayList<>();
-				}
-				fetchedL.add(subDVal);
-				drel.setFetchedItems(fetchedL);
+				DRelationHelper.addToFetchedItems(drel, subDVal);
 				return;
 			}
 		}
@@ -327,11 +331,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return dval;
 	}
 	
-	public static class RSStuff {
-		public int numColumnsRead;
-	}
-
-	private DValue readStructDValue(ResultSet rs, DStructType dtype, DBAccessContext dbctx, RenderedField rf, RSStuff rsstuff) throws SQLException {
+	private DValue readStructDValue(ResultSet rs, DStructType dtype, DBAccessContext dbctx, RenderedField rf, ColumnReadInfo rsstuff) throws SQLException {
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 		for(TypePair pair: dtype.getAllFields()) {
 			
