@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSQueryStatement;
@@ -258,8 +259,8 @@ public class ResultSetToDValConverter extends ServiceBase {
 				for(int k = rsstuff.numColumnsRead; k < rfList.size(); k++) {
 					RenderedField rff =  rfList.get(k);
 					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
-						dval = readStructDValueUsingIndex(rs, dbctx, rff, rfList);
-						list.add(dval);
+						DValue subDVal= readStructDValueUsingIndex(rs, dbctx, rff, rfList);
+						addAsSubOjbect(dval, subDVal, rff, rfList);
 					}
 				}
 			}
@@ -268,6 +269,31 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return list;
 	}
 	
+	private void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
+		String targetAlias = getAlias(rff.field);
+		
+		for(RenderedField rf: rfList) {
+			String alias = getAlias(rf.field);
+			if (alias != null && alias.equals(targetAlias)) {
+				log.log("sdf");
+				String fieldName = StringUtils.substringAfter(rf.field, " as ");
+				DValue inner = dval.asStruct().getField(fieldName);
+				DRelation drel = inner.asRelation();
+				List<DValue> fetchedL = drel.getFetchedItems();
+				if (fetchedL == null) {
+					fetchedL = new ArrayList<>();
+				}
+				fetchedL.add(subDVal);
+				drel.setFetchedItems(fetchedL);
+				return;
+			}
+		}
+	}
+
+	private String getAlias(String field) {
+		return StringUtils.substringBefore(field, ".");
+	}
+
 	private DValue readStructDValueUsingIndex(ResultSet rs, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
 		DStructType dtype = rfTarget.structType;
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
