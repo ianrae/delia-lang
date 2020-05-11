@@ -21,6 +21,8 @@ import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.PrimaryKey;
+import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
@@ -246,11 +248,17 @@ public class ResultSetToDValConverter extends ServiceBase {
 			dval = readStructDValue(rs, dtype, dbctx, rf, rsstuff);
 			list.add(dval);
 			if (rf != null) {
+				//add column indexes
+				int j = 1;
+				for(RenderedField rff: rfList) {
+					rff.columnIndex = j++;;
+				}
+				
 				//look for other sub-objects
 				for(int k = rsstuff.numColumnsRead; k < rfList.size(); k++) {
 					RenderedField rff =  rfList.get(k);
 					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
-						dval = readStructDValueUsingIndex(rs, dbctx, rf, k + 1);
+						dval = readStructDValueUsingIndex(rs, dbctx, rff, rfList);
 						list.add(dval);
 					}
 				}
@@ -260,26 +268,29 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return list;
 	}
 	
-	private DValue readStructDValueUsingIndex(ResultSet rs, DBAccessContext dbctx, RenderedField rf, int columnIndex) throws SQLException {
-		DStructType dtype = rf.structType;
+	private DValue readStructDValueUsingIndex(ResultSet rs, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
+		DStructType dtype = rfTarget.structType;
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 
-		for(TypePair pair: dtype.getAllFields()) {
-			if (pair.type.isStructShape()) {
-				//FK only goes in child so it may not be here.
-				//However if .fks() was used then it is
-				String strValue = rs.getString(columnIndex++);
-				if (rs.wasNull()) {
-					structBuilder.addField(pair.name, null);
+		for(RenderedField rff: rfList) {
+			if (rff.structType == rfTarget.structType) {
+				if (rff.pair.type.isStructShape()) {
+					//FK only goes in child so it may not be here.
+					//However if .fks() was used then it is
+					String strValue = rs.getString(rff.columnIndex);
+					if (rs.wasNull()) {
+						structBuilder.addField(rff.pair.name, null);
+					} else {
+						DValue inner = createRelation(dtype, rff.pair, strValue, dbctx, rff);
+						structBuilder.addField(rff.pair.name, inner);
+					}
 				} else {
-					DValue inner = createRelation(dtype, pair, strValue, dbctx, rf);
-					structBuilder.addField(pair.name, inner);
+					DValue inner = valueHelper.readFieldByColumnIndex(rff.pair, rs, rff.columnIndex, dbctx);
+					structBuilder.addField(rff.pair.name, inner);
 				}
-			} else {
-				DValue inner = valueHelper.readFieldByColumnIndex(pair, rs, columnIndex++, dbctx);
-				structBuilder.addField(pair.name, inner);
 			}
 		}
+		
 		boolean b = structBuilder.finish();
 		if (! b) {
 			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
@@ -334,7 +345,13 @@ public class ResultSetToDValConverter extends ServiceBase {
 		ScalarValueBuilder xbuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 		DValue keyVal;
 		if (rf != null) {
-			keyVal = dvalConverter.buildFromObject(s, rf.pair.type.getShape(), xbuilder);
+			Shape shape = rf.pair.type.getShape();
+			if (rf.pair.type.isStructShape()) {
+				PrimaryKey pk = ((DStructType)rf.pair.type).getPrimaryKey();
+				shape = pk.getKey().type.getShape();
+			}
+			
+			keyVal = dvalConverter.buildFromObject(s, shape, xbuilder);
 		} else {
 			keyVal = xbuilder.buildInt(s);
 		}

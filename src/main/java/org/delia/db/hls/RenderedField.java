@@ -8,4 +8,6 @@ public class RenderedField {
 	public TypePair pair;
 	public boolean isAssocField;
 	public DStructType structType;
+	
+	public int columnIndex; //used when reading resultset
 }
