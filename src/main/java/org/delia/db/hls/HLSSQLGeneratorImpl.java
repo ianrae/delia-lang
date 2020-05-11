@@ -15,11 +15,13 @@ import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
+import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
@@ -63,7 +65,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				SUBElement subEl = new SUBElement();
 				subEl.allFKs = true;
 				hlspan1.subEl = subEl;
-//				hlspan1.doubleFlip = true;
 				//1 - Address, 2 - Customer
 				
 				String sql = processOneStatement(hlspan1, false);
@@ -73,7 +74,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				SUBElement subEl = new SUBElement();
 				subEl.allFKs = true;
 				hlspan1.subEl = subEl;
-//				hlspan1.doubleFlip = true;
 				//1 - Address, 2 - Customer
 				
 				String sql = processOneStatement(hlspan1, false);
@@ -84,16 +84,30 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
 				
-				String assocTblName = assocTblMgr.getTableFor(hlspan1.fromType, hlspan2.fromType);
-				String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
-				String fff = assocTblMgr.getAssocRightField(hlspan1.fromType, hlspan2.fromType);
-				String s3 = String.format("%s.%s", newAlias, fff);
-				
-				String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
-				String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
-				String target = String.format("%s.%s", alias2, pkField);
-				s2 = s2.replace(target, s3);		
-				return sql + " " + s2;
+				TypePair relPair = hlspan1.rEl.rfieldPair;
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan2.fromType, relPair);
+				switch(relinfo.cardinality) {
+				case ONE_TO_ONE:
+				case ONE_TO_MANY:
+				{
+					s2 = StringUtils.substringAfter(s2, "WHERE ");
+					sql = String.format("%s AND %s", sql, s2);
+					return sql;
+				}
+				case MANY_TO_MANY:
+				{
+					String assocTblName = assocTblMgr.getTableFor(hlspan1.fromType, hlspan2.fromType);
+					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
+					String fff = assocTblMgr.getAssocRightField(hlspan1.fromType, hlspan2.fromType);
+					String s3 = String.format("%s.%s", newAlias, fff);
+					
+					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
+					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+					String target = String.format("%s.%s", alias2, pkField);
+					s2 = s2.replace(target, s3);		
+					return sql + " " + s2;
+				}
+				}
 			}
 		} 
 		//need to handle this at a higher level

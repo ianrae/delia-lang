@@ -24,7 +24,6 @@ public class HLSQuerySpan implements HLSElement {
 	
 	//fields added during sql generation
 	public List<DValue> paramL = new ArrayList<>(); //for prepared statement
-//	public boolean doubleFlip = false;
 	public QueryDetails details;
 	public String finalWhereSql;
 	public List<RenderedField> renderedFieldL = new ArrayList<>();
