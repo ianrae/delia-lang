@@ -288,16 +288,15 @@ public class H2BDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		
 //		runR1600File("t0-fetch.txt", 3);
-//		runR500File("t0-relation-one-to-many.txt", 9);
-//		runR1600File("t0-fetch.txt", 3);
-		runR1600File("t0-fetch-field.txt", 6);
+//		runR1600File("t0-fetch-field.txt", 6);
+		runR950File("t0-crud-assoc-insert.txt", 6);
 
 	}
 	

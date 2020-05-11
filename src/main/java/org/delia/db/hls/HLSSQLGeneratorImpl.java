@@ -90,8 +90,14 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				case ONE_TO_ONE:
 				case ONE_TO_MANY:
 				{
+					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
 					s2 = StringUtils.substringAfter(s2, "WHERE ");
-					sql = String.format("%s AND %s", sql, s2);
+					String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
+					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+					
+					sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2, pkField);
+					
 					return sql;
 				}
 				case MANY_TO_MANY:
