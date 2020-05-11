@@ -161,7 +161,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx);
+			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx, null);
 			qresp.ok = true;
 		}
 		return qresp;

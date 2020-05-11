@@ -164,7 +164,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx);
+			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx, null);
 			qresp.ok = true;
 		}
 		return qresp;
@@ -473,7 +473,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		} else {
 			String typeName = hls.querySpec.queryExp.getTypeName();
 			DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx);
+			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx, hls);
 			qresp.ok = true;
 		}
 		return qresp;

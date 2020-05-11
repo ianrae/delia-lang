@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.hls.RenderedField;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.error.DeliaError;
 import org.delia.runner.ValueException;
@@ -60,10 +62,10 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return null;
 	}
 
-	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
+	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLSQueryStatement hls) {
 		List<DValue> list = null;
 		try {
-			list = doBuildDValueList(rs, dtype, dbctx);
+			list = doBuildDValueList(rs, dtype, dbctx, hls);
 			if (details.mergeRows) {
 				if (details.isManyToMany) {
 					list = mergeRowsManyToMany(list, dtype, details, dbctx);
@@ -222,10 +224,14 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 	}
 
-	private List<DValue> doBuildDValueList(ResultSet rs, DStructType dtype, DBAccessContext dbctx) throws Exception {
+	private List<DValue> doBuildDValueList(ResultSet rs, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
 		List<DValue> list = new ArrayList<>();
 
+		int index = 0;
 		while(rs.next()) {
+			RenderedField rf = hls.getMainHLSSpan().renderedFieldL.get(index);
+			log.log("rf: %s", rf.field);
+			
 			StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 			for(TypePair pair: dtype.getAllFields()) {
 //				//key goes in child only
@@ -254,6 +260,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 			}
 			DValue dval = structBuilder.getDValue();
 			list.add(dval);
+			index++;
 		}
 
 		return list;
