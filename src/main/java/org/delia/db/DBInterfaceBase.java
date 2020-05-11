@@ -69,6 +69,7 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		this.factorySvc = factorySvc;
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();
+		this.resultSetConverter.init(factorySvc);
 	}
 
 	/**

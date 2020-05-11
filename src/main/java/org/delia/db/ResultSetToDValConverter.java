@@ -11,7 +11,9 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.RenderedField;
+import org.delia.db.hls.RenderedFieldHelper;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.runner.ValueException;
 import org.delia.type.BuiltInTypes;
@@ -32,6 +34,7 @@ import org.delia.valuebuilder.StructValueBuilder;
  */
 public class ResultSetToDValConverter extends ServiceBase {
 	private ValueHelper valueHelper;
+	private DValueConverterService dvalConverter;
 
 	public ResultSetToDValConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
 		super(factorySvc);
@@ -42,6 +45,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		this.factorySvc = factorySvc;
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();
+		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 
 	/**
@@ -227,11 +231,15 @@ public class ResultSetToDValConverter extends ServiceBase {
 	private List<DValue> doBuildDValueList(ResultSet rs, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
 		List<DValue> list = new ArrayList<>();
 
+		List<RenderedField> rfList = null;
+		if (hls != null) {
+			RenderedFieldHelper.logRenderedFieldList(hls, log);
+			rfList = hls.getRenderedFields();
+		}
+		
 		int index = 0;
 		while(rs.next()) {
-			RenderedField rf = hls.getMainHLSSpan().renderedFieldL.get(index);
-			log.log("rf: %s", rf.field);
-			
+			RenderedField rf = rfList == null ? null : rfList.get(index++);
 			StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 			for(TypePair pair: dtype.getAllFields()) {
 //				//key goes in child only
@@ -243,7 +251,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 					//FK only goes in child so it may not be here.
 					//However if .fks() was used then it is
 					if (ResultSetHelper.hasColumn(rs, pair.name)) {
-						DValue inner = createRelation(dtype, pair, rs, dbctx);
+						DValue inner = createRelation(dtype, pair, rs, dbctx, rf);
 						structBuilder.addField(pair.name, inner);
 					}
 				} else {
@@ -260,23 +268,26 @@ public class ResultSetToDValConverter extends ServiceBase {
 			}
 			DValue dval = structBuilder.getDValue();
 			list.add(dval);
-			index++;
 		}
 
 		return list;
 	}
 	
-	private DValue createRelation(DStructType structType, TypePair targetPair, ResultSet rs, DBAccessContext dbctx) throws SQLException {
+	private DValue createRelation(DStructType structType, TypePair targetPair, ResultSet rs, DBAccessContext dbctx, RenderedField rf) throws SQLException {
 		//get as string and let builder convert
 		String s = rs.getString(targetPair.name);
 		if (rs.wasNull()) {
 			return null;
 		}
+		
 		ScalarValueBuilder xbuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
-		//			RelationInfo info = DRuleHelper.findMatchingRuleInfo(structType, targetPair);
-		//			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(targetPair.type);
-		DValue keyVal = xbuilder.buildInt(s);
-
+		DValue keyVal;
+		if (rf != null) {
+			keyVal = dvalConverter.buildFromObject(s, rf.pair.type.getShape(), xbuilder);
+		} else {
+			keyVal = xbuilder.buildInt(s);
+		}
+		
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
 		String typeName = targetPair.type.getName();
 		RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, dbctx.registry);
