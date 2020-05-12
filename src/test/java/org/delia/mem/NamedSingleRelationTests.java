@@ -37,7 +37,7 @@ public class NamedSingleRelationTests extends TopoTestBase {
 	public void test2UnNamed() {
 		try {
 			createCustomerTypeWithRelations(null, null);
-			this.execStatement("insert Customer {id:3, wid:44}");
+			this.execStatement("insert Customer {wid:44}");
 		} catch (DeliaException e) {
 			assertEquals("ambiguous-relation", e.getLastError().getId());
 		}
@@ -47,7 +47,7 @@ public class NamedSingleRelationTests extends TopoTestBase {
 	public void testBadName() {
 		try {
 			createCustomerTypeWithRelations(null,  "x");
-			this.execStatement("insert Customer {id:3, wid:44}");
+			this.execStatement("insert Customer {wid:44}");
 		} catch (DeliaException e) {
 			assertEquals("ambiguous-relation", e.getLastError().getId());
 		}
@@ -69,7 +69,7 @@ public class NamedSingleRelationTests extends TopoTestBase {
 	
 	@Test
 	public void testUnknown() {
-		ensureErrorId("ambiguous-relation");
+		ensureErrorId("named-relation-error");
 		try {
 			createCustomerTypeWithRelations("addr1", "x");
 		} catch (DeliaException e) {
