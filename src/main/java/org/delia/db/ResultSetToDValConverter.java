@@ -38,6 +38,8 @@ import org.delia.valuebuilder.StructValueBuilder;
  *
  */
 public class ResultSetToDValConverter extends ServiceBase {
+	public static boolean logResultSetDetails = false;
+	
 	static class ColumnReadInfo {
 		public int numColumnsRead;
 	}
@@ -76,9 +78,10 @@ public class ResultSetToDValConverter extends ServiceBase {
 	}
 
 	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLSQueryStatement hls) {
+		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
 		List<DValue> list = null;
 		try {
-			list = doBuildDValueList(rs, dtype, dbctx, hls);
+			list = doBuildDValueList(rsw, dtype, dbctx, hls);
 			if (details.mergeRows) {
 				if (details.isManyToMany) {
 					list = mergeRowsManyToMany(list, dtype, details, dbctx);
@@ -239,7 +242,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 	}
 
-	private List<DValue> doBuildDValueList(ResultSet rs, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
+	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
 		List<DValue> list = new ArrayList<>();
 
 		List<RenderedField> rfList = null;
@@ -249,11 +252,11 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 		
 		RenderedField rf = CollectionUtils.isEmpty(rfList) ? null : rfList.get(0);
-		while(rs.next()) {  //get row
+		while(rsw.next()) {  //get row
 			
 			//first columns are the main object
 			ColumnReadInfo columnReadInfo = new ColumnReadInfo();
-			DValue dval = readStructDValue(rs, dtype, dbctx, rf, columnReadInfo);
+			DValue dval = readStructDValue(rsw, dtype, dbctx, rf, columnReadInfo);
 			list.add(dval);
 			
 			//now read sub-objects (if are any)
@@ -268,7 +271,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 				for(int k = columnReadInfo.numColumnsRead; k < rfList.size(); k++) {
 					RenderedField rff =  rfList.get(k);
 					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
-						DValue subDVal= readStructDValueUsingIndex(rs, dbctx, rff, rfList);
+						DValue subDVal= readStructDValueUsingIndex(rsw, dbctx, rff, rfList);
 						if (subDVal != null) {
 							addAsSubOjbect(dval, subDVal, rff, rfList);
 						}
@@ -302,7 +305,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return StringUtils.substringBefore(field, ".");
 	}
 
-	private DValue readStructDValueUsingIndex(ResultSet rs, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
+	private DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
 		DStructType dtype = rfTarget.structType;
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 		PrimaryKey pk = dtype.getPrimaryKey();
@@ -312,15 +315,15 @@ public class ResultSetToDValConverter extends ServiceBase {
 				if (rff.pair.type.isStructShape()) {
 					//FK only goes in child so it may not be here.
 					//However if .fks() was used then it is
-					String strValue = rs.getString(rff.columnIndex);
-					if (rs.wasNull()) {
+					String strValue = rsw.getString(rff.columnIndex);
+					if (strValue == null) {
 						structBuilder.addField(rff.pair.name, null);
 					} else {
 						DValue inner = createRelation(dtype, rff.pair, strValue, dbctx, rff);
 						structBuilder.addField(rff.pair.name, inner);
 					}
 				} else {
-					DValue inner = valueHelper.readFieldByColumnIndex(rff.pair, rs, rff.columnIndex, dbctx);
+					DValue inner = rsw.readFieldByColumnIndex(rff.pair, rff.columnIndex, dbctx);
 					if (inner == null && rff.pair.name.equals(pk.getFieldName())) {
 						//is optional relation and is null
 						return null;
@@ -340,17 +343,17 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return dval;
 	}
 	
-	private DValue readStructDValue(ResultSet rs, DStructType dtype, DBAccessContext dbctx, RenderedField rf, ColumnReadInfo rsstuff) throws SQLException {
+	private DValue readStructDValue(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, RenderedField rf, ColumnReadInfo rsstuff) throws SQLException {
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 		for(TypePair pair: dtype.getAllFields()) {
 			
 			if (pair.type.isStructShape()) {
 				//FK only goes in child so it may not be here.
 				//However if .fks() was used then it is
-				if (ResultSetHelper.hasColumn(rs, pair.name)) {
+				if (rsw.hasColumn(pair.name)) {
 					rsstuff.numColumnsRead++;
-					String strValue = rs.getString(pair.name);
-					if (rs.wasNull()) {
+					String strValue = rsw.getString(pair.name);
+					if (strValue == null) {
 						structBuilder.addField(pair.name, null);
 					} else {
 						DValue inner = createRelation(dtype, pair, strValue, dbctx, rf);
@@ -358,7 +361,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 					}
 				}
 			} else {
-				DValue inner = readField(pair, rs, dbctx);
+				DValue inner = readField(pair, rsw, dbctx);
 				structBuilder.addField(pair.name, inner);
 				rsstuff.numColumnsRead++;
 			}
@@ -411,7 +414,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 	}
 
-	private DValue readField(TypePair pair, ResultSet rs, DBAccessContext dbctx) throws SQLException {
-		return valueHelper.readField(pair, rs, dbctx);
+	private DValue readField(TypePair pair, ResultSetWrapper rsw, DBAccessContext dbctx) throws SQLException {
+		return rsw.readField(pair, dbctx);
 	}
 }

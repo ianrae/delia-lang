@@ -4,6 +4,7 @@ import org.delia.bdd.core.BDDTester2;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.ResultSetToDValConverter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -293,9 +294,10 @@ public class H2BDDTests extends NewBDDBase {
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
+		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-		
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+		runR1000File("t0-upsert-mm-id.txt", 4);
+
 	}
 	
 	//---
