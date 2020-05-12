@@ -29,4 +29,5 @@ public interface FactoryService {
 	QueryBuilderService getQueryBuilderService();
 	SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
+	int getNextGeneratedRuleId();
 }

@@ -29,13 +29,15 @@ public class RelationManyRule extends DRuleBase {
 	private DStructType owningType;
 	private DTypeRegistry registry;
 	public RelationInfo relInfo;
+	private String relationName; //either user-defined or delia assigns a name
 
 	public RelationManyRule(RuleGuard guard, RuleOperand oper1, 
-			DStructType owningType, DTypeRegistry registry) {
+			DStructType owningType, DTypeRegistry registry, String relationName) {
 		super("relationMany", guard);
 		this.oper1 = oper1;
 		this.owningType = owningType;
 		this.registry = registry;
+		this.relationName = relationName;
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
@@ -203,5 +205,8 @@ public class RelationManyRule extends DRuleBase {
 		if (relInfo != null) {
 			relInfo.performTypeReplacement(spec);
 		}
+	}
+	public String getRelationName() {
+		return relationName;
 	}
 }

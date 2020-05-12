@@ -27,7 +27,6 @@ public class TypeRunner extends ServiceBase {
 		this.registry = registry;
 	}
 
-
 	public void executeStatements(List<Exp> extL, List<DeliaError> allErrors, boolean runRulePostProcessor) {
 		for(Exp exp: extL) {
 			ResultValue res = executeStatement(exp);

@@ -28,14 +28,16 @@ public class RelationOneRule extends DRuleBase {
 	private DTypeRegistry registry;
 	private boolean isParent;
 	public RelationInfo relInfo;
+	private String relationName; //either user-defined or delia assigns a name
 
 	public RelationOneRule(RuleGuard guard, RuleOperand oper1, 
-			DStructType owningType, DTypeRegistry registry, boolean isParent) {
+			DStructType owningType, DTypeRegistry registry, boolean isParent, String relationName) {
 		super("relationOne", guard);
 		this.oper1 = oper1;
 		this.owningType = owningType;
 		this.registry = registry;
 		this.isParent = isParent;
+		this.relationName = relationName;
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
@@ -219,5 +221,8 @@ public class RelationOneRule extends DRuleBase {
 		if (relInfo != null) {
 			relInfo.performTypeReplacement(spec);
 		}
+	}
+	public String getRelationName() {
+		return relationName;
 	}
 }

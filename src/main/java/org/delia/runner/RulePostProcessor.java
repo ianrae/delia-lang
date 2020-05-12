@@ -104,11 +104,11 @@ public class RulePostProcessor extends ServiceBase {
 				if (rule instanceof RelationOneRule) {
 					RelationOneRule rr = (RelationOneRule) rule;
 					RelationInfo info = rr.relInfo;
-					info.otherSide = DRuleHelper.findOtherSideOne(info.farType, info.nearType);
+					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType);
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
-					info.otherSide = DRuleHelper.findOtherSideOne(info.farType, info.nearType);
+					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType);
 				}
 			}
 		}
@@ -116,6 +116,33 @@ public class RulePostProcessor extends ServiceBase {
 	
 	
 	
+	private RelationInfo findOtherSide(DRule rrSrc, String relationName, DStructType farType, DStructType nearType) {
+		for(DRule rule: farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (rr.getRelationName().equals(relationName)) {
+					return rr.relInfo;
+				}
+
+				//otherwise find by field type 
+				if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
+					return rr.relInfo;
+				}
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (rr.getRelationName().equals(relationName)) {
+					return rr.relInfo;			
+				}
+					
+				//otherwise find by field type 
+				if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
+					return rr.relInfo;
+				}
+			}
+		}
+		return null;
+	}
+
 	private void setParentFlagsIfNeeded(DTypeRegistry registry) {
 		for(String typeName: registry.getAll()) {
 			DType dtype = registry.getType(typeName);
