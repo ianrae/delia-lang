@@ -90,15 +90,22 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				case ONE_TO_ONE:
 				case ONE_TO_MANY:
 				{
-					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
-					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
-					s2 = StringUtils.substringAfter(s2, "WHERE ");
-					String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
-					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
-					
-					sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2, pkField);
-					
-					return sql;
+					if (isQueryPKOnly(hlspan1)) {
+						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
+						RelationInfo relinfo1 = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						sql = String.format("%s WHERE %s.%s=?", sql, alias, relinfo1.fieldName);
+						return sql;
+					} else {
+						RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
+						s2 = StringUtils.substringAfter(s2, "WHERE ");
+						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
+						String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+						
+						sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2, pkField);
+						
+						return sql;
+					}
 				}
 				case MANY_TO_MANY:
 				{
@@ -121,6 +128,19 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return null; //not supported
 	}
 	
+	private boolean isQueryPKOnly(HLSQuerySpan hlspan1) {
+		if (hlspan1.fEl == null) {
+			return false;
+		}
+		
+		PrimaryKey pk = hlspan1.fromType.getPrimaryKey();
+		if (pk != null && pk.getFieldName().equals(hlspan1.fEl.fieldPair.name)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
 		if (hlspan.fromType != null) {
