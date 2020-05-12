@@ -309,8 +309,8 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Before
 	public void init() {
-//		this.disableAllSlowTests = true;
 		disableAllSlowTestsIfNeeded();
+		BDDTester2.useHLS = true;
 	}
 	@After
 	public void shutdown() {
