@@ -171,7 +171,7 @@ public class RulePostProcessor extends ServiceBase {
 			DeliaError err = new DeliaError("ambiguous-relation", msg);
 			allErrors.add(err);
 		}
-		return relL.get(0);
+		return relL.isEmpty() ? null : relL.get(0);
 	}
 
 	private void setParentFlagsIfNeeded(DTypeRegistry registry) {
