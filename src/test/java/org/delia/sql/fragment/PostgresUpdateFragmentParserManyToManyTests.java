@@ -17,6 +17,7 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -31,6 +32,7 @@ import org.delia.runner.ConversionResult;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -401,6 +403,10 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 
 	@Before
 	public void init() {
+	}
+	@After
+	public void shutdown() {
+		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
 	private String buildSrcManyToMany() {

@@ -19,6 +19,7 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -437,6 +438,10 @@ public class AssocCrudTests extends FragmentParserTestBase {
 
 	@Before
 	public void init() {
+	}
+	@After
+	public void shutdown() {
+		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 	
 

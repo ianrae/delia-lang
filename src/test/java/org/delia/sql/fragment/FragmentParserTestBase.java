@@ -24,7 +24,6 @@ import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
-import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatementGroup;

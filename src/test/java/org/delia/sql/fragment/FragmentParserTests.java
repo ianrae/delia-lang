@@ -25,6 +25,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -38,6 +39,7 @@ import org.delia.runner.RunnerImpl;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -215,6 +217,10 @@ public class FragmentParserTests extends NewBDDBase {
 
 	@Before
 	public void init() {
+	}
+	@After
+	public void shutdown() {
+		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
 	private DeliaDao createDao() {
