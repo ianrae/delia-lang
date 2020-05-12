@@ -297,10 +297,7 @@ public class AllBDDTests extends NewBDDBase {
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-//		runR1550File("t0-queryfn-oneone-childa.txt", 7);
-//		runR1500File("t0-queryfn-max-bool.txt", 4);
-		runR1500File("t0-queryfn-min-bool.txt", 4);
-//		runR1500File("t0-queryfn-min-date.txt", 4);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 
 	}
 	

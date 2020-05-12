@@ -18,7 +18,6 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
-import org.delia.relation.RelationInfo;
 import org.delia.runner.ValueException;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;
@@ -28,7 +27,6 @@ import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
@@ -191,7 +189,9 @@ public class ResultSetToDValConverter extends ServiceBase {
 					DValue inner = subVal.asStruct().getField(details.mergeOnField);
 					if (inner != null) {
 						DRelation drel = inner.asRelation();
-						toMergeL.addAll(drel.getMultipleKeys());
+						if (drel.haveFetched()) {
+							toMergeL.addAll(drel.getFetchedItems());
+						}
 					}
 				}
 				
@@ -213,7 +213,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 						}
 					}
 					DRelation drel2 = inner2.asRelation();
-					drel2.getMultipleKeys().addAll(toMergeL);
+					DRelationHelper.addToFetchedItems(drel2, toMergeL);
 					list.add(dval);
 				}
 			}

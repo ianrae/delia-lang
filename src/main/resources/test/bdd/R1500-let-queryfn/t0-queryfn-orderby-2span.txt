@@ -16,7 +16,7 @@ thenType: struct
 
 ---
 title: 1 orderby
-#TODO: fix. fetch should be retrieving all of Address not just pk
+#TODO: fix. should sub-obj have fks filled in? addr.cust?
 given:
 when:
   let x = Customer[true].fetch('addr').orderBy('x', desc)
@@ -35,10 +35,15 @@ value:a:Customer {
 value:a:Customer {
  vid:56
  vx:11
- vaddr:{[101,102]}
+ vaddr:{101:
    {
    vid:101
    vy:21
+   vcust:null
+  }
+   {
+   vid:102
+   vy:22
    vcust:null
   }
 }
@@ -46,15 +51,24 @@ value:a:Customer {
 value:a:Customer {
  vid:55
  vx:10
- vaddr:{[100,101,102]}
+ vaddr:{100:
    {
    vid:100
    vy:20
    vcust:null
   }
+   {
+   vid:101
+   vy:21
+   vcust:null
+  }
+   {
+   vid:102
+   vy:22
+   vcust:null
+  }
 }
 }
-
 ---
 SKIP: 2 orderby
 #db-multiple-spans-not-supported

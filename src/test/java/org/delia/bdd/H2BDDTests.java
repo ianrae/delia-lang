@@ -1,11 +1,9 @@
 package org.delia.bdd;
 
-import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTester2;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.log.LogLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -297,7 +295,7 @@ public class H2BDDTests extends NewBDDBase {
 		cleanTables = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-		runR1600File("t0-fetch-field.txt", 6);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---
