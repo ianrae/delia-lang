@@ -257,6 +257,14 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 		
 		RenderedField rf = CollectionUtils.isEmpty(rfList) ? null : rfList.get(0);
+		if (rf != null) {
+			//add column indexes
+			int j = 1;
+			for(RenderedField rff: rfList) {
+				rff.columnIndex = j++;;
+			}
+		}		
+		
 		while(rsw.next()) {  //get row
 			
 			//first columns are the main object
@@ -266,12 +274,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 			
 			//now read sub-objects (if are any)
 			if (rf != null) {
-				//add column indexes
-				int j = 1;
-				for(RenderedField rff: rfList) {
-					rff.columnIndex = j++;;
-				}
-				
 				//look for sub-objects to the right the main object
 				for(int k = columnReadInfo.numColumnsRead; k < rfList.size(); k++) {
 					RenderedField rff =  rfList.get(k);

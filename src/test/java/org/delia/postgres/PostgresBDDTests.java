@@ -5,6 +5,7 @@ import org.delia.bdd.core.BDDTester2;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.ResultSetToDValConverter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -289,13 +290,15 @@ public class PostgresBDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 0;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
-
+		ResultSetToDValConverter.logResultSetDetails = true;
+		
 //		runR900File("t0-update-mm-other-othertbl.txt", 2);
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+		runR1600File("t0-fetch.txt", 3);
 	}
 	
 	//---
