@@ -60,7 +60,7 @@ public class BDDTestRunner {
 		src += "\n";
 		src += buildFrom(test.whenL);
 		
-		BDDTester2 tester = new BDDTester2(retainedDBinterface, creator, test, test.cleanTables);
+		BDDTesterEx tester = new BDDTesterEx(retainedDBinterface, creator, test, test.cleanTables);
 		boolean pass = false;
 		
 		ThenValue thenVal = createThenValue(test); 

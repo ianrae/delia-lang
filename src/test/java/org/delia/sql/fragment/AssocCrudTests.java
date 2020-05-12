@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
-import org.delia.bdd.core.BDDTester2;
+import org.delia.bdd.core.BDDTesterEx;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;

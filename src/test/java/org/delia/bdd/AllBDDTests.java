@@ -1,6 +1,6 @@
 package org.delia.bdd;
 
-import org.delia.bdd.core.BDDTester2;
+import org.delia.bdd.core.BDDTesterEx;
 import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
 import org.junit.After;
@@ -294,10 +294,10 @@ public class AllBDDTests extends NewBDDBase {
 	public void test8Debug() {
 		testIndexToRun = 0;
 		enableAllFileCheck = false;
-		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-		runR1600File("t0-fetch.txt", 3);
+//		runR1600File("t0-fetch.txt", 3);
 
 	}
 	
@@ -306,13 +306,13 @@ public class AllBDDTests extends NewBDDBase {
 
 	@Before
 	public void init() {
-		BDDTester2.useHLS = true;
+		BDDTesterEx.useHLS = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
-		BDDTester2.disableSQLLoggingDuringSchemaMigration = true;
-		BDDTester2.useHLS = false;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTesterEx.useHLS = false;
 	}
 	
 	@Override

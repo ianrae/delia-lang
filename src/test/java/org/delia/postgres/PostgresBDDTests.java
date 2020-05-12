@@ -1,7 +1,7 @@
 package org.delia.postgres;
 
 import org.delia.bdd.NewBDDBase;
-import org.delia.bdd.core.BDDTester2;
+import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
@@ -316,13 +316,13 @@ public class PostgresBDDTests extends NewBDDBase {
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
-		BDDTester2.useHLS = true;
+		BDDTesterEx.useHLS = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
-		BDDTester2.disableSQLLoggingDuringSchemaMigration = true;
-		BDDTester2.useHLS = false;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTesterEx.useHLS = false;
 	}
 
 	@Override

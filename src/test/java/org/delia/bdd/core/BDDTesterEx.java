@@ -30,7 +30,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.valuebuilder.IntegerValueBuilder;
 
-public class BDDTester2 {
+public class BDDTesterEx {
 	private static class NumberChecker extends ValueCheckerBase {
 		@Override
 		public void chkShape(BDDResult bddres) {
@@ -60,7 +60,7 @@ public class BDDTester2 {
 
 	private BDDTest currentTest;
 
-	BDDTester2(DBInterface retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
+	BDDTesterEx(DBInterface retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
 		this.currentTest = test;
 		if (retainedDBInterface == null) {
 			dbInterface = creator.createForTest(); 
