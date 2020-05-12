@@ -18,6 +18,7 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
+import org.delia.relation.RelationInfo;
 import org.delia.runner.ValueException;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;
@@ -27,6 +28,7 @@ import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
@@ -376,17 +378,24 @@ public class ResultSetToDValConverter extends ServiceBase {
 		String s = strValue;
 		
 		ScalarValueBuilder xbuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
-		DValue keyVal;
-		if (rf != null) {
-			Shape shape = rf.pair.type.getShape();
+		Shape shape = null;
+		if (rf != null && rf.pair != null) {
+			shape = rf.pair.type.getShape();
 			if (rf.pair.type.isStructShape()) {
 				PrimaryKey pk = ((DStructType)rf.pair.type).getPrimaryKey();
 				shape = pk.getKey().type.getShape();
 			}
+		} else {
+			DStructType otherSideType = (DStructType) targetPair.type;
+			PrimaryKey pk = otherSideType.getPrimaryKey();
+			shape = pk.getKey().type.getShape();
+		}			
 			
+		DValue keyVal;
+		if (shape != null) {
 			keyVal = dvalConverter.buildFromObject(s, shape, xbuilder);
 		} else {
-			keyVal = xbuilder.buildInt(s);
+			keyVal = xbuilder.buildInt(s); //guess. TODO: fix
 		}
 		
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);

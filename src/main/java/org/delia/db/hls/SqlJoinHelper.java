@@ -172,7 +172,7 @@ public class SqlJoinHelper {
 				for(TypePair pair: hlspan.fromType.getAllFields()) {
 					if (pair.type.isStructShape()) {
 						RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
-						if (!relinfo.isParent) {
+						if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 							joinL.add(pair);
 						}
 					}
