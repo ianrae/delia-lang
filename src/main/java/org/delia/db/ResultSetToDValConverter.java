@@ -187,18 +187,20 @@ public class ResultSetToDValConverter extends ServiceBase {
 				list.add(dval);
 			} else {
 				alreadyHandledL.put(keyVal.getObject(), "");
-				List<DValue> toMergeL = new ArrayList<>();
+				List<DValue> toMergeFetchedL = new ArrayList<>();
+				List<DValue> toMergeKeyL = new ArrayList<>();
 				for(DValue subVal: subL) {
 					DValue inner = subVal.asStruct().getField(details.mergeOnField);
 					if (inner != null) {
 						DRelation drel = inner.asRelation();
 						if (drel.haveFetched()) {
-							toMergeL.addAll(drel.getFetchedItems());
+							toMergeFetchedL.addAll(drel.getFetchedItems());
 						}
+						toMergeKeyL.addAll(drel.getMultipleKeys());
 					}
 				}
 				
-				if (!toMergeL.isEmpty()) {
+				if (!toMergeFetchedL.isEmpty() || !toMergeKeyL.isEmpty()) {
 					//and add back into dval
 					DValue inner2 = dval.asStruct().getField(details.mergeOnField);
 					if (inner2 == null) {
@@ -216,7 +218,10 @@ public class ResultSetToDValConverter extends ServiceBase {
 						}
 					}
 					DRelation drel2 = inner2.asRelation();
-					DRelationHelper.addToFetchedItems(drel2, toMergeL);
+					drel2.getMultipleKeys().addAll(toMergeKeyL);
+					
+					//only add each key once
+					DRelationHelper.addToFetchedItems(drel2, toMergeFetchedL);
 					list.add(dval);
 				}
 			}

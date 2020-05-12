@@ -9,6 +9,9 @@ import org.delia.type.DValue;
 public class DRelationHelper {
 
 	public static void addToFetchedItems(DRelation drel, List<DValue> subObjL) {
+		if (subObjL.isEmpty()) {
+			return;
+		}
 		List<DValue> fetchedL = drel.haveFetched() ? drel.getFetchedItems() : new ArrayList<>();
 		fetchedL.addAll(subObjL);
 		drel.setFetchedItems(fetchedL);

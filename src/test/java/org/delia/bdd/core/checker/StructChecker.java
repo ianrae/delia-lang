@@ -48,8 +48,17 @@ public class StructChecker extends ValueCheckerBase {
 		int index = 0;
 		for (String actualLine : genL) {
 			if (index >= thenL.size()) {
-				String err = String.format("then text is too short: '%s'", actualLine);
+				String err = String.format("'then:' text is too short: '%s'", actualLine);
 				log.logError(err);
+				boolean once = true;
+				for(String x: genL) {
+					if (once) {
+						log.log("actual: %s", x);
+						once = false;
+					} else {
+						log.log("%s", x);
+					}
+				}
 				return false;
 			}
 			String s = thenL.get(index);

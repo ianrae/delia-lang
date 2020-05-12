@@ -187,7 +187,7 @@ public class H2BDDTests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -289,15 +289,17 @@ public class H2BDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
+//		testIndexToRun = 1;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-		runR1000File("t0-upsert-mm-id.txt", 4);
-
+//		runR1000File("t0-upsert-mm-id.txt", 4);
+//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR500File("t0-relation-many-to-many.txt", 11);
+		runR1550File("t0-queryfn-oneone-childa.txt", 6);
 	}
 	
 	//---

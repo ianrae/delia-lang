@@ -30,7 +30,7 @@ value:a:Customer {
  vwid:333
  vaddr:{[100,101]}
 }
-
+}
 ---
 title: update many-to-many
 thenType: int
