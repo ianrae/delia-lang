@@ -43,6 +43,7 @@ public class TypeParserTests {
 		chelper.parseTwo(src + "type Actor struct {relation addr Address one unique} end");
 		chelper.parseTwo(src + "type Actor struct {relation addr Address one optional} end");
 		chelper.parseTwo(src + "type Actor struct {relation addr Address one optional} end");
+		chelper.parseTwo(src + "type Actor struct {relation addr Address 'homeAddr' one optional} end");
 	}
 	@Test
 	public void testRelationMany() {
