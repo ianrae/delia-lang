@@ -21,6 +21,8 @@ public abstract class StatementFragmentBase implements SqlFragment {
 	public LimitFragment limitFrag = null;
 	public int paramStartIndex; //used with SqlStatementGroup
 	
+	public List<FieldFragment> hlsRemapList = new ArrayList<>();
+	
 	public TableFragment findByAlias(String alias) {
 		if (alias == null) {
 			return null;

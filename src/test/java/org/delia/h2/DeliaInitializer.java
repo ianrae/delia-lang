@@ -9,8 +9,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.h2.H2DBConnection;
-import org.delia.db.h2.H2DBInterface;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.schema.SchemaMigrator;

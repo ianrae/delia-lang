@@ -128,7 +128,7 @@ public class DeliaDao  {
 		return dbInterface;
 	}
 
-	public DeliaSession getMostRecentSess() {
+	public DeliaSession getMostRecentSession() {
 		return mostRecentSess;
 	}
 

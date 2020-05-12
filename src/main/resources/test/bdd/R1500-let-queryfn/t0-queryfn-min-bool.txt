@@ -1,6 +1,7 @@
 # queryfn tests
 
-FEATURE: queryfn-min-boolean TODO: implement this!
+FEATURE: queryfn-min-boolean 
+#TODO: drop support. postgress doesn't support min() of bool
 background:
   type Flight struct {id int unique, wid boolean optional }  end
 thenType: struct
@@ -8,18 +9,18 @@ thenType: struct
 ---
 SKIP: min
 given:
-  insert Flight {id: 55, wid: 4 }
-  insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 55, wid: true }
+  insert Flight {id: 56, wid: false }
 when:
   let x = Flight[true].wid.min()
 then:
-value:a:boolean:3.0
+value:a:boolean:false
 
 ---
 SKIP: min empty
 given:
-  insert Flight {id: 55, wid: 4 }
-  insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 55, wid: true }
+  insert Flight {id: 56, wid: false }
 when:
   let x = Flight[id=100].wid.min()
 then:
@@ -30,17 +31,17 @@ SKIP: null
 #we ignore null values
 given:
   insert Flight {id: 55 }
-  insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 56, wid: false }
 when:
   let x = Flight[true].wid.min()
 then:
-value:a:boolean:3.0
+value:a:boolean:false
 
 ---
 SKIP: bad field name
 given:
-  insert Flight {id: 55, wid: 4 }
-  insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 55, wid: true }
+  insert Flight {id: 56, wid: false }
 when:
   let x = Flight[true].zzz.min()
 then:

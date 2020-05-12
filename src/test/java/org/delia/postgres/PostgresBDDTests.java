@@ -1,10 +1,11 @@
 package org.delia.postgres;
 
 import org.delia.bdd.NewBDDBase;
-import org.delia.bdd.core.BDDTester2;
+import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.ResultSetToDValConverter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,7 +99,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Test
 	public void testR950() {
-		runR950File("t0-crud-assoc-insert.txt", 0);
+		runR950File("t0-crud-assoc-insert.txt", 6);
 	}
 	
 	@Test
@@ -150,7 +151,9 @@ public class PostgresBDDTests extends NewBDDBase {
 	@Test
 	public void testR1500() {
 		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-distinct.txt", 0);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+		runR1500File("t0-queryfn-distinct.txt", 3);
+		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 		runR1500File("t0-queryfn-flatten.txt", 0);
 		runR1500File("t0-queryfn-count.txt", 2);
 		runR1500File("t0-queryfn-exist.txt", 2);
@@ -165,7 +168,9 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-min-bool.txt", 0);
 		runR1500File("t0-queryfn-min-relation.txt", 0);
 		runR1500File("t0-queryfn-min-string.txt", 4);
-		
+		runR1500File("t0-queryfn-min-date.txt", 4);
+		runR1500File("t0-queryfn-max-date.txt", 4);
+
 		runR1500File("t0-queryfn-max.txt", 0);
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
@@ -183,7 +188,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//TODO runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -289,13 +294,17 @@ public class PostgresBDDTests extends NewBDDBase {
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
-
+		ResultSetToDValConverter.logResultSetDetails = true;
+		
 //		runR900File("t0-update-mm-other-othertbl.txt", 2);
-		runR1000File("t0-upsert-no-update.txt", 2);
-		runR1000File("t0-upsert-mm-id.txt", 4);
-		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
-		runR1000File("t0-upsert-mm-all.txt", 1);
-		runR1000File("t0-upsert-mm-other.txt", 1);
+//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR1600File("t0-fetch.txt", 3);
+//		runR1400File("t0-filterfn-date.txt", 12);
+//		runR1500File("t0-queryfn-exist.txt", 2);
+//		runR1500File("t0-queryfn-first.txt", 2);
+//		runR1500File("t0-queryfn-last.txt", 2);
+//		runR1500File("t0-queryfn-ith.txt", 4);
+		runR1500File("t0-queryfn-min-bool.txt", 0);
 	}
 	
 	//---
@@ -306,12 +315,14 @@ public class PostgresBDDTests extends NewBDDBase {
 	
 	@Before
 	public void init() {
-//		this.disableAllSlowTests = true;
 		disableAllSlowTestsIfNeeded();
+		BDDTesterEx.useHLS = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTesterEx.useHLS = false;
 	}
 
 	@Override

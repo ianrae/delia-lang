@@ -2,6 +2,9 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
@@ -96,6 +99,34 @@ public class DsonToDValueTests {
 		assertEquals(44, id);
 		String s = merged.asStruct().getField("firstName").asString();
 		assertEquals("bobby", s);
+		DRelation drel = dval.asStruct().getField("dept").asRelation();
+		assertEquals(44, drel.getForeignKey().asInt());
+	}
+	
+	@Test
+	public void testMergeSkip() {
+		String src = "insert Employee {id:44, firstName:'bob', dept:33 }";
+		InsertStatementExp exp = chkInsert(src, null);
+		
+		initConverter();
+		DValue dval = converter.convertOne("Employee", exp.dsonExp, null);
+		assertEquals(true, dval.getType().isStructShape());
+		assertEquals("Employee", dval.getType().getName());
+		
+		src = "update Employee {firstName:'bobby', dept:44 }";
+		UpdateStatementExp uexp = chelper.chkUpdate(src, null);
+		
+		DValue dvalPartial = converter.convertOnePartial("Employee", uexp.dsonExp);
+		assertEquals(true, dvalPartial.getType().isStructShape());
+		assertEquals("Employee", dvalPartial.getType().getName());
+		
+		Map<String,String> skipMap = new HashMap<>();
+		skipMap.put("firstName", "");
+		DValue merged = DValueHelper.mergeOne(dvalPartial, dval, skipMap);
+		int id = merged.asStruct().getField("id").asInt();
+		assertEquals(44, id);
+		String s = merged.asStruct().getField("firstName").asString();
+		assertEquals("bob", s);
 		DRelation drel = dval.asStruct().getField("dept").asRelation();
 		assertEquals(44, drel.getForeignKey().asInt());
 	}

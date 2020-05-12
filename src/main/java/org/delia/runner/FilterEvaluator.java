@@ -41,7 +41,7 @@ public class FilterEvaluator extends ServiceBase {
 			List<DValue> list = varEvaluator.lookupVar(varName);
 			if (list.isEmpty() || list.size() > 1) { //TODO later support 0 and > 1!!
 				String msg = String.format("var eval failed: %s", varName);
-				DeliaError err = et.add("varEval failed", "var eval failed: %s", msg);
+				DeliaError err = et.add("var-eval-failed", msg);
 				throw new DeliaException(err);
 			}
 			

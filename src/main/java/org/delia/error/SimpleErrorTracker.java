@@ -23,10 +23,7 @@ public class SimpleErrorTracker implements ErrorTracker {
 		return errL.isEmpty();
 	}
 	@Override
-	public void add(Object self, DeliaError err) {
-		if (self != null && err.getSourceClass() == null) {
-			err.setSourceClass(self.getClass());
-		}
+	public void add(DeliaError err) {
 		errL.add(err);
 
 		String s = err.toString();
@@ -34,22 +31,18 @@ public class SimpleErrorTracker implements ErrorTracker {
 		log.logError("%s: %s", errType, s);
 	}
 	@Override
-	public void add(DeliaError err) {
-		add(null, err);
+	public DeliaError addNoLog(DeliaError err) {
+		errL.add(err); //don't log the error
+		return err;
 	}
+	
 	@Override
 	public void clear() {
 		errL.clear();
 	}
 	@Override
-	public DeliaError add(Object self, String id, String msg) {
-		DeliaError err = new DeliaError(id, msg, null);
-		this.add(self, err);
-		return err;
-	}
-	@Override
 	public DeliaError add(String id, String msg) {
-		DeliaError err = new DeliaError(id, msg, null);
+		DeliaError err = new DeliaError(id, msg);
 		this.add(err);
 		return err;
 	}

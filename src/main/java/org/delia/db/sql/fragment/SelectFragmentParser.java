@@ -47,12 +47,31 @@ public class SelectFragmentParser extends FragmentParserBase {
 		}
 
 		if (selectFrag.fieldL.isEmpty()) {
-			FieldFragment fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+			FieldFragment fieldF = buildSpanFieldFieldFrag(structType, selectFrag); 
+			if (fieldF == null) {
+				fieldF = buildStarFieldFrag(structType, selectFrag); //new FieldFragment();
+			}
 			selectFrag.fieldL.add(fieldF);
 		}
 
 
 		return selectFrag;
+	}
+
+	private FieldFragment buildSpanFieldFieldFrag(DStructType structType, SelectStatementFragment selectFrag) {
+		if (spanHelper == null) {
+			return null;
+		}
+		
+		QueryFuncExp fieldExp = spanHelper.isTargetAField();
+		if (fieldExp != null) {
+			TypePair pair = DValueHelper.findField(structType, fieldExp.funcName);
+			if (pair != null) {
+				FieldFragment fieldF = FragmentHelper.buildFieldFrag(structType, selectFrag, pair);
+				return fieldF;
+			}
+		}
+		return null;
 	}
 
 	protected boolean needJoin(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag, QueryDetails details) {

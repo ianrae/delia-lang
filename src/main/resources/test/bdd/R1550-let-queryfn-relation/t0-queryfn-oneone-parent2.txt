@@ -1,5 +1,5 @@
 # let queryfn when relations
-# count, exist, min, max, first, last
+# count, exists, min, max, first, last
 FEATURE: one-to-one parent. test wid field (not id)
 background:
  configure loadFKs = true
@@ -30,13 +30,13 @@ then:
 value:a:int:33
 
 ---
-title: exist
+title: exists
 given:
 
   insert Customer {id: 55, wid:33 }
   insert Customer {id: 56, wid:34 }
 when:
-  let x = Customer[true].wid.exist()
+  let x = Customer[true].wid.exists()
 then:
 value:a:boolean:true
 

@@ -54,7 +54,7 @@ public class TypeBuilder extends ServiceBase {
 				String msg = String.format("can't find base type '%s' for type '%s'", typeStatementExp.baseTypeName, typeStatementExp.typeName);
 				FutureDeclError future = new FutureDeclError("uknown-base-type", msg);
 				future.baseTypeName = typeStatementExp.baseTypeName;
-				et.add(future);
+				et.addNoLog(future);
 //				return null;
 			}
 		}
@@ -150,7 +150,7 @@ public class TypeBuilder extends ServiceBase {
 				String msg = String.format("can't find base type '%s' for scalar type '%s'", typeStatementExp.baseTypeName, typeStatementExp.typeName);
 				FutureDeclError future = new FutureDeclError("uknown-scalar-base-type", msg);
 				future.baseTypeName = typeStatementExp.baseTypeName;
-				et.add(future);
+				et.addNoLog(future);
 				return null;
 			}
 		} else {
@@ -200,7 +200,7 @@ public class TypeBuilder extends ServiceBase {
 				String msg = String.format("can't find field type '%s'.", fieldExp.typeName);
 				FutureDeclError future = new FutureDeclError("uknown-field-type", msg);
 				future.baseTypeName = fieldExp.typeName;
-				et.add(future);
+				et.addNoLog(future);
 				return null;
 			}
 		}

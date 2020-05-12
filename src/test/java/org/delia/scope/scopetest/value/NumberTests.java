@@ -13,7 +13,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test1Scalar() {
 		createScalarType("number", "");
-		
+		beginSession();
+
 		//string
 		chkNumber(actualNumberVal.toString(), actualNumberVal);
 		chkNumber("114.0", 114.0);
@@ -36,7 +37,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRulePass() {
 		createScalarType("number", "< 10000");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//string
@@ -60,7 +62,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRuleFail() {
 		createScalarType("number", "< 10");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//primitive types - can't have rules
@@ -80,7 +83,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRuleFail2() {
 		createScalarType("number", "< 10.0");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//primitive types - can't have rules
@@ -101,7 +105,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("number", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldNumber("114.0", 114.0);
@@ -117,7 +122,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructLet() {
 		createStructType("number", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldNumber("114.0", 114.0);
@@ -131,7 +137,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("number", "field1 < 10");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -148,7 +155,8 @@ public class NumberTests extends TypeLayerTestBase {
 	@Test
 	public void test5LetScalar() {
 		createScalarType("number", "");
-		
+		beginSession();
+
 		//string
 		chkNumber("114.0", 114.0);
 		chkNumber("0.0", 0.0);
@@ -187,6 +195,8 @@ public class NumberTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -207,6 +217,8 @@ public class NumberTests extends TypeLayerTestBase {
 	public void test6Insert2() {
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		chkNumber(actualNumberVal.toString(), actualNumberVal);
 
 		//C
@@ -221,6 +233,8 @@ public class NumberTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -234,6 +248,8 @@ public class NumberTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -248,6 +264,8 @@ public class NumberTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -271,6 +289,8 @@ public class NumberTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("number", "");
 		createStructType("number", "");
+		beginSession();
+
 		chkNumber(actualNumberVal.toString(), actualNumberVal);
 
 		//C

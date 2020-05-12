@@ -7,11 +7,12 @@ thenType: struct
 
 ---
 title: last
+#need orderBy else the order is undefined
 given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight[true].last()
+  let x = Flight[true].orderBy('id').last()
 then:
 value:a:Flight {
  vid:56

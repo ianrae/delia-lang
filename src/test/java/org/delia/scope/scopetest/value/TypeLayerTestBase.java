@@ -7,9 +7,7 @@ import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.error.DeliaError;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.ValueException;
 import org.delia.scope.scopetest.ScopeTestBase;
-import org.delia.type.BuiltInTypes;
 import org.delia.type.DValue;
 
 public class TypeLayerTestBase extends ScopeTestBase {
@@ -38,25 +36,34 @@ public class TypeLayerTestBase extends ScopeTestBase {
 		DBHelper.createTable(dbInterface, "C2"); //!! fake schema
 	}
 
+	String pendingSrc = "";
+	
 	protected void createScalarType(String type, String rule) {
 		String src = String.format("type X %s %s end", type, rule);
-		ResultValue res = execTypeStatement(src);
-		chkResOK(res);
+		pendingSrc += " " + src;
+//		ResultValue res = execTypeStatement(src);
+//		chkResOK(res);
 		chelper = helper.createCompilerHelper();
 		src = String.format(" type X2 X end", type);
-		res = execTypeStatement(src);
-		chkResOK(res);
+		pendingSrc += " " + src;
+		
+//		res = execTypeStatement(src);
+//		chkResOK(res);
 	}
 	protected void createStructType(String type, String rule) {
 		String sid = addIdFlag ? String.format(" id int primaryKey") : "";
 		String src = String.format("type C struct { %s field1 %s } %s end", sid, type, rule);
-		ResultValue res = execTypeStatement(src);
-		chkResOK(res);
+		//		ResultValue res = execTypeStatement(src);
+//		chkResOK(res);
 		chelper = helper.createCompilerHelper();
 //		src = String.format("type C2 C { field2 %s } %s end", type, rule);
-		src = String.format("type C2 C { } end");
-		res = execTypeStatement(src);
-		chkResOK(res);
+		src += String.format(" type C2 C { } end");
+		pendingSrc += " " + src;
+//		ResultValue res = execTypeStatement(src);
+//		chkResOK(res);
+	}
+	protected void beginSession() {
+		this.runner.begin(pendingSrc);
 	}
 	protected QueryResponse insertAndQuery(String typeName, String valStr, int expectedSize) {
 		String sid = addIdFlag ? String.format(" id:%d", nextId) : "";
@@ -208,7 +215,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 		}
 		String src = String.format("delete %s", typeName);
 		DeleteStatementExp exp = (DeleteStatementExp) chelper.parseOne(src);
-		ResultValue res = runner.executeOneStatement(exp);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 	}
 

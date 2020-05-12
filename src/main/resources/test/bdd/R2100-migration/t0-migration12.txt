@@ -10,7 +10,7 @@ thenType: struct
 title: migration12
 chainNextTest:true
 given:
- type Customer struct {id int unique serial, wid int, height int } end
+ type Customer struct {id int primaryKey serial, wid int, height int } end
 
 when:
   insert Customer { wid:33, height:44}
@@ -25,7 +25,7 @@ value:a:Customer {
 ---
 title: migration12.1 - alter field type
 given:
- type Customer struct {id int unique serial, wid int, height long } end
+ type Customer struct {id int primaryKey serial, wid int, height long } end
 
 when:
   insert Customer { wid:34, height:45}

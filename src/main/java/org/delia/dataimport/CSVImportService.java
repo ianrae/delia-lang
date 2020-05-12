@@ -9,10 +9,13 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.db.DBType;
+import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+
+import sun.rmi.runtime.Log;
 
 public class CSVImportService  {
 	
@@ -20,6 +23,7 @@ public class CSVImportService  {
 		public int numRowsToImport = Integer.MAX_VALUE;
 		public boolean logDetails = false;
 		public boolean useInsertStatement;
+		public LogLevel logLevel;
 	}
 
 	private DeliaSession session;
@@ -51,6 +55,9 @@ public class CSVImportService  {
 				String inputFunctionName, Options options) {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
+		if (options.logLevel != null) {
+			delia.getLog().setLevel(options.logLevel);
+		}
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
@@ -134,5 +141,9 @@ public class CSVImportService  {
 		importSvc.setMetricsObserver(observer);
 		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupL, ImportLevel.FOUR);
 		return resultL;
+	}
+
+	public DeliaSession getSession() {
+		return session;
 	}
 }

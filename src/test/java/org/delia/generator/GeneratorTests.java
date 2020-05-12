@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.Runner;
 import org.delia.scope.scopetest.ScopeTestBase;
@@ -180,7 +181,7 @@ public class GeneratorTests extends ScopeTestBase {
 		String src = String.format("type Flight struct {field1 %s} end", type);
 		execTypeStatement(src);
 	}
-	private DValue insertAndQueryEx(Runner runner, String valStr) {
+	private DValue insertAndQueryEx(NewLegacyRunner runner, String valStr) {
 		QueryResponse qresp= insertAndQuery(runner, valStr);
 		return getOneVar(qresp, false);
 	}
@@ -190,7 +191,7 @@ public class GeneratorTests extends ScopeTestBase {
 		return dval;
 	}
 	
-	private QueryResponse insertAndQuery(Runner runner, String valStr) {
+	private QueryResponse insertAndQuery(NewLegacyRunner runner, String valStr) {
 		String src = String.format("insert Flight {field1:%s}", valStr);
 		execInsertStatement(src);
 		
@@ -201,6 +202,7 @@ public class GeneratorTests extends ScopeTestBase {
 
 	private DValue createAndInsert(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
 		DValue dval = insertAndQueryEx(runner, valStr);
 		return dval;
 	}

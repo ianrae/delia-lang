@@ -107,11 +107,13 @@ public class FieldOptionalTests extends ScopeTestBase {
 
 	private DValue createAndInsert(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
 		DValue dval = insertAndQueryEx(valStr, false);
 		return dval;
 	}
 	private DValue createAndInsertNull(String type, String valStr) {
 		createFlightType(type);
+		baseBeginSession();
 		DValue dval = insertAndQueryEx(valStr, true);
 		return dval;
 	}

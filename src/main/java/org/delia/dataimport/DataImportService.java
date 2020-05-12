@@ -66,7 +66,7 @@ public class DataImportService extends ServiceBase {
 		inputFnSvc.getOptions().logDetails = logDetails;
 		inputFnSvc.getOptions().useInsertStatement = useInsertStatement;
 		initImportLevel(inputFnSvc, importLevel);
-		
+		log.log("---- import: %s ----", lineObjIter.getFileName());
 		ProgramSet progset = inputFnSvc.buildProgram(inputFnName, session);
 		if (progset == null) {
 			DeliaExceptionHelper.throwError("cant-find-user-fn", "Can't find input fn '%s'", inputFnName);

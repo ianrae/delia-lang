@@ -13,6 +13,7 @@ import org.delia.compiler.ast.ListExp;
 import org.delia.compiler.ast.NullExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueConverterService;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.sprig.SprigService;
@@ -34,6 +35,7 @@ public class DsonToDValueConverter extends ServiceBase {
 		private ScalarValueBuilder builder;
 		private SprigService sprigSvc;
 		private Map<String,String> assocCrudMap;
+		private DValueConverterService dvalConverter;
 		
 		public DsonToDValueConverter(FactoryService factorySvc, ErrorTracker localET, DTypeRegistry registry, VarEvaluator varEvaluator, SprigService sprigSvc) {
 			super(factorySvc);
@@ -41,6 +43,7 @@ public class DsonToDValueConverter extends ServiceBase {
 			this.varEvaluator = varEvaluator;
 			this.et = localET;
 			this.builder = new ScalarValueBuilder(factorySvc, registry);
+			this.dvalConverter = new DValueConverterService(factorySvc);
 			this.sprigSvc = sprigSvc;
 		}
 
@@ -182,19 +185,19 @@ public class DsonToDValueConverter extends ServiceBase {
 		}
 
 		private List<DValue> buildList(ListExp listExp, String typeName) {
-			//int only for now.
-			//TODO later, string, long,etc
 			List<DValue> resultL = new ArrayList<>();
 			
 			for(Exp exp: listExp.valueL) {
-				String s;
-				if (exp instanceof IdentExp) {
-					s = varEvaluator.evalVarAsString(exp.strValue(), typeName);
-				} else {
-					s = exp.strValue();
-				}
 				
-				DValue dval = builder.buildInt(s);
+				DValue dval = dvalConverter.createDValFromExp(exp, this.builder);
+//				String s;
+//				if (exp instanceof IdentExp) {
+//					s = varEvaluator.evalVarAsString(exp.strValue(), typeName);
+//				} else {
+//					s = exp.strValue();
+//				}
+//				
+//				DValue dval = builder.buildInt(s);
 				resultL.add(dval);
 			}
 			return resultL;

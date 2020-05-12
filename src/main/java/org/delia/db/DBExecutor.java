@@ -3,10 +3,9 @@ package org.delia.db;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
-import org.delia.runner.VarEvaluator;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
 /**
@@ -22,12 +21,15 @@ public interface DBExecutor extends AutoCloseable {
 	int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag); 
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx);
 	void executeDelete(QuerySpec spec);
+	
+	//hls layer
+	QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx);
 
 	boolean execTableDetect(String tableName);
 	boolean execFieldDetect(String tableName, String fieldName);
 	
 	FetchRunner createFetchRunner(FactoryService factorySvc);
-	
+	TableExistenceService createTableExistService();
 
 	//schema actions
 	void createTable(String tableName);

@@ -11,7 +11,7 @@ given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight[true].exist()
+  let x = Flight[true].exists()
 then:
 value:a:boolean:true
 
@@ -22,6 +22,6 @@ given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight[id=100].exist()
+  let x = Flight[id=100].exists()
 then:
 value:a:boolean:false

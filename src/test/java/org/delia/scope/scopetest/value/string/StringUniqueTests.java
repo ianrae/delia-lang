@@ -1,10 +1,5 @@
 package org.delia.scope.scopetest.value.string;
 
-import static org.junit.Assert.assertEquals;
-
-import org.delia.runner.QueryResponse;
-import org.delia.scope.scopetest.value.TypeLayerTestBase;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,6 +10,7 @@ public class StringUniqueTests extends StringTestBase {
 	public void test6Insert() {
 		createScalarType("string", "");
 		createStructType("string unique", "");
+		beginSession();
 
 		//C
 		typeNameToUse = "C";
@@ -25,6 +21,8 @@ public class StringUniqueTests extends StringTestBase {
 	public void test6InsertFail() {
 		createScalarType("string", "");
 		createStructType("string unique", "");
+		beginSession();
+
 		deleteBeforeInsertFlag = false;
 		//C
 		typeNameToUse = "C";
@@ -37,6 +35,7 @@ public class StringUniqueTests extends StringTestBase {
 		addIdFlag = true;
 		createScalarType("string", "");
 		createStructType("string unique", "");
+		beginSession();
 		deleteBeforeInsertFlag = false;
 
 		//C

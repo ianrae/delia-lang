@@ -21,7 +21,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[55].fetch('addr').id
+  let x = Customer[55].addr.id
 then:
 value:a:int:100
 
@@ -34,7 +34,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: null }
-  let x = Customer[55].fetch('addr').id
+  let x = Customer[55].addr.id
 then:
 null
 
@@ -47,7 +47,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: 55 }
-  let x = Customer[55].fetch('addr').zzz
+  let x = Customer[55].addr.zzz
 then:
 ERROR: unknown-field
 
@@ -62,7 +62,7 @@ given:
 when:
   insert Address {id: 100, cust: 55 }
   insert Address {id: 101, cust: 55 }
-  let x = Customer[55].fetch('addr').id
+  let x = Customer[55].addr.id
 then:
 value:a:int:100
 value:a:int:101
@@ -77,7 +77,7 @@ given:
 when:
   insert Address {id: 100, cust: null }
   insert Address {id: 101, cust: 55 }
-  let x = Customer[55].fetch('addr').id
+  let x = Customer[55].addr.id
 then:
 value:a:int:101
 
@@ -91,7 +91,7 @@ given:
 when:
   insert Address {id: 100, cust: null }
   insert Address {id: 101, cust: null }
-  let x = Customer[55].fetch('addr').id
+  let x = Customer[55].addr.id
 then:
 null
 

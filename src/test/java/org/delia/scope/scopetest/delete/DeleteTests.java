@@ -122,6 +122,7 @@ public class DeleteTests extends ScopeTestBase {
 	private void createFlightType(String type, String modifier) {
 		String src = String.format("type Flight struct {field1 %s unique %s} end", type, modifier);
 		this.execTypeStatement(src);
+		baseBeginSession();
 	}
 	private DValue insertAndQueryEx(String valStr, boolean expectNull, int expectedSize) {
 		QueryResponse qresp= insertAndQuery(valStr, expectedSize);

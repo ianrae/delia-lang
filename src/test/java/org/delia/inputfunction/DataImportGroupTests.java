@@ -74,7 +74,7 @@ public class DataImportGroupTests  extends NewBDDBase {
 		log.log(path);
 		numExpectedColumnsProcessed = 4;
 		stopAfterErrorThreshold = 10;
-		buildAndRun(2, "prod1", fileLoader, 8);
+		buildAndRun(2, "prod1", fileLoader, 77);
 	}
 	
 	

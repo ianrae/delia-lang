@@ -1,10 +1,5 @@
 package org.delia.scope.scopetest.value.string;
 
-import static org.junit.Assert.assertEquals;
-
-import org.delia.runner.QueryResponse;
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,6 +8,7 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test1Scalar() {
 		createScalarType("string", "");
+		beginSession();
 		
 		//string
 		chkString("'bob'", "bob");
@@ -33,6 +29,7 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test2ScalarRulePass() {
 		createScalarType("string", "maxlen(4)");
+		beginSession();
 		
 		//TODO: run all rules types - pos and neg tests
 		
@@ -54,6 +51,7 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test2ScalarRuleFail() {
 		createScalarType("string", "maxlen(2)");
+		beginSession();
 		
 		//TODO: run all rules types - pos and neg tests
 		
@@ -75,6 +73,7 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("string", "");
+		beginSession();
 		
 		//C
 		typeNameToUse = "C";
@@ -91,7 +90,8 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test4StructLet() {
 		createStructType("string", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldString("'bob'", "bob");
@@ -106,7 +106,8 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("string", "maxlen(2)");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -125,7 +126,8 @@ public class StringTests extends StringTestBase {
 	@Test
 	public void test5LetScalar() {
 		createScalarType("string", "");
-		
+		beginSession();
+
 		//string
 		chkString("'bob'", "bob");
 		chkString("''", "");
@@ -162,6 +164,8 @@ public class StringTests extends StringTestBase {
 	public void test6Insert() {
 		createScalarType("string", "");
 		createStructType("string", "");
+		beginSession();
+
 		chkString("'sue'", "sue");
 		chkString("'sue2'", "X",  "sue2");
 		chkString("'sue3'", "X2",  "sue3");
@@ -181,6 +185,8 @@ public class StringTests extends StringTestBase {
 		addIdFlag = true;
 		createScalarType("string", "");
 		createStructType("string", "");
+		beginSession();
+
 		chkString("'sue'", "sue");
 		chkString("'sue2'", "X",  "sue2");
 		chkString("'sue3'", "X2",  "sue3");
@@ -196,6 +202,8 @@ public class StringTests extends StringTestBase {
 		addIdFlag = true;
 		createScalarType("string", "");
 		createStructType("string", "");
+		beginSession();
+
 		chkString("'sue'", "sue");
 		chkString("'sue2'", "X",  "sue2");
 		chkString("'sue3'", "X2",  "sue3");
@@ -212,6 +220,8 @@ public class StringTests extends StringTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("string", "");
 		createStructType("string", "");
+		beginSession();
+
 		chkString("'sue'", "sue");
 		chkString("'sue2'", "X",  "sue2");
 		chkString("'sue3'", "X2",  "sue3");

@@ -2,8 +2,6 @@ package org.delia.scope.scopetest.value;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Date;
-
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DValue;
@@ -15,7 +13,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test1Scalar() {
 		createScalarType("long", "");
-		
+		beginSession();
+
 		//string
 		chkLong(actualLongVal.toString(), actualLongVal);
 		chkLongInt("114", 114L); //implicity seen as int since we didn't provide a type
@@ -36,7 +35,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRulePass() {
 		createScalarType("long", "< 10000");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//string
@@ -58,7 +58,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test2ScalarRuleFail() {
 		createScalarType("long", "< 10");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//primitive types - can't have rules
@@ -79,7 +80,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("long", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldLong("114", 114L);
@@ -95,7 +97,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructLet() {
 		createStructType("long", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldLong("114", 114L);
@@ -109,7 +112,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("long", "field1 < 10");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -126,7 +130,8 @@ public class LongTests extends TypeLayerTestBase {
 	@Test
 	public void test5LetScalar() {
 		createScalarType("long", "");
-		
+		beginSession();
+
 		//string
 		chkLongInt("114", 114L);
 		chkLongInt("0", 0L);
@@ -163,6 +168,8 @@ public class LongTests extends TypeLayerTestBase {
 	public void test6Insert() {
 		createScalarType("long", "");
 		createStructType("long", "");
+		beginSession();
+
 		chkLongInt("66", 66L);
 		chkLongInt("67", "X",  67L);
 		chkLongInt("68", "X2",  68L);
@@ -179,6 +186,8 @@ public class LongTests extends TypeLayerTestBase {
 	public void test6Insert2() {
 		createScalarType("long", "");
 		createStructType("long", "");
+		beginSession();
+
 		chkLong(actualLongVal.toString(), actualLongVal);
 
 		//C
@@ -193,6 +202,8 @@ public class LongTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("long", "");
 		createStructType("long", "");
+		beginSession();
+
 		chkLongInt("66", 66L);
 		chkLongInt("67", "X",  67L);
 		chkLongInt("68", "X2",  68L);
@@ -208,6 +219,7 @@ public class LongTests extends TypeLayerTestBase {
 		addIdFlag = true;
 		createScalarType("long", "");
 		createStructType("long", "");
+		beginSession();
 		chkLongInt("66", 66L);
 		chkLongInt("67", "X",  67L);
 		chkLongInt("68", "X2",  68L);
@@ -224,6 +236,8 @@ public class LongTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("long", "");
 		createStructType("long", "");
+		beginSession();
+
 		chkLongInt("66", 66L);
 		chkLongInt("67", "X",  67L);
 		chkLongInt("68", "X2",  68L);
@@ -249,6 +263,8 @@ public class LongTests extends TypeLayerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("long", "");
 		createStructType("long", "");
+		beginSession();
+
 		chkLong(actualLongVal.toString(), actualLongVal);
 
 		//C

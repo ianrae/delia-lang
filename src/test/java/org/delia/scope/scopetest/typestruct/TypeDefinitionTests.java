@@ -24,7 +24,8 @@ public class TypeDefinitionTests extends ScopeTestBase {
 	}
 	@Test(expected=DeliaException.class)
 	public void testReservedWordFail() {
-		createSomeType("int", "struct", ""); 
+		createSomeTypeRaw("int", "struct", ""); 
+		this.runner.begin(basePendingSrc);
 	}
 	
 	@Test
@@ -59,10 +60,11 @@ public class TypeDefinitionTests extends ScopeTestBase {
 
 	@Test(expected=DeliaException.class)
 	public void testInheritanceFailDupFields() {
-		createSomeType("User", "struct", "f1 int"); 
-		assertEquals(true, runner.getCompileState().compiledTypeMap.containsKey("User"));
-		chelper = helper.createCompilerHelper();
-		createSomeType("Employee", "User", "f1 int"); 
+		createSomeTypeRaw("User", "struct", "f1 int"); 
+//		chelper = helper.createCompilerHelper();
+		createSomeTypeRaw("Employee", "User", "f1 int"); 
+//		assertEquals(true, runner.getCompileState().compiledTypeMap.containsKey("User"));
+		this.runner.begin(basePendingSrc);
 	}
 	
 	// --
@@ -74,10 +76,17 @@ public class TypeDefinitionTests extends ScopeTestBase {
 	private void createSomeType(String type, String baseType, String field1) {
 		String src = String.format("type %s %s {%s} end", type, baseType, field1);
 		this.execTypeStatement(src);
+		baseBeginSession();
+	}
+	private void createSomeTypeRaw(String type, String baseType, String field1) {
+		String src = String.format("type %s %s {%s} end", type, baseType, field1);
+		this.execTypeStatement(src);
 	}
 	private void createFlightType(String body) {
 		String src = String.format("type Flight struct {%s} end", body);
 		this.execTypeStatement(src);
+		baseBeginSession();
+
 	}
 	private DValue insertAndQueryEx(String valStr, boolean expectNull, int expectedSize) {
 		QueryResponse qresp= insertAndQuery(valStr, expectedSize);

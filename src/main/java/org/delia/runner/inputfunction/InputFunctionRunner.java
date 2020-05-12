@@ -13,11 +13,11 @@ import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.ErrorType;
-import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DeliaException;
 import org.delia.runner.inputfunction.ProgramSet.OutputSpec;
+import org.delia.runner.inputfunction.ViaService.ViaInfo;
 import org.delia.tlang.runner.TLangResult;
 import org.delia.tlang.runner.TLangRunner;
 import org.delia.tlang.runner.TLangRunnerImpl;
@@ -45,22 +45,26 @@ public class InputFunctionRunner extends ServiceBase {
 	private boolean haltNowFlag;
 	private DValueConverterService dvalConverter;
 	private ImportMetricObserver metricsObserver;
+	private ViaService viaSvc;
 
-	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator) {
+	public InputFunctionRunner(FactoryService factorySvc, DTypeRegistry registry, ErrorTracker localET, TLangVarEvaluator varEvaluator, ViaService viaSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		this.et = localET;
 		this.varEvaluator = varEvaluator;
 		this.dvalConverter = new DValueConverterService(factorySvc);
+		this.viaSvc = viaSvc;
 	}
 	
-	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL) {
+	public List<DValue> process(HdrInfo hdr, LineObj lineObj, List<DeliaError> lineErrorsL, ViaLineInfo viaLineInfo) {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
+		//map of inputField,raw value
 		Map<String,Object> inputData = createInputMap(hdr, lineObj);
-		//it can produce multiple
+		viaLineInfo.inputData = inputData;
+		//it can produce multiple if input function has multiple args (Customer c, Address a)
 		List<ProcessedInputData> processedDataL = runTLang(inputData);
 		if (haltNowFlag) {
 			return dvalL;
@@ -68,10 +72,12 @@ public class InputFunctionRunner extends ServiceBase {
 
 		for(ProcessedInputData data: processedDataL) {
 			List<DeliaError> errL = new ArrayList<>();
-			DValue dval = buildFromData(data, errL);
+			DValue dval = buildFromData(data, errL, viaLineInfo, lineObj);
 			
 			if (errL.isEmpty()) {
-				dvalL.add(dval);
+				if (dval != null) {
+					dvalL.add(dval);
+				}
 			} else {
 				for(DeliaError err: errL) {
 					err.setLineAndPos(lineObj.lineNum, 0);
@@ -82,10 +88,11 @@ public class InputFunctionRunner extends ServiceBase {
 		return dvalL;
 	}
 
-	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL) {
+	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, ViaLineInfo viaLineInfo, LineObj lineObj) {
 		int mark = errL.size();
 		StructValueBuilder structBuilder = new StructValueBuilder(data.structType);
 		
+		int viaCount = 0;
 		for(String outputFieldName: data.outputFieldMap.keySet()) {
 			TypePair pair = DValueHelper.findField(data.structType, outputFieldName);
 			if (pair == null) {
@@ -94,7 +101,14 @@ public class InputFunctionRunner extends ServiceBase {
 				return null;
 			}
 			
-			Object input = data.outputFieldMap.get(pair.name);
+			ProcessedInputData.ProcessedValue pvalue = data.outputFieldMap.get(pair.name);
+			Object input = pvalue.obj;
+			if (pvalue.isVia) {
+				viaCount++;
+				ViaInfo viaInfo = viaSvc.findMatch(viaLineInfo, outputFieldName);
+				ViaPendingInfo vpi = new ViaPendingInfo(data.structType, outputFieldName, input, viaInfo);
+				viaLineInfo.viaPendingL.add(vpi);
+			}
 			log.logDebug("field: %s = %s", outputFieldName, input);
 			
 			DValue inner = null;
@@ -106,7 +120,12 @@ public class InputFunctionRunner extends ServiceBase {
 				inner = buildScalarValue(input, shape, errL, pair, data, metricsObserver); 
 			}
 			structBuilder.addField(pair.name, inner);
-		}			
+		}		
+		
+		//if all fields were via, don't build dval
+		if (viaCount > 0 && viaCount == data.outputFieldMap.size()) {
+			return null;
+		}
 		
 		boolean b = structBuilder.finish();
 		if (!b) {
@@ -179,7 +198,7 @@ public class InputFunctionRunner extends ServiceBase {
 		return null;
 	}
 
-	private DValue buildScalarValue(Object input, Shape shape, List<DeliaError> errL, TypePair pair, ProcessedInputData data, ImportMetricObserver metricsObserver2) {
+	public DValue buildScalarValue(Object input, Shape shape, List<DeliaError> errL, TypePair pair, ProcessedInputData data, ImportMetricObserver metricsObserver2) {
 		DValue inner = null;
 		try {
 			inner = dvalConverter.buildFromObject(input, shape, scalarBuilder);
@@ -229,6 +248,8 @@ public class InputFunctionRunner extends ServiceBase {
 				continue; //for a different output type
 			}
 			
+			boolean isVia = spec.viaPK != null;
+			
 			String value;
 			Object obj = inputData.get(inputField);
 			if (obj instanceof DValue) {
@@ -258,12 +279,14 @@ public class InputFunctionRunner extends ServiceBase {
 				value = finalValue == null ? null : finalValue.asString();
 				if (res.failFlag) {
 					haltNowFlag = true;
-					data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
+					ProcessedInputData.ProcessedValue pvalue = new ProcessedInputData.ProcessedValue(value, isVia);
+					data.outputFieldMap.put(outPair.argName(), pvalue); //fieldname might be different
 					return data;
 				}
 			}
 			
-			data.outputFieldMap.put(outPair.argName(), value); //fieldname might be different
+			ProcessedInputData.ProcessedValue pvalue = new ProcessedInputData.ProcessedValue(value, isVia);
+			data.outputFieldMap.put(outPair.argName(), pvalue); //fieldname might be different
 		}
 		return data;
 	}
@@ -296,8 +319,8 @@ public class InputFunctionRunner extends ServiceBase {
 			ImportSpec ispec = ospec.ispec;
 			for(OutputFieldHandle ofh: ispec.ofhList) {
 				if (ofh.ifhIndex >= 0) {
-					String inputValue = lineObj.elements[ofh.ifhIndex];
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
+					String inputValue = lineObj.elements[ifh.columnIndex];
 					inputData.put(ifh.columnName, inputValue);
 					log.logDebug("input: %d:%s = %s", ifh.columnIndex, ifh.columnName, inputValue);
 				} else if (ofh.syntheticFieldName != null) {

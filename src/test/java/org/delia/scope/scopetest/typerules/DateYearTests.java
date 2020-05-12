@@ -2,13 +2,8 @@ package org.delia.scope.scopetest.typerules;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.base.DBHelper;
-import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.compiler.ast.LetStatementExp;
-import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.RunnerImpl;
 import org.delia.scope.scopetest.ScopeTestBase;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -72,14 +67,14 @@ public class DateYearTests extends ScopeTestBase {
 	
 	private QueryResponse insertAndQuery(int id) {
 		String src = String.format("insert Actor {id:%d, firstName:'bob', dt:'2011-01-30' }", id);
-		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.executeOneStatement(exp);
+//		InsertStatementExp exp = chelper.chkInsert(src, null);
+		ResultValue res = runner.continueExecution(src);
 		chkResOK(res);
 		
 		//now query it
 		src = String.format("let a = Actor[%d]", id);
-		LetStatementExp exp2 = chelper.chkQueryLet(src, null);
-		res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chelper.chkQueryLet(src, null);
+		res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = helper.chkResQuery(res, "Actor");
 		return qresp;

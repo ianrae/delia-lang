@@ -25,6 +25,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -38,6 +39,7 @@ import org.delia.runner.RunnerImpl;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -216,6 +218,10 @@ public class FragmentParserTests extends NewBDDBase {
 	@Before
 	public void init() {
 	}
+	@After
+	public void shutdown() {
+		TableExistenceServiceImpl.hackYesFlag = false;
+	}
 
 	private DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
@@ -310,7 +316,7 @@ public class FragmentParserTests extends NewBDDBase {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
 		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
@@ -337,7 +343,7 @@ public class FragmentParserTests extends NewBDDBase {
 		this.fragmentParser = createFragmentParser(dao, src); 
 		
 //		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		LetStatementExp letStatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof LetStatementExp) {

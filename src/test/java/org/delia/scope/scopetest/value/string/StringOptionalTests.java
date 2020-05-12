@@ -22,7 +22,8 @@ public class StringOptionalTests extends StringTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("string optional", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldString("'bob'", "bob");
@@ -38,7 +39,8 @@ public class StringOptionalTests extends StringTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("string optional", "field1.maxlen(2)");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -63,6 +65,8 @@ public class StringOptionalTests extends StringTestBase {
 	public void test6Insert() {
 		createScalarType("string", "");
 		createStructType("string optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -88,6 +92,8 @@ public class StringOptionalTests extends StringTestBase {
 		addIdFlag = true;
 		createScalarType("string", "");
 		createStructType("string optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -102,6 +108,8 @@ public class StringOptionalTests extends StringTestBase {
 		addIdFlag = true;
 		createScalarType("string", "");
 		createStructType("string optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C
@@ -116,6 +124,8 @@ public class StringOptionalTests extends StringTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("string", "");
 		createStructType("string optional", "");
+		beginSession();
+
 		do3Lets();
 
 		//C

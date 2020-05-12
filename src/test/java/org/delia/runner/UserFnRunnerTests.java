@@ -8,6 +8,7 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UserFunctionDefStatementExp;
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
@@ -19,7 +20,7 @@ public class UserFnRunnerTests extends RunnerTestBase {
 	
 	@Test
 	public void test() {
-		Runner runner = createBasicActorType();
+		NewLegacyRunner runner = createBasicActorType();
 		createUserFn1(runner, "foo", false);
 		chelper = helper.createCompilerHelper();
 		int id = 120;
@@ -32,7 +33,7 @@ public class UserFnRunnerTests extends RunnerTestBase {
 	}
 	@Test
 	public void test2() {
-		Runner runner = createBasicActorType();
+		NewLegacyRunner runner = createBasicActorType();
 		createUserFn1(runner, "foo", true);
 		chelper = helper.createCompilerHelper();
 		int id = 120;
@@ -50,7 +51,7 @@ public class UserFnRunnerTests extends RunnerTestBase {
 	public void init() {
 		runner = initRunner();
 	}
-	private void createUserFn1(Runner runner, String fnName, boolean withArg) {
+	private void createUserFn1(NewLegacyRunner runner, String fnName, boolean withArg) {
 		String src;
 		if (withArg) {
 			String arg = withArg ? "id" : "";
@@ -59,34 +60,34 @@ public class UserFnRunnerTests extends RunnerTestBase {
 			src = String.format("function foo() { let x = Actor[120] } ");
 		}
 		
-		UserFunctionDefStatementExp exp0 = chelper.chkUserFn(src, fnName);
-		ResultValue res = runner.executeOneStatement(exp0);
+//		UserFunctionDefStatementExp exp0 = chelper.chkUserFn(src, fnName);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 	}
-	private DValue insertAndQueryEx(Runner runner, int id) {
+	private DValue insertAndQueryEx(NewLegacyRunner runner, int id) {
 		QueryResponse qresp= insertAndQuery(runner, id);
 		DValue dval = qresp.getOne();
 		assertEquals("bob", dval.asStruct().getField("firstName").asString());
 		return dval;
 	}
-	private QueryResponse insertAndQuery(Runner runner, int id) {
+	private QueryResponse insertAndQuery(NewLegacyRunner runner, int id) {
 		String src = String.format("insert Actor {id:%d, firstName:'bob'}", id);
-		InsertStatementExp exp = chelper.chkInsert(src, null);
-		ResultValue res = runner.executeOneStatement(exp);
+//		InsertStatementExp exp = chelper.chkInsert(src, null);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 		
 		//now query it
 		src = String.format("let a = Actor[%d]", id);
-		LetStatementExp exp2 = chkQueryLet(src, null);
-		res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chkQueryLet(src, null);
+		res = runner.beginOrContinue(src, true);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = chkResQuery(res, "Actor");
 		return qresp;
 	}
-	private QueryResponse invokeUserFn(Runner runner, Integer id) {
+	private QueryResponse invokeUserFn(NewLegacyRunner runner, Integer id) {
 		String src = String.format("let b = foo(%s)", id == null ? "" : id.toString());
-		LetStatementExp exp2 = chelper.chkUserFuncInvoke(src, null);
-		ResultValue res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chelper.chkUserFuncInvoke(src, null);
+		ResultValue res = runner.beginOrContinue(src, true);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = chkResQuery(res, "Actor");
 		return qresp;

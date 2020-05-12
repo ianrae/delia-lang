@@ -3,14 +3,9 @@ package org.delia.runner;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.base.DBHelper;
-import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.compiler.ast.LetStatementExp;
-import org.delia.compiler.ast.TypeStatementExp;
-import org.delia.core.FactoryService;
-import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
-import org.delia.queryresponse.function.QueryFuncOrFieldRunner;
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,11 +16,11 @@ public class QueryFieldTests extends RunnerTestBase {
 	
 	@Test
 	public void testField() {
-		Runner runner = initData();
+		NewLegacyRunner runner = initData();
 		
 		//now query it
-		LetStatementExp exp2 = chkQueryLet("let a = Actor[44].firstName", "let a = Actor[44].firstName");
-		ResultValue res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chkQueryLet("let a = Actor[44].firstName", "let a = Actor[44].firstName");
+		ResultValue res = runner.continueExecution("let a = Actor[44].firstName");
 		assertEquals(true, res.ok);
 		QueryResponse qresp = helper.chkRawResQuery(res, 1);
 		
@@ -34,11 +29,10 @@ public class QueryFieldTests extends RunnerTestBase {
 	}
 	@Test
 	public void testFieldThenFunc() {
-		Runner runner = initData();
+		NewLegacyRunner runner = initData();
 		
 		//now query it
-		LetStatementExp exp2 = chkQueryLet("let a = Actor[44].id.max()", "let a = Actor[44].id.max()");
-		ResultValue res = runner.executeOneStatement(exp2);
+		ResultValue res = runner.continueExecution("let a = Actor[44].id.max()");
 		assertEquals(true, res.ok);
 		QueryResponse qresp = helper.chkRawResQuery(res, 1);
 		
@@ -47,45 +41,46 @@ public class QueryFieldTests extends RunnerTestBase {
 	}
 	@Test
 	public void testFieldThenFuncFail() {
-		Runner runner = initData();
+		NewLegacyRunner runner = initData();
 		
 		//now query it
-		LetStatementExp exp2 = chkQueryLet("let a = Actor[44].id.zzz()", "let a = Actor[44].id.zzz()");
-		ResultValue res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chkQueryLet("let a = Actor[44].id.zzz()", "let a = Actor[44].id.zzz()");
+		String src = "let a = Actor[44].id.zzz()";
+		ResultValue res = doExecCatchFail(src, false);
 		assertEquals(false, res.ok);
 	}
 	
 	// --
 	//private Runner runner;
-	private QueryFuncOrFieldRunner qffRunner;
 	
 	@Before
 	public void init() {
 		initRunner();
-		FactoryService factorySvc = new FactoryServiceImpl(log, et);
+		runner.begin("");
 		FetchRunner fetchRunner = createFetchRunner();
-		qffRunner = new QueryFuncOrFieldRunner(factorySvc, runner.getRegistry(), fetchRunner, dbInterface.getCapabilities());
+//		qffRunner = new QueryFuncOrFieldRunner(factorySvc, runner.getRegistry(), fetchRunner, dbInterface.getCapabilities());
 	}
 	private FetchRunner createFetchRunner() {
-		DBAccessContext dbctx = new DBAccessContext(runner);
+		DBAccessContext dbctx = runner.createDBAccessContext();
 		DBExecutor dbexecutor = dbInterface.createExector(dbctx);
-		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), runner);
+		Runner run = runner.getDeliaRunner();
+		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), run);
 		return fetchRunner;
 	}
 	
-	private Runner initData() {
-		TypeStatementExp exp0 = chkType("type Actor struct {id int unique, firstName string, flag boolean} end", "type Actor struct {id int unique, firstName string, flag boolean } end");
-		InsertStatementExp exp = chkInsert("insert Actor {id:44, firstName:'bob', flag:true }", "insert Actor {id: 44,firstName: 'bob',flag: true }");
+	private NewLegacyRunner initData() {
+//		TypeStatementExp exp0 = chkType("type Actor struct {id int unique, firstName string, flag boolean} end", "type Actor struct {id int unique, firstName string, flag boolean } end");
+//		InsertStatementExp exp = chkInsert("insert Actor {id:44, firstName:'bob', flag:true }", "insert Actor {id: 44,firstName: 'bob',flag: true }");
 		
-		Runner runner = initRunner();
-		ResultValue res = runner.executeOneStatement(exp0);
-		chkResOK(res);
+		NewLegacyRunner runner = initRunner();
+		runner.begin("type Actor struct {id int unique, firstName string, flag boolean} end");
 		
 		DBHelper.createTable(dbInterface, "Actor"); //!! fake schema
 
-		res = runner.executeOneStatement(exp);
+		String src = "insert Actor {id:44, firstName:'bob', flag:true }";
+		ResultValue res = runner.continueExecution(src);
 		chkResOK(res);
-		assertEquals(false, runner.exists("a"));
+//		assertEquals(false, runner..exists("a"));
 		return runner;
 	}
 	

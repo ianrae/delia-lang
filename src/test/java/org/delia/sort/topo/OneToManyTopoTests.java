@@ -1,18 +1,8 @@
 package org.delia.sort.topo;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
 import org.delia.relation.RelationCardinality;
-import org.delia.relation.RelationInfo;
-import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
-import org.delia.scope.scopetest.relation.NewRelationTestBase;
-import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
-import org.delia.util.StringUtil;
 import org.junit.Before;
 import org.junit.Test;
 

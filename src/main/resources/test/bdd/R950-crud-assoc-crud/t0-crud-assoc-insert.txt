@@ -1,4 +1,87 @@
-#TODO 
-#      update Customer[45] { addr: insert [100]} add one assoc row
-#      update Customer[45] { addr: delete [100]} delete one assoc row
-#      update Customer[45] { addr: update [100,102]} pairs. replace row with 100 with 102
+FEATURE: CRUD assoc crud in many-to-many relations
+background:
+	type Customer struct {id int unique, wid int, relation addr Address optional many } end
+	type Address struct {id int unique, z int, relation cust Customer optional many } end
+	insert Customer {id: 55, wid: 33}
+	insert Customer {id: 56, wid: 34}
+	insert Address {id: 100, z:5, cust: [55] }
+	insert Address {id: 101, z:6, cust: [55] }
+thenType: struct
+
+---
+title: no assoc-crud
+when:
+  update Customer[true] {wid: 333}
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vwid:333
+ vaddr:{[100,101]}
+}
+
+---
+title: assoc-crud insert
+when:
+  update Address[100] { insert cust:56}
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vwid:33
+ vaddr:{[100,101]}
+}
+
+---
+title: assoc-crud insert2. when rel initially empty
+when:
+  insert Address {id: 102, z:7 }
+  update Address[102] { insert cust:56}
+  let x = Address[102].fks()
+then:
+value:a:Address {
+ vid:102
+ vz:7
+ vcust:{56}
+}
+
+---
+title: assoc-crud update
+# remember update must be pairs of values: old,new
+when:
+  insert Customer {id: 57, wid: 35}
+  update Address[100] { update cust:[55,57]}
+  let x = Address[100].fks()
+then:
+value:a:Address {
+ vid:100
+ vz:5
+ vcust:{57}
+}
+
+---
+title: assoc-crud delete
+when:
+  insert Customer {id: 57, wid: 35}
+  update Address[100] { delete cust:55}
+  let x = Address[100].fks()
+then:
+value:a:Address {
+ vid:100
+ vz:5
+ vcust:null
+}
+
+---
+title: assoc-crud delete2. when rel initially empty
+when:
+  insert Address {id: 102, z:7 }
+  update Address[102] { delete cust:55}
+  let x = Address[102].fks()
+then:
+value:a:Address {
+ vid:102
+ vz:7
+ vcust:null
+}
+

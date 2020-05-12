@@ -372,7 +372,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		deleteFrag.paramStartIndex = statement.paramL.size();
 		
 		StrCreator sc = new StrCreator();
-		sc.o("%s = ? and %s == ?", "leftv", "right"); 
+		sc.o("%s = ? and %s = ?", "leftv", "rightv"); 
 		RawFragment rawFrag = new RawFragment(sc.str);
 		deleteFrag.whereL.add(rawFrag);
 		
@@ -403,7 +403,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		
 		StrCreator sc = new StrCreator();
-		sc.o(" %s = ? and %s == ?", "leftv", "right"); 
+		sc.o(" %s = ? and %s = ?", "leftv", "rightv"); 
 		RawFragment rawFrag = new RawFragment(sc.str);
 		innerUpdateFrag.whereL.add(rawFrag);
 		

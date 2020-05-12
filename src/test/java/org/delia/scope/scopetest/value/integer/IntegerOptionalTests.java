@@ -22,6 +22,7 @@ public class IntegerOptionalTests extends IntegerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("int optional", "");
+		beginSession();
 		
 		//C
 		typeNameToUse = "C";
@@ -38,6 +39,7 @@ public class IntegerOptionalTests extends IntegerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("int optional", "field1 < 10");
+		beginSession();
 		
 		//TODO - other rules!!!
 		
@@ -61,6 +63,7 @@ public class IntegerOptionalTests extends IntegerTestBase {
 	public void test6Insert() {
 		createScalarType("int", "");
 		createStructType("int optional", "");
+		beginSession();
 		do3Lets();
 
 		//C
@@ -84,6 +87,7 @@ public class IntegerOptionalTests extends IntegerTestBase {
 		addIdFlag = true;
 		createScalarType("int", "");
 		createStructType("int optional", "");
+		beginSession();
 		do3Lets();
 
 		//C
@@ -98,6 +102,7 @@ public class IntegerOptionalTests extends IntegerTestBase {
 		addIdFlag = true;
 		createScalarType("int", "");
 		createStructType("int optional", "");
+		beginSession();
 		do3Lets();
 
 		//C
@@ -112,6 +117,7 @@ public class IntegerOptionalTests extends IntegerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("int", "");
 		createStructType("int optional", "");
+		beginSession();
 		do3Lets();
 
 		//C

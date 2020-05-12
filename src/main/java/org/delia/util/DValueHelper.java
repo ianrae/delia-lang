@@ -146,6 +146,17 @@ public class DValueHelper {
 	 * @return new value
 	 */
 	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal) {
+		return mergeOne(dvalPartial, existingDVal, null);
+	}	
+	
+	/**
+	 * Return a new DValue that combines dvalPartial into existingDVal
+	 * @param dvalPartial  value contains some of the type's fields
+	 * @param existingDVal DValue that we are merging into
+	 * @param skipMap fields to skip. ie. to not merge
+	 * @return new value
+	 */
+	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal, Map<String,String> skipMap) {
 	    Map<String,DValue> srcMap = new HashMap<>(dvalPartial.asMap()); //make a copy
 	    Map<String,DValue> existingMap = existingDVal.asMap();
 	    
@@ -153,8 +164,12 @@ public class DValueHelper {
 	    
 	    //merge or copy fields in existingDVal
 	    for(String fieldName: existingMap.keySet()) {
+	    	boolean skip = skipMap != null && skipMap.containsKey(fieldName);
+	    	
 			DValue inner;
-			if (srcMap.containsKey(fieldName)) {
+			if (skip) {
+				inner = existingMap.get(fieldName);
+			} else if (srcMap.containsKey(fieldName)) {
 				inner = srcMap.get(fieldName);
 				srcMap.remove(fieldName);
 			} else {
@@ -166,6 +181,10 @@ public class DValueHelper {
 	    
 	    //add fields in dvalPartial but not in existingDVal (ie. are null in existingDVal)
 	    for(String fieldName: srcMap.keySet()) {
+	    	boolean skip = skipMap != null && skipMap.containsKey(fieldName);
+	    	if (skip) {
+	    		continue;
+	    	}
 			DValue inner = srcMap.get(fieldName);
 			DValue clone = cloneField(inner);
 			newMap.put(fieldName, clone);
@@ -181,7 +200,7 @@ public class DValueHelper {
 		DValueImpl clone;
 		if (inner.getObject() instanceof DRelation) {
 			DRelation rel = (DRelation) inner.getObject();
-			DRelation copy = new DRelation(rel.getTypeName(), rel.getForeignKey());
+			DRelation copy = new DRelation(rel.getTypeName(), rel.getMultipleKeys());
 			clone = new DValueImpl(inner.getType(), copy);
 		} else {
 			Object obj = inner.getObject();
@@ -208,11 +227,16 @@ public class DValueHelper {
 	}
 
 	public static void throwIfFieldNotExist(String msgPrefix, String fieldName, DValue dval) {
-		if (dval == null || !dval.getType().isStructShape()) {
+		if (dval != null) {
+			throwIfFieldNotExist(msgPrefix, fieldName, dval.getType());
+		}
+	}
+	public static void throwIfFieldNotExist(String msgPrefix, String fieldName, DType dtype) {
+		if (dtype == null || !dtype.isStructShape()) {
 			return;
 		}
-		DStructType dtype = (DStructType) dval.getType();
-		if (! fieldExists(dtype, fieldName)) {
+		DStructType structType = (DStructType) dtype;
+		if (! fieldExists(structType, fieldName)) {
 			DeliaExceptionHelper.throwError("unknown-field", "%s - can't find field '%s' in type '%s'", msgPrefix, fieldName, dtype.getName());
 		}
 	}

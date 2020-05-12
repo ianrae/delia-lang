@@ -15,6 +15,7 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.SpanHelper;
 import org.delia.db.sql.StrCreator;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
@@ -25,10 +26,12 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class SelectFuncHelper extends ServiceBase {
 	protected DTypeRegistry registry;
+	private SpanHelper spanHelper;
 
-	public SelectFuncHelper(FactoryService factorySvc, DTypeRegistry registry) {
+	public SelectFuncHelper(FactoryService factorySvc, DTypeRegistry registry, SpanHelper spanHelper) {
 		super(factorySvc);
 		this.registry = registry;
+		this.spanHelper = spanHelper;
 	}
 	
 	public DType getSelectResultType(QuerySpec spec) {
@@ -48,6 +51,15 @@ public class SelectFuncHelper extends ServiceBase {
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
+			
+			QueryFuncExp fieldExp = null;
+			if (this.spanHelper != null) {
+				fieldExp = spanHelper.isTargetAField();
+				if (fieldExp != null) {
+					return DValueHelper.findFieldType(dtype, fieldExp.funcName);
+				}
+			}
+			
 			return dtype;
 		}
 	}

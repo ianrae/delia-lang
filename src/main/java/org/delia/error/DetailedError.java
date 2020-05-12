@@ -19,7 +19,7 @@ public class DetailedError extends DeliaError {
 	private int listIndex;
 	
 	public DetailedError(String id, String message) {
-		super(id, message, null);
+		super(id, message);
 		errorType = Type.IO_ERROR;
 	}
 	

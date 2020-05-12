@@ -6,6 +6,7 @@ import org.delia.base.DBHelper;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.db.sql.NewLegacyRunner;
 import org.delia.error.DeliaError;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
@@ -91,14 +92,14 @@ public class ValidationTests extends RunnerTestBase {
 	}
 	private QueryResponse insertAndQuery(int id) {
 		String src = String.format("insert Actor {id:%d, firstName:'bob', flag:true }", id);
-		InsertStatementExp exp = chkInsert(src, null);
-		ResultValue res = runner.executeOneStatement(exp);
+//		InsertStatementExp exp = chkInsert(src, null);
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 		
 		//now query it
 		src = String.format("let a = Actor[%d]", id);
-		LetStatementExp exp2 = chkQueryLet(src, null);
-		res = runner.executeOneStatement(exp2);
+//		LetStatementExp exp2 = chkQueryLet(src, null);
+		res = runner.beginOrContinue(src, true);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = chkResQuery(res, "Actor");
 		return qresp;
@@ -106,20 +107,22 @@ public class ValidationTests extends RunnerTestBase {
 	
 	private void insertFail(int id, String errId) {
 		String src = String.format("insert Actor {id:%d, firstName:'bob', flag:true }", id);
-		ResultValue res = execInsertFail(src, 1, errId);
+//		ResultValue res = execInsertFail(src, 1, errId);
+		this.doExecCatchFail(src, false);
 	}
 
 	@Test
 	public void testQueryAll() {
-		InsertStatementExp exp = chkInsert("insert Customer {id:44, firstName:'bob' }", "insert Customer {id: 44,firstName: 'bob' }");
+		String src = "type Customer struct { id int, firstName string } end";
+		src += " insert Customer {id:44, firstName:'bob' }";
 		
-		Runner runner = initRunner();
-		ResultValue res = runner.executeOneStatement(exp);
+		NewLegacyRunner runner = initRunner();
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 		
 		//now query it
-		LetStatementExp exp2 = chkQueryLet("let a = Customer", "let a = Customer");
-		res = runner.executeOneStatement(exp2);
+		src = "let a = Customer";
+		res = runner.beginOrContinue(src, true);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = chkResQuery(res, "Customer");
 		DValue dval = qresp.getOne();
@@ -139,20 +142,19 @@ public class ValidationTests extends RunnerTestBase {
 	private void chkInvalid(DValue dval) {
 		assertEquals(ValidationState.INVALID, dval.getValidationState());
 	}
-	private Runner createActorType(String rule) {
+	private NewLegacyRunner createActorType(String rule) {
 		String src = String.format("type Actor struct {id int unique, firstName string, flag boolean} %s end", rule);
-		TypeStatementExp exp0 = chkType(src, null);
-		Runner runner = initRunner();
-		ResultValue res = runner.executeOneStatement(exp0);
+//		TypeStatementExp exp0 = chkType(src, null);
+		NewLegacyRunner runner = initRunner();
+		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
 		
-		DBHelper.createTable(dbInterface, "Actor"); //!! fake schema
 		return runner;
 	}
 
 	protected ResultValue execInsertFail(String src, int expectedErrorCount, String errId) {
-		InsertStatementExp exp = chkInsert(src, null);
-		ResultValue res = runner.executeOneStatement(exp);
+//		InsertStatementExp exp = chkInsert(src, null);
+		ResultValue res = runner.beginOrContinue(src, true);
 		assertEquals(false, res.ok);
 		assertEquals(expectedErrorCount, res.errors.size());
 		//get last error

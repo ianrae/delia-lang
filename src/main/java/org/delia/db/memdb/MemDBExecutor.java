@@ -9,6 +9,9 @@ import org.delia.db.DBInterface;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.QueryResponse;
@@ -106,5 +109,13 @@ public class MemDBExecutor implements DBExecutor {
 	@Override
 	public FetchRunner createFetchRunner(FactoryService factorySvc) {
 		return new FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
+	}
+	@Override
+	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+		return dbInterface.executeHLSQuery(hls, sql, qtx, dbctx);
+	}
+	@Override
+	public TableExistenceService createTableExistService() {
+		return new TableExistenceServiceImpl(dbInterface, dbctx);
 	}
 }

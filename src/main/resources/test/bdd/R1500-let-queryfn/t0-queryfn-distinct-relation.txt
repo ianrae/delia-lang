@@ -1,0 +1,35 @@
+# queryfn tests
+
+FEATURE: queryfn-distint relation
+background:
+	type Customer struct {id int unique, wid int, relation addr Address optional many } end
+	type Address struct {id int unique, z int, relation cust Customer optional many } end
+	insert Customer {id: 55, wid: 33}
+	insert Customer {id: 56, wid: 34}
+	insert Address {id: 100, z:5, cust: [55] }
+	insert Address {id: 101, z:6, cust: [55,56] }
+	insert Address {id: 102, z:6, cust: [55,56] }
+thenType: struct
+
+---
+title: without distinct
+when:
+  update Customer[true] {wid: 333}
+  let x = Customer[true].fks().addr.id
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102
+value:a:int:101
+value:a:int:102
+
+---
+title: distinct
+when:
+  update Customer[true] {wid: 333}
+  let x = Customer[true].fks().addr.id.distinct()
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102
+

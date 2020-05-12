@@ -130,15 +130,6 @@ public class Pass2Compiler extends CompilerPassBase {
 	}
 
 
-	private boolean findField(String target, TypeStatementExp typeExp) {
-		for(StructFieldExp fieldExp: typeExp.structExp.argL) {
-			if (fieldExp.getFieldName().equals(target)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private void checkLetStatement(CompilerResults results, LetStatementExp letExp) {
 //		log.log("a" + letExp.strValue());
 		if (letExp.value instanceof QueryExp) {

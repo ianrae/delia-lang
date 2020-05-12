@@ -13,9 +13,7 @@ import org.delia.api.MigrationAction;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBAccessContext;
-import org.delia.db.SqlHelperFactory;
-import org.delia.db.h2.H2SqlHelperFactory;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
@@ -26,6 +24,7 @@ import org.delia.runner.ConversionResult;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -275,6 +274,10 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 	@Before
 	public void init() {
 	}
+	@After
+	public void shutdown() {
+		TableExistenceServiceImpl.hackYesFlag = false;
+	}
 
 	private String buildSrc() {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
@@ -322,15 +325,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 
 		return parser;
 	}
-	private InsertFragmentParser createParser(DeliaDao dao) {
-		List<TableInfo> tblinfoL = createTblInfoL(); 
-		return createParser(dao, tblinfoL);
-	}
 	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
-		DBAccessContext dbctx = new DBAccessContext(runner);
-
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, null);
+		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
 		return parser;
 	}
@@ -405,7 +401,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		this.fragmentParser = createFragmentParser(dao, src, tblinfoL); 
 
 		//		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		InsertStatementExp insertStatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof InsertStatementExp) {

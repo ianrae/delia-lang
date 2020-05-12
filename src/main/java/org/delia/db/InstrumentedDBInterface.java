@@ -3,6 +3,7 @@ package org.delia.db;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.memdb.MemDBExecutor;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.QueryResponse;
@@ -137,5 +138,10 @@ public class InstrumentedDBInterface implements DBInterface {
 	@Override
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		actualInterface.performTypeReplacement(spec);
+	}
+
+	@Override
+	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
+		return actualInterface.executeHLSQuery(hls, sql, qtx, dbctx);
 	}
 }

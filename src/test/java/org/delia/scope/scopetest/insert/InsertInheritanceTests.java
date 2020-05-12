@@ -145,6 +145,7 @@ public class InsertInheritanceTests extends ScopeTestBase {
 	private void createSomeType(String type, String baseType, String field1) {
 		String src = String.format("type %s %s {%s} end", type, baseType, field1);
 		this.execTypeStatement(src);
+		baseBeginSession();
 	}
 	private void createScalarSomeType(String type, String baseType) {
 		String src = String.format("type %s %s end", type, baseType);

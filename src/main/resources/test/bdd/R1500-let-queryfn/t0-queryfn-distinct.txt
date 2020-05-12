@@ -1,24 +1,48 @@
 # queryfn tests
 
-FEATURE: queryfn-distint TODO: implement this!
+FEATURE: queryfn-distint 
 background:
   type Flight struct {id int unique, wid int optional }  end
 thenType: struct
 
 ---
-SKIP: asc implicit
+title: without distinct
 given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 57, wid: 4 }
+  insert Flight {id: 58, wid: 3 }
 when:
-  let x = Flight[true].orderBy('wid')
+  let x = Flight[true].wid
 then:
-value:a:Flight {
- vid:56
- vwid:3
-}
-value:a:Flight {
- vid:55
- vwid:4
-}
+value:a:int:4
+value:a:int:3
+value:a:int:4
+value:a:int:3
 
+---
+title: with distinct
+#need to sort else the order is undefined
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 57, wid: 4 }
+  insert Flight {id: 58, wid: 3 }
+when:
+  let x = Flight[true].wid.distinct().orderBy('wid',desc)
+then:
+value:a:int:4
+value:a:int:3
+
+---
+title: with distinct and orderBy
+given:
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+  insert Flight {id: 57, wid: 4 }
+  insert Flight {id: 58, wid: 3 }
+when:
+  let x = Flight[true].orderBy('wid').wid.distinct()
+then:
+value:a:int:3
+value:a:int:4

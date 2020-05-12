@@ -2,7 +2,6 @@ package org.delia.scope.scopetest.configure;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.ScopeTestBase;
@@ -41,8 +40,8 @@ public class ConfigureTests extends ScopeTestBase {
 	
 	private Object runConfigureStatement(String varName, String valStr) {
 		String src = String.format("configure %s = %s", varName, valStr);
-		ConfigureStatementExp exp2 = chelper.chkConfingure(src);
-		ResultValue res = runner.executeOneStatement(exp2);
+//		ConfigureStatementExp exp2 = chelper.chkConfingure(src);
+		ResultValue res = runner.continueExecution(src);
 		assertEquals(true, res.ok);
 		Object obj = res.val;
 		return obj;

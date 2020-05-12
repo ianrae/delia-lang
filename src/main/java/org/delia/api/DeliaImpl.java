@@ -8,6 +8,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
+import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
@@ -33,6 +34,7 @@ public class DeliaImpl implements Delia {
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
+	private Runner mostRecentRunner;
 
 	public DeliaImpl(DBInterface dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
@@ -99,7 +101,14 @@ public class DeliaImpl implements Delia {
 			DeliaError err = et.add("runner-init-failed", "runner init failed");
 			throw new DeliaException(err);
 		}
+		
+		HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
+		if (deliaOptions.useHLS) {
+			runner.setHLSManager(mgr);
+		}
+		
 		dbInterface.init(factorySvc);
+		mostRecentRunner = runner;
 		return runner;
 	}
 
@@ -297,22 +306,52 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ResultValue continueExecution(String src, DeliaSession dbsess) {
-		DeliaCompiler compiler = createCompiler();
-		List<Exp> extL = compiler.parse(src);
-		for(Exp exp: extL) {
+	public ResultValue continueExecution(String src, DeliaSession session) {
+		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
+		if (execCtx != null) {
+			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
+			execCtx.delcaredVarMap.remove(RunnerImpl.VAR_SERIAL);
+		}
+
+		DeliaCompiler compiler = doCreateCompiler(execCtx);
+		List<Exp> expL = compiler.parse(src);
+		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {
 				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
-				DeliaError err = new DeliaError("type-statement-not-allowed", msg, null);
+				DeliaError err = new DeliaError("type-statement-not-allowed", msg);
 				throw new DeliaException(err);
 			}
 		}
 
-		Runner runner = createRunner(dbsess);
-		ResultValue res = doExecute(runner, extL);
-
+		Runner runner = createRunner(session);
+		ResultValue res = doExecute(runner, expL);
+		
+		if (session instanceof DeliaSessionImpl) {
+			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+			sessimpl.mostRecentContinueExpL = expL;
+		}
 		return res;
 	}
+	
+	public List<Exp>  continueCompile(String src, DeliaSession session) {
+		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
+		if (execCtx != null) {
+			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
+			execCtx.delcaredVarMap.remove(RunnerImpl.VAR_SERIAL);
+		}
+
+		DeliaCompiler compiler = doCreateCompiler(execCtx);
+		List<Exp> expL = compiler.parse(src);
+		for(Exp exp: expL) {
+			if (exp instanceof TypeStatementExp) {
+				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
+				DeliaError err = new DeliaError("type-statement-not-allowed", msg);
+				throw new DeliaException(err);
+			}
+		}
+		return expL;
+	}
+	
 
 	@Override
 	public Log getLog() {
@@ -332,5 +371,13 @@ public class DeliaImpl implements Delia {
 	@Override
 	public DBInterface getDBInterface() {
 		return dbInterface;
+	}
+	//for internal use only - unit tests
+	public void setDbInterface(DBInterface dbInterface) {
+		this.dbInterface = dbInterface;
+	}
+
+	public Runner getMostRecentRunner() {
+		return mostRecentRunner;
 	}
 }

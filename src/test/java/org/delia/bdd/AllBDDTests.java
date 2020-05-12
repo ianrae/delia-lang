@@ -1,6 +1,6 @@
 package org.delia.bdd;
 
-import org.delia.bdd.core.BDDTester2;
+import org.delia.bdd.core.BDDTesterEx;
 import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
 import org.junit.After;
@@ -96,7 +96,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void testR950() {
-		runR950File("t0-crud-assoc-insert.txt", 0);
+		runR950File("t0-crud-assoc-insert.txt", 6);
 	}
 
 	@Test
@@ -148,7 +148,9 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR1500() {
 		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-distinct.txt", 0);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+		runR1500File("t0-queryfn-distinct.txt", 3);
+		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 		runR1500File("t0-queryfn-flatten.txt", 0);
 		runR1500File("t0-queryfn-count.txt", 2);
 		runR1500File("t0-queryfn-exist.txt", 2);
@@ -163,7 +165,9 @@ public class AllBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-min-bool.txt", 0);
 		runR1500File("t0-queryfn-min-relation.txt", 0);
 		runR1500File("t0-queryfn-min-string.txt", 4);
-		
+		runR1500File("t0-queryfn-min-date.txt", 4);
+		runR1500File("t0-queryfn-max-date.txt", 4);
+
 		runR1500File("t0-queryfn-max.txt", 0);
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
@@ -288,16 +292,13 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 13;
+		testIndexToRun = 0;
 		enableAllFileCheck = false;
-		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
+		
+//		runR1600File("t0-fetch.txt", 3);
 
-//		runR1350File("t0-filter-op-relation.txt", 13);
-//		runR1000File("t0-upsert-mm-other.txt", 1);
-//		runR1000File("t0-upsert-mm-all.txt", 1);
-//		runR1350File("t0-filter-op-relation.txt", 14);
-		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 	}
 	
 	//---
@@ -305,11 +306,15 @@ public class AllBDDTests extends NewBDDBase {
 
 	@Before
 	public void init() {
+		BDDTesterEx.useHLS = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTesterEx.useHLS = false;
 	}
+	
 	@Override
 	public DBInterface createForTest() {
 		MemDBInterface db = new MemDBInterface();

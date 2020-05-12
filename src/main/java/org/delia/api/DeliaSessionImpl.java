@@ -13,6 +13,7 @@ public class DeliaSessionImpl implements DeliaSession {
 	
 	//only set in beginExecution, not in continueExecution
 	public List<Exp> expL; //for getting at parse results. TODO: need a flag that disables this to save memory
+	public List<Exp> mostRecentContinueExpL; //for getting at parse results. TODO: need a flag that disables this to save memory
 //	private DValueIterator insertPrebuiltValueIterator;
 	private RunnerInitializer runnerInitializer;
 	private Delia delia;

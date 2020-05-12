@@ -10,7 +10,7 @@ thenType: struct
 title: migration3
 chainNextTest:true
 given:
- type Customer struct {id int unique serial, wid int } end
+ type Customer struct {id int primaryKey serial, wid int } end
 
 when:
  let z = 55
@@ -20,7 +20,7 @@ value:a:int:55
 ---
 title: migration3.1 - add field
 given:
- type Customer struct {id int unique serial, wid int, height int  } end
+ type Customer struct {id int primaryKey serial, wid int, height int  } end
 
 when:
   insert Customer { wid:34, height: 150}

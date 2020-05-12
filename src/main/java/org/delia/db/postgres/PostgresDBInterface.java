@@ -16,9 +16,14 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.H2DBConnection;
+import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.hls.HLSSelectHelper;
+import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
@@ -43,6 +48,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zqueryresponse.LetSpan;
 
 
 /**
@@ -81,7 +87,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		
 		if (useFragmentParser) {
 //			log.log("FRAG PARSER INSERT....................");
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
 			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
 			String typeName = dval.getType().getName();
 			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
@@ -116,13 +122,15 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	@Override
 	public QueryResponse executeQuery(QuerySpec spec, QueryContext qtx, DBAccessContext dbctx) {
+		List<LetSpan> spanL = buildSpans(spec, qtx);
+		failIfMultiSpan(spec, qtx, spanL);
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
 		if (useFragmentParser) {
 //			log.log("FRAG PARSEr....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
 			SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
 			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
@@ -145,17 +153,21 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		//TODO: do we need to catch and interpret execptions here??
 
 		QueryResponse qresp = new QueryResponse();
-		
-		SelectFuncHelper sfhelper = sqlHelperFactory.createSelectFuncHelper(dbctx);
+
+		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
+		SelectFuncHelper sfhelper = sqlHelperFactory.createSelectFuncHelper(dbctx, spanHelper);
 		DType selectResultType = sfhelper.getSelectResultType(spec);
 		if (selectResultType.isScalarShape()) {
-			qresp.dvalList = buildScalarResult(rs, selectResultType, details, dbctx);
+			ResultTypeInfo rti = new ResultTypeInfo();
+			rti.logicalType = selectResultType;
+			rti.physicalType = selectResultType;
+			qresp.dvalList = buildScalarResult(rs, rti, details, dbctx);
 			fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
 			qresp.ok = true;
 		} else {
 			String typeName = spec.queryExp.getTypeName();
 			DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx);
+			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx, null);
 			qresp.ok = true;
 		}
 		return qresp;
@@ -190,7 +202,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 //			log.log("FRAG PARSER DELETE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
 			whereGen.tableFragmentMaker = parser;
 			QueryDetails details = new QueryDetails();
@@ -223,7 +235,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 //			log.log("FRAG PARSER UPDATE....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
@@ -265,7 +277,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 //			log.log("FRAG PARSER UPSERT....................");
 			createTableCreator(dbctx);
 			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen);
+			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 			PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 			whereGen.tableFragmentMaker = parser;
@@ -406,5 +418,37 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		//nothing to do
 	}
 
-	
+
+	@Override
+	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
+		SqlStatement statement = new SqlStatement();
+		statement.sql = sql;
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			statement.paramL.addAll(hlspan.paramL);
+		}
+		logSql(statement);
+		
+		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
+		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+		//TODO: do we need to catch and interpret execptions here??
+
+		QueryDetails details = hls.details;
+
+		QueryResponse qresp = new QueryResponse();
+		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, dbctx.registry);
+		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
+		if (selectResultType.isScalarShape()) {
+			qresp.dvalList = buildScalarResult(rs, selectResultType, details, dbctx);
+//			fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+			qresp.ok = true;
+		} else {
+			String typeName = hls.querySpec.queryExp.getTypeName();
+			DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
+			qresp.dvalList = buildDValueList(rs, dtype, details, dbctx, hls);
+			qresp.ok = true;
+		}
+		return qresp;
+	}
+
+
 }

@@ -11,16 +11,15 @@ import java.util.StringJoiner;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
+import org.delia.bdd.core.BDDTesterEx;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.SqlHelperFactory;
-import org.delia.db.h2.H2SqlHelperFactory;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -35,6 +34,7 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -233,7 +233,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and rightv = ?");
 		chkNoLine(3);
 		chkParams(selectFrag, 333,55, 100,55);
 		chkNumParams(2, 2);
@@ -249,8 +249,8 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and right == ?;");
-		chkLine(3, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and rightv = ?;");
+		chkLine(3, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and rightv = ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,55, 100,55, 101,55);
 		chkNumParams(2, 2, 2);
@@ -266,8 +266,8 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc as b WHERE leftv = ? and right == ?;");
-		chkLine(3, selectFrag, " DELETE FROM CustomerAddressAssoc as b WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc as b WHERE leftv = ? and rightv = ?;");
+		chkLine(3, selectFrag, " DELETE FROM CustomerAddressAssoc as b WHERE leftv = ? and rightv = ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,55, 55,100, 55,101);
 		chkNumParams(2, 2, 2);
@@ -284,7 +284,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc as b WHERE leftv = ? and rightv = ?");
 		chkNoLine(3);
 		chkParams(selectFrag, 7, 100, 100,55);
 		chkNumParams(2, 2);
@@ -300,7 +300,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc as b WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc as b WHERE leftv = ? and rightv = ?");
 		chkNoLine(3);
 		chkParams(selectFrag, 7, 100, 55,100);
 		chkNumParams(2, 2);
@@ -345,7 +345,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?");
 		chkNoLine(3);
 		chkParams(selectFrag, 333,55, 222,55, 100,55);
 		chkNumParams(2, 4);
@@ -361,8 +361,8 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?;");
-		chkLine(3, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?;");
+		chkLine(3, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,55, 222,55,100,55, 223,55,101,55);
 		chkNumParams(2, 4, 4);
@@ -378,8 +378,8 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?;");
-		chkLine(3, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?;");
+		chkLine(3, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,55, 55,222,55,100,  55,223,55,101);
 		chkNumParams(2, 4, 4);
@@ -396,7 +396,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " UPDATE AddressCustomerAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?");
 		chkNoLine(3);
 		chkParams(selectFrag, 7,100, 100,56,100,55);
 		chkNumParams(2, 4);
@@ -412,7 +412,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and right == ?");
+		chkLine(2, selectFrag, " UPDATE CustomerAddressAssoc as b SET b.leftv = ?, b.rightv = ? WHERE leftv = ? and rightv = ?");
 		chkNoLine(3);
 		chkParams(selectFrag, 7,100, 56,100,55,100);
 		chkNumParams(2, 4);
@@ -439,6 +439,11 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	@Before
 	public void init() {
 	}
+	@After
+	public void shutdown() {
+		TableExistenceServiceImpl.hackYesFlag = false;
+	}
+	
 
 	private String buildSrcOneToOne() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one } end";
@@ -475,27 +480,16 @@ public class AssocCrudTests extends FragmentParserTestBase {
 
 		return parser;
 	}
-	private UpdateFragmentParser createParser(DeliaDao dao) {
-		List<TableInfo> tblinfoL = createTblInfoL(); 
-		return createParser(dao, tblinfoL);
-	}
 	private UpdateFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
-		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		DBAccessContext dbctx = new DBAccessContext(runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen);
+		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		return parser;
 	}
 
-	private void runAndChk(UpdateStatementFragment selectFrag, String expected) {
-		String sql = fragmentParser.renderSelect(selectFrag);
-		log.log(sql);
-		assertEquals(expected, sql);
-	}
 	private void runAndChkLine(int lineNum, UpdateStatementFragment selectFrag, String expected) {
 		SqlStatementGroup stgroup = fragmentParser.renderUpdateGroup(selectFrag);
 		currentGroup = stgroup;
@@ -547,10 +541,6 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		return selectFrag;
 	}
 
-	private UpdateStatementExp buildFromSrc(String src) {
-		List<TableInfo> tblinfoL = this.createTblInfoL();
-		return buildFromSrc(src, tblinfoL);
-	}
 	private UpdateStatementExp buildFromSrc(String src, List<TableInfo> tblinfoL) {
 		DeliaDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();
@@ -560,7 +550,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		this.fragmentParser = createFragmentParser(dao, src, tblinfoL); 
 		
 		//		List<Exp> expL = dao.getMostRecentSess().
-		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSess();
+		DeliaSessionImpl sessImpl = (DeliaSessionImpl) dao.getMostRecentSession();
 		UpdateStatementExp updateStatementExp = null;
 		for(Exp exp: sessImpl.expL) {
 			if (exp instanceof UpdateStatementExp) {

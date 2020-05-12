@@ -21,6 +21,7 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
@@ -554,5 +555,10 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 			}
 		}
 		
+	}
+
+	@Override
+	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
+		return this.doExecuteQuery(hls.querySpec, qtx, dbctx);
 	}
 }

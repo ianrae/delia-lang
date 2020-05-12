@@ -8,6 +8,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.SpanHelper;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
@@ -33,6 +34,7 @@ import org.delia.util.DValueHelper;
 		protected FKHelper fkHelper;
 		protected JoinFragment savedJoinedFrag;
 		protected List<TableInfo> tblinfoL;
+		protected SpanHelper spanHelper;
 		
 		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc) {
 			super(factorySvc);
@@ -45,6 +47,7 @@ import org.delia.util.DValueHelper;
 			this.existSvc = fpSvc.createTableExistenceService(); 
 			
 			this.fkHelper = fpSvc.createFKHelper(); 
+			this.spanHelper = fpSvc.spanHelper;
 		}
 		
 		public void createAlias(AliasedFragment frag) {

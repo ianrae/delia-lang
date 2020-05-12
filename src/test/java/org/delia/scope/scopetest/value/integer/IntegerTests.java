@@ -8,7 +8,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test1Scalar() {
 		createScalarType("int", "");
-		
+		beginSession();
+
 		//string
 		chkInteger("114", 114);
 		chkInteger("0", 0);
@@ -28,7 +29,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test2ScalarRulePass() {
 		createScalarType("int", "< 1000");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//string
@@ -49,7 +51,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test2ScalarRuleFail() {
 		createScalarType("int", "< 10");
-		
+		beginSession();
+
 		//TODO: run all rules types - pos and neg tests
 		
 		//primitive types - can't have rules
@@ -70,7 +73,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test4Struct() {
 		createStructType("int", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldInteger("114", 114);
@@ -86,7 +90,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test4StructLet() {
 		createStructType("int", "");
-		
+		beginSession();
+
 		//C
 		typeNameToUse = "C";
 		chkFieldInteger("114", 114);
@@ -105,7 +110,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test4StructRulePass() {
 		createStructType("int", "field1 < 10");
-		
+		beginSession();
+
 		//TODO - other rules!!!
 		
 		//C
@@ -122,7 +128,8 @@ public class IntegerTests extends IntegerTestBase {
 	@Test
 	public void test5LetScalar() {
 		createScalarType("int", "");
-		
+		beginSession();
+
 		//string
 		chkInteger("114", 114);
 		chkInteger("0", 0);
@@ -159,6 +166,8 @@ public class IntegerTests extends IntegerTestBase {
 	public void test6Insert() {
 		createScalarType("int", "");
 		createStructType("int", "");
+		beginSession();
+
 		chkInteger("66", 66);
 		chkInteger("67", "X",  67);
 		chkInteger("68", "X2",  68);
@@ -177,6 +186,8 @@ public class IntegerTests extends IntegerTestBase {
 		addIdFlag = true;
 		createScalarType("int", "");
 		createStructType("int", "");
+		beginSession();
+
 		chkInteger("66", 66);
 		chkInteger("67", "X",  67);
 		chkInteger("68", "X2",  68);
@@ -192,6 +203,8 @@ public class IntegerTests extends IntegerTestBase {
 		addIdFlag = true;
 		createScalarType("int", "");
 		createStructType("int", "");
+		beginSession();
+
 		chkInteger("66", 66);
 		chkInteger("67", "X",  67);
 		chkInteger("68", "X2",  68);
@@ -208,6 +221,8 @@ public class IntegerTests extends IntegerTestBase {
 		deleteBeforeInsertFlag = false;
 		createScalarType("int", "");
 		createStructType("int", "");
+		beginSession();
+
 		chkInteger("66", 66);
 		chkInteger("67", "X",  67);
 		chkInteger("68", "X2",  68);

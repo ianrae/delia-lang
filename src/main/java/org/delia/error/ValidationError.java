@@ -10,8 +10,8 @@ package org.delia.error;
  */
 public class ValidationError extends DeliaError {
 
-	public ValidationError(String id, String msg, Class<?> sourceClass) {
-		super(id, msg, sourceClass);
+	public ValidationError(String id, String msg) {
+		super(id, msg);
 	}
 
 }

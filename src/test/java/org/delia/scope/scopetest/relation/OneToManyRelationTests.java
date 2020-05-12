@@ -1,6 +1,5 @@
 package org.delia.scope.scopetest.relation;
 
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.ResultValue;
 import org.junit.Before;
 import org.junit.Test;

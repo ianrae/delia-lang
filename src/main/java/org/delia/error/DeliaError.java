@@ -12,7 +12,6 @@ public class DeliaError {
 	private String id;
 	private String msg;
 	private Date timestamp = new Date();
-	private Class<?> sourceClass;
 	private String area; //descriptive name. eg. pipeline name
 	private String arg1;
 	private String arg2;
@@ -21,12 +20,8 @@ public class DeliaError {
 	private int pos;
 
 	public DeliaError(String id, String msg) {
-		this(id, msg, null);
-	}
-	public DeliaError(String id, String msg, Class<?> sourceClass) {
 		this.id = id;
 		this.msg = msg;
-		this.sourceClass = sourceClass;
 	}
 	
 	public void setLineAndPos(int lineNum, int pos) {
@@ -36,8 +31,7 @@ public class DeliaError {
 	
 	@Override
 	public String toString() {
-		String src = (sourceClass == null) ? "" : String.format("[%s]", sourceClass.getName());
-		return String.format("%s%s: %s", src, id, msg);
+		return String.format("%s: %s", id, msg);
 	}
 	public String getId() {
 		return id;
@@ -47,13 +41,6 @@ public class DeliaError {
 	}
 	public Date getTimestamp() {
 		return timestamp;
-	}
-	public Class<?> getSourceClass() {
-		return sourceClass;
-	}
-
-	public void setSourceClass(Class<?> sourceClass) {
-		this.sourceClass = sourceClass;
 	}
 	public String getArea() {
 		return area;

@@ -10,7 +10,7 @@ public class RelationInfo {
 	public RelationCardinality cardinality;
 	public boolean isParent;
 	public boolean isOneWay;
-	
+	public RelationInfo otherSide; //null if one-sided relation
 	
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		if (spec.needsReplacement(this, nearType)) {
