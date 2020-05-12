@@ -36,7 +36,7 @@ public class RulePostProcessor extends ServiceBase {
 		buildRelInfos(registry);
 		setParentFlagsIfNeeded(registry);
 		
-		//thenvalidate types can be put into a correct dependency order (i.e. no cycles)
+		//then validate types can be put into a correct dependency order (i.e. no cycles)
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		try {
 			List<String> orderL = typeSorter.topoSort(registry);

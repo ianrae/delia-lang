@@ -11,7 +11,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
-import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.error.DeliaError;

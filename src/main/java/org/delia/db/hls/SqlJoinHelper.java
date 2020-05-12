@@ -130,6 +130,10 @@ public class SqlJoinHelper {
 			//err!!
 			return null;
 		}
+		
+		public boolean needJoin(HLSQuerySpan hlspan) {
+			return !genJoinList(hlspan).isEmpty();
+		}
 
 		private List<TypePair> genJoinList(HLSQuerySpan hlspan) {
 			List<TypePair> joinL = genFullJoinList(hlspan);
@@ -167,7 +171,10 @@ public class SqlJoinHelper {
 			if (hlspan.subEl.allFKs) {
 				for(TypePair pair: hlspan.fromType.getAllFields()) {
 					if (pair.type.isStructShape()) {
-						joinL.add(pair);
+						RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
+						if (!relinfo.isParent) {
+							joinL.add(pair);
+						}
 					}
 				}
 			}
