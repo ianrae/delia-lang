@@ -22,19 +22,37 @@ when:
   let x = Customer[true].fetch('addr').orderBy('x', desc)
 then:
 value:a:Customer {
-vid:57
-vx:12
-vaddr:{101}
+ vid:57
+ vx:12
+ vaddr:{101:
+   {
+   vid:101
+   vy:21
+   vcust:null
+  }
+}
 }
 value:a:Customer {
-vid:56
-vx:11
-vaddr:{[101,102]}
+ vid:56
+ vx:11
+ vaddr:{[101,102]}
+   {
+   vid:101
+   vy:21
+   vcust:null
+  }
+}
 }
 value:a:Customer {
-vid:55
-vx:10
-vaddr:{[100,101,102]}
+ vid:55
+ vx:10
+ vaddr:{[100,101,102]}
+   {
+   vid:100
+   vy:20
+   vcust:null
+  }
+}
 }
 
 ---
