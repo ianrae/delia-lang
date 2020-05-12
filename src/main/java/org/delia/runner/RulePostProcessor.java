@@ -108,15 +108,26 @@ public class RulePostProcessor extends ServiceBase {
 					RelationOneRule rr = (RelationOneRule) rule;
 					RelationInfo info = rr.relInfo;
 					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+					addErrorIfShouldBeHookedUp(info, rr.nameIsExplicit, allErrors);
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
 					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+					addErrorIfShouldBeHookedUp(info, rr.nameIsExplicit, allErrors);
 				}
 			}
 		}
 	}
 	
+	private void addErrorIfShouldBeHookedUp(RelationInfo info, boolean nameIsExplicit, List<DeliaError> allErrors) {
+		if (info.otherSide == null && nameIsExplicit) {
+			String s = info.relationName;
+			String msg = String.format("named relation '%s' - cannot find other side of relation", s);
+			DeliaError err = new DeliaError("named-relation-error", msg);
+			allErrors.add(err);
+		}
+	}
+
 	private RelationInfo findOtherSide(DRule rrSrc, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
 		List<RelationInfo> nameRelL = new ArrayList<>();
 		List<RelationInfo> relL = new ArrayList<>();

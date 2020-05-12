@@ -29,6 +29,7 @@ public class RelationOneRule extends DRuleBase {
 	private boolean isParent;
 	public RelationInfo relInfo;
 	private String relationName; //either user-defined or delia assigns a name
+	public boolean nameIsExplicit;
 
 	public RelationOneRule(RuleGuard guard, RuleOperand oper1, 
 			DStructType owningType, DTypeRegistry registry, boolean isParent, String relationName) {

@@ -13,6 +13,13 @@ import org.junit.Test;
 
 public class NamedRelationTests extends TopoTestBase {
 	
+	/*
+	 * TODO:
+	 * test duplicate rule names
+	 * test rule named same as other relation field
+	 * get rid of DRuleHelper find other side fn
+	 */
+	
 	
 	@Test
 	public void test0() {
