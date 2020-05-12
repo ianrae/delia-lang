@@ -315,6 +315,8 @@ public class H2BDDTests extends NewBDDBase {
 	@After
 	public void shutdown() {
 		chkAllFiles();
+		BDDTester2.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTester2.useHLS = false;
 	}
 
 	@Override

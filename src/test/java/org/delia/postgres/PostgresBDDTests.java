@@ -321,6 +321,8 @@ public class PostgresBDDTests extends NewBDDBase {
 	@After
 	public void shutdown() {
 		chkAllFiles();
+		BDDTester2.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTester2.useHLS = false;
 	}
 
 	@Override

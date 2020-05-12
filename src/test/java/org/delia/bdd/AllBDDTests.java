@@ -310,7 +310,10 @@ public class AllBDDTests extends NewBDDBase {
 	@After
 	public void shutdown() {
 		chkAllFiles();
+		BDDTester2.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTester2.useHLS = false;
 	}
+	
 	@Override
 	public DBInterface createForTest() {
 		MemDBInterface db = new MemDBInterface();

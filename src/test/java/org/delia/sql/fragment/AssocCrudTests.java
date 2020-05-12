@@ -11,6 +11,7 @@ import java.util.StringJoiner;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
+import org.delia.bdd.core.BDDTester2;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -32,6 +33,7 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -436,6 +438,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	@Before
 	public void init() {
 	}
+	
 
 	private String buildSrcOneToOne() {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional one } end";
