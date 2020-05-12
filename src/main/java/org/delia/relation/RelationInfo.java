@@ -11,6 +11,7 @@ public class RelationInfo {
 	public boolean isParent;
 	public boolean isOneWay;
 	public RelationInfo otherSide; //null if one-sided relation
+	public String relationName; //never null
 	
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		if (spec.needsReplacement(this, nearType)) {

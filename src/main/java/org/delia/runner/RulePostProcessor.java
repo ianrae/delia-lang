@@ -1,5 +1,6 @@
 package org.delia.runner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.core.FactoryService;
@@ -34,7 +35,7 @@ public class RulePostProcessor extends ServiceBase {
 
 	public void process(DTypeRegistry registry, List<DeliaError> allErrors) {
 		buildRelInfos(registry);
-		setOtherSide(registry);
+		setOtherSide(registry, allErrors);
 		setParentFlagsIfNeeded(registry);
 		
 		//then validate types can be put into a correct dependency order (i.e. no cycles)
@@ -73,6 +74,7 @@ public class RulePostProcessor extends ServiceBase {
 							info.isOneWay = (farSide == null);
 							info.isParent = rr.isParent();
 							info.nearType = structType;
+							info.relationName = rr.getRelationName();
 						} else if (rule instanceof RelationManyRule) {
 							RelationManyRule rr = (RelationManyRule) rule;
 							RelationInfo info = new RelationInfo();
@@ -85,6 +87,7 @@ public class RulePostProcessor extends ServiceBase {
 							info.isOneWay = false;
 							info.isParent = false; //will set after this
 							info.nearType = structType;
+							info.relationName = rr.getRelationName();
 						}
 					}
 				}
@@ -92,7 +95,7 @@ public class RulePostProcessor extends ServiceBase {
 		}
 	}
 	
-	private void setOtherSide(DTypeRegistry registry) {
+	private void setOtherSide(DTypeRegistry registry, List<DeliaError> allErrors) {
 		for(String typeName: registry.getAll()) {
 			DType dtype = registry.getType(typeName);
 			if (! dtype.isStructShape()) {
@@ -104,43 +107,60 @@ public class RulePostProcessor extends ServiceBase {
 				if (rule instanceof RelationOneRule) {
 					RelationOneRule rr = (RelationOneRule) rule;
 					RelationInfo info = rr.relInfo;
-					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType);
+					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
-					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType);
+					info.otherSide = findOtherSide(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
 				}
 			}
 		}
 	}
 	
-	
-	
-	private RelationInfo findOtherSide(DRule rrSrc, String relationName, DStructType farType, DStructType nearType) {
+	private RelationInfo findOtherSide(DRule rrSrc, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
+		List<RelationInfo> nameRelL = new ArrayList<>();
+		List<RelationInfo> relL = new ArrayList<>();
 		for(DRule rule: farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
 				if (rr.getRelationName().equals(relationName)) {
-					return rr.relInfo;
+					nameRelL.add(rr.relInfo);
 				}
 
 				//otherwise find by field type 
 				if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
-					return rr.relInfo;
+					relL.add(rr.relInfo);
 				}
 			} else if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
 				if (rr.getRelationName().equals(relationName)) {
-					return rr.relInfo;			
+					nameRelL.add(rr.relInfo);
 				}
 					
 				//otherwise find by field type 
 				if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
-					return rr.relInfo;
+					relL.add(rr.relInfo);
 				}
 			}
 		}
-		return null;
+		
+		if (!nameRelL.isEmpty()) {
+			if (nameRelL.size() > 1) {
+				String s = nameRelL.get(0).relationName;
+				String msg = String.format("Relation name '%s' used more than once (%d)", s, nameRelL.size());
+				DeliaError err = new DeliaError("relation-names-must-be-unique", msg);
+				allErrors.add(err);
+			}
+			return nameRelL.get(0);
+		}
+		
+		if (relL.size() > 1) {
+			String s = relL.get(0).relationName;
+			String msg = String.format("ambigious relation '%s' could point to %d fields. Perhaps you need to use a named relation?", s, relL.size());
+			DeliaError err = new DeliaError("ambiguous-relation", msg);
+			allErrors.add(err);
+		}
+		return relL.get(0);
 	}
 
 	private void setParentFlagsIfNeeded(DTypeRegistry registry) {
