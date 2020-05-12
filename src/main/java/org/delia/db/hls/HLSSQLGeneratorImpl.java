@@ -201,9 +201,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		boolean hasIth = hlspan.hasFunction("ith");
 
 		if (hlspan.oloEl == null) {
-			if (needLimit1) {
-				sc.out("LIMIT 1");
-			}
 			if (hasLast) {
 				//implicitly add sort by pk (if there is one)
 				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
@@ -221,6 +218,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 					Integer iOffset = gel.getIntArg(0);
 					sc.out("ORDER BY %s LIMIT 1 OFFSET %s",ss, iOffset.toString());
 				}
+			}
+			if (needLimit1) {
+				sc.out("LIMIT 1");
 			}
 			return;
 		}
