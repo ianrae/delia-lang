@@ -41,7 +41,7 @@ public class DateFormatServiceImpl implements DateFormatService {
 			applyTimeZone(df);
 			dt = df.parse(input);
 		} catch (ParseException e) {
-			DeliaError err = new DeliaError("date-parse-error", e.getMessage(), null);
+			DeliaError err = new DeliaError("date-parse-error", e.getMessage());
 			throw new DeliaException(err);
 		}  
 		return dt;

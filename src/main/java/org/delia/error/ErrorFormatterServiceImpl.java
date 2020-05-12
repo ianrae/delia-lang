@@ -30,11 +30,10 @@ public class ErrorFormatterServiceImpl implements ErrorFormatterService {
 	}
 	@Override
 	public String format(DeliaError err, Locale locale) {
-		String src = (err.getSourceClass() == null) ? "?" : err.getSourceClass().getName();
 		String dateStr = err.getTimestamp().toString();
 		
 		String textMessage = getTextMessage(err, locale);
-		String s = String.format("%s: [%s] - (%s) %s - %s", dateStr, err.getId(), err.getArea(), src, textMessage);
+		String s = String.format("%s: [%s] - (%s) - %s", dateStr, err.getId(), err.getArea(), textMessage);
 		return s;
 	}
 	protected synchronized String getTextMessage(DeliaError err, Locale locale) {

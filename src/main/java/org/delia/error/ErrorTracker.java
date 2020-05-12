@@ -17,8 +17,6 @@ public interface ErrorTracker {
 	void add(DeliaError err);
 	void addAll(List<DeliaError> errL);
 	DeliaError add(String id, String msg);
-	void add(Object self, DeliaError err);
-	DeliaError add(Object self, String id, String msg);
 
 	void clear();
 	void dump();

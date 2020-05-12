@@ -318,7 +318,7 @@ public class DeliaImpl implements Delia {
 		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {
 				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
-				DeliaError err = new DeliaError("type-statement-not-allowed", msg, null);
+				DeliaError err = new DeliaError("type-statement-not-allowed", msg);
 				throw new DeliaException(err);
 			}
 		}
@@ -345,7 +345,7 @@ public class DeliaImpl implements Delia {
 		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {
 				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
-				DeliaError err = new DeliaError("type-statement-not-allowed", msg, null);
+				DeliaError err = new DeliaError("type-statement-not-allowed", msg);
 				throw new DeliaException(err);
 			}
 		}

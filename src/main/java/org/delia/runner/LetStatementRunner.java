@@ -202,7 +202,8 @@ public class LetStatementRunner extends ServiceBase {
 
 		//avoid stack overflow. fn can't call itself
 		if (runner.activeUserFnMap.containsKey(userFnExp.funcName)) {
-			DeliaError err = et.add("user-func-self-invoke", "A user function may not invoke itself - function %s", userFnExp.funcName);
+			String msg = String.format("A user function may not invoke itself - function %s", userFnExp.funcName);
+			DeliaError err = et.add("user-func-self-invoke", msg);
 			throw new DeliaException(err);
 		}
 

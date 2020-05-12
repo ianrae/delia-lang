@@ -43,7 +43,7 @@ public abstract class OpEvaluatorBase implements OpEvaluator {
 		}
 		if (!DValueHelper.fieldExists(dval.getType(), fieldName)) {
 			String msg = String.format("Type '%s' doesn't have field '%s'", dval.getType().getName(), fieldName);
-			DeliaError err = new DeliaError("memdb-unknown-field", msg, null);
+			DeliaError err = new DeliaError("memdb-unknown-field", msg);
 			throw new InternalException(err);
 		}
 	}

@@ -26,7 +26,7 @@ public class NullOpEvaluator implements OpEvaluator {
 			return s1 != null;
 		} else {
 			String msg = String.format("Can't use null with %s operand", op);
-			DeliaError err = new DeliaError("null-not-allowed-here", msg, null);
+			DeliaError err = new DeliaError("null-not-allowed-here", msg);
 			throw new DeliaException(err);
 		}
 	}
