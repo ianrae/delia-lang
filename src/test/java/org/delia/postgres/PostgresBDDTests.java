@@ -300,10 +300,10 @@ public class PostgresBDDTests extends NewBDDBase {
 //		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 //		runR1600File("t0-fetch.txt", 3);
 //		runR1400File("t0-filterfn-date.txt", 12);
-		runR1500File("t0-queryfn-exist.txt", 2);
-//		runR1500File("t0-queryfn-first.txt", 2);
-//		runR1500File("t0-queryfn-last.txt", 2);
-//		runR1500File("t0-queryfn-ith.txt", 4);
+//		runR1500File("t0-queryfn-exist.txt", 2);
+		runR1500File("t0-queryfn-first.txt", 2);
+		runR1500File("t0-queryfn-last.txt", 2);
+		runR1500File("t0-queryfn-ith.txt", 4);
 	}
 	
 	//---

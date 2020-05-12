@@ -18,6 +18,7 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSQLGenerator;
 import org.delia.db.hls.HLSSQLGeneratorImpl;
+import org.delia.db.postgres.PostgresHLSSQLGeneratorImpl;
 import org.delia.db.postgres.PostgresWhereFragmentGenerator;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
@@ -107,9 +108,11 @@ public class HLSManager extends ServiceBase {
 			}
 		}
 		case H2:
-		case POSTGRES:
-		default:
 			return gen;
+		case POSTGRES:
+			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, existSvc);
+		default:
+			return null; //should never happen
 		}
 	}
 

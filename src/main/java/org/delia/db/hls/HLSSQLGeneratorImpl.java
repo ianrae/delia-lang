@@ -195,8 +195,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	}
 
 
-	private void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
-		boolean needLimit1 = hlspan.hasFunction("exists");
+	protected void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
+		boolean needLimit1 = oloNeedsLimit(hlspan); 
 		boolean hasLast = hlspan.hasFunction("last");
 		boolean hasIth = hlspan.hasFunction("ith");
 
@@ -246,6 +246,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 	}
 
+	protected boolean oloNeedsLimit(HLSQuerySpan hlspan) {
+		return hlspan.hasFunction("exists");
+	}
+
 	private void genWhere(SQLCreator sc, HLSQuerySpan hlspan) {
 		if (hlspan.filEl ==  null) {
 			return;
@@ -268,10 +272,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		List<RenderedField> fieldL = new ArrayList<>();
 
 		if (hlspan.hasFunction("first")) {
-			sc.out("TOP 1");
+			doFirst(sc, hlspan);
 		}
 		if (hlspan.hasFunction("last")) { //we apply desc sorting
-			sc.out("TOP 1");
+			doLast(sc, hlspan);
 		}
 
 		boolean isJustFieldName = false;
@@ -333,6 +337,14 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		hlspan.renderedFieldL = fieldL;
 		sc.out(joiner.toString());
 	}
+
+	protected void doFirst(SQLCreator sc, HLSQuerySpan hlspan) {
+		sc.out("TOP 1");
+	}
+	protected void doLast(SQLCreator sc, HLSQuerySpan hlspan) {
+		sc.out("TOP 1");
+	}
+	
 
 	private void addField(List<RenderedField> fieldL, DStructType structType, TypePair pair, String s) {
 		RenderedField rf = new RenderedField();
