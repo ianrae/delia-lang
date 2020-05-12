@@ -123,7 +123,7 @@ public class BrightspaceTests {
 	 
 	}
 	
-	@Test
+//	@Test
 	public void test() {
 		String path = "C:/Users/ian/Documents/GitHub/basis/algonquin/sysdesign/final-exam.txt";
 		TestGenerator svc = new TestGenerator();

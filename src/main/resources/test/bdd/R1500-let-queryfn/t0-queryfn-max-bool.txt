@@ -1,12 +1,13 @@
 # queryfn tests
 
 FEATURE: queryfn-max-boolean 
+#TODO: drop support. postgress doesn't support max() of bool
 background:
   type Flight struct {id int unique, wid boolean optional }  end
 thenType: struct
 
 ---
-title: max
+SKIP: max
 given:
   insert Flight {id: 55, wid: true }
   insert Flight {id: 56, wid: false }
@@ -16,7 +17,7 @@ then:
 value:a:boolean:true
 
 ---
-title: max empty
+SKIP: max empty
 given:
   insert Flight {id: 55, wid: true }
   insert Flight {id: 56, wid: false }
@@ -26,7 +27,7 @@ then:
 null
 
 ---
-title: null
+SKIP: null
 #we ignore null values
 given:
   insert Flight {id: 55 }
@@ -37,7 +38,7 @@ then:
 value:a:boolean:false
 
 ---
-title: bad field name
+SKIP: bad field name
 given:
   insert Flight {id: 55, wid: true }
   insert Flight {id: 56, wid: false }

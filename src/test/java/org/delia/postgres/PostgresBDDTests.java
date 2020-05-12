@@ -165,7 +165,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-min-int.txt", 4);
 		runR1500File("t0-queryfn-min-long.txt", 4);
 		runR1500File("t0-queryfn-min-number.txt", 4);
-		runR1500File("t0-queryfn-min-bool.txt", 4);
+		runR1500File("t0-queryfn-min-bool.txt", 0);
 		runR1500File("t0-queryfn-min-relation.txt", 0);
 		runR1500File("t0-queryfn-min-string.txt", 4);
 		runR1500File("t0-queryfn-min-date.txt", 4);
@@ -175,7 +175,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-max-int.txt", 4);
 		runR1500File("t0-queryfn-max-long.txt", 4);
 		runR1500File("t0-queryfn-max-number.txt", 4);
-		runR1500File("t0-queryfn-max-bool.txt", 4);
+		runR1500File("t0-queryfn-max-bool.txt", 0);
 		runR1500File("t0-queryfn-max-relation.txt", 0);
 		runR1500File("t0-queryfn-max-string.txt", 4);
 		runR1500File("t0-queryfn-avg.txt", 0);
@@ -188,7 +188,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
 		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR1550File("t0-queryfn-oneone-child.txt", 6);
-		//TODO runR1550File("t0-queryfn-oneone-childa.txt", 6);
+		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 		runR1550File("t0-queryfn-onemany-parent.txt", 6);
 		runR1550File("t0-queryfn-onemany-child.txt", 6);
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
@@ -301,9 +301,10 @@ public class PostgresBDDTests extends NewBDDBase {
 //		runR1600File("t0-fetch.txt", 3);
 //		runR1400File("t0-filterfn-date.txt", 12);
 //		runR1500File("t0-queryfn-exist.txt", 2);
-		runR1500File("t0-queryfn-first.txt", 2);
-		runR1500File("t0-queryfn-last.txt", 2);
-		runR1500File("t0-queryfn-ith.txt", 4);
+//		runR1500File("t0-queryfn-first.txt", 2);
+//		runR1500File("t0-queryfn-last.txt", 2);
+//		runR1500File("t0-queryfn-ith.txt", 4);
+		runR1500File("t0-queryfn-min-bool.txt", 0);
 	}
 	
 	//---
