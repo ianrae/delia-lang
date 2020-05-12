@@ -10,7 +10,7 @@ thenType: struct
 title: migration10a
 chainNextTest:true
 given:
- type Customer struct {id int unique serial, wid int } end
+ type Customer struct {id int primaryKey serial, wid int } end
 
 when:
   insert Customer { wid:33}
@@ -26,7 +26,7 @@ title: migration10a.1 - rename field. migration checks and halt when this occurs
 #this fails because we added mandatory field wid2 but didn't update previous records
 chainNextTest:true
 given:
- type Customer struct {id int unique serial, wid2 long } end
+ type Customer struct {id int primaryKey serial, wid2 long } end
 
 when:
   insert Customer { wid2:34}

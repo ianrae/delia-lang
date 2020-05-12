@@ -10,7 +10,7 @@ thenType: struct
 title: migration4
 chainNextTest:true
 given:
- type Customer struct {id int unique serial, wid int } end
+ type Customer struct {id int primaryKey serial, wid int } end
 
 when:
   insert Customer { wid:33}
@@ -26,7 +26,7 @@ value:a:Customer {
 #that doesn't have the field. get null
 title: migration4.1 - add field
 given:
- type Customer struct {id int unique serial, wid int, height int optional } end
+ type Customer struct {id int primaryKey serial, wid int, height int optional } end
 
 when:
   insert Customer { wid:34, height: 150}

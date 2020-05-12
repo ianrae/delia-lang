@@ -11,7 +11,7 @@ title: migration10
 chainNextTest:true
 useSafeMigrationPolicy:false
 given:
- type Customer struct {id int unique serial, wid int } end
+ type Customer struct {id int primaryKey serial, wid int } end
 
 when:
   insert Customer { wid:33}
@@ -26,7 +26,7 @@ value:a:Customer {
 title: migration10.1 - rename field
 useSafeMigrationPolicy:false
 given:
- type Customer struct {id int unique serial, wid2 int } end
+ type Customer struct {id int primaryKey serial, wid2 int } end
 
 when:
   insert Customer { wid2:34}

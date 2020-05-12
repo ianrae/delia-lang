@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -90,7 +91,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 			DeliaError err = ((ValueException)e).errL.get(0);
 			throw new DBException(err);
 		} catch (Exception e) {
-			//			e.printStackTrace();
+						e.printStackTrace();
 			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
 			throw new DBException(err);
 		}
@@ -245,9 +246,8 @@ public class ResultSetToDValConverter extends ServiceBase {
 			rfList = hls.getRenderedFields();
 		}
 		
-		int index = 0;
+		RenderedField rf = CollectionUtils.isEmpty(rfList) ? null : rfList.get(0);
 		while(rs.next()) {  //get row
-			RenderedField rf = rfList == null ? null : rfList.get(index++);
 			
 			//first columns are the main object
 			ColumnReadInfo columnReadInfo = new ColumnReadInfo();

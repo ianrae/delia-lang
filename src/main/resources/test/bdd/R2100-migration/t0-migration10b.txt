@@ -14,7 +14,7 @@ chainNextTest:true
 useSafeMigrationPolicy:false
 cleanTables:Customer,Customer__BAK,DELIA_SCHEMA_VERSION
 given:
- type Customer struct {id int unique serial, wid int } end
+ type Customer struct {id int primaryKey serial, wid int } end
 
 when:
   insert Customer { wid:33}
@@ -31,7 +31,7 @@ title: migration10a.1 - rename field TODO:migration should check and halt when t
 useSafeMigrationPolicy:false
 chainNextTest:true
 given:
- type Customer struct {id int unique serial, wid2 long } end
+ type Customer struct {id int primaryKey serial, wid2 long } end
 
 when:
   insert Customer { wid2:34}
@@ -43,7 +43,7 @@ ERROR: NODATA
 title: migration10a.2 - new record is ok
 useSafeMigrationPolicy:false
 given:
- type Customer struct {id int unique serial, wid2 long } end
+ type Customer struct {id int primaryKey serial, wid2 long } end
 
 when:
   let x = Customer[2]
