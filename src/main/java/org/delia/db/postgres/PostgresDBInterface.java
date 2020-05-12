@@ -23,6 +23,7 @@ import org.delia.db.h2.H2DBConnection;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
+import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
@@ -157,7 +158,10 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		SelectFuncHelper sfhelper = sqlHelperFactory.createSelectFuncHelper(dbctx, spanHelper);
 		DType selectResultType = sfhelper.getSelectResultType(spec);
 		if (selectResultType.isScalarShape()) {
-			qresp.dvalList = buildScalarResult(rs, selectResultType, details, dbctx);
+			ResultTypeInfo rti = new ResultTypeInfo();
+			rti.logicalType = selectResultType;
+			rti.physicalType = selectResultType;
+			qresp.dvalList = buildScalarResult(rs, rti, details, dbctx);
 			fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
 			qresp.ok = true;
 		} else {
@@ -432,7 +436,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 		QueryResponse qresp = new QueryResponse();
 		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, dbctx.registry);
-		DType selectResultType = selectHelper.getSelectResultType(hls);
+		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
 		if (selectResultType.isScalarShape()) {
 			qresp.dvalList = buildScalarResult(rs, selectResultType, details, dbctx);
 //			fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);

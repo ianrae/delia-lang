@@ -9,6 +9,7 @@ import java.util.StringJoiner;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -99,7 +100,7 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	}
 	
 	
-	protected List<DValue> buildScalarResult(ResultSet rs, DType selectResultType, QueryDetails details, DBAccessContext dbctx) {
+	protected List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details, DBAccessContext dbctx) {
 		return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
 	}
 	

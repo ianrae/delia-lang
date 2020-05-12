@@ -14,6 +14,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.RenderedField;
 import org.delia.db.hls.RenderedFieldHelper;
+import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
@@ -102,10 +103,15 @@ public class ResultSetToDValConverter extends ServiceBase {
 	}
 	
 	
-	public List<DValue> buildScalarResult(ResultSet rs, DType selectResultType, QueryDetails details, DBAccessContext dbctx) {
+	public List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details, DBAccessContext dbctx) {
 		List<DValue> list = new ArrayList<>();
 		try {
-			DValue dval = valueHelper.readIndexedField(selectResultType, 1, rs, dbctx);
+			DValue dval = valueHelper.readIndexedField(selectResultType.physicalType, 1, rs, dbctx);
+			if (selectResultType.needPhysicalToLogicalMapping()) {
+				ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, dbctx.registry);
+				dval = selectResultType.mapPhysicalToLogicalValue(dval, builder);
+			}
+			
 			if (dval != null) {
 				list.add(dval);
 			}
