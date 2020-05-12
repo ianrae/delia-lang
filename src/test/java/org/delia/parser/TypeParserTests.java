@@ -42,13 +42,14 @@ public class TypeParserTests {
 		chelper.parseTwo(src + "type Actor struct {relation addr Address one} end");
 		chelper.parseTwo(src + "type Actor struct {relation addr Address one unique} end");
 		chelper.parseTwo(src + "type Actor struct {relation addr Address one optional} end");
+		chelper.parseTwo(src + "type Actor struct {relation addr Address one optional} end");
 	}
 	@Test
 	public void testRelationMany() {
 		String src = "type Address struct {x int, y int} end\n";
 		chelper.parseTwo(src + "type Actor struct {relation addr Address many} end");
 		chelper.parseTwo(src + "type Actor struct {relation addr Address many unique} end");
-		chelper.parseTwo(src + "type Actor struct {relation addr Address many optional} end");
+		chelper.parseTwo(src + "type Actor struct {relation addr Address 'homeAddr' many optional} end");
 	}
 	
 	@Test
