@@ -90,4 +90,10 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 			actualInterface.enableSQLLogging(b);
 		}
 	}
+	
+	@Override
+	public DBType getDBType() {
+		return dbType;
+	}
+
 }

@@ -289,7 +289,7 @@ public class H2BDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 0;
+//		testIndexToRun = 0;
 		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -297,7 +297,8 @@ public class H2BDDTests extends NewBDDBase {
 		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR1000File("t0-upsert-mm-id.txt", 4);
-		runR1600File("t0-fetch.txt", 3);
+//		runR1600File("t0-fetch.txt", 3);
+		runR1500File("t0-queryfn-exist.txt", 2);
 	}
 	
 	//---

@@ -8,6 +8,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.TableExistenceService;
@@ -17,6 +18,7 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSQLGenerator;
 import org.delia.db.hls.HLSSQLGeneratorImpl;
+import org.delia.db.postgres.PostgresWhereFragmentGenerator;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -56,9 +58,19 @@ public class HLSManager extends ServiceBase {
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+		WhereFragmentGenerator whereGen = createWhereGen();
 		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
 		whereGen.tableFragmentMaker = miniSelectParser;
+	}
+	
+	private WhereFragmentGenerator createWhereGen() {
+		DBType dbType = delia.getDBInterface().getDBType();
+		switch(dbType) {
+		case POSTGRES:
+			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator);
+		default:
+			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+		}
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
