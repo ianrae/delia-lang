@@ -434,22 +434,22 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	//			selectFrag.offsetFrag = frag;
 	//		}
 
-	public String renderUpdate(UpdateStatementFragment selectFrag) {
-		if(selectFrag.setValuesL.isEmpty()) {
-			selectFrag.statement.sql = ""; //nothing to do
-			return selectFrag.statement.sql;
-		}
-
-		selectFrag.statement.sql = selectFrag.render();
-		return selectFrag.statement.sql;
-	}
+//	public String renderUpdate(UpdateStatementFragment selectFrag) {
+//		if(selectFrag.setValuesL.isEmpty()) {
+//			selectFrag.statement.sql = ""; //nothing to do
+//			return selectFrag.statement.sql;
+//		}
+//
+//		selectFrag.statement.sql = selectFrag.render();
+//		return selectFrag.statement.sql;
+//	}
 	
 	public SqlStatementGroup renderUpdateGroup(UpdateStatementFragment updateFrag) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
-		if(updateFrag.setValuesL.isEmpty()) {
-			updateFrag.statement.sql = ""; //nothing to do
-			return stgroup;
-		}
+//		if(updateFrag.setValuesL.isEmpty()) {
+//			updateFrag.statement.sql = ""; //nothing to do
+//			return stgroup;
+//		}
 
 		SqlStatement mainStatement = updateFrag.statement;
 		mainStatement.sql = updateFrag.render();
@@ -457,7 +457,17 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		
 		List<StatementFragmentBase> allL = new ArrayList<>();
 		mainStatement.paramL.clear();
-		stgroup.add(updateFrag.statement);
+		if (!updateFrag.setValuesL.isEmpty()) {
+			stgroup.add(updateFrag.statement);
+		} else {
+			removeAliases(updateFrag.assocUpdateFrag);
+			removeAliases(updateFrag.assocDeleteFrag);
+			removeAliases(updateFrag.assocMergeIntoFrag);
+			removeAliasesList(updateFrag.assocCrudInsertL);
+			removeAliasesList(updateFrag.assocCrudDeleteL);
+			removeAliasesList(updateFrag.assocCrudUpdateL);
+		}
+		
 		initMainParams(mainStatement, save, allL, updateFrag.assocUpdateFrag);
 		initMainParams(mainStatement, save, allL, updateFrag.assocDeleteFrag);
 		initMainParams(mainStatement, save, allL, updateFrag.assocMergeIntoFrag);
@@ -496,6 +506,21 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 		
 		return stgroup;
+	}
+
+	private void removeAliases(StatementFragmentBase frag) {
+		if (frag != null) {
+			frag.tblFrag.alias = null;
+			frag.aliasMap.clear();
+			for(FieldFragment field: frag.fieldL) {
+				field.alias = null;
+			}
+		}
+	}
+	private void removeAliasesList(List<? extends StatementFragmentBase> fragL) {
+		for(StatementFragmentBase frag: fragL) {
+			removeAliases(frag);
+		}
 	}
 
 	protected void initMainParams(SqlStatement mainStatement, List<DValue> saveL, List<StatementFragmentBase> allL, StatementFragmentBase innerFrag) {
