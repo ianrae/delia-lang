@@ -31,6 +31,12 @@ public class SimpleErrorTracker implements ErrorTracker {
 		log.logError("%s: %s", errType, s);
 	}
 	@Override
+	public DeliaError addNoLog(DeliaError err) {
+		errL.add(err); //don't log the error
+		return err;
+	}
+	
+	@Override
 	public void clear() {
 		errL.clear();
 	}
