@@ -1,4 +1,4 @@
-package org.delia.typebuilder;
+package org.delia.base;
 
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
@@ -52,15 +52,4 @@ public class FakeTypeCreator {
 		registry.add("Employee", dtype);
 	}
 	
-	public DStructType createSchemaVersionType(DTypeRegistry registry, String typeName) {
-		DType strType = registry.getType(BuiltInTypes.STRING_SHAPE);
-		DType intType = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		
-		OrderedMap omap = new OrderedMap();
-		omap.add("id", intType, false, true, false, true); //serial
-		omap.add("fingerprint", strType, false, false, false, false);
-		PrimaryKey prikey = new PrimaryKey(new TypePair("id", intType));
-		DStructType dtype = new DStructType(Shape.STRUCT, typeName, null, omap, prikey);
-		return dtype;
-	}
 }

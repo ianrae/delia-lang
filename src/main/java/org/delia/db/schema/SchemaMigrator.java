@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.base.FakeTypeCreator;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -25,7 +26,7 @@ import org.delia.sort.topo.DeliaTypeSorter;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.typebuilder.FakeTypeCreator;
+import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.util.StringUtil;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
@@ -49,7 +50,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		this.varEvaluator = varEvaluator;
 
-		FakeTypeCreator fakeCreator = new FakeTypeCreator();
+		InternalTypeCreator fakeCreator = new InternalTypeCreator();
 		DStructType dtype = fakeCreator.createSchemaVersionType(registry, SCHEMA_TABLE);
 		registry.setSchemaVersionType(dtype);
 		this.migrationRunner = new MigrationRunner(factorySvc, dbInterface, registry, dbexecutor);

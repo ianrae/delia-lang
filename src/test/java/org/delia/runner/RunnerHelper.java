@@ -2,6 +2,7 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.base.FakeTypeCreator;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
@@ -13,7 +14,6 @@ import org.delia.runner.Runner;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.typebuilder.FakeTypeCreator;
 
 
 

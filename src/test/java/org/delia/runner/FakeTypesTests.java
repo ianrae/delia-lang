@@ -2,8 +2,8 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.base.FakeTypeCreator;
 import org.delia.type.DTypeRegistry;
-import org.delia.typebuilder.FakeTypeCreator;
 import org.junit.Test;
 
 
