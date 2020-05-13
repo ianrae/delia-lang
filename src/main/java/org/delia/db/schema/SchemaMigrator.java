@@ -303,7 +303,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			finfo.name = StringUtils.substringBefore(ss, ":");
 			finfo.type = StringUtils.substringBetween(ss, ":", ":");
 			String tmp = StringUtils.substringAfterLast(ss, ":");
-			finfo.flagStr = StringUtils.substringBetween(tmp, "/");
+			finfo.flagStr = StringUtils.substringBefore(tmp, "/");
 			tmp = StringUtils.substringAfterLast(ss, "/");
 			finfo.datId = Integer.parseInt(tmp);
 			list.add(finfo);

@@ -21,4 +21,8 @@ public class RelationInfo {
 			farType = (DStructType) spec.newType;
 		}
 	}
+	
+	public boolean isManyToMany() {
+		return RelationCardinality.MANY_TO_MANY.equals(cardinality);
+	}
 }
