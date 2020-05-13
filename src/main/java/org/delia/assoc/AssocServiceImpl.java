@@ -63,6 +63,7 @@ public class AssocServiceImpl implements AssocService {
 	private void sdfsdf() {
 		//read schema fingerprint
         //parse to get datIds	B
+		 //build map<customer.addr, datId>
 		//for each struct type
 		//assign dat values from B
 		  //set relinfo and relinfo.otherSide
@@ -70,8 +71,9 @@ public class AssocServiceImpl implements AssocService {
 		//if dat is 0 then insert row and store returned id (serial)
 		  //set relinfo and relinfo.otherSide
 		
-		
-		
+		//TODO: find a way for schema migrator to not have to re-query for fingerprint
+
+		//are doing this every time delia.beginexecution
 		
 		//HLSQueryStatement hls = null; //build this		
 		

@@ -5,7 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.function.Consumer;
 
 import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.rule.rules.RelationRuleBase;
 import org.delia.runner.DeliaException;
 import org.delia.sort.topo.TopoTestBase;
 import org.delia.type.DStructType;
@@ -43,7 +45,12 @@ public class NamedRelationTestBase extends TopoTestBase {
 		RelationOneRule rr = DRuleHelper.findOneRule(dtype, relField);
 		return rr;
 	}
-	protected void chkRule(RelationOneRule rr, boolean b, String expected, String expectedOtherSide) {
+	protected RelationManyRule getManyRule(String typeName, String relField) {
+		DStructType dtype = (DStructType) sess.getExecutionContext().registry.getType(typeName);
+		RelationManyRule rr = DRuleHelper.findManyRule(dtype, relField);
+		return rr;
+	}
+	protected void chkRule(RelationRuleBase rr, boolean b, String expected, String expectedOtherSide) {
 		assertEquals(b, rr.nameIsExplicit);
 		assertEquals(expected, rr.getRelationName());
 		RelationInfo relinfo = rr.relInfo;
