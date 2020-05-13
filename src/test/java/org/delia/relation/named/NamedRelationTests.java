@@ -118,17 +118,6 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	
 	
-	private void chkRule(RelationOneRule rr, boolean b, String expected, String expectedOtherSide) {
-		assertEquals(b, rr.nameIsExplicit);
-		assertEquals(expected, rr.getRelationName());
-		RelationInfo relinfo = rr.relInfo;
-		assertEquals(expected, relinfo.relationName);
-		assertEquals(expectedOtherSide, relinfo.otherSide.relationName);
-		
-	}
-
-	// --
-	
 	@Before
 	public void init() {
 		super.init();

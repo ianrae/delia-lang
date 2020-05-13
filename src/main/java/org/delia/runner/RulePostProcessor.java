@@ -138,7 +138,7 @@ public class RulePostProcessor extends ServiceBase {
 				RelationOneRule rr = (RelationOneRule) rule;
 				if (rr.getRelationName().equals(relationName)) {
 					nameRelL.add(rr.relInfo);
-				} else if (! rr.nameIsExplicit) {
+				} else {
 					//otherwise find by field type 
 					if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
 						relL.add(rr.relInfo);
@@ -149,7 +149,7 @@ public class RulePostProcessor extends ServiceBase {
 				RelationManyRule rr = (RelationManyRule) rule;
 				if (rr.getRelationName().equals(relationName)) {
 					nameRelL.add(rr.relInfo);
-				} else if (! rr.nameIsExplicit) {
+				} else  {
 					//otherwise find by field type 
 					if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
 						relL.add(rr.relInfo);
