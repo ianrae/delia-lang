@@ -78,13 +78,17 @@ public class SchemaFingerprintGenerator {
 		// b - relation one         (child)
 		// c = relation many parent
 		// d = relation many        (child) -can this occur?
+		int datId = 0;
 		RelationOneRule oneRule = DRuleHelper.findOneRule(dtype.getName(), pair.name, registry);
 		if (oneRule != null) {
 			flags += oneRule.relInfo.isParent ? "a" : "b"; 
-		}
-		RelationManyRule manyRule = DRuleHelper.findManyRule(dtype.getName(), pair.name, registry);
-		if (manyRule != null) {
-			flags += manyRule.relInfo.isParent ? "c" : "d"; 
+			datId = oneRule.getDatId() == null ? 0 : oneRule.getDatId();
+		} else {
+			RelationManyRule manyRule = DRuleHelper.findManyRule(dtype.getName(), pair.name, registry);
+			if (manyRule != null) {
+				flags += manyRule.relInfo.isParent ? "c" : "d"; 
+			}
+			datId = oneRule.getDatId() == null ? 0 : oneRule.getDatId();
 		}
 		
 		String fldName = getTypeAsString(pair);

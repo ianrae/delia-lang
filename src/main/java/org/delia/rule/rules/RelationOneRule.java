@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.delia.error.DetailedError;
 import org.delia.relation.RelationInfo;
-import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
@@ -22,23 +21,13 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
-public class RelationOneRule extends DRuleBase {
-	private RuleOperand oper1;
-	private DStructType owningType;
-	private DTypeRegistry registry;
+public class RelationOneRule extends RelationRuleBase {
 	private boolean isParent;
-	public RelationInfo relInfo;
-	private String relationName; //either user-defined or delia assigns a name
-	public boolean nameIsExplicit;
 
 	public RelationOneRule(RuleGuard guard, RuleOperand oper1, 
 			DStructType owningType, DTypeRegistry registry, boolean isParent, String relationName) {
-		super("relationOne", guard);
-		this.oper1 = oper1;
-		this.owningType = owningType;
-		this.registry = registry;
+		super("relationOne", guard, oper1, owningType, registry, relationName);
 		this.isParent = isParent;
-		this.relationName = relationName;
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
@@ -158,14 +147,6 @@ public class RelationOneRule extends DRuleBase {
 		DStructType dtype = (DStructType) otherSide.getType();
 		return DRuleHelper.findMatchingRelByType(dtype, targetType);
 	}
-	@Override
-	public boolean dependsOn(String fieldName) {
-		return oper1.dependsOn(fieldName);
-	}
-	@Override
-	public String getSubject() {
-		return oper1.getSubject();
-	}
 	public boolean isParent() {
 		return isParent;
 	}
@@ -222,8 +203,5 @@ public class RelationOneRule extends DRuleBase {
 		if (relInfo != null) {
 			relInfo.performTypeReplacement(spec);
 		}
-	}
-	public String getRelationName() {
-		return relationName;
 	}
 }
