@@ -138,14 +138,16 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
 		QueryContext qtx = new QueryContext();
 		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
-
+		//TODO: should specify orderby id!!
+		
+		
 		if (qresp.emptyResults()) {
 			return "";
 		}
 
-		//TODO: later handle case where are multiple rows!!
+		//there may be multiple rows
 		int n = qresp.dvalList.size();
-		DValue dval = qresp.dvalList.get(n - 1);
+		DValue dval = qresp.dvalList.get(n - 1); //last one
 		return dval.asStruct().getField("fingerprint").asString();
 	}
 

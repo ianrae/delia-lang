@@ -12,7 +12,8 @@ public class RelationInfo {
 	public boolean isOneWay;
 	public RelationInfo otherSide; //null if one-sided relation
 	public String relationName; //never null
-	
+	private Integer datId; //many-to-many table id
+
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		if (spec.needsReplacement(this, nearType)) {
 			nearType = (DStructType) spec.newType;
@@ -25,4 +26,11 @@ public class RelationInfo {
 	public boolean isManyToMany() {
 		return RelationCardinality.MANY_TO_MANY.equals(cardinality);
 	}
+	public Integer getDatId() {
+		return datId;
+	}
+	public void forceDatId(Integer datId) {
+		this.datId = datId;
+	}
+
 }

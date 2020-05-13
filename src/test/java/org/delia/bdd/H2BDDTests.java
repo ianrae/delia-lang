@@ -300,7 +300,9 @@ public class H2BDDTests extends NewBDDBase {
 //		runR1600File("t0-fetch.txt", 3);
 //		runR1500File("t0-queryfn-exist.txt", 2);
 		runR2100File("t0-migration.txt", 2);
-//		runR2100File("t0-migration2.txt", 2);
+		runR2100File("t0-migration2.txt", 2);
+		runR2100File("t0-migration3.txt", 2);
+		runR2100File("t0-migration3a.txt", 2);
 	}
 	
 	//---

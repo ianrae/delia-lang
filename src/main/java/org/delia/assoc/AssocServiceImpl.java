@@ -1,5 +1,6 @@
 package org.delia.assoc;
 
+import org.delia.db.DBInterface;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
@@ -14,11 +15,12 @@ public class AssocServiceImpl implements AssocService {
 
 	private Log log;
 	private ErrorTracker et;
+	private DBInterface dbInterface;
 	
-	
-	public AssocServiceImpl(Log log, ErrorTracker et) {
+	public AssocServiceImpl(Log log, ErrorTracker et, DBInterface dbInterface) {
 		this.log = log;
 		this.et = et;
+		this.dbInterface = dbInterface;
 	}
 	@Override
 	public int assignDATIds(DTypeRegistry registry) {
@@ -49,8 +51,30 @@ public class AssocServiceImpl implements AssocService {
 
 	private int assignInTypeIfNeeded(RelationInfo relInfo) {
 		if (relInfo.isManyToMany()) {
+			if (relInfo.getDatId() == null || relInfo.getDatId() == 0) {
+				int datId = 7; //assign new one
+				relInfo.forceDatId(datId);
+				return 1;
+			}
 		}
 		return 0;
+	}
+	
+	private void sdfsdf() {
+		//read schema fingerprint
+        //parse to get datIds	B
+		//for each struct type
+		//assign dat values from B
+		  //set relinfo and relinfo.otherSide
+		//for each struct type (again)
+		//if dat is 0 then insert row and store returned id (serial)
+		  //set relinfo and relinfo.otherSide
+		
+		
+		
+		
+		//HLSQueryStatement hls = null; //build this		
+		
 	}
 }
 

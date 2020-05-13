@@ -14,7 +14,6 @@ public abstract class RelationRuleBase extends DRuleBase {
 	public RelationInfo relInfo;
 	private String relationName; //either user-defined or delia assigns a name
 	public boolean nameIsExplicit; //delia source had a name for the relation
-	private Integer datId; //many-to-many table id
 
 	public RelationRuleBase(String ruleName, RuleGuard guard, RuleOperand oper1, 
 			DStructType owningType, DTypeRegistry registry, String relationName) {
@@ -36,11 +35,5 @@ public abstract class RelationRuleBase extends DRuleBase {
 	
 	public String getRelationName() {
 		return relationName;
-	}
-	public Integer getDatId() {
-		return datId;
-	}
-	public void forceDatId(Integer datId) {
-		this.datId = datId;
 	}
 }

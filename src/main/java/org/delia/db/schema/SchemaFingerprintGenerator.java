@@ -82,12 +82,12 @@ public class SchemaFingerprintGenerator {
 		RelationOneRule oneRule = DRuleHelper.findOneRule(dtype.getName(), pair.name, registry);
 		if (oneRule != null) {
 			flags += oneRule.relInfo.isParent ? "a" : "b"; 
-			datId = oneRule.getDatId() == null ? 0 : oneRule.getDatId();
+			datId = oneRule.relInfo.getDatId() == null ? 0 : oneRule.relInfo.getDatId();
 		} else {
 			RelationManyRule manyRule = DRuleHelper.findManyRule(dtype.getName(), pair.name, registry);
 			if (manyRule != null) {
 				flags += manyRule.relInfo.isParent ? "c" : "d"; 
-				datId = manyRule.getDatId() == null ? 0 : manyRule.getDatId();
+				datId = manyRule.relInfo.getDatId() == null ? 0 : manyRule.relInfo.getDatId();
 			}
 		}
 		
