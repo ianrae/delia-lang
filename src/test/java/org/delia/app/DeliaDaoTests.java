@@ -161,7 +161,7 @@ public class DeliaDaoTests extends NewBDDBase {
 			log.log(e.getMessage());
 			failMsg = e.getMessage();
 		}
-		assertEquals("Type 'Flight' doesn't have field 'zzz'", failMsg);
+		assertEquals("memdb-unknown-field: Type 'Flight' doesn't have field 'zzz'", failMsg);
 	}
 	@Test
 	public void testErr3() {
@@ -181,7 +181,7 @@ public class DeliaDaoTests extends NewBDDBase {
 			log.log(e.getMessage());
 			failMsg = e.getMessage();
 		}
-		assertEquals("unknown struct type 'bb'", failMsg);
+		assertEquals("struct-unknown-type-in-query: unknown struct type 'bb'", failMsg);
 	}
 	
 	

@@ -87,12 +87,12 @@ public class SchemaFingerprintGenerator {
 			RelationManyRule manyRule = DRuleHelper.findManyRule(dtype.getName(), pair.name, registry);
 			if (manyRule != null) {
 				flags += manyRule.relInfo.isParent ? "c" : "d"; 
+				datId = manyRule.getDatId() == null ? 0 : manyRule.getDatId();
 			}
-			datId = oneRule.getDatId() == null ? 0 : oneRule.getDatId();
 		}
 		
 		String fldName = getTypeAsString(pair);
-		String s = String.format("%s:%s:%s", pair.name, fldName, flags);
+		String s = String.format("%s:%s:%s/%d", pair.name, fldName, flags, datId);
 		return s;
 	}
 	private String getTypeAsString(TypePair pair) {

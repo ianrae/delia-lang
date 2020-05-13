@@ -309,7 +309,7 @@ public class H2BDDTests extends NewBDDBase {
 	
 	@Before
 	public void init() {
-//		disableAllSlowTestsIfNeeded();
+		disableAllSlowTestsIfNeeded();
 		BDDTesterEx.useHLS = true;
 	}
 	@After
