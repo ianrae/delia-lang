@@ -1,4 +1,4 @@
-package org.delia.runner;
+package org.delia.rule.rules;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,8 +11,6 @@ import org.delia.error.DeliaError;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
-import org.delia.rule.rules.RelationManyRule;
-import org.delia.rule.rules.RelationOneRule;
 import org.delia.sort.topo.DeliaTypeSorter;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
