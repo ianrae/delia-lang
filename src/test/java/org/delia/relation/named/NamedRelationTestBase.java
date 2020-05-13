@@ -49,7 +49,13 @@ public class NamedRelationTestBase extends TopoTestBase {
 		RelationInfo relinfo = rr.relInfo;
 		assertEquals(expected, relinfo.relationName);
 		assertEquals(expectedOtherSide, relinfo.otherSide.relationName);
-		
+	}
+	protected void chkRuleOneSided(RelationOneRule rr, boolean b, String expected) {
+		assertEquals(b, rr.nameIsExplicit);
+		assertEquals(expected, rr.getRelationName());
+		RelationInfo relinfo = rr.relInfo;
+		assertEquals(expected, relinfo.relationName);
+		assertEquals(null, relinfo.otherSide);
 	}
 
 }

@@ -1,15 +1,7 @@
 package org.delia.relation.named;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.function.Consumer;
-
-import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.ResultValue;
-import org.delia.type.DStructType;
-import org.delia.type.DValue;
-import org.delia.util.DRuleHelper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,10 +22,14 @@ public class NamedRelationTests extends NamedRelationTestBase {
 		execStatement("insert Customer {wid:44}");
 		execStatement("insert Address {z:5, cust:1}");
 		ResultValue res = this.execStatement("let x = Customer[true]");
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals(1, dval.asStruct().getField("id").asInt());
-		assertEquals(44, dval.asStruct().getField("wid").asInt());
+		
+		RelationOneRule rr = getOneRule("Address", "cust"); 
+		chkRule(rr, true, "addr1", "addr1");
+		rr = getOneRule("Customer", "addr1"); 
+		chkRule(rr, false, "addr1", "addr1"); //these two are hooked up
+		
+		rr = getOneRule("Customer", "addr2"); 
+		chkRuleOneSided(rr, false, "addr2");
 	}
 	
 	@Test
@@ -44,14 +40,13 @@ public class NamedRelationTests extends NamedRelationTestBase {
 		});
 	}
 	
-	@Test
-	public void testBadNameFail() {
-		Consumer<String> fn = (parameter) -> { 
-			createCustomerTypeWithRelations(null, null, "x");
-		};
-		expectException("ambiguous-relation", fn);
-	}
-	
+//	@Test
+//	public void testBadNameFail() {
+//		Consumer<String> fn = (parameter) -> { 
+//			createCustomerTypeWithRelations(null, null, "x");
+//		};
+//		expectException("ambiguous-relation", fn);
+//	}
 	@Test
 	public void testBadNameFail2() {
 		//better syntax
@@ -69,7 +64,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void test3() {
-		expectException("named-relation-error", (s) -> {
+		expectException("relation-already-assigned", (s) -> {
 			createCustomerTypeWithRelations("addr", "addr1", "addr1");
 		});
 	}
@@ -82,7 +77,6 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	}
 	@Test
 	public void testDup2() {
-//		expectException("relation-names-must-be-unique", (s) -> {
 		expectException("relation-already-assigned", (s) -> {
 			createCustomerTypeWithRelations("joe", "joe", "joe");
 		});
@@ -90,7 +84,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void testUnknown() {
-		expectException("named-relation-error", (s) -> {
+		expectException("ambiguous-relation", (s) -> {
 			createCustomerTypeWithRelations("addr1", null, "x");
 		});
 	}
@@ -103,20 +97,16 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void testOK() {
-		createCustomerTypeWithRelations("joe", null, null);
-		DStructType dtype = (DStructType) sess.getExecutionContext().registry.getType("Address");
-		RelationOneRule rr = DRuleHelper.findOneRule(dtype, "cust");
-		chkRule(rr, false, "cust", "addr2");
+		createCustomerTypeWithRelations("joe", null, "joe");
+		RelationOneRule rr = getOneRule("Address", "cust");
+		chkRule(rr, true, "joe", "joe");
 		
-		dtype = (DStructType) sess.getExecutionContext().registry.getType("Customer");
-		rr = DRuleHelper.findOneRule(dtype, "addr1");
-		chkRule(rr, true, "joe", "cust");
+		rr = getOneRule("Customer", "addr1");
+		chkRule(rr, true, "joe", "joe");
 		
-		rr = DRuleHelper.findOneRule(dtype, "addr2");
-		chkRule(rr, false, "addr2", "cust");
+		rr = getOneRule("Customer", "addr2");
+		chkRuleOneSided(rr, false, "addr2");
 	}
-	
-	
 	
 	@Before
 	public void init() {

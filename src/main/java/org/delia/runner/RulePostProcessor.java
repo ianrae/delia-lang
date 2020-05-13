@@ -119,18 +119,30 @@ public class RulePostProcessor extends ServiceBase {
 					RelationOneRule rr = (RelationOneRule) rule;
 					RelationInfo info = rr.relInfo;
 					if (rr.nameIsExplicit) {
-						info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+						if (info.otherSide == null) {
+							info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+							logIfSet("step1", rr.getRelationName(), info);
+						}
 					}
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
 					if (rr.nameIsExplicit) {
-						info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+						if (info.otherSide == null) {
+							info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+							logIfSet("step1", rr.getRelationName(), info);
+						}
 					}
 				}
 			}
 		}
 	}
+	private void logIfSet(String prefix, String relName, RelationInfo info) {
+		if (info.otherSide != null) {
+			log.log("%s: rule %s -> %s", prefix, relName, info.otherSide.fieldName);
+		}
+	}
+
 	private RelationInfo findOtherSideNamed(DRule rrSrc, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
 		List<RelationInfo> nameRelL = new ArrayList<>();
 		List<RelationInfo> relL = new ArrayList<>();
@@ -222,12 +234,14 @@ public class RulePostProcessor extends ServiceBase {
 					RelationInfo info = rr.relInfo;
 					if (info.otherSide == null) {
 						info.otherSide = findOtherSideUnNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+						logIfSet("step3", rr.getRelationName(), info);
 					}
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
 					if (info.otherSide == null) {
 						info.otherSide = findOtherSideUnNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+						logIfSet("step3", rr.getRelationName(), info);
 					}
 				}
 			}
@@ -239,12 +253,12 @@ public class RulePostProcessor extends ServiceBase {
 		for(DRule rule: farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
-				if (!rr.nameIsExplicit && DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
+				if (!rr.nameIsExplicit && rr.relInfo != null && DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
 					relL.add(rr.relInfo);
 				}
 			} else if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
-				if (!rr.nameIsExplicit && DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
+				if (!rr.nameIsExplicit && rr.relInfo != null && DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
 					relL.add(rr.relInfo);
 				}
 			}
