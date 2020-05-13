@@ -22,4 +22,16 @@ public class InternalTypeCreator {
 		DStructType dtype = new DStructType(Shape.STRUCT, typeName, null, omap, prikey);
 		return dtype;
 	}
+	public DStructType createDATType(DTypeRegistry registry, String typeName) {
+		DType strType = registry.getType(BuiltInTypes.STRING_SHAPE);
+		DType intType = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+		
+		OrderedMap omap = new OrderedMap();
+		omap.add("id", intType, false, true, false, true); //serial
+		omap.add("tblName", strType, false, false, false, false);
+		PrimaryKey prikey = new PrimaryKey(new TypePair("id", intType));
+		DStructType dtype = new DStructType(Shape.STRUCT, typeName, null, omap, prikey);
+		return dtype;
+	}
+	
 }

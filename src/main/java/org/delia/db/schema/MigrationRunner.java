@@ -102,9 +102,6 @@ public class MigrationRunner extends ServiceBase {
 		StructValueBuilder structBuilder = new StructValueBuilder(type);
 
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
-//		DValue dval = builder.buildInt("100");
-//		structBuilder.addField("id", dval);
-
 		DValue dval = builder.buildString(fingerprint);
 		structBuilder.addField("fingerprint", dval);
 

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.base.FakeTypeCreator;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -32,6 +31,7 @@ import org.delia.util.StringUtil;
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
+	public static final String DAT_TABLE = "DELIA_ASSOC"; //DAT = Delia Assoc Table
 	private DTypeRegistry registry;
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
@@ -53,6 +53,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		InternalTypeCreator fakeCreator = new InternalTypeCreator();
 		DStructType dtype = fakeCreator.createSchemaVersionType(registry, SCHEMA_TABLE);
 		registry.setSchemaVersionType(dtype);
+		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
+		registry.setDATType(datType);
 		this.migrationRunner = new MigrationRunner(factorySvc, dbInterface, registry, dbexecutor);
 		this.optimizer = new MigrationOptimizer(factorySvc, dbInterface, registry, varEvaluator);
 	}
@@ -67,10 +69,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	public boolean createSchemaTableIfNeeded() {
-		if (dbexecutor.execTableDetect(SCHEMA_TABLE)) {
-			return true;
+		if (!dbexecutor.execTableDetect(SCHEMA_TABLE)) {
+			dbexecutor.createTable(SCHEMA_TABLE);
 		}
-		dbexecutor.createTable(SCHEMA_TABLE);
+		
+		if (!dbexecutor.execTableDetect(DAT_TABLE)) {
+			dbexecutor.createTable(DAT_TABLE);
+		}
+		
 		return true;
 	}
 
@@ -296,7 +302,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			FieldInfo finfo = new FieldInfo();
 			finfo.name = StringUtils.substringBefore(ss, ":");
 			finfo.type = StringUtils.substringBetween(ss, ":", ":");
-			finfo.flagStr = StringUtils.substringAfterLast(ss, ":");
+			String tmp = StringUtils.substringAfterLast(ss, ":");
+			finfo.flagStr = StringUtils.substringBetween(tmp, "/");
+			tmp = StringUtils.substringAfterLast(ss, "/");
+			finfo.datId = Integer.parseInt(tmp);
 			list.add(finfo);
 		}
 		return list;
