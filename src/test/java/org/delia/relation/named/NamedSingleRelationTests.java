@@ -1,4 +1,4 @@
-package org.delia.mem;
+package org.delia.relation.named;
 
 import static org.junit.Assert.assertEquals;
 

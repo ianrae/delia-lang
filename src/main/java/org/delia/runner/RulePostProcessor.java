@@ -1,7 +1,9 @@
 package org.delia.runner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -36,6 +38,7 @@ public class RulePostProcessor extends ServiceBase {
 	public void process(DTypeRegistry registry, List<DeliaError> allErrors) {
 		buildRelInfos(registry);
 		setOtherSide(registry, allErrors);
+		checkForOtherSideDuplicates(registry, allErrors);
 		setParentFlagsIfNeeded(registry);
 		
 		//then validate types can be put into a correct dependency order (i.e. no cycles)
@@ -118,7 +121,6 @@ public class RulePostProcessor extends ServiceBase {
 			}
 		}
 	}
-	
 	private void addErrorIfShouldBeHookedUp(RelationInfo info, boolean nameIsExplicit, List<DeliaError> allErrors) {
 		if (info.otherSide == null && nameIsExplicit) {
 			String s = info.relationName;
@@ -216,5 +218,46 @@ public class RulePostProcessor extends ServiceBase {
 	private boolean isOtherSideMany(DType otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
+	
+	private void checkForOtherSideDuplicates(DTypeRegistry registry, List<DeliaError> allErrors) {
+		Map<RelationInfo,String> duplicateMap = new HashMap<>();
+		
+		for(String typeName: registry.getAll()) {
+			DType dtype = registry.getType(typeName);
+			if (! dtype.isStructShape()) {
+				continue;
+			}
+			DStructType structType = (DStructType) dtype;
+			
+			for(DRule rule: structType.getRawRules()) {
+				if (rule instanceof RelationOneRule) {
+					RelationOneRule rr = (RelationOneRule) rule;
+					RelationInfo info = rr.relInfo;
+					ensureNotAlreadyUsed(duplicateMap, info.otherSide, allErrors);
+				} else if (rule instanceof RelationManyRule) {
+					RelationManyRule rr = (RelationManyRule) rule;
+					RelationInfo info = rr.relInfo;
+					ensureNotAlreadyUsed(duplicateMap, info.otherSide, allErrors);
+				}
+			}
+		}
+	}
+
+	
+	private void ensureNotAlreadyUsed(Map<RelationInfo, String> duplicateMap, RelationInfo otherSide, List<DeliaError> allErrors) {
+		if (otherSide == null) {
+			return;
+		}
+		if (duplicateMap.containsKey(otherSide)) {
+			String s = otherSide.relationName;
+			String msg = String.format("named relation '%s' - already assigned to another relation", s);
+			DeliaError err = new DeliaError("relation-already-assigned", msg);
+			allErrors.add(err);
+			
+		}
+		duplicateMap.put(otherSide, "");
+	}
+
+	
 	
 }

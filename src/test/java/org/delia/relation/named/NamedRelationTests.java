@@ -1,13 +1,15 @@
-package org.delia.mem;
+package org.delia.relation.named;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.function.Consumer;
 
-import org.delia.runner.DeliaException;
+import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.ResultValue;
-import org.delia.sort.topo.TopoTestBase;
+import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.util.DRuleHelper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,7 +38,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void test2UnNamed() {
-		expectException("ambiguous-relation", (s) -> {
+		expectException("relation-already-assigned", (s) -> {
 			createCustomerTypeWithRelations(null, null,null);
 			this.execStatement("insert Customer {id:3, wid:44}");
 		});
@@ -60,7 +62,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void testNameSameAsOtherField() {
-		expectException("relation-names-must-be-unique", (s) -> {
+		expectException("relation-already-assigned", (s) -> {
 			createCustomerTypeWithRelations(null, "addr1", "addr1");
 		});
 	}
@@ -78,6 +80,13 @@ public class NamedRelationTests extends NamedRelationTestBase {
 			createCustomerTypeWithRelations("addr2", "addr2", "addr1");
 		});
 	}
+	@Test
+	public void testDup2() {
+//		expectException("relation-names-must-be-unique", (s) -> {
+		expectException("relation-already-assigned", (s) -> {
+			createCustomerTypeWithRelations("joe", "joe", "joe");
+		});
+	}
 	
 	@Test
 	public void testUnknown() {
@@ -85,7 +94,39 @@ public class NamedRelationTests extends NamedRelationTestBase {
 			createCustomerTypeWithRelations("addr1", null, "x");
 		});
 	}
+	@Test
+	public void testAlreadyAssigned() {
+		expectException("relation-already-assigned", (s) -> {
+			createCustomerTypeWithRelations("joe", null, null);
+		});
+	}
 	
+	@Test
+	public void testOK() {
+		createCustomerTypeWithRelations("joe", null, null);
+		DStructType dtype = (DStructType) sess.getExecutionContext().registry.getType("Address");
+		RelationOneRule rr = DRuleHelper.findOneRule(dtype, "cust");
+		chkRule(rr, false, "cust", "addr2");
+		
+		dtype = (DStructType) sess.getExecutionContext().registry.getType("Customer");
+		rr = DRuleHelper.findOneRule(dtype, "addr1");
+		chkRule(rr, true, "joe", "cust");
+		
+		rr = DRuleHelper.findOneRule(dtype, "addr2");
+		chkRule(rr, false, "addr2", "cust");
+	}
+	
+	
+	
+	private void chkRule(RelationOneRule rr, boolean b, String expected, String expectedOtherSide) {
+		assertEquals(b, rr.nameIsExplicit);
+		assertEquals(expected, rr.getRelationName());
+		RelationInfo relinfo = rr.relInfo;
+		assertEquals(expected, relinfo.relationName);
+		assertEquals(expectedOtherSide, relinfo.otherSide.relationName);
+		
+	}
+
 	// --
 	
 	@Before
@@ -100,7 +141,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 		String rn3 = relationName3 == null ? "" : String.format("'%s'", relationName3);
 		
 		String src = String.format("type Customer struct { id int primaryKey serial, wid int, relation addr1 Address %s one optional,", rn1);
-		src += String.format(" relation addr2 Address %s one optional} end", rn2);
+		src += String.format("\n relation addr2 Address %s one optional} end", rn2);
 		src += "\n";
 		src += String.format("\n type Address struct { id int primaryKey serial, z int, relation cust Customer %s one} end",rn3);
 		src += "\n";
