@@ -25,7 +25,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void test0() {
-		createCustomerTypeWithRelations("addr1", null, "addr1");
+		createCustomerTypeWithRelations(null, null, "addr1");
 		
 		execStatement("insert Customer {wid:44}");
 		execStatement("insert Address {z:5, cust:1}");
@@ -76,7 +76,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void testDup() {
-		expectException("named-relation-error", (s) -> {
+		expectException("relation-already-assigned", (s) -> {
 			createCustomerTypeWithRelations("addr2", "addr2", "addr1");
 		});
 	}

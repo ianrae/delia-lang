@@ -36,10 +36,17 @@ public class RulePostProcessor extends ServiceBase {
 	}
 
 	public void process(DTypeRegistry registry, List<DeliaError> allErrors) {
-		buildRelInfos(registry);
-		setOtherSide(registry, allErrors);
-		checkForOtherSideDuplicates(registry, allErrors);
-		setParentFlagsIfNeeded(registry);
+		List<DStructType> structsL = buildListAllStructs(registry);		
+		buildRelInfos(structsL);
+		step1HookupNamedRelations(structsL, allErrors);
+		step2HookupNamedOtherSide(structsL, allErrors);
+		hookupUnNamedRelations(registry, allErrors);
+		
+		
+		
+//		setOtherSide(registry, allErrors);
+//		checkForOtherSideDuplicates(registry, allErrors);
+//		setParentFlagsIfNeeded(registry);
 		
 		//then validate types can be put into a correct dependency order (i.e. no cycles)
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
@@ -52,15 +59,23 @@ public class RulePostProcessor extends ServiceBase {
 			return;
 		}
 	}
-
-	private void buildRelInfos(DTypeRegistry registry) {
+	
+	private List<DStructType> buildListAllStructs(DTypeRegistry registry) {
+		List<DStructType> list = new ArrayList<>();
 		for(String typeName: registry.getAll()) {
 			DType dtype = registry.getType(typeName);
 			if (! dtype.isStructShape()) {
 				continue;
 			}
 			DStructType structType = (DStructType) dtype;
-			
+			list.add(structType);
+		}
+		return list;
+	}
+	
+
+	private void buildRelInfos(List<DStructType> structsL) {
+		for(DStructType structType: structsL) {
 			for(TypePair pair: structType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					
@@ -98,6 +113,135 @@ public class RulePostProcessor extends ServiceBase {
 		}
 	}
 	
+	private void step1HookupNamedRelations(List<DStructType> structsL, List<DeliaError> allErrors) {
+		for(DStructType structType: structsL) {
+			for(DRule rule: structType.getRawRules()) {
+				if (rule instanceof RelationOneRule) {
+					RelationOneRule rr = (RelationOneRule) rule;
+					RelationInfo info = rr.relInfo;
+					if (rr.nameIsExplicit) {
+						info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+					}
+				} else if (rule instanceof RelationManyRule) {
+					RelationManyRule rr = (RelationManyRule) rule;
+					RelationInfo info = rr.relInfo;
+					if (rr.nameIsExplicit) {
+						info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+					}
+				}
+			}
+		}
+	}
+	private void step2HookupNamedOtherSide(List<DStructType> structsL, List<DeliaError> allErrors) {
+		for(DStructType structType: structsL) {
+			for(DRule rule: structType.getRawRules()) {
+				if (rule instanceof RelationOneRule) {
+					RelationOneRule rr = (RelationOneRule) rule;
+					RelationInfo info = rr.relInfo;
+					if (info.otherSide != null) {
+						RelationInfo otherSide = info.otherSide;
+						if (otherSide.otherSide == null) {
+							otherSide.otherSide = info;
+						} else if (otherSide.otherSide == info) {
+						} else {
+							String msg = String.format("Relation name '%s' already assigned", otherSide.relationName);
+							DeliaError err = new DeliaError("relation-already-assigned", msg);
+							allErrors.add(err);
+						}
+					}
+				} else if (rule instanceof RelationManyRule) {
+					RelationManyRule rr = (RelationManyRule) rule;
+					RelationInfo info = rr.relInfo;
+					if (info.otherSide != null) {
+						RelationInfo otherSide = info.otherSide;
+						if (otherSide.otherSide == null) {
+							otherSide.otherSide = info;
+						} else if (otherSide.otherSide == info) {
+						} else {
+							String msg = String.format("Relation name '%s' already assigned", otherSide.relationName);
+							DeliaError err = new DeliaError("relation-already-assigned", msg);
+							allErrors.add(err);
+						}
+					}
+				}
+			}
+		}
+	}
+	private void hookupUnNamedRelations(DTypeRegistry registry, List<DeliaError> allErrors) {
+//		for(String typeName: registry.getAll()) {
+//			DType dtype = registry.getType(typeName);
+//			if (! dtype.isStructShape()) {
+//				continue;
+//			}
+//			DStructType structType = (DStructType) dtype;
+//			
+//			for(DRule rule: structType.getRawRules()) {
+//				if (rule instanceof RelationOneRule) {
+//					RelationOneRule rr = (RelationOneRule) rule;
+//					RelationInfo info = rr.relInfo;
+//					info.otherSide = findOtherSideUnNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+//				} else if (rule instanceof RelationManyRule) {
+//					RelationManyRule rr = (RelationManyRule) rule;
+//					RelationInfo info = rr.relInfo;
+//					if (rr.nameIsExplicit) {
+//						info.otherSide = findOtherSideUnNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+//					}
+//				}
+//			}
+//		}
+	}
+
+	
+	private RelationInfo findOtherSideNamed(DRule rrSrc, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
+		List<RelationInfo> nameRelL = new ArrayList<>();
+		List<RelationInfo> relL = new ArrayList<>();
+		for(DRule rule: farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (rr.getRelationName().equals(relationName)) {
+					nameRelL.add(rr.relInfo);
+				} else {
+					//otherwise find by field type 
+					if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
+						relL.add(rr.relInfo);
+					}
+				}
+
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (rr.getRelationName().equals(relationName)) {
+					nameRelL.add(rr.relInfo);
+				} else  {
+					//otherwise find by field type 
+					if (DRuleHelper.typesAreEqual(rr.relInfo.farType, nearType)) {
+						relL.add(rr.relInfo);
+					}
+				}
+			}
+		}
+		
+		if (!nameRelL.isEmpty()) {
+			if (nameRelL.size() > 1) {
+				String s = nameRelL.get(0).relationName;
+				String msg = String.format("Relation name '%s' used more than once (%d)", s, nameRelL.size());
+				DeliaError err = new DeliaError("relation-names-must-be-unique", msg);
+				allErrors.add(err);
+			}
+			return nameRelL.get(0);
+		}
+		
+		if (relL.size() > 1) {
+			String s = relL.get(0).relationName;
+			String msg = String.format("ambigious relation '%s' could point to %d fields. Perhaps you need to use a named relation?", s, relL.size());
+			DeliaError err = new DeliaError("ambiguous-relation", msg);
+			allErrors.add(err);
+		}
+		return relL.isEmpty() ? null : relL.get(0);
+	}
+
+	
+	
+	///////////////////////////////////////////////////////////
 	private void setOtherSide(DTypeRegistry registry, List<DeliaError> allErrors) {
 		for(String typeName: registry.getAll()) {
 			DType dtype = registry.getType(typeName);
@@ -136,6 +280,10 @@ public class RulePostProcessor extends ServiceBase {
 		for(DRule rule: farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
+//				if (rr.relInfo.otherSide != null) {
+//					continue;
+//				}
+				
 				if (rr.getRelationName().equals(relationName)) {
 					nameRelL.add(rr.relInfo);
 				} else {
@@ -147,6 +295,10 @@ public class RulePostProcessor extends ServiceBase {
 
 			} else if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
+//				if (rr.relInfo.otherSide != null) {
+//					continue;
+//				}
+				
 				if (rr.getRelationName().equals(relationName)) {
 					nameRelL.add(rr.relInfo);
 				} else  {

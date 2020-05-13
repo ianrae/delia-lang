@@ -15,7 +15,8 @@ public class SingleNamedRelationTests extends NamedRelationTestBase {
 		createCustomerTypeWithRelations("addr1", "addr1");
 		
 		execStatement("insert Customer {wid:44}");
-		execStatement("insert Address {z:5, cust:1}");
+		execStatement(
+				"insert Address {z:5, cust:1}");
 		ResultValue res = this.execStatement("let x = Customer[true]");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
