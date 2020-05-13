@@ -2,11 +2,19 @@ package org.delia.relation.named;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.delia.db.schema.FieldInfo;
+import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.schema.SchemaType;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -78,7 +86,31 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		MyManyToManyVisitor visitor = new MyManyToManyVisitor();
 		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-		assertEquals("Customer.addr1", visitor.trail.getTrail());
+		assertEquals("Address.cust;Customer.addr1", visitor.trail.getTrail());
+		
+		DTypeRegistry registry = sess.getExecutionContext().registry;
+		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator());
+		schemaMigrator.dbNeedsMigration();
+		String fingerprint = schemaMigrator.getCurrentFingerprint();
+		log(fingerprint);
+		
+		Map<String,Integer> datMap = new HashMap<>();
+		List<SchemaType> list = schemaMigrator.parseFingerprint(fingerprint);
+		for(SchemaType sctype: list) {
+			List<FieldInfo> fieldInfoL = schemaMigrator.parseFields(sctype);
+			for(FieldInfo ff: fieldInfoL) {
+				DType dtype = registry.getType(ff.type);
+				if (dtype != null && dtype.isStructShape()) {
+					String key = String.format("%s.%s", sctype.typeName, ff.name);
+					int datId = ff.datId;
+					datMap.put(key, datId);
+					log(String.format("f %s %s", key, ff.type));
+				}
+			}
+		}
+		
+		schemaMigrator.close();
+		
 	}
 
 	@Before

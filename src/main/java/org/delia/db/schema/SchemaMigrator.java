@@ -294,7 +294,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	private List<FieldInfo> parseFields(SchemaType schema1) {
+	public List<FieldInfo> parseFields(SchemaType schema1) {
 		//Customer:struct:{id:int:P,wid:int:}
 		List<FieldInfo> list = new ArrayList<>();
 		String s = StringUtils.substringAfter(schema1.line, "{");
