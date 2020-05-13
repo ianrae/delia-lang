@@ -2,6 +2,8 @@ package org.delia.mem;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.function.Consumer;
+
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.sort.topo.TopoTestBase;
@@ -9,7 +11,7 @@ import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NamedRelationTests extends TopoTestBase {
+public class NamedRelationTests extends NamedRelationTestBase {
 	
 	/*
 	 * TODO:
@@ -34,54 +36,54 @@ public class NamedRelationTests extends TopoTestBase {
 	
 	@Test
 	public void test2UnNamed() {
-		try {
+		expectException("ambiguous-relation", (s) -> {
 			createCustomerTypeWithRelations(null, null,null);
 			this.execStatement("insert Customer {id:3, wid:44}");
-		} catch (DeliaException e) {
-			assertEquals("ambiguous-relation", e.getLastError().getId());
-		}
+		});
 	}
 	
 	@Test
-	public void testBadName() {
-		try {
+	public void testBadNameFail() {
+		Consumer<String> fn = (parameter) -> { 
 			createCustomerTypeWithRelations(null, null, "x");
-			this.execStatement("insert Customer {id:3, wid:44}");
-		} catch (DeliaException e) {
-			assertEquals("ambiguous-relation", e.getLastError().getId());
-		}
+		};
+		expectException("ambiguous-relation", fn);
+	}
+	
+	@Test
+	public void testBadNameFail2() {
+		//better syntax
+		expectException("ambiguous-relation", (s) -> {
+			createCustomerTypeWithRelations(null, null, "x");
+		});
+	}
+	
+	@Test
+	public void testNameSameAsOtherField() {
+		expectException("relation-names-must-be-unique", (s) -> {
+			createCustomerTypeWithRelations(null, "addr1", "addr1");
+		});
 	}
 	
 	@Test
 	public void test3() {
-		//pathological but allowed
-		createCustomerTypeWithRelations("addr2", "addr1", "addr1");
-		
-		execStatement("insert Customer {wid:44}");
-		execStatement("insert Address {z:5, cust:1}");
-		ResultValue res = this.execStatement("let x = Customer[true]");
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals(1, dval.asStruct().getField("id").asInt());
-		assertEquals(44, dval.asStruct().getField("wid").asInt());
+		expectException("named-relation-error", (s) -> {
+			createCustomerTypeWithRelations("addr", "addr1", "addr1");
+		});
 	}
 	
 	@Test
 	public void testDup() {
-		try {
+		expectException("named-relation-error", (s) -> {
 			createCustomerTypeWithRelations("addr2", "addr2", "addr1");
-		} catch (DeliaException e) {
-			assertEquals("ambiguous-relation", e.getLastError().getId());
-		}
+		});
 	}
 	
 	@Test
 	public void testUnknown() {
-		try {
+		expectException("named-relation-error", (s) -> {
 			createCustomerTypeWithRelations("addr1", null, "x");
-		} catch (DeliaException e) {
-			assertEquals("ambiguous-relation", e.getLastError().getId());
-		}
+		});
 	}
 	
 	// --
