@@ -70,9 +70,30 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
 		DBExecutor dbexecutor = schemaMigrator.getDbexecutor();
 		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
-		int numAssocTbls = qresp.emptyResults() ? 0 : qresp.getOne().asInt();
+		
+		int numAssocTbls = getNumRows(qresp);
 		nextAssocNameInt = numAssocTbls + 1; //start at one
 	}
+	
+	//careful. MEM db doesn't run any fns like count(), so qresp will contain
+	//a list of DAT DValues.  Normal databases (h2, postgres) *will* contain the result
+	//of count() (a long);
+	int getNumRows(QueryResponse qresp) {
+		if (qresp.emptyResults()) {
+			return 0;
+		}
+		
+		DValue dval = qresp.getOne();
+		if (dval.getType().isScalarShape()) {
+			Long n = dval.asLong();
+			return n.intValue();
+		} else {
+			return qresp.dvalList.size();
+		}
+		
+	}
+	
+	
 	private String createAssocTableName() {
 		String tlbName = String.format("dat%d", nextAssocNameInt++);
 		return tlbName;
