@@ -80,6 +80,18 @@ public class MigrationOptimizer extends ServiceBase {
 				} else {
 					newlist.add(st);
 				}
+			} else if (st.isFieldDelete()) {
+				FieldInfo f1 = parseFieldInfo(st);
+				//relation codes
+				// a - relation one parent
+				// b - relation one         (child)
+				// c = relation many parent
+				// d = relation many        (child) -can this occur?
+				String flags = f1.flagStr;
+				if (flags.contains("a") || flags.contains("c") || flags.contains("d")) {
+				} else {
+					newlist.add(st);
+				}
 			} else {
 				newlist.add(st);
 			}
@@ -256,7 +268,8 @@ public class MigrationOptimizer extends ServiceBase {
 			FieldInfo finfo = new FieldInfo();
 			finfo.name = StringUtils.substringBefore(ss, ":");
 			finfo.type = StringUtils.substringBetween(ss, ":", ":");
-			finfo.flagStr = StringUtils.substringAfterLast(ss, ":");
+			String tmp = StringUtils.substringAfterLast(ss, ":");
+			finfo.flagStr = StringUtils.substringBefore(tmp, "/");
 			list.add(finfo);
 		}
 		return list;

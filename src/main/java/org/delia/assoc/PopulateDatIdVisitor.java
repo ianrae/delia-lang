@@ -24,6 +24,7 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 	private Log log;
 	private Map<String,Integer> dataIdMap;
 	public int datIdCounter;
+	public long maxIdSeen = 0L;
 
 	public PopulateDatIdVisitor(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, Log log) {
 		this.factorySvc = factorySvc;
@@ -45,6 +46,9 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 			rr.relInfo.forceDatId(datId);
 			rr.relInfo.otherSide.forceDatId(datId);
 			datIdCounter++;
+			if (datId > maxIdSeen) {
+				maxIdSeen = datId;
+			}
 		}
 	}
 
@@ -52,6 +56,7 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 		//only read from DB if there are MM relations.
 		if (schemaMigrator == null) {
 			schemaMigrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
+			schemaMigrator.createSchemaTableIfNeeded();
 			String fingerprint = schemaMigrator.calcDBFingerprint();
 			log.log("DB fingerprint: " + fingerprint);
 			this.dataIdMap = buildDatIdMap(fingerprint);

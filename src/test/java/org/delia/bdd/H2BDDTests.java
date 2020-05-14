@@ -297,7 +297,7 @@ public class H2BDDTests extends NewBDDBase {
 		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR1600File("t0-fetch.txt", 3);
-		runR2150File("t0-migrate-one-to-many1.txt", 3);
+		runR2150File("t0-migrate-one-to-many2.txt", 2);
 	}
 	
 	//---
