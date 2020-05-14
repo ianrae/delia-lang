@@ -44,7 +44,6 @@ public class MigrationService extends ServiceBase {
 						log.log(ss.getSummary());
 					}
 					log.log("=== END MIGRATION PLAN ===");
-					migrator.close();
 					return false;
 				}
 			}

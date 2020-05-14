@@ -1,25 +1,31 @@
 package org.delia.relation.named;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.core.FactoryService;
+import org.delia.db.DBInterface;
+import org.delia.db.InsertContext;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
+import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
 import org.delia.runner.DoNothingVarEvaluator;
-import org.delia.runner.ResultValue;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.util.StringTrail;
+import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.valuebuilder.StructValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,9 +62,136 @@ public class AssocServiceTests extends NamedRelationTestBase {
 			String s = String.format("%s.%s", structType.getName(), relinfo.fieldName);
 			trail.add(s);
 		}
-		
 	}
 
+	public static class PopulateDatIdVisitor implements ManyToManyVisitor {
+		private FactoryService factorySvc;
+		private DBInterface dbInterface;
+		private DTypeRegistry registry;
+		private SchemaMigrator schemaMigrator;
+		private Log log;
+		private Map<String,Integer> dataIdMap;
+
+		public PopulateDatIdVisitor(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, Log log) {
+			this.factorySvc = factorySvc;
+			this.dbInterface = dbInterface;
+			this.registry = registry;
+			this.log = log;
+		}
+		
+		@Override
+		public void visit(DStructType structType, RelationRuleBase rr) {
+			if (rr.relInfo.getDatId() != null) {
+				return;
+			}
+			
+			loadSchemaFingerprintIfNeeded();
+			String key = createKey(structType.getName(), rr.relInfo.fieldName);
+			Integer datId = dataIdMap.get(key);
+			if (datId != null) {  //will be null for new types
+				rr.relInfo.forceDatId(datId);
+				rr.relInfo.otherSide.forceDatId(datId);
+			}
+		}
+
+		private void loadSchemaFingerprintIfNeeded() {
+			//only read from DB if there are MM relations.
+			if (schemaMigrator == null) {
+				schemaMigrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
+				String fingerprint = schemaMigrator.calcDBFingerprint();
+				log.log("DB fingerprint: " + fingerprint);
+				this.dataIdMap = buildDatIdMap(fingerprint);
+			}
+		}
+		
+		private Map<String,Integer> buildDatIdMap(String fingerprint) {
+			Map<String,Integer> datMap = new HashMap<>();
+			List<SchemaType> list = schemaMigrator.parseFingerprint(fingerprint);
+			for(SchemaType sctype: list) {
+				List<FieldInfo> fieldInfoL = schemaMigrator.parseFields(sctype);
+				for(FieldInfo ff: fieldInfoL) {
+					DType dtype = registry.getType(ff.type);
+					if (dtype != null && dtype.isStructShape()) {
+						String key = createKey(sctype.typeName, ff.name);
+						int datId = ff.datId;
+						datMap.put(key, datId);
+						log.log(String.format("f %s %s", key, ff.type));
+					}
+				}
+			}
+			return datMap;
+		}
+		private String createKey(String typeName, String fieldName) {
+			String key = String.format("%s.%s", typeName, fieldName);
+			return key;
+		}
+
+		public SchemaMigrator getSchemaMigrator() {
+			return schemaMigrator;
+		}
+	}
+
+	public static class CreateNewDatIdVisitor implements ManyToManyVisitor {
+		private FactoryService factorySvc;
+		private DTypeRegistry registry;
+		private SchemaMigrator schemaMigrator;
+		private Log log;
+
+		public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log) {
+			this.factorySvc = factorySvc;
+			this.schemaMigrator = schemaMigrator;
+			this.registry = registry;
+			this.log = log;
+		}
+		
+		@Override
+		public void visit(DStructType structType, RelationRuleBase rr) {
+			if (rr.relInfo.getDatId() != null) {
+				return;
+			}
+			
+			//create new row 
+			//write new schema to db
+			DStructType dtype = registry.getDATType();
+			DValue dval = createDatTableObj(dtype, "dat11");
+			if (dval == null) {
+				return;
+			}
+
+			InsertContext ictx = new InsertContext();
+			DValue newDatIdValue = schemaMigrator.getDbexecutor().executeInsert(dval, ictx);
+			
+			if (newDatIdValue != null) {  
+				rr.relInfo.forceDatId(newDatIdValue.asInt());
+				rr.relInfo.otherSide.forceDatId(newDatIdValue.asInt());
+				String key = createKey(structType.getName(), rr.relInfo.fieldName);
+				log.log("key: %s, created datId: %d", key, newDatIdValue.asInt());
+			}
+		}
+		
+		private DValue createDatTableObj(DStructType type, String datTableName) {
+			StructValueBuilder structBuilder = new StructValueBuilder(type);
+
+			ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
+			DValue dval = builder.buildString(datTableName);
+			structBuilder.addField("tblName", dval);
+
+			boolean b = structBuilder.finish();
+			if (! b) {
+				return null;
+			}
+			dval = structBuilder.getDValue();
+			return dval;
+		}
+
+		private String createKey(String typeName, String fieldName) {
+			String key = String.format("%s.%s", typeName, fieldName);
+			return key;
+		}
+		
+	}
+	
+	
 	@Test
 	public void test11() {
 		createCustomer11TypeWithRelations("joe", null, "joe");
@@ -90,8 +223,8 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
 		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator());
-		schemaMigrator.dbNeedsMigration();
-		String fingerprint = schemaMigrator.getCurrentFingerprint();
+//		schemaMigrator.dbNeedsMigration();
+		String fingerprint = schemaMigrator.calcDBFingerprint();
 		log(fingerprint);
 		
 		Map<String,Integer> datMap = new HashMap<>();
@@ -110,7 +243,25 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		}
 		
 		schemaMigrator.close();
+	}
+	
+	
+	@Test
+	public void testMM2() {
+		createCustomerMMTypeWithRelations("joe", null, "joe");
+		RelationManyRule rr = getManyRule("Address", "cust");
+		chkRule(rr, true, "joe", "joe");
+
+		DTypeRegistry registry = sess.getExecutionContext().registry;
+		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(delia.getFactoryService(), delia.getDBInterface(), registry, delia.getLog());
+		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
+		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
 		
+		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), visitor.getSchemaMigrator(), registry, delia.getLog());
+		enumerator = new ManyToManyEnumerator();
+		enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
+		
+		visitor.getSchemaMigrator().close();
 	}
 
 	@Before

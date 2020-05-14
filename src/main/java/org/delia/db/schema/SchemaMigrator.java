@@ -408,4 +408,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return true;
 	}
 
+	public DBExecutor getDbexecutor() {
+		return dbexecutor;
+	}
+
 }
