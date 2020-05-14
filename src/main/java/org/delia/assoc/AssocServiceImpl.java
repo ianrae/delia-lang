@@ -29,7 +29,6 @@ public class AssocServiceImpl implements AssocService {
 	@Override
 	public void assignDATIds(DTypeRegistry registry) {
 		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(factorySvc, dbInterface, registry, log);
-		DBExecutor dbexecutor = null;
 		try {
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(registry, visitor);
@@ -41,13 +40,11 @@ public class AssocServiceImpl implements AssocService {
 
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator == null) {
-				DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-				dbexecutor = dbInterface.createExector(dbctx);
-			} else {
-				dbexecutor = schemaMigrator.getDbexecutor();
+				visitor.loadSchemaFingerprintIfNeeded(); //force creation of schema migrator
+				schemaMigrator = visitor.getSchemaMigrator();
 			}
 			
-			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, dbexecutor, registry, log, datIdMap);
+			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator.getDbexecutor(), registry, log, datIdMap);
 			//since types of fields may have been deletect we can't trust the registry
 			//to visit all types needed for schema migration.
 			newIdVisitor.initTableNameCreatorIfNeeded(); //explicitly load every time.
@@ -68,12 +65,6 @@ public class AssocServiceImpl implements AssocService {
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator != null) {
 				schemaMigrator.close();
-			} else if (dbexecutor != null) {
-				try {
-					dbexecutor.close();
-				} catch (Exception e) {
-					DBHelper.handleCloseFailure(e);
-				}
 			}
 		}
 	}

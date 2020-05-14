@@ -50,7 +50,7 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 		}
 	}
 
-	private void loadSchemaFingerprintIfNeeded() {
+	public void loadSchemaFingerprintIfNeeded() {
 		//only read from DB if there are MM relations.
 		if (schemaMigrator == null) {
 			schemaMigrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());

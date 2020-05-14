@@ -258,6 +258,7 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR2150() {
 		enableAllFileCheck = false;
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
@@ -274,6 +275,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
 		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
 		runR2150File("t0-migrate-many-to-many2.txt", 2);
 		runR2150File("t0-migrate-many-to-many2a.txt", 2);
 		runR2150File("t0-migrate-many-to-many3.txt", 2);
