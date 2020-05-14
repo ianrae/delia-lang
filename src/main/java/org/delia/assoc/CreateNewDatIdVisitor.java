@@ -1,5 +1,7 @@
 package org.delia.assoc;
 
+import java.util.Map;
+
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBExecutor;
@@ -14,7 +16,6 @@ import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -29,13 +30,15 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private QueryBuilderService queryBuilder;
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
+	private Map<String,Integer> datIdMap;
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log, Map<String, Integer> datIdMap) {
 		this.factorySvc = factorySvc;
 		this.schemaMigrator = schemaMigrator;
 		this.registry = registry;
 		this.log = log;
 		this.queryBuilder = factorySvc.getQueryBuilderService();
+		this.datIdMap = datIdMap;
 	}
 	
 	@Override
@@ -61,11 +64,13 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		DValue newDatIdValue = schemaMigrator.getDbexecutor().executeInsert(dval, ictx);
 		
 		if (newDatIdValue != null) {  
-			rr.relInfo.forceDatId(newDatIdValue.asInt());
-			rr.relInfo.otherSide.forceDatId(newDatIdValue.asInt());
+			int datId = newDatIdValue.asInt();
+			rr.relInfo.forceDatId(datId);
+			rr.relInfo.otherSide.forceDatId(datId);
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
-			log.log("DAT: %s -> datId: %d (table: %s)", key, newDatIdValue.asInt(), tblName);
+			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
 			datIdCounter++;
+			datIdMap.put(key, datId);
 		}
 	}
 	

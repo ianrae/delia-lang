@@ -317,4 +317,66 @@ public class TableCreator extends ServiceBase {
 		sc.o("ALTER TABLE %s ", tblName(tableName));
 	}
 	
+	
+	public String generateDeleteField(String typeName, DStructType dtype, String fieldName) {
+		if (dtype == null) {
+			dtype = (DStructType) registry.getType(typeName);
+		}
+		
+		StrCreator sc = new StrCreator();
+		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, fieldName);
+		sc.nl();
+		List<SqlElement> fieldL = new ArrayList<>();
+		int manyToManyFieldCount = 0;
+		
+		TypePair pair = DValueHelper.findField(dtype, fieldName);
+		if (isManyToManyRelation(pair, dtype)) {
+			manyToManyFieldCount++;
+		} else {
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+			fieldL.add(field);
+		}
+		
+		//delete constraints
+		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
+			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, true);
+			if (constraint != null) {
+				fieldL.add(constraint);
+			}
+		}
+		
+		List<ConstraintGen> constraints = getConstraintsOnly(fieldL);
+		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
+		
+		
+//		ListWalker<FieldGen> walker1 = new ListWalker<>(getFieldsOnly(fieldL));
+//		while(walker1.hasNext()) {
+//			FieldGen ff = walker1.next();
+//			ff.generateField(sc);
+//			walker1.addIfNotLast(sc, ",", nl());
+//		}
+		
+		sc.o(";");
+		sc.nl();
+		ListWalker<ConstraintGen> walker = new ListWalker<>(constraints);
+		while(walker.hasNext()) {
+			ConstraintGen con = walker.next();
+			sc.o("ALTER TABLE %s DROP  ", typeName);
+			con.generateField(sc);
+			walker.addIfNotLast(sc, ",", nl());
+		}
+		
+		sc.nl();
+		if (manyToManyFieldCount > 0) {
+			if (fieldL.isEmpty()) {
+				sc = new StrCreator(); //reset
+			} else {
+				sc.nl();
+			}
+			//DROP TABLE dat15
+//			alterGenerateAssocTable(sc, pair, dtype);
+		}
+		return sc.str;
+	}
+	
 }

@@ -1,5 +1,7 @@
 package org.delia.assoc;
 
+import java.util.Map;
+
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
 import org.delia.db.schema.SchemaMigrator;
@@ -13,7 +15,8 @@ public class AssocServiceImpl implements AssocService {
 	private ErrorTracker et;
 	private DBInterface dbInterface;
 	private FactoryService factorySvc;
-	
+	private Map<String,Integer> datIdMap;
+
 	public AssocServiceImpl(FactoryService factorySvc, ErrorTracker et, DBInterface dbInterface) {
 		this.factorySvc = factorySvc;
 		this.log = factorySvc.getLog();
@@ -28,18 +31,22 @@ public class AssocServiceImpl implements AssocService {
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(registry, visitor);
 			int numLoaded = visitor.datIdCounter;
-			
+			datIdMap = visitor.getDatIdMap();
+
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator == null) {
 				log.log("DAT ids: %d loaded, %d added", 0, 0);
 				return; //there are no many-to-many types
 			}
-			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator, registry, log);
+			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator, registry, log, datIdMap);
 			enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(registry, newIdVisitor);
 			int numAdded = newIdVisitor.datIdCounter;
 			
 			log.log("DAT ids: %d loaded, %d added", numLoaded, numAdded);
+			if (datIdMap.size() != numLoaded + numAdded) {
+				log.logError("DAT ERROR: datIdMap size: %d -- something's wrong", datIdMap.size());
+			}
 		} finally {
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator != null) {
@@ -63,9 +70,12 @@ public class AssocServiceImpl implements AssocService {
 		//TODO: find a way for schema migrator to not have to re-query for fingerprint
 
 		//are doing this every time delia.beginexecution
-		
-		//HLSQueryStatement hls = null; //build this		
-		
+	}
+
+	@Override
+	public String getAssocTblName(int datId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 
