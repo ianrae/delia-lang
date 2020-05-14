@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
@@ -103,7 +104,8 @@ public class StartupTestBase {
 		assertEquals(nAdded, diffL.size());
 		assertEquals(typeName, diffL.get(0).typeName);
 
-		b = migrator.performMigrations(diffL, true);
+		DatIdMap datIdMap = null; //TODO: is this ok?
+		b = migrator.performMigrations(diffL, true, datIdMap);
 		assertEquals(true, b);
 	}
 

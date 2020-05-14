@@ -1,5 +1,6 @@
 package org.delia.db.schema;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBInterface;
@@ -22,9 +23,10 @@ public class MigrationService extends ServiceBase {
 	 * perform schema migration if needed.
 	 * @param registry - type registry
 	 * @param varEvaluator - for evaluating delia var references
+	 * @param datIdMap 
 	 * @return success flag
 	 */
-	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
@@ -33,7 +35,7 @@ public class MigrationService extends ServiceBase {
 				MigrationPlan plan = migrator.generateMigrationPlan();
 				if (policy.shouldMigrationOccur(plan)) {
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
-					b = migrator.performMigrations(performRiskChecks);
+					b = migrator.performMigrations(performRiskChecks, datIdMap);
 					if (! b) {
 						return false;
 					}
@@ -65,14 +67,15 @@ public class MigrationService extends ServiceBase {
 	 * @param registry type registry
 	 * @param plan migration plan
 	 * @param varEvaluator variable evaluator
+	 * @param datIdMap 
 	 * @return plan
 	 */
-	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator) {
+	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
 			log.log("RUN MIGRATION PLAN: %b", b);
-			plan = migrator.runMigrationPlan(plan);
+			plan = migrator.runMigrationPlan(plan, datIdMap);
 			return plan;
 		}
 	}

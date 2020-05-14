@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -17,6 +18,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.SchemaContext;
 import org.delia.db.memdb.MemDBExecutor;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
@@ -69,12 +71,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	public boolean createSchemaTableIfNeeded() {
+		SchemaContext ctx = new SchemaContext();
 		if (!dbexecutor.execTableDetect(SCHEMA_TABLE)) {
-			dbexecutor.createTable(SCHEMA_TABLE);
+			dbexecutor.createTable(SCHEMA_TABLE, ctx);
 		}
 		
 		if (!dbexecutor.execTableDetect(DAT_TABLE)) {
-			dbexecutor.createTable(DAT_TABLE);
+			dbexecutor.createTable(DAT_TABLE, ctx);
 		}
 		
 		return true;
@@ -91,13 +94,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @param doLowRiskChecks whether to do additional pre-migration checks
 	 * @return true if successful
 	 */
-	public boolean performMigrations(boolean doLowRiskChecks) {
+	public boolean performMigrations(boolean doLowRiskChecks, DatIdMap datIdMap) {
 		List<SchemaType> list = parseFingerprint(dbFingerprint);
 		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
 		
 		List<SchemaType> diffL =  calcDiff(list, list2);
 		diffL = optimizer.optimizeDiffs(diffL);
-		boolean b = performMigrations(diffL, doLowRiskChecks);
+		boolean b = performMigrations(diffL, doLowRiskChecks, datIdMap);
 		return b;
 	}
 	
@@ -122,10 +125,11 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	/**
 	 * dbNeedsMigration MUST have been called before this.
 	 * @param plan migration plan
+	 * @param datIdMap 
 	 * @return migration plan
 	 */
-	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
-		boolean b = performMigrations(plan.diffL, false);
+	public MigrationPlan runMigrationPlan(MigrationPlan plan, DatIdMap datIdMap) {
+		boolean b = performMigrations(plan.diffL, false, datIdMap);
 		plan.runResultFlag = b;
 		return plan;
 	}
@@ -322,7 +326,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks) {
+	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks, DatIdMap datIdMap) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
@@ -332,7 +336,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			return false;
 		}
 		
-		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL);
+		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL, datIdMap);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {

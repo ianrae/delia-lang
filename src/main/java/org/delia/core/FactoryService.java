@@ -1,5 +1,6 @@
 package org.delia.core;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.schema.SchemaMigrator;

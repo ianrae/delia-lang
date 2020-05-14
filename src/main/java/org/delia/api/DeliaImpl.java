@@ -253,6 +253,7 @@ public class DeliaImpl implements Delia {
 		AssocService assocSvc = new AssocServiceImpl(factorySvc, factorySvc.getErrorTracker(), dbInterface);
 		assocSvc.assignDATIds(mainRunner.getRegistry());
 		extraInfo.datIdMap = assocSvc.getDatIdMap();
+		DatIdMap datIdMap = extraInfo.datIdMap;
 		
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.
@@ -266,10 +267,10 @@ public class DeliaImpl implements Delia {
 				if (deliaOptions.disableSQLLoggingDuringSchemaMigration) {
 					boolean prev = dbInterface.isSQLLoggingEnabled();
 					dbInterface.enableSQLLogging(false);
-					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
 					dbInterface.enableSQLLogging(prev);
 				} else {
-					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
 				}
 				
 				if (!b) {
@@ -288,7 +289,7 @@ public class DeliaImpl implements Delia {
 			{
 				ResultValue res = new ResultValue();
 				res.ok = true;
-				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner);
+				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner, datIdMap);
 				return res;
 			}
 			case DO_NOTHING:

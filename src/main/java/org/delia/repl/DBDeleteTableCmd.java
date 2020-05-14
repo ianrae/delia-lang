@@ -4,6 +4,7 @@ import org.delia.api.Delia;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
+import org.delia.db.SchemaContext;
 import org.delia.runner.ResultValue;
 
 public class DBDeleteTableCmd extends CmdBase {
@@ -30,7 +31,8 @@ public class DBDeleteTableCmd extends CmdBase {
 		try(DBExecutor exec = dbInterface.createExector(dbctx)) {
 			String tableName = cmd.arg1;
 			if (exec.execTableDetect(tableName)) {
-				exec.deleteTable(cmd.arg1);
+				SchemaContext ctx = new SchemaContext();
+				exec.deleteTable(cmd.arg1, ctx);
 				log(String.format("deleted table '%s'", cmd.arg1));
 			} else {
 				log("can't find that table: " + tableName);

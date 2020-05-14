@@ -2,11 +2,13 @@ package org.delia.db.schema;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.InsertContext;
+import org.delia.db.SchemaContext;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -18,6 +20,7 @@ public class MigrationRunner extends ServiceBase {
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
 	private DBExecutor dbexecutor;
+	private DatIdMap datIdMap;
 
 	public MigrationRunner(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, DBExecutor dbexecutor) {
 		super(factorySvc);
@@ -25,7 +28,9 @@ public class MigrationRunner extends ServiceBase {
 		this.registry = registry;
 	}
 
-	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {
+	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL, DatIdMap datIdMap) {
+		this.datIdMap = datIdMap;
+		SchemaContext ctx = createSchemaContext();
 		
 		log.log("running migration with %d steps:", orderL.size());
 		for(String typeName: orderL) {
@@ -33,19 +38,19 @@ public class MigrationRunner extends ServiceBase {
 				if (st.typeName.equals(typeName)) {
 					if (st.isTblInsert()) {
 						log.log("  create-table: %s", st.typeName);
-						dbexecutor.createTable(st.typeName);
+						dbexecutor.createTable(st.typeName, ctx);
 					} else if (st.isFieldInsert()) {
 						log.log("  add-field: %s", st);
-						dbexecutor.createField(st.typeName, st.field);
+						dbexecutor.createField(st.typeName, st.field, ctx);
 					} else if (st.isFieldRename()) {
 						log.log("  rename-field: %s %s", st, st.newName);
-						dbexecutor.renameField(st.typeName, st.field, st.newName);
+						dbexecutor.renameField(st.typeName, st.field, st.newName, ctx);
 					} else if (st.isFieldAlterType()) {
 						log.log("  alter-field-type: %s %s", st, st.newName);
-						dbexecutor.alterFieldType(st.typeName, st.field, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, ctx);
 					} else if (st.isFieldAlter()) {
 						log.log("  alter-field: %s '%s'", st, st.newName);
-						dbexecutor.alterField(st.typeName, st.field, st.newName);
+						dbexecutor.alterField(st.typeName, st.field, st.newName, ctx);
 					}
 				}
 			}
@@ -58,10 +63,10 @@ public class MigrationRunner extends ServiceBase {
 			} else if (st.isFieldDelete()) {
 				log.log("  delete-field: %s", st);
 				//TODO: implement soft delete
-				dbexecutor.deleteField(st.typeName, st.field);
+				dbexecutor.deleteField(st.typeName, st.field, ctx);
 			} else if (st.isTblRename()) {
 				log.log("  rename-table: %s %s", st, st.newName);
-				dbexecutor.renameTable(st.typeName, st.newName);
+				dbexecutor.renameTable(st.typeName, st.newName, ctx);
 			} 
 		}
 
@@ -77,23 +82,31 @@ public class MigrationRunner extends ServiceBase {
 
 		return true;
 	}
+	
+	private SchemaContext createSchemaContext() {
+		SchemaContext ctx = new SchemaContext();
+		ctx.datIdMap = datIdMap;
+		return ctx;
+	}
 
 	private void doSoftDelete(String typeName) {
+		SchemaContext ctx = createSchemaContext();
 		String backupName = String.format("%s__BAK", typeName);
 		if (dbexecutor.execTableDetect(backupName)) {
 			//only keep one backup table per type
-			dbexecutor.deleteTable(backupName);
+			dbexecutor.deleteTable(backupName, ctx);
 		}
-		dbexecutor.renameTable(typeName, backupName);
+		dbexecutor.renameTable(typeName, backupName, ctx);
 		log.log("rename TBL: %s -> %s", typeName, backupName);
 	}
 	private void doSoftDeleteField(String typeName, String fieldName) {
+		SchemaContext ctx = createSchemaContext();
 		String backupName = String.format("%s__BAK", fieldName);
 		if (dbexecutor.execTableDetect(backupName)) {
 			//only keep one backup table per type
-			dbexecutor.deleteTable(backupName);
+			dbexecutor.deleteTable(backupName, ctx);
 		}
-		dbexecutor.renameTable(typeName, backupName);
+		dbexecutor.renameTable(typeName, backupName, ctx);
 		log.log("rename TBL: %s -> %s", typeName, backupName);
 	}
 	
