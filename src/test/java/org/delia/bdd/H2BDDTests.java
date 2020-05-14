@@ -296,13 +296,8 @@ public class H2BDDTests extends NewBDDBase {
 		cleanTables = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		runR1000File("t0-upsert-mm-id.txt", 4);
 //		runR1600File("t0-fetch.txt", 3);
-//		runR1500File("t0-queryfn-exist.txt", 2);
-		runR2100File("t0-migration.txt", 2);
-		runR2100File("t0-migration2.txt", 2);
-		runR2100File("t0-migration3.txt", 2);
-		runR2100File("t0-migration3a.txt", 2);
+		runR2150File("t0-migrate-one-to-many1.txt", 3);
 	}
 	
 	//---

@@ -68,8 +68,10 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 				if (dtype != null && dtype.isStructShape()) {
 					String key = createKey(sctype.typeName, ff.name);
 					int datId = ff.datId;
-					datMap.put(key, datId);
-					log.log(String.format("f %s %s", key, ff.type));
+					if (datId != 0) {
+						datMap.put(key, datId);
+						log.log(String.format("DAT map: %s %d", key, datId));
+					}
 				}
 			}
 		}

@@ -12,7 +12,9 @@ import org.delia.log.Log;
 import org.delia.rule.rules.RelationRuleBase;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -25,6 +27,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private Log log;
 	public int datIdCounter;
 	private QueryBuilderService queryBuilder;
+	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
 
 	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log) {
@@ -53,6 +56,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		}
 
 		InsertContext ictx = new InsertContext();
+		ictx.extractGeneratedKeys = true;
+		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
 		DValue newDatIdValue = schemaMigrator.getDbexecutor().executeInsert(dval, ictx);
 		
 		if (newDatIdValue != null) {  
@@ -65,6 +70,17 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	}
 	
 	private void initTableNameCreatorIfNeeded() {
+		if (haveInitTableNameCreator) {
+			return; //only do this once
+		}
+		haveInitTableNameCreator = true;
+		
+		//DAT tables are named dat1,dat2, etc
+		//we need to determine how many datIds there are so we
+		//can generate new names. i.e. if there are 3 then we should
+		//generate dat4,dat5,...
+		//TODO: we could instead calc highest-datid during first visitor
+		
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createCountQuery(datType.getName());
 		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
@@ -72,6 +88,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
 		
 		int numAssocTbls = getNumRows(qresp);
+		log.log("DAT: %d assoc tables.", numAssocTbls);
 		nextAssocNameInt = numAssocTbls + 1; //start at one
 	}
 	
@@ -92,7 +109,6 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		}
 		
 	}
-	
 	
 	private String createAssocTableName() {
 		String tlbName = String.format("dat%d", nextAssocNameInt++);

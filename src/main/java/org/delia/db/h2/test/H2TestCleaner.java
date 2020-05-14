@@ -53,6 +53,8 @@ public class H2TestCleaner {
 
 			String tbl = SchemaMigrator.SCHEMA_TABLE;
 			safeDeleteTable(executor, tbl.toLowerCase());
+			tbl = SchemaMigrator.DAT_TABLE;
+			safeDeleteTable(executor, tbl.toLowerCase());
 		} catch (Exception e1) {
 			DBHelper.handleCloseFailure(e1);
 		}

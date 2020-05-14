@@ -56,7 +56,7 @@ public class ResultSetWrapper {
 	public DValue readField(TypePair pair, DBAccessContext dbctx) throws SQLException {
 		DValue dval = valueHelper.readField(pair, rs, dbctx);
 		if (logResultSetDetails) {
-			log.log("RWS: field %s", dval == null ? "null" : dval.asString());
+			log.log("RSW: field %s", dval == null ? "null" : dval.asString());
 		}
 		
 		return dval;
@@ -65,7 +65,7 @@ public class ResultSetWrapper {
 	public DValue readFieldByColumnIndex(TypePair pair, int index, DBAccessContext dbctx) throws SQLException {
 		DValue dval = valueHelper.readFieldByColumnIndex(pair, rs, index, dbctx);
 		if (logResultSetDetails) {
-			log.log("RWS: field %s", dval == null ? "null" : dval.asString());
+			log.log("RSW: field %s", dval == null ? "null" : dval.asString());
 		}
 		return dval;
 	}
