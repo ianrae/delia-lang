@@ -88,7 +88,7 @@ public class MigrationOptimizer extends ServiceBase {
 				// c = relation many parent
 				// d = relation many        (child) -can this occur?
 				String flags = f1.flagStr;
-				if (flags.contains("a") || flags.contains("c") || flags.contains("d")) {
+				if (flags.contains("a") || flags.contains("c")) {
 				} else {
 					newlist.add(st);
 				}
