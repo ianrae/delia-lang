@@ -63,7 +63,7 @@ public class MigrationRunner extends ServiceBase {
 			} else if (st.isFieldDelete()) {
 				log.log("  delete-field: %s", st);
 				//TODO: implement soft delete
-				dbexecutor.deleteField(st.typeName, st.field, ctx);
+				dbexecutor.deleteField(st.typeName, st.field, st.datId, ctx);
 			} else if (st.isTblRename()) {
 				log.log("  rename-table: %s %s", st, st.newName);
 				dbexecutor.renameTable(st.typeName, st.newName, ctx);

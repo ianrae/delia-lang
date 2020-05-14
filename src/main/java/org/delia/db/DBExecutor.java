@@ -36,7 +36,7 @@ public interface DBExecutor extends AutoCloseable {
 	void deleteTable(String tableName, SchemaContext ctx);
 	void renameTable(String tableName, String newTableName, SchemaContext ctx);
 	void createField(String typeName, String field, SchemaContext ctx);
-	void deleteField(String typeName, String field, SchemaContext ctx);
+	void deleteField(String typeName, String field, int datId, SchemaContext ctx);
 	void renameField(String typeName, String field, String newName, SchemaContext ctx);
 	void alterFieldType(String typeName, String fieldName, String newFieldType, SchemaContext ctx);
 	void alterField(String typeName, String fieldName, String deltaFlags, SchemaContext ctx);

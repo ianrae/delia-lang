@@ -485,7 +485,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
 		//nothing to do
 	}
 

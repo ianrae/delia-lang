@@ -97,8 +97,8 @@ public class PostgresDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, SchemaContext ctx) {
-		dbInterface.deleteField(typeName, field, dbctx, ctx);
+	public void deleteField(String typeName, String field, int datId, SchemaContext ctx) {
+		dbInterface.deleteField(typeName, field, datId, dbctx, ctx);
 	}
 	@Override
 	public void renameField(String typeName, String fieldName, String newName, SchemaContext ctx) {

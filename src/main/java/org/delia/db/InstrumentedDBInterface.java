@@ -96,8 +96,8 @@ public class InstrumentedDBInterface implements DBInterface {
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
-		actualInterface.deleteField(typeName, field, dbctx, ctx);
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.deleteField(typeName, field, datId, dbctx, ctx);
 	}
 
 	@Override

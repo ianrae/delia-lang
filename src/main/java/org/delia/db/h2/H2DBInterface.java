@@ -369,11 +369,11 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
 //		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, field);
 //		executeSQL(sql, dbctx);
 		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
-		String sql = creator.generateDeleteField(typeName, null, field);
+		String sql = creator.generateDeleteField(typeName, null, field, datId);
 		executeSQL(sql, dbctx);
 	}
 

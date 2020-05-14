@@ -346,7 +346,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
 		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, field);
 		executeSQL(sql, dbctx);
 	}

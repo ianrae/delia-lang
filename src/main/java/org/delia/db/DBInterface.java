@@ -39,7 +39,7 @@ public interface DBInterface {
 	void deleteTable(String tableName, DBAccessContext dbctx, SchemaContext ctx);
 	void renameTable(String tableName, String newTableName, DBAccessContext dbctx, SchemaContext ctx);
 	void createField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx);
-	void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx);
+	void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx);
 	void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx);
 	void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx);
 	void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx, SchemaContext ctx);
