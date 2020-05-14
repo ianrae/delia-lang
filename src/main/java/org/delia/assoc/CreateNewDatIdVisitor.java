@@ -23,17 +23,17 @@ import org.delia.valuebuilder.StructValueBuilder;
 public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private FactoryService factorySvc;
 	private DTypeRegistry registry;
-	private SchemaMigrator schemaMigrator;
 	private Log log;
 	public int datIdCounter;
 	private QueryBuilderService queryBuilder;
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
+	private DBExecutor dbexecutor;
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, DBExecutor dbexecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
-		this.schemaMigrator = schemaMigrator;
+		this.dbexecutor = dbexecutor;
 		this.registry = registry;
 		this.log = log;
 		this.queryBuilder = factorySvc.getQueryBuilderService();
@@ -60,7 +60,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		InsertContext ictx = new InsertContext();
 		ictx.extractGeneratedKeys = true;
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		DValue newDatIdValue = schemaMigrator.getDbexecutor().executeInsert(dval, ictx);
+		DValue newDatIdValue = dbexecutor.executeInsert(dval, ictx);
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();
@@ -88,7 +88,6 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
 		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
-		DBExecutor dbexecutor = schemaMigrator.getDbexecutor();
 		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
 		
 		int maxDatId = loadDATRows(qresp);

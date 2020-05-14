@@ -11,6 +11,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
 import org.delia.assoc.PopulateDatIdVisitor;
+import org.delia.db.DBExecutor;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
@@ -109,7 +110,8 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
 		DatIdMap datIdMap = visitor.getDatIdMap();
 		
-		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), visitor.getSchemaMigrator(), registry, delia.getLog(), datIdMap);
+		DBExecutor dbexecutor = visitor.getSchemaMigrator().getDbexecutor();
+		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), dbexecutor, registry, delia.getLog(), datIdMap);
 		enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
 		

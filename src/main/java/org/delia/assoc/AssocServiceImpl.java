@@ -1,10 +1,14 @@
 package org.delia.assoc;
 
 import org.delia.core.FactoryService;
+import org.delia.db.DBAccessContext;
+import org.delia.db.DBExecutor;
+import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DTypeRegistry;
 
 public class AssocServiceImpl implements AssocService {
@@ -25,6 +29,7 @@ public class AssocServiceImpl implements AssocService {
 	@Override
 	public void assignDATIds(DTypeRegistry registry) {
 		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(factorySvc, dbInterface, registry, log);
+		DBExecutor dbexecutor = null;
 		try {
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(registry, visitor);
@@ -36,13 +41,21 @@ public class AssocServiceImpl implements AssocService {
 
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator == null) {
-				log.log("DAT ids: %d loaded, %d added", 0, 0);
-				return; //there are no many-to-many types
+				DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+				dbexecutor = dbInterface.createExector(dbctx);
+			} else {
+				dbexecutor = schemaMigrator.getDbexecutor();
 			}
-			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator, registry, log, datIdMap);
+			
+			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, dbexecutor, registry, log, datIdMap);
 			//since types of fields may have been deletect we can't trust the registry
 			//to visit all types needed for schema migration.
 			newIdVisitor.initTableNameCreatorIfNeeded(); //explicitly load every time.
+			
+			if (schemaMigrator == null) {
+				log.log("DAT ids: %d loaded, %d added", 0, 0);
+				return; //there are no many-to-many types
+			}
 			enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(registry, newIdVisitor);
 			int numAdded = newIdVisitor.datIdCounter;
@@ -55,6 +68,12 @@ public class AssocServiceImpl implements AssocService {
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator != null) {
 				schemaMigrator.close();
+			} else if (dbexecutor != null) {
+				try {
+					dbexecutor.close();
+				} catch (Exception e) {
+					DBHelper.handleCloseFailure(e);
+				}
 			}
 		}
 	}
