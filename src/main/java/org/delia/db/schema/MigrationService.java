@@ -1,9 +1,12 @@
 package org.delia.db.schema;
 
+import org.delia.assoc.AssocService;
+import org.delia.assoc.AssocServiceImpl;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBInterface;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 
@@ -90,5 +93,15 @@ public class MigrationService extends ServiceBase {
 		}
 	}
 
+	public DatIdMap loadDATData(DTypeRegistry registry) {
+		DatIdMap datIdMap = null;
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator())) {
+			migrator.createSchemaTableIfNeeded();
+			AssocService assocSvc = new AssocServiceImpl(migrator, factorySvc, factorySvc.getErrorTracker());
+			assocSvc.assignDATIds(registry);
+			datIdMap = assocSvc.getDatIdMap();
+		}
+		return datIdMap;
+	}
 
 }

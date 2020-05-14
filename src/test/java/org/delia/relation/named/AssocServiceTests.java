@@ -105,7 +105,8 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		rr.relInfo.forceDatId(null);;
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
-		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(delia.getFactoryService(), delia.getDBInterface(), registry, delia.getLog());
+		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
+		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
 		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
 		DatIdMap datIdMap = visitor.getDatIdMap();

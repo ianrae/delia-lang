@@ -2,33 +2,28 @@ package org.delia.assoc;
 
 import java.util.List;
 
-import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.log.Log;
 import org.delia.rule.rules.RelationRuleBase;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 
 public class PopulateDatIdVisitor implements ManyToManyVisitor {
-	private FactoryService factorySvc;
-	private DBInterface dbInterface;
 	private DTypeRegistry registry;
 	private SchemaMigrator schemaMigrator;
 	private Log log;
 	private DatIdMap datIdMap;
 	public int datIdCounter;
 	public long maxIdSeen = 0L;
+	private boolean haveLoadedSchemaFingerprint = false;
 
-	public PopulateDatIdVisitor(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, Log log) {
-		this.factorySvc = factorySvc;
-		this.dbInterface = dbInterface;
+	public PopulateDatIdVisitor(SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log) {
 		this.registry = registry;
 		this.log = log;
+		this.schemaMigrator = schemaMigrator;
 	}
 	
 	@Override
@@ -52,9 +47,8 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 
 	public void loadSchemaFingerprintIfNeeded() {
 		//only read from DB if there are MM relations.
-		if (schemaMigrator == null) {
-			schemaMigrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
-			schemaMigrator.createSchemaTableIfNeeded();
+		if (!haveLoadedSchemaFingerprint) {
+			haveLoadedSchemaFingerprint = true;
 			String fingerprint = schemaMigrator.calcDBFingerprint();
 			log.log("DB fingerprint: " + fingerprint);
 			this.datIdMap = buildDatIdMap(fingerprint);

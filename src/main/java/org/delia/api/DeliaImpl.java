@@ -250,9 +250,7 @@ public class DeliaImpl implements Delia {
 		compiler.executePass4(src, extL, mainRunner.getRegistry());
 		
 		//load or assign DAT ids. must do this even if don't do migration
-		AssocService assocSvc = new AssocServiceImpl(factorySvc, factorySvc.getErrorTracker(), dbInterface);
-		assocSvc.assignDATIds(mainRunner.getRegistry());
-		extraInfo.datIdMap = assocSvc.getDatIdMap();
+		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry());
 		DatIdMap datIdMap = extraInfo.datIdMap;
 		
 		//now that we know the types, do a flyway-style schema migration
