@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.assoc.CreateNewDatIdVisitor;
+import org.delia.assoc.DatIdMap;
 import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
 import org.delia.assoc.PopulateDatIdVisitor;
@@ -97,13 +98,18 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		createCustomerMMTypeWithRelations("joe", null, "joe");
 		RelationManyRule rr = getManyRule("Address", "cust");
 		chkRule(rr, true, "joe", "joe");
-
+		//clear datIds
+		rr.relInfo.forceDatId(null);;
+		rr = getManyRule("Customer", "addr1");
+		rr.relInfo.forceDatId(null);;
+		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
 		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(delia.getFactoryService(), delia.getDBInterface(), registry, delia.getLog());
 		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
+		DatIdMap datIdMap = visitor.getDatIdMap();
 		
-		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), visitor.getSchemaMigrator(), registry, delia.getLog());
+		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), visitor.getSchemaMigrator(), registry, delia.getLog(), datIdMap);
 		enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
 		

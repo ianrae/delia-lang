@@ -15,7 +15,7 @@ public class AssocServiceImpl implements AssocService {
 	private ErrorTracker et;
 	private DBInterface dbInterface;
 	private FactoryService factorySvc;
-	private Map<String,Integer> datIdMap;
+	private DatIdMap datIdMap;
 
 	public AssocServiceImpl(FactoryService factorySvc, ErrorTracker et, DBInterface dbInterface) {
 		this.factorySvc = factorySvc;
@@ -74,8 +74,7 @@ public class AssocServiceImpl implements AssocService {
 
 	@Override
 	public String getAssocTblName(int datId) {
-		// TODO Auto-generated method stub
-		return null;
+		return datIdMap.getAssocTblName(datId);
 	}
 }
 

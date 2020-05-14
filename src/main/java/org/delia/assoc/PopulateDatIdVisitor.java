@@ -22,7 +22,8 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 	private DTypeRegistry registry;
 	private SchemaMigrator schemaMigrator;
 	private Log log;
-	private Map<String,Integer> datIdMap;
+	private DatIdMap datIdMap;
+//	private Map<String,Integer> datIdMap;
 	public int datIdCounter;
 	public long maxIdSeen = 0L;
 
@@ -63,8 +64,8 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 		}
 	}
 	
-	private Map<String,Integer> buildDatIdMap(String fingerprint) {
-		Map<String,Integer> datMap = new HashMap<>();
+	private DatIdMap buildDatIdMap(String fingerprint) {
+		DatIdMap datMap = new DatIdMap();
 		List<SchemaType> list = schemaMigrator.parseFingerprint(fingerprint);
 		for(SchemaType sctype: list) {
 			List<FieldInfo> fieldInfoL = schemaMigrator.parseFields(sctype);
@@ -87,7 +88,7 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 		return schemaMigrator;
 	}
 
-	public Map<String, Integer> getDatIdMap() {
+	public DatIdMap getDatIdMap() {
 		return datIdMap;
 	}
 }

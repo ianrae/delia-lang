@@ -1,6 +1,5 @@
 package org.delia.assoc;
 
-import java.util.Map;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
@@ -30,9 +29,9 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private QueryBuilderService queryBuilder;
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
-	private Map<String,Integer> datIdMap;
+	private DatIdMap datIdMap;
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log, Map<String, Integer> datIdMap) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
 		this.schemaMigrator = schemaMigrator;
 		this.registry = registry;
@@ -70,7 +69,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
 			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
 			datIdCounter++;
-			datIdMap.put(key, datId);
+			datIdMap.attachTblName(datId, tblName);
 		}
 	}
 	
@@ -87,32 +86,33 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		//TODO: we could instead calc highest-datid during first visitor
 		
 		DStructType datType = registry.getDATType();
-		QueryExp exp = queryBuilder.createCountQuery(datType.getName());
+		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
 		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
 		DBExecutor dbexecutor = schemaMigrator.getDbexecutor();
 		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
 		
-		int numAssocTbls = getNumRows(qresp);
-		log.log("DAT: %d assoc tables.", numAssocTbls);
-		nextAssocNameInt = numAssocTbls + 1; //start at one
+		int maxDatId = loadDATRows(qresp);
+		log.log("DAT: max id %d.", maxDatId);
+		nextAssocNameInt = maxDatId + 1; //start at one
 	}
 	
-	//careful. MEM db doesn't run any fns like count(), so qresp will contain
-	//a list of DAT DValues.  Normal databases (h2, postgres) *will* contain the result
-	//of count() (a long);
-	int getNumRows(QueryResponse qresp) {
+	int loadDATRows(QueryResponse qresp) {
 		if (qresp.emptyResults()) {
 			return 0;
 		}
 		
-		DValue dval = qresp.getOne();
-		if (dval.getType().isScalarShape()) {
-			Long n = dval.asLong();
-			return n.intValue();
-		} else {
-			return qresp.dvalList.size();
+		int maxId = 0;
+		for(DValue dval: qresp.dvalList) {
+			int id = dval.asStruct().getField("id").asInt();
+			if (id > maxId) {
+				maxId = id;
+			}
+			
+			String tblName = dval.asStruct().getField("tblName").asString();
+			datIdMap.attachTblName(id, tblName);
 		}
-		
+
+		return maxId;
 	}
 	
 	private String createAssocTableName() {
