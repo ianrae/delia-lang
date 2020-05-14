@@ -340,7 +340,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	}
 	@Override
 	public void createField(String typeName, String fieldName, DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateCreateField(typeName, null, fieldName);
 		executeSQL(sql, dbctx);
 	}
@@ -359,14 +359,14 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 
 	@Override
 	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateRenameField(typeName, fieldName, newName);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
 	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateAlterFieldType(typeName, fieldName, newFieldType);
 		executeSQL(sql, dbctx);
 	}
@@ -374,7 +374,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	@Override
 	public void alterField(String tableName, String fieldName, String deltaFlags,
 			DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String constraintName = String.format("%s_%s_key", creator.tblName(tableName), creator.tblName(fieldName));		
 		String sql = creator.generateAlterField(tableName, fieldName, deltaFlags, constraintName);
 		executeSQL(sql, dbctx);

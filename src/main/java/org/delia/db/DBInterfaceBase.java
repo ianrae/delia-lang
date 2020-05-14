@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringJoiner;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSQueryStatement;
@@ -119,7 +120,8 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	
 	protected synchronized TableCreator createTableCreator(DBAccessContext dbctx) {
 		if (tableCreator == null) {
-			this.tableCreator = sqlHelperFactory.createTableCreator(dbctx);
+			DatIdMap datIdMap = null; //TODO is this ok?
+			this.tableCreator = sqlHelperFactory.createTableCreator(dbctx, datIdMap);
 		}
 		return tableCreator;
 	}

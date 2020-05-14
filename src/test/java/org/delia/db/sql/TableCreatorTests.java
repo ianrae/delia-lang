@@ -2,6 +2,7 @@ package org.delia.db.sql;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
@@ -77,7 +78,8 @@ public class TableCreatorTests {
 		DBAccessContext dbctx = runner.createDBAccessContext();
 		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
 		FactoryService factorySvc = runner.getFactoryService();
-		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc);
+		DatIdMap datIdMap = new DatIdMap();
+		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc, datIdMap);
 		return tblCreator;
 	}
 	

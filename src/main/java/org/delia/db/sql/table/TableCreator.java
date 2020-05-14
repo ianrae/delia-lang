@@ -3,6 +3,7 @@ package org.delia.db.sql.table;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.TableExistenceService;
@@ -23,15 +24,17 @@ public class TableCreator extends ServiceBase {
 	protected SqlNameFormatter nameFormatter;
 	protected TableExistenceService existSvc;
 	private AssocTableCreator assocTblCreator;
+	private DatIdMap datIdMap;
 	
 	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
+				SqlNameFormatter nameFormatter, TableExistenceService existSvc, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		this.existSvc = existSvc;
 		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL);
+		this.datIdMap = datIdMap;
 	}
 
 	public String generateCreateTable(String typeName, DStructType dtype) {

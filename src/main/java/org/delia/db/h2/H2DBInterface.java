@@ -363,7 +363,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	}
 	@Override
 	public void createField(String typeName, String fieldName, DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateCreateField(typeName, null, fieldName);
 		executeSQL(sql, dbctx);
 	}
@@ -372,7 +372,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
 //		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, field);
 //		executeSQL(sql, dbctx);
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateDeleteField(typeName, null, field);
 		executeSQL(sql, dbctx);
 	}
@@ -386,14 +386,14 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	
 	@Override
 	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateRenameField(typeName, fieldName, newName);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
 	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateAlterFieldType(typeName, fieldName, newFieldType);
 		executeSQL(sql, dbctx);
 	}
@@ -411,7 +411,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 			constraintName = generateUniqueConstraintName();
 		}
 		
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateAlterField(typeName, fieldName, deltaFlags, constraintName);
 		executeSQL(sql, dbctx);
 	}

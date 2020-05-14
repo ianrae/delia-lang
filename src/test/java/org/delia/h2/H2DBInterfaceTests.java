@@ -214,7 +214,7 @@ public class H2DBInterfaceTests {
 		Runner runner = helper.create(factorySvc, dbInterface);
 
 		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, new DBAccessContext(runner));
-		this.tableCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc);
+		this.tableCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc, null);
 		return runner;
 	}
 	
