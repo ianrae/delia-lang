@@ -23,6 +23,7 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 	private SchemaMigrator schemaMigrator;
 	private Log log;
 	private Map<String,Integer> dataIdMap;
+	public int datIdCounter;
 
 	public PopulateDatIdVisitor(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, Log log) {
 		this.factorySvc = factorySvc;
@@ -43,6 +44,7 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 		if (datId != null) {  //will be null for new types
 			rr.relInfo.forceDatId(datId);
 			rr.relInfo.otherSide.forceDatId(datId);
+			datIdCounter++;
 		}
 	}
 

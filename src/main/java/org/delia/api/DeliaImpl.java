@@ -3,6 +3,8 @@ package org.delia.api;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.assoc.AssocService;
+import org.delia.assoc.AssocServiceImpl;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
@@ -238,6 +240,10 @@ public class DeliaImpl implements Delia {
 
 		//and do pass4
 		compiler.executePass4(src, extL, mainRunner.getRegistry());
+		
+		//load or assign DAT ids. must do this even if don't do migration
+		AssocService assocSvc = new AssocServiceImpl(factorySvc, factorySvc.getErrorTracker(), dbInterface);
+		assocSvc.assignDATIds(mainRunner.getRegistry());
 
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.

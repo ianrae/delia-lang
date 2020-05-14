@@ -4,5 +4,5 @@ import org.delia.type.DTypeRegistry;
 
 public interface AssocService {
 
-	int assignDATIds(DTypeRegistry registry);
+	void assignDATIds(DTypeRegistry registry);
 }

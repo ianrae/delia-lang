@@ -1,14 +1,10 @@
 package org.delia.assoc;
 
+import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
+import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
-import org.delia.relation.RelationInfo;
-import org.delia.rule.DRule;
-import org.delia.rule.rules.RelationManyRule;
-import org.delia.rule.rules.RelationOneRule;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 
 public class AssocServiceImpl implements AssocService {
@@ -16,48 +12,40 @@ public class AssocServiceImpl implements AssocService {
 	private Log log;
 	private ErrorTracker et;
 	private DBInterface dbInterface;
+	private FactoryService factorySvc;
 	
-	public AssocServiceImpl(Log log, ErrorTracker et, DBInterface dbInterface) {
-		this.log = log;
+	public AssocServiceImpl(FactoryService factorySvc, ErrorTracker et, DBInterface dbInterface) {
+		this.factorySvc = factorySvc;
+		this.log = factorySvc.getLog();
 		this.et = et;
 		this.dbInterface = dbInterface;
 	}
+	
 	@Override
-	public int assignDATIds(DTypeRegistry registry) {
-		int numAdded = 0;
-		for(String typeName: registry.getAll()) {
-			DType dtype = registry.getType(typeName);
-			if (! dtype.isStructShape()) {
-				continue;
+	public void assignDATIds(DTypeRegistry registry) {
+		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(factorySvc, dbInterface, registry, log);
+		try {
+			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
+			enumerator.visitTypes(registry, visitor);
+			int numLoaded = visitor.datIdCounter;
+			
+			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
+			if (schemaMigrator == null) {
+				return; //there are no many-to-many types
 			}
-			DStructType structType = (DStructType) dtype;
-			numAdded += assignInTypeIfNeeded(structType);
-		}
-		return numAdded;
-	}
-	private int assignInTypeIfNeeded(DStructType structType) {
-		int numAdded = 0;
-		for(DRule rule: structType.getRawRules()) {
-			if (rule instanceof RelationOneRule) {
-				RelationOneRule rr = (RelationOneRule) rule;
-				numAdded += assignInTypeIfNeeded(rr.relInfo);
-			} else if (rule instanceof RelationManyRule) {
-				RelationManyRule rr = (RelationManyRule) rule;
-				numAdded += assignInTypeIfNeeded(rr.relInfo);
-			}
-		}
-		return numAdded;
-	}
-
-	private int assignInTypeIfNeeded(RelationInfo relInfo) {
-		if (relInfo.isManyToMany()) {
-			if (relInfo.getDatId() == null || relInfo.getDatId() == 0) {
-				int datId = 7; //assign new one
-				relInfo.forceDatId(datId);
-				return 1;
+			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator, registry, log);
+			enumerator = new ManyToManyEnumerator();
+			enumerator.visitTypes(registry, newIdVisitor);
+			int numAdded = newIdVisitor.datIdCounter;
+			
+			log.log("DAT ids: %d loaded, %d added", numLoaded, numAdded);
+		} finally {
+			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
+			if (schemaMigrator != null) {
+				schemaMigrator.close();
 			}
 		}
-		return 0;
+		
 	}
 	
 	private void sdfsdf() {

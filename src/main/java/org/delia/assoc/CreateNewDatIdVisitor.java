@@ -16,6 +16,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private DTypeRegistry registry;
 	private SchemaMigrator schemaMigrator;
 	private Log log;
+	public int datIdCounter;
 
 	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log) {
 		this.factorySvc = factorySvc;
@@ -46,6 +47,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			rr.relInfo.otherSide.forceDatId(newDatIdValue.asInt());
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
 			log.log("key: %s, created datId: %d", key, newDatIdValue.asInt());
+			datIdCounter++;
 		}
 	}
 	
