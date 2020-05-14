@@ -31,6 +31,7 @@ public class AssocServiceImpl implements AssocService {
 			
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator == null) {
+				log.log("DAT ids: %d loaded, %d added", 0, 0);
 				return; //there are no many-to-many types
 			}
 			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator, registry, log);

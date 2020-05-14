@@ -1,10 +1,17 @@
 package org.delia.assoc;
 
+import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
+import org.delia.db.QueryBuilderService;
+import org.delia.db.QueryContext;
+import org.delia.db.QuerySpec;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
 import org.delia.rule.rules.RelationRuleBase;
+import org.delia.runner.DoNothingVarEvaluator;
+import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -17,12 +24,15 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private SchemaMigrator schemaMigrator;
 	private Log log;
 	public int datIdCounter;
+	private QueryBuilderService queryBuilder;
+	private int nextAssocNameInt;
 
 	public CreateNewDatIdVisitor(FactoryService factorySvc, SchemaMigrator schemaMigrator, DTypeRegistry registry, Log log) {
 		this.factorySvc = factorySvc;
 		this.schemaMigrator = schemaMigrator;
 		this.registry = registry;
 		this.log = log;
+		this.queryBuilder = factorySvc.getQueryBuilderService();
 	}
 	
 	@Override
@@ -31,10 +41,13 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			return;
 		}
 		
+		initTableNameCreatorIfNeeded();
+		
 		//create new row 
 		//write new schema to db
 		DStructType dtype = registry.getDATType();
-		DValue dval = createDatTableObj(dtype, "dat11");
+		String tblName = createAssocTableName();
+		DValue dval = createDatTableObj(dtype, tblName);
 		if (dval == null) {
 			return;
 		}
@@ -46,11 +59,25 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			rr.relInfo.forceDatId(newDatIdValue.asInt());
 			rr.relInfo.otherSide.forceDatId(newDatIdValue.asInt());
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
-			log.log("key: %s, created datId: %d", key, newDatIdValue.asInt());
+			log.log("DAT: %s -> datId: %d (table: %s)", key, newDatIdValue.asInt(), tblName);
 			datIdCounter++;
 		}
 	}
 	
+	private void initTableNameCreatorIfNeeded() {
+		DStructType datType = registry.getDATType();
+		QueryExp exp = queryBuilder.createCountQuery(datType.getName());
+		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
+		DBExecutor dbexecutor = schemaMigrator.getDbexecutor();
+		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
+		int numAssocTbls = qresp.emptyResults() ? 0 : qresp.getOne().asInt();
+		nextAssocNameInt = numAssocTbls + 1; //start at one
+	}
+	private String createAssocTableName() {
+		String tlbName = String.format("dat%d", nextAssocNameInt++);
+		return tlbName;
+	}
+
 	private DValue createDatTableObj(DStructType type, String datTableName) {
 		StructValueBuilder structBuilder = new StructValueBuilder(type);
 
