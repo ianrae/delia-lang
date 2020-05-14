@@ -1,7 +1,5 @@
 package org.delia.assoc;
 
-import java.util.Map;
-
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterface;
 import org.delia.db.schema.SchemaMigrator;
@@ -53,7 +51,6 @@ public class AssocServiceImpl implements AssocService {
 				schemaMigrator.close();
 			}
 		}
-		
 	}
 	
 	private void sdfsdf() {
@@ -75,6 +72,11 @@ public class AssocServiceImpl implements AssocService {
 	@Override
 	public String getAssocTblName(int datId) {
 		return datIdMap.getAssocTblName(datId);
+	}
+
+	@Override
+	public DatIdMap getDatIdMap() {
+		return datIdMap;
 	}
 }
 

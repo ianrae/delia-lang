@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.delia.assoc.AssocService;
 import org.delia.assoc.AssocServiceImpl;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
@@ -31,6 +32,10 @@ import org.delia.typebuilder.FutureDeclError;
 import org.delia.util.DeliaExceptionHelper;
 
 public class DeliaImpl implements Delia {
+	private static class MigrationExtraInfo {
+		public DatIdMap datIdMap;
+	}
+	
 	private Log log;
 	private DBInterface dbInterface;
 	private FactoryService factorySvc;
@@ -52,7 +57,8 @@ public class DeliaImpl implements Delia {
 
 		Runner runner = createRunner(null);
 		execTypes(runner, expL);
-		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null);
+		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
+		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null, extraInfo);
 		if (migrationPlanRes != null) {
 			return migrationPlanRes;
 		}
@@ -126,13 +132,15 @@ public class DeliaImpl implements Delia {
 		//1st pass
 		Runner mainRunner = createRunner(null);
 		execTypes(mainRunner, expL);
-		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan);
+		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
+		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan, extraInfo);
 		if (migrationPlanRes != null) {
 			DeliaSessionImpl session = new DeliaSessionImpl(this);
 			session.execCtx = mainRunner.getExecutionState();
 			session.ok = true;
 			session.res = migrationPlanRes;
 			session.expL = expL;
+			session.datIdMap = extraInfo.datIdMap;
 			return session;
 		}
 
@@ -223,7 +231,7 @@ public class DeliaImpl implements Delia {
 		}
 	}
 
-	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan) {
+	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {
 		InternalCompileState execCtx = mainRunner.getCompileState();
 		for(Exp exp: extL) {
 			if (exp instanceof TypeStatementExp) {
@@ -244,7 +252,8 @@ public class DeliaImpl implements Delia {
 		//load or assign DAT ids. must do this even if don't do migration
 		AssocService assocSvc = new AssocServiceImpl(factorySvc, factorySvc.getErrorTracker(), dbInterface);
 		assocSvc.assignDATIds(mainRunner.getRegistry());
-
+		extraInfo.datIdMap = assocSvc.getDatIdMap();
+		
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.
 		if (dbInterface.getCapabilities().requiresSchemaMigration()) {
