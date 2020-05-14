@@ -30,6 +30,9 @@ public class AssocServiceImpl implements AssocService {
 			enumerator.visitTypes(registry, visitor);
 			int numLoaded = visitor.datIdCounter;
 			datIdMap = visitor.getDatIdMap();
+			if (datIdMap == null) {
+				datIdMap = new DatIdMap();
+			}
 
 			SchemaMigrator schemaMigrator = visitor.getSchemaMigrator();
 			if (schemaMigrator == null) {

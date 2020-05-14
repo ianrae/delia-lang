@@ -326,12 +326,14 @@ public class TableCreator extends ServiceBase {
 			dtype = (DStructType) registry.getType(typeName);
 		}
 		
-		StrCreator sc = new StrCreator();
-		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, fieldName);
-		sc.o(sql);
-		sc.nl();
-		List<SqlElement> fieldL = new ArrayList<>();
 		boolean isManyToMany = datId != 0;
+		StrCreator sc = new StrCreator();
+		if (! isManyToMany) {
+			String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, fieldName);
+			sc.o(sql);
+			sc.nl();
+		}
+		List<SqlElement> fieldL = new ArrayList<>();
 		
 //		TypePair pair = DValueHelper.findField(dtype, fieldName);
 //		if (isManyToManyRelation(pair, dtype)) {

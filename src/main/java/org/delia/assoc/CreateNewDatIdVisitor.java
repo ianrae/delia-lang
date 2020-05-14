@@ -69,7 +69,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
 			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
 			datIdCounter++;
-			datIdMap.attachTblName(datId, tblName);
+			datIdMap.putFull(key, datId, tblName);
 		}
 	}
 	

@@ -14,6 +14,10 @@ public class DatIdMap {
 		datIdMap.put(key, datId);
 		tblNameMap.put(datId, "?"); //we will replace this shortly
 	}
+	public void putFull(String key, int datId, String tblName) {
+		datIdMap.put(key, datId);
+		tblNameMap.put(datId, tblName);
+	}
 	public int size() {
 		return datIdMap.size();
 	}
