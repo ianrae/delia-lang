@@ -73,7 +73,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		}
 	}
 	
-	private void initTableNameCreatorIfNeeded() {
+	public void initTableNameCreatorIfNeeded() {
 		if (haveInitTableNameCreator) {
 			return; //only do this once
 		}

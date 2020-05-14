@@ -40,6 +40,9 @@ public class AssocServiceImpl implements AssocService {
 				return; //there are no many-to-many types
 			}
 			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator, registry, log, datIdMap);
+			//since types of fields may have been deletect we can't trust the registry
+			//to visit all types needed for schema migration.
+			newIdVisitor.initTableNameCreatorIfNeeded(); //explicitly load every time.
 			enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(registry, newIdVisitor);
 			int numAdded = newIdVisitor.datIdCounter;

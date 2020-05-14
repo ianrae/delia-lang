@@ -23,9 +23,9 @@ public class DatIdMap {
 	}
 	
 	public void attachTblName(int datId, String tblName) {
-		if (tblNameMap.containsKey(datId)) {
-			tblNameMap.put(datId, tblName);
-		}
+		//put into map even if not in datIdMap because if we deleted a field,
+		//then this info will be needed during schema migration
+		tblNameMap.put(datId, tblName);
 	}
 	
 	public String getAssocTblName(int datId) {

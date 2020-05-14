@@ -21,7 +21,6 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 	private SchemaMigrator schemaMigrator;
 	private Log log;
 	private DatIdMap datIdMap;
-//	private Map<String,Integer> datIdMap;
 	public int datIdCounter;
 	public long maxIdSeen = 0L;
 
