@@ -18,6 +18,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.SchemaContext;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.hls.HLSQuerySpan;
@@ -343,7 +344,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	}
 
 	@Override
-	public void createTable(String tableName, DBAccessContext dbctx) {
+	public void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		DStructType dtype = dbctx.registry.findTypeOrSchemaVersionType(tableName);
 		String sql;
 		createTableCreator(dbctx);
@@ -351,24 +352,24 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		executeSQL(sql, dbctx);
 	}	
 	@Override
-	public void deleteTable(String tableName, DBAccessContext dbctx) {
+	public void deleteTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		String sql = String.format("DROP TABLE IF EXISTS %s;", tableName);
 		executeSQL(sql, dbctx);
 	}
 	@Override
-	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx) {
+	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx, SchemaContext ctx) {
 		String sql = String.format("ALTER TABLE %s RENAME TO %s", tableName, newTableName);
 		executeSQL(sql, dbctx);
 	}
 	@Override
-	public void createField(String typeName, String fieldName, DBAccessContext dbctx) {
+	public void createField(String typeName, String fieldName, DBAccessContext dbctx, SchemaContext ctx) {
 		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
 		String sql = creator.generateCreateField(typeName, null, fieldName);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx) {
+	public void deleteField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
 //		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, field);
 //		executeSQL(sql, dbctx);
 		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
@@ -384,14 +385,14 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	}
 	
 	@Override
-	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx) {
+	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx) {
 		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
 		String sql = creator.generateRenameField(typeName, fieldName, newName);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx) {
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx) {
 		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
 		String sql = creator.generateAlterFieldType(typeName, fieldName, newFieldType);
 		executeSQL(sql, dbctx);
@@ -399,7 +400,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 
 	@Override
 	public void alterField(String typeName, String fieldName, String deltaFlags,
-			DBAccessContext dbctx) {
+			DBAccessContext dbctx, SchemaContext ctx) {
 		
 		String constraintName = null;
 		if (deltaFlags.contains("-U")) {

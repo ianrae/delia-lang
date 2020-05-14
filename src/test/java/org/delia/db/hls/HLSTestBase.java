@@ -19,6 +19,7 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.SchemaContext;
 import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.memdb.MemDBInterface;
@@ -139,11 +140,12 @@ public class HLSTestBase extends NewBDDBase {
 	protected DeliaDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
+		SchemaContext ctx = new SchemaContext();
 		
 		if (flipAssocTbl) {
-			delia.getDBInterface().createTable("AddressCustomerAssoc", null);
+			delia.getDBInterface().createTable("AddressCustomerAssoc", null, ctx);
 		} else {
-			delia.getDBInterface().createTable("CustomerAddressAssoc", null);
+			delia.getDBInterface().createTable("CustomerAddressAssoc", null, ctx);
 		}
 		existsSvc = new TableExistenceServiceImpl(delia.getDBInterface(), null); //2nd param not needed for MEM
 		assocTblMgr = new AssocTblManager(existsSvc);

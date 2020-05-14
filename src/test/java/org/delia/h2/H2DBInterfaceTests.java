@@ -84,7 +84,7 @@ public class H2DBInterfaceTests {
 		
 		boolean b = dbi.doesTableExist("CUSTOMER", dbctx);
 		assertEquals(false, b);
-		dbi.createTable("Customer", dbctx);
+		dbi.createTable("Customer", dbctx, null);
 		b = dbi.doesTableExist("CUSTOMER", dbctx);
 		assertEquals(true, b);
 		
@@ -114,7 +114,7 @@ public class H2DBInterfaceTests {
 		conn.openDB();
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		dbctx.connObject = conn;
-		dbInterface.createTable("Actor", dbctx); //!! fake schema
+		dbInterface.createTable("Actor", dbctx, null); //!! fake schema
 		res = runner.executeOneStatement(exp);
 		chkResOK(res);
 		
