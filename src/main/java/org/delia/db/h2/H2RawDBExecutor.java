@@ -6,7 +6,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.RawDBExecutor;
-import org.delia.db.sql.prepared.PreparedStatementGenerator;
+import org.delia.db.SchemaContext;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
@@ -34,8 +34,7 @@ public class H2RawDBExecutor implements RawDBExecutor {
 
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+		return dbInterface.executeInsert(dval, new InsertContext(), dbctx);
 	}
 
 	@Override
@@ -44,15 +43,16 @@ public class H2RawDBExecutor implements RawDBExecutor {
 	}
 
 	@Override
-	public boolean execTableDetect(String tableName) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public void createTable(String tableName) {
-		// TODO Auto-generated method stub
-		
+		dbInterface.createTable(tableName, dbctx, new SchemaContext());
+	}
+	
+	@Override
+	public boolean execTableDetect(String tableName) {
+		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
+		RawStatementGenerator sqlgen = new RawStatementGenerator(dbInterface.getFactorySvc(), DBType.H2);
+		String sql = sqlgen.generateTableDetect(tableName);
+		return conn.doesTableExistRaw(sql, false);
 	}
 
 	@Override
