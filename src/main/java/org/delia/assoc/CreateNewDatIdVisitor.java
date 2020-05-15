@@ -3,11 +3,11 @@ package org.delia.assoc;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
-import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.RawDBExecutor;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;
@@ -29,9 +29,9 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
-	private DBExecutor dbexecutor;
+	private RawDBExecutor dbexecutor;
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, DBExecutor dbexecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, RawDBExecutor dbexecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;

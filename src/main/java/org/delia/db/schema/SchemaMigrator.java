@@ -18,6 +18,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.RawDBExecutor;
 import org.delia.db.SchemaContext;
 import org.delia.db.memdb.MemDBExecutor;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -38,6 +39,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
 	private String dbFingerprint;
+	private RawDBExecutor rawEexecutor;
 	private DBExecutor dbexecutor;
 	private DBAccessContext dbctx;
 	private MigrationRunner migrationRunner;
@@ -47,6 +49,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+		this.rawEexecutor = dbInterface.createRawExector(dbctx);
 		this.dbexecutor = dbInterface.createExector(dbctx);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
@@ -64,6 +67,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	@Override
 	public void close() {
 		try {
+			rawEexecutor.close();
+		} catch (Exception e) {
+			DBHelper.handleCloseFailure(e);
+		}
+		//and close 2nd one
+		try {
 			dbexecutor.close();
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -72,12 +81,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public boolean createSchemaTableIfNeeded() {
 		SchemaContext ctx = new SchemaContext();
-		if (!dbexecutor.execTableDetect(SCHEMA_TABLE)) {
-			dbexecutor.createTable(SCHEMA_TABLE, ctx);
+		if (!rawEexecutor.execTableDetect(SCHEMA_TABLE)) {
+			rawEexecutor.createTable(SCHEMA_TABLE);
 		}
 		
-		if (!dbexecutor.execTableDetect(DAT_TABLE)) {
-			dbexecutor.createTable(DAT_TABLE, ctx);
+		if (!rawEexecutor.execTableDetect(DAT_TABLE)) {
+			rawEexecutor.createTable(DAT_TABLE);
 		}
 		
 		return true;
@@ -141,7 +150,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		QueryResponse qresp = rawEexecutor.executeQuery(spec, qtx);
 		//TODO: should specify orderby id!!
 		
 		
@@ -361,7 +370,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(st.typeName);
 					QuerySpec spec = queryBuilder.buildSpec(exp, varEvaluator);
-					QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
+					QueryResponse qresp = rawEexecutor.executeQuery(spec, new QueryContext());
 					DValue dval = qresp.getOne();
 					long numRecords = dval.asLong();
 					if (numRecords > 0) {
@@ -393,12 +402,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	private boolean isMemDB() {
-		return dbexecutor instanceof MemDBExecutor;
+		return rawEexecutor instanceof MemDBExecutor;
 	}
 
 	private boolean doSoftDeletePreRunCheck(String typeName) {
 		String backupName = String.format("%s__BAK", typeName);
-		if (dbexecutor.execTableDetect(backupName)) {
+		if (rawEexecutor.execTableDetect(backupName)) {
 			log.logError("Backup table '%s' already exists. You must delete this table first before running migration.", backupName);
 			return false;
 		}
@@ -406,15 +415,15 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 	private boolean doSoftFieldDeletePreRunCheck(String typeName, String fieldName) {
 		String backupName = String.format("%s__BAK", fieldName);
-		if (dbexecutor.execFieldDetect(typeName, backupName)) {
+		if (rawEexecutor.execFieldDetect(typeName, backupName)) {
 			log.logError("Backup field '%s.%s' already exists. You must delete this field first before running migration.", typeName, backupName);
 			return false;
 		}
 		return true;
 	}
 
-	public DBExecutor getDbexecutor() {
-		return dbexecutor;
+	public RawDBExecutor getRawExecutor() {
+		return rawEexecutor;
 	}
 
 }

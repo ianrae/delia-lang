@@ -12,6 +12,7 @@ import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
 import org.delia.assoc.PopulateDatIdVisitor;
 import org.delia.db.DBExecutor;
+import org.delia.db.RawDBExecutor;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
@@ -105,18 +106,21 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		rr.relInfo.forceDatId(null);;
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
-		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
-		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
-		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
-		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-		DatIdMap datIdMap = visitor.getDatIdMap();
 		
-		DBExecutor dbexecutor = visitor.getSchemaMigrator().getDbexecutor();
-		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), dbexecutor, registry, delia.getLog(), datIdMap);
-		enumerator = new ManyToManyEnumerator();
-		enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
-		
-		visitor.getSchemaMigrator().close();
+		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator())) {
+			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
+			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
+			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
+			DatIdMap datIdMap = visitor.getDatIdMap();
+
+			RawDBExecutor rawExecutor = visitor.getSchemaMigrator().getRawExecutor();
+			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);
+			enumerator = new ManyToManyEnumerator();
+			enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
+			
+			visitor.getSchemaMigrator().close();
+			
+		}
 	}
 
 	@Before

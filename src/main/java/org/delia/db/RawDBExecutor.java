@@ -17,7 +17,7 @@ public interface RawDBExecutor extends AutoCloseable {
 	QueryResponse executeQuery(QuerySpec spec, QueryContext qtx);
 	
 	boolean execTableDetect(String tableName);
-//	boolean execFieldDetect(String tableName, String fieldName);
+	boolean execFieldDetect(String tableName, String fieldName);
 	
 	//schema actions
 	void createTable(String tableName);

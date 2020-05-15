@@ -48,5 +48,10 @@ public class PostgresRawDBExecutor implements RawDBExecutor {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public boolean execFieldDetect(String tableName, String fieldName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 }
