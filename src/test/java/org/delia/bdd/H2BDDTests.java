@@ -309,7 +309,6 @@ public class H2BDDTests extends NewBDDBase {
 	private DBType dbType = DBType.H2;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
-	private boolean useFragmentParser = true;
 	
 	@Before
 	public void init() {
@@ -327,7 +326,6 @@ public class H2BDDTests extends NewBDDBase {
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
-		db.useFragmentParser = useFragmentParser;
 		dbInterfaceToUse = db;
 //		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {

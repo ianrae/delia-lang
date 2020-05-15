@@ -58,7 +58,6 @@ import org.delia.zqueryresponse.LetSpan;
  *
  */
 public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceInternal {
-//	public boolean useFragmentParser = true;
 
 	public PostgresDBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.POSTGRES, factorySvc, connFactory, new PostgresSqlHelperFactory(factorySvc));
