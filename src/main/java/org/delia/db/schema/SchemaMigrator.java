@@ -39,7 +39,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
 	private String dbFingerprint;
-	private RawDBExecutor rawEexecutor;
+	private RawDBExecutor rawExecutor;
 	private DBExecutor dbexecutor;
 	private DBAccessContext dbctx;
 	private MigrationRunner migrationRunner;
@@ -49,7 +49,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		this.rawEexecutor = dbInterface.createRawExector(dbctx);
+		this.rawExecutor = dbInterface.createRawExector(dbctx);
 		this.dbexecutor = dbInterface.createExector(dbctx);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
@@ -67,7 +67,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	@Override
 	public void close() {
 		try {
-			rawEexecutor.close();
+			rawExecutor.close();
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
@@ -81,12 +81,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public boolean createSchemaTableIfNeeded() {
 		SchemaContext ctx = new SchemaContext();
-		if (!rawEexecutor.execTableDetect(SCHEMA_TABLE)) {
-			rawEexecutor.createTable(SCHEMA_TABLE);
+		if (!rawExecutor.execTableDetect(SCHEMA_TABLE)) {
+			rawExecutor.createTable(SCHEMA_TABLE);
 		}
 		
-		if (!rawEexecutor.execTableDetect(DAT_TABLE)) {
-			rawEexecutor.createTable(DAT_TABLE);
+		if (!rawExecutor.execTableDetect(DAT_TABLE)) {
+			rawExecutor.createTable(DAT_TABLE);
 		}
 		
 		return true;
@@ -150,7 +150,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = rawEexecutor.executeQuery(spec, qtx);
+		QueryResponse qresp = rawExecutor.executeQuery(spec, qtx);
 		//TODO: should specify orderby id!!
 		
 		
@@ -370,7 +370,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(st.typeName);
 					QuerySpec spec = queryBuilder.buildSpec(exp, varEvaluator);
-					QueryResponse qresp = rawEexecutor.executeQuery(spec, new QueryContext());
+					QueryResponse qresp = rawExecutor.executeQuery(spec, new QueryContext());
 					DValue dval = qresp.getOne();
 					long numRecords = dval.asLong();
 					if (numRecords > 0) {
@@ -402,12 +402,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	private boolean isMemDB() {
-		return rawEexecutor instanceof MemDBExecutor;
+		return rawExecutor instanceof MemDBExecutor;
 	}
 
 	private boolean doSoftDeletePreRunCheck(String typeName) {
 		String backupName = String.format("%s__BAK", typeName);
-		if (rawEexecutor.execTableDetect(backupName)) {
+		if (rawExecutor.execTableDetect(backupName)) {
 			log.logError("Backup table '%s' already exists. You must delete this table first before running migration.", backupName);
 			return false;
 		}
@@ -415,7 +415,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 	private boolean doSoftFieldDeletePreRunCheck(String typeName, String fieldName) {
 		String backupName = String.format("%s__BAK", fieldName);
-		if (rawEexecutor.execFieldDetect(typeName, backupName)) {
+		if (rawExecutor.execFieldDetect(typeName, backupName)) {
 			log.logError("Backup field '%s.%s' already exists. You must delete this field first before running migration.", typeName, backupName);
 			return false;
 		}
@@ -423,7 +423,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	public RawDBExecutor getRawExecutor() {
-		return rawEexecutor;
+		return rawExecutor;
 	}
 
 }

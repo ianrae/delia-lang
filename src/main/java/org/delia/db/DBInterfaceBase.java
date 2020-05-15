@@ -55,6 +55,10 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		this.valueHelper = sqlHelperFactory.createValueHelper();
 		this.resultSetConverter = new ResultSetToDValConverter(dbType, factorySvc, connFactory, sqlhelperFactory);
 	}
+	
+	public FactoryService getFactorySvc() {
+		return this.factorySvc;
+	}
 
 	@Override
 	public DBCapabilties getCapabilities() {
