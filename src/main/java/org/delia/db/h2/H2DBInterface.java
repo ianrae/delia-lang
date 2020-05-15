@@ -62,8 +62,6 @@ import org.delia.zqueryresponse.LetSpan;
  */
 public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInternal {
 	
-	public boolean useFragmentParser = true;
-
 	public H2DBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.H2, factorySvc, connFactory, new H2SqlHelperFactory(factorySvc));
 		this.sqlHelperFactory.init(this);
@@ -87,20 +85,12 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		SqlStatementGroup stgroup;
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		
-		if (useFragmentParser) {
 //			log.log("FRAG PARSER INSERT....................");
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
-			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
-			String typeName = dval.getType().getName();
-			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
-			stgroup = parser.renderInsertGroup(selectFrag);
-		} else {
-//			InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
-//			SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
-//			stgroup = new SqlStatementGroup();
-//			stgroup.statementL.add(statement);
-			stgroup = null;
-		}		
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
+		String typeName = dval.getType().getName();
+		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
+		stgroup = parser.renderInsertGroup(selectFrag);
 		
 		logStatementGroup(stgroup);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -129,26 +119,15 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
 		
-		if (useFragmentParser) {
 //			log.log("FRAG PARSER-QUERY....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
-			SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
-			whereGen.tableFragmentMaker = parser;
-			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
-			parser.renderSelect(selectFrag);
-			statement = selectFrag.statement;
-		} else if (qtx.loadFKs) {
-//			createTableCreator(dbctx);
-//			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
-//			statement = smartgen.generateFKsQuery(spec, details);
-			statement = null;
-		} else {
-//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-//			statement = sqlgen.generateQuery(spec);
-			statement = null;
-		}
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
+		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
+		whereGen.tableFragmentMaker = parser;
+		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+		parser.renderSelect(selectFrag);
+		statement = selectFrag.statement;
 		
 		logSql(statement);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -202,22 +181,16 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public void executeDelete(QuerySpec spec, DBAccessContext dbctx) {
 		SqlStatement statement;
 		
-		if (useFragmentParser) {
 //			log.log("FRAG PARSER DELETE....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
-			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
-			whereGen.tableFragmentMaker = parser;
-			QueryDetails details = new QueryDetails();
-			DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
-			parser.renderDelete(selectFrag);
-			statement = selectFrag.statement;
-		} else {
-//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-//			statement = sqlgen.generateDelete(spec);
-			statement = null;
-		}
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
+		whereGen.tableFragmentMaker = parser;
+		QueryDetails details = new QueryDetails();
+		DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
+		parser.renderDelete(selectFrag);
+		statement = selectFrag.statement;
 		
 		logSql(statement);
 		createTableCreator(dbctx);
@@ -236,25 +209,17 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		
-		if (useFragmentParser) {
 //			log.log("FRAG PARSER UPDATE....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
-		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
-			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
-			whereGen.tableFragmentMaker = parser;
-			QueryDetails details = new QueryDetails();
-			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
-			stgroup = parser.renderUpdateGroup(selectFrag);
-//			s = selectFrag.statement;
-		} else {
-//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-//			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
-//			stgroup = new SqlStatementGroup();
-//			stgroup.add(statement);
-			stgroup = null;
-		}
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+		whereGen.tableFragmentMaker = parser;
+		QueryDetails details = new QueryDetails();
+		UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
+		stgroup = parser.renderUpdateGroup(selectFrag);
+		//			s = selectFrag.statement;
 		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
 		}
@@ -278,39 +243,35 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		
-		if (useFragmentParser) {
-//			log.log("FRAG PARSER UPSERT....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
-		    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
-			UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
-			
-			//hack hack hack TODO:improve this
-			//this works but is slow, and has race conditions if other thread does insert
-			//between the time we call executeQuery and do the update.
-			
-			if (noUpdateFlag) {
-				QueryBuilderService queryBuilder = factorySvc.getQueryBuilderService();
-				DValue keyVal = parser.getPrimaryKeyValue(spec, dval);
-				QueryExp queryExp = queryBuilder.createPrimaryKeyQuery(spec.queryExp.typeName, keyVal);
-				QuerySpec query = queryBuilder.buildSpec(queryExp, new DoNothingVarEvaluator());
-				QueryContext qtx = new QueryContext();
-				QueryResponse qresp = executeQuery(query, qtx, dbctx);
-				if (!qresp.emptyResults()) {
-					return 0;
-				}
+		//			log.log("FRAG PARSER UPSERT....................");
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+		UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+
+		//hack hack hack TODO:improve this
+		//this works but is slow, and has race conditions if other thread does insert
+		//between the time we call executeQuery and do the update.
+
+		if (noUpdateFlag) {
+			QueryBuilderService queryBuilder = factorySvc.getQueryBuilderService();
+			DValue keyVal = parser.getPrimaryKeyValue(spec, dval);
+			QueryExp queryExp = queryBuilder.createPrimaryKeyQuery(spec.queryExp.typeName, keyVal);
+			QuerySpec query = queryBuilder.buildSpec(queryExp, new DoNothingVarEvaluator());
+			QueryContext qtx = new QueryContext();
+			QueryResponse qresp = executeQuery(query, qtx, dbctx);
+			if (!qresp.emptyResults()) {
+				return 0;
 			}
-			
-			whereGen.tableFragmentMaker = parser;
-			QueryDetails details = new QueryDetails();
-			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);
-			stgroup = parser.renderUpsertGroup(selectFrag);
-//			s = selectFrag.statement;
-		} else {
-			//not supported
-			stgroup = null;
 		}
+
+		whereGen.tableFragmentMaker = parser;
+		QueryDetails details = new QueryDetails();
+		UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);
+		stgroup = parser.renderUpsertGroup(selectFrag);
+		//			s = selectFrag.statement;
+		
 		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
 		}

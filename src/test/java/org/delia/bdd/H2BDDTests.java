@@ -301,7 +301,8 @@ public class H2BDDTests extends NewBDDBase {
 //		runR1600File("t0-fetch.txt", 3);
 		
 //		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-		runR2150File("t0-migrate-many-to-many1a.txt", 2);
+//		runR2150File("t0-migrate-many-to-many1a.txt", 2);
+		runR1600File("t0-fetch.txt", 3);
 	}
 	
 	//---
