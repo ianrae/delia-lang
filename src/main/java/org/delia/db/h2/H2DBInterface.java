@@ -320,7 +320,12 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		DStructType dtype = dbctx.registry.findTypeOrSchemaVersionType(tableName);
 		String sql;
-		this.tableCreator = sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
+		if (tableCreator == null) {
+			this.tableCreator = sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
+		} else {
+			tableCreator.datIdMap = ctx.datIdMap;
+		}
+		
 		sql = tableCreator.generateCreateTable(tableName, dtype);
 		executeSQL(sql, dbctx);
 	}	

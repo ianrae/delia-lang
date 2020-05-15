@@ -24,7 +24,7 @@ public class TableCreator extends ServiceBase {
 	protected SqlNameFormatter nameFormatter;
 	protected TableExistenceService existSvc;
 	private AssocTableCreator assocTblCreator;
-	private DatIdMap datIdMap;
+	public DatIdMap datIdMap;
 	
 	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
 				SqlNameFormatter nameFormatter, TableExistenceService existSvc, DatIdMap datIdMap) {
