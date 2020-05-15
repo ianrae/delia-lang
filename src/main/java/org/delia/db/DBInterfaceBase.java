@@ -20,7 +20,6 @@ import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
@@ -55,7 +54,6 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		this.sqlHelperFactory = sqlhelperFactory;
 		this.valueHelper = sqlHelperFactory.createValueHelper();
 		this.resultSetConverter = new ResultSetToDValConverter(dbType, factorySvc, connFactory, sqlhelperFactory);
-
 	}
 
 	@Override

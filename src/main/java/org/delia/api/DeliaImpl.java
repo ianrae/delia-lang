@@ -3,8 +3,6 @@ package org.delia.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.assoc.AssocService;
-import org.delia.assoc.AssocServiceImpl;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;

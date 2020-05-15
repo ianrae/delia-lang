@@ -8,8 +8,8 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
@@ -51,7 +51,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		//create new row 
 		//write new schema to db
 		DStructType dtype = registry.getDATType();
-		String tblName = createAssocTableName();
+		String tblName = createAssocTableName(rr.relInfo);
 		DValue dval = createDatTableObj(dtype, tblName);
 		if (dval == null) {
 			return;
@@ -114,8 +114,10 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		return maxId;
 	}
 	
-	private String createAssocTableName() {
-		String tlbName = String.format("dat%d", nextAssocNameInt++);
+	private String createAssocTableName(RelationInfo relInfo) {
+		String s1 = relInfo.nearType.getName();
+		String s2 = relInfo.farType.getName();
+		String tlbName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt++);
 		return tlbName;
 	}
 

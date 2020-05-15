@@ -54,5 +54,10 @@ public class DeliaSessionImpl implements DeliaSession {
 	public RunnerInitializer getRunnerIntiliazer() {
 		return runnerInitializer;
 	}
+
+	@Override
+	public DatIdMap getDatIdMap() {
+		return datIdMap;
+	}
 	
 }

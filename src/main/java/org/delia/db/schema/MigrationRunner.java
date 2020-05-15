@@ -31,6 +31,7 @@ public class MigrationRunner extends ServiceBase {
 	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL, DatIdMap datIdMap) {
 		this.datIdMap = datIdMap;
 		SchemaContext ctx = createSchemaContext();
+		ctx.datIdMap = datIdMap;
 		
 		log.log("running migration with %d steps:", orderL.size());
 		for(String typeName: orderL) {
