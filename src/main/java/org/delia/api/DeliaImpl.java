@@ -149,6 +149,7 @@ public class DeliaImpl implements Delia {
 		session.ok = true;
 		session.res = res;
 		session.expL = expL;
+		session.datIdMap = extraInfo.datIdMap;
 		return session;
 	}
 

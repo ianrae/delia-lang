@@ -19,7 +19,8 @@ public interface DBInterface {
 	DBCapabilties getCapabilities();
 	
 	void init(FactoryService factorySvc);
-	DBExecutor createExector(DBAccessContext ctx);
+	DBExecutor createExector(DBAccessContext dbctx);
+	RawDBExecutor createRawExector(DBAccessContext dbctx);
 	
 	DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap, DBAccessContext dbctx); 

@@ -144,4 +144,9 @@ public class InstrumentedDBInterface implements DBInterface {
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
 		return actualInterface.executeHLSQuery(hls, sql, qtx, dbctx);
 	}
+
+	@Override
+	public RawDBExecutor createRawExector(DBAccessContext dbctx) {
+		return actualInterface.createRawExector(dbctx);
+	}
 }

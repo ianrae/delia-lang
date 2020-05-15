@@ -18,6 +18,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.RawDBExecutor;
 import org.delia.db.SchemaContext;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
@@ -78,6 +79,17 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		conn.openDB();
 		return dbexecutor;
 	}
+
+	@Override
+	public RawDBExecutor createRawExector(DBAccessContext dbctx) {
+		H2DBConnection conn;
+		conn = new H2DBConnection(factorySvc, connFactory, errorConverter);
+		H2RawDBExecutor dbexecutor = new H2RawDBExecutor(this, dbctx, conn);
+		dbctx.connObject = conn;
+		conn.openDB();
+		return dbexecutor;
+	}
+
 	
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx) {
@@ -447,5 +459,4 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		}
 		return qresp;
 	}
-
 }

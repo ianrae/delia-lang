@@ -21,6 +21,7 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.RawDBExecutor;
 import org.delia.db.SchemaContext;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.sql.QueryType;
@@ -493,6 +494,10 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	public DBExecutor createExector(DBAccessContext ctx) {
 		return new MemDBExecutor(this, ctx);
 	}
+	@Override
+	public RawDBExecutor createRawExector(DBAccessContext dbctx) {
+		return new MemRawDBExecutor(this, dbctx);
+	}
 
 	@Override
 	public void enablePrintStackTrace(boolean b) {
@@ -561,4 +566,5 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
 		return this.doExecuteQuery(hls.querySpec, qtx, dbctx);
 	}
+
 }
