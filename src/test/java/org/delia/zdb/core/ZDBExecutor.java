@@ -7,6 +7,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
@@ -22,7 +23,8 @@ public interface ZDBExecutor {
 		//executor holds session data regarding db
 		void init1(DTypeRegistry registry);
 		void init2(DatIdMap datIdMap, VarEvaluator varEvaluator);
-		
+		FetchRunner createFetchRunner();
+
 		//these can be called after init1
 		DValue rawInsert(DValue dval, InsertContext ctx);
 		QueryResponse rawQuery(QuerySpec spec, QueryContext qtx);

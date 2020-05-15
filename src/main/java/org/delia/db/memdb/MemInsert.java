@@ -1,22 +1,16 @@
 package org.delia.db.memdb;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.InsertContext;
-import org.delia.db.QuerySpec;
 import org.delia.db.memdb.MemDBInterface.Stuff;
 import org.delia.error.DeliaError;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
-import org.delia.util.DValueHelper;
 
 /**
  * Performs update
