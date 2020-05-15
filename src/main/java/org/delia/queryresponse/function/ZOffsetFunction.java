@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse.function;
+package org.delia.queryresponse.function;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.ZQueryResponseFunctionBase;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.zqueryresponse.ZQueryResponseFunctionBase;
 
 public class ZOffsetFunction extends ZQueryResponseFunctionBase {
 		public ZOffsetFunction(DTypeRegistry registry) {

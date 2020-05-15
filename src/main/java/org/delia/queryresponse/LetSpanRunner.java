@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse;
+package org.delia.queryresponse;
 
 import org.delia.runner.QueryResponse;
 

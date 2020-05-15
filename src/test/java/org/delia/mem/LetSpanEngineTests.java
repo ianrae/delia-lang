@@ -18,14 +18,14 @@ import org.delia.dao.DeliaDao;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.queryresponse.LetSpan;
+import org.delia.queryresponse.LetSpanEngine;
+import org.delia.queryresponse.LetSpanRunner;
+import org.delia.queryresponse.LetSpanRunnerImpl;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.util.StringTrail;
-import org.delia.zqueryresponse.LetSpan;
-import org.delia.zqueryresponse.LetSpanEngine;
-import org.delia.zqueryresponse.LetSpanRunner;
-import org.delia.zqueryresponse.LetSpanRunnerImpl;
 import org.junit.Before;
 import org.junit.Test;
 

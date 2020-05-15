@@ -1,11 +1,11 @@
-package org.delia.zqueryresponse.function;
+package org.delia.queryresponse.function;
 
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.ConfigureService;
 import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.ZQueryResponseFunctionBase;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
-import org.delia.zqueryresponse.ZQueryResponseFunctionBase;
 
 public class ZFKsFunction extends ZQueryResponseFunctionBase {
 

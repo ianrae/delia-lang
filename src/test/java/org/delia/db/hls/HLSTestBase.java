@@ -25,14 +25,14 @@ import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
+import org.delia.queryresponse.LetSpan;
+import org.delia.queryresponse.LetSpanEngine;
+import org.delia.queryresponse.LetSpanRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.StringTrail;
-import org.delia.zqueryresponse.LetSpan;
-import org.delia.zqueryresponse.LetSpanEngine;
-import org.delia.zqueryresponse.LetSpanRunner;
 
 /**
  * 

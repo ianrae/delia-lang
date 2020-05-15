@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse;
+package org.delia.queryresponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +8,13 @@ import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
-import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
 
 public class LetSpanEngine extends ServiceBase {
 	private DTypeRegistry registry;

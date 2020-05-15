@@ -1,23 +1,24 @@
-package org.delia.zqueryresponse.function;
+package org.delia.queryresponse.function;
 
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.ZQueryResponseFunctionBase;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zqueryresponse.ZQueryResponseFunctionBase;
 
-public class ZMaxFunction extends ZQueryResponseFunctionBase {
+public class ZMinFunction extends ZQueryResponseFunctionBase {
 	private FactoryService factorySvc;
 
-	public ZMaxFunction(FactoryService factorySvc, DTypeRegistry registry) {
+	public ZMinFunction(FactoryService factorySvc, DTypeRegistry registry) {
 		super(registry);
 		this.factorySvc = factorySvc;
 	}
@@ -49,77 +50,77 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 		case DATE:
 			return processDate(qresp, dvalList);
 		default:
-			DeliaExceptionHelper.throwError("unsupported-max-type", "max() doesn't support type '%s'", shape);
+			DeliaExceptionHelper.throwError("unsupported-min-type", "min() doesn't support type '%s'", shape);
 		}
 		return qresp;
 	}
 
 	private QueryResponse processInt(QueryResponse qresp, List<DValue> dvalList) {
-		int max = Integer.MIN_VALUE;
+		int min = Integer.MAX_VALUE;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
 			int k = dval.asInt(); 
-			if (k > max) {
-				max = k;
+			if (k < min) {
+				min = k;
 			}
 		}
 		
-		DValue dval = buildIntVal(max);
+		DValue dval = buildIntVal(min);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processLong(QueryResponse qresp, List<DValue> dvalList) {
-		long max = Integer.MIN_VALUE;
+		long min = Long.MAX_VALUE;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
-			long k = dval.asLong(); 
-			if (k > max) {
-				max = k;
+			long k = dval.asLong();
+			if (k < min) {
+				min = k;
 			}
 		}
 		
-		DValue dval = buildLongVal(max);
+		DValue dval = buildLongVal(min);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processNumber(QueryResponse qresp, List<DValue> dvalList) {
-		double max = Double.MIN_VALUE;
+		double min = Double.MAX_VALUE;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
 			double k = dval.asNumber();
-			if (k > max) {
-				max = k;
+			if (k < min) {
+				min = k;
 			}
 		}
 		
-		DValue dval = buildNumberVal(max);
+		DValue dval = buildNumberVal(min);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processBoolean(QueryResponse qresp, List<DValue> dvalList) {
-		Boolean max = false;
+		Boolean min = true;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
-			Boolean k = dval.asBoolean(); 
-			if (k.compareTo(max) > 0) {
-				max = k;
+			Boolean k = dval.asBoolean();
+			if (k.compareTo(min) < 0) {
+				min = k;
 			}
 		}
 		
-		DValue dval = buildBoolVal(max);
+		DValue dval = buildBoolVal(min);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processString(QueryResponse qresp, List<DValue> dvalList) {
-		String min = null; //min possible string
+		String min = null; //max possible string
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
@@ -128,7 +129,7 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 			
 			if (min == null) {
 				min = k;
-			} else if (k.compareTo(min) > 0) {
+			} else if (k.compareTo(min) < 0) {
 				min = k;
 			}
 		}
@@ -138,7 +139,7 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 		return qresp;
 	}
 	private QueryResponse processDate(QueryResponse qresp, List<DValue> dvalList) {
-		Date min = new Date(Long.MIN_VALUE);
+		Date min = new Date(Long.MAX_VALUE); //max possible string
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
@@ -147,7 +148,7 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 			
 			if (min == null) {
 				min = k;
-			} else if (k.compareTo(min) > 0) {
+			} else if (k.compareTo(min) < 0) {
 				min = k;
 			}
 		}

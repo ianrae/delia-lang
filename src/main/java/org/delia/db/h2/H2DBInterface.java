@@ -46,6 +46,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
+import org.delia.queryresponse.LetSpan;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
@@ -53,7 +54,6 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zqueryresponse.LetSpan;
 
 
 /**

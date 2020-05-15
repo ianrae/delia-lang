@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse.function;
+package org.delia.queryresponse.function;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.queryresponse.ZQueryResponseFunction;
 import org.delia.runner.FetchRunner;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
@@ -13,7 +14,6 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.zqueryresponse.ZQueryResponseFunction;
 
 public class ZQueryResponseFunctionFactory extends ServiceBase {
 	private FetchRunner fetchRunner;

@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse.function;
+package org.delia.queryresponse.function;
 
 import java.util.List;
 

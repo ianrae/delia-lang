@@ -19,11 +19,11 @@ import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.queryresponse.LetSpan;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zqueryresponse.LetSpan;
 
 /**
  * Represents db access to a single database.

@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse.function;
+package org.delia.queryresponse.function;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.ZQueryResponseFunctionBase;
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;
@@ -16,7 +17,6 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
-import org.delia.zqueryresponse.ZQueryResponseFunctionBase;
 
 public class ZDistinctFunction extends ZQueryResponseFunctionBase {
 

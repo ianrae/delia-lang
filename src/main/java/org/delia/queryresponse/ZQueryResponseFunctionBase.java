@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse;
+package org.delia.queryresponse;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,7 +9,6 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
-import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;

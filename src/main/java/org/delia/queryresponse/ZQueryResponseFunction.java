@@ -1,7 +1,6 @@
-package org.delia.zqueryresponse;
+package org.delia.queryresponse;
 
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 
 public interface ZQueryResponseFunction {

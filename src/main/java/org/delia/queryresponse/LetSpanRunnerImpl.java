@@ -1,4 +1,4 @@
-package org.delia.zqueryresponse;
+package org.delia.queryresponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,7 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.queryresponse.FuncScope;
-import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DRelation;
@@ -21,7 +20,6 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
 
 public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 
