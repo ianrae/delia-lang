@@ -20,7 +20,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.RawDBExecutor;
 import org.delia.db.SchemaContext;
-import org.delia.db.memdb.MemDBExecutor;
+import org.delia.db.memdb.MemRawDBExecutor;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -402,7 +402,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	private boolean isMemDB() {
-		return rawExecutor instanceof MemDBExecutor;
+		return rawExecutor instanceof MemRawDBExecutor;
 	}
 
 	private boolean doSoftDeletePreRunCheck(String typeName) {

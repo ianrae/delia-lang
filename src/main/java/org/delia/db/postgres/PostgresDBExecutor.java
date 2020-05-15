@@ -31,6 +31,10 @@ public class PostgresDBExecutor implements DBExecutor {
 	public H2DBConnection getConn() {
 		return (H2DBConnection) dbctx.connObject;
 	}
+	@Override
+	public DBAccessContext getDBAccessContext() {
+		return dbctx;
+	}
 
 
 	@Override

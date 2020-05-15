@@ -30,7 +30,10 @@ public class MemDBExecutor implements DBExecutor {
 	public void forceDBInterface(DBInterface newOne) {
 		this.dbInterface = newOne;
 	}
-
+	@Override
+	public DBAccessContext getDBAccessContext() {
+		return dbctx;
+	}
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx) {
 		return dbInterface.executeInsert(dval, ctx, dbctx);

@@ -29,6 +29,11 @@ public class H2DBExecutor implements DBExecutor {
 		dbctx.connObject = conn;
 	}
 	
+	@Override
+	public DBAccessContext getDBAccessContext() {
+		return dbctx;
+	}
+	
 	public H2DBConnection getConn() {
 		return (H2DBConnection) dbctx.connObject;
 	}

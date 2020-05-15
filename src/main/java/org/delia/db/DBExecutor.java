@@ -16,6 +16,7 @@ import org.delia.type.DValue;
  */
 public interface DBExecutor extends AutoCloseable {
 	
+	DBAccessContext getDBAccessContext();
 	DValue executeInsert(DValue dval, InsertContext ctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
 	int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag); 

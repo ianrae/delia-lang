@@ -41,7 +41,6 @@ import org.delia.db.sql.fragment.UpsertFragmentParser;
 import org.delia.db.sql.fragment.UpsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.PreparedStatementGenerator;
-import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -321,7 +320,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 	public void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		DStructType dtype = dbctx.registry.findTypeOrSchemaVersionType(tableName);
 		String sql;
-		createTableCreator(dbctx);
+		this.tableCreator = sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		sql = tableCreator.generateCreateTable(tableName, dtype);
 		executeSQL(sql, dbctx);
 	}	
