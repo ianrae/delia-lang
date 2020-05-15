@@ -95,11 +95,11 @@ public class PreparedStatementGenerator extends ServiceBase {
 //		return selectFnHelper.doLastFixup(spec, typeName, null);
 //	}
 
-	public void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
-		this.selectFnHelper.doOrderByIfPresent(sc, spec, typeName);
-		this.selectFnHelper.doLimitIfPresent(sc, spec, typeName);
-		this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);
-	}
+//	public void generateQueryFns(StrCreator sc, QuerySpec spec, String typeName) {
+//		this.selectFnHelper.doOrderByIfPresent(sc, spec, typeName);
+//		this.selectFnHelper.doLimitIfPresent(sc, spec, typeName);
+//		this.selectFnHelper.doOffsetIfPresent(sc, spec, typeName);
+//	}
 
 //	public SqlStatement generateDelete(QuerySpec spec) {
 //		StrCreator sc = new StrCreator();
