@@ -1,4 +1,4 @@
-package org.delia.zdb;
+package org.delia.zdb.core;
 
 import java.util.List;
 
@@ -18,7 +18,6 @@ import org.delia.queryresponse.LetSpan;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.core.ZTableCreator;
 
 public class ZQuery extends ServiceBase {
 	

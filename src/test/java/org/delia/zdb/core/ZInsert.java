@@ -1,4 +1,4 @@
-package org.delia.zdb;
+package org.delia.zdb.core;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -12,7 +12,6 @@ import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.zdb.core.ZTableCreator;
 
 public class ZInsert extends ServiceBase {
 	
