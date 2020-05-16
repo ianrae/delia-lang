@@ -3,7 +3,6 @@ package org.delia.zdb;
 import java.util.List;
 
 import org.delia.db.TableExistenceService;
-import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 
@@ -44,7 +43,8 @@ public class ZTableExistenceService implements TableExistenceService {
 		index = tblInfoL.size();
 		
 		//try tbl1 tbl2 Assoc
-		String assocTblName = AssocTableCreator.createAssocTableName(tbl1, tbl2);
+//		String assocTblName = AssocTableCreator.createAssocTableName(tbl1, tbl2);
+		String assocTblName = dbexecutor.getDatIdMap().getAssocTblName(info.getDatId());
 		if (doesTableExist(assocTblName)) {
 			TableInfo tblinfo = new TableInfo(tbl1, assocTblName);
 			tblinfo.tbl1 = tbl1;
@@ -53,15 +53,15 @@ public class ZTableExistenceService implements TableExistenceService {
 			return index;
 		}
 		
-		//try other way around
-		assocTblName = AssocTableCreator.createAssocTableName(tbl2, tbl1);
-		if (doesTableExist(assocTblName)) {
-			TableInfo tblinfo = new TableInfo(tbl2, assocTblName);
-			tblinfo.tbl1 = tbl2;
-			tblinfo.tbl2 = tbl1;
-			tblInfoL.add(tblinfo);
-			return index;
-		}
+//		//try other way around
+//		assocTblName = AssocTableCreator.createAssocTableName(tbl2, tbl1);
+//		if (doesTableExist(assocTblName)) {
+//			TableInfo tblinfo = new TableInfo(tbl2, assocTblName);
+//			tblinfo.tbl1 = tbl2;
+//			tblinfo.tbl2 = tbl1;
+//			tblInfoL.add(tblinfo);
+//			return index;
+//		}
 		return -1;
 	}
 	

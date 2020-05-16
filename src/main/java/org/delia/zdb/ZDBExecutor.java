@@ -12,7 +12,6 @@ import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.TypeReplaceSpec;
 
 public interface ZDBExecutor extends AutoCloseable {
 //		public boolean disableSqlLogging; //for internal use only
@@ -24,7 +23,8 @@ public interface ZDBExecutor extends AutoCloseable {
 		void init1(DTypeRegistry registry);
 		void init2(DatIdMap datIdMap, VarEvaluator varEvaluator);
 		FetchRunner createFetchRunner();
-
+		DatIdMap getDatIdMap();
+		
 		//these can be called after init1
 		DValue rawInsert(DValue dval, InsertContext ctx);
 		QueryResponse rawQuery(QuerySpec spec, QueryContext qtx);

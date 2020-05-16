@@ -3,6 +3,7 @@ package org.delia.db.sql.table;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.TableExistenceService;
@@ -22,15 +23,17 @@ public class AssocTableCreator extends ServiceBase {
 	private FieldGenFactory fieldgenFactory;
 	private SqlNameFormatter nameFormatter;
 	private TableExistenceService existSvc;
+	private DatIdMap datIdMap;
 	
 	public AssocTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, TableExistenceService existSvc, List<TableInfo> alreadyCreatedL) {
+				SqlNameFormatter nameFormatter, TableExistenceService existSvc, List<TableInfo> alreadyCreatedL, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		this.existSvc = existSvc;
 		this.alreadyCreatedL = alreadyCreatedL;
+		this.datIdMap = datIdMap;
 	}
 
 	
@@ -56,6 +59,7 @@ public class AssocTableCreator extends ServiceBase {
 		generateAssocTable(sc, pair, dtype);
 	}
 	
+	//TODO delete this!
 	public static String createAssocTableName(String tbl1, String tbl2) {
 		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
 		return assocTableName;
@@ -68,8 +72,10 @@ public class AssocTableCreator extends ServiceBase {
 		if (!(haveCreatedTable(tbl1) && haveCreatedTable(tbl2))) {
 			return;
 		}
+		
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 
-		String assocTableName = createAssocTableName(tbl1, tbl2);
+		String assocTableName = datIdMap.getAssocTblName(relinfo.getDatId());
 		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
 		tblinfo.assocTblName = assocTableName;
 		tblinfo.tbl1 = tbl1;

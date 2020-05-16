@@ -9,7 +9,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.table.AssocInfo;
 import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.ConstraintGen;
 import org.delia.db.sql.table.FieldGen;
@@ -23,23 +22,24 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.util.DeliaExceptionHelper;
 
 public class ZTableCreator extends ServiceBase {
 	protected DTypeRegistry registry;
 	public List<TableInfo> alreadyCreatedL = new ArrayList<>();
 	protected FieldGenFactory fieldgenFactory;
 	protected SqlNameFormatter nameFormatter;
-//	private AssocTableCreator assocTblCreator;
+	private AssocTableCreator assocTblCreator;
 	public DatIdMap datIdMap;
 	
 	public ZTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, DatIdMap datIdMap) {
+				SqlNameFormatter nameFormatter, DatIdMap datIdMap, ZDBExecutor zexec) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
-//		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL);
+		
+		TableExistenceService existSvc = new ZTableExistenceService(zexec);
+		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
 		this.datIdMap = datIdMap;
 	}
 
@@ -142,11 +142,11 @@ public class ZTableCreator extends ServiceBase {
 	}
 	
 	protected void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype) {
-		//TODO assocTblCreator.alterGenerateAssocTable(sc, pair, dtype);
+		assocTblCreator.alterGenerateAssocTable(sc, pair, dtype);
 	}
 	
 	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
-		//TODO assocTblCreator.generateAssocTable(sc, xpair, dtype);
+		assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
 	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {

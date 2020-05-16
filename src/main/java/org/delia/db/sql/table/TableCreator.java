@@ -33,7 +33,7 @@ public class TableCreator extends ServiceBase {
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		this.existSvc = existSvc;
-		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL);
+		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, null);
 		this.datIdMap = datIdMap;
 	}
 

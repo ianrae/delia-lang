@@ -2,7 +2,6 @@ package org.delia.db.schema;
 
 import java.util.List;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.InsertContext;

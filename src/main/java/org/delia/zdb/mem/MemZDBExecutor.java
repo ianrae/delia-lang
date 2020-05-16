@@ -33,12 +33,10 @@ import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.runner.ZFetchRunnerImpl;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.DValueImpl;
 import org.delia.type.TypePair;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
@@ -505,6 +503,10 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	@Override
 	public ZDBInterfaceFactory getDbInterface() {
 		return dbInterface;
+	}
+	@Override
+	public DatIdMap getDatIdMap() {
+		return datIdMap;
 	}
 
 }

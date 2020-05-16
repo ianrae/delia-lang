@@ -4,7 +4,6 @@ import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.ResultSetToDValConverter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -301,6 +300,7 @@ public class H2BDDTests extends NewBDDBase {
 		
 //		runR1600File("t0-fetch.txt", 3);
 //		runR1550File("t0-queryfn-manymany-left.txt", 6);
+//		runR500File("t0-relation-one-to-one.txt", 9);
 		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	

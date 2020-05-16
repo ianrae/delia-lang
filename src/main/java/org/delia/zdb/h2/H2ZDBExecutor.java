@@ -45,7 +45,6 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
@@ -104,7 +103,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		private ZTableCreator createPartialTableCreator() {
 			SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
 			FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
-			return new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, null);
+			return new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, null, this);
 		}
 		
 
@@ -116,7 +115,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 			SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
 			FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
-			this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap);
+			this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, this);
 		}
 
 		@Override
@@ -448,5 +447,9 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		@Override
 		public ZDBInterfaceFactory getDbInterface() {
 			return dbInterface;
+		}
+		@Override
+		public DatIdMap getDatIdMap() {
+			return datIdMap;
 		}
 	}
