@@ -29,7 +29,6 @@ import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class DeliaImpl implements Delia {
 	private static class MigrationExtraInfo {

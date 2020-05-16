@@ -8,6 +8,7 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.DBInterface;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
+import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.prepared.SelectFuncHelper;
@@ -22,7 +23,7 @@ public class FragmentParserService extends ServiceBase {
 	public DTypeRegistry registry;
 	public WhereFragmentGenerator whereGen;
 	public SelectFuncHelper selectFnHelper;
-	public TableExistenceServiceImpl existSvc;
+	public TableExistenceService existSvc;
 	public FKHelper fkHelper;
 	public JoinFragment savedJoinedFrag;
 	public List<TableInfo> tblinfoL;
@@ -55,8 +56,8 @@ public class FragmentParserService extends ServiceBase {
 		return this.queryDetectorSvc;
 	}
 
-	public TableExistenceServiceImpl createTableExistenceService() {
-		return new TableExistenceServiceImpl(dbInterface, dbctx);
+	public TableExistenceService createTableExistenceService() {
+		return existSvc;
 	}
 
 	public FKHelper createFKHelper() {
@@ -65,6 +66,10 @@ public class FragmentParserService extends ServiceBase {
 
 	public SelectFuncHelper createSelectFuncHelper() {
 		return new SelectFuncHelper(factorySvc, registry, spanHelper);
+	}
+
+	public void setExistSvc(TableExistenceService existSvc) {
+		this.existSvc = existSvc;
 	}
 
 }
