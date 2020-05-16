@@ -291,17 +291,17 @@ public class H2BDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 0;
+//		testIndexToRun = 0;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
-		ResultSetToDValConverter.logResultSetDetails = true;
+//		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR500File("t0-relation-many-to-many.txt", 11);
-		runR1000File("t0-upsert.txt", 5);
+		runR800File("t0-delete.txt", 4);
 	}
 	
 	//---

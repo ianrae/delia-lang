@@ -50,6 +50,7 @@ import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZDelete;
 import org.delia.zdb.ZInsert;
 import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
@@ -74,6 +75,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		private ZQuery zquery;
 		private ZUpdate zupdate;
 		private ZUpsert zupsert;
+		private ZDelete zdelete;
 
 		public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
 			super(factorySvc);
@@ -104,6 +106,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			this.zquery = new ZQuery(factorySvc, registry);
 			this.zupdate = new ZUpdate(factorySvc, registry);
 			this.zupsert = new ZUpsert(factorySvc, registry);
+			this.zdelete = new ZDelete(factorySvc, registry);
 		}
 		
 		private ZTableCreator createPartialTableCreator() {
@@ -386,8 +389,20 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		@Override
 		public void executeDelete(QuerySpec spec) {
-			// TODO Auto-generated method stub
+			SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
+			if (stgroup.statementL.isEmpty()) {
+				return; //nothing to delete
+			}
 
+			logStatementGroup(stgroup);
+			try {
+				ZDBExecuteContext dbctx = createContext();
+				for(SqlStatement statement: stgroup.statementL) {
+					conn.execStatement(statement, dbctx);
+				}
+			} catch (DBValidationException e) {
+				convertAndRethrow(e);
+			}
 		}
 
 		@Override
