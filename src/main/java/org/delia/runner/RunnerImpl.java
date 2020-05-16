@@ -543,7 +543,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, zexec, registry, fetchRunner, mgr, this);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, zexec, registry, fetchRunner, mgr, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		

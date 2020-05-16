@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.assoc.DatIdMap;
@@ -54,7 +53,7 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
 
-	private Map<String,MemDBTable> tableMap = new ConcurrentHashMap<>();
+	private Map<String,MemDBTable> tableMap;
 	private ZStuff stuff; //created lazily
 	DateFormatService fmtSvc;
 	public boolean createTablesAsNeededFlag = true;
@@ -64,6 +63,7 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.tableMap = dbInterface.createSingleMemDB();
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();
 		this.fmtSvc = factorySvc.getDateFormatService();

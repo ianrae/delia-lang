@@ -14,10 +14,8 @@ import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DRelation;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
