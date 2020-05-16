@@ -32,6 +32,7 @@ import org.delia.runner.FetchRunner;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
+import org.delia.runner.ZFetchRunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -46,7 +47,6 @@ import org.delia.validation.ValidationRuleRunner;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 
 public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 
@@ -185,7 +185,7 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 	@Override
 	public FetchRunner createFetchRunner() {
-		return null; //TODO fix
+		return new ZFetchRunnerImpl(factorySvc, this, registry, varEvaluator);
 	}
 
 

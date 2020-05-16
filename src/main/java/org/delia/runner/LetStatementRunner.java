@@ -30,6 +30,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.ZDBExecutor;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -41,13 +42,14 @@ public class LetStatementRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private DBInterface dbInterface;
 	private DBExecutor dbexecutor;
+	private ZDBExecutor zexec;
 	private LetSpanEngine letSpanEngine;
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
 	private HLSManager mgr;
 
-	public LetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, DBExecutor dbexecutor, DTypeRegistry registry, 
+	public LetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, DBExecutor dbexecutor, ZDBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
@@ -55,6 +57,7 @@ public class LetStatementRunner extends ServiceBase {
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
 		this.dbexecutor = dbexecutor;
+		this.zexec = zexec;
 		this.mgr = mgr;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 
@@ -149,7 +152,7 @@ public class LetStatementRunner extends ServiceBase {
 			HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
 			qresp = result.qresp;
 		} else {
-			qresp = dbexecutor.executeQuery(spec, qtx);
+			qresp = zexec.rawQuery(spec, qtx);
 		}
 		return qresp;
 	}

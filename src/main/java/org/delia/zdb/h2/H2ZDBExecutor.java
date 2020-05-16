@@ -39,6 +39,7 @@ import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
+import org.delia.runner.ZFetchRunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -120,8 +121,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		@Override
 		public FetchRunner createFetchRunner() {
-			// TODO Auto-generated method stub
-			return null;
+			return new ZFetchRunnerImpl(factorySvc, this, registry, varEvaluator);
 		}
 
 		@Override

@@ -49,6 +49,7 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
+import org.delia.zdb.ZDBExecutor;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -62,6 +63,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		protected DTypeRegistry registry;
 		private DBInterface dbInterface;
 		private DBExecutor dbexecutor;
+		private ZDBExecutor zexec;
 		protected FetchRunner fetchRunner;
 		Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
@@ -152,10 +154,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExector(dbctx);
-//			dbexecutor.init1(registry);
-//			dbexecutor.init2(this, datIdMap);
+			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
+			zexec.init1(registry);
+			zexec.init2(datIdMap, this);
 			
-			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
+			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : zexec.createFetchRunner();
 //			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 //			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
 //			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner, spanRunner);
@@ -176,6 +179,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 						DBHelper.handleCloseFailure(e);
 					}
 				}
+				if (zexec != null) {
+					try {
+						zexec.close();
+					} catch (Exception e) {
+						DBHelper.handleCloseFailure(e);
+					}
+				}
+				
 			}
 			return res;
 		}
@@ -297,7 +308,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				int numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
+				int numRowsAffected = zexec.executeUpdate(spec, cres.dval, cres.assocCrudMap);
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -373,7 +384,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
 				boolean noUpdateFlag = exp.optionExp != null;
-				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
+				int numRowsAffected = zexec.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -400,7 +411,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			try {
 				QuerySpec spec = this.resolveFilterVars(exp.queryExp);
-				dbexecutor.executeDelete(spec);
+				zexec.executeDelete(spec);
 			} catch (DBException e) {
 				res.errors.add(e.getLastError());
 				res.ok = false;
@@ -458,14 +469,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				if (hasSerialId) {
 					ctx.extractGeneratedKeys = true;
 					ctx.genKeytype = DValueHelper.findPrimaryKeyFieldPair(cres.dval.getType()).type;
-					DValue generatedId = dbexecutor.executeInsert(cres.dval, ctx);
+					DValue generatedId = zexec.executeInsert(cres.dval, ctx);
 					assignSerialVar(generatedId);
 					boolean sprigFlag = sprigSvc.haveEnabledFor(typeName);
 					if (sprigFlag) {
 						sprigSvc.rememberSynthId(typeName, cres.dval, generatedId, cres.extraMap);
 					}
 				} else {
-					dbexecutor.executeInsert(cres.dval, ctx);
+					zexec.executeInsert(cres.dval, ctx);
 				}
 				
 			} catch (DBException e) {
@@ -532,7 +543,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, this);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, zexec, registry, fetchRunner, mgr, this);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
