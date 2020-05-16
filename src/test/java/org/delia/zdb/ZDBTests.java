@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -27,21 +28,33 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
+import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.ResultSetHelper;
+import org.delia.db.ResultSetToDValConverter;
+import org.delia.db.TableExistenceService;
+import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.ValueHelper;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.H2DBConnection;
 import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.h2.H2ErrorConverter;
+import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.hls.HLSSelectHelper;
+import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.SimpleSqlNameFormatter;
+import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.table.FieldGenFactory;
+import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -59,6 +72,7 @@ import org.delia.zdb.core.ZDBConnection;
 import org.delia.zdb.core.ZDBExecuteContext;
 import org.delia.zdb.core.ZDBExecutor;
 import org.delia.zdb.core.ZDBInterfaceFactory;
+import org.delia.zdb.core.ZTableCreator;
 import org.delia.zdb.core.mem.MemZDBExecutor;
 import org.delia.zdb.core.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
@@ -289,6 +303,7 @@ public class ZDBTests  extends NewBDDBase {
 		private VarEvaluator varEvaluator;
 		private DBType dbType;
 		private DBErrorConverter errorConverter;
+		protected ZTableCreator tableCreator;
 
 		public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
 			super(factorySvc);
@@ -345,15 +360,24 @@ public class ZDBTests  extends NewBDDBase {
 		public boolean rawTableDetect(String tableName) {
 			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 			String sql = sqlgen.generateTableDetect(tableName);
-			SqlStatement statement = new SqlStatement();
-			statement.sql = sql;
+			SqlStatement statement = createSqlStatement(sql); 
 			return execResultBoolean(statement);
 		}
+		private SqlStatement createSqlStatement(String sql) {
+			SqlStatement statement = new SqlStatement();
+			statement.sql = sql;
+			return statement;
+		}
+		private ZDBExecuteContext createContext() {
+			ZDBExecuteContext dbctx = new ZDBExecuteContext();
+			dbctx.logToUse = log;
+			return dbctx;
+		}
+
 		private boolean execResultBoolean(SqlStatement statement) {
 			logSql(statement);
 
-			ZDBExecuteContext dbctx = new ZDBExecuteContext();
-			dbctx.logToUse = log;
+			ZDBExecuteContext dbctx = createContext();
 			ResultSet rs = conn.execQueryStatement(statement, dbctx);
 
 			boolean tblExists = false;
@@ -402,14 +426,12 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public void rawCreateTable(String tableName) {
-			// TODO Auto-generated method stub
-
+			createTable(tableName);
 		}
 
 		@Override
 		public void performTypeReplacement(TypeReplaceSpec spec) {
-			// TODO Auto-generated method stub
-
+			//nothing to do
 		}
 
 		@Override
@@ -439,9 +461,42 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-			// TODO Auto-generated method stub
-			return null;
+			SqlStatement statement = createSqlStatement(sql);
+			for(HLSQuerySpan hlspan: hls.hlspanL) {
+				statement.paramL.addAll(hlspan.paramL);
+			}
+			logSql(statement);
+			
+			ZDBExecuteContext dbctx = createContext();
+			ResultSet rs = conn.execQueryStatement(statement, dbctx);
+			//TODO: do we need to catch and interpret execptions here??
+
+			QueryDetails details = hls.details;
+
+			QueryResponse qresp = new QueryResponse();
+			HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
+			ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
+			if (selectResultType.isScalarShape()) {
+				qresp.dvalList = buildScalarResult(rs, selectResultType, details);
+//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+				qresp.ok = true;
+			} else {
+				String typeName = hls.querySpec.queryExp.getTypeName();
+				DStructType dtype = (DStructType) dbctx.registry.findTypeOrSchemaVersionType(typeName);
+				qresp.dvalList = buildDValueList(rs, dtype, details, dbctx, hls);
+				qresp.ok = true;
+			}
+			return qresp;
 		}
+		protected List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details) {
+			DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+			ResultSetToDValConverter resultSetConverter;
+			resultSetConverter = new ResultSetToDValConverter(factorySvc, new ValueHelper(factorySvc));
+			resultSetConverter.init(factorySvc);
+			
+			return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
+		}
+		
 
 		@Override
 		public boolean doesTableExist(String tableName) {
@@ -457,8 +512,18 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public void createTable(String tableName) {
-			// TODO Auto-generated method stub
-
+			DStructType dtype = registry.findTypeOrSchemaVersionType(tableName);
+			String sql;
+			if (tableCreator == null) {
+				SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
+				FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
+				this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap);
+			}
+			
+			sql = tableCreator.generateCreateTable(tableName, dtype);
+			SqlStatement statement = createSqlStatement(sql); 
+			ZDBExecuteContext dbctx = createContext();
+			conn.execStatement(statement, dbctx);
 		}
 
 		@Override
