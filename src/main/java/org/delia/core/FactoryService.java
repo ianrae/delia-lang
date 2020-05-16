@@ -9,6 +9,7 @@ import org.delia.log.Log;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.ZDBExecutor;
 
 /**
  * To allow multiple clients of Delia to each
@@ -31,4 +32,6 @@ public interface FactoryService {
 	SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
+	
+	ZDBExecutor hackGetZDB(DTypeRegistry registry); //TODO remove later!!
 }

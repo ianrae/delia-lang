@@ -45,6 +45,8 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 
 public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 
@@ -70,6 +72,10 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	@Override
 	public ZDBConnection getDBConnection() {
 		return null; //none for MEM
+	}
+	
+	@Override
+	public void close() {
 	}
 
 	@Override
@@ -516,6 +522,11 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 				throw new DBException(err);
 			}
 		}
+	}
+
+	@Override
+	public ZDBInterfaceFactory getDbInterface() {
+		return dbInterface;
 	}
 
 }

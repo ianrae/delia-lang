@@ -4,11 +4,18 @@ import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.error.ErrorTracker;
+import org.delia.h2.H2ConnectionHelper;
 import org.delia.log.Log;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.h2.H2ZDBConnection;
+import org.delia.zdb.h2.H2ZDBExecutor;
+import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 
 public class FactoryServiceImpl implements FactoryService {
 	protected Log log;
@@ -72,5 +79,16 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public int getNextGeneratedRuleId() {
 		return this.nextGeneratedRuleId++;
+	}
+
+	@Override
+	public ZDBExecutor hackGetZDB(DTypeRegistry registry) {
+		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
+		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(this, connFact);
+		
+		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
+		ZDBExecutor dbexec = new H2ZDBExecutor(this, log, dbFactory, conn);
+		dbexec.init1(registry);
+		return dbexec;
 	}
 }

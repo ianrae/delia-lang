@@ -13,8 +13,9 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
+import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 
-public interface ZDBExecutor {
+public interface ZDBExecutor extends AutoCloseable {
 //		public boolean disableSqlLogging; //for internal use only
 //		public Object connObject; //for internal use only
 //		ZAccessContext getContext();
@@ -51,4 +52,6 @@ public interface ZDBExecutor {
 		void renameField(String typeName, String fieldName, String newName);
 		void alterFieldType(String typeName, String fieldName, String newFieldType);
 		void alterField(String typeName, String fieldName, String deltaFlags);
+
+		ZDBInterfaceFactory getDbInterface();
 	}

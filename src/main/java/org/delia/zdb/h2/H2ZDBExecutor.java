@@ -49,6 +49,7 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZInsert;
 import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
@@ -84,6 +85,11 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		@Override
 		public ZDBConnection getDBConnection() {
 			return conn;
+		}
+		
+		@Override
+		public void close() {
+			conn.close();
 		}
 
 		@Override
@@ -444,4 +450,8 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		}
 
+		@Override
+		public ZDBInterfaceFactory getDbInterface() {
+			return dbInterface;
+		}
 	}

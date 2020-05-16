@@ -15,6 +15,7 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.DBExecutor;
 import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -30,6 +31,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.util.StringUtil;
+import org.delia.zdb.ZDBExecutor;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
@@ -41,6 +43,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private String dbFingerprint;
 	private RawDBExecutor rawExecutor;
 	private DBExecutor dbexecutor;
+	private ZDBExecutor zexec;
 	private DBAccessContext dbctx;
 	private MigrationRunner migrationRunner;
 	private VarEvaluator varEvaluator;
@@ -51,6 +54,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		this.rawExecutor = dbInterface.createRawExector(dbctx);
 		this.dbexecutor = dbInterface.createExector(dbctx);
+		this.zexec = factorySvc.hackGetZDB(registry);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		this.varEvaluator = varEvaluator;
@@ -77,16 +81,22 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
+		//and close 3rd one
+		try {
+			zexec.close();
+		} catch (Exception e) {
+			DBHelper.handleCloseFailure(e);
+		}
 	}
 
 	public boolean createSchemaTableIfNeeded() {
-		SchemaContext ctx = new SchemaContext();
-		if (!rawExecutor.execTableDetect(SCHEMA_TABLE)) {
-			rawExecutor.createTable(SCHEMA_TABLE);
+//		SchemaContext ctx = new SchemaContext();
+		if (!zexec.rawTableDetect(SCHEMA_TABLE)) {
+			zexec.rawCreateTable(SCHEMA_TABLE);
 		}
 		
-		if (!rawExecutor.execTableDetect(DAT_TABLE)) {
-			rawExecutor.createTable(DAT_TABLE);
+		if (!zexec.rawTableDetect(DAT_TABLE)) {
+			zexec.rawCreateTable(DAT_TABLE);
 		}
 		
 		return true;
@@ -150,7 +160,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = rawExecutor.executeQuery(spec, qtx);
+//		QueryResponse qresp = rawExecutor.executeQuery(spec, qtx);
+		QueryResponse qresp = zexec.rawQuery(spec, qtx);
 		//TODO: should specify orderby id!!
 		
 		
@@ -370,7 +381,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(st.typeName);
 					QuerySpec spec = queryBuilder.buildSpec(exp, varEvaluator);
-					QueryResponse qresp = rawExecutor.executeQuery(spec, new QueryContext());
+//					QueryResponse qresp = rawExecutor.executeQuery(spec, new QueryContext());
+					QueryResponse qresp = zexec.rawQuery(spec, new QueryContext());
 					DValue dval = qresp.getOne();
 					long numRecords = dval.asLong();
 					if (numRecords > 0) {
@@ -402,12 +414,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	private boolean isMemDB() {
-		return rawExecutor instanceof MemRawDBExecutor;
+		//return rawExecutor instanceof MemRawDBExecutor;
+		return DBType.MEM.equals(zexec.getDbInterface().getDBType());
 	}
 
 	private boolean doSoftDeletePreRunCheck(String typeName) {
 		String backupName = String.format("%s__BAK", typeName);
-		if (rawExecutor.execTableDetect(backupName)) {
+		if (zexec.rawTableDetect(backupName)) {
 			log.logError("Backup table '%s' already exists. You must delete this table first before running migration.", backupName);
 			return false;
 		}
@@ -415,7 +428,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 	private boolean doSoftFieldDeletePreRunCheck(String typeName, String fieldName) {
 		String backupName = String.format("%s__BAK", fieldName);
-		if (rawExecutor.execFieldDetect(typeName, backupName)) {
+		if (zexec.rawFieldDetect(typeName, backupName)) {
 			log.logError("Backup field '%s.%s' already exists. You must delete this field first before running migration.", typeName, backupName);
 			return false;
 		}
