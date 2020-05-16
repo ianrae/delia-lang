@@ -37,6 +37,7 @@ import org.delia.db.ResultSetToDValConverter;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.ValueHelper;
+import org.delia.db.h2.H2DBConnection;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
@@ -44,6 +45,7 @@ import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
@@ -51,6 +53,7 @@ import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.FieldGenFactory;
+import org.delia.h2.H2ConnectionHelper;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
@@ -271,6 +274,7 @@ public class ZDBTests  extends NewBDDBase {
 		public ZDBConnection openConnection() {
 			H2ZDBConnection conn;
 			conn = new H2ZDBConnection(factorySvc, connFactory, errorConverter);
+			conn.openDB();
 			return conn;
 		}
 
@@ -528,7 +532,10 @@ public class ZDBTests  extends NewBDDBase {
 		@Override
 		public void rawCreateTable(String tableName) {
 			failIfNotInit1(); 
-			createTable(tableName);
+			ZTableCreator partialTableCreator = this.createPartialTableCreator();
+			DStructType dtype = registry.findTypeOrSchemaVersionType(tableName);
+			String sql = partialTableCreator.generateCreateTable(tableName, dtype);
+			execSqlStatement(sql);
 		}
 
 		@Override
@@ -628,7 +635,8 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public void deleteTable(String tableName) {
-			failIfNotInit2(); 
+//			failIfNotInit2(); 
+			failIfNotInit1(); 
 			String sql = String.format("DROP TABLE IF EXISTS %s;", tableName);
 			execSqlStatement(sql);
 		}
@@ -676,7 +684,7 @@ public class ZDBTests  extends NewBDDBase {
 	}
 
 	@Test
-	public void test() {
+	public void testMEM() {
 		MemZDBInterfaceFactory dbFactory = new MemZDBInterfaceFactory(factorySvc);
 		MemZDBExecutor dbexec = new MemZDBExecutor(factorySvc, dbFactory);
 		dbexec.init1(registry);
@@ -697,6 +705,34 @@ public class ZDBTests  extends NewBDDBase {
 		assertEquals(1, newDatIdValue.asInt());
 	}
 
+	@Test
+	public void testH2() {
+		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
+		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(factorySvc, connFact);
+//		H2ErrorConverter errorConverter = new H2ErrorConverter();
+		
+//		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, errorConverter);
+		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
+		ZDBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn);
+		dbexec.init1(registry);
+
+		InternalTypeCreator typeCreator = new InternalTypeCreator();
+		String typeName = "DELIA_ASSOC";
+		dbexec.deleteTable(typeName);
+		
+		DStructType datType = typeCreator.createDATType(registry, typeName);
+		assertEquals(false, dbexec.rawTableDetect(datType.getName()));
+		dbexec.rawCreateTable(typeName);
+		assertEquals(true, dbexec.rawTableDetect(datType.getName()));
+
+		DValue dval = createDatTableObj(datType, "dat1");
+
+		InsertContext ictx = new InsertContext();
+		ictx.extractGeneratedKeys = true;
+		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+		DValue newDatIdValue = dbexec.rawInsert(dval, ictx);
+		assertEquals(1, newDatIdValue.asInt());
+	}
 
 	// --
 	private DeliaDao dao;
