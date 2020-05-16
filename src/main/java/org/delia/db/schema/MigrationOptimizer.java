@@ -6,12 +6,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBInterface;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
-import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -23,7 +21,7 @@ public class MigrationOptimizer extends ServiceBase {
 	private DTypeRegistry registry;
 //	private DBAccessContext dbctx;
 
-	public MigrationOptimizer(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public MigrationOptimizer(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 //		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		this.registry = registry;

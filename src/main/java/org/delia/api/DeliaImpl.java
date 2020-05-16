@@ -250,7 +250,6 @@ public class DeliaImpl implements Delia {
 		
 		//load or assign DAT ids. must do this even if don't do migration
 		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry(), mainRunner);
-		DatIdMap datIdMap = extraInfo.datIdMap;
 		
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.
@@ -264,10 +263,10 @@ public class DeliaImpl implements Delia {
 				if (deliaOptions.disableSQLLoggingDuringSchemaMigration) {
 					boolean prev = dbInterface.isSQLLoggingEnabled();
 					dbInterface.enableSQLLogging(false);
-					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
 					dbInterface.enableSQLLogging(prev);
 				} else {
-					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
 				}
 				
 				if (!b) {
@@ -286,7 +285,7 @@ public class DeliaImpl implements Delia {
 			{
 				ResultValue res = new ResultValue();
 				res.ok = true;
-				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner, datIdMap);
+				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner);
 				return res;
 			}
 			case DO_NOTHING:

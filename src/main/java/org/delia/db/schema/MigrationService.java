@@ -29,7 +29,7 @@ public class MigrationService extends ServiceBase {
 	 * @param datIdMap 
 	 * @return success flag
 	 */
-	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator) {
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
@@ -38,7 +38,7 @@ public class MigrationService extends ServiceBase {
 				MigrationPlan plan = migrator.generateMigrationPlan();
 				if (policy.shouldMigrationOccur(plan)) {
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
-					b = migrator.performMigrations(performRiskChecks, datIdMap);
+					b = migrator.performMigrations(performRiskChecks);
 					if (! b) {
 						return false;
 					}
@@ -73,12 +73,12 @@ public class MigrationService extends ServiceBase {
 	 * @param datIdMap 
 	 * @return plan
 	 */
-	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator) {
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
 			log.log("RUN MIGRATION PLAN: %b", b);
-			plan = migrator.runMigrationPlan(plan, datIdMap);
+			plan = migrator.runMigrationPlan(plan);
 			return plan;
 		}
 	}

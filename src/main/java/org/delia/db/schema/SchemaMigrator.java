@@ -5,23 +5,18 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.RawDBExecutor;
-import org.delia.db.SchemaContext;
-import org.delia.db.memdb.MemRawDBExecutor;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -42,7 +37,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private String currentFingerprint;
 	private String dbFingerprint;
 //	private RawDBExecutor rawExecutor;
-	private DBExecutor dbexecutor;
+//	private DBExecutor dbexecutor;
 	private ZDBExecutor zexec;
 	private DBAccessContext dbctx;
 	private MigrationRunner migrationRunner;
@@ -53,7 +48,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 //		this.rawExecutor = dbInterface.createRawExector(dbctx);
-		this.dbexecutor = dbInterface.createExector(dbctx);
+//		this.dbexecutor = dbInterface.createExector(dbctx);
 		this.zexec = factorySvc.hackGetZDB(registry);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
@@ -64,8 +59,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setSchemaVersionType(dtype);
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
-		this.migrationRunner = new MigrationRunner(factorySvc, dbInterface, registry, dbexecutor);
-		this.optimizer = new MigrationOptimizer(factorySvc, dbInterface, registry, varEvaluator);
+		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec);
+		this.optimizer = new MigrationOptimizer(factorySvc, registry);
 	}
 	
 	@Override
@@ -75,12 +70,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 //		} catch (Exception e) {
 //			DBHelper.handleCloseFailure(e);
 //		}
-		//and close 2nd one
-		try {
-			dbexecutor.close();
-		} catch (Exception e) {
-			DBHelper.handleCloseFailure(e);
-		}
+//		//and close 2nd one
+//		try {
+//			dbexecutor.close();
+//		} catch (Exception e) {
+//			DBHelper.handleCloseFailure(e);
+//		}
 		//and close 3rd one
 		try {
 			zexec.close();
@@ -113,13 +108,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @param doLowRiskChecks whether to do additional pre-migration checks
 	 * @return true if successful
 	 */
-	public boolean performMigrations(boolean doLowRiskChecks, DatIdMap datIdMap) {
+	public boolean performMigrations(boolean doLowRiskChecks) {
 		List<SchemaType> list = parseFingerprint(dbFingerprint);
 		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
 		
 		List<SchemaType> diffL =  calcDiff(list, list2);
 		diffL = optimizer.optimizeDiffs(diffL);
-		boolean b = performMigrations(diffL, doLowRiskChecks, datIdMap);
+		boolean b = performMigrations(diffL, doLowRiskChecks);
 		return b;
 	}
 	
@@ -147,8 +142,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @param datIdMap 
 	 * @return migration plan
 	 */
-	public MigrationPlan runMigrationPlan(MigrationPlan plan, DatIdMap datIdMap) {
-		boolean b = performMigrations(plan.diffL, false, datIdMap);
+	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
+		boolean b = performMigrations(plan.diffL, false);
 		plan.runResultFlag = b;
 		return plan;
 	}
@@ -347,7 +342,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks, DatIdMap datIdMap) {
+	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
@@ -357,7 +352,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			return false;
 		}
 		
-		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL, datIdMap);
+		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {
