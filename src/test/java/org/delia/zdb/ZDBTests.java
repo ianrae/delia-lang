@@ -34,13 +34,9 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.ResultSetHelper;
 import org.delia.db.ResultSetToDValConverter;
+import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
-import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.ValueHelper;
-import org.delia.db.h2.DBListingType;
-import org.delia.db.h2.H2DBConnection;
-import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
@@ -51,13 +47,14 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
+import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.FieldGenFactory;
-import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.queryresponse.LetSpan;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
@@ -311,6 +308,7 @@ public class ZDBTests  extends NewBDDBase {
 		protected ZTableCreator tableCreator;
 		private ResultSetToDValConverter resultSetConverter;
 		private ZInsert zinsert;
+		private ZQuery zquery;
 
 		public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
 			super(factorySvc);
@@ -333,6 +331,7 @@ public class ZDBTests  extends NewBDDBase {
 			this.init1HasBeenDone = true;
 			this.registry = registry;
 			this.zinsert = new ZInsert(factorySvc, registry);
+			this.zquery = new ZQuery(factorySvc, registry);
 		}
 
 		@Override
@@ -351,49 +350,76 @@ public class ZDBTests  extends NewBDDBase {
 		@Override
 		public DValue rawInsert(DValue dval, InsertContext ctx) {
 			if (ctx.extractGeneratedKeys) {
-				SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator);
-				
-				logStatementGroup(stgroup);
-				DType keyType = ctx.genKeytype;
-				int nTotal = 0;
-				ZDBExecuteContext dbctxMain = null; //assume only one. TODO fix
-				try {
-					ZDBExecuteContext dbctx = createContext();
-					for(SqlStatement statement: stgroup.statementL) {
-						int n = conn.executeCommandStatementGenKey(statement, keyType, dbctx);
-						nTotal += n;
-						dbctxMain = dbctx;
-					}
-				} catch (DBValidationException e) {
-					convertAndRethrow(e);
-				}
-				
-				DValue genVal = null;
-				if (ctx.extractGeneratedKeys && !dbctxMain.genKeysL.isEmpty()) {
-					try {
-						SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
-						sqlctx.genKeysL = dbctxMain.genKeysL;
-						genVal = resultSetConverter.extractGeneratedKey(ctx, sqlctx);
-					} catch (SQLException e) {
-						DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
-					}
-				}
-				return genVal;
-				
+				return doInsert(dval, ctx);
 			} else {
-				int n = conn.executeCommandStatement(statement, sqlctx);
+				doInsert(dval, ctx);
 				return null;
 			}
 		}
+		
+		private DValue doInsert(DValue dval, InsertContext ctx) {
+			SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator);
+
+			logStatementGroup(stgroup);
+			DType keyType = ctx.genKeytype;
+			int nTotal = 0;
+			ZDBExecuteContext dbctxMain = null; //assume only one. TODO fix
+			try {
+				ZDBExecuteContext dbctx = createContext();
+				for(SqlStatement statement: stgroup.statementL) {
+					int n = conn.executeCommandStatementGenKey(statement, keyType, dbctx);
+					nTotal += n;
+					dbctxMain = dbctx;
+				}
+			} catch (DBValidationException e) {
+				convertAndRethrow(e);
+			}
+
+			DValue genVal = null;
+			if (ctx.extractGeneratedKeys && !dbctxMain.genKeysL.isEmpty()) {
+				try {
+					SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
+					sqlctx.genKeysL = dbctxMain.genKeysL;
+					genVal = resultSetConverter.extractGeneratedKey(ctx, sqlctx);
+				} catch (SQLException e) {
+					DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
+				}
+			}
+			return genVal;
+		}
+		
 		private void convertAndRethrow(DBValidationException e) {
 			errorConverter.convertAndRethrow(e, tableCreator.alreadyCreatedL);
 		}
 
 		@Override
 		public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+			List<LetSpan> spanL = new ArrayList<>();
+			QueryDetails details = new QueryDetails();
+			SqlStatement statement = zquery.generate(spec, qtx, tableCreator, spanL, details);
+
+			logSql(statement);
+			ZDBExecuteContext dbctx = createContext();
 			ResultSet rs = conn.execQueryStatement(statement, dbctx);
-			// TODO Auto-generated method stub
-			return null;
+
+			QueryResponse qresp = new QueryResponse();
+			SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
+			SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
+			DType selectResultType = sfhelper.getSelectResultType(spec);
+			if (selectResultType.isScalarShape()) {
+				ResultTypeInfo rti = new ResultTypeInfo();
+				rti.logicalType = selectResultType;
+				rti.physicalType = selectResultType;
+				qresp.dvalList = buildScalarResult(rs, rti, details);
+//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+				qresp.ok = true;
+			} else {
+				String typeName = spec.queryExp.getTypeName();
+				DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+				qresp.dvalList = buildDValueList(rs, dtype, details, null);
+				qresp.ok = true;
+			}
+			return qresp;
 		}
 
 		@Override
