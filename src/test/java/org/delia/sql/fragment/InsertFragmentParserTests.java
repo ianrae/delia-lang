@@ -14,6 +14,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.dao.DeliaDao;
 import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
@@ -327,7 +328,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 	}
 	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
 		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
+		AssocTblManager assocTblMgr = null; //TODO fix new AssocTblManager(existSvc, datIdMap);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
 		return parser;
 	}
 

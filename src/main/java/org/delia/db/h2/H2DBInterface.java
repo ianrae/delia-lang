@@ -99,7 +99,7 @@ public class H2DBInterface extends DBInterfaceBase implements DBInterfaceInterna
 		
 //			log.log("FRAG PARSER INSERT....................");
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, null); //TODO fix null
 		String typeName = dval.getType().getName();
 		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
 		stgroup = parser.renderInsertGroup(selectFrag);

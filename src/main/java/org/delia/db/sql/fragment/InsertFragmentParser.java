@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
+import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.prepared.TableInfoHelper;
@@ -24,9 +25,11 @@ import org.delia.util.DeliaExceptionHelper;
 public class InsertFragmentParser extends SelectFragmentParser {
 
 	private boolean useAliases = false;
+	private AssocTblManager assocTblMgr;
 
-	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc) {
+	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, AssocTblManager assocTblMgr) {
 		super(factorySvc, fpSvc);
+		this.assocTblMgr = assocTblMgr;
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {
@@ -183,15 +186,24 @@ public class InsertFragmentParser extends SelectFragmentParser {
 
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
 			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
+		
+		String field1 = assocTblMgr.getAssocLeftField(info.farType, info.nearType);
+		String field2 = assocTblMgr.getAssocRightField(info.farType, info.nearType);
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		if (mainDValFirst) {
-			genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
-			genxrow(assocInsertFrag, "rightv", keyPair2, xdval);
-		} else {
-			genxrow(assocInsertFrag, "leftv", keyPair1, xdval);
-			genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
-		}
+		genxrow(assocInsertFrag, field2, keyPair1, mainDVal);
+		genxrow(assocInsertFrag, field1, keyPair2, xdval);
+		
+		
+//		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+//		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
+//		if (mainDValFirst) {
+//			genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
+//			genxrow(assocInsertFrag, "rightv", keyPair2, xdval);
+//		} else {
+//			genxrow(assocInsertFrag, "leftv", keyPair1, xdval);
+//			genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
+//		}
 	}
 
 	private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {
