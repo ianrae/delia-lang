@@ -72,7 +72,8 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		assertEquals("Address.cust;Customer.addr1", visitor.trail.getTrail());
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
-		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator());
+		DatIdMap datIdMap = null; //TODO is this ok?
+		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator(), datIdMap);
 //		schemaMigrator.dbNeedsMigration();
 		String fingerprint = schemaMigrator.calcDBFingerprint();
 		log(fingerprint);
@@ -107,12 +108,13 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		rr.relInfo.forceDatId(null);;
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
-		
-		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator())) {
+		DatIdMap datIdMap = null; //TODO is this ok?
+
+		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator(), datIdMap)) {
 			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-			DatIdMap datIdMap = visitor.getDatIdMap();
+			datIdMap = visitor.getDatIdMap();
 
 			ZDBExecutor rawExecutor = visitor.getSchemaMigrator().getZDBExecutor();
 			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);

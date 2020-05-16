@@ -74,7 +74,7 @@ public class DeliaInitializer {
 	}
 	
 	public SchemaMigrator createSchemaMigrator() {
-		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), new DoNothingVarEvaluator());
+		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), new DoNothingVarEvaluator(), null);
 		return migrator;
 	}
 }

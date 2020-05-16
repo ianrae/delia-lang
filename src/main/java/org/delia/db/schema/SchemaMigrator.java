@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -44,15 +45,21 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private VarEvaluator varEvaluator;
 	private MigrationOptimizer optimizer;
 
-	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 //		this.rawExecutor = dbInterface.createRawExector(dbctx);
 //		this.dbexecutor = dbInterface.createExector(dbctx);
-		this.zexec = factorySvc.hackGetZDB(registry);
+		this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		this.varEvaluator = varEvaluator;
+		
+		//init zdb (but datIdMap will be null in early phase of startup)
+		zexec.init1(registry);
+		if (datIdMap != null) {
+			zexec.init2(datIdMap, varEvaluator);
+		}
 
 		InternalTypeCreator fakeCreator = new InternalTypeCreator();
 		DStructType dtype = fakeCreator.createSchemaVersionType(registry, SCHEMA_TABLE);

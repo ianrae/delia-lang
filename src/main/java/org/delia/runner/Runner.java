@@ -2,6 +2,7 @@ package org.delia.runner;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.db.hls.manager.HLSManager;
@@ -104,4 +105,6 @@ public interface Runner extends VarEvaluator {
 	FetchRunner getPrebuiltFetchRunnerToUse();
 	void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse);
 	void setHLSManager(HLSManager mgr);
+
+	void setDatIdMap(DatIdMap datIdMap);
 }

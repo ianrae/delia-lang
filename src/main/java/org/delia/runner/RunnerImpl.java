@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.DsonExp;
@@ -70,6 +71,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
 		private HLSManager mgr;
+		private DatIdMap datIdMap;
 		
 		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
 			super(factorySvc);
@@ -150,6 +152,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExector(dbctx);
+//			dbexecutor.init1(registry);
+//			dbexecutor.init2(this, datIdMap);
+			
 			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
 //			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 //			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
@@ -616,5 +621,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setHLSManager(HLSManager mgr) {
 			this.mgr = mgr;
+		}
+		@Override
+		public void setDatIdMap(DatIdMap datIdMap) {
+			this.datIdMap = datIdMap;
 		}
 	}

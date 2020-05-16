@@ -1,6 +1,8 @@
 package org.delia.core;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
@@ -16,6 +18,8 @@ import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.H2ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBExecutor;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class FactoryServiceImpl implements FactoryService {
 	protected Log log;
@@ -66,8 +70,8 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
-		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, registry, varEvaluator);
+	public SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, registry, varEvaluator, datIdMap);
 		return migrator;
 	}
 
@@ -82,13 +86,22 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public ZDBExecutor hackGetZDB(DTypeRegistry registry) {
-		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(this, connFact);
-		
-		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
-		ZDBExecutor dbexec = new H2ZDBExecutor(this, log, dbFactory, conn);
-		dbexec.init1(registry);
-		return dbexec;
+	public ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType) {
+		if (DBType.MEM.equals(dbType)) {
+			MemZDBInterfaceFactory dbFactory = new MemZDBInterfaceFactory(this);
+			MemZDBExecutor dbexec = new MemZDBExecutor(this, dbFactory);
+			dbexec.init1(registry);
+			return dbexec;
+		} else if (DBType.H2.equals(dbType)) {
+			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
+			H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(this, connFact);
+			
+			H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
+			ZDBExecutor dbexec = new H2ZDBExecutor(this, log, dbFactory, conn);
+			dbexec.init1(registry);
+			return dbexec;
+		} else {
+			return null; //not yet supported
+		}
 	}
 }

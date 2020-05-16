@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.base.DBHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -15,7 +14,6 @@ import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
-import org.delia.runner.Runner;
 import org.junit.Test;
 
 /**
@@ -47,8 +45,7 @@ public class SchemaMigratorTests {
 		assertEquals(1, diffL.size());
 		assertEquals("Customer", diffL.get(0).typeName);
 
-		DatIdMap datIdMap = new DatIdMap();
-		b = migrator.performMigrations(diffL, true, datIdMap);
+		b = migrator.performMigrations(diffL, true);
 		assertEquals(true, b);
 
 		String fingerprint = migrator.calcDBFingerprint();
@@ -86,7 +83,7 @@ public class SchemaMigratorTests {
 		FactoryService factorySvc = new FactoryServiceImpl(log, et);
 		Runner runner = helper.create(factorySvc, dbInterface);
 
-		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner);
+		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner, null);
 		return runner;
 	}
 

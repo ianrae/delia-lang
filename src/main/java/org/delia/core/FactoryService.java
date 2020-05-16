@@ -2,6 +2,7 @@ package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.ErrorTracker;
@@ -29,9 +30,9 @@ public interface FactoryService {
 	Log getLog();
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
-	SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator);
+	SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	
-	ZDBExecutor hackGetZDB(DTypeRegistry registry); //TODO remove later!!
+	ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType); //TODO remove later!!
 }

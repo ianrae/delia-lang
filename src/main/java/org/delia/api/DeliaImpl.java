@@ -61,10 +61,10 @@ public class DeliaImpl implements Delia {
 			return migrationPlanRes;
 		}
 
-		return doExecute(runner, expL);
+		return doExecute(runner, expL, extraInfo.datIdMap);
 	}
 
-	private ResultValue doExecute(Runner runner, List<Exp> expL) {
+	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap) {
 		ResultValue res = null;
 		if (!deliaOptions.enableExecution) {
 			res = new ResultValue();
@@ -72,6 +72,7 @@ public class DeliaImpl implements Delia {
 			return res;
 		}
 
+		runner.setDatIdMap(datIdMap);
 		res = runner.executeProgram(expL);
 		if (res != null && ! res.ok) {
 			throw new DeliaException(res.errors);
@@ -142,7 +143,7 @@ public class DeliaImpl implements Delia {
 			return session;
 		}
 
-		ResultValue res = doExecute(mainRunner, expL);
+		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap);
 
 		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();
@@ -250,6 +251,7 @@ public class DeliaImpl implements Delia {
 		
 		//load or assign DAT ids. must do this even if don't do migration
 		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry(), mainRunner);
+		DatIdMap datIdMap = extraInfo.datIdMap;
 		
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.
@@ -263,10 +265,10 @@ public class DeliaImpl implements Delia {
 				if (deliaOptions.disableSQLLoggingDuringSchemaMigration) {
 					boolean prev = dbInterface.isSQLLoggingEnabled();
 					dbInterface.enableSQLLogging(false);
-					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
 					dbInterface.enableSQLLogging(prev);
 				} else {
-					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner);
+					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
 				}
 				
 				if (!b) {
@@ -278,14 +280,14 @@ public class DeliaImpl implements Delia {
 			{
 				ResultValue res = new ResultValue();
 				res.ok = true;
-				res.val = migrationSvc.createMigrationPlan(mainRunner.getRegistry(), mainRunner);
+				res.val = migrationSvc.createMigrationPlan(mainRunner.getRegistry(), mainRunner, datIdMap);
 				return res;
 			}
 			case RUN_MIGRATION_PLAN:
 			{
 				ResultValue res = new ResultValue();
 				res.ok = true;
-				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner);
+				res.val = migrationSvc.runMigrationPlan(mainRunner.getRegistry(), plan, mainRunner, datIdMap);
 				return res;
 			}
 			case DO_NOTHING:
@@ -336,7 +338,7 @@ public class DeliaImpl implements Delia {
 		}
 
 		Runner runner = createRunner(session);
-		ResultValue res = doExecute(runner, expL);
+		ResultValue res = doExecute(runner, expL, session.getDatIdMap());
 		
 		if (session instanceof DeliaSessionImpl) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
