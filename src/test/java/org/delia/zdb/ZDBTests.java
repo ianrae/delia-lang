@@ -333,12 +333,23 @@ public class ZDBTests  extends NewBDDBase {
 			this.zinsert = new ZInsert(factorySvc, registry);
 			this.zquery = new ZQuery(factorySvc, registry);
 		}
+		
+		private ZTableCreator createPartialTableCreator() {
+			SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
+			FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
+			return new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, null);
+		}
+		
 
 		@Override
 		public void init2(DatIdMap datIdMap, VarEvaluator varEvaluator) {
 			this.init2HasBeenDone = true;
 			this.datIdMap = datIdMap;
 			this.varEvaluator = varEvaluator;
+
+			SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
+			FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
+			this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap);
 		}
 
 		@Override
@@ -349,7 +360,9 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public DValue rawInsert(DValue dval, InsertContext ctx) {
+			failIfNotInit1();
 			if (ctx.extractGeneratedKeys) {
+				failIfNotInit2();
 				return doInsert(dval, ctx);
 			} else {
 				doInsert(dval, ctx);
@@ -357,6 +370,17 @@ public class ZDBTests  extends NewBDDBase {
 			}
 		}
 		
+		private void failIfNotInit1() {
+			if (! init1HasBeenDone) {
+				DeliaExceptionHelper.throwError("zinit1-not-done", "init1 not done");
+			}
+		}
+		private void failIfNotInit2() {
+			if (! init2HasBeenDone) {
+				DeliaExceptionHelper.throwError("zinit2-not-done", "init2 not done");
+			}
+		}
+
 		private DValue doInsert(DValue dval, InsertContext ctx) {
 			SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator);
 
@@ -389,14 +413,17 @@ public class ZDBTests  extends NewBDDBase {
 		}
 		
 		private void convertAndRethrow(DBValidationException e) {
-			errorConverter.convertAndRethrow(e, tableCreator.alreadyCreatedL);
+			ZTableCreator tmp = tableCreator == null ? createPartialTableCreator() : tableCreator;
+			errorConverter.convertAndRethrow(e, tmp.alreadyCreatedL);
 		}
 
 		@Override
 		public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+			failIfNotInit1(); 
 			List<LetSpan> spanL = new ArrayList<>();
 			QueryDetails details = new QueryDetails();
-			SqlStatement statement = zquery.generate(spec, qtx, tableCreator, spanL, details);
+			ZTableCreator partialTableCreator = createPartialTableCreator();
+			SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details);
 
 			logSql(statement);
 			ZDBExecuteContext dbctx = createContext();
@@ -424,6 +451,7 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public boolean rawTableDetect(String tableName) {
+			failIfNotInit1(); 
 			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 			String sql = sqlgen.generateTableDetect(tableName);
 			SqlStatement statement = createSqlStatement(sql); 
@@ -489,6 +517,7 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public boolean rawFieldDetect(String tableName, String fieldName) {
+			failIfNotInit1(); 
 			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 			String sql = sqlgen.generateFieldDetect(tableName, fieldName);
 			SqlStatement statement = new SqlStatement();
@@ -498,6 +527,7 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public void rawCreateTable(String tableName) {
+			failIfNotInit1(); 
 			createTable(tableName);
 		}
 
@@ -508,8 +538,8 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public DValue executeInsert(DValue dval, InsertContext ctx) {
-			// TODO Auto-generated method stub
-			return null;
+			failIfNotInit1(); 
+			return this.rawInsert(dval, ctx);
 		}
 
 		@Override
@@ -533,6 +563,7 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+			failIfNotInit2(); 
 			SqlStatement statement = createSqlStatement(sql);
 			for(HLSQuerySpan hlspan: hls.hlspanL) {
 				statement.paramL.addAll(hlspan.paramL);
@@ -572,27 +603,24 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public boolean doesTableExist(String tableName) {
-			// TODO Auto-generated method stub
-			return false;
+			failIfNotInit2(); 
+			return rawTableDetect(tableName);
 		}
 
 		@Override
 		public boolean doesFieldExist(String tableName, String fieldName) {
-			// TODO Auto-generated method stub
-			return false;
+			failIfNotInit2(); 
+			return rawFieldDetect(tableName, fieldName);
 		}
 
 		@Override
 		public void createTable(String tableName) {
+			failIfNotInit2(); 
 			DStructType dtype = registry.findTypeOrSchemaVersionType(tableName);
-			String sql;
-			if (tableCreator == null) {
-				SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-				FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
-				this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap);
-			}
-			
-			sql = tableCreator.generateCreateTable(tableName, dtype);
+			String sql = tableCreator.generateCreateTable(tableName, dtype);
+			execSqlStatement(sql);
+		}
+		private void execSqlStatement(String sql) {
 			SqlStatement statement = createSqlStatement(sql); 
 			ZDBExecuteContext dbctx = createContext();
 			conn.execStatement(statement, dbctx);
@@ -600,8 +628,9 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public void deleteTable(String tableName) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit2(); 
+			String sql = String.format("DROP TABLE IF EXISTS %s;", tableName);
+			execSqlStatement(sql);
 		}
 
 		@Override
@@ -612,14 +641,18 @@ public class ZDBTests  extends NewBDDBase {
 
 		@Override
 		public void createField(String typeName, String field) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit2(); 
+			DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
+			String sql = tableCreator.generateCreateField(typeName, dtype, field);
+			execSqlStatement(sql);
 		}
 
 		@Override
 		public void deleteField(String typeName, String field, int datId) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit2(); 
+			DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
+			String sql = tableCreator.generateDeleteField(typeName, dtype, field, datId);
+			execSqlStatement(sql);
 		}
 
 		@Override
@@ -663,6 +696,7 @@ public class ZDBTests  extends NewBDDBase {
 		DValue newDatIdValue = dbexec.executeInsert(dval, ictx);
 		assertEquals(1, newDatIdValue.asInt());
 	}
+
 
 	// --
 	private DeliaDao dao;
