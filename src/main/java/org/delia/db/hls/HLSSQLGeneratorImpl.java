@@ -11,7 +11,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -26,7 +25,6 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
 
-//	private DTypeRegistry registry;
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
 	private AliasAllocator aliasAlloc = new AliasAllocator();
@@ -34,16 +32,12 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
 	public Map<String,String> asNameMap = new HashMap<>();
-//	private MiniSelectFragmentParser miniSelectParser;
-//	private TableExistenceService existSvc;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, TableExistenceService existSvc) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
 		this.assocTblMgr = assocTblMgr;
-//		this.miniSelectParser = miniSelectParser;
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasAlloc);
-//		this.existSvc = existSvc;
 	}
 
 	@Override

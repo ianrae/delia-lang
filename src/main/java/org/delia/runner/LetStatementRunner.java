@@ -149,7 +149,7 @@ public class LetStatementRunner extends ServiceBase {
 		QueryResponse qresp;
 		if (flag) {
 			spec.queryExp = queryExp;
-			HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
+			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 			qresp = result.qresp;
 		} else {
 			qresp = zexec.rawQuery(spec, qtx);

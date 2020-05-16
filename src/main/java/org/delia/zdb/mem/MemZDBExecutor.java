@@ -57,7 +57,7 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	private Map<String,MemDBTable> tableMap = new ConcurrentHashMap<>();
 	private ZStuff stuff; //created lazily
 	DateFormatService fmtSvc;
-	public boolean createTablesAsNeededFlag = false;
+	public boolean createTablesAsNeededFlag = true;
 	private MemZDBInterfaceFactory dbInterface;
 
 

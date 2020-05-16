@@ -13,7 +13,6 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 
 public interface ZDBExecutor extends AutoCloseable {
 //		public boolean disableSqlLogging; //for internal use only

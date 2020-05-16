@@ -12,7 +12,6 @@ import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.DBExecutor;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQuerySpan;
@@ -28,6 +27,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.util.DRuleHelper;
+import org.delia.zdb.ZDBExecutor;
 
 //normally we just call db directly. one 'let' statement = one call to db
 public class DoubleHLSStragey implements HLSStragey {
@@ -43,7 +43,7 @@ public class DoubleHLSStragey implements HLSStragey {
 	}
 
 	@Override
-	public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor) {
+	public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, ZDBExecutor dbexecutor) {
 		HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
 		HLSQuerySpan hlspan2 = hls.hlspanL.get(0); //Customer
 		QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
