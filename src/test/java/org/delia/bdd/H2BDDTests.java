@@ -291,7 +291,7 @@ public class H2BDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 10;
+		testIndexToRun = 0;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -302,7 +302,9 @@ public class H2BDDTests extends NewBDDBase {
 //		runR1600File("t0-fetch.txt", 3);
 //		runR1550File("t0-queryfn-manymany-left.txt", 6);
 //		runR500File("t0-relation-one-to-one.txt", 9);
-		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR1000File("t0-upsert.txt", 5);
+		runR900File("t0-update.txt", 7);
 	}
 	
 	//---

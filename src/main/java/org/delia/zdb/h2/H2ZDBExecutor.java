@@ -53,6 +53,7 @@ import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZInsert;
 import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
+import org.delia.zdb.ZUpdate;
 
 public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
@@ -70,6 +71,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		private ResultSetToDValConverter resultSetConverter;
 		private ZInsert zinsert;
 		private ZQuery zquery;
+		private ZUpdate zupdate;
 
 		public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
 			super(factorySvc);
@@ -98,6 +100,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			this.registry = registry;
 			this.zinsert = new ZInsert(factorySvc, registry);
 			this.zquery = new ZQuery(factorySvc, registry);
+			this.zupdate = new ZUpdate(factorySvc, registry);
 		}
 		
 		private ZTableCreator createPartialTableCreator() {
@@ -314,8 +317,20 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		@Override
 		public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
-			// TODO Auto-generated method stub
-			return 0;
+			SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
+
+			logStatementGroup(stgroup);
+			int nTotal = 0;
+			try {
+				ZDBExecuteContext dbctx = createContext();
+				for(SqlStatement statement: stgroup.statementL) {
+					int n = conn.executeCommandStatement(statement, dbctx);
+					nTotal += n;
+				}
+			} catch (DBValidationException e) {
+				convertAndRethrow(e);
+			}
+			return nTotal;
 		}
 
 		@Override

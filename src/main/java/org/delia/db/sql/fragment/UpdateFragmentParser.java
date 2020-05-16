@@ -299,6 +299,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		//struct is Address AddressCustomerAssoc
 		String field1;
 		String field2;
+//		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
 		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
 			field1 = "rightv";
 			field2 = "leftv";
