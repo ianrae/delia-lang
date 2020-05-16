@@ -85,10 +85,14 @@ public class FactoryServiceImpl implements FactoryService {
 		return this.nextGeneratedRuleId++;
 	}
 
+	private MemZDBInterfaceFactory dbFactory = null; //just one
+
 	@Override
 	public ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType) {
 		if (DBType.MEM.equals(dbType)) {
-			MemZDBInterfaceFactory dbFactory = new MemZDBInterfaceFactory(this);
+			if (dbFactory == null) {
+				dbFactory = new MemZDBInterfaceFactory(this);
+			}
 			MemZDBExecutor dbexec = new MemZDBExecutor(this, dbFactory);
 			dbexec.init1(registry);
 			return dbexec;
