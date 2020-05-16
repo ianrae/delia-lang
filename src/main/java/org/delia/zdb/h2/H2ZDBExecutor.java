@@ -54,6 +54,7 @@ import org.delia.zdb.ZInsert;
 import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.ZUpdate;
+import org.delia.zdb.ZUpsert;
 
 public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
@@ -72,6 +73,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		private ZInsert zinsert;
 		private ZQuery zquery;
 		private ZUpdate zupdate;
+		private ZUpsert zupsert;
 
 		public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
 			super(factorySvc);
@@ -101,6 +103,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			this.zinsert = new ZInsert(factorySvc, registry);
 			this.zquery = new ZQuery(factorySvc, registry);
 			this.zupdate = new ZUpdate(factorySvc, registry);
+			this.zupsert = new ZUpsert(factorySvc, registry);
 		}
 		
 		private ZTableCreator createPartialTableCreator() {
@@ -318,6 +321,9 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		@Override
 		public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
 			SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
+			if (stgroup.statementL.isEmpty()) {
+				return 0; //nothing to update
+			}
 
 			logStatementGroup(stgroup);
 			int updateCount = 0;
@@ -353,8 +359,29 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		@Override
 		public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
 				boolean noUpdateFlag) {
-			// TODO Auto-generated method stub
-			return 0;
+			
+			SqlStatementGroup stgroup = zupsert.generate(spec, dvalFull, assocCrudMap, noUpdateFlag, varEvaluator, tableCreator, this);
+			if (stgroup == null) {
+				return 0; //noupdate flag thing
+			}
+			if (stgroup.statementL.isEmpty()) {
+				return 0; //nothing to update
+			}
+
+			logStatementGroup(stgroup);
+			int updateCount = 0;
+			List<Integer > updateCountL = new ArrayList<>();
+			try {
+				ZDBExecuteContext dbctx = createContext();
+				for(SqlStatement statement: stgroup.statementL) {
+					int n = conn.executeCommandStatement(statement, dbctx);
+					updateCountL.add(n);
+				}
+				updateCount = findUpdateCount("merge", updateCountL, stgroup);
+			} catch (DBValidationException e) {
+				convertAndRethrow(e);
+			}
+			return updateCount;
 		}
 
 		@Override
