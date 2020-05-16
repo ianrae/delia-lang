@@ -25,6 +25,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.StringTrail;
+import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -113,7 +114,7 @@ public class AssocServiceTests extends NamedRelationTestBase {
 			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
 			DatIdMap datIdMap = visitor.getDatIdMap();
 
-			RawDBExecutor rawExecutor = visitor.getSchemaMigrator().getRawExecutor();
+			ZDBExecutor rawExecutor = visitor.getSchemaMigrator().getZDBExecutor();
 			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);
 			enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);

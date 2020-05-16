@@ -34,7 +34,7 @@ public class AssocServiceImpl implements AssocService {
 
 		visitor.loadSchemaFingerprintIfNeeded(); //force loading of fingerprint and loading datIdMap
 
-		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator.getRawExecutor(), registry, log, datIdMap);
+		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator.getZDBExecutor(), registry, log, datIdMap);
 		//since types of fields may have been deleted, we can't trust the registry
 		//to visit all types needed for schema migration.
 		newIdVisitor.initTableNameCreatorIfNeeded(); //explicitly load every time.

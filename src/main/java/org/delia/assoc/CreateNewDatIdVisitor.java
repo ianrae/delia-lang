@@ -19,6 +19,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
+import org.delia.zdb.ZDBExecutor;
 
 public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private FactoryService factorySvc;
@@ -29,11 +30,11 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
-	private RawDBExecutor dbexecutor;
+	private ZDBExecutor dbexecutor;
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, RawDBExecutor dbexecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, ZDBExecutor zdbExecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
-		this.dbexecutor = dbexecutor;
+		this.dbexecutor = zdbExecutor;
 		this.registry = registry;
 		this.log = log;
 		this.queryBuilder = factorySvc.getQueryBuilderService();
@@ -60,7 +61,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		InsertContext ictx = new InsertContext();
 		ictx.extractGeneratedKeys = true;
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		DValue newDatIdValue = dbexecutor.executeInsert(dval, ictx);
+		DValue newDatIdValue = dbexecutor.rawInsert(dval, ictx);
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();
@@ -88,7 +89,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
 		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
-		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
+		QueryResponse qresp = dbexecutor.rawQuery(spec, new QueryContext());
 		
 		int maxDatId = loadDATRows(qresp);
 		log.log("DAT: max id %d.", maxDatId);

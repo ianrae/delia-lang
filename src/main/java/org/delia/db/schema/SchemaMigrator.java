@@ -438,5 +438,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	public RawDBExecutor getRawExecutor() {
 		return rawExecutor;
 	}
+	public ZDBExecutor getZDBExecutor() {
+		return zexec;
+	}
 
 }
