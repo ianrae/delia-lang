@@ -1,4 +1,4 @@
-package org.delia.zdb.core.h2;
+package org.delia.zdb.h2;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,12 +46,12 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.core.ZDBConnection;
-import org.delia.zdb.core.ZDBExecuteContext;
-import org.delia.zdb.core.ZDBExecutor;
-import org.delia.zdb.core.ZInsert;
-import org.delia.zdb.core.ZQuery;
-import org.delia.zdb.core.ZTableCreator;
+import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBExecuteContext;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZInsert;
+import org.delia.zdb.ZQuery;
+import org.delia.zdb.ZTableCreator;
 
 public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 

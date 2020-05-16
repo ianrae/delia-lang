@@ -1,4 +1,4 @@
-package org.delia.zdb.core.h2;
+package org.delia.zdb.h2;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -9,8 +9,8 @@ import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
-import org.delia.zdb.core.ZDBConnection;
-import org.delia.zdb.core.ZDBInterfaceFactory;
+import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
 	private DBCapabilties capabilities;

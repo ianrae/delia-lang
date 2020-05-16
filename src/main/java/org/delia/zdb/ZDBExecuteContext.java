@@ -1,4 +1,4 @@
-package org.delia.zdb.core;
+package org.delia.zdb;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;

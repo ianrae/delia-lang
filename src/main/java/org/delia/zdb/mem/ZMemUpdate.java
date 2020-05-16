@@ -1,4 +1,4 @@
-package org.delia.zdb.core.mem;
+package org.delia.zdb.mem;
 
 import java.util.List;
 import java.util.Map;

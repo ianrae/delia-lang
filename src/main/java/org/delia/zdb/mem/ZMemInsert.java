@@ -1,4 +1,4 @@
-package org.delia.zdb.core.mem;
+package org.delia.zdb.mem;
 
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;

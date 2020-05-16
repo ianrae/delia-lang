@@ -1,4 +1,4 @@
-package org.delia.zdb.core.h2;
+package org.delia.zdb.h2;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,8 +15,8 @@ import org.delia.db.ValueHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DType;
-import org.delia.zdb.core.ZDBConnection;
-import org.delia.zdb.core.ZDBExecuteContext;
+import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBExecuteContext;
 
 public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	protected Connection conn;

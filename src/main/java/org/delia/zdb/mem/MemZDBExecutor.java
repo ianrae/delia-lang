@@ -1,4 +1,4 @@
-package org.delia.zdb.core.mem;
+package org.delia.zdb.mem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +43,8 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
-import org.delia.zdb.core.ZDBConnection;
-import org.delia.zdb.core.ZDBExecutor;
+import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBExecutor;
 
 public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 

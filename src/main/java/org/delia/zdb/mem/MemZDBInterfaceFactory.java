@@ -1,11 +1,11 @@
-package org.delia.zdb.core.mem;
+package org.delia.zdb.mem;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
 import org.delia.db.DBType;
-import org.delia.zdb.core.ZDBConnection;
-import org.delia.zdb.core.ZDBInterfaceFactory;
+import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
 	private DBCapabilties capabilities;

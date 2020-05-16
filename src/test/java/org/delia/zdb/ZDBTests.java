@@ -24,12 +24,11 @@ import org.delia.type.DValue;
 import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
-import org.delia.zdb.core.ZDBExecutor;
-import org.delia.zdb.core.h2.H2ZDBConnection;
-import org.delia.zdb.core.h2.H2ZDBExecutor;
-import org.delia.zdb.core.h2.H2ZDBInterfaceFactory;
-import org.delia.zdb.core.mem.MemZDBExecutor;
-import org.delia.zdb.core.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.h2.H2ZDBConnection;
+import org.delia.zdb.h2.H2ZDBExecutor;
+import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBExecutor;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 

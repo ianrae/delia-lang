@@ -1,4 +1,4 @@
-package org.delia.zdb.core;
+package org.delia.zdb;
 
 //holds session data regarding db
 public class ZDBIContext {
