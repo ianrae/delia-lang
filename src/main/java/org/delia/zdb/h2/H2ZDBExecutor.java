@@ -320,17 +320,34 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
 
 			logStatementGroup(stgroup);
-			int nTotal = 0;
+			int updateCount = 0;
+			List<Integer > updateCountL = new ArrayList<>();
 			try {
 				ZDBExecuteContext dbctx = createContext();
 				for(SqlStatement statement: stgroup.statementL) {
 					int n = conn.executeCommandStatement(statement, dbctx);
-					nTotal += n;
+					updateCountL.add(n);
 				}
+				updateCount = findUpdateCount("update", updateCountL, stgroup);
 			} catch (DBValidationException e) {
 				convertAndRethrow(e);
 			}
-			return nTotal;
+			return updateCount;
+		}
+		protected int findUpdateCount(String target, List<Integer> updateCountL, SqlStatementGroup stgroup) {
+			int minPos = Integer.MAX_VALUE;
+			int foundResult = 0;
+			
+			int index = 0;
+			for(SqlStatement stat: stgroup.statementL) {
+				int pos = stat.sql.toLowerCase().indexOf(target);
+				if (pos >= 0 && pos < minPos) {
+					minPos = pos;
+					foundResult = updateCountL.get(index);
+				}
+				index++;
+			}
+			return foundResult;
 		}
 
 		@Override
