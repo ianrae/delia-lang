@@ -298,7 +298,7 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
@@ -306,7 +306,7 @@ public class AllBDDTests extends NewBDDBase {
 //		runR2150File("t0-migrate-one-to-many1.txt", 3);
 //		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 //		runR1000File("t0-upsert.txt", 5);
-		runR1100File("t0-userfn.txt", 1);
+		runR1500File("t0-queryfn-ith.txt", 4);
 
 	}
 	

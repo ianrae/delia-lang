@@ -30,6 +30,10 @@ public class ZFirstFunction extends ZQueryResponseFunctionBase {
 		
 		List<DValue> dvalList = qresp.dvalList;
 		if (dvalList == null || dvalList.size() <= 1) {
+			if (qfe.argL.isEmpty()) {
+				DeliaExceptionHelper.throwError("queryfn-bad-index", "bad index!! no index provided");				
+			}
+			
 			return qresp; //nothing to do
 		}
 		
@@ -38,7 +42,9 @@ public class ZFirstFunction extends ZQueryResponseFunctionBase {
 		if (ithFlag) {
 			n = getIntArg(qfe, ctx); 
 			if (n < 0 || n >= dvalList.size()) {
-				DeliaExceptionHelper.throwError("queryfn-ith-bad-index", "bad index!! %d", n);				
+				qresp.dvalList = newlist;
+				return qresp;
+//				DeliaExceptionHelper.throwError("queryfn-ith-bad-index", "bad index!! %d", n);				
 			}
 		} else {
 			n = firstFlag ? 0 : dvalList.size() - 1;
