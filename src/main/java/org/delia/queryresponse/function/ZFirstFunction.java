@@ -30,7 +30,7 @@ public class ZFirstFunction extends ZQueryResponseFunctionBase {
 		
 		List<DValue> dvalList = qresp.dvalList;
 		if (dvalList == null || dvalList.size() <= 1) {
-			if (qfe.argL.isEmpty()) {
+			if (ithFlag && qfe.argL.isEmpty()) {
 				DeliaExceptionHelper.throwError("queryfn-bad-index", "bad index!! no index provided");				
 			}
 			

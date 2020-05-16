@@ -28,6 +28,8 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class DeliaImpl implements Delia {
 	private static class MigrationExtraInfo {
@@ -210,6 +212,11 @@ public class DeliaImpl implements Delia {
 			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
 				dbInterface.performTypeReplacement(spec);
 			}
+			ZDBInterfaceFactory zdb = factorySvc.getHackZdbFactory();
+			if (zdb != null && zdb.getCapabilities().isRequiresTypeReplacementProcessing()) {
+				zdb.performTypeReplacement(spec);
+			}
+			
 		}
 		
 		//and check that we did all replacement

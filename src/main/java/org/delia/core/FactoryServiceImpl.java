@@ -15,6 +15,7 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.H2ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
@@ -85,15 +86,23 @@ public class FactoryServiceImpl implements FactoryService {
 		return this.nextGeneratedRuleId++;
 	}
 
-	private MemZDBInterfaceFactory dbFactory = null; //just one
+	private ZDBInterfaceFactory zdbFactory = null; //just one
+	public static ZDBInterfaceFactory retainedZDBFactory = null; //for bdd
+	public static ZDBInterfaceFactory nextZDBToUse = null; //for bdd
 
 	@Override
 	public ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType) {
 		if (DBType.MEM.equals(dbType)) {
-			if (dbFactory == null) {
-				dbFactory = new MemZDBInterfaceFactory(this);
+			if (zdbFactory == null) {
+				if (nextZDBToUse != null) {
+					zdbFactory = nextZDBToUse;
+					nextZDBToUse = null;
+				} else {
+					zdbFactory = new MemZDBInterfaceFactory(this);
+				}
+				retainedZDBFactory = zdbFactory;
 			}
-			MemZDBExecutor dbexec = new MemZDBExecutor(this, dbFactory);
+			MemZDBExecutor dbexec = new MemZDBExecutor(this, (MemZDBInterfaceFactory) zdbFactory);
 			dbexec.init1(registry);
 			return dbexec;
 		} else if (DBType.H2.equals(dbType)) {
@@ -107,5 +116,10 @@ public class FactoryServiceImpl implements FactoryService {
 		} else {
 			return null; //not yet supported
 		}
+	}
+
+	@Override
+	public ZDBInterfaceFactory getHackZdbFactory() {
+		return zdbFactory;
 	}
 }

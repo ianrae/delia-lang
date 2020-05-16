@@ -9,6 +9,7 @@ import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -61,5 +62,10 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 
 	public DBErrorConverter getErrorConverter() {
 		return errorConverter;
+	}
+
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		//nothing to do
 	}
 }

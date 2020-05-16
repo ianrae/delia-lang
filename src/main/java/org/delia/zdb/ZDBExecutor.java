@@ -31,7 +31,6 @@ public interface ZDBExecutor extends AutoCloseable {
 		boolean rawTableDetect(String tableName);
 		boolean rawFieldDetect(String tableName, String fieldName);
 		void rawCreateTable(String tableName);
-		void performTypeReplacement(TypeReplaceSpec spec);
 		
 		//these can ONLY be called after init2
 		DValue executeInsert(DValue dval, InsertContext ctx);

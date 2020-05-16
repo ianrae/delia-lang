@@ -268,28 +268,6 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	}
 
 	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		for (String typeName: tableMap.keySet()) {
-			MemDBTable tbl = tableMap.get(typeName);
-			for(DValue dval: tbl.rowL) {
-				DType dtype = dval.getType();
-
-				//in addition the DValues stored here may be from a previous entire run
-				//of Runner (and its registry).
-				//so also check by name
-				boolean shouldReplace = dtype.getName().equals(spec.newType.getName());
-
-				if (shouldReplace || spec.needsReplacement(this, dtype)) {
-					DValueImpl impl = (DValueImpl) dval;
-					impl.forceType(spec.newType);
-				} else {
-					dtype.performTypeReplacement(spec);
-				}
-			}
-		}
-	}
-
-	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx) {
 		String typeName = dval.getType().getName();
 		MemDBTable tbl = tableMap.get(typeName);

@@ -11,6 +11,8 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 /**
  * To allow multiple clients of Delia to each
@@ -35,4 +37,5 @@ public interface FactoryService {
 	int getNextGeneratedRuleId();
 	
 	ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType); //TODO remove later!!
+	ZDBInterfaceFactory getHackZdbFactory();
 }

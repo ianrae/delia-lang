@@ -4,14 +4,17 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.base.UnitTestLog;
+import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBInterface;
 import org.delia.log.Log;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class BDDTestRunner {
 	private Log log = new UnitTestLog();
 	private int testIndexToRun = -1;
 	public int numSkippedTests;
 	private DBInterface retainedDBinterface;
+	private ZDBInterfaceFactory retainedZDB;
 	private DBInterfaceCreator creator;
 	
 	public BDDTestRunner(DBInterfaceCreator creator) {
@@ -60,6 +63,7 @@ public class BDDTestRunner {
 		src += "\n";
 		src += buildFrom(test.whenL);
 		
+		FactoryServiceImpl.nextZDBToUse = retainedZDB;
 		BDDTesterEx tester = new BDDTesterEx(retainedDBinterface, creator, test, test.cleanTables);
 		boolean pass = false;
 		
@@ -94,8 +98,10 @@ public class BDDTestRunner {
 		
 		if (test.chainNextTest) {
 			retainedDBinterface = tester.dbInterface;
+			this.retainedZDB = FactoryServiceImpl.retainedZDBFactory;
 		} else {
 			retainedDBinterface = null;
+			FactoryServiceImpl.retainedZDBFactory = null; //clear
 		}
 		
 		if (!pass) {

@@ -8,6 +8,10 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
+import org.delia.type.DType;
+import org.delia.type.DValue;
+import org.delia.type.DValueImpl;
+import org.delia.type.TypeReplaceSpec;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -53,4 +57,27 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	public void enableSQLLogging(boolean b) {
 		//not supported
 	}
+	
+	@Override
+	public void performTypeReplacement(TypeReplaceSpec spec) {
+		for (String typeName: tableMap.keySet()) {
+			MemDBTable tbl = tableMap.get(typeName);
+			for(DValue dval: tbl.rowL) {
+				DType dtype = dval.getType();
+
+				//in addition the DValues stored here may be from a previous entire run
+				//of Runner (and its registry).
+				//so also check by name
+				boolean shouldReplace = dtype.getName().equals(spec.newType.getName());
+
+				if (shouldReplace || spec.needsReplacement(this, dtype)) {
+					DValueImpl impl = (DValueImpl) dval;
+					impl.forceType(spec.newType);
+				} else {
+					dtype.performTypeReplacement(spec);
+				}
+			}
+		}
+	}
+
 }

@@ -302,11 +302,6 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		}
 
 		@Override
-		public void performTypeReplacement(TypeReplaceSpec spec) {
-			//nothing to do
-		}
-
-		@Override
 		public DValue executeInsert(DValue dval, InsertContext ctx) {
 			failIfNotInit2(); 
 			
