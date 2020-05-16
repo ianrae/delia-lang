@@ -219,7 +219,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		public boolean rawTableDetect(String tableName) {
 			failIfNotInit1(); 
 			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
-			String sql = sqlgen.generateTableDetect(tableName);
+			String sql = sqlgen.generateTableDetect(tableName.toUpperCase()); //h2 tbls are UPPERCASE
 			SqlStatement statement = createSqlStatement(sql); 
 			return execResultBoolean(statement);
 		}

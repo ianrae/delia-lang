@@ -38,6 +38,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, "cars");
 			safeDeleteTable(executor, "CustomerAddressAssoc");
 			safeDeleteTable(executor, "AddressCustomerAssoc");
+			safeDeleteTable(executor, "AddressCustomerDat1");
 			safeDeleteTable(executor, "Customer");
 			safeDeleteTable(executor, "CUSTOMERS");
 			safeDeleteTable(executor, "Address");
@@ -45,6 +46,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, "Address");
 			safeDeleteTable(executor, "CustomerAddressAssoc");
 			safeDeleteTable(executor, "AddressCustomerAssoc");
+			safeDeleteTable(executor, "AddressCustomerDat1");
 			safeDeleteTable(executor, "Customer__BAK");
 			safeDeleteTable(executor, "Actor");
 			safeDeleteTable(executor, "Flight");

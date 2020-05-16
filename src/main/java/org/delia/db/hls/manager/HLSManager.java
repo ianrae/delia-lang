@@ -98,7 +98,7 @@ public class HLSManager extends ServiceBase {
 		
 //		TableExistenceService existSvc = dbexecutor.createTableExistService();
 		TableExistenceService existSvc = new ZTableExistenceService(zexec);
-		AssocTblManager assocTblMgr = new AssocTblManager(existSvc);
+		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, zexec.getDatIdMap());
 
 		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
 		switch(dbInterface.getDBType()) {

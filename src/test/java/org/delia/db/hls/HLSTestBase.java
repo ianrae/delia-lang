@@ -148,7 +148,7 @@ public class HLSTestBase extends NewBDDBase {
 			delia.getDBInterface().createTable("CustomerAddressAssoc", null, ctx);
 		}
 		existsSvc = new TableExistenceServiceImpl(delia.getDBInterface(), null); //2nd param not needed for MEM
-		assocTblMgr = new AssocTblManager(existsSvc);
+		assocTblMgr = new AssocTblManager(existsSvc, null);
 		return new DeliaDao(delia);
 	}
 

@@ -4,6 +4,7 @@ import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
+import org.delia.db.ResultSetToDValConverter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -290,7 +291,7 @@ public class H2BDDTests extends NewBDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 0;
+//		testIndexToRun = 0;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
