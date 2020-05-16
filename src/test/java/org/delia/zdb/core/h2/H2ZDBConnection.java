@@ -1,0 +1,178 @@
+package org.delia.zdb.core.h2;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.StringJoiner;
+
+import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
+import org.delia.db.DBErrorConverter;
+import org.delia.db.ResultSetHelper;
+import org.delia.db.ValueHelper;
+import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.type.DType;
+import org.delia.zdb.core.ZDBConnection;
+import org.delia.zdb.core.ZDBExecuteContext;
+
+public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
+	protected Connection conn;
+	protected ConnectionFactory connectionFactory;
+	private ValueHelper valueHelper;
+	private DBErrorConverter errorConverter;
+
+	public H2ZDBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
+		super(factorySvc);
+		this.connectionFactory = connectionFactory;
+		this.valueHelper = new ValueHelper(factorySvc);
+		this.errorConverter = errorConverter;
+	}
+
+	@Override
+	public void openDB() {
+		if (conn != null) {
+			return; //already open
+		}
+
+		conn = connectionFactory.createConnection();
+	}
+
+	@Override
+	public void close() {
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public ResultSet execQueryStatement(SqlStatement statement, ZDBExecuteContext dbctx) {
+		ResultSet rs = null;
+		try {
+			PreparedStatement stm = createPrepStatement(statement);
+			rs = stm.executeQuery();
+			return rs;
+		} catch (SQLException e) {
+			convertAndRethrowException(e);
+		}
+		return rs;
+	}
+	private PreparedStatement createPrepStatement(SqlStatement statement) throws SQLException {
+		return valueHelper.createPrepStatement(statement, conn);
+	}
+	private void convertAndRethrowException(SQLException e) {
+		errorConverter.convertAndRethrowException(e);
+	}
+
+	@Override
+	public void execStatement(SqlStatement statement, ZDBExecuteContext sqlctx) {
+		boolean b = false;
+		try {
+			PreparedStatement stm = createPrepStatement(statement);
+			b = stm.execute();
+		} catch (SQLException e) {
+			convertAndRethrowException(e);
+		}
+	}
+
+	@Override
+	public int executeCommandStatement(SqlStatement statement, ZDBExecuteContext sqlctx) {
+		boolean b = false;
+		int affectedRows = 0;
+		try {
+			PreparedStatement stm = createPrepStatement(statement);
+			affectedRows = stm.executeUpdate();
+		} catch (SQLException e) {
+			convertAndRethrowException(e);
+		}
+		log.logDebug("b:%b %d", b, affectedRows);
+		return affectedRows;
+	}
+
+	@Override
+	public int executeCommandStatementGenKey(SqlStatement statement, DType keyType, ZDBExecuteContext sqlctx) {
+		boolean b = false;
+		int affectedRows = 0;
+		try {
+			PreparedStatement stm = valueHelper.createPrepStatementWithGenKey(statement, conn);
+			affectedRows = stm.executeUpdate();
+			if (affectedRows > 0) {
+				sqlctx.genKeysL.add(stm.getGeneratedKeys());
+			}
+		} catch (SQLException e) {
+			convertAndRethrowException(e);
+		}
+		log.logDebug("b:%b %d", b, affectedRows);
+		return affectedRows;
+	}
+
+	@Override
+	public void enumerateDBSchema(String sql, String title, ZDBExecuteContext dbctx) {
+		ResultSet rs = null;
+		try {
+			//String sql = String.format("SELECT count(*) from %s;", tableName);
+			dbctx.logToUse.log("SQL: %s", sql);
+			Statement stm = conn.createStatement();
+			rs = stm.executeQuery(sql);
+			if (rs != null) {
+				dbctx.logToUse.log("--- list of %s ---", title);
+				int n = ResultSetHelper.getColumnCount(rs);
+				while(rs.next()) {
+					StringJoiner joiner = new StringJoiner(",");
+					for(int i = 0; i < n; i++) {
+						Object obj = rs.getObject(i+1);
+						joiner.add(obj == null ? "null" : obj.toString());
+					}
+					log.log(joiner.toString());
+				}
+				dbctx.logToUse.log("--- end list of %s ---", title);
+			}        
+		} catch (SQLException e) {
+			convertAndRethrowException(e);
+		}
+	}
+
+	@Override
+	public String findConstraint(String sql, String tableName, String fieldName, String constraintType) {
+		ResultSet rs = null;
+		try {
+			log.log("SQL: %s", sql);
+			Statement stm = conn.createStatement();
+			rs = stm.executeQuery(sql);
+			if (rs != null) {
+				int n = ResultSetHelper.getColumnCount(rs);
+				//so we want to enumerate and capture
+				int iConstrainName = 3;
+				int iConstrainType = 4;
+				int iTable = 7;
+				int iColumn = 10;
+
+				while(rs.next()) {
+					String cname = getRsValue(rs, iConstrainName);
+					String ctype= getRsValue(rs, iConstrainType);
+					String tbl = getRsValue(rs, iTable);
+					String field = getRsValue(rs, iColumn);
+
+					//for now assume only one
+					if (tableName.equalsIgnoreCase(tbl) && fieldName.equalsIgnoreCase(field)) {
+						if (constraintType.equalsIgnoreCase(ctype)) {
+							return cname;
+						}
+					}
+				}
+			}        
+		} catch (SQLException e) {
+			convertAndRethrowException(e);
+		}
+
+		return null;
+	}
+	private String getRsValue(ResultSet rs, int index) throws SQLException {
+		Object obj = rs.getObject(index);
+		return obj == null ? "" : obj.toString();
+	}
+}

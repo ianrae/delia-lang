@@ -1,5 +1,6 @@
 package org.delia.core;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.schema.SchemaMigrator;
@@ -29,4 +30,5 @@ public interface FactoryService {
 	QueryBuilderService getQueryBuilderService();
 	SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
+	int getNextGeneratedRuleId();
 }

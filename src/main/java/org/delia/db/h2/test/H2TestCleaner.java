@@ -10,6 +10,7 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBInterface;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
+import org.delia.db.SchemaContext;
 import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
@@ -53,6 +54,8 @@ public class H2TestCleaner {
 
 			String tbl = SchemaMigrator.SCHEMA_TABLE;
 			safeDeleteTable(executor, tbl.toLowerCase());
+			tbl = SchemaMigrator.DAT_TABLE;
+			safeDeleteTable(executor, tbl.toLowerCase());
 		} catch (Exception e1) {
 			DBHelper.handleCloseFailure(e1);
 		}
@@ -92,13 +95,14 @@ public class H2TestCleaner {
 
 	public void safeDeleteTable(DBExecutor executor, String tblName) {
 		tblName = adjustTblName(tblName);
+		SchemaContext ctx = new SchemaContext();
 		try {
 			if (executor instanceof H2DBExecutor) {
 				this.deleteH2TableCascade(executor, tblName);
 //				deleteContraintsForTable(executor, tblName);
-				executor.deleteTable(tblName);
+				executor.deleteTable(tblName, ctx);
 			} else {
-				executor.deleteTable(tblName);
+				executor.deleteTable(tblName, ctx);
 			}
 		} catch (Exception e) {
 			System.out.print(e.getMessage());

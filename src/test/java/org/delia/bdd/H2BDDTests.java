@@ -254,6 +254,7 @@ public class H2BDDTests extends NewBDDBase {
 	@Test
 	public void testR2150() {
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
@@ -270,6 +271,7 @@ public class H2BDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
 		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
 		runR2150File("t0-migrate-many-to-many2.txt", 2);
 		runR2150File("t0-migrate-many-to-many2a.txt", 2);
 		runR2150File("t0-migrate-many-to-many3.txt", 2);
@@ -294,22 +296,22 @@ public class H2BDDTests extends NewBDDBase {
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
-		ResultSetToDValConverter.logResultSetDetails = true;
+//		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		runR1000File("t0-upsert-mm-id.txt", 4);
+		
 //		runR1600File("t0-fetch.txt", 3);
-		runR1500File("t0-queryfn-exist.txt", 2);
+//		runR1550File("t0-queryfn-manymany-left.txt", 6);
+		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	
 	//---
 	private DBType dbType = DBType.H2;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
-	private boolean useFragmentParser = true;
 	
 	@Before
 	public void init() {
-//		disableAllSlowTestsIfNeeded();
+		disableAllSlowTestsIfNeeded();
 		BDDTesterEx.useHLS = true;
 	}
 	@After
@@ -323,7 +325,6 @@ public class H2BDDTests extends NewBDDBase {
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
-		db.useFragmentParser = useFragmentParser;
 		dbInterfaceToUse = db;
 //		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {

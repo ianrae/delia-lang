@@ -16,6 +16,8 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.RawDBExecutor;
+import org.delia.db.SchemaContext;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
@@ -42,13 +44,13 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
+import org.delia.queryresponse.LetSpan;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zqueryresponse.LetSpan;
 
 
 /**
@@ -57,7 +59,6 @@ import org.delia.zqueryresponse.LetSpan;
  *
  */
 public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceInternal {
-	public boolean useFragmentParser = true;
 
 	public PostgresDBInterface(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(DBType.POSTGRES, factorySvc, connFactory, new PostgresSqlHelperFactory(factorySvc));
@@ -76,6 +77,19 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		conn.openDB();
 		return dbexecutor;
 	}
+
+	@Override
+	public RawDBExecutor createRawExector(DBAccessContext dbctx) {
+		H2DBConnection conn;
+		//we can use the h2 connection class
+		conn = new H2DBConnection(factorySvc, connFactory, errorConverter);
+		PostgresRawDBExecutor dbexecutor = new PostgresRawDBExecutor(this, dbctx, conn);
+		dbctx.connObject = conn;
+		conn.openDB();
+		return dbexecutor;
+	}
+
+
 	
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx) {
@@ -85,20 +99,12 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		SqlStatementGroup stgroup;
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		
-		if (useFragmentParser) {
-//			log.log("FRAG PARSER INSERT....................");
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
-			InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
-			String typeName = dval.getType().getName();
-			InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
-			stgroup = parser.renderInsertGroup(selectFrag);
-		} else {
-//			InsertStatementGenerator sqlgen = createPrepInsertSqlGen(dbctx);
-//			SqlStatement statement = sqlgen.generateInsert(dval, tableCreator.alreadyCreatedL);
-//			stgroup = new SqlStatementGroup();
-//			stgroup.statementL.add(statement);
-			stgroup = null;
-		}		
+		//			log.log("FRAG PARSER INSERT....................");
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc);
+		String typeName = dval.getType().getName();
+		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
+		stgroup = parser.renderInsertGroup(selectFrag);
 		
 		logStatementGroup(stgroup);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -126,26 +132,16 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		failIfMultiSpan(spec, qtx, spanL);
 		QueryDetails details = new QueryDetails();
 		SqlStatement statement;
-		if (useFragmentParser) {
-//			log.log("FRAG PARSEr....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
-			SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, fpSvc);
-			whereGen.tableFragmentMaker = parser;
-			SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
-			parser.renderSelect(selectFrag);
-			statement = selectFrag.statement;
-		} else if (qtx.loadFKs) {
-//			createTableCreator(dbctx);
-//			FKSqlGenerator smartgen = createFKSqlGen(tableCreator.alreadyCreatedL, dbctx);
-//			statement = smartgen.generateFKsQuery(spec, details);
-			statement = null;
-		} else {
-//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-//			statement = sqlgen.generateQuery(spec);
-			statement = null;
-		}
+		
+		//			log.log("FRAG PARSEr....................");
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
+		SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, fpSvc);
+		whereGen.tableFragmentMaker = parser;
+		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
+		parser.renderSelect(selectFrag);
+		statement = selectFrag.statement;
 		
 		logSql(statement);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -198,22 +194,18 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	@Override
 	public void executeDelete(QuerySpec spec, DBAccessContext dbctx) {
 		SqlStatement statement;
-		if (useFragmentParser) {
-//			log.log("FRAG PARSER DELETE....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
-			DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
-			whereGen.tableFragmentMaker = parser;
-			QueryDetails details = new QueryDetails();
-			DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
-			parser.renderDelete(selectFrag);
-			statement = selectFrag.statement;
-		} else {
-//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-//			statement = sqlgen.generateDelete(spec);
-			statement = null;
-		}
+		
+		//			log.log("FRAG PARSER DELETE....................");
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
+		whereGen.tableFragmentMaker = parser;
+		QueryDetails details = new QueryDetails();
+		DeleteStatementFragment selectFrag = parser.parseDelete(spec, details);
+		parser.renderDelete(selectFrag);
+		statement = selectFrag.statement;
+			
 		logSql(statement);
 		createTableCreator(dbctx);
 		H2DBConnection conn = (H2DBConnection) dbctx.connObject;
@@ -231,25 +223,17 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
 		
-		if (useFragmentParser) {
-//			log.log("FRAG PARSER UPDATE....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
-			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
-			UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
-			whereGen.tableFragmentMaker = parser;
-			parser.useAliases(false);
-			QueryDetails details = new QueryDetails();
-			UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
-			stgroup = parser.renderUpdateGroup(selectFrag);
-		} else {
-//			PreparedStatementGenerator sqlgen = createPrepSqlGen(dbctx);
-//			SqlStatement statement = sqlgen.generateUpdate(dval, tableCreator.alreadyCreatedL, spec);
-//			stgroup = new SqlStatementGroup();
-//			stgroup.add(statement);
-			stgroup = null;
-		}
+		//			log.log("FRAG PARSER UPDATE....................");
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
+		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+		whereGen.tableFragmentMaker = parser;
+		parser.useAliases(false);
+		QueryDetails details = new QueryDetails();
+		UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dval, assocCrudMap);
+		stgroup = parser.renderUpdateGroup(selectFrag);
 		
 		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
@@ -272,23 +256,19 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	public int executeUpsert(QuerySpec spec, DValue dval, Map<String, String> assocCrudMap, boolean noUpdateFlag, DBAccessContext dbctx) {
 		SqlStatementGroup stgroup;
 		createTableCreator(dbctx);
-		//TODO implement this!!
-		if (useFragmentParser) {
-//			log.log("FRAG PARSER UPSERT....................");
-			createTableCreator(dbctx);
-			WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-			FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
-			PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
-			PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
-			whereGen.tableFragmentMaker = parser;
-			QueryDetails details = new QueryDetails();
-			UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);
-			stgroup = parser.renderUpsertGroup(selectFrag);
-//			s = selectFrag.statement;
-		} else {
-			//not supported
-			stgroup = null;
-		}
+		
+		//			log.log("FRAG PARSER UPSERT....................");
+		createTableCreator(dbctx);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
+		PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+		whereGen.tableFragmentMaker = parser;
+		QueryDetails details = new QueryDetails();
+		UpsertStatementFragment selectFrag = parser.parseUpsert(spec, details, dval, assocCrudMap, noUpdateFlag);
+		stgroup = parser.renderUpsertGroup(selectFrag);
+		//			s = selectFrag.statement;
+			
 		if (stgroup.statementL.isEmpty()) {
 			return 0; //nothing to update
 		}
@@ -321,31 +301,31 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	}
 
 	@Override
-	public void createTable(String tableName, DBAccessContext dbctx) {
+	public void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		DStructType dtype = dbctx.registry.findTypeOrSchemaVersionType(tableName);
 		String sql;
 		createTableCreator(dbctx);
 		sql = tableCreator.generateCreateTable(tableName, dtype);
 		executeSQL(sql, dbctx);
 	}	@Override
-	public void deleteTable(String tableName, DBAccessContext dbctx) {
+	public void deleteTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		String sql = String.format("DROP TABLE IF EXISTS %s;", tableName);
 		executeSQL(sql, dbctx);
 	}
 	@Override
-	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx) {
+	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx, SchemaContext ctx) {
 		String sql = String.format("ALTER TABLE %s RENAME TO %s", tableName, newTableName);
 		executeSQL(sql, dbctx);
 	}
 	@Override
-	public void createField(String typeName, String fieldName, DBAccessContext dbctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+	public void createField(String typeName, String fieldName, DBAccessContext dbctx, SchemaContext ctx) {
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateCreateField(typeName, null, fieldName);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx) {
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
 		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, field);
 		executeSQL(sql, dbctx);
 	}
@@ -357,23 +337,23 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 	}
 
 	@Override
-	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx) {
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateRenameField(typeName, fieldName, newName);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx) {
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String sql = creator.generateAlterFieldType(typeName, fieldName, newFieldType);
 		executeSQL(sql, dbctx);
 	}
 
 	@Override
 	public void alterField(String tableName, String fieldName, String deltaFlags,
-			DBAccessContext dbctx) {
-		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx);
+			DBAccessContext dbctx, SchemaContext ctx) {
+		TableCreator creator = this.sqlHelperFactory.createTableCreator(dbctx, ctx.datIdMap);
 		String constraintName = String.format("%s_%s_key", creator.tblName(tableName), creator.tblName(fieldName));		
 		String sql = creator.generateAlterField(tableName, fieldName, deltaFlags, constraintName);
 		executeSQL(sql, dbctx);
@@ -449,6 +429,4 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		}
 		return qresp;
 	}
-
-
 }

@@ -19,7 +19,8 @@ public interface DBInterface {
 	DBCapabilties getCapabilities();
 	
 	void init(FactoryService factorySvc);
-	DBExecutor createExector(DBAccessContext ctx);
+	DBExecutor createExector(DBAccessContext dbctx);
+	RawDBExecutor createRawExector(DBAccessContext dbctx);
 	
 	DValue executeInsert(DValue dval, InsertContext ctx, DBAccessContext dbctx);
 	int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap, DBAccessContext dbctx); 
@@ -35,13 +36,13 @@ public interface DBInterface {
 	//schema actions
 	boolean doesTableExist(String tableName, DBAccessContext dbctx);
 	boolean doesFieldExist(String tableName, String fieldName, DBAccessContext dbctx);
-	void createTable(String tableName, DBAccessContext dbctx);
-	void deleteTable(String tableName, DBAccessContext dbctx);
-	void renameTable(String tableName, String newTableName, DBAccessContext dbctx);
-	void createField(String typeName, String field, DBAccessContext dbctx);
-	void deleteField(String typeName, String field, DBAccessContext dbctx);
-	void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx);
-	void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx);
-	void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx);
+	void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx);
+	void deleteTable(String tableName, DBAccessContext dbctx, SchemaContext ctx);
+	void renameTable(String tableName, String newTableName, DBAccessContext dbctx, SchemaContext ctx);
+	void createField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx);
+	void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx);
+	void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx);
+	void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx);
+	void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx, SchemaContext ctx);
 	void performTypeReplacement(TypeReplaceSpec spec);
 }

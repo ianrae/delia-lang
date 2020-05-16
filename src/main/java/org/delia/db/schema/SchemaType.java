@@ -6,6 +6,7 @@ public class SchemaType {
 	public String action; //I/U/D
 	public String field;
 	public String newName;
+	public int datId; //used for delete-field
 	
 	public boolean isTblInsert() {
 		return (action.equals("I") && field == null);

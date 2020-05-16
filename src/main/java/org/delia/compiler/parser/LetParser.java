@@ -23,13 +23,13 @@ import org.delia.compiler.ast.UserFnCallExp;
  *
  */
 public class LetParser extends ParserBase {
-	public static Parser<BooleanExp> booleanvalueassign() {
+	public static Parser<BooleanExp> booleanValue() {
 		return Parsers.or(
 				TerminalParser.tokenExpT("true" ,new BooleanExp(true)),
 				TerminalParser.tokenExpT("false", new BooleanExp(false)));
 	}
 
-	public static Parser<StringExp> stringvalueassign() {
+	public static Parser<StringExp> stringValue() {
 		return Parsers.or(TerminalParser.stringSyntacticParser).
 				map(new org.codehaus.jparsec.functors.Map<String, StringExp>() {
 					@Override
@@ -63,7 +63,7 @@ public class LetParser extends ParserBase {
 	public static Parser<Token> optionalNegSign() {
 		return term("-").optional();
 	}
-	public static Parser<Exp> someNumberValueassign() {
+	public static Parser<Exp> someNumberValue() {
 		return Parsers.sequence(Parsers.INDEX, optionalNegSign(), TerminalParser.numberSyntacticParser, (Integer pos, Token tok, String s) -> numberBuilder(pos, tok, s));
 	}
 
@@ -94,9 +94,9 @@ public class LetParser extends ParserBase {
 	
 	public static Parser<Exp> explicitValue() {
 		return Parsers.or(
-				LetParser.booleanvalueassign(),
-				LetParser.someNumberValueassign(),
-				LetParser.stringvalueassign(),
+				LetParser.booleanValue(),
+				LetParser.someNumberValue(),
+				LetParser.stringValue(),
 				nullValue());
 	}
 

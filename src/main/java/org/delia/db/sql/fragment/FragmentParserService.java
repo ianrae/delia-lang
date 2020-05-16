@@ -12,9 +12,9 @@ import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.TableInfo;
+import org.delia.queryresponse.LetSpan;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
-import org.delia.zqueryresponse.LetSpan;
 
 public class FragmentParserService extends ServiceBase {
 	public int nextAliasIndex = 0;

@@ -1,6 +1,6 @@
 package org.delia.db;
 
-import org.delia.zqueryresponse.LetSpanEngine;
+import org.delia.queryresponse.LetSpanEngine;
 
 /**
  * Additional parameters for DBInterface.executeQuery.

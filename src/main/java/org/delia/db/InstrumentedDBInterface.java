@@ -67,18 +67,18 @@ public class InstrumentedDBInterface implements DBInterface {
 	}
 
 	@Override
-	public void createTable(String tableName, DBAccessContext dbctx) {
-		actualInterface.createTable(tableName, dbctx);
+	public void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.createTable(tableName, dbctx, ctx);
 	}
 
 	@Override
-	public void deleteTable(String tableName, DBAccessContext dbctx) {
-		actualInterface.deleteTable(tableName, dbctx);
+	public void deleteTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.deleteTable(tableName, dbctx, ctx);
 	}
 
 	@Override
-	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx) {
-		actualInterface.renameTable(tableName, newTableName, dbctx);
+	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.renameTable(tableName, newTableName, dbctx, ctx);
 	}
 
 	@Override
@@ -91,13 +91,13 @@ public class InstrumentedDBInterface implements DBInterface {
 	}
 
 	@Override
-	public void createField(String typeName, String field, DBAccessContext dbctx) {
-		actualInterface.createField(typeName, field, dbctx);
+	public void createField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.createField(typeName, field, dbctx, ctx);
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx) {
-		actualInterface.deleteField(typeName, field, dbctx);
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.deleteField(typeName, field, datId, dbctx, ctx);
 	}
 
 	@Override
@@ -121,18 +121,18 @@ public class InstrumentedDBInterface implements DBInterface {
 	}
 
 	@Override
-	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx) {
-		actualInterface.renameField(typeName, fieldName, newName, dbctx);
+	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.renameField(typeName, fieldName, newName, dbctx, ctx);
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx) {
-		actualInterface.alterFieldType(typeName, fieldName, newFieldType, dbctx);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.alterFieldType(typeName, fieldName, newFieldType, dbctx, ctx);
 	}
 
 	@Override
-	public void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx) {
-		actualInterface.alterField(typeName, fieldName, deltaFlags, dbctx);
+	public void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx, SchemaContext ctx) {
+		actualInterface.alterField(typeName, fieldName, deltaFlags, dbctx, ctx);
 	}
 
 	@Override
@@ -143,5 +143,10 @@ public class InstrumentedDBInterface implements DBInterface {
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
 		return actualInterface.executeHLSQuery(hls, sql, qtx, dbctx);
+	}
+
+	@Override
+	public RawDBExecutor createRawExector(DBAccessContext dbctx) {
+		return actualInterface.createRawExector(dbctx);
 	}
 }

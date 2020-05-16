@@ -3,6 +3,7 @@ package org.delia.db.postgres;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
@@ -20,8 +21,8 @@ import org.delia.util.DValueHelper;
 public class PostgresTableCreator extends TableCreator {
 	
 	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-			SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
-		super(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc);
+			SqlNameFormatter nameFormatter, TableExistenceService existSvc, DatIdMap datIdMap) {
+		super(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, datIdMap);
 	}
 
 	public String generateRenameField(String tableName, String fieldName, String newName) {

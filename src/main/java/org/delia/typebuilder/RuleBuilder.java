@@ -140,18 +140,30 @@ public class RuleBuilder extends ServiceBase {
 				if (fieldExp.isPrimaryKey || fieldExp.isOne) {
 					StructDValueRuleOperand oper = new StructDValueRuleOperand(pair.name);
 					RuleGuard guard = new AlwaysRuleGuard(); //TODO: is this correct?
-					RelationOneRule rule = new RelationOneRule(guard, oper, dtype, registry, fieldExp.isParent);
+					String relName = getRelationName(fieldExp, pair.name);
+					RelationOneRule rule = new RelationOneRule(guard, oper, dtype, registry, fieldExp.isParent, relName);
+					rule.nameIsExplicit = fieldExp.relationName != null;
 					dtype.getRawRules().add(rule);
 				} else if (fieldExp.isMany) {
 					StructDValueRuleOperand oper = new StructDValueRuleOperand(pair.name);
 					RuleGuard guard = new AlwaysRuleGuard(); //TODO: is this correct?
-					RelationManyRule rule = new RelationManyRule(guard, oper, dtype, registry);
+					String relName = getRelationName(fieldExp, pair.name);
+					RelationManyRule rule = new RelationManyRule(guard, oper, dtype, registry, relName);
+					rule.nameIsExplicit = fieldExp.relationName != null;
 					dtype.getRawRules().add(rule);
 				}
 			}
 		}
 	}
 	
+	private String getRelationName(StructFieldExp fieldExp, String fieldName) {
+		if (fieldExp.relationName != null) {
+			return fieldExp.relationName;
+		}
+//		String name = String.format("__rule%d", factorySvc.getNextGeneratedRuleId());
+		return fieldName;
+	}
+
 	private StructFieldExp getFieldExp(TypeStatementExp typeStatementExp, String fieldName) {
 		for(StructFieldExp fieldExp: typeStatementExp.structExp.argL) {
 			if (fieldExp.fieldName.equals(fieldName)) {

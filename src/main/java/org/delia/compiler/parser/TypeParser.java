@@ -9,6 +9,7 @@ import org.delia.compiler.ast.FieldQualifierExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.RuleSetExp;
 import org.delia.compiler.ast.StructExp;
+import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.ast.StructFieldExp;
 import org.delia.compiler.ast.StructFieldPrefix;
 import org.delia.compiler.ast.TypeStatementExp;
@@ -33,9 +34,9 @@ public class TypeParser extends ParserBase {
 	}
 	
 	public static Parser<StructFieldPrefix> structFieldPrefix() {
-		return Parsers.sequence(Parsers.INDEX, term("relation").optional(), ident(), ident(), 
-				(Integer pos, Token tokRelation, IdentExp fieldNameExp, IdentExp exp) 
-				-> new StructFieldPrefix(pos, tokRelation, fieldNameExp, exp));
+		return Parsers.sequence(Parsers.INDEX, term("relation").optional(), ident(), ident(), LetParser.stringValue().optional(), 
+				(Integer pos, Token tokRelation, IdentExp fieldNameExp, IdentExp exp, StringExp relNameExp) 
+				-> new StructFieldPrefix(pos, tokRelation, fieldNameExp, exp, relNameExp));
 	}
 
 	public static Parser<StructFieldExp> structField() {

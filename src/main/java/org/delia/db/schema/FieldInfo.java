@@ -1,7 +1,8 @@
 package org.delia.db.schema;
 
 public class FieldInfo {
-	String name;
-	String type;
-	String flagStr;
+	public String name;
+	public String type;
+	public String flagStr;
+	public int datId;
 }

@@ -8,6 +8,7 @@ import org.delia.db.DBExecutor;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.SchemaContext;
 import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2DBConnection;
@@ -29,6 +30,10 @@ public class PostgresDBExecutor implements DBExecutor {
 	}
 	public H2DBConnection getConn() {
 		return (H2DBConnection) dbctx.connObject;
+	}
+	@Override
+	public DBAccessContext getDBAccessContext() {
+		return dbctx;
 	}
 
 
@@ -76,40 +81,40 @@ public class PostgresDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void createTable(String tableName) {
-		dbInterface.createTable(tableName, dbctx);
+	public void createTable(String tableName, SchemaContext ctx) {
+		dbInterface.createTable(tableName, dbctx, ctx);
 	}
 
 	@Override
-	public void deleteTable(String tableName) {
-		dbInterface.deleteTable(tableName, dbctx);
+	public void deleteTable(String tableName, SchemaContext ctx) {
+		dbInterface.deleteTable(tableName, dbctx, ctx);
 	}
 
 	@Override
-	public void renameTable(String tableName, String newTableName) {
-		dbInterface.renameTable(tableName, newTableName, dbctx);
+	public void renameTable(String tableName, String newTableName, SchemaContext ctx) {
+		dbInterface.renameTable(tableName, newTableName, dbctx, ctx);
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
-		dbInterface.createField(typeName, field, dbctx);
+	public void createField(String typeName, String field, SchemaContext ctx) {
+		dbInterface.createField(typeName, field, dbctx, ctx);
 	}
 
 	@Override
-	public void deleteField(String typeName, String field) {
-		dbInterface.deleteField(typeName, field, dbctx);
+	public void deleteField(String typeName, String field, int datId, SchemaContext ctx) {
+		dbInterface.deleteField(typeName, field, datId, dbctx, ctx);
 	}
 	@Override
-	public void renameField(String typeName, String fieldName, String newName) {
-		dbInterface.renameField(typeName, fieldName, newName, dbctx);
+	public void renameField(String typeName, String fieldName, String newName, SchemaContext ctx) {
+		dbInterface.renameField(typeName, fieldName, newName, dbctx, ctx);
 	}
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-		dbInterface.alterFieldType(typeName, fieldName, newFieldType, dbctx);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, SchemaContext ctx) {
+		dbInterface.alterFieldType(typeName, fieldName, newFieldType, dbctx, ctx);
 	}
 	@Override
-	public void alterField(String typeName, String fieldName, String deltaFlags) {
-		dbInterface.alterField(typeName, fieldName, deltaFlags, dbctx);
+	public void alterField(String typeName, String fieldName, String deltaFlags, SchemaContext ctx) {
+		dbInterface.alterField(typeName, fieldName, deltaFlags, dbctx, ctx);
 	}
 
 	@Override

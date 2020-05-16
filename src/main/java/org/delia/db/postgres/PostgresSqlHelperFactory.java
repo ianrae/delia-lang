@@ -1,5 +1,6 @@
 package org.delia.db.postgres;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
@@ -53,10 +54,10 @@ public class PostgresSqlHelperFactory extends H2SqlHelperFactory {
 //		return sqlgen;
 //	}
 	@Override
-	public TableCreator createTableCreator(DBAccessContext dbctx) {
+	public TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
 		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
-		return new PostgresTableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc);
+		return new PostgresTableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc, datIdMap);
 	}
 
 }

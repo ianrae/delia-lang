@@ -1,5 +1,6 @@
 package org.delia.api;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 /**
@@ -18,4 +19,5 @@ public interface DeliaSession {
 	void setRunnerIntiliazer(RunnerInitializer runnerInitializer);
 	RunnerInitializer getRunnerIntiliazer();
 	Delia getDelia();
+	DatIdMap getDatIdMap();
 }

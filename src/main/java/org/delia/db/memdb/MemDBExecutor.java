@@ -9,6 +9,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.SchemaContext;
 import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.hls.HLSQueryStatement;
@@ -29,7 +30,10 @@ public class MemDBExecutor implements DBExecutor {
 	public void forceDBInterface(DBInterface newOne) {
 		this.dbInterface = newOne;
 	}
-
+	@Override
+	public DBAccessContext getDBAccessContext() {
+		return dbctx;
+	}
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx) {
 		return dbInterface.executeInsert(dval, ctx, dbctx);
@@ -66,44 +70,44 @@ public class MemDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void createTable(String tableName) {
-		dbInterface.createTable(tableName, dbctx);
+	public void createTable(String tableName, SchemaContext ctx) {
+		dbInterface.createTable(tableName, dbctx, ctx);
 	}
 
 	@Override
-	public void deleteTable(String tableName) {
-		dbInterface.deleteTable(tableName, dbctx);
+	public void deleteTable(String tableName, SchemaContext ctx) {
+		dbInterface.deleteTable(tableName, dbctx, ctx);
 	}
 
 	@Override
-	public void renameTable(String tableName, String newTableName) {
-		dbInterface.renameTable(tableName, newTableName, dbctx);
+	public void renameTable(String tableName, String newTableName, SchemaContext ctx) {
+		dbInterface.renameTable(tableName, newTableName, dbctx, ctx);
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
-		dbInterface.createField(typeName, field, dbctx);
+	public void createField(String typeName, String field, SchemaContext ctx) {
+		dbInterface.createField(typeName, field, dbctx, ctx);
 	}
 
 	@Override
-	public void deleteField(String typeName, String field) {
-		dbInterface.deleteField(typeName, field, dbctx);
+	public void deleteField(String typeName, String field, int datId, SchemaContext ctx) {
+		dbInterface.deleteField(typeName, field, datId, dbctx, ctx);
 	}
 	@Override
 	public boolean execFieldDetect(String tableName, String fieldName) {
 		return dbInterface.doesFieldExist(tableName, fieldName, dbctx);
 	}
 	@Override
-	public void renameField(String typeName, String field, String newName) {
-		dbInterface.renameField(typeName, field, newName, dbctx);
+	public void renameField(String typeName, String field, String newName, SchemaContext ctx) {
+		dbInterface.renameField(typeName, field, newName, dbctx, ctx);
 	}
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-		dbInterface.alterFieldType(typeName, fieldName, newFieldType, dbctx);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, SchemaContext ctx) {
+		dbInterface.alterFieldType(typeName, fieldName, newFieldType, dbctx, ctx);
 	}
 	@Override
-	public void alterField(String typeName, String fieldName, String deltaFlags) {
-		dbInterface.alterField(typeName, fieldName, deltaFlags, dbctx);
+	public void alterField(String typeName, String fieldName, String deltaFlags, SchemaContext ctx) {
+		dbInterface.alterField(typeName, fieldName, deltaFlags, dbctx, ctx);
 	}
 
 	@Override

@@ -17,7 +17,8 @@ public class FactoryServiceImpl implements FactoryService {
 	private ConfigureService configSvc;
 	private DateFormatServiceImpl fmtSvc;
 	private QueryBuilderServiceImpl queryBuilderSvc;
-
+	private int nextGeneratedRuleId = 1;
+	
 	public FactoryServiceImpl(Log log, ErrorTracker et) {
 		this.log = log;
 		this.et = et;
@@ -66,5 +67,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry) {
 		return new ScalarValueBuilder(this, registry);
+	}
+
+	@Override
+	public int getNextGeneratedRuleId() {
+		return this.nextGeneratedRuleId++;
 	}
 }

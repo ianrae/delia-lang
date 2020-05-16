@@ -52,6 +52,10 @@ public class ResultSetToDValConverter extends ServiceBase {
 		super(factorySvc);
 		this.valueHelper = sqlhelperFactory.createValueHelper();
 	}
+	public ResultSetToDValConverter(FactoryService factorySvc, ValueHelper valueHelper) {
+		super(factorySvc);
+		this.valueHelper = valueHelper;
+	}
 
 	public void init(FactoryService factorySvc) {
 		this.factorySvc = factorySvc;

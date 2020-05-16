@@ -13,11 +13,11 @@ public class DeliaException extends RuntimeException {
 	private List<DeliaError> errorL;
 	
 	public DeliaException(DeliaError err) {
-		super(err.getMsg());
+		super(err.getId() + ": " + err.getMsg());
 		this.errorL = Collections.singletonList(err);
 	}
 	public DeliaException(List<DeliaError> errL) {
-		super(errL.get(0).getMsg()); //TODO: what if errL empty??
+		super(errL.get(0).getId() + ": " + errL.get(0).getMsg()); //TODO: what if errL empty??
 		this.errorL = errL;
 	}
 	public DeliaError getLastError() {

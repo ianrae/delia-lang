@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.base.UnitTestLog;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
@@ -93,7 +94,8 @@ public class BDDTestBase {
 		assertEquals(typeName, diffL.get(0).typeName);
 		log("migrate: +" + typeName + " +" + typeName2);
 
-		b = migrator.performMigrations(diffL, true);
+		DatIdMap datIdMap = null; //TODO: is this ok?
+		b = migrator.performMigrations(diffL, true, datIdMap);
 		assertEquals(true, b);
 		migrator.close();
 	}

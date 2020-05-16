@@ -33,7 +33,7 @@ public class DRuleHelper {
 		return null;
 	}
 	
-	private static boolean typesAreEqual(DType type1, DType type2) {
+	public static boolean typesAreEqual(DType type1, DType type2) {
 		String s1 = type1.getName();
 		String s2 = type2.getName();
 		return s1.equals(s2);

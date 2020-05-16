@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.base.DBHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -46,11 +47,12 @@ public class SchemaMigratorTests {
 		assertEquals(1, diffL.size());
 		assertEquals("Customer", diffL.get(0).typeName);
 
-		b = migrator.performMigrations(diffL, true);
+		DatIdMap datIdMap = new DatIdMap();
+		b = migrator.performMigrations(diffL, true, datIdMap);
 		assertEquals(true, b);
 
 		String fingerprint = migrator.calcDBFingerprint();
-		assertEquals("Customer:struct:{id:int:U,firstName:string:,lastName:string:O,points:int:O,flag:boolean:O}\n", fingerprint);
+		assertEquals("Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
 		
 		//and migrate again (should be nothing to do)
 		b = migrator.dbNeedsMigration();

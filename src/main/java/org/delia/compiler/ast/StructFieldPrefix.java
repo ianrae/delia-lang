@@ -9,12 +9,14 @@ public class StructFieldPrefix extends ExpBase {
 	public IdentExp nameExp;
 	public IdentExp exp;
 	public boolean isRelation;
+	public String relationName;
 
-	public StructFieldPrefix(int pos, Token tokRelation, IdentExp name, IdentExp exp) {
+	public StructFieldPrefix(int pos, Token tokRelation, IdentExp name, IdentExp exp, StringExp relationNameExp) {
 		super(pos);
 		this.nameExp = name;
 		this.exp = exp;
 		this.isRelation = (tokRelation != null);
+		this.relationName = relationNameExp == null ? null : relationNameExp.strValue();
 	}
 	
 	@Override

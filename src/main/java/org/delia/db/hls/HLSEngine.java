@@ -9,13 +9,13 @@ import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.queryresponse.LetSpan;
+import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.zqueryresponse.LetSpan;
-import org.delia.zqueryresponse.function.ZQueryResponseFunctionFactory;
 
 public class HLSEngine extends ServiceBase {
 

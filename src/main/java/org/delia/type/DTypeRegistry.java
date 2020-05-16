@@ -22,6 +22,7 @@ public class DTypeRegistry {
 	private int nextBitIndex; //TODO !! atomic thing later for thread safety
 	private DTypeHierarchy th;
 	private DStructType schemaVersionType;
+	private DStructType datType;
 	
 	public static final int NUM_BUILTIN_TYPES = 7;
 	
@@ -100,9 +101,18 @@ public class DTypeRegistry {
 	public DStructType getSchemaVersionType() {
 		return schemaVersionType;
 	}
+	public void setDATType(DStructType dtype) {
+		datType = dtype;
+	}
+	public DStructType getDATType() {
+		return datType;
+	}
 	public DStructType findTypeOrSchemaVersionType(String typeName) {
 		if (schemaVersionType != null && schemaVersionType.getName().equals(typeName)) {
 			return schemaVersionType;
+		}
+		if (datType != null && datType.getName().equals(typeName)) {
+			return datType;
 		}
 		return (DStructType) getType(typeName);
 	}

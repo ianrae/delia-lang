@@ -158,6 +158,9 @@ public class DBConnectionBase extends ServiceBase {
 
 	public boolean doesTableExist(String tableName, PreparedStatementGenerator sqlgen, boolean disableSqlLogging) {
 		String sql = sqlgen.generateTableDetect(tableName);
+		return doesTableExistRaw(sql, disableSqlLogging);
+	}
+	public boolean doesTableExistRaw(String sql, boolean disableSqlLogging) {
 		ResultSet rs = null;
 		boolean tblExists = false;
 		try {
@@ -177,8 +180,13 @@ public class DBConnectionBase extends ServiceBase {
 
 		return tblExists;
 	}
+	
 	public boolean execFieldDetect(String tableName, String fieldName, PreparedStatementGenerator sqlgen, boolean disableSqlLogging) {
 		String sql = sqlgen.generateFieldDetect(tableName, fieldName);
+		return execFieldDetectRaw(sql, disableSqlLogging);
+	}
+
+	public boolean execFieldDetectRaw(String sql, boolean disableSqlLogging) {
 		ResultSet rs = null;
 		boolean tblExists = false;
 		try {
@@ -198,7 +206,6 @@ public class DBConnectionBase extends ServiceBase {
 
 		return tblExists;
 	}
-
 	
 	
 	public int enumerateDBSchema(PreparedStatementGenerator sqlgen, Log logToUse, DBListingType listingType) {

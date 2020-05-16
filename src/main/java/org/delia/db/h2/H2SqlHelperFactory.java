@@ -1,5 +1,6 @@
 package org.delia.db.h2;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -76,10 +77,10 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	
 	//why syncrhonized?
 	@Override
-	public TableCreator createTableCreator(DBAccessContext dbctx) {
+	public TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
 		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
-		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc);
+		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc, datIdMap);
 	}
 	
 	@Override

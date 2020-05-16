@@ -8,6 +8,7 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
+import org.delia.rule.rules.RulePostProcessor;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.typebuilder.FutureDeclError;
@@ -26,7 +27,6 @@ public class TypeRunner extends ServiceBase {
 		super(factorySvc);
 		this.registry = registry;
 	}
-
 
 	public void executeStatements(List<Exp> extL, List<DeliaError> allErrors, boolean runRulePostProcessor) {
 		for(Exp exp: extL) {

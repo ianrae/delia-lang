@@ -6,7 +6,6 @@ import java.util.Map;
 import org.delia.error.DetailedError;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
-import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
@@ -24,18 +23,11 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
-public class RelationManyRule extends DRuleBase {
-	private RuleOperand oper1;
-	private DStructType owningType;
-	private DTypeRegistry registry;
-	public RelationInfo relInfo;
+public class RelationManyRule extends RelationRuleBase {
 
 	public RelationManyRule(RuleGuard guard, RuleOperand oper1, 
-			DStructType owningType, DTypeRegistry registry) {
-		super("relationMany", guard);
-		this.oper1 = oper1;
-		this.owningType = owningType;
-		this.registry = registry;
+			DStructType owningType, DTypeRegistry registry, String relationName) {
+		super("relationMany", guard, oper1, owningType, registry, relationName);
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
@@ -148,14 +140,6 @@ public class RelationManyRule extends DRuleBase {
 	}
 	public TypePair findMatchingRel(DType otherSide, DType targetType) {
 		return DRuleHelper.findMatchingRelByType((DStructType) otherSide, targetType);
-	}
-	@Override
-	public boolean dependsOn(String fieldName) {
-		return oper1.dependsOn(fieldName);
-	}
-	@Override
-	public String getSubject() {
-		return oper1.getSubject();
 	}
 	
 	//Customer. find address

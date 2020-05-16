@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringJoiner;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSQueryStatement;
@@ -18,12 +19,11 @@ import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.queryresponse.LetSpan;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zqueryresponse.LetSpan;
 
 /**
  * Represents db access to a single database.
@@ -54,7 +54,10 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 		this.sqlHelperFactory = sqlhelperFactory;
 		this.valueHelper = sqlHelperFactory.createValueHelper();
 		this.resultSetConverter = new ResultSetToDValConverter(dbType, factorySvc, connFactory, sqlhelperFactory);
-
+	}
+	
+	public FactoryService getFactorySvc() {
+		return this.factorySvc;
 	}
 
 	@Override
@@ -119,7 +122,8 @@ public abstract class DBInterfaceBase extends ServiceBase implements DBInterface
 	
 	protected synchronized TableCreator createTableCreator(DBAccessContext dbctx) {
 		if (tableCreator == null) {
-			this.tableCreator = sqlHelperFactory.createTableCreator(dbctx);
+			DatIdMap datIdMap = null; //TODO is this ok?
+			this.tableCreator = sqlHelperFactory.createTableCreator(dbctx, datIdMap);
 		}
 		return tableCreator;
 	}

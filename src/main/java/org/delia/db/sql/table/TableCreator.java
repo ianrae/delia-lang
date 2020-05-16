@@ -3,6 +3,7 @@ package org.delia.db.sql.table;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.TableExistenceService;
@@ -23,15 +24,17 @@ public class TableCreator extends ServiceBase {
 	protected SqlNameFormatter nameFormatter;
 	protected TableExistenceService existSvc;
 	private AssocTableCreator assocTblCreator;
+	public DatIdMap datIdMap;
 	
 	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, TableExistenceService existSvc) {
+				SqlNameFormatter nameFormatter, TableExistenceService existSvc, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		this.existSvc = existSvc;
 		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL);
+		this.datIdMap = datIdMap;
 	}
 
 	public String generateCreateTable(String typeName, DStructType dtype) {
@@ -315,6 +318,66 @@ public class TableCreator extends ServiceBase {
 	}
 	protected void doAlterTablePrefix(StrCreator sc, String tableName) {
 		sc.o("ALTER TABLE %s ", tblName(tableName));
+	}
+	
+	
+	public String generateDeleteField(String typeName, DStructType dtype, String fieldName, int datId) {
+		if (dtype == null) {
+			dtype = (DStructType) registry.getType(typeName);
+		}
+		
+		boolean isManyToMany = datId != 0;
+		StrCreator sc = new StrCreator();
+		if (! isManyToMany) {
+			String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, fieldName);
+			sc.o(sql);
+			sc.nl();
+		}
+		List<SqlElement> fieldL = new ArrayList<>();
+		
+//		TypePair pair = DValueHelper.findField(dtype, fieldName);
+//		if (isManyToManyRelation(pair, dtype)) {
+//		} else {
+//			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+//			fieldL.add(field);
+//		}
+//		
+//		//delete constraints
+//		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
+//			ConstraintGen constraint = generateFKConstraint(sc, pair, dtype, true);
+//			if (constraint != null) {
+//				fieldL.add(constraint);
+//			}
+//		}
+//		
+//		List<ConstraintGen> constraints = getConstraintsOnly(fieldL);
+//		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
+		
+		
+//		ListWalker<FieldGen> walker1 = new ListWalker<>(getFieldsOnly(fieldL));
+//		while(walker1.hasNext()) {
+//			FieldGen ff = walker1.next();
+//			ff.generateField(sc);
+//			walker1.addIfNotLast(sc, ",", nl());
+//		}
+		
+		sc.o(";");
+//		sc.nl();
+//		ListWalker<ConstraintGen> walker = new ListWalker<>(constraints);
+//		while(walker.hasNext()) {
+//			ConstraintGen con = walker.next();
+//			sc.o("ALTER TABLE %s DROP  ", typeName);
+//			con.generateField(sc);
+//			walker.addIfNotLast(sc, ",", nl());
+//		}
+//		sc.o(";");
+		
+		sc.nl();
+		if (isManyToMany) {
+			String tblName = datIdMap.getAssocTblName(datId);
+			sc.o("DROP TABLE IF EXISTS %s;", tblName);
+		}
+		return sc.str;
 	}
 	
 }

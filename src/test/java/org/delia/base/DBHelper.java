@@ -6,6 +6,6 @@ public class DBHelper {
 
 	//Only works for mem db (it doesn't need registry for this)
 	public static void createTable(DBInterface dbInterface, String tableName) {
-		dbInterface.createTable(tableName, null);
+		dbInterface.createTable(tableName, null, null);
 	}
 }

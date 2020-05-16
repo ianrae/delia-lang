@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -17,7 +18,9 @@ import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.memdb.MemDBExecutor;
+import org.delia.db.RawDBExecutor;
+import org.delia.db.SchemaContext;
+import org.delia.db.memdb.MemRawDBExecutor;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -25,16 +28,18 @@ import org.delia.sort.topo.DeliaTypeSorter;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.typebuilder.FakeTypeCreator;
+import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.util.StringUtil;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
+	public static final String DAT_TABLE = "DELIA_ASSOC"; //DAT = Delia Assoc Table
 	private DTypeRegistry registry;
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
 	private String dbFingerprint;
+	private RawDBExecutor rawExecutor;
 	private DBExecutor dbexecutor;
 	private DBAccessContext dbctx;
 	private MigrationRunner migrationRunner;
@@ -44,20 +49,29 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+		this.rawExecutor = dbInterface.createRawExector(dbctx);
 		this.dbexecutor = dbInterface.createExector(dbctx);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		this.varEvaluator = varEvaluator;
 
-		FakeTypeCreator fakeCreator = new FakeTypeCreator();
+		InternalTypeCreator fakeCreator = new InternalTypeCreator();
 		DStructType dtype = fakeCreator.createSchemaVersionType(registry, SCHEMA_TABLE);
 		registry.setSchemaVersionType(dtype);
+		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
+		registry.setDATType(datType);
 		this.migrationRunner = new MigrationRunner(factorySvc, dbInterface, registry, dbexecutor);
 		this.optimizer = new MigrationOptimizer(factorySvc, dbInterface, registry, varEvaluator);
 	}
 	
 	@Override
 	public void close() {
+		try {
+			rawExecutor.close();
+		} catch (Exception e) {
+			DBHelper.handleCloseFailure(e);
+		}
+		//and close 2nd one
 		try {
 			dbexecutor.close();
 		} catch (Exception e) {
@@ -66,10 +80,15 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	public boolean createSchemaTableIfNeeded() {
-		if (dbexecutor.execTableDetect(SCHEMA_TABLE)) {
-			return true;
+		SchemaContext ctx = new SchemaContext();
+		if (!rawExecutor.execTableDetect(SCHEMA_TABLE)) {
+			rawExecutor.createTable(SCHEMA_TABLE);
 		}
-		dbexecutor.createTable(SCHEMA_TABLE);
+		
+		if (!rawExecutor.execTableDetect(DAT_TABLE)) {
+			rawExecutor.createTable(DAT_TABLE);
+		}
+		
 		return true;
 	}
 
@@ -84,13 +103,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @param doLowRiskChecks whether to do additional pre-migration checks
 	 * @return true if successful
 	 */
-	public boolean performMigrations(boolean doLowRiskChecks) {
+	public boolean performMigrations(boolean doLowRiskChecks, DatIdMap datIdMap) {
 		List<SchemaType> list = parseFingerprint(dbFingerprint);
 		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
 		
 		List<SchemaType> diffL =  calcDiff(list, list2);
 		diffL = optimizer.optimizeDiffs(diffL);
-		boolean b = performMigrations(diffL, doLowRiskChecks);
+		boolean b = performMigrations(diffL, doLowRiskChecks, datIdMap);
 		return b;
 	}
 	
@@ -115,10 +134,11 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	/**
 	 * dbNeedsMigration MUST have been called before this.
 	 * @param plan migration plan
+	 * @param datIdMap 
 	 * @return migration plan
 	 */
-	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
-		boolean b = performMigrations(plan.diffL, false);
+	public MigrationPlan runMigrationPlan(MigrationPlan plan, DatIdMap datIdMap) {
+		boolean b = performMigrations(plan.diffL, false, datIdMap);
 		plan.runResultFlag = b;
 		return plan;
 	}
@@ -130,15 +150,17 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
-
+		QueryResponse qresp = rawExecutor.executeQuery(spec, qtx);
+		//TODO: should specify orderby id!!
+		
+		
 		if (qresp.emptyResults()) {
 			return "";
 		}
 
-		//TODO: later handle case where are multiple rows!!
+		//there may be multiple rows
 		int n = qresp.dvalList.size();
-		DValue dval = qresp.dvalList.get(n - 1);
+		DValue dval = qresp.dvalList.get(n - 1); //last one
 		return dval.asStruct().getField("fingerprint").asString();
 	}
 
@@ -229,6 +251,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 				st.line = st1.line;
 				st.action = "D";
 				st.field = finfo.name;
+				st.datId = finfo.datId;
 				diffList.add(st);
 			}
 		}
@@ -285,7 +308,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	private List<FieldInfo> parseFields(SchemaType schema1) {
+	public List<FieldInfo> parseFields(SchemaType schema1) {
 		//Customer:struct:{id:int:P,wid:int:}
 		List<FieldInfo> list = new ArrayList<>();
 		String s = StringUtils.substringAfter(schema1.line, "{");
@@ -295,7 +318,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			FieldInfo finfo = new FieldInfo();
 			finfo.name = StringUtils.substringBefore(ss, ":");
 			finfo.type = StringUtils.substringBetween(ss, ":", ":");
-			finfo.flagStr = StringUtils.substringAfterLast(ss, ":");
+			String tmp = StringUtils.substringAfterLast(ss, ":");
+			finfo.flagStr = StringUtils.substringBefore(tmp, "/");
+			tmp = StringUtils.substringAfterLast(ss, "/");
+			finfo.datId = Integer.parseInt(tmp);
 			list.add(finfo);
 		}
 		return list;
@@ -310,7 +336,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks) {
+	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks, DatIdMap datIdMap) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
@@ -320,7 +346,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			return false;
 		}
 		
-		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL);
+		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL, datIdMap);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {
@@ -344,7 +370,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(st.typeName);
 					QuerySpec spec = queryBuilder.buildSpec(exp, varEvaluator);
-					QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
+					QueryResponse qresp = rawExecutor.executeQuery(spec, new QueryContext());
 					DValue dval = qresp.getOne();
 					long numRecords = dval.asLong();
 					if (numRecords > 0) {
@@ -376,12 +402,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	private boolean isMemDB() {
-		return dbexecutor instanceof MemDBExecutor;
+		return rawExecutor instanceof MemRawDBExecutor;
 	}
 
 	private boolean doSoftDeletePreRunCheck(String typeName) {
 		String backupName = String.format("%s__BAK", typeName);
-		if (dbexecutor.execTableDetect(backupName)) {
+		if (rawExecutor.execTableDetect(backupName)) {
 			log.logError("Backup table '%s' already exists. You must delete this table first before running migration.", backupName);
 			return false;
 		}
@@ -389,11 +415,15 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 	private boolean doSoftFieldDeletePreRunCheck(String typeName, String fieldName) {
 		String backupName = String.format("%s__BAK", fieldName);
-		if (dbexecutor.execFieldDetect(typeName, backupName)) {
+		if (rawExecutor.execFieldDetect(typeName, backupName)) {
 			log.logError("Backup field '%s.%s' already exists. You must delete this field first before running migration.", typeName, backupName);
 			return false;
 		}
 		return true;
+	}
+
+	public RawDBExecutor getRawExecutor() {
+		return rawExecutor;
 	}
 
 }

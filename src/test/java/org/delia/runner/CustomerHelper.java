@@ -2,11 +2,11 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.base.FakeTypeCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.typebuilder.FakeTypeCreator;
 import org.delia.valuebuilder.BooleanValueBuilder;
 import org.delia.valuebuilder.IntegerValueBuilder;
 import org.delia.valuebuilder.StringValueBuilder;

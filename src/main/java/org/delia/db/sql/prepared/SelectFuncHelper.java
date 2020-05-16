@@ -77,61 +77,61 @@ public class SelectFuncHelper extends ServiceBase {
 		return fieldType;
 	}
 
-	public void doOrderByIfPresent(StrCreator sc, QuerySpec spec, String typeName) {
-		QueryFuncExp qfexp = findFn(spec, "orderBy");
-		if (qfexp == null) {
-			return;
-		}
-		
-		doInnerOrderBy(sc, spec, typeName, qfexp);
-	}
-	public void doInnerOrderBy(StrCreator sc, QuerySpec spec, String typeName, QueryFuncExp qfexp) {
-		DStructType structType = (DStructType) registry.getType(typeName);
-		StringJoiner joiner = new StringJoiner(",");
-		boolean isDesc = false;
-		for(Exp exp : qfexp.argL) {
-			if (exp instanceof IdentExp) {
-				isDesc = exp.strValue().equals("desc");
-			} else {
-				String fieldName = exp.strValue();
-				if (fieldName.contains(".")) {
-					fieldName = StringUtils.substringAfter(fieldName, ".");
-				}
-				if (! DValueHelper.fieldExists(structType, fieldName)) {
-					DeliaExceptionHelper.throwError("unknown-field", "type '%s' does not have field '%s'. Invalid orderBy parameter", typeName, fieldName);
-				}
-				joiner.add(exp.strValue());
-			}
-		}
-		String s = String.format(" ORDER BY %s", joiner.toString());
-		sc.o(s);
-		if (isDesc) {
-			sc.o(" DESC");
-		}
-	}
-	
-	public void doOffsetIfPresent(StrCreator sc, QuerySpec spec, String typeName) {
-		QueryFuncExp qfexp = findFn(spec, "offset");
-		if (qfexp == null) {
-			return;
-		}
-		
-		IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
-		Integer n = exp.val;
-		String s = String.format(" OFFSET %d", n);
-		sc.o(s);
-	}
-	public void doLimitIfPresent(StrCreator sc, QuerySpec spec, String typeName) {
-		QueryFuncExp qfexp = findFn(spec, "limit");
-		if (qfexp == null) {
-			return;
-		}
-		
-		IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
-		Integer n = exp.val;
-		String s = String.format(" LIMIT %d", n);
-		sc.o(s);
-	}
+//	public void doOrderByIfPresent(StrCreator sc, QuerySpec spec, String typeName) {
+//		QueryFuncExp qfexp = findFn(spec, "orderBy");
+//		if (qfexp == null) {
+//			return;
+//		}
+//		
+//		doInnerOrderBy(sc, spec, typeName, qfexp);
+//	}
+//	public void doInnerOrderBy(StrCreator sc, QuerySpec spec, String typeName, QueryFuncExp qfexp) {
+//		DStructType structType = (DStructType) registry.getType(typeName);
+//		StringJoiner joiner = new StringJoiner(",");
+//		boolean isDesc = false;
+//		for(Exp exp : qfexp.argL) {
+//			if (exp instanceof IdentExp) {
+//				isDesc = exp.strValue().equals("desc");
+//			} else {
+//				String fieldName = exp.strValue();
+//				if (fieldName.contains(".")) {
+//					fieldName = StringUtils.substringAfter(fieldName, ".");
+//				}
+//				if (! DValueHelper.fieldExists(structType, fieldName)) {
+//					DeliaExceptionHelper.throwError("unknown-field", "type '%s' does not have field '%s'. Invalid orderBy parameter", typeName, fieldName);
+//				}
+//				joiner.add(exp.strValue());
+//			}
+//		}
+//		String s = String.format(" ORDER BY %s", joiner.toString());
+//		sc.o(s);
+//		if (isDesc) {
+//			sc.o(" DESC");
+//		}
+//	}
+//	
+//	public void doOffsetIfPresent(StrCreator sc, QuerySpec spec, String typeName) {
+//		QueryFuncExp qfexp = findFn(spec, "offset");
+//		if (qfexp == null) {
+//			return;
+//		}
+//		
+//		IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
+//		Integer n = exp.val;
+//		String s = String.format(" OFFSET %d", n);
+//		sc.o(s);
+//	}
+//	public void doLimitIfPresent(StrCreator sc, QuerySpec spec, String typeName) {
+//		QueryFuncExp qfexp = findFn(spec, "limit");
+//		if (qfexp == null) {
+//			return;
+//		}
+//		
+//		IntegerExp exp = (IntegerExp) qfexp.argL.get(0);
+//		Integer n = exp.val;
+//		String s = String.format(" LIMIT %d", n);
+//		sc.o(s);
+//	}
 //	public QuerySpec doFirstFixup(QuerySpec specOriginal, String typeName, String alias) {
 //		QuerySpec spec = doLastFixup(specOriginal, typeName, alias, true);
 //		QueryFuncExp limitFn = this.findFn(spec, "limit");
@@ -194,23 +194,23 @@ public class SelectFuncHelper extends ServiceBase {
 //			return spec;
 //		}
 //	}
-	protected QuerySpec makeCopy(QuerySpec spec) {
-		QuerySpec copy = new QuerySpec();
-		copy.evaluator = spec.evaluator;
-		
-		QueryExp qfe = spec.queryExp;
-		List<QueryFuncExp> qfelist = new ArrayList<>();
-		qfelist.addAll(qfe.qfelist);
-		copy.queryExp = new QueryExp(qfe.pos, new IdentExp(qfe.typeName), qfe.filter, null);
-		copy.queryExp.qfelist = qfelist;
-		
-		return copy;
-	}
+//	protected QuerySpec makeCopy(QuerySpec spec) {
+//		QuerySpec copy = new QuerySpec();
+//		copy.evaluator = spec.evaluator;
+//		
+//		QueryExp qfe = spec.queryExp;
+//		List<QueryFuncExp> qfelist = new ArrayList<>();
+//		qfelist.addAll(qfe.qfelist);
+//		copy.queryExp = new QueryExp(qfe.pos, new IdentExp(qfe.typeName), qfe.filter, null);
+//		copy.queryExp.qfelist = qfelist;
+//		
+//		return copy;
+//	}
 
-	public boolean isOrderByPresent(QuerySpec spec) {
-		QueryFuncExp qfexp = findFn(spec, "orderBy");
-		return qfexp != null;
-	}
+//	public boolean isOrderByPresent(QuerySpec spec) {
+//		QueryFuncExp qfexp = findFn(spec, "orderBy");
+//		return qfexp != null;
+//	}
 	public boolean isCountPresent(QuerySpec spec) {
 		QueryFuncExp qfexp = findFn(spec, "count");
 		return qfexp != null;

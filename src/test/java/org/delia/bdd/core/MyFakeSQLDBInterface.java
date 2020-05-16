@@ -21,7 +21,6 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 	private boolean deferFlag;
 	private boolean enableSQLLoggingFlag;
 	public String tablesToClean;
-	public boolean useFragmentParser;
 	
 	public MyFakeSQLDBInterface(DBType dbtype) {
 		super(null); //set later

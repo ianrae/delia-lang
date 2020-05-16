@@ -296,22 +296,15 @@ public class PostgresBDDTests extends NewBDDBase {
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
-//		runR900File("t0-update-mm-other-othertbl.txt", 2);
-//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
-//		runR1600File("t0-fetch.txt", 3);
-//		runR1400File("t0-filterfn-date.txt", 12);
-//		runR1500File("t0-queryfn-exist.txt", 2);
-//		runR1500File("t0-queryfn-first.txt", 2);
-//		runR1500File("t0-queryfn-last.txt", 2);
 //		runR1500File("t0-queryfn-ith.txt", 4);
-		runR1500File("t0-queryfn-min-bool.txt", 0);
+//		runR1500File("t0-queryfn-min-bool.txt", 0);
+		runR1600File("t0-fetch.txt", 3);
 	}
 	
 	//---
 	private DBType dbType = DBType.POSTGRES;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
-	private boolean useFragmentParser = true;
 	
 	@Before
 	public void init() {
@@ -329,7 +322,6 @@ public class PostgresBDDTests extends NewBDDBase {
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
-		db.useFragmentParser = useFragmentParser;
 		dbInterfaceToUse = db;
 //		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {

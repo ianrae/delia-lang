@@ -21,6 +21,8 @@ import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.queryresponse.LetSpanEngine;
+import org.delia.queryresponse.LetSpanRunnerImpl;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -28,8 +30,6 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zqueryresponse.LetSpanEngine;
-import org.delia.zqueryresponse.LetSpanRunnerImpl;
 
 /**
  * This class is not thread-safe. Only use it as a local var.

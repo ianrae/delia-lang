@@ -148,7 +148,6 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR1500() {
 		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 		runR1500File("t0-queryfn-distinct.txt", 3);
 		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 		runR1500File("t0-queryfn-flatten.txt", 0);
@@ -178,6 +177,11 @@ public class AllBDDTests extends NewBDDBase {
 		runR1500File("t0-queryfn-avg.txt", 0);
 		runR1500File("t0-queryfn-limit.txt", 5);
 		runR1500File("t0-queryfn-offset.txt", 5);
+	}
+	
+	@Test
+	public void testR1500a() {
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	@Test
@@ -254,6 +258,7 @@ public class AllBDDTests extends NewBDDBase {
 	public void testR2150() {
 		enableAllFileCheck = false;
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
@@ -270,6 +275,7 @@ public class AllBDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
 		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
 		runR2150File("t0-migrate-many-to-many2.txt", 2);
 		runR2150File("t0-migrate-many-to-many2a.txt", 2);
 		runR2150File("t0-migrate-many-to-many3.txt", 2);
@@ -292,12 +298,12 @@ public class AllBDDTests extends NewBDDBase {
 	
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 0;
+//		testIndexToRun = 0;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-//		runR1600File("t0-fetch.txt", 3);
+		runR2150File("t0-migrate-one-to-many1.txt", 3);
 
 	}
 	

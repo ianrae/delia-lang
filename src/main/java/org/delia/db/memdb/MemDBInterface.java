@@ -21,6 +21,8 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.RawDBExecutor;
+import org.delia.db.SchemaContext;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
@@ -31,7 +33,6 @@ import org.delia.log.Log;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.FetchRunner;
-import org.delia.runner.FetchRunnerImpl;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DStructType;
@@ -331,7 +332,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	 */
 	private MemDBTable handleUnknownTable(String typeName, DBAccessContext dbctx) {
 		if (createTablesAsNeededFlag) {
-			createTable(typeName, dbctx);
+			createTable(typeName, dbctx, null);
 			return tableMap.get(typeName);
 		} else {
 			DeliaError err = et.add("unknown-table-type", String.format("can't find type '%s'", typeName));
@@ -395,16 +396,16 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public void createTable(String tableName, DBAccessContext dbctx) {
+	public void createTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		tableMap.put(tableName, new MemDBTable());
 	}
 	@Override
-	public void deleteTable(String tableName, DBAccessContext dbctx) {
+	public void deleteTable(String tableName, DBAccessContext dbctx, SchemaContext ctx) {
 		tableMap.remove(tableName);
 	}
 
 	@Override
-	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx) {
+	public void renameTable(String tableName, String newTableName, DBAccessContext dbctx, SchemaContext ctx) {
 		MemDBTable tbl = tableMap.get(tableName);
 		tbl.name = newTableName;
 		tableMap.remove(tableName);
@@ -466,7 +467,7 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public void createField(String typeName, String field, DBAccessContext dbctx) {
+	public void createField(String typeName, String field, DBAccessContext dbctx, SchemaContext ctx) {
 		MemDBTable tbl = tableMap.get(typeName);
 		if (tbl == null) {
 			tbl = handleUnknownTable(typeName, dbctx);
@@ -485,13 +486,17 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public void deleteField(String typeName, String field, DBAccessContext dbctx) {
+	public void deleteField(String typeName, String field, int datId, DBAccessContext dbctx, SchemaContext ctx) {
 		//nothing to do
 	}
 
 	@Override
 	public DBExecutor createExector(DBAccessContext ctx) {
 		return new MemDBExecutor(this, ctx);
+	}
+	@Override
+	public RawDBExecutor createRawExector(DBAccessContext dbctx) {
+		return new MemRawDBExecutor(this, dbctx);
 	}
 
 	@Override
@@ -510,17 +515,17 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	}
 
 	@Override
-	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx) {
+	public void renameField(String typeName, String fieldName, String newName, DBAccessContext dbctx, SchemaContext ctx) {
 		//nothing to do
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx) {
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, DBAccessContext dbctx, SchemaContext ctx) {
 		//nothing to do
 	}
 
 	@Override
-	public void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx) {
+	public void alterField(String typeName, String fieldName, String deltaFlags, DBAccessContext dbctx, SchemaContext ctx) {
 		//nothing to do
 	}
 
@@ -561,4 +566,5 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx, DBAccessContext dbctx) {
 		return this.doExecuteQuery(hls.querySpec, qtx, dbctx);
 	}
+
 }

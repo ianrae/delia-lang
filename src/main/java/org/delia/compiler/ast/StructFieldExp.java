@@ -12,12 +12,14 @@ public class StructFieldExp extends ExpBase {
 	public boolean isMany;
 	public boolean isParent;
 	public boolean isSerial;
+	public String relationName;
 
 	public StructFieldExp(StructFieldPrefix structFieldPrefix, FieldQualifierExp qual1, FieldQualifierExp qual2, FieldQualifierExp qual3, FieldQualifierExp qual4) {
 		super(structFieldPrefix.pos);
 		this.fieldName = structFieldPrefix.nameExp.name();
 		this.typeName = structFieldPrefix.exp.name();
 		this.isRelation = structFieldPrefix.isRelation;
+		this.relationName = structFieldPrefix.relationName;
 		
 		if (qual1 != null) {
 			setFlags(qual1);

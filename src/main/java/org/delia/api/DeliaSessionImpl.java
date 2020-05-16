@@ -2,6 +2,7 @@ package org.delia.api;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
@@ -17,6 +18,7 @@ public class DeliaSessionImpl implements DeliaSession {
 //	private DValueIterator insertPrebuiltValueIterator;
 	private RunnerInitializer runnerInitializer;
 	private Delia delia;
+	public DatIdMap datIdMap;
 						
 	
 	public DeliaSessionImpl(Delia delia) {
@@ -51,6 +53,11 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public RunnerInitializer getRunnerIntiliazer() {
 		return runnerInitializer;
+	}
+
+	@Override
+	public DatIdMap getDatIdMap() {
+		return datIdMap;
 	}
 	
 }
