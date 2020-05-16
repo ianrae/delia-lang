@@ -7,7 +7,6 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.RawDBExecutor;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;

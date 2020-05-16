@@ -93,13 +93,16 @@ public class MigrationService extends ServiceBase {
 		}
 	}
 
-	public DatIdMap loadDATData(DTypeRegistry registry) {
+	public DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator) {
 		DatIdMap datIdMap = null;
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator())) {
 			migrator.createSchemaTableIfNeeded();
 			AssocService assocSvc = new AssocServiceImpl(migrator, factorySvc, factorySvc.getErrorTracker());
 			assocSvc.assignDATIds(registry);
 			datIdMap = assocSvc.getDatIdMap();
+			
+			//ok we can init db executor now
+			migrator.getZDBExecutor().init2(datIdMap, varEvaluator);
 		}
 		return datIdMap;
 	}

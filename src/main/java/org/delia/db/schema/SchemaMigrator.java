@@ -41,7 +41,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
 	private String dbFingerprint;
-	private RawDBExecutor rawExecutor;
+//	private RawDBExecutor rawExecutor;
 	private DBExecutor dbexecutor;
 	private ZDBExecutor zexec;
 	private DBAccessContext dbctx;
@@ -52,7 +52,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		this.rawExecutor = dbInterface.createRawExector(dbctx);
+//		this.rawExecutor = dbInterface.createRawExector(dbctx);
 		this.dbexecutor = dbInterface.createExector(dbctx);
 		this.zexec = factorySvc.hackGetZDB(registry);
 		this.registry = registry;
@@ -70,11 +70,11 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	
 	@Override
 	public void close() {
-		try {
-			rawExecutor.close();
-		} catch (Exception e) {
-			DBHelper.handleCloseFailure(e);
-		}
+//		try {
+//			rawExecutor.close();
+//		} catch (Exception e) {
+//			DBHelper.handleCloseFailure(e);
+//		}
 		//and close 2nd one
 		try {
 			dbexecutor.close();
@@ -435,9 +435,9 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return true;
 	}
 
-	public RawDBExecutor getRawExecutor() {
-		return rawExecutor;
-	}
+//	public RawDBExecutor getRawExecutor() {
+//		return rawExecutor;
+//	}
 	public ZDBExecutor getZDBExecutor() {
 		return zexec;
 	}
