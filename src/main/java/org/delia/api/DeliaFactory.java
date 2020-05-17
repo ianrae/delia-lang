@@ -2,11 +2,7 @@ package org.delia.api;
 
 import org.delia.builder.ConnectionInfo;
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.h2.H2DBInterface;
-import org.delia.db.memdb.MemDBInterface;
-import org.delia.db.postgres.PostgresDBInterface;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.db.sql.ConnectionString;

@@ -3,15 +3,8 @@ package org.delia.bdd.core;
 import org.delia.core.FactoryService;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
-import org.delia.db.InstrumentedDBInterface;
-import org.delia.db.h2.H2DBInterface;
 import org.delia.db.h2.test.H2TestCleaner;
-import org.delia.db.postgres.PostgresDBInterface;
-import org.delia.db.sql.ConnectionFactory;
-import org.delia.db.sql.ConnectionFactoryImpl;
-import org.delia.h2.H2ConnectionHelper;
 import org.delia.log.Log;
-import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.zdb.InstrumentedZDBInterface;
 
 public class MyFakeSQLDBInterface extends InstrumentedZDBInterface {

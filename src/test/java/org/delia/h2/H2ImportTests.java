@@ -79,7 +79,7 @@ public class H2ImportTests  extends NewBDDBase {
 		cleaner.deleteTables(delia.getFactoryService(), delia.getDBInterface(), "Category,Product");
 	}
 	
-	@Test
+//	@Test
 	public void testLevel4() {
 		List<ImportGroupSpec> groupList = new ArrayList<>();
 		ImportGroupSpec gspec = new ImportGroupSpec();
@@ -116,7 +116,7 @@ public class H2ImportTests  extends NewBDDBase {
 		
 		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
-		
+		cleaner.deleteContraintsForTable("CATEGORY");
 		return delia;
 	}
 	// --

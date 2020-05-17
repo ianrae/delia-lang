@@ -7,11 +7,12 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBHelper;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
-import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.log.Log;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2ZDBExecutor;
 
 public class H2TestCleaner {
 	
@@ -57,6 +58,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, "BASE");
 			safeDeleteTable(executor, "BASE2");
 			safeDeleteTable(executor, "Category");
+			safeDeleteTable(executor, "Product");
 
 			String tbl = SchemaMigrator.SCHEMA_TABLE;
 			safeDeleteTable(executor, tbl.toLowerCase());
@@ -102,7 +104,7 @@ public class H2TestCleaner {
 	public void safeDeleteTable(ZDBExecutor executor, String tblName) {
 		tblName = adjustTblName(tblName);
 		try {
-			if (executor instanceof H2DBExecutor) {
+			if (executor instanceof H2ZDBExecutor) {
 				this.deleteH2TableCascade(executor, tblName);
 //				deleteContraintsForTable(executor, tblName);
 				executor.deleteTable(tblName);
@@ -121,11 +123,22 @@ public class H2TestCleaner {
 		}
 	}
 
-	private void deleteContraintsForTable(ZDBExecutor executor, String tblName) throws SQLException {
+	public void deleteContraintsForTable(String tblName) {
+		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			deleteContraintsForTable(zexec, tblName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	
+	
+	public void deleteContraintsForTable(ZDBExecutor executor, String tblName) throws SQLException {
 		String sql = String.format("SELECT CONSTRAINT_NAME FROM information_schema.constraints WHERE  table_schema = 'PUBLIC' and table_name = '%s'", tblName);
-		if (executor instanceof H2DBExecutor) {
-			H2DBExecutor h2exec = (H2DBExecutor) executor;
-			ResultSet rs = h2exec.executeRawQuery(sql);
+		if (executor instanceof H2ZDBExecutor) {
+			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
+			SqlStatement statement = new SqlStatement();
+			statement.sql = sql;
+			ResultSet rs = h2exec.getDBConnection().execQueryStatement(statement, null);
 			while(rs.next()) {
 				String s = rs.getString(1);
 				if (rs.wasNull()) {
@@ -134,20 +147,26 @@ public class H2TestCleaner {
 				
 				log.log("\n%s: ndropping CONSTRAINT: %s", tblName, s);
 				sql = String.format("ALTER TABLE %s DROP constraint %s", tblName, s);
-				h2exec.executeRawSql(sql);
+				SqlStatement statement2 = new SqlStatement();
+				statement2.sql = sql;
+				h2exec.getDBConnection().execStatement(statement2, null);
 		    }
 			
 			sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			log.log(sql);
-			h2exec.executeRawSql(sql);
+			statement = new SqlStatement();
+			statement.sql = sql;
+			h2exec.getDBConnection().execStatement(statement, null);
 		}
 	}
 	private void deleteH2TableCascade(ZDBExecutor executor, String tblName) throws SQLException {
-		if (executor instanceof H2DBExecutor) {
-			H2DBExecutor h2exec = (H2DBExecutor) executor;
+		if (executor instanceof H2ZDBExecutor) {
+			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
-			h2exec.executeRawSql(sql);
+			SqlStatement statement = new SqlStatement();
+			statement.sql = sql;
+			h2exec.getDBConnection().execStatement(statement, null);
 		}
 	}
 
