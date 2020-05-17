@@ -175,7 +175,7 @@ public class BDDTesterEx {
 			String id = e.getLastError() == null ? "?" : e.getLastError().getId();
 			if (expectedErr == null) {
 				log.logError("EXCEPTION(%s): %s", id, e.getMessage());
-				throw new RuntimeException("can't find ERROR: value!");
+				throw new RuntimeException("Exception occured, and can't find ERROR: value!");
 			}
 
 			if (expectedErr.startsWith("ERROR:")) {

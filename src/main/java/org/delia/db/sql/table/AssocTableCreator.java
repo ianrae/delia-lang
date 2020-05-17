@@ -66,56 +66,65 @@ public class AssocTableCreator extends ServiceBase {
 	}
 	
 	public void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
-		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
-		String tbl1 = info.nearType.getName();
-		String tbl2 = info.farType.getName();
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
+		String tbl1 = relinfo.nearType.getName();
+		String tbl2 = relinfo.farType.getName();
 		if (!(haveCreatedTable(tbl1) && haveCreatedTable(tbl2))) {
 			return;
 		}
 		
-		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
-
 		String assocTableName = datIdMap.getAssocTblName(relinfo.getDatId());
 		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
 		tblinfo.assocTblName = assocTableName;
-		tblinfo.tbl1 = tbl1;
-		tblinfo.tbl2 = tbl2;
-		tblinfo.fieldName = xpair.name;
 		
+		if (datIdMap.isLeftType(assocTableName, relinfo.nearType)) {
+			tblinfo.tbl1 = tbl1;
+			tblinfo.tbl2 = tbl2;
+			tblinfo.fieldName = xpair.name;
+			doGenerateAssocTable(sc, assocTableName, relinfo.nearType, relinfo.farType);
+		} else {
+			tblinfo.tbl1 = tbl2;
+			tblinfo.tbl2 = tbl1;
+			tblinfo.fieldName = xpair.name;
+			doGenerateAssocTable(sc, assocTableName, relinfo.farType, relinfo.nearType);
+		}
+	}
+
+	private void doGenerateAssocTable(StrCreator sc, String assocTableName, DStructType leftType, DStructType rightType) {
 		sc.o("CREATE TABLE %s (", assocTableName);
 		sc.nl();
 		int index = 0;
 		List<SqlElement> fieldL = new ArrayList<>();
-		int n = dtype.getAllFields().size();
-		for(TypePair pair: dtype.getAllFields()) {
-			if (isManyToManyRelation(pair, dtype)) {
+		int n = leftType.getAllFields().size();
+		for(TypePair pair: leftType.getAllFields()) {
+			if (isManyToManyRelation(pair, leftType)) {
 				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
 				TypePair copy = new TypePair("leftv", pair.type);
-				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, dtype, false);
-				RelationInfo otherSide = DRuleHelper.findOtherSideMany(info.farType, dtype);
-				field.setIsAssocTblField(info.farType.fieldIsOptional(otherSide.fieldName));
+				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false);
+				RelationInfo otherSide = DRuleHelper.findOtherSideMany(rightType, leftType);
+				field.setIsAssocTblField(rightType.fieldIsOptional(otherSide.fieldName));
 				fieldL.add(field);
 
-				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(info.farType);
+				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(rightType);
 				copy = new TypePair("rightv", xx.type);
-				field = fieldgenFactory.createFieldGen(registry, copy, info.farType, false);
-				field.setIsAssocTblField(dtype.fieldIsOptional(pair.name));
+				field = fieldgenFactory.createFieldGen(registry, copy, rightType, false);
+				field.setIsAssocTblField(leftType.fieldIsOptional(pair.name));
 				fieldL.add(field);
 
 				index++;
 			}
 		}
 		
-		for(TypePair pair: dtype.getAllFields()) {
-			if (isManyToManyRelation(pair, dtype)) {
-				TypePair copy = new TypePair("leftv", info.nearType); //address
-				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.nearType, false);
+		for(TypePair pair: leftType.getAllFields()) {
+			if (isManyToManyRelation(pair, leftType)) {
+				TypePair copy = new TypePair("leftv", leftType); //address
+				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, leftType, false);
 				if (constraint != null) {
 					fieldL.add(constraint);
 				}
 				
-				copy = new TypePair("rightv", info.farType);
-				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, info.farType, false);
+				copy = new TypePair("rightv", rightType);
+				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, rightType, false);
 				if (constraint != null) {
 					fieldL.add(constraint);
 				}
@@ -141,6 +150,8 @@ public class AssocTableCreator extends ServiceBase {
 		sc.nl();
 		
 	}
+
+
 
 	private boolean haveCreatedTable(String tbl1) {
 		for(TableInfo info: alreadyCreatedL) {
