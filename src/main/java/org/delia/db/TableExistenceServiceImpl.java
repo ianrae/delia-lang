@@ -3,7 +3,6 @@ package org.delia.db;
 import java.util.List;
 
 import org.delia.assoc.DatIdMap;
-import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.zdb.ZDBExecutor;

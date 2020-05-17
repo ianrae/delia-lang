@@ -33,6 +33,7 @@ import org.delia.type.DValue;
 import org.delia.util.StringTrail;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZTableExistenceService;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 
@@ -151,7 +152,7 @@ public class HLSTestBase extends NewBDDBase {
 		} else {
 			createTable(memDBinterface, "CustomerAddressDat1");
 		}
-		existsSvc = new TableExistenceServiceImpl(delia.getDBInterface(), null); //2nd param not needed for MEM
+		existsSvc = new ZTableExistenceService(delia.getDBInterface()); 
 		return new DeliaDao(delia);
 	}
 	

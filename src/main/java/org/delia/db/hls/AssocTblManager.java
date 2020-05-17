@@ -115,4 +115,16 @@ public class AssocTblManager {
 		return datIdMap;
 	}
 	
+	
+	public boolean isFlipped(DStructType type1, DStructType type2) {
+		getTableFor(type1, type2); //fill in existsMap
+		
+		String assocTblName1 = buildName(type1,type2);
+		if (assocTblName1.startsWith(type1.getName())) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 }

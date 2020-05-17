@@ -16,6 +16,12 @@ public class ZTableExistenceService implements TableExistenceService {
 	public ZTableExistenceService(ZDBExecutor dbexecutor) {
 		this.dbexecutor = dbexecutor;
 	}
+	public ZTableExistenceService(ZDBInterfaceFactory dbInterface) {
+		//TODO: this is bad. fix! should not be using dbexecutor
+		//need to close!
+		this.dbexecutor = dbInterface.createExecutor();
+	}
+
 	
 	@Override
 	public boolean doesTableExist(String tableName) {

@@ -79,9 +79,9 @@ public class FragmentParserTestBase extends NewBDDBase {
 
 
 	protected List<TableInfo> createTblInfoL() {
-		TableExistenceServiceImpl.hackYesFlag = true;
+//		TableExistenceServiceImpl.hackYesFlag = true;
 		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Address", "AddressCustomerAssoc");
+		TableInfo info = new  TableInfo("Address", "AddressCustomerDat1");
 		info.tbl1 = "Address";
 		info.tbl2 = "Customer";
 		//public String fieldName;
@@ -89,9 +89,9 @@ public class FragmentParserTestBase extends NewBDDBase {
 		return tblinfoL;
 	}
 	protected List<TableInfo> createTblInfoLOtherWay() {
-		TableExistenceServiceImpl.hackYesFlag = true;
+//		TableExistenceServiceImpl.hackYesFlag = true;
 		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Customer", "CustomerAddressAssoc");
+		TableInfo info = new  TableInfo("Customer", "CustomerAddressDat1");
 		info.tbl1 = "Customer";
 		info.tbl2 = "Address";
 		//public String fieldName;

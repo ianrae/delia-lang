@@ -194,8 +194,13 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		
 		DValue pk = mainDVal.asStruct().getField(keyPair2.name);
 		
-		genxrow(assocInsertFrag, field1, keyPair1, xdval);
-		genxrow(assocInsertFrag, field2, keyPair2, pk);
+		if (assocTblMgr.isFlipped(nearType, farType)) {
+			genxrow(assocInsertFrag, field2, keyPair1, xdval);
+			genxrow(assocInsertFrag, field1, keyPair2, pk);
+		} else {
+			genxrow(assocInsertFrag, field1, keyPair1, xdval);
+			genxrow(assocInsertFrag, field2, keyPair2, pk);
+		}
 	}
 
 	private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {

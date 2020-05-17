@@ -16,7 +16,9 @@ import org.delia.db.sql.table.TableInfo;
 import org.delia.queryresponse.LetSpan;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZTableExistenceService;
 
 public class FragmentParserService extends ServiceBase {
 	public int nextAliasIndex = 0;
@@ -49,7 +51,10 @@ public class FragmentParserService extends ServiceBase {
 
 		
 		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		
+		//TODO: this is bad. fix! should not be using dbexecutor
+//		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		this.existSvc = new ZTableExistenceService(dbInterface);
 	}
 
 	public QueryTypeDetector createQueryTypeDetector() {

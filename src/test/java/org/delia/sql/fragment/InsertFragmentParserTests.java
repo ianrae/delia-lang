@@ -15,7 +15,6 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
 import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.TestCreatorHelper;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -281,7 +280,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 	}
 	@After
 	public void shutdown() {
-		TableExistenceServiceImpl.hackYesFlag = false;
+//		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
 	private String buildSrc() {

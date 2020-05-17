@@ -16,6 +16,7 @@ import org.delia.parser.LineChecker;
 import org.delia.runner.ResultValue;
 import org.delia.runner.RunnerHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZTableExistenceService;
 import org.junit.Test;
 
 public class TableCreatorTests {
@@ -76,8 +77,7 @@ public class TableCreatorTests {
 		return runner;
 	}
 	private TableCreator createTableCreator(NewLegacyRunner runner)  {
-		DBAccessContext dbctx = runner.createDBAccessContext();
-		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		TableExistenceService existSvc = new ZTableExistenceService(dbInterface);
 		FactoryService factorySvc = runner.getFactoryService();
 		DatIdMap datIdMap = new DatIdMap();
 		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc, datIdMap);
