@@ -184,19 +184,19 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		return true;
 	}
 
-	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
-			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval) {
+	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean notFlipped, 
+			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval) {
 		
 		String field1 = assocTblMgr.getAssocLeftField(nearType, farType);
 		String field2 = assocTblMgr.getAssocRightField(nearType, farType);
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
-		DValue pk = mainDVal.asStruct().getField(keyPair2.name);
+		DValue pk = mainDVal.asStruct().getField(keyPair1.name);
 		
-		if (assocTblMgr.isFlipped(nearType, farType)) {
-			genxrow(assocInsertFrag, field2, keyPair1, xdval);
+		if (notFlipped) {
 			genxrow(assocInsertFrag, field1, keyPair2, pk);
+			genxrow(assocInsertFrag, field2, keyPair1, xdval);
 		} else {
 			genxrow(assocInsertFrag, field1, keyPair1, xdval);
 			genxrow(assocInsertFrag, field2, keyPair2, pk);

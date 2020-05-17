@@ -66,8 +66,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
-		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerDat1 as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,  100);
 		chkNumParams(1, 0, 1);
@@ -83,8 +83,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc;");
-		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer) INSERT INTO CustomerAddressDat1 as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 333,  100);
 		chkNumParams(1, 0, 1);
@@ -100,8 +100,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc;");
-		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address) INSERT INTO AddressCustomerDat1 as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 7,  55);
 		chkNumParams(1, 0, 1);
@@ -117,8 +117,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc;");
-		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1;");
+		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address) INSERT INTO CustomerAddressDat1 as t SELECT * from cte1");
 		chkNoLine(4);
 		chkParams(selectFrag, 7,  55);
 		chkNumParams(1, 0, 1);
@@ -134,7 +134,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1");
 		chkParams(selectFrag, 333);
 		chkNumParams(1, 0);
 	}
@@ -149,7 +149,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1");
 		chkParams(selectFrag, 333);
 		chkNumParams(1, 0);
 	}
@@ -167,8 +167,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE rightv = ? and leftv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Customer as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1 WHERE rightv = ? and leftv <> ?;");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Customer as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333, 55, 55, 100,  100, 55, 100, 55);
 		chkNumParams(2, 2, 4);
@@ -184,8 +184,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE leftv = ? and rightv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Customer as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?;");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressDat1 as t (leftv,rightv) VALUES((SELECT s.id FROM Customer as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 333, 55, 55, 100,  55, 100, 55, 100);
 		chkNumParams(2, 2, 4);
@@ -201,8 +201,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ? and rightv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc as t (leftv,rightv) VALUES((SELECT s.id FROM Address as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1 WHERE leftv = ? and rightv <> ?;");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 as t (leftv,rightv) VALUES((SELECT s.id FROM Address as s WHERE s.id = ?),?) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 7, 100, 100,55,  100,55,100,55);
 		chkNumParams(2, 2, 4);
@@ -218,8 +218,8 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv = ? and leftv <> ?;");
-		chkLine(3, selectFrag, " INSERT INTO CustomerAddressAssoc as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Address as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1 WHERE rightv = ? and leftv <> ?;");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressDat1 as t (leftv,rightv) VALUES(?,(SELECT s.id FROM Address as s WHERE s.id = ?)) ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		chkNoLine(4);
 		chkParams(selectFrag, 7, 100, 100,55,  55,100,55,100);
 		chkNumParams(2, 2, 4);
@@ -235,7 +235,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE leftv = ?");
+		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1 WHERE leftv = ?");
 		chkParams(selectFrag, 7, 100, 100);
 		chkNumParams(2, 1);
 	}
@@ -250,7 +250,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.id = ?;");
-		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE rightv = ?");
+		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1 WHERE rightv = ?");
 		chkParams(selectFrag, 7, 100, 100);
 		chkNumParams(2, 1);
 	}
@@ -268,14 +268,14 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 //		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
+//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1 WHERE  rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO AddressCustomerDat1 as t SELECT * from cte1");
 //		chkNoLine(4);
 //		chkParams(selectFrag, 333,10,500, 10,500, 100,10,500);
 //		chkNumParams(3, 2, 3);
 		
-		runAndChkLine(1, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE  rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-		chkLine(2, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1;");
+		runAndChkLine(1, selectFrag, "DELETE FROM AddressCustomerDat1 WHERE  rightv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+		chkLine(2, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO AddressCustomerDat1 as t SELECT * from cte1;");
 		chkLine(3, selectFrag, " UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 10,500, 100,10,500, 333,10,500);
@@ -292,14 +292,14 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 //		runAndChkLine(1, selectFrag, "UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?;");
-//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
+//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1 WHERE  leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO CustomerAddressDat1 as t SELECT * from cte1");
 //		chkNoLine(4);
 //		chkParams(selectFrag, 333,10,500, 10,500, 100,10,500);
 //		chkNumParams(3, 2, 3);
 		
-		runAndChkLine(1, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE  leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
-		chkLine(2, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1;");
+		runAndChkLine(1, selectFrag, "DELETE FROM CustomerAddressDat1 WHERE  leftv IN (SELECT id FROM Customer as a WHERE  a.wid > ? and  a.id < ?);");
+		chkLine(2, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Customer as a WHERE  a.wid > ? and  a.id < ?) INSERT INTO CustomerAddressDat1 as t SELECT * from cte1;");
 		chkLine(3, selectFrag, " UPDATE Customer as a SET a.wid = ? WHERE  a.wid > ? and  a.id < ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 10,500, 100,10,500, 333,10,500);
@@ -316,14 +316,14 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 //		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address as a WHERE a.z > ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1");
+//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1 WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address as a WHERE a.z > ?) INSERT INTO AddressCustomerDat1 as t SELECT * from cte1");
 //		chkNoLine(4);
 //		chkParams(selectFrag, 7,10, 10, 55,10);
 //		chkNumParams(2, 1, 2);
 
-		runAndChkLine(1, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-		chkLine(2, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address as a WHERE a.z > ?) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1;");
+		runAndChkLine(1, selectFrag, "DELETE FROM AddressCustomerDat1 WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+		chkLine(2, selectFrag, " WITH cte1 AS (SELECT id as leftv, ? as rightv FROM Address as a WHERE a.z > ?) INSERT INTO AddressCustomerDat1 as t SELECT * from cte1;");
 		chkLine(3, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 10, 55,10, 7,10);
@@ -340,14 +340,14 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 //		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address as a WHERE a.z > ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1");
+//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1 WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+//		chkLine(3, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address as a WHERE a.z > ?) INSERT INTO CustomerAddressDat1 as t SELECT * from cte1");
 //		chkNoLine(4);
 //		chkParams(selectFrag, 7,10, 10, 55,10);
 //		chkNumParams(2, 1, 2);
 		
-		runAndChkLine(1, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
-		chkLine(2, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address as a WHERE a.z > ?) INSERT INTO CustomerAddressAssoc as t SELECT * from cte1;");
+		runAndChkLine(1, selectFrag, "DELETE FROM CustomerAddressDat1 WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+		chkLine(2, selectFrag, " WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Address as a WHERE a.z > ?) INSERT INTO CustomerAddressDat1 as t SELECT * from cte1;");
 		chkLine(3, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkNoLine(4);
 		chkParams(selectFrag, 10, 55,10, 7,10);
@@ -364,11 +364,11 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 //		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerAssoc WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?)");
+//		chkLine(2, selectFrag, " DELETE FROM AddressCustomerDat1 WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?)");
 //		chkParams(selectFrag, 7, 10, 10);
 //		chkNumParams(2, 1);
 		
-		runAndChkLine(1, selectFrag, "DELETE FROM AddressCustomerAssoc WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+		runAndChkLine(1, selectFrag, "DELETE FROM AddressCustomerDat1 WHERE  leftv IN (SELECT id FROM Address as a WHERE a.z > ?);");
 		chkLine(2, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkParams(selectFrag, 10, 7,10);
 		chkNumParams(1, 2);
@@ -384,11 +384,11 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
 		
 //		runAndChkLine(1, selectFrag, "UPDATE Address as a SET a.z = ? WHERE a.z > ?;");
-//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressAssoc WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?)");
+//		chkLine(2, selectFrag, " DELETE FROM CustomerAddressDat1 WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?)");
 //		chkParams(selectFrag, 7, 10, 10);
 //		chkNumParams(2, 1);
 		
-		runAndChkLine(1, selectFrag, "DELETE FROM CustomerAddressAssoc WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
+		runAndChkLine(1, selectFrag, "DELETE FROM CustomerAddressDat1 WHERE  rightv IN (SELECT id FROM Address as a WHERE a.z > ?);");
 		chkLine(2, selectFrag, " UPDATE Address as a SET a.z = ? WHERE a.z > ?");
 		chkParams(selectFrag, 10,  7,10);
 		chkNumParams(1, 2);
