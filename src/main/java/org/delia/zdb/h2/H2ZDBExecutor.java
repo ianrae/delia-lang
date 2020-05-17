@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.StringJoiner;
 
 import org.delia.assoc.DatIdMap;
@@ -22,6 +23,7 @@ import org.delia.db.ResultSetToDValConverter;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.ValueHelper;
+import org.delia.db.h2.DBListingType;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
@@ -71,6 +73,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		private DBErrorConverter errorConverter;
 		protected ZTableCreator tableCreator;
 		private ResultSetToDValConverter resultSetConverter;
+		protected Random random = new Random();
 		private ZInsert zinsert;
 		private ZQuery zquery;
 		private ZUpdate zupdate;
@@ -480,8 +483,9 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		@Override
 		public void renameTable(String tableName, String newTableName) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit1(); 
+			String sql = String.format("ALTER TABLE %s RENAME TO %s", tableName, newTableName);
+			execSqlStatement(sql);
 		}
 
 		@Override
@@ -502,20 +506,36 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		@Override
 		public void renameField(String typeName, String fieldName, String newName) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit2(); 
+			String sql = tableCreator.generateRenameField(typeName, fieldName, newName);
+			execSqlStatement(sql);
 		}
 
 		@Override
 		public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit2(); 
+			String sql = tableCreator.generateAlterFieldType(typeName, fieldName, newFieldType);
+			execSqlStatement(sql);
 		}
 
 		@Override
 		public void alterField(String typeName, String fieldName, String deltaFlags) {
-			// TODO Auto-generated method stub
-
+			failIfNotInit2(); 
+			String constraintName = null;
+			if (deltaFlags.contains("-U")) {
+				RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+				String sql = sqlgen.generateSchemaListing(DBListingType.ALL_CONSTRAINTS);
+				constraintName = conn.findConstraint(sql, typeName, fieldName, "UNIQUE");
+			} else if (deltaFlags.contains("+U")) {
+				constraintName = generateUniqueConstraintName();
+			}
+			
+			String sql = tableCreator.generateAlterField(typeName, fieldName, deltaFlags, constraintName);
+			execSqlStatement(sql);
+		}
+		protected String generateUniqueConstraintName() {
+			int n = random.nextInt(Integer.MAX_VALUE - 10);
+			return String.format("DConstraint_%d", n);
 		}
 
 		@Override

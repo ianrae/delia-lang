@@ -9,6 +9,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.table.AssocInfo;
 import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.ConstraintGen;
 import org.delia.db.sql.table.FieldGen;
@@ -22,6 +23,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 public class ZTableCreator extends ServiceBase {
 	protected DTypeRegistry registry;
@@ -234,66 +236,66 @@ public class ZTableCreator extends ServiceBase {
 		return list;
 	}
 
-//	public String generateRenameField(String tableName, String fieldName, String newName) {
-//		StrCreator sc = new StrCreator();
-//		sc.o("ALTER TABLE %s ALTER COLUMN %s", tblName(tableName), fieldName);
-//		sc.o(" RENAME TO %s", newName); 
-//		return sc.str;
-//	}
+	public String generateRenameField(String tableName, String fieldName, String newName) {
+		StrCreator sc = new StrCreator();
+		sc.o("ALTER TABLE %s ALTER COLUMN %s", tblName(tableName), fieldName);
+		sc.o(" RENAME TO %s", newName); 
+		return sc.str;
+	}
 	
 	public String tblName(String tableName) {
 		return nameFormatter.convert(tableName);
 	}
 
-//	public String generateAlterFieldType(String tableName, String fieldName, String newFieldType) {
-//		StrCreator sc = new StrCreator();
-//		doAlterColumnPrefix(sc, tableName, fieldName);
-//
-//		DStructType dtype = (DStructType) registry.getType(tableName);
-//		TypePair pair = DValueHelper.findField(dtype, fieldName);
-//		
-//		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
-//		String sqlType = fieldGen.deliaToSql(pair);
-//		
-//		sc.o(" SET DATA TYPE %s", sqlType); 
-//		return sc.str;
-//	}
-//	public String generateAlterField(String tableName, String fieldName, String deltaFlags, String constraintName) {
-//		StrCreator sc = new StrCreator();
-//		String[] ar = deltaFlags.split(",");
-//		//  deltaFlags: +O,+U,+P,+S
-//		
-//		AssocInfo ainfo = assocTblCreator.createAssocInfoIfIsManyToMany(tableName, fieldName);
-//		if (ainfo != null) {
-//			return assocTblCreator.generateAlterField(tableName, fieldName, deltaFlags, constraintName, ainfo);
-//		}
-//		
-//		for(String delta: ar) {
-//			switch(delta) {
-//			case "+O":
-//				doAlterColumnOptional(sc, tableName, fieldName, true);
-//				break;
-//			case "-O":
-//				doAlterColumnOptional(sc, tableName, fieldName, false);
-//				break;
-//			case "+U":
-//				doAlterColumnUnique(sc, tableName, fieldName, true, constraintName);
-//				break;
-//			case "-U":
-//				doAlterColumnUnique(sc, tableName, fieldName, false, constraintName);
-//				break;
-//			default:
-//			{
-//				//most databases don't support changing serial or primaryKey
-//				String msg = String.format("Field '%s.%s' - field change '%s' not supported", tableName, fieldName, delta);
-//				DeliaExceptionHelper.throwError("unsupported-alter-field-change", msg);
-//			}
-//				break;
-//			}
-//		}
-//			
-//		return sc.str;
-//	}
+	public String generateAlterFieldType(String tableName, String fieldName, String newFieldType) {
+		StrCreator sc = new StrCreator();
+		doAlterColumnPrefix(sc, tableName, fieldName);
+
+		DStructType dtype = (DStructType) registry.getType(tableName);
+		TypePair pair = DValueHelper.findField(dtype, fieldName);
+		
+		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+		String sqlType = fieldGen.deliaToSql(pair);
+		
+		sc.o(" SET DATA TYPE %s", sqlType); 
+		return sc.str;
+	}
+	public String generateAlterField(String tableName, String fieldName, String deltaFlags, String constraintName) {
+		StrCreator sc = new StrCreator();
+		String[] ar = deltaFlags.split(",");
+		//  deltaFlags: +O,+U,+P,+S
+		
+		AssocInfo ainfo = assocTblCreator.createAssocInfoIfIsManyToMany(tableName, fieldName);
+		if (ainfo != null) {
+			return assocTblCreator.generateAlterField(tableName, fieldName, deltaFlags, constraintName, ainfo);
+		}
+		
+		for(String delta: ar) {
+			switch(delta) {
+			case "+O":
+				doAlterColumnOptional(sc, tableName, fieldName, true);
+				break;
+			case "-O":
+				doAlterColumnOptional(sc, tableName, fieldName, false);
+				break;
+			case "+U":
+				doAlterColumnUnique(sc, tableName, fieldName, true, constraintName);
+				break;
+			case "-U":
+				doAlterColumnUnique(sc, tableName, fieldName, false, constraintName);
+				break;
+			default:
+			{
+				//most databases don't support changing serial or primaryKey
+				String msg = String.format("Field '%s.%s' - field change '%s' not supported", tableName, fieldName, delta);
+				DeliaExceptionHelper.throwError("unsupported-alter-field-change", msg);
+			}
+				break;
+			}
+		}
+			
+		return sc.str;
+	}
 
 	protected void doAlterColumnUnique(StrCreator sc, String tableName, String fieldName, boolean b, String constraintName) {
 		doAlterTablePrefix(sc, tableName);
