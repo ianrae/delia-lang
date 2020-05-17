@@ -15,6 +15,7 @@ import org.delia.log.Log;
 import org.delia.parser.LineChecker;
 import org.delia.runner.ResultValue;
 import org.delia.runner.RunnerHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.Test;
 
 public class TableCreatorTests {
@@ -64,7 +65,7 @@ public class TableCreatorTests {
 //	}
 //	
 	// --
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private TableCreator tblCreator;
 	private Log log = new UnitTestLog();
 	private RunnerHelper helper = new RunnerHelper();

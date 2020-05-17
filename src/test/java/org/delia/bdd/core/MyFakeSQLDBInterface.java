@@ -12,60 +12,52 @@ import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
 import org.delia.log.Log;
 import org.delia.postgres.PostgresConnectionHelper;
+import org.delia.zdb.InstrumentedZDBInterface;
 
-public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
+public class MyFakeSQLDBInterface extends InstrumentedZDBInterface {
 	private Log log;
 	public boolean cleanTables = true;
 	public int execCount = 0;
-	private DBType dbType;
 	private boolean deferFlag;
 	private boolean enableSQLLoggingFlag;
 	public String tablesToClean;
 	
 	public MyFakeSQLDBInterface(DBType dbtype) {
-		super(null); //set later
-		this.dbType = dbtype;
+		super(dbtype); 
 	}
 
 	@Override
 	public void init(FactoryService factorySvc) {
 		this.log = factorySvc.getLog();
 		log.log("DBTYPE: %s", dbType.name());
-
+		super.init(factorySvc);
+		
+		
 		switch(dbType) {
 		case MEM:
 			break;
 		case H2:
 		{
-			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-			H2DBInterface h2db = new H2DBInterface(factorySvc, connFact);
-			actualInterface = h2db;
-			//h2db.useFragmentParser = useFragmentParser;
-
-			actualInterface.init(factorySvc);
-
-			if (cleanTables) {
-				H2TestCleaner cleaner = new H2TestCleaner(dbType);
-				cleaner.deleteKnownTables(factorySvc, actualInterface);
-			}
-			
-			//h2db.enumerateAllConstraints(log);
-		}
-		break;
-		case POSTGRES:
-		{
-			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), log);
-			PostgresDBInterface pgdb = new PostgresDBInterface(factorySvc, connFact);
-			actualInterface = pgdb;
-			//pgdb.useFragmentParser = useFragmentParser;
-			actualInterface.init(factorySvc);
-
 			if (cleanTables) {
 				H2TestCleaner cleaner = new H2TestCleaner(dbType);
 				cleaner.deleteKnownTables(factorySvc, actualInterface);
 			}
 		}
 		break;
+//		case POSTGRES:
+//		{
+//			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), log);
+//			PostgresDBInterface pgdb = new PostgresDBInterface(factorySvc, connFact);
+//			actualInterface = pgdb;
+//			//pgdb.useFragmentParser = useFragmentParser;
+//			actualInterface.init(factorySvc);
+//
+//			if (cleanTables) {
+//				H2TestCleaner cleaner = new H2TestCleaner(dbType);
+//				cleaner.deleteKnownTables(factorySvc, actualInterface);
+//			}
+//		}
+//		break;
 		}
 
 		if (deferFlag) {
@@ -90,9 +82,4 @@ public class MyFakeSQLDBInterface extends InstrumentedDBInterface {
 		}
 	}
 	
-	@Override
-	public DBType getDBType() {
-		return dbType;
-	}
-
 }

@@ -107,8 +107,9 @@ public class ZDBTests  extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private DValue createDatTableObj(DStructType type, String datTableName) {

@@ -3,6 +3,8 @@ package org.delia.bdd;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -323,8 +325,8 @@ public class AllBDDTests extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
-		MemDBInterface db = new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);
 		}

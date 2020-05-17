@@ -24,6 +24,8 @@ import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -257,8 +259,9 @@ public class DataImportServiceTests  extends NewBDDBase {
 	
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private LineObjIterator createIter(int n) {

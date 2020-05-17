@@ -26,6 +26,8 @@ import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -284,8 +286,9 @@ public class ImportToolTests  extends NewBDDBase {
 	
 	
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private LineObj createLineObj(int id, String nameStr) {

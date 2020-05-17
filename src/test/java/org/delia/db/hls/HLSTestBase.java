@@ -33,6 +33,8 @@ import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.StringTrail;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 /**
  * 
@@ -141,12 +143,13 @@ public class HLSTestBase extends NewBDDBase {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
 		SchemaContext ctx = new SchemaContext();
-		
-		if (flipAssocTbl) {
-			delia.getDBInterface().createTable("AddressCustomerAssoc", null, ctx);
-		} else {
-			delia.getDBInterface().createTable("CustomerAddressAssoc", null, ctx);
-		}
+
+		//TODO do we still need this?
+//		if (flipAssocTbl) {
+//			delia.getDBInterface().createTable("AddressCustomerAssoc", null, ctx);
+//		} else {
+//			delia.getDBInterface().createTable("CustomerAddressAssoc", null, ctx);
+//		}
 		existsSvc = new TableExistenceServiceImpl(delia.getDBInterface(), null); //2nd param not needed for MEM
 		assocTblMgr = new AssocTblManager(existsSvc, null);
 		return new DeliaDao(delia);
@@ -192,8 +195,9 @@ public class HLSTestBase extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 	
 	protected HLSSQLGenerator createGen() {

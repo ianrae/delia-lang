@@ -26,6 +26,8 @@ import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.util.StringTrail;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -147,8 +149,9 @@ public class LetSpanEngineTests extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 }

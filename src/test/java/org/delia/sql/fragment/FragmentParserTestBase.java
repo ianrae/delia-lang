@@ -40,6 +40,8 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 
 public class FragmentParserTestBase extends NewBDDBase {
@@ -65,8 +67,9 @@ public class FragmentParserTestBase extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	protected QuerySpec buildQuery(QueryExp exp) {

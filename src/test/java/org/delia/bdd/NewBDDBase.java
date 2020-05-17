@@ -15,9 +15,13 @@ import org.delia.bdd.core.BDDParser;
 import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.DBInterfaceCreator;
+import org.delia.core.FactoryService;
+import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBInterface;
+import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public abstract class NewBDDBase implements DBInterfaceCreator {
 	
@@ -65,7 +69,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	protected FileHelper fileHelper = new FileHelper();
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
-	protected DBInterface dbInterfaceToUse;
+	protected ZDBInterfaceFactory dbInterfaceToUse;
 	
 	protected List<String> filesExecutedL = new ArrayList<>();
 	private BDDGroup currentGroup;
@@ -228,7 +232,11 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		assertEquals(0, missedL.size());
 	}
 
-	public abstract DBInterface createForTest();
+	public abstract ZDBInterfaceFactory createForTest();
 	
-	
+	protected FactoryService createFactorySvc() {
+		return new FactoryServiceImpl(log, new SimpleErrorTracker(log));
+	}
+
+
 }

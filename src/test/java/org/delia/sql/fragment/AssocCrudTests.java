@@ -34,6 +34,8 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -459,11 +461,6 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = " type Customer struct {id int unique, wid int, relation addr Address optional many } end";
 		src += "\n type Address struct {id int unique, z int, relation cust Customer optional many } end";
 		return src;
-	}
-
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
 	}
 
 	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {

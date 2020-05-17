@@ -24,6 +24,8 @@ import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,12 +34,12 @@ public class ClientTests {
 	public static class DeliaClient {
 		private Delia delia;
 		private DeliaSession sess = null;
-		private DBInterface dbInterface ;
+		private ZDBInterfaceFactory dbInterface ;
 		private FactoryService factorySvc;
 		
 //		public static DBInterface forcedDBInterface; //for injecting other dbinterfaces
 
-		public DeliaClient(DBInterface dbInterfaceParam) {
+		public DeliaClient(ZDBInterfaceFactory dbInterfaceParam) {
 //			this.dbInterface = forcedDBInterface == null ? dbInterfaceParam : forcedDBInterface;
 			this.dbInterface = dbInterfaceParam;
 			Log log = new UnitTestLog(); //TODO fix later
@@ -142,13 +144,14 @@ public class ClientTests {
 	private DeliaClient client;
 //	private DBSession sess = null;
 	private boolean addIdFlag;
-	private DBInterface dbInterface ;
+	private ZDBInterfaceFactory dbInterface ;
 	private int nextVarNum = 1;
 
 	public void xinit() {
 		addIdFlag = true;
 		Log log = new UnitTestLog();
-		dbInterface = new MemDBInterface();
+		FactoryService factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
+		dbInterface = new MemZDBInterfaceFactory(factorySvc);
 		client = new DeliaClient(dbInterface);
 		DBHelper.createTable(dbInterface, "Address"); //!! fake schema
 		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema

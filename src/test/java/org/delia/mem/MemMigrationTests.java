@@ -13,6 +13,7 @@ import org.delia.sort.topo.TopoTestBase;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -143,9 +144,13 @@ public class MemMigrationTests extends TopoTestBase {
 		chkTblExists(tableName, true);
 	}
 	private void chkTblExists(String tableName, boolean expected) {
-		DBAccessContext dbctx = new DBAccessContext(sess.getExecutionContext().registry, new DoNothingVarEvaluator());
-		boolean b = dbInterface.doesTableExist(tableName, dbctx);
-		assertEquals(expected, b);
+		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			boolean b = zexec.doesTableExist(tableName);
+			assertEquals(expected, b);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void createNewDelia() {

@@ -17,9 +17,11 @@ import org.delia.log.Log;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.LegacyRunner;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class DeliaInitializer {
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private Log log;
 	private SimpleErrorTracker et;
 	private FactoryService factorySvc;
@@ -50,16 +52,16 @@ public class DeliaInitializer {
 		switch(dbType) {
 		case MEM:
 		{
-			dbInterface = new MemDBInterface();
+			dbInterface = new MemZDBInterfaceFactory(factorySvc);
 			DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
-			dbInterface.init(factorySvc);
+//			dbInterface.init(factorySvc);
 		}
 		break;
 		case H2:
 		{
 			Delia deliaTmp = DeliaFactory.create(H2ConnectionHelper.getTestDB(), DBType.H2, log, factorySvc);
 			dbInterface = deliaTmp.getDBInterface(); //new H2DBInterface(factorySvc, H2ConnectionHelper.getTestDB());
-			dbInterface.init(factorySvc);
+//			dbInterface.init(factorySvc);
 			
 			H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 			cleaner.deleteKnownTables(factorySvc, dbInterface);
@@ -69,7 +71,7 @@ public class DeliaInitializer {
 		return true;
 	}
 
-	public DBInterface getDbInterface() {
+	public ZDBInterfaceFactory getDbInterface() {
 		return dbInterface;
 	}
 	

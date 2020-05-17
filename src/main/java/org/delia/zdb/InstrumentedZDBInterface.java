@@ -13,8 +13,8 @@ import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	
-	private DBType dbType;
-	private ZDBInterfaceFactory actualInterface;
+	protected DBType dbType;
+	protected ZDBInterfaceFactory actualInterface;
 	
 	public InstrumentedZDBInterface(DBType dbType) {
 		this.dbType = dbType;
@@ -32,6 +32,9 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 			default:
 				DeliaExceptionHelper.throwError("fixthis", "arggh");
 		}
+	}
+	public void init(ZDBInterfaceFactory actual) {
+		actualInterface = actual;
 	}
 
 	@Override

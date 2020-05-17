@@ -27,6 +27,8 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -288,8 +290,9 @@ public class NorthwindTests extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 }

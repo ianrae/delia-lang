@@ -29,6 +29,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.valuebuilder.IntegerValueBuilder;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class BDDTesterEx {
 	private static class NumberChecker extends ValueCheckerBase {
@@ -56,11 +57,11 @@ public class BDDTesterEx {
 	private Log log = new UnitTestLog();
 
 	private DeliaClient client;
-	DBInterface dbInterface;
+	ZDBInterfaceFactory dbInterface;
 
 	private BDDTest currentTest;
 
-	BDDTesterEx(DBInterface retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
+	BDDTesterEx(ZDBInterfaceFactory retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
 		this.currentTest = test;
 		if (retainedDBInterface == null) {
 			dbInterface = creator.createForTest(); 

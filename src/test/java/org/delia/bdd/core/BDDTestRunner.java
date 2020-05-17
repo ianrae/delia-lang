@@ -13,7 +13,7 @@ public class BDDTestRunner {
 	private Log log = new UnitTestLog();
 	private int testIndexToRun = -1;
 	public int numSkippedTests;
-	private DBInterface retainedDBinterface;
+	private ZDBInterfaceFactory retainedDBinterface;
 	private ZDBInterfaceFactory retainedZDB;
 	private DBInterfaceCreator creator;
 	
@@ -21,7 +21,7 @@ public class BDDTestRunner {
 		this.creator = creator;
 	}
 
-	public int runTests(List<BDDTest> tests, DBInterface dbInterface) {
+	public int runTests(List<BDDTest> tests, ZDBInterfaceFactory dbInterface) {
 		int numPass = 0;
 		BDDFeature currentFeature = null;
 		int index = 0;

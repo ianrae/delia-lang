@@ -5,6 +5,7 @@ import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.ResultSetToDValConverter;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -339,7 +340,7 @@ public class H2BDDTests extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
+	public ZDBInterfaceFactory createForTest() {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
 		dbInterfaceToUse = db;

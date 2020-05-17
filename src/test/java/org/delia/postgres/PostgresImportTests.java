@@ -22,6 +22,8 @@ import org.delia.h2.H2ConnectionHelper;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -125,7 +127,8 @@ public class PostgresImportTests  extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 }

@@ -26,6 +26,7 @@ import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
+import org.delia.zdb.InstrumentedZDBInterface;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -166,7 +167,7 @@ public class PostgresTests {
 	}
 	
 	//--
-	protected InstrumentedDBInterface dbInterface;
+	protected InstrumentedZDBInterface dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected Runner runner;
 	protected Log log = new UnitTestLog();

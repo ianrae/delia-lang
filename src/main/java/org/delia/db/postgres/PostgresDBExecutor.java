@@ -119,7 +119,7 @@ public class PostgresDBExecutor implements DBExecutor {
 
 	@Override
 	public FetchRunner createFetchRunner(FactoryService factorySvc) {
-		return new FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
+		return null;//TODOfixnew FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
 	}
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {

@@ -133,7 +133,7 @@ public class H2DBExecutor implements DBExecutor {
 
 	@Override
 	public FetchRunner createFetchRunner(FactoryService factorySvc) {
-		return new FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
+		return null; //TODOfixnew FetchRunnerImpl(factorySvc, this, dbctx.registry, dbctx.varEvaluator);
 	}
 
 	@Override

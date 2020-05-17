@@ -32,6 +32,8 @@ import org.delia.runner.ConversionResult;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -419,8 +421,9 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
