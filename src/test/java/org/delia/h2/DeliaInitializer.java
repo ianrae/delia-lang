@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaFactory;
+import org.delia.assoc.DatIdMap;
 import org.delia.base.DBHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -76,7 +77,7 @@ public class DeliaInitializer {
 	}
 	
 	public SchemaMigrator createSchemaMigrator() {
-		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), new DoNothingVarEvaluator(), null);
+		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), new DoNothingVarEvaluator(), new DatIdMap());
 		return migrator;
 	}
 }

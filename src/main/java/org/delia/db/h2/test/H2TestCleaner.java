@@ -4,13 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.delia.core.FactoryService;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBHelper;
-import org.delia.db.DBInterface;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
-import org.delia.db.SchemaContext;
 import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
@@ -60,6 +56,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, "Flight2");
 			safeDeleteTable(executor, "BASE");
 			safeDeleteTable(executor, "BASE2");
+			safeDeleteTable(executor, "Category");
 
 			String tbl = SchemaMigrator.SCHEMA_TABLE;
 			safeDeleteTable(executor, tbl.toLowerCase());

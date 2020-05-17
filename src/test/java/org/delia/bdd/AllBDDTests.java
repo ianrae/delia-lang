@@ -259,6 +259,7 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR2150() {
 		enableAllFileCheck = false;
+		enableMigration = true;
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
 		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);

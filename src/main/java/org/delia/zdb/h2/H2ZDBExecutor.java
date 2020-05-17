@@ -347,7 +347,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 
 	@Override
 	public void deleteTable(String tableName) {
-		failIfNotInit1(); 
+		//failIfNotInit1(); 
 		String sql = String.format("DROP TABLE IF EXISTS %s;", tableName);
 		execSqlStatement(sql);
 	}
