@@ -95,20 +95,17 @@ public class AssocTableCreator extends ServiceBase {
 		sc.nl();
 		int index = 0;
 		List<SqlElement> fieldL = new ArrayList<>();
-		int n = leftType.getAllFields().size();
 		for(TypePair pair: leftType.getAllFields()) {
 			if (isManyToManyRelation(pair, leftType)) {
-				//pair is cust when dtype is Address. so firstcol is addr id called 'cust'
-				TypePair copy = new TypePair("leftv", pair.type);
+				RelationInfo relinfo = DRuleHelper.findManyToManyRelation(pair, leftType);
+				TypePair copy = new TypePair("leftv", relinfo.nearType);
 				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false);
-				RelationInfo otherSide = DRuleHelper.findOtherSideMany(rightType, leftType);
-				field.setIsAssocTblField(rightType.fieldIsOptional(otherSide.fieldName));
+				field.setIsAssocTblField(false); //rightType.fieldIsOptional(otherSide.fieldName));
 				fieldL.add(field);
 
-				TypePair xx = DValueHelper.findPrimaryKeyFieldPair(rightType);
-				copy = new TypePair("rightv", xx.type);
+				copy = new TypePair("rightv", relinfo.farType);
 				field = fieldgenFactory.createFieldGen(registry, copy, rightType, false);
-				field.setIsAssocTblField(leftType.fieldIsOptional(pair.name));
+				field.setIsAssocTblField(false); //leftType.fieldIsOptional(pair.name));
 				fieldL.add(field);
 
 				index++;

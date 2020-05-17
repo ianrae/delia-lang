@@ -302,7 +302,7 @@ public class H2BDDTests extends NewBDDBase {
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR500File("t0-relation-many-to-many.txt", 11);
 //		runR2100File("t0-migration10.txt", 2);
-		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
 	}
 	
 	//---

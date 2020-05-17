@@ -177,33 +177,25 @@ public class InsertFragmentParser extends SelectFragmentParser {
 
 		//struct is Address AddressCustomerAssoc
 		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
-			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval, info);
+			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval);
 		} else {
-			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval, info);
+			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval);
 		}
 		return true;
 	}
 
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
-			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
+			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval) {
 		
-		String field1 = assocTblMgr.getAssocLeftField(info.nearType, info.farType);
-		String field2 = assocTblMgr.getAssocRightField(info.nearType, info.farType);
-		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		genxrow(assocInsertFrag, field1, keyPair1, mainDVal);
+		String field1 = assocTblMgr.getAssocLeftField(nearType, farType);
+		String field2 = assocTblMgr.getAssocRightField(nearType, farType);
+		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
+		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
+		
+		DValue pk = mainDVal.asStruct().getField(keyPair1.name);
+		
+		genxrow(assocInsertFrag, field1, keyPair1, pk);
 		genxrow(assocInsertFrag, field2, keyPair2, xdval);
-		
-		
-//		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-//		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-//		if (mainDValFirst) {
-//			genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
-//			genxrow(assocInsertFrag, "rightv", keyPair2, xdval);
-//		} else {
-//			genxrow(assocInsertFrag, "leftv", keyPair1, xdval);
-//			genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
-//		}
 	}
 
 	private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {

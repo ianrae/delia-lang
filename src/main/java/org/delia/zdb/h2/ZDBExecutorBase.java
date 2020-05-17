@@ -135,6 +135,12 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		for(DValue dval: statement.paramL) {
 			if (dval.getType().isShape(Shape.STRING)) {
 				joiner.add(String.format("'%s'", dval.asString()));
+//			} else if (dval.getType().isRelationShape()) {
+//				DValue fk = dval.asRelation().getForeignKey(); //TODO: fix for composite keys
+//				joiner.add(dval == null ? "null" : fk.asString());
+//			} else if (dval.getType().isStructShape()) {
+//				DValue fk = dval.asRelation().getForeignKey(); 
+//				joiner.add(dval == null ? "null" : fk.asString());
 			} else {
 				joiner.add(dval == null ? "null" : dval.asString());
 			}
