@@ -59,12 +59,11 @@ public class AssocTableCreator extends ServiceBase {
 		generateAssocTable(sc, pair, dtype);
 	}
 	
-	//TODO delete this!
-	public static String createAssocTableName(String tbl1, String tbl2) {
-		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
-		return assocTableName;
-	}
-	
+//	//TODO delete this!
+//	public static String createAssocTableName(String tbl1, String tbl2) {
+//		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
+//		return assocTableName;
+//	}
 	public void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 		String tbl1 = relinfo.nearType.getName();
@@ -202,7 +201,7 @@ public class AssocTableCreator extends ServiceBase {
 	private void doAlterColumnOptional(StrCreator sc, String tableName, String fieldName, boolean b, AssocInfo ainfo) {
 		List<TableInfo> tblInfoL = new ArrayList<>();
 		RelationInfo relinfo = DRuleHelper.findManyToManyRelation(ainfo.pair, ainfo.structType);
-		existSvc.fillTableInfoIfNeeded(tblInfoL, relinfo);
+		existSvc.fillTableInfoIfNeeded(tblInfoL, relinfo, datIdMap);
 		TableInfo tblinfo = tblInfoL.get(0);
 		if (tblinfo.tbl2.equals(tableName)) {
 			doAlterColumnPrefix(sc, tblinfo.assocTblName, "leftv");
@@ -225,5 +224,4 @@ public class AssocTableCreator extends ServiceBase {
 	public String tblName(String tableName) {
 		return nameFormatter.convert(tableName);
 	}
-	
 }

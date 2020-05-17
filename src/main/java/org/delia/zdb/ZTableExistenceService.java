@@ -2,6 +2,7 @@ package org.delia.zdb;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.TableExistenceService;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
@@ -25,7 +26,7 @@ public class ZTableExistenceService implements TableExistenceService {
 	}
 	
 	@Override
-	public int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info) {
+	public int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info, DatIdMap datIdMap) {
 		String tbl1 = info.nearType.getName();
 		String tbl2 = info.farType.getName();
 
@@ -44,7 +45,7 @@ public class ZTableExistenceService implements TableExistenceService {
 		
 		//try tbl1 tbl2 Assoc
 //		String assocTblName = AssocTableCreator.createAssocTableName(tbl1, tbl2);
-		String assocTblName = dbexecutor.getDatIdMap().getAssocTblName(info.getDatId());
+		String assocTblName = datIdMap.getAssocTblName(info.getDatId());
 		if (doesTableExist(assocTblName)) {
 			TableInfo tblinfo = new TableInfo(tbl1, assocTblName);
 			tblinfo.tbl1 = tbl1;

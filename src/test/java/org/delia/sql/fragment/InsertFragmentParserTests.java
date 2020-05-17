@@ -13,6 +13,8 @@ import org.delia.api.MigrationAction;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.dao.DeliaDao;
+import org.delia.db.DBAccessContext;
+import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -213,7 +215,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33", "100", "55");
 		chkNumParams(2, 2);
 	}
@@ -229,8 +231,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "55", "33", "100", "55", "101", "55");
 		chkNumParams(2, 2, 2);
 	}
@@ -246,7 +248,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "100", "5", "100", "55");
 		chkNumParams(2, 2);
 	}
@@ -262,12 +264,11 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerAssoc (leftv, rightv) VALUES(?, ?)");
+		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
 		chkParams(selectFrag, "100", "5", "100", "55", "100", "56");
 		chkNumParams(2, 2, 2);
 	}
-
 
 	//---
 	private InsertFragmentParser fragmentParser;
@@ -328,7 +329,10 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 	}
 	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
 		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
-		AssocTblManager assocTblMgr = null; //TODO fix new AssocTblManager(existSvc, datIdMap);
+		
+		DBAccessContext dbctx = new DBAccessContext(runner);
+		TableExistenceService existSvc = new TableExistenceServiceImpl(delia.getDBInterface(), dbctx);
+		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, dao.getMostRecentSession().getDatIdMap());
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
 		return parser;
 	}

@@ -111,5 +111,8 @@ public class AssocTblManager {
 //		
 //		return null; //trouble
 	}
+	public DatIdMap getDatIdMap() {
+		return datIdMap;
+	}
 	
 }

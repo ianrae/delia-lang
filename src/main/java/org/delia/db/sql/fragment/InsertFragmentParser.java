@@ -165,7 +165,7 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	}
 
 	private int fillTableInfoIfNeeded(List<TableInfo> tblinfoL, RelationInfo info) {
-		return existSvc.fillTableInfoIfNeeded(tblinfoL, info);
+		return existSvc.fillTableInfoIfNeeded(tblinfoL, info, assocTblMgr.getDatIdMap());
 	}
 
 	private boolean genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, DValue xdval, 
