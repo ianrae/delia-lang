@@ -6,14 +6,13 @@ import org.delia.api.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBType;
-import org.delia.db.SchemaContext;
-import org.delia.db.h2.H2DBExecutor;
-import org.delia.db.h2.H2DBInterface;
+import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
+import org.delia.db.sql.prepared.RawStatementGenerator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
@@ -22,7 +21,6 @@ import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.h2.H2ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -148,8 +146,7 @@ public class H2MigrationTests extends TopoTestBase {
 //		xx.getConn().execRawQuery("select * from information_schema.tables");
 //		xx.close();
 		
-		H2DBInterface dbi = (H2DBInterface) dbInterface;
-		dbi.enumerateAllTables(log);
+		doEnumAllTables();
 		
 		log("again...");
 		createNewDelia();
@@ -157,8 +154,7 @@ public class H2MigrationTests extends TopoTestBase {
 		String src = createCustomerType(", x int optional");
 		execTypeStatement(src);
 		log("xxxx");
-		dbi = (H2DBInterface) dbInterface;
-		dbi.enumerateAllTables(log);
+		doEnumAllTables();
 		chkTblExists("Customer");
 
 		execStatement("insert Customer {wid:45, x:50}");
@@ -186,6 +182,19 @@ public class H2MigrationTests extends TopoTestBase {
 		assertEquals(50, dval.asStruct().getField("y").asInt());
 	}
 	
+	private void doEnumAllTables() {
+		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2);
+		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
+		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			SqlStatement statement = new SqlStatement();
+			statement.sql = sql;
+			zexec.getDBConnection().execStatement(statement, null);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	// --
 	private FactoryService factorySvc;
 	
