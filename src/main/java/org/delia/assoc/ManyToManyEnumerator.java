@@ -8,8 +8,7 @@ import org.delia.type.DTypeRegistry;
 
 public class ManyToManyEnumerator {
 	public void visitTypes(DTypeRegistry registry, ManyToManyVisitor visitor) {
-		for(String typeName: registry.getAll()) {
-			DType dtype = registry.getType(typeName);
+		for(DType dtype: registry.getOrderedList()) {
 			if (! dtype.isStructShape()) {
 				continue;
 			}

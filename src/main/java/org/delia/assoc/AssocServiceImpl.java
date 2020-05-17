@@ -48,10 +48,12 @@ public class AssocServiceImpl implements AssocService {
 		int numAdded = newIdVisitor.datIdCounter;
 
 		log.log("DAT ids: %d loaded, %d added", numLoaded, numAdded);
-		if (datIdMap.size() != numLoaded + numAdded) {
+		int numActualRelations = datIdMap.getNumUniqueDatIds();
+		if (numActualRelations != numLoaded + numAdded) {
 			log.logError("DAT ERROR: datIdMap size: %d -- something's wrong", datIdMap.size());
 		}
 	}
+	
 	
 	private void sdfsdf() {
 		//read schema fingerprint

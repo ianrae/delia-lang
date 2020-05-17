@@ -1,5 +1,6 @@
 package org.delia.assoc;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,6 +38,16 @@ public class DatIdMap {
 	//AddressCustomerDat1, so "Address" is left type
 	public boolean isLeftType(String assocTblName, DType dtype) {
 		return assocTblName.startsWith(dtype.getName());
+	}
+	
+	//used for consistency check
+	public int getNumUniqueDatIds() {
+		Map<Integer,String> tmp = new HashMap<>();
+		for(String key: datIdMap.keySet()) {
+			Integer id = datIdMap.get(key);
+			tmp.put(id, "");
+		}
+		return tmp.size();
 	}
 
 }

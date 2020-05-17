@@ -282,6 +282,7 @@ public class H2BDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-many-to-many8.txt", 3);
 		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
+	
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
