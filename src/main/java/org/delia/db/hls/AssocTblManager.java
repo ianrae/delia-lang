@@ -26,20 +26,20 @@ public class AssocTblManager {
 			return assocTblName1;
 		}
 		
-//		String assocTblName2 = buildName(type2, type1);
-//		if (existsMap.containsKey(assocTblName2)) {
-//			return assocTblName2;
-//		}
+		String assocTblName2 = buildName(type2, type1);
+		if (existsMap.containsKey(assocTblName2)) {
+			return assocTblName2;
+		}
 		
 		if (existSvc.doesTableExist(assocTblName1)) {
 			existsMap.put(assocTblName1, "");
 			return assocTblName1;
 		}
 		
-//		if (existSvc.doesTableExist(assocTblName2)) {
-//			existsMap.put(assocTblName2, "");
-//			return assocTblName2;
-//		}
+		if (existSvc.doesTableExist(assocTblName2)) {
+			existsMap.put(assocTblName2, "");
+			return assocTblName2;
+		}
 		
 		DeliaExceptionHelper.throwError("cant-find-assoc-tbl", "Can't find assoc table: %s", assocTblName1);
 		return null; //unknown table flip ? "AddressCustomerAssoc" : "CustomerAddressAssoc"; //type1 on left

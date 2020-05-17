@@ -96,7 +96,7 @@ public class HLSManagerTests extends HLSTestBase {
 	
 	@Before
 	public void init() {
-		createDao();
+		//createDao();
 	}
 
 	private QueryResponse sqlchk(String src, String sqlExpected) {

@@ -8,7 +8,6 @@ import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;

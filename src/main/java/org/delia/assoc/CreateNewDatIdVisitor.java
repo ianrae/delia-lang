@@ -21,6 +21,8 @@ import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.ZDBExecutor;
 
 public class CreateNewDatIdVisitor implements ManyToManyVisitor {
+	public static boolean hackFlag = false; //for unit tests
+	
 	private FactoryService factorySvc;
 	private DTypeRegistry registry;
 	private Log log;
@@ -117,6 +119,21 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private String createAssocTableName(RelationInfo relInfo) {
 		String s1 = relInfo.nearType.getName();
 		String s2 = relInfo.farType.getName();
+		
+		if (hackFlag) {
+			String tblName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt);
+			if (this.dbexecutor.doesTableExist(tblName)) {
+				nextAssocNameInt++;
+				return tblName;
+			} else {
+				tblName = String.format("%s%sDat%d", s2, s1, nextAssocNameInt);
+				if (this.dbexecutor.doesTableExist(tblName)) {
+					nextAssocNameInt++;
+					return tblName;
+				}
+			}
+		}
+		
 		String tlbName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt++);
 		return tlbName;
 	}
