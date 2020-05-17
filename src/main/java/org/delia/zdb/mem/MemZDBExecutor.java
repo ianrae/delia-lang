@@ -260,7 +260,9 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public void deleteField(String typeName, String field, int datId) {
 		MemDBTable tbl = tableMap.get(typeName);
 		for(DValue dval: tbl.rowL) {
-			DStructType structType = (DStructType) dval.getType();
+			//subtle. get structType from registry (so is new type definition).
+			//dval.getType may have type definition from a previous run.
+			DStructType structType = (DStructType) registry.getType(typeName);
 			removeFieldFromSingleDVal(dval, field, structType);
 		}
 		

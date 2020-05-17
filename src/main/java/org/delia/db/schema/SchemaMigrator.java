@@ -11,14 +11,11 @@ import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBHelper;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.sort.topo.DeliaTypeSorter;
@@ -38,20 +35,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
 	private String dbFingerprint;
-//	private RawDBExecutor rawExecutor;
-//	private DBExecutor dbexecutor;
 	private ZDBExecutor zexec;
-	private DBAccessContext dbctx;
 	private MigrationRunner migrationRunner;
 	private VarEvaluator varEvaluator;
 	private MigrationOptimizer optimizer;
 
 	public SchemaMigrator(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
-		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-//		this.rawExecutor = dbInterface.createRawExector(dbctx);
-//		this.dbexecutor = dbInterface.createExector(dbctx);
-//		this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
 		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
@@ -69,7 +59,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
 		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec);
-		this.optimizer = new MigrationOptimizer(factorySvc, registry);
+		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
 	}
 	
 	@Override

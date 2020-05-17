@@ -217,6 +217,8 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 				dval.asMap().remove(pair.name);
 			}
 		}
+		DValueImpl dvalimpl = (DValueImpl) dval;
+		dvalimpl.forceType(structType);
 	}
 
 	/**

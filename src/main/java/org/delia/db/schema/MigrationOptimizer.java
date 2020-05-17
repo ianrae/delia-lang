@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBType;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
@@ -19,12 +20,12 @@ public class MigrationOptimizer extends ServiceBase {
 
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
-//	private DBAccessContext dbctx;
+	private boolean isMemDB;
 
-	public MigrationOptimizer(FactoryService factorySvc, DTypeRegistry registry) {
+	public MigrationOptimizer(FactoryService factorySvc, DTypeRegistry registry, DBType dbType) {
 		super(factorySvc);
-//		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		this.registry = registry;
+		this.isMemDB = DBType.MEM.equals(dbType);
 	}
 	
 	public List<SchemaType> optimizeDiffs(List<SchemaType> diffL) {
@@ -44,6 +45,10 @@ public class MigrationOptimizer extends ServiceBase {
 	 * @return
 	 */
 	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
+		if (isMemDB) {
+			return diffL; //we need to modify parent relations too in MEM db
+		}
+		
 		List<SchemaType> newlist = new ArrayList<>();
 		List<SchemaType> manyToManyList = new ArrayList<>();
 		for(SchemaType st: diffL) {
