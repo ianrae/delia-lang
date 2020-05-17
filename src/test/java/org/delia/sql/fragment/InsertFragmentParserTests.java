@@ -17,6 +17,7 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.hls.AssocTblManager;
+import org.delia.db.hls.TestCreatorHelper;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
@@ -27,6 +28,8 @@ import org.delia.runner.ConversionResult;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZTableExistenceService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -324,6 +327,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 
 		InsertFragmentParser parser = createParser(dao, tblInfoL); 
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
+		TestCreatorHelper.createTable(dao.getDbInterface(), "AddressCustomerDat1");
 
 		return parser;
 	}
@@ -331,7 +335,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
 		
 		DBAccessContext dbctx = new DBAccessContext(runner);
-		TableExistenceService existSvc = new TableExistenceServiceImpl(delia.getDBInterface(), dbctx);
+		ZDBExecutor zexec = dao.getDbInterface().createExecutor(); //don't worry about closing, is MME
+		TableExistenceService existSvc = new ZTableExistenceService(zexec);
 		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, dao.getMostRecentSession().getDatIdMap());
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
 		return parser;

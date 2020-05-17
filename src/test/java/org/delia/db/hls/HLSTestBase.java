@@ -156,13 +156,7 @@ public class HLSTestBase extends NewBDDBase {
 	}
 	
 	private void createTable(MemZDBInterfaceFactory db, String tableName) {
-		try(ZDBExecutor zexec = db.createExecutor()) {
-			zexec.createTable(tableName);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		TestCreatorHelper.createTable(db, tableName);
 	}
 
 	protected String buildSrc() {
