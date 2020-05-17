@@ -306,7 +306,8 @@ public class AllBDDTests extends NewBDDBase {
 		enableMigration = true;
 		
 //		runR2150File("t0-migrate-one-to-many1.txt", 3);
-		runR2150File("t0-migrate-one-to-one1.txt", 3);
+//		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 
 	}
 	

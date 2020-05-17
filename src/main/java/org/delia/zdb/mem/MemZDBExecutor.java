@@ -1,15 +1,11 @@
 package org.delia.zdb.mem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.assoc.DatIdMap;
-import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
-import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.InsertContext;
 import org.delia.db.InternalException;
@@ -19,14 +15,9 @@ import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
-import org.delia.db.memdb.OpRowSelector;
-import org.delia.db.memdb.PrimaryKeyRowSelector;
 import org.delia.db.memdb.RowSelector;
-import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
-import org.delia.rule.rules.RelationManyRule;
-import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
@@ -35,36 +26,20 @@ import org.delia.runner.ZFetchRunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.DValueImpl;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.util.DeliaExceptionHelper;
-import org.delia.validation.ValidationRuleRunner;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
-public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
+public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
-	private DTypeRegistry registry;
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
 
-	private Map<String,MemDBTable> tableMap;
-	private ZStuff stuff; //created lazily
-	DateFormatService fmtSvc;
-	public boolean createTablesAsNeededFlag = true;
-	private MemZDBInterfaceFactory dbInterface;
-
 
 	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
-		super(factorySvc);
-		this.dbInterface = dbInterface;
-		this.tableMap = dbInterface.createSingleMemDB();
-		this.log = factorySvc.getLog();
-		this.et = factorySvc.getErrorTracker();
-		this.fmtSvc = factorySvc.getDateFormatService();
+		super(factorySvc, dbInterface);
 	}
 
 	@Override
@@ -106,136 +81,23 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 		return qresp;
 	}
 
-	private QueryResponse doExecuteQuery(QuerySpec spec, QueryContext qtx) {
-		QueryResponse qresp = new QueryResponse();
-		RowSelector selector = createSelector(spec); 
-		if (selector == null) {
-			//err!!
-			return qresp;
-		} else {
-			List<DValue> dvalList = selector.match(selector.getTbl().rowL);
-			if (selector.wasError()) {
-				//err!!
-				qresp.ok = false;
-				return qresp;
-			}
-
-			//add fks if needed
-			if (qtx.loadFKs) {
-				for(DValue dval: dvalList) {
-					addAnyFKs(dval);
-				}
-			} else if (qtx.pruneParentRelationFlag) {
-				dvalList = removeParentSideRelations(dvalList);
-			}
-			//TODO: if query does NOT include fks or fetch then we should
-			//remove all parent side relations
-
-			qresp.dvalList = dvalList;
-			qresp.ok = true;
-			return qresp;
-		}
-	}
-	private List<DValue> removeParentSideRelations(List<DValue> dvalList) {
-		List<DValue> list = new ArrayList<>();
-		for(DValue dval: dvalList) {
-			dval = removeParentSideRelationsOne(dval);
-			list.add(dval);
-		}
-
-		return list;
-	}
-	private DValue removeParentSideRelationsOne(DValue dval) {
-		if (! dval.getType().isStructShape()) {
-			return dval;
-		}
-		DStructType structType = (DStructType) dval.getType();
-		List<String> doomedL =  new ArrayList<>();
-		for(TypePair pair: structType.getAllFields()) {
-			RelationOneRule oneRule = DRuleHelper.findOneRule(structType, pair.name);
-			if (oneRule != null) {
-				if (oneRule.relInfo != null && oneRule.relInfo.isParent) {
-					doomedL.add(pair.name);
-				}
-			} else {
-				RelationManyRule manyRule = DRuleHelper.findManyRule(structType, pair.name);
-				if (manyRule != null) {
-					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
-						doomedL.add(pair.name);
-					}
-				}
-			}
-		}
-
-		//clone without doomed fields
-		if (doomedL.isEmpty()) {
-			return dval;
-		}
-
-		Map<String,DValue> cloneMap = new TreeMap<>(dval.asMap());
-		for(String doomed: doomedL) {
-			cloneMap.remove(doomed);
-		}
-
-		DValueImpl clone = new DValueImpl(structType, cloneMap);
-		return clone;
-	}
-
 	@Override
 	public FetchRunner createFetchRunner() {
+		return doCreateFetchRunner();
+	}
+	@Override
+	public FetchRunner doCreateFetchRunner() {
 		return new ZFetchRunnerImpl(factorySvc, this, registry, varEvaluator);
 	}
 
 
-	private void addAnyFKs(DValue dval) {
-		FetchRunner fetchRunner = createFetchRunner();
-		ValidationRuleRunner ruleRunner = new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
-		ruleRunner.enableRelationModifier(true);
-		ruleRunner.setPopulateFKsFlag(true);
-		ruleRunner.validateRelationRules(dval);
-	}
-
-	private RowSelector createSelector(QuerySpec spec) {
-		String typeName = spec.queryExp.getTypeName();
-		MemDBTable tbl = tableMap.get(typeName);
-		if (tbl == null) {
-			tbl = handleUnknownTable(typeName);
-		}
-
-		ZStuff stuff = findOrCreateStuff();
-		RowSelector selector;
-		QueryType queryType = stuff.queryDetectorSvc.detectQueryType(spec);
-		switch(queryType) {
-		case ALL_ROWS:
-			selector = new AllRowSelector();
-			break;
-		case OP:
-			selector = new OpRowSelector();
-			break;
-		case PRIMARY_KEY:
-		default:
-			selector = new PrimaryKeyRowSelector();
-		}
-
-		selector.setTbl(tbl);
-		DStructType dtype = findType(typeName); 
-		if (dtype == null) {
-			DeliaExceptionHelper.throwError("struct-unknown-type-in-query", "unknown struct type '%s'", typeName);
-		}
-
-		selector.init(et, spec, dtype, registry); 
-		if (selector.wasError()) {
-			DeliaError err = et.add("row-selector-error", String.format("row selector failed for type '%s'", typeName));
-			throw new DBException(err);
-		}
-		return selector;
-	}
 	/**
 	 * for unit tests we want to explicitly create tables during test startup.
 	 * But at other times we want to create tables as needed.
 	 * @param typeName a registered type
 	 */
-	private MemDBTable handleUnknownTable(String typeName) {
+	@Override
+	public MemDBTable handleUnknownTable(String typeName) {
 		if (createTablesAsNeededFlag) {
 			this.rawCreateTable(typeName);
 			return tableMap.get(typeName);
@@ -244,15 +106,6 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 			throw new DBException(err);
 		}
 	}
-
-	private DStructType findType(String typeName) {
-		DStructType structType = registry.findTypeOrSchemaVersionType(typeName);
-//		if (structType == null) {
-//			DeliaExceptionHelper.throwError("type-not-found", "Can't find type '%s'", typeName);
-//		}
-		return structType;
-	}
-
 
 	@Override
 	public boolean rawTableDetect(String tableName) {
@@ -290,8 +143,6 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, assocCrudMap);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
-			//				qresp.ok = false;
-			//				qresp.err = e.getLastError();
 		}
 		return numRowsAffected;
 	}
@@ -311,8 +162,6 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 			numRowsAffected = doExecuteUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
-			//				qresp.ok = false;
-			//				qresp.err = e.getLastError();
 		}
 		return numRowsAffected;
 	}
@@ -335,8 +184,6 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 			qresp = doExecuteDelete(spec);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
-			//				qresp.ok = false;
-			//				qresp.err = e.getLastError();
 		}
 	}
 	private QueryResponse doExecuteDelete(QuerySpec spec) {
@@ -429,20 +276,6 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 		//nothing to do
 	}
 
-	/**
-	 * Ugly. we need a serial provider per registry (really per runner i thinkg)
-	 * TODO fix later
-	 * @param ctx db context
-	 * @return stuff
-	 */
-	private ZStuff findOrCreateStuff() {
-		if (stuff == null) {
-			stuff = new ZStuff();
-			stuff.init(factorySvc, registry, dbInterface.getSerialMap());
-		}
-		return stuff;
-	}
-
 	void checkUniqueness(DValue dval, MemDBTable tbl, String typeName, DValue existing, boolean allowMissing) {
 		//TODO: later support types without primarykey
 		List<TypePair> candidates = DValueHelper.findAllUniqueFieldPair(dval.getType());
@@ -478,18 +311,9 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 				}
 			}
 
-			//				Exp xx = createExpFor(inner);
-			//				FilterOpExp cond0 = new FilterOpExp(0, new IdentExp(uniqueField), new StringExp("=="), xx);
-			//				FilterOpFullExp cond = new FilterOpFullExp(0, cond0);
-			//				
-			////				FilterExp filter = new FilterExp(99, new StringExp(inner.asString()));
-			//				FilterExp filter = new FilterExp(99, cond);
 			QuerySpec spec = new QuerySpec();
-			//				spec.queryExp = new QueryExp(99, new IdentExp(typeName), filter, null);
-
 			QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 			spec.queryExp = builderSvc.createEqQuery(typeName, uniqueField, inner);
-
 
 			spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 			spec.evaluator.init(spec.queryExp);

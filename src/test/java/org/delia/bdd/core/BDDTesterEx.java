@@ -18,7 +18,6 @@ import org.delia.bdd.core.checker.StructChecker;
 import org.delia.bdd.core.checker.ValueChecker;
 import org.delia.bdd.core.checker.ValueCheckerBase;
 import org.delia.client.ClientTests.DeliaClient;
-import org.delia.db.DBInterface;
 import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;

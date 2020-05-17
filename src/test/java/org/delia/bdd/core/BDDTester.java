@@ -27,9 +27,6 @@ public class BDDTester {
 		initter = new DeliaInitializer();
 		runner = initter.init(DBType.MEM, log);
 		qhelper = new BDDQueryHelper(initter, runner);
-
-		//			setupTypes();
-		//			addData();
 	}
 
 	public boolean chkString(String delia, String expected) {
