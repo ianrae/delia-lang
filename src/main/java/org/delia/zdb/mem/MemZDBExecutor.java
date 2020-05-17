@@ -246,7 +246,11 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	}
 
 	private DStructType findType(String typeName) {
-		return registry.findTypeOrSchemaVersionType(typeName);
+		DStructType structType = registry.findTypeOrSchemaVersionType(typeName);
+		if (structType == null) {
+			DeliaExceptionHelper.throwError("type-not-found", "Can't find type '%s'", typeName);
+		}
+		return structType;
 	}
 
 
