@@ -11,15 +11,10 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.NewLegacyRunner;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
-import org.delia.runner.QueryResponse;
-import org.delia.runner.ResultValue;
-import org.delia.runner.Runner;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 

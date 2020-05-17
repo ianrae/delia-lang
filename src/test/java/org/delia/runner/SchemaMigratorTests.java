@@ -7,7 +7,6 @@ import java.util.List;
 import org.delia.base.DBHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.error.ErrorTracker;

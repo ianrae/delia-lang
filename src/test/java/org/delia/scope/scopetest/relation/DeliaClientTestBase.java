@@ -7,8 +7,6 @@ import org.delia.api.DeliaFactory;
 import org.delia.api.DeliaSession;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
