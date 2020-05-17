@@ -36,6 +36,7 @@ public class ConfigureTests extends ScopeTestBase {
 	@Before
 	public void init() {
 		initRunner();
+		runner.begin("");
 	}
 	
 	private Object runConfigureStatement(String varName, String valStr) {

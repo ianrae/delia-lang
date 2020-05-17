@@ -5,10 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.delia.assoc.DatIdMap;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
 import org.delia.log.Log;
@@ -66,7 +63,6 @@ public class TableCreatorTests {
 //	}
 //	
 	// --
-	private ZDBInterfaceFactory dbInterface;
 	private TableCreator tblCreator;
 	private Log log = new UnitTestLog();
 	private RunnerHelper helper = new RunnerHelper();
@@ -77,7 +73,7 @@ public class TableCreatorTests {
 		return runner;
 	}
 	private TableCreator createTableCreator(NewLegacyRunner runner)  {
-		TableExistenceService existSvc = new ZTableExistenceService(dbInterface);
+		TableExistenceService existSvc = new ZTableExistenceService(runner.getDelia().getDBInterface());
 		FactoryService factorySvc = runner.getFactoryService();
 		DatIdMap datIdMap = new DatIdMap();
 		tblCreator = new TableCreator(factorySvc, runner.getRegistry(), new FieldGenFactory(factorySvc), new SimpleSqlNameFormatter(), existSvc, datIdMap);

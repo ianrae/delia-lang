@@ -54,7 +54,7 @@ public class FragmentParserService extends ServiceBase {
 		
 		//TODO: this is bad. fix! should not be using dbexecutor
 //		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
-		this.existSvc = new ZTableExistenceService(dbInterface);
+		this.existSvc = (dbInterface == null) ? null : new ZTableExistenceService(dbInterface);
 	}
 
 	public QueryTypeDetector createQueryTypeDetector() {

@@ -57,7 +57,7 @@ public class ZDBTests  extends NewBDDBase {
 	}
 
 	@Test
-	public void testH2() {
+	public void testH2() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
 		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(factorySvc, connFact);
 		
@@ -81,6 +81,7 @@ public class ZDBTests  extends NewBDDBase {
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
 		DValue newDatIdValue = dbexec.rawInsert(dval, ictx);
 		assertEquals(1, newDatIdValue.asInt());
+		dbexec.close();
 	}
 
 	// --
