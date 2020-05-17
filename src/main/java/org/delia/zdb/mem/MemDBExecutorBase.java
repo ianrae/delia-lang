@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -19,16 +18,21 @@ import org.delia.db.memdb.PrimaryKeyRowSelector;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
+import org.delia.relation.RelationInfo;
+import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.DValueImpl;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRuleRunner;
 
@@ -174,8 +178,46 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 		DStructType structType = registry.findTypeOrSchemaVersionType(typeName);
 		return structType;
 	}
+	
+	protected void removeFetchedItems(DValue dval, String typeName, String fieldName) {
+		DStructType targetStructType = (DStructType) registry.getType(typeName);
+		if (targetStructType == null) {
+			return;
+		}
+		
+		for(DRule rule: dval.getType().getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				removeFromRelationFetchedItems(dval, rr.relInfo, targetStructType, fieldName);
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				removeFromRelationFetchedItems(dval, rr.relInfo, targetStructType, fieldName);
+			}
+		}
+	}
+	
+	private void removeFromRelationFetchedItems(DValue dval, RelationInfo relInfo, DStructType structType, String fieldName) {
+		if (DValueHelper.typesAreSame(relInfo.farType, structType)) {
+			DValue inner = dval.asStruct().getField(relInfo.fieldName);
+			if (inner != null) {
+				DRelation drel = inner.asRelation();
+				if (drel.haveFetched()) {
+					for(DValue x: drel.getFetchedItems()) {
+						removeFieldFromSingleDVal(x, fieldName, structType);
+					}
+				}
+			}
+		}
+	}
 
 
+	protected void removeFieldFromSingleDVal(DValue dval, String fieldName, DStructType structType) {
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.name.equals(fieldName)) {
+				dval.asMap().remove(pair.name);
+			}
+		}
+	}
 
 	/**
 	 * Ugly. we need a serial provider per registry (really per runner i thinkg)

@@ -258,8 +258,20 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
 	@Override
 	public void deleteField(String typeName, String field, int datId) {
-		//nothing to do
+		MemDBTable tbl = tableMap.get(typeName);
+		for(DValue dval: tbl.rowL) {
+			DStructType structType = (DStructType) dval.getType();
+			removeFieldFromSingleDVal(dval, field, structType);
+		}
+		
+		for(String tblName: tableMap.keySet()) {
+			tbl = tableMap.get(tblName);
+			for(DValue dval: tbl.rowL) {
+				removeFetchedItems(dval, typeName, field);
+			}
+		}
 	}
+
 
 	@Override
 	public void renameField(String typeName, String fieldName, String newName) {

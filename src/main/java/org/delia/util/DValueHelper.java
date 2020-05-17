@@ -15,19 +15,17 @@ import org.delia.type.PrimaryKeyValue;
 import org.delia.type.TypePair;
 
 public class DValueHelper {
-
-//	public static String findUniqueField(DType inner) {
-//		if (! inner.isStructShape()) {
-//			return null;
-//		}
-//		TypePair pair = findPrimaryKeyFieldPair(inner); 
-//		if (pair == null) {
-//			return null;
-//		} else {
-//			return pair.name;
-//		}
-//	}
 	
+	public static boolean typesAreSame(DType type1, DType type2) {
+		if (type1 == type2) {
+			return true;
+		} else if (type1.getName().equals(type2.getName())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public static DValue findPrimaryKeyValue(DValue dval) {
 		if (! dval.getType().isStructShape()) {
 			return null;
