@@ -3,8 +3,6 @@ package org.delia.db;
 import org.delia.assoc.DatIdMap;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
-//import org.delia.db.sql.prepared.InsertStatementGenerator;
-import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
@@ -16,7 +14,7 @@ public interface SqlHelperFactory {
 	ValueHelper createValueHelper();
 	FieldGenFactory createFieldGenFactory();
 	DBErrorConverter createErrorConverter();
-	PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx);
+//	PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx);
 //	InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc);
 	SqlNameFormatter createNameFormatter(DBAccessContext dbctx);
 //	FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc);

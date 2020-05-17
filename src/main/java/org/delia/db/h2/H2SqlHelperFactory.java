@@ -9,12 +9,10 @@ import org.delia.db.DBInterface;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.ValueHelper;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
-import org.delia.db.sql.prepared.PreparedStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.TableCreator;
@@ -45,11 +43,11 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	public DBErrorConverter createErrorConverter() {
 		return new H2ErrorConverter();
 	}
-	@Override
-	public PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx) {
-		PreparedStatementGenerator sqlgen = new PreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator, existSvc);
-		return sqlgen;
-	}
+//	@Override
+//	public PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx) {
+//		PreparedStatementGenerator sqlgen = new PreparedStatementGenerator(factorySvc, dbctx.registry, this, dbctx.varEvaluator, existSvc);
+//		return sqlgen;
+//	}
 //	@Override
 //	public InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc) {
 //		SqlNameFormatter nameFormatter = createNameFormatter(dbctx);
