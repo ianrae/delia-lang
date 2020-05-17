@@ -12,7 +12,6 @@ import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;
-import org.delia.db.InstrumentedDBInterface;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
@@ -157,7 +156,6 @@ public class H2Tests {
 	}
 
 	//--
-	protected InstrumentedDBInterface dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected Runner runner;
 	protected Log log = new UnitTestLog();

@@ -18,7 +18,6 @@ import org.delia.bdd.core.checker.StructChecker;
 import org.delia.bdd.core.checker.ValueChecker;
 import org.delia.bdd.core.checker.ValueCheckerBase;
 import org.delia.client.ClientTests.DeliaClient;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
@@ -29,6 +28,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.valuebuilder.IntegerValueBuilder;
 import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class BDDTesterEx {
 	private static class NumberChecker extends ValueCheckerBase {
@@ -77,9 +77,9 @@ public class BDDTesterEx {
 		}
 		client = new DeliaClient(dbInterface);
 		
-		if (dbInterface instanceof MemDBInterface) {
-			MemDBInterface memdb = (MemDBInterface) dbInterface;
-			memdb.createTablesAsNeededFlag = true;
+		if (dbInterface instanceof MemZDBInterfaceFactory) {
+			MemZDBInterfaceFactory memdb = (MemZDBInterfaceFactory) dbInterface;
+			//memdb.createTablesAsNeededFlag = true;
 		}
 		
 		if (cleanTables != null) {

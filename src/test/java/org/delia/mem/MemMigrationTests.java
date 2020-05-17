@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.api.DeliaFactory;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBAccessContext;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
 import org.delia.sort.topo.TopoTestBase;
 import org.delia.type.DStructType;

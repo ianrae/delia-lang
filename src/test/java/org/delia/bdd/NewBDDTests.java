@@ -1,6 +1,6 @@
 package org.delia.bdd;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,6 @@ import org.delia.bdd.core.BDDParser;
 import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.BDDTester;
-import org.delia.core.FactoryService;
-import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
-import org.delia.error.SimpleErrorTracker;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;

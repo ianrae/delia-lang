@@ -9,7 +9,6 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.QuerySpec;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.where.InPhrase;
 import org.delia.db.sql.where.LogicalPhrase;
 import org.delia.db.sql.where.SqlWhereConverter;

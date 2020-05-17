@@ -11,8 +11,6 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
@@ -70,10 +68,10 @@ public class ReplRunner  {
 		dbInterface = delia.getDBInterface();
 		dbInterface.getCapabilities().setRequiresSchemaMigration(true);
 		dbInterface.enableSQLLogging(false);
-		if (dbInterface instanceof MemDBInterface) {
-			MemDBInterface memdb = (MemDBInterface) dbInterface;
-			memdb.createTablesAsNeededFlag = true;
-		}
+//		if (dbInterface instanceof MemZDBInterfaceFactory) {
+//			MemDBInterface memdb = (MemDBInterface) dbInterface;
+//			memdb.createTablesAsNeededFlag = true;
+//		}
 		
 		for(Cmd cmdx: allCmdsL) {
 			CmdBase cmd = (CmdBase) cmdx;

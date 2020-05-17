@@ -1,6 +1,5 @@
 package org.delia.rule;
 
-import org.delia.db.memdb.MemDBInterface;
 import org.junit.Before;
 import org.junit.Test;
 

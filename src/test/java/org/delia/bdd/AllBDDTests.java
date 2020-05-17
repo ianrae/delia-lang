@@ -1,8 +1,6 @@
 package org.delia.bdd;
 
 import org.delia.bdd.core.BDDTesterEx;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;

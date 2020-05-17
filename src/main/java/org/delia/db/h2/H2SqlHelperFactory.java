@@ -5,7 +5,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
-import org.delia.db.DBInterface;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceService;
@@ -20,15 +19,8 @@ import org.delia.db.sql.where.SqlWhereConverter;
 
 public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory {
 
-	protected DBInterface dbInterface;
-
 	public H2SqlHelperFactory(FactoryService factorySvc) {
 		super(factorySvc);
-	}
-	
-	@Override
-	public void init(DBInterface dbInterface) {
-		this.dbInterface = dbInterface;
 	}
 	
 	@Override
