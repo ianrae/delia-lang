@@ -24,6 +24,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.RawDBExecutor;
 import org.delia.db.SchemaContext;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.memdb.SerialProvider.SerialGenerator;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.error.DeliaError;
@@ -62,7 +63,8 @@ public class MemDBInterface implements DBInterface, DBInterfaceInternal {
 		public void init(FactoryService factorySvc, DBAccessContext dbctx) {
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, dbctx.registry);
 			if (serialProvider == null) {
-				this.serialProvider = new SerialProvider(factorySvc, dbctx.registry);
+				Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
+				this.serialProvider = new SerialProvider(factorySvc, dbctx.registry, serialMap);
 			} else {
 				//we want to keep the serial providers so don't generate ids already used
 				this.serialProvider.setRegistry(dbctx.registry);

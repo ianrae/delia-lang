@@ -438,7 +438,7 @@ public class MemZDBExecutor extends ServiceBase implements ZDBExecutor {
 	private ZStuff findOrCreateStuff() {
 		if (stuff == null) {
 			stuff = new ZStuff();
-			stuff.init(factorySvc, registry);
+			stuff.init(factorySvc, registry, dbInterface.getSerialMap());
 		}
 		return stuff;
 	}

@@ -8,6 +8,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
+import org.delia.db.memdb.SerialProvider.SerialGenerator;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.DValueImpl;
@@ -19,6 +20,8 @@ import org.delia.zdb.ZDBInterfaceFactory;
 public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
 	private DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
+	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
+	
 
 	public MemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
@@ -61,6 +64,9 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	
 	@Override
 	public void performTypeReplacement(TypeReplaceSpec spec) {
+		//autocreate if needed
+		createSingleMemDB();
+		
 		for (String typeName: tableMap.keySet()) {
 			MemDBTable tbl = tableMap.get(typeName);
 			for(DValue dval: tbl.rowL) {
@@ -84,6 +90,11 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	@Override
 	public ZDBExecutor createExecutor() {
 		return new MemZDBExecutor(factorySvc, this);
+	}
+	
+	
+	public Map<String, SerialGenerator> getSerialMap() {
+		return serialMap;
 	}
 
 }

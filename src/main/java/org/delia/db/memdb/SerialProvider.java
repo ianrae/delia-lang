@@ -55,10 +55,11 @@ public class SerialProvider extends ServiceBase {
 	private ScalarValueBuilder scalarBuilder;
 	
 	
-	public SerialProvider(FactoryService factorySvc, DTypeRegistry registry) {
+	public SerialProvider(FactoryService factorySvc, DTypeRegistry registry, Map<String,SerialGenerator> map) {
 		super(factorySvc);
 		this.registry = registry;
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
+		this.map = map;
 	}
 
 	public DValue generateSerialValue(DStructType structType, TypePair pair) {

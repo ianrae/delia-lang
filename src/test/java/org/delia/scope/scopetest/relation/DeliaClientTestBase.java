@@ -38,8 +38,8 @@ public class DeliaClientTestBase {
 //		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 	}
 	protected void enableAutoCreateTables() {
-		MemDBInterface memdb = (MemDBInterface) dbInterface;
-		memdb.createTablesAsNeededFlag = true;
+//		MemDBInterface memdb = (MemDBInterface) dbInterface;
+//		memdb.createTablesAsNeededFlag = true;
 	}
 	
 	protected void createType(String type, String relField) {

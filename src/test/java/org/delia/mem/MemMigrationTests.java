@@ -112,8 +112,8 @@ public class MemMigrationTests extends TopoTestBase {
 	@Before
 	public void init() {
 		super.init();
-		MemDBInterface memDBInterface = (MemDBInterface) dbInterface;
-		memDBInterface.createTablesAsNeededFlag = false;
+//		MemDBInterface memDBInterface = (MemDBInterface) dbInterface;
+//		memDBInterface.createTablesAsNeededFlag = false;
 		dbInterface.getCapabilities().setRequiresSchemaMigration(true);
 	}
 
