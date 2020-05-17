@@ -2,9 +2,6 @@ package org.delia.repl;
 
 import org.delia.api.Delia;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
-import org.delia.db.DBInterface;
-import org.delia.db.SchemaContext;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -28,7 +25,6 @@ public class DBDeleteTableCmd extends CmdBase {
 	public ResultValue runCmd(Cmd cmd, ReplRunner runner) {
 		Delia delia = runner.getDelia();
 		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
-		DBAccessContext dbctx = new DBAccessContext(null, null);
 		
 		try(ZDBExecutor exec = dbInterface.createExecutor()) {
 			String tableName = cmd.arg1;

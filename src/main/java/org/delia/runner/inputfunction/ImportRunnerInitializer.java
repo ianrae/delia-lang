@@ -35,6 +35,8 @@ public class ImportRunnerInitializer implements RunnerInitializer {
 		
 		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, runner);
 		ZDBExecutor tmpExecutor = session.getDelia().getDBInterface().createExecutor();
+		tmpExecutor.init1(session.getExecutionContext().registry);
+		tmpExecutor.init2(session.getDatIdMap(), runner);
 		FetchRunner fr = tmpExecutor.createFetchRunner();
 		FetchRunnerFacade frfacade = new FetchRunnerFacade(factorySvc, fr, externalLoader, ispec, metricsObserver);
 		runner.setPrebuiltFetchRunnerToUse(frfacade);

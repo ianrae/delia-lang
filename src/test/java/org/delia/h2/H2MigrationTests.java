@@ -143,7 +143,7 @@ public class H2MigrationTests extends TopoTestBase {
 		assertEquals(1, dval.asStruct().getField("id").asInt());
 		assertEquals(44, dval.asStruct().getField("wid").asInt());
 		
-		H2ZDBExecutor xx = (H2ZDBExecutor) this.dbInterface.createExecutor();
+//		H2ZDBExecutor xx = (H2ZDBExecutor) this.dbInterface.createExecutor();
 //		xx.getConn().execRawQuery("select * from Customer");
 //		xx.getConn().execRawQuery("select * from information_schema.tables");
 //		xx.close();
@@ -205,8 +205,8 @@ public class H2MigrationTests extends TopoTestBase {
 		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 		cleaner.deleteKnownTables(factorySvc, dbInterface);
 		
-		ZDBExecutor dbexecutor = dbInterface.createExecutor();
-		SchemaContext ctx = new SchemaContext();
+//		ZDBExecutor dbexecutor = dbInterface.createExecutor();
+//		SchemaContext ctx = new SchemaContext();
 //		dbexecutor.deleteTable("Address__BAK", ctx);
 //		dbexecutor.deleteTable("Customer__BAK", ctx);
 	}

@@ -114,6 +114,7 @@ public class HLSManagerTests extends HLSTestBase {
 //		ZDBExecutor zexec = delia.getFactoryService().hackGetZDB(session.getExecutionContext().registry, DBType.MEM);
 		ZDBExecutor zexec = delia.getDBInterface().createExecutor();
 		zexec.init1(session.getExecutionContext().registry);
+		zexec.init2(session.getDatIdMap(), varEvaluator);
 		HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 		assertEquals(sqlExpected, result.sql);
 		return result.qresp;

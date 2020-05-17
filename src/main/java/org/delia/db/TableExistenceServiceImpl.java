@@ -29,6 +29,7 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 		//TODO fix. very bad perf
 		boolean exist = false;
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			zexec.init1(dbctx.registry);
 			exist = zexec.doesTableExist(tableName);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
