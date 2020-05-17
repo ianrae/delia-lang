@@ -192,10 +192,10 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
-		DValue pk = mainDVal.asStruct().getField(keyPair1.name);
+		DValue pk = mainDVal.asStruct().getField(keyPair2.name);
 		
-		genxrow(assocInsertFrag, field1, keyPair1, pk);
-		genxrow(assocInsertFrag, field2, keyPair2, xdval);
+		genxrow(assocInsertFrag, field1, keyPair1, xdval);
+		genxrow(assocInsertFrag, field2, keyPair2, pk);
 	}
 
 	private void genxrow(InsertStatementFragment assocInsertFrag, String assocFieldName, TypePair keyPair1, DValue dval) {

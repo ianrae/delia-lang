@@ -279,6 +279,8 @@ public class H2BDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-many-to-many6.txt", 2);
 		runR2150File("t0-migrate-many-to-many6a.txt", 2);
 		runR2150File("t0-migrate-many-to-many7.txt", 0);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	@Test
 	public void testR2200() {
@@ -302,7 +304,7 @@ public class H2BDDTests extends NewBDDBase {
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR500File("t0-relation-many-to-many.txt", 11);
 //		runR2100File("t0-migration10.txt", 2);
-		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	
 	//---

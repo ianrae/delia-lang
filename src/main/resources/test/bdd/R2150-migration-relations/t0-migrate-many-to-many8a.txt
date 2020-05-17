@@ -1,6 +1,6 @@
 # migration-relation tests
 
-FEATURE: migration - many-to-many. relation types different
+FEATURE: migration - many-to-many. relation types different, other way
 background:
  configure loadFKs = true
 thenType: struct
@@ -10,8 +10,8 @@ thenType: struct
 title: MtoN-1
 chainNextTest:true
 given:
- type Customer struct {id int primaryKey, wid int } end
  type Address struct {sid string primaryKey } end
+ type Customer struct {id int primaryKey, wid int } end
 
 when:
   insert Customer { id: 1, wid:33 }
@@ -26,8 +26,8 @@ value:a:Customer {
 title: MtoN-1 - add rel
 chainNextTest:true
 given:
+ type Address struct {sid string primaryKey, relation cust Customer many optional } end
  type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end
- type Address struct {sid string primaryKey, relation cust Customer many } end
 
   insert Customer {id: 2, wid: 34 }
 when:
@@ -43,8 +43,8 @@ value:a:Customer {
 ---
 title: MtoN-1 - add cust 2
 given:
+ type Address struct {sid string primaryKey, relation cust Customer many optional } end
  type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end
- type Address struct {sid string primaryKey, relation cust Customer many } end
 
 when:
   insert Address {sid: '101', cust: 2 }
