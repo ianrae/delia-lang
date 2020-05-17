@@ -10,6 +10,7 @@ import org.delia.runner.ResultValue;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DType;
 import org.delia.typebuilder.TypeBuilder;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * For unit tests only.
@@ -26,7 +27,7 @@ public class LegacyRunner extends RunnerImpl {
 		public boolean legacyTypeMode;
 		private TypeBuilder typeBuilder;
 
-		public LegacyRunner(FactoryService factorySvc, DBInterface dbInterface) {
+		public LegacyRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
 			super(factorySvc, dbInterface);
 		}
 		

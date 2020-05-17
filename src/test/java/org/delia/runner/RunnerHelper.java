@@ -14,18 +14,19 @@ import org.delia.runner.Runner;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 
 
 public class RunnerHelper {
 	private LegacyRunner currentRunner;
 	
-	public LegacyRunner create(FactoryService factorySvc, DBInterface dbInterface) {
+	public LegacyRunner create(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
 		LegacyRunner runner = new LegacyRunner(factorySvc, dbInterface);
 		runner.legacyTypeMode = true; //TODO: remove
 		boolean b = runner.init(null);
 		assertEquals(true, b);
-		dbInterface.init(factorySvc);
+//		dbInterface.init(factorySvc);
 		this.addFakeTypes(runner.getRegistry());
 //		dbInterface.setRegistry(runner.getRegistry());
 //		dbInterface.setVarEvaluator(runner);

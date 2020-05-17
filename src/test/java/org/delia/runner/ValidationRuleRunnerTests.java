@@ -15,6 +15,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.StringValueBuilder;
+import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -103,7 +104,7 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 
 	private FetchRunner createFetchRunner() {
 		DBAccessContext dbctx = runner.createDBAccessContext();
-		DBExecutor dbexecutor = dbInterface.createExector(dbctx);
+		ZDBExecutor dbexecutor = dbInterface.createExecutor();
 		Runner run = runner.getDeliaRunner();
 		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), run);
 		return fetchRunner;

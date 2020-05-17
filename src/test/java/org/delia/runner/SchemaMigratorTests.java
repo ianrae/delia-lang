@@ -14,6 +14,7 @@ import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Test;
 
 /**
@@ -70,17 +71,17 @@ public class SchemaMigratorTests {
 
 	// --
 	//private Runner runner;
-	private MemDBInterface dbInterface;
+	private MemZDBInterfaceFactory dbInterface;
 	private SchemaMigrator migrator;
 	private RunnerHelper helper = new RunnerHelper();
 
 	private Runner initRunner()  {
 		Log log = new SimpleLog();
 		ErrorTracker et = new SimpleErrorTracker(log);
-		dbInterface = new MemDBInterface();
+		FactoryService factorySvc = new FactoryServiceImpl(log, et);
+		dbInterface = new MemZDBInterfaceFactory(factorySvc);
 		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 
-		FactoryService factorySvc = new FactoryServiceImpl(log, et);
 		Runner runner = helper.create(factorySvc, dbInterface);
 
 		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner, null);

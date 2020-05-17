@@ -20,6 +20,7 @@ import org.delia.log.Log;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 
 public class RunnerTestBase {
@@ -27,7 +28,7 @@ public class RunnerTestBase {
 
 	// --
 	//private Runner runner;
-	protected DBInterface dbInterface;
+	protected ZDBInterfaceFactory dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper;
 	protected NewLegacyRunner runner;
