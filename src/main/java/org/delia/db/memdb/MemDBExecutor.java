@@ -120,6 +120,6 @@ public class MemDBExecutor implements DBExecutor {
 	}
 	@Override
 	public TableExistenceService createTableExistService() {
-		return new TableExistenceServiceImpl(dbInterface, dbctx);
+		return null; //TODO fixnew TableExistenceServiceImpl(dbInterface, dbctx);
 	}
 }

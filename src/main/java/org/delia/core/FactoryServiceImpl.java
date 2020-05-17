@@ -71,7 +71,7 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, registry, varEvaluator, datIdMap);
 		return migrator;
 	}

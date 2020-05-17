@@ -13,6 +13,7 @@ import org.delia.type.DValue;
 import org.delia.type.DValueImpl;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
@@ -78,6 +79,11 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 				}
 			}
 		}
+	}
+
+	@Override
+	public ZDBExecutor createExecutor() {
+		return new MemZDBExecutor(factorySvc, this);
 	}
 
 }

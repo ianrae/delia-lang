@@ -9,12 +9,13 @@ import org.delia.db.DBInterface;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MigrationService extends ServiceBase {
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private MigrationPolicy policy;
 
-	public MigrationService(DBInterface dbInterface, FactoryService factorySvc) {
+	public MigrationService(ZDBInterfaceFactory dbInterface, FactoryService factorySvc) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;

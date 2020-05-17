@@ -32,7 +32,7 @@ public interface FactoryService {
 	Log getLog();
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
-	SchemaMigrator createSchemaMigrator(DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
+	SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	

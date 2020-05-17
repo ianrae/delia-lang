@@ -5,6 +5,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.h2.H2DBInterface;
 import org.delia.db.postgres.PostgresDBInterface;
 import org.delia.runner.ResultValue;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class ListDBTablesCmd extends CmdBase {
 	public ListDBTablesCmd() {
@@ -24,7 +25,7 @@ public class ListDBTablesCmd extends CmdBase {
 	@Override
 	public ResultValue runCmd(Cmd cmd, ReplRunner runner) {
 		Delia delia = runner.getDelia();
-		DBInterface dbInterface = delia.getDBInterface();
+		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
 		
 		if (dbInterface instanceof H2DBInterface) {
 			H2DBInterface h2db = (H2DBInterface) dbInterface;

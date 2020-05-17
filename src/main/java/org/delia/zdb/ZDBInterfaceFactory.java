@@ -9,6 +9,7 @@ public interface ZDBInterfaceFactory {
 	DBCapabilties getCapabilities();
 	
 	ZDBConnection openConnection();
+	ZDBExecutor createExecutor();
 	
 	boolean isSQLLoggingEnabled();
 	void enableSQLLogging(boolean b);

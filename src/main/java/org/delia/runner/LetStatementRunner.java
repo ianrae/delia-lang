@@ -31,6 +31,7 @@ import org.delia.type.Shape;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -40,7 +41,7 @@ import org.delia.zdb.ZDBExecutor;
 public class LetStatementRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private ZDBExecutor zexec;
 	private LetSpanEngine letSpanEngine;
 	private FetchRunner fetchRunner;
@@ -49,7 +50,7 @@ public class LetStatementRunner extends ServiceBase {
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
 
-	public LetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
+	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;

@@ -12,6 +12,9 @@ import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 /**
  * Factory for creating Delia objects.
@@ -31,18 +34,18 @@ public class DeliaFactory {
 	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc) {
 		ConnectionFactory connFactory = new ConnectionFactoryImpl(connectionString, log);
 		
-		DBInterface dbInterface = null;
+		ZDBInterfaceFactory dbInterface = null;
 		switch(dbType) {
 		case MEM:
-			dbInterface = new MemDBInterface();
+			dbInterface = new MemZDBInterfaceFactory(factorySvc);
 			((MemDBInterface)dbInterface).createTablesAsNeededFlag = true;
 			break;
 		case H2:
-			dbInterface = new H2DBInterface(factorySvc, connFactory);
+			dbInterface = new H2ZDBInterfaceFactory(factorySvc, connFactory);
 			break;
-		case POSTGRES:
-			dbInterface = new PostgresDBInterface(factorySvc, connFactory);
-			break;
+//		case POSTGRES:  TODO fix this
+//			dbInterface = new PostgresDBInterface(factorySvc, connFactory);
+//			break;
 		default:
 			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", dbType == null ? "null" : dbType.name());
 			break;
@@ -50,7 +53,7 @@ public class DeliaFactory {
 		return create(dbInterface, log, factorySvc);
 	}
 	
-	public static Delia create(DBInterface dbInterface, Log log, FactoryService factorySvc) {
+	public static Delia create(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		return new DeliaImpl(dbInterface, log, factorySvc);
 	}
 }

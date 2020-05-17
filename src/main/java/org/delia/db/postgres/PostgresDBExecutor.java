@@ -127,6 +127,6 @@ public class PostgresDBExecutor implements DBExecutor {
 	}
 	@Override
 	public TableExistenceService createTableExistService() {
-		return new TableExistenceServiceImpl(dbInterface, dbctx);
+		return null; //TODO fix new TableExistenceServiceImpl(dbInterface, dbctx);
 	}
 }

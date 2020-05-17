@@ -100,7 +100,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		SqlExecuteContext sqlctx = new SqlExecuteContext(dbctx);
 		
 		//			log.log("FRAG PARSER INSERT....................");
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
+		FragmentParserService fpSvc = null; //TODO fix new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, null, null);
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, null); //TODO fix null
 		String typeName = dval.getType().getName();
 		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
@@ -136,7 +136,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		//			log.log("FRAG PARSEr....................");
 		createTableCreator(dbctx);
 		WhereFragmentGenerator whereGen = new PostgresWhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
+		FragmentParserService fpSvc = null; //TODO fixnew FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, spanL);
 		SelectFragmentParser parser = new PostgresFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
@@ -198,7 +198,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		//			log.log("FRAG PARSER DELETE....................");
 		createTableCreator(dbctx);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		FragmentParserService fpSvc = null;//TODO new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		QueryDetails details = new QueryDetails();
@@ -226,7 +226,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		//			log.log("FRAG PARSER UPDATE....................");
 		createTableCreator(dbctx);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		FragmentParserService fpSvc = null; //TODOnew FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
@@ -260,7 +260,7 @@ public class PostgresDBInterface extends DBInterfaceBase implements DBInterfaceI
 		//			log.log("FRAG PARSER UPSERT....................");
 		createTableCreator(dbctx);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, dbctx.registry, dbctx.varEvaluator);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
+		FragmentParserService fpSvc = null;//TODO new FragmentParserService(factorySvc, dbctx.registry, dbctx.varEvaluator, tableCreator.alreadyCreatedL, this, dbctx, sqlHelperFactory, whereGen, null);
 		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 		PostgresUpsertFragmentParser parser = new PostgresUpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;

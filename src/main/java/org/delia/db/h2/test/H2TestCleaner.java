@@ -14,11 +14,13 @@ import org.delia.db.SchemaContext;
 import org.delia.db.h2.H2DBExecutor;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.log.Log;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class H2TestCleaner {
 	
 	private DBType dbType;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private Log log;
 
 	public H2TestCleaner(DBType dbType) {
@@ -26,12 +28,12 @@ public class H2TestCleaner {
 	}
 
 	//h2 persists tables across runs, so cleanup first
-	public void deleteKnownTables(FactoryService factorySvc, DBInterface innerInterface) {
+	public void deleteKnownTables(FactoryService factorySvc, ZDBInterfaceFactory innerInterface) {
 		this.dbInterface = innerInterface;
 		this.log = factorySvc.getLog();
 		boolean b = innerInterface.isSQLLoggingEnabled();
 		
-		try(DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null))) {
+		try(ZDBExecutor executor = innerInterface.createExecutor()) {
 			innerInterface.enableSQLLogging(false);
 //			System.out.println("dropping...");
 			log.log("CLEAN tables..");
@@ -47,6 +49,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, "CustomerAddressAssoc");
 			safeDeleteTable(executor, "AddressCustomerAssoc");
 			safeDeleteTable(executor, "AddressCustomerDat1");
+			safeDeleteTable(executor, "CUSTOMERADDRESSDAT1");
 			safeDeleteTable(executor, "Customer__BAK");
 			safeDeleteTable(executor, "Other");
 			safeDeleteTable(executor, "CustomerOtherDat1");
@@ -68,8 +71,8 @@ public class H2TestCleaner {
 		innerInterface.enableSQLLogging(b);
 	}
 	
-	public void deleteTables(FactoryService factorySvc, DBInterface innerInterface, String tables) {
-		try(DBExecutor executor = innerInterface.createExector(new DBAccessContext(null, null))) {
+	public void deleteTables(FactoryService factorySvc, ZDBInterfaceFactory innerInterface, String tables) {
+		try(ZDBExecutor executor = innerInterface.createExecutor()) {
 			boolean b = innerInterface.isSQLLoggingEnabled();
 			innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
@@ -99,16 +102,15 @@ public class H2TestCleaner {
 		}
 	}
 
-	public void safeDeleteTable(DBExecutor executor, String tblName) {
+	public void safeDeleteTable(ZDBExecutor executor, String tblName) {
 		tblName = adjustTblName(tblName);
-		SchemaContext ctx = new SchemaContext();
 		try {
 			if (executor instanceof H2DBExecutor) {
 				this.deleteH2TableCascade(executor, tblName);
 //				deleteContraintsForTable(executor, tblName);
-				executor.deleteTable(tblName, ctx);
+				executor.deleteTable(tblName);
 			} else {
-				executor.deleteTable(tblName, ctx);
+				executor.deleteTable(tblName);
 			}
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -122,7 +124,7 @@ public class H2TestCleaner {
 		}
 	}
 
-	private void deleteContraintsForTable(DBExecutor executor, String tblName) throws SQLException {
+	private void deleteContraintsForTable(ZDBExecutor executor, String tblName) throws SQLException {
 		String sql = String.format("SELECT CONSTRAINT_NAME FROM information_schema.constraints WHERE  table_schema = 'PUBLIC' and table_name = '%s'", tblName);
 		if (executor instanceof H2DBExecutor) {
 			H2DBExecutor h2exec = (H2DBExecutor) executor;
@@ -143,7 +145,7 @@ public class H2TestCleaner {
 			h2exec.executeRawSql(sql);
 		}
 	}
-	private void deleteH2TableCascade(DBExecutor executor, String tblName) throws SQLException {
+	private void deleteH2TableCascade(ZDBExecutor executor, String tblName) throws SQLException {
 		if (executor instanceof H2DBExecutor) {
 			H2DBExecutor h2exec = (H2DBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);

@@ -11,6 +11,7 @@ import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
@@ -67,5 +68,11 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	@Override
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		//nothing to do
+	}
+
+	@Override
+	public ZDBExecutor createExecutor() {
+		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
+		return new H2ZDBExecutor(factorySvc, log, this, conn);
 	}
 }

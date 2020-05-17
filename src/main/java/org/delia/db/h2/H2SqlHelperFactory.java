@@ -79,7 +79,7 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	@Override
 	public TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
-		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		TableExistenceService existSvc =  null; //TODOfixnew TableExistenceServiceImpl(dbInterface, dbctx);
 		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc, datIdMap);
 	}
 	

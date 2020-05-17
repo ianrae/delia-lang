@@ -6,6 +6,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.DBInterfaceInternal;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class StatusCmd extends CmdBase {
 	public StatusCmd() {
@@ -31,7 +32,7 @@ public class StatusCmd extends CmdBase {
 		
 		DeliaSession sess = runner.getMostRecentSess();
 		Delia delia = runner.getDelia();
-		DBInterface dbInterface = delia.getDBInterface();
+		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
 		
 		int numTypes = sess.getExecutionContext().registry.size();
 		numTypes -= DTypeRegistry.NUM_BUILTIN_TYPES;

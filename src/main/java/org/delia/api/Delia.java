@@ -6,6 +6,7 @@ import org.delia.db.DBInterface;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * An instance of the Delia compiler and runtime.
@@ -27,5 +28,5 @@ public interface Delia {
 		FactoryService getFactoryService();
 		DeliaCompiler createCompiler();
 		DeliaOptions getOptions();
-		DBInterface getDBInterface();
+		ZDBInterfaceFactory getDBInterface();
 	}

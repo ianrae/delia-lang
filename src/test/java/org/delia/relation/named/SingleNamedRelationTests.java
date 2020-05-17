@@ -2,13 +2,52 @@ package org.delia.relation.named;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.relation.RelationInfo;
+import org.delia.rule.DRule;
+import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.ResultValue;
+import org.delia.type.DRelation;
+import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SingleNamedRelationTests extends NamedRelationTestBase {
+	
+	@FunctionalInterface
+	public interface ManyToManyVisitor {
+		void visit(DStructType structType, RelationInfo relinfo);
+	}
+	@FunctionalInterface
+	public interface ManyToManyValueVisitor {
+		void visit(DValue structVal, DStructType structType, RelationInfo relinfo, DRelation drel);
+	}
+	
+	private void foo(DStructType structType, ManyToManyVisitor fn) {
+		for(DRule rule: structType.getRawRules()) {
+			if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				fn.visit(structType, rr.relInfo);
+			}
+		}
+	}
+	private void foox(DValue structVal, ManyToManyValueVisitor fn) {
+		if (! structVal.getType().isStructShape()) {
+			return;
+		}
+		DStructType structType = (DStructType) structVal.getType();
+		for(DRule rule: structVal.getType().getRawRules()) {
+			if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				DValue inner = structVal.asStruct().getField(rr.relInfo.fieldName);
+				DRelation drel = inner == null ? null : inner.asRelation();
+				fn.visit(structVal, structType, rr.relInfo, drel);
+			}
+		}
+
+	}
 	
 	@Test
 	public void test0() {

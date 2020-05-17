@@ -17,12 +17,14 @@ import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.type.DRelation;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataLoader {
 
 	private DeliaSession externalSession;
 	private DTypeRegistry externalRegistry;
-	private DBInterface externalDBInterface;
+	private ZDBInterfaceFactory externalDBInterface;
 	private DoNothingVarEvaluator varEvaluator;
 
 	public ExternalDataLoaderImpl(FactoryService factorySvc, DeliaSession externalSession) {
@@ -39,9 +41,8 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		
 		QueryResponse qresp = null;
 		QueryContext qtx = new QueryContext();
-		DBAccessContext dbctx = new DBAccessContext(externalRegistry, varEvaluator);
-		try(DBExecutor dbexecutor = externalDBInterface.createExector(dbctx)) {
-			qresp = dbexecutor.executeQuery(spec, qtx);
+		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+			qresp = dbexecutor.rawQuery(spec, qtx);
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
@@ -55,9 +56,8 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		
 		QueryResponse qresp = null;
 		QueryContext qtx = new QueryContext();
-		DBAccessContext dbctx = new DBAccessContext(externalRegistry, varEvaluator);
-		try(DBExecutor dbexecutor = externalDBInterface.createExector(dbctx)) {
-			qresp = dbexecutor.executeQuery(spec, qtx);
+		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+			qresp = dbexecutor.rawQuery(spec, qtx);
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}

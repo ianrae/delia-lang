@@ -50,6 +50,7 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -61,8 +62,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		public static final String VAR_SERIAL = "_serial";
 		Map<String,ResultValue> varMap = new HashMap<>(); //ok for thread-safety
 		protected DTypeRegistry registry;
-		private DBInterface dbInterface;
-		private DBExecutor dbexecutor;
+		private ZDBInterfaceFactory dbInterface;
+		private ZDBExecutor dbexecutor;
 		private ZDBExecutor zexec;
 		protected FetchRunner fetchRunner;
 		Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
@@ -75,7 +76,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private HLSManager mgr;
 		private DatIdMap datIdMap;
 		
-		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
+		public RunnerImpl(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
 		}
@@ -153,7 +154,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		public ResultValue executeProgram(List<Exp> expL) {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
-			this.dbexecutor = dbInterface.createExector(dbctx);
+			this.dbexecutor = dbInterface.createExecutor();
 			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
 			zexec.init1(registry);
 			zexec.init2(datIdMap, this);

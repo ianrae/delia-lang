@@ -28,6 +28,7 @@ import org.delia.type.DValue;
 import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.util.StringUtil;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
@@ -45,7 +46,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private VarEvaluator varEvaluator;
 	private MigrationOptimizer optimizer;
 
-	public SchemaMigrator(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 //		this.rawExecutor = dbInterface.createRawExector(dbctx);

@@ -36,13 +36,13 @@ public class DeliaImpl implements Delia {
 	}
 	
 	private Log log;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
 	private Runner mostRecentRunner;
 
-	public DeliaImpl(DBInterface dbInterface, Log log, FactoryService factorySvc) {
+	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
@@ -115,7 +115,7 @@ public class DeliaImpl implements Delia {
 			runner.setHLSManager(mgr);
 		}
 		
-		dbInterface.init(factorySvc);
+		//dbInterface.init(factorySvc);
 		mostRecentRunner = runner;
 		return runner;
 	}
@@ -389,11 +389,11 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public DBInterface getDBInterface() {
+	public ZDBInterfaceFactory getDBInterface() {
 		return dbInterface;
 	}
 	//for internal use only - unit tests
-	public void setDbInterface(DBInterface dbInterface) {
+	public void setDbInterface(ZDBInterfaceFactory dbInterface) {
 		this.dbInterface = dbInterface;
 	}
 

@@ -5,15 +5,17 @@ import java.util.List;
 import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class TableExistenceServiceImpl implements TableExistenceService {
 
 	private DBAccessContext dbctx;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	
 	public static boolean hackYesFlag; //for unit tests only
 	
-	public TableExistenceServiceImpl(DBInterface dbInterface, DBAccessContext dbctx) {
+	public TableExistenceServiceImpl(ZDBInterfaceFactory dbInterface, DBAccessContext dbctx) {
 		this.dbInterface = dbInterface;
 		this.dbctx = dbctx;
 	}
@@ -23,7 +25,17 @@ public class TableExistenceServiceImpl implements TableExistenceService {
 		if (hackYesFlag) {
 			return true;
 		}
-		return dbInterface.doesTableExist(tableName, dbctx);
+		
+		//TODO fix. very bad perf
+		boolean exist = false;
+		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			exist = zexec.doesTableExist(tableName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		return exist;
 	}
 	
 	@Override

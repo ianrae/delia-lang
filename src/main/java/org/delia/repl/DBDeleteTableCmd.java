@@ -6,6 +6,8 @@ import org.delia.db.DBExecutor;
 import org.delia.db.DBInterface;
 import org.delia.db.SchemaContext;
 import org.delia.runner.ResultValue;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class DBDeleteTableCmd extends CmdBase {
 	public DBDeleteTableCmd() {
@@ -25,14 +27,13 @@ public class DBDeleteTableCmd extends CmdBase {
 	@Override
 	public ResultValue runCmd(Cmd cmd, ReplRunner runner) {
 		Delia delia = runner.getDelia();
-		DBInterface dbInterface = delia.getDBInterface();
+		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
 		DBAccessContext dbctx = new DBAccessContext(null, null);
 		
-		try(DBExecutor exec = dbInterface.createExector(dbctx)) {
+		try(ZDBExecutor exec = dbInterface.createExecutor()) {
 			String tableName = cmd.arg1;
-			if (exec.execTableDetect(tableName)) {
-				SchemaContext ctx = new SchemaContext();
-				exec.deleteTable(cmd.arg1, ctx);
+			if (exec.rawTableDetect(tableName)) {
+				exec.deleteTable(cmd.arg1);
 				log(String.format("deleted table '%s'", cmd.arg1));
 			} else {
 				log("can't find that table: " + tableName);

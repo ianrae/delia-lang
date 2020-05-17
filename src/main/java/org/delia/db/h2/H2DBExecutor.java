@@ -143,6 +143,6 @@ public class H2DBExecutor implements DBExecutor {
 
 	@Override
 	public TableExistenceService createTableExistService() {
-		return new TableExistenceServiceImpl(dbInterface, dbctx);
+		return null; //TODOfixnew TableExistenceServiceImpl(dbInterface, dbctx);
 	}
 }

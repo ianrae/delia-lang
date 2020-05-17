@@ -26,13 +26,14 @@ import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.h2.store.fs.FileUtils;
 
 public class ReplRunner  {
 	private Log log = new SimpleLog();
 
 	private Delia delia;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 
 	private DeliaException mostRecentException;

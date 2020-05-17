@@ -30,6 +30,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZTableExistenceService;
 
 /**
@@ -44,7 +45,7 @@ import org.delia.zdb.ZTableExistenceService;
 public class HLSManager extends ServiceBase {
 
 	private DeliaSession session;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private DTypeRegistry registry;
 //	private AssocTblManager assocTblMgr;
 	private HLSStragey defaultStrategy = new StandardHLSStragey();

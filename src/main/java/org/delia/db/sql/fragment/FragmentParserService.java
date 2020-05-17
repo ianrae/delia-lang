@@ -16,6 +16,7 @@ import org.delia.db.sql.table.TableInfo;
 import org.delia.queryresponse.LetSpan;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class FragmentParserService extends ServiceBase {
 	public int nextAliasIndex = 0;
@@ -28,13 +29,13 @@ public class FragmentParserService extends ServiceBase {
 	public JoinFragment savedJoinedFrag;
 	public List<TableInfo> tblinfoL;
 	public VarEvaluator varEvaluator;
-	public DBInterface dbInterface;
+	public ZDBInterfaceFactory dbInterface;
 	public DBAccessContext dbctx;
 	public SqlHelperFactory sqlHelperFactory;
 	public SpanHelper spanHelper;
 	
 	public FragmentParserService(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
-			DBInterface dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
+			ZDBInterfaceFactory dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);

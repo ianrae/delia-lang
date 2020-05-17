@@ -56,7 +56,7 @@ public class PostgresSqlHelperFactory extends H2SqlHelperFactory {
 	@Override
 	public TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap) {
 		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
-		TableExistenceService existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		TableExistenceService existSvc = null;//TODOfix new TableExistenceServiceImpl(dbInterface, dbctx);
 		return new PostgresTableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc, datIdMap);
 	}
 
