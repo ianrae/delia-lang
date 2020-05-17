@@ -5,7 +5,6 @@ import org.delia.assoc.AssocServiceImpl;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBInterface;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;

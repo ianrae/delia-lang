@@ -18,7 +18,6 @@ import org.delia.util.DRuleHelper;
 
 public class MigrationOptimizer extends ServiceBase {
 
-	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
 	private boolean isMemDB;
 

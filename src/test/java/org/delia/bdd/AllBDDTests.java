@@ -305,8 +305,7 @@ public class AllBDDTests extends NewBDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-//		runR2150File("t0-migrate-one-to-many1.txt", 3);
-//		runR2150File("t0-migrate-one-to-one1.txt", 3);
+//		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 
 	}

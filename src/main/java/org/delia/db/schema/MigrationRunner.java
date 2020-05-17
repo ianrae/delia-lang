@@ -14,7 +14,6 @@ import org.delia.zdb.ZDBExecutor;
 
 public class MigrationRunner extends ServiceBase {
 
-	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
 	private ZDBExecutor dbexecutor;
 

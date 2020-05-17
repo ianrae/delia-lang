@@ -28,9 +28,9 @@ import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
-
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	public static final String DAT_TABLE = "DELIA_ASSOC"; //DAT = Delia Assoc Table
+
 	private DTypeRegistry registry;
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
