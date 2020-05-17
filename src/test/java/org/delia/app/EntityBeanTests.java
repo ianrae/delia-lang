@@ -4,24 +4,14 @@ package org.delia.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.delia.api.Delia;
-import org.delia.bdd.NewBDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class EntityBeanTests extends NewBDDBase {
+public class EntityBeanTests extends DaoTestBase {
 	
 	/**
 	 * Used internally by delia to extract data from
@@ -357,23 +347,10 @@ public class EntityBeanTests extends NewBDDBase {
 	public void init() {
 	}
 
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
-	}
-
 	private String buildSrc() {
 		String src = "type Flight struct {field1 int unique, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
 	}
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
-
 }

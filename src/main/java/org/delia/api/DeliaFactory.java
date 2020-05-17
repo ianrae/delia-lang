@@ -38,7 +38,7 @@ public class DeliaFactory {
 		switch(dbType) {
 		case MEM:
 			dbInterface = new MemZDBInterfaceFactory(factorySvc);
-			((MemDBInterface)dbInterface).createTablesAsNeededFlag = true;
+//			((MemZDBInterfaceFactory)dbInterface).createTablesAsNeededFlag = true;
 			break;
 		case H2:
 			dbInterface = new H2ZDBInterfaceFactory(factorySvc, connFactory);

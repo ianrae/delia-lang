@@ -7,15 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.delia.api.Delia;
-import org.delia.bdd.NewBDDBase;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.builder.ConnectionBuilder;
 import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -27,13 +19,11 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class NorthwindTests extends NewBDDBase {
+public class NorthwindTests extends DaoTestBase {
 	
 	public static class LineObj {
 		public String[] elements;
@@ -245,12 +235,6 @@ public class NorthwindTests extends NewBDDBase {
 		String src = loadFromFile(path);
 		return src;
 	}
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-//		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).jdbcUrl("jdbc:h2:~/test").build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
-	}
 
 	public String loadFromFile(String path) {
 		log.log("FILE: %s", path);
@@ -288,11 +272,4 @@ public class NorthwindTests extends NewBDDBase {
 		
 		log.log("done..");
 	}
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
-
 }
