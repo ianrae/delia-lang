@@ -1,8 +1,6 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.ErrorTracker;
@@ -10,9 +8,7 @@ import org.delia.log.Log;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 /**
  * To allow multiple clients of Delia to each
@@ -36,6 +32,6 @@ public interface FactoryService {
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	
-	ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType); //TODO remove later!!
-	ZDBInterfaceFactory getHackZdbFactory();
+//	ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType); //TODO remove later!!
+//	ZDBInterfaceFactory getHackZdbFactory();
 }

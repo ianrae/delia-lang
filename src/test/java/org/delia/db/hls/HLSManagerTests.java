@@ -109,9 +109,10 @@ public class HLSManagerTests extends HLSTestBase {
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
 		QueryContext qtx = new QueryContext();
-		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, null);
+//		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, null);
 //		DBExecutor dbexecutor = delia.getDBInterface().createExector(dbctx);
-		ZDBExecutor zexec = delia.getFactoryService().hackGetZDB(session.getExecutionContext().registry, DBType.MEM);
+//		ZDBExecutor zexec = delia.getFactoryService().hackGetZDB(session.getExecutionContext().registry, DBType.MEM);
+		ZDBExecutor zexec = delia.getDBInterface().createExecutor();
 		HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 		assertEquals(sqlExpected, result.sql);
 		return result.qresp;

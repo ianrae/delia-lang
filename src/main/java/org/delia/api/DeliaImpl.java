@@ -210,10 +210,10 @@ public class DeliaImpl implements Delia {
 			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
 				dbInterface.performTypeReplacement(spec);
 			}
-			ZDBInterfaceFactory zdb = factorySvc.getHackZdbFactory();
-			if (zdb != null && zdb.getCapabilities().isRequiresTypeReplacementProcessing()) {
-				zdb.performTypeReplacement(spec);
-			}
+//			ZDBInterfaceFactory zdb = factorySvc.getHackZdbFactory();
+//			if (zdb != null && zdb.getCapabilities().isRequiresTypeReplacementProcessing()) {
+//				zdb.performTypeReplacement(spec);
+//			}
 			
 		}
 		

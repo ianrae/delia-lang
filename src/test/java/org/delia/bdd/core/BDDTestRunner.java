@@ -63,7 +63,7 @@ public class BDDTestRunner {
 		src += "\n";
 		src += buildFrom(test.whenL);
 		
-		FactoryServiceImpl.nextZDBToUse = retainedZDB;
+//		FactoryServiceImpl.nextZDBToUse = retainedZDB;
 		BDDTesterEx tester = new BDDTesterEx(retainedDBinterface, creator, test, test.cleanTables);
 		boolean pass = false;
 		
@@ -98,10 +98,10 @@ public class BDDTestRunner {
 		
 		if (test.chainNextTest) {
 			retainedDBinterface = tester.dbInterface;
-			this.retainedZDB = FactoryServiceImpl.retainedZDBFactory;
+//			this.retainedZDB = FactoryServiceImpl.retainedZDBFactory;
 		} else {
 			retainedDBinterface = null;
-			FactoryServiceImpl.retainedZDBFactory = null; //clear
+//			FactoryServiceImpl.retainedZDBFactory = null; //clear
 		}
 		
 		if (!pass) {

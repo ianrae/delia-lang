@@ -64,7 +64,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		protected DTypeRegistry registry;
 		private ZDBInterfaceFactory dbInterface;
 		private ZDBExecutor dbexecutor;
-		private ZDBExecutor zexec;
+//		private ZDBExecutor zexec;
 		protected FetchRunner fetchRunner;
 		Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
@@ -155,11 +155,11 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExecutor();
-			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
-			zexec.init1(registry);
-			zexec.init2(datIdMap, this);
+//			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
+			dbexecutor.init1(registry);
+			dbexecutor.init2(datIdMap, this);
 			
-			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : zexec.createFetchRunner();
+			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner();
 //			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 //			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
 //			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner, spanRunner);
@@ -180,13 +180,13 @@ public class RunnerImpl extends ServiceBase implements Runner {
 						DBHelper.handleCloseFailure(e);
 					}
 				}
-				if (zexec != null) {
-					try {
-						zexec.close();
-					} catch (Exception e) {
-						DBHelper.handleCloseFailure(e);
-					}
-				}
+//				if (zexec != null) {
+//					try {
+//						zexec.close();
+//					} catch (Exception e) {
+//						DBHelper.handleCloseFailure(e);
+//					}
+//				}
 				
 			}
 			return res;
@@ -309,7 +309,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				int numRowsAffected = zexec.executeUpdate(spec, cres.dval, cres.assocCrudMap);
+				int numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -385,7 +385,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
 				boolean noUpdateFlag = exp.optionExp != null;
-				int numRowsAffected = zexec.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
+				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -412,7 +412,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			try {
 				QuerySpec spec = this.resolveFilterVars(exp.queryExp);
-				zexec.executeDelete(spec);
+				dbexecutor.executeDelete(spec);
 			} catch (DBException e) {
 				res.errors.add(e.getLastError());
 				res.ok = false;
@@ -470,14 +470,14 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				if (hasSerialId) {
 					ctx.extractGeneratedKeys = true;
 					ctx.genKeytype = DValueHelper.findPrimaryKeyFieldPair(cres.dval.getType()).type;
-					DValue generatedId = zexec.executeInsert(cres.dval, ctx);
+					DValue generatedId = dbexecutor.executeInsert(cres.dval, ctx);
 					assignSerialVar(generatedId);
 					boolean sprigFlag = sprigSvc.haveEnabledFor(typeName);
 					if (sprigFlag) {
 						sprigSvc.rememberSynthId(typeName, cres.dval, generatedId, cres.extraMap);
 					}
 				} else {
-					zexec.executeInsert(cres.dval, ctx);
+					dbexecutor.executeInsert(cres.dval, ctx);
 				}
 				
 			} catch (DBException e) {
@@ -544,7 +544,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, zexec, registry, fetchRunner, mgr, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		

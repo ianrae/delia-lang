@@ -51,7 +51,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 //		this.rawExecutor = dbInterface.createRawExector(dbctx);
 //		this.dbexecutor = dbInterface.createExector(dbctx);
-		this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
+//		this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
+		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		this.varEvaluator = varEvaluator;
