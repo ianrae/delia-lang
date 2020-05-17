@@ -5,39 +5,28 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.StringJoiner;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
-import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.ResultSetToDValConverter;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
-import org.delia.db.ValueHelper;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
-import org.delia.db.sql.SimpleSqlNameFormatter;
-import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
-import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.log.Log;
 import org.delia.queryresponse.LetSpan;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -46,7 +35,6 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
@@ -59,21 +47,10 @@ import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.ZUpdate;
 import org.delia.zdb.ZUpsert;
 
-public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
+public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 
-		private Log sqlLog;
 		private H2ZDBInterfaceFactory dbInterface;
 		private H2ZDBConnection conn;
-		private DTypeRegistry registry;
-		private boolean init1HasBeenDone;
-		private boolean init2HasBeenDone;
-		private DatIdMap datIdMap;
-		private VarEvaluator varEvaluator;
-		private DBType dbType;
-		private DBErrorConverter errorConverter;
-		protected ZTableCreator tableCreator;
-		private ResultSetToDValConverter resultSetConverter;
-		protected Random random = new Random();
 		private ZInsert zinsert;
 		private ZQuery zquery;
 		private ZUpdate zupdate;
@@ -81,14 +58,10 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		private ZDelete zdelete;
 
 		public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
-			super(factorySvc);
-			this.sqlLog = sqlLog;
+			super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 			this.dbInterface = dbInterface;
 			this.conn = conn;
 			this.dbType = DBType.H2;
-			this.errorConverter = dbInterface.getErrorConverter();
-			this.resultSetConverter = new ResultSetToDValConverter(factorySvc, new ValueHelper(factorySvc));
-			resultSetConverter.init(factorySvc);
 		}
 
 		@Override
@@ -103,8 +76,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 
 		@Override
 		public void init1(DTypeRegistry registry) {
-			this.init1HasBeenDone = true;
-			this.registry = registry;
+			super.init1(registry);
 			this.zinsert = new ZInsert(factorySvc, registry);
 			this.zquery = new ZQuery(factorySvc, registry);
 			this.zupdate = new ZUpdate(factorySvc, registry);
@@ -113,21 +85,12 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		}
 		
 		private ZTableCreator createPartialTableCreator() {
-			SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-			FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
-			return new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, null, this);
+			return super.createPartialTableCreator(this);
 		}
-		
 
 		@Override
 		public void init2(DatIdMap datIdMap, VarEvaluator varEvaluator) {
-			this.init2HasBeenDone = true;
-			this.datIdMap = datIdMap;
-			this.varEvaluator = varEvaluator;
-
-			SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-			FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
-			this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, this);
+			super.init2(datIdMap, varEvaluator, this);
 		}
 
 		@Override
@@ -148,17 +111,6 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			}
 		}
 		
-		private void failIfNotInit1() {
-			if (! init1HasBeenDone) {
-				DeliaExceptionHelper.throwError("zinit1-not-done", "init1 not done");
-			}
-		}
-		private void failIfNotInit2() {
-			if (! init2HasBeenDone) {
-				DeliaExceptionHelper.throwError("zinit2-not-done", "init2 not done");
-			}
-		}
-
 		private DValue doInsert(DValue dval, InsertContext ctx, ZTableCreator tmpTableCreator) {
 			SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tmpTableCreator, this);
 
@@ -191,8 +143,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 		}
 		
 		private void convertAndRethrow(DBValidationException e) {
-			ZTableCreator tmp = tableCreator == null ? createPartialTableCreator() : tableCreator;
-			errorConverter.convertAndRethrow(e, tmp.alreadyCreatedL);
+			super.convertAndRethrow(e, this);
 		}
 
 		@Override
@@ -233,63 +184,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 			String sql = sqlgen.generateTableDetect(tableName.toUpperCase()); //h2 tbls are UPPERCASE
 			SqlStatement statement = createSqlStatement(sql); 
-			return execResultBoolean(statement);
-		}
-		private SqlStatement createSqlStatement(String sql) {
-			SqlStatement statement = new SqlStatement();
-			statement.sql = sql;
-			return statement;
-		}
-		private ZDBExecuteContext createContext() {
-			ZDBExecuteContext dbctx = new ZDBExecuteContext();
-			dbctx.logToUse = log;
-			return dbctx;
-		}
-
-		private boolean execResultBoolean(SqlStatement statement) {
-			logSql(statement);
-
-			ZDBExecuteContext dbctx = createContext();
-			ResultSet rs = conn.execQueryStatement(statement, dbctx);
-
-			boolean tblExists = false;
-			try {
-				if (rs != null && rs.next()) {
-					Boolean b = rs.getBoolean(1);
-					tblExists = b;
-				}
-			} catch (SQLException e) {
-				convertAndRethrowException(e);
-			}        
-
-			return tblExists;
-		}
-		
-		private void convertAndRethrowException(SQLException e) {
-			errorConverter.convertAndRethrowException(e);
-		}
-
-		protected void logSql(SqlStatement statement) {
-			StringJoiner joiner = new StringJoiner(",");
-			for(DValue dval: statement.paramL) {
-				if (dval.getType().isShape(Shape.STRING)) {
-					joiner.add(String.format("'%s'", dval.asString()));
-				} else {
-					joiner.add(dval == null ? "null" : dval.asString());
-				}
-			}
-
-			String s = String.format("%s  -- (%s)", statement.sql, joiner.toString());
-			logSql(s);
-		}
-		protected void logSql(String sql) {
-			sqlLog.log("SQL: " + sql);
-		}
-		protected void logStatementGroup(SqlStatementGroup stgroup) {
-//			sqlLog.log("SQL: " + stgroup.flatten());
-			for(SqlStatement stat: stgroup.statementL) {
-				this.logSql(stat);
-			}
+			return execResultBoolean(conn, statement);
 		}
 
 
@@ -300,7 +195,7 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			String sql = sqlgen.generateFieldDetect(tableName, fieldName);
 			SqlStatement statement = new SqlStatement();
 			statement.sql = sql;
-			return execResultBoolean(statement);
+			return execResultBoolean(conn, statement);
 		}
 
 		@Override
@@ -345,21 +240,6 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 				convertAndRethrow(e);
 			}
 			return updateCount;
-		}
-		protected int findUpdateCount(String target, List<Integer> updateCountL, SqlStatementGroup stgroup) {
-			int minPos = Integer.MAX_VALUE;
-			int foundResult = 0;
-			
-			int index = 0;
-			for(SqlStatement stat: stgroup.statementL) {
-				int pos = stat.sql.toLowerCase().indexOf(target);
-				if (pos >= 0 && pos < minPos) {
-					minPos = pos;
-					foundResult = updateCountL.get(index);
-				}
-				index++;
-			}
-			return foundResult;
 		}
 
 		@Override
@@ -438,15 +318,6 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			}
 			return qresp;
 		}
-		protected List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details) {
-			DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-			return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
-		}
-		protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, HLSQueryStatement hls) {
-			DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-			return resultSetConverter.buildDValueList(rs, dtype, details, dbctx, hls);
-		}
-
 
 		@Override
 		public boolean doesTableExist(String tableName) {
@@ -532,10 +403,6 @@ public class H2ZDBExecutor extends ServiceBase implements ZDBExecutor {
 			
 			String sql = tableCreator.generateAlterField(typeName, fieldName, deltaFlags, constraintName);
 			execSqlStatement(sql);
-		}
-		protected String generateUniqueConstraintName() {
-			int n = random.nextInt(Integer.MAX_VALUE - 10);
-			return String.format("DConstraint_%d", n);
 		}
 
 		@Override
