@@ -14,7 +14,6 @@ import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;

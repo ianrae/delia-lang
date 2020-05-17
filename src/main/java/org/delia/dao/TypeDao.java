@@ -5,7 +5,6 @@ import org.delia.api.DeliaSession;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;

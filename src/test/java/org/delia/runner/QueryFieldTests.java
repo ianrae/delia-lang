@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.base.DBHelper;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.sql.NewLegacyRunner;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBExecutor;

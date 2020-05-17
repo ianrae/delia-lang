@@ -5,18 +5,15 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.queryresponse.LetSpan;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZTableExistenceService;
 

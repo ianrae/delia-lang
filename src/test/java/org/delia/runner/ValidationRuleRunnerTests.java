@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.base.FakeTypeCreator;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.rule.AlwaysRuleGuard;
 import org.delia.rule.DRule;
 import org.delia.rule.DRuleContext;

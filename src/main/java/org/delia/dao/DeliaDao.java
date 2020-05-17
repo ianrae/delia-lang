@@ -7,7 +7,6 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionString;
 import org.delia.error.ErrorTracker;

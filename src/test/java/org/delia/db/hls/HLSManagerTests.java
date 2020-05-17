@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;

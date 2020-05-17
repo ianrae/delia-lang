@@ -1,7 +1,6 @@
 package org.delia.repl;
 
 import org.delia.api.Delia;
-import org.delia.db.DBInterface;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.ZDBInterfaceFactory;
 

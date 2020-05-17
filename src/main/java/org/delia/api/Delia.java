@@ -2,7 +2,6 @@ package org.delia.api;
 
 import org.delia.compiler.DeliaCompiler;
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;

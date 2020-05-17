@@ -6,8 +6,6 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBExecutor;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;

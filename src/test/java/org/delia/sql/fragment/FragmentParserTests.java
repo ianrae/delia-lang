@@ -19,7 +19,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;

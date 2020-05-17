@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.delia.base.FakeTypeCreator;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.log.Log;
 import org.delia.runner.InternalCompileState;
 import org.delia.runner.QueryResponse;

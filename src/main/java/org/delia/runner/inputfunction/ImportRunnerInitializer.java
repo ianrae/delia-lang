@@ -4,7 +4,6 @@ import org.delia.api.DeliaSession;
 import org.delia.api.RunnerInitializer;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBHelper;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.FetchRunner;

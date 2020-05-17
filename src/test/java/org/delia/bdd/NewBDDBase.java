@@ -17,7 +17,6 @@ import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.DBInterfaceCreator;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;

@@ -1,6 +1,5 @@
 package org.delia.base;
 
-import org.delia.db.DBInterface;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 

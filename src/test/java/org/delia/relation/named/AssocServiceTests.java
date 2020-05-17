@@ -11,8 +11,6 @@ import org.delia.assoc.DatIdMap;
 import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
 import org.delia.assoc.PopulateDatIdVisitor;
-import org.delia.db.DBExecutor;
-import org.delia.db.RawDBExecutor;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
