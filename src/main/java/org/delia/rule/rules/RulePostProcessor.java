@@ -412,7 +412,7 @@ public class RulePostProcessor extends ServiceBase {
 
 					//if near is optional and far side is mandatory then near is parent
 					if (isOptional) {
-						RelationInfo farSideInfo = DRuleHelper.findOtherSideOne(info.farType, info.nearType);
+						RelationInfo farSideInfo = info.otherSide; //DRuleHelper.findOtherSideOne(info.farType, info.nearType);
 						if (farSideInfo != null) {
 							if (!farSideInfo.nearType.fieldIsOptional(farSideInfo.fieldName)) {
 								rr.forceParentFlag(true);

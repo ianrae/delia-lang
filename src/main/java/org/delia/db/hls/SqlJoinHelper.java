@@ -53,7 +53,7 @@ public class SqlJoinHelper {
 				String s;
 				if (bHasFK) {
 					DStructType pairType = (DStructType) pair.type; //Address
-					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
+					RelationInfo relinfoB = findOtherSide(pair, hlspan.fromType);
 					PrimaryKey pk = hlspan.fromType.getPrimaryKey();
 //					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
@@ -117,16 +117,21 @@ public class SqlJoinHelper {
 			sc.out(s);
 		}
 
-		private RelationInfo findOtherSide(DStructType pairType, DStructType fromType) {
-			RelationInfo relinfo = DRuleHelper.findOtherSideOne(pairType, fromType);
-			if (relinfo != null) {
-				return relinfo;
+		private RelationInfo findOtherSide(TypePair pair, DStructType fromType) {
+			RelationInfo info = DRuleHelper.findOtherSideOneOrManyForField(fromType, pair.name);
+			if (info != null) {
+				return info.otherSide; //can be null for one-sided relation
 			}
-
-			relinfo = DRuleHelper.findOtherSideMany(pairType, fromType);
-			if (relinfo != null) {
-				return relinfo;
-			}
+			
+//			RelationInfo relinfo = DRuleHelper.findOtherSideOne(pairType, fromType);
+//			if (relinfo != null) {
+//				return relinfo;
+//			}
+//
+//			relinfo = DRuleHelper.findOtherSideMany(pairType, fromType);
+//			if (relinfo != null) {
+//				return relinfo;
+//			}
 			//err!!
 			return null;
 		}

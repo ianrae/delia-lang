@@ -144,12 +144,14 @@ public class DoubleHLSStragey implements HLSStragey {
 		String field1 = hlspan1.rEl.rfieldPair.name;
 		RelationOneRule ruleOne = DRuleHelper.findOneRule(hlspan2.fromType, field1);
 		if (ruleOne != null) {
-			RelationInfo relinfo = DRuleHelper.findOtherSideOne(ruleOne.relInfo.farType, hlspan1.fromType);
-			return relinfo.fieldName;
+			return ruleOne.relInfo.otherSide.fieldName; //can fail if one-sided
+//			RelationInfo relinfo = DRuleHelper.findOtherSideOne(ruleOne.relInfo.farType, hlspan1.fromType);
+//			return relinfo.fieldName;
 		} else {
 			RelationManyRule ruleMany = DRuleHelper.findManyRule(hlspan2.fromType, field1);
-			RelationInfo relinfo = DRuleHelper.findOtherSideMany(ruleMany.relInfo.farType, hlspan2.fromType);
-			return relinfo.fieldName;
+			return ruleMany.relInfo.otherSide.fieldName; //many always has otherSide
+//			RelationInfo relinfo = DRuleHelper.findOtherSideMany(ruleMany.relInfo.farType, hlspan2.fromType);
+//			return relinfo.fieldName;
 		}
 	}
 
