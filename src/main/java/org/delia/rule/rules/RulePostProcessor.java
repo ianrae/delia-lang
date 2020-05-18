@@ -96,6 +96,10 @@ public class RulePostProcessor extends ServiceBase {
 					for(DRule rule: structType.getRawRules()) {
 						if (rule instanceof RelationOneRule) {
 							RelationOneRule rr = (RelationOneRule) rule;
+							if (!rr.getSubject().equals(pair.name)) {
+								continue;
+							}
+							
 							RelationInfo info = new RelationInfo();
 							rr.relInfo = info;
 //							TypePair farSide = DRuleHelper.findMatchingRelByType((DStructType)pair.type, structType);
@@ -119,6 +123,10 @@ public class RulePostProcessor extends ServiceBase {
 						} else if (rule instanceof RelationManyRule) {
 							RelationManyRule rr = (RelationManyRule) rule;
 							RelationInfo info = new RelationInfo();
+							if (!rr.getSubject().equals(pair.name)) {
+								continue;
+							}
+							
 							rr.relInfo = info;
 							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType);
 							//may be multiple possible matches here
