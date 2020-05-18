@@ -390,20 +390,23 @@ public class RulePostProcessor extends ServiceBase {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
 					
-					boolean b = isOtherSideOne(info.farType, structType);
+//					boolean b = isOtherSideOne(info.farType, structType);
+					boolean b = isOtherSideOne(info);
 					info.isParent = b;
 				}
 			}
 		}
 	}
 	
-	private boolean isOtherSideOne(DType otherSide, DStructType structType) {
-		return DRuleHelper.isOtherSideOne(otherSide, structType);
+	private boolean isOtherSideOne(RelationInfo info) {
+		return DRuleHelper.xfindOtherSideOne(info) != null;
+	}
+	private boolean isOtherSideMany(RelationInfo info) {
+		return DRuleHelper.xfindOtherSideMany(info) != null;
 	}
 	private boolean isOtherSideMany(DType otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
-	
 	private void checkForOtherSideDuplicates(DTypeRegistry registry, List<DeliaError> allErrors) {
 		Map<RelationInfo,String> duplicateMap = new HashMap<>();
 		

@@ -110,6 +110,30 @@ public class DRuleHelper {
 		}
 		return null;
 	}
+	//x is temporary marker of new safer fns
+	public static RelationInfo xfindOtherSideOne(RelationInfo relinfo) {
+		for(DRule rule: relinfo.farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (rr.relInfo.otherSide == relinfo) {
+					return rr.relInfo;
+				}
+			}
+		}
+		return null;
+	}
+	public static RelationInfo xfindOtherSideMany(RelationInfo relinfo) {
+		for(DRule rule: relinfo.farType.getRawRules()) {
+			if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (rr.relInfo.otherSide == relinfo) {
+					return rr.relInfo;
+				}
+			}
+		}
+		return null;
+	}
+
 	public static RelationInfo findOtherSideMany(DType otherSide, DStructType structType) {
 		for(DRule rule: otherSide.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
