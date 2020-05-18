@@ -110,7 +110,7 @@ public class WhereClauseHelper extends ServiceBase {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(ff.structType, pair);
 		if (relinfo != null && relinfo.isParent) {
 			//TODO need more foolproof way to find other side
-			RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
+			RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
 			if (otherSide != null) {
 				String tmp = aliasAlloc.findOrCreateFor(relinfo.farType);
 				af.alias = aliasAdjustmentMap.get(tmp);

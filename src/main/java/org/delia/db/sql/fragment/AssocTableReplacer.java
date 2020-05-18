@@ -305,7 +305,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		DRelation drel = mmMap.get(fieldName); //100
 		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 
-		RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
+		RelationInfo farInfo = info.otherSide;// DRuleHelper.findOtherSideMany(info.farType, structType);
 		TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
 		TypePair rightPair = new TypePair(assocFieldName, pair2.type);
 		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);

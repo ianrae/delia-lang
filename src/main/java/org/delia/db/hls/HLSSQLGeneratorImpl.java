@@ -86,11 +86,11 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				{
 					if (isQueryPKOnly(hlspan1)) {
 						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
-						RelationInfo relinfo1 = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						RelationInfo relinfo1 = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
 						sql = String.format("%s WHERE %s.%s=?", sql, alias, relinfo1.fieldName);
 						return sql;
 					} else {
-						RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
 						String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
 						s2 = StringUtils.substringAfter(s2, "WHERE ");
 						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);

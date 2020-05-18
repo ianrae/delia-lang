@@ -122,7 +122,7 @@ public class MigrationOptimizer extends ServiceBase {
 					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
 					DType farType = ruleMany.relInfo.farType;
 					DStructType nearType = ruleMany.relInfo.nearType;
-					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+					RelationInfo otherSide = ruleMany.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
 
 					st.action = "A";
 					st.field = otherSide.fieldName;
@@ -134,7 +134,7 @@ public class MigrationOptimizer extends ServiceBase {
 					RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
 					DType farType = ruleOne.relInfo.farType;
 					DStructType nearType = ruleOne.relInfo.nearType;
-					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+					RelationInfo otherSide = ruleOne.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
 
 					st.action = "A";
 					st.field = otherSide.fieldName;

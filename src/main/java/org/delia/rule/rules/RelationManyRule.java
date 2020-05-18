@@ -153,7 +153,7 @@ public class RelationManyRule extends RelationRuleBase {
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		DValue keyVal = dval.asStruct().getField(pair.name);
 		
-		RelationInfo farInfo = DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
+		RelationInfo farInfo = info.otherSide;// DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
 		
 //		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
 		QueryResponse qresp = fetchRunner.loadFKOnly(info.farType.getName(), farInfo.fieldName, keyVal);
