@@ -1,5 +1,8 @@
 package org.delia.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
@@ -31,6 +34,15 @@ public class DRuleHelper {
 			}
 		}
 		return null;
+	}
+	public static List<TypePair> xfindAllMatchingRelByType(DStructType dtype, DType targetType) {
+		List<TypePair> list = new ArrayList<>();
+		for(TypePair pair: dtype.getAllFields()) {
+			if (typesAreEqual(pair.type, targetType)) {
+				list.add(pair);
+			}
+		}
+		return list;
 	}
 	
 	public static boolean typesAreEqual(DType type1, DType type2) {

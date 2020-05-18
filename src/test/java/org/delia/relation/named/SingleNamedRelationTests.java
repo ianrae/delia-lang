@@ -10,7 +10,6 @@ import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
-import org.delia.type.TypePair;
 import org.junit.Before;
 import org.junit.Test;
 
