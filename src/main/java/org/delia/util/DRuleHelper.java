@@ -162,7 +162,7 @@ public class DRuleHelper {
 //		}
 //		return farInfo;
 //	}
-	public static RelationInfo findOtherSideOneOrManyForField(DType structType, String fieldName) {
+	public static RelationInfo findRelinfoOneOrManyForField(DType structType, String fieldName) {
 		for(DRule rule: structType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;

@@ -118,7 +118,7 @@ public class SqlJoinHelper {
 		}
 
 		private RelationInfo findOtherSide(TypePair pair, DStructType fromType) {
-			RelationInfo info = DRuleHelper.findOtherSideOneOrManyForField(fromType, pair.name);
+			RelationInfo info = DRuleHelper.findRelinfoOneOrManyForField(fromType, pair.name);
 			if (info != null) {
 				return info.otherSide; //can be null for one-sided relation
 			}
