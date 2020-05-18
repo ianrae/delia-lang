@@ -172,9 +172,9 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 			throw new DBException(err);
 		}
 
-		ZMemUpsert memUpdate = new ZMemUpsert(factorySvc, registry);
+		ZMemUpsert memUpsert = new ZMemUpsert(factorySvc, registry);
 		ZStuff stuff = findOrCreateStuff();
-		return memUpdate.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, noUpdateFlag, selector, this, stuff);
+		return memUpsert.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, noUpdateFlag, selector, this, stuff);
 	}
 
 	@Override

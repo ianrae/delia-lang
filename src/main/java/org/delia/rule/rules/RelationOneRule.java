@@ -61,6 +61,10 @@ public class RelationOneRule extends RelationRuleBase {
 		} else {
 			boolean bb = ctx.isPopulateFKsFlag();
 			if (!bb) {
+				bb = chkRelationUniqueness(ctx, drel);
+				if (! bb) {
+					return false;
+				}
 				return true;
 			}
 			
@@ -74,19 +78,29 @@ public class RelationOneRule extends RelationRuleBase {
 		
 		//next ensure this is only foreign key of that value
 		if (!otherSideIsMany) {
-			boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
-			if (!exists) {
-//			qresResult.err = qrespFetch.err;
-			} else {
-				String key = drel.getForeignKey().asString();
-				String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
-				addDetailedError(ctx, msg, getSubject());
+			boolean ok = this.chkRelationUniqueness(ctx, drel);
+			if (!ok) {
 				return false;
 			}
 		}
 
 		return true;
 	}
+	
+	private boolean chkRelationUniqueness(DRuleContext ctx, DRelation drel) {
+		boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
+		if (!exists) {
+//		qresResult.err = qrespFetch.err;
+		} else {
+			String key = drel.getForeignKey().asString();
+			String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
+			addDetailedError(ctx, msg, getSubject());
+			return false;
+		}
+		return true;
+	}
+	
+	
 	private void addDetailedError(DRuleContext ctx, String msg, String fieldName) {
 		DetailedError err = ctx.addError(this, msg);
 		err.setFieldName(fieldName);

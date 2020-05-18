@@ -8,6 +8,7 @@ import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.log.LogLevel;
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
@@ -74,7 +75,21 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 	}
 	
 	@Test
-	public void test3Fail() {
+	public void test3() {
+		createCustomer11TypeWithRelations();
+		doInsert("insert Customer { wid:11 }");
+		doInsert("insert Customer { wid:12 }");
+		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
+		
+		//for 1:1 parent we need fks() to get relations to get fks
+		DValue dvalC = doQuery("Customer[1].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", 1); //is ok for 2 different relations to have same Customer
+		chkRelation(dvalC, "addr2", 1);
+	}
+	
+	@Test(expected=DeliaException.class)
+	public void test4Fail() {
 		createCustomer11TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
@@ -85,8 +100,51 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 		dumpDVal(dvalC);
 		chkRelation(dvalC, "addr1", 1);
 		chkRelation(dvalC, "addr2", 1);
+		
+		doInsert("insert Customer { wid:13 }");
+		doInsert("insert Customer { wid:14 }");
+		doInsert("insert Address { z:20, cust1:1, cust2:1 }"); //should fail
+		//ERROR: rule-relationOne: relation field 'cust1' one - foreign key '1' already used -- type Address - in rule: relationOne
 	}
 	
+	@Test
+	public void test5Update() {
+		createCustomer11TypeWithRelations();
+		doInsert("insert Customer { wid:11 }");
+		doInsert("insert Customer { wid:12 }");
+		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
+		doInsert("insert Customer { wid:13 }"); //3
+		
+		doUpdate("update Address[1] {cust1:3}");
+		
+		//for 1:1 parent we need fks() to get relations to get fks
+		DValue dvalC = doQuery("Customer[1].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", null);
+		chkRelation(dvalC, "addr2", 1);
+		
+		dvalC = doQuery("Customer[3].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", 1);
+		chkRelation(dvalC, "addr2", null);
+	}
+	
+	@Test
+	public void test6Delete() {
+		createCustomer11TypeWithRelations();
+		doInsert("insert Customer { wid:11 }");
+		doInsert("insert Customer { wid:12 }");
+		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
+		doInsert("insert Customer { wid:13 }"); //3
+		
+		doDelete("delete Address[1]");
+		
+		//for 1:1 parent we need fks() to get relations to get fks
+		DValue dvalC = doQuery("Customer[1].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", null);
+		chkRelation(dvalC, "addr2", null);
+	}
 	private void dumpDVal(DValue dvalC) {
 		List<String> list = this.generateFromDVal(dvalC);
 		for(String s: list) {
@@ -137,6 +195,16 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 	}
 
 	private void doInsert(String src) {
+		ResultValue res = delia.continueExecution(src, this.sess);
+		DValue dval = res.getAsDValue();
+		assertEquals(null, dval);
+	}
+	private void doUpdate(String src) {
+		ResultValue res = delia.continueExecution(src, this.sess);
+		Integer numAdded = (Integer) res.val;
+		assertEquals(1, numAdded.intValue());
+	}
+	private void doDelete(String src) {
 		ResultValue res = delia.continueExecution(src, this.sess);
 		DValue dval = res.getAsDValue();
 		assertEquals(null, dval);

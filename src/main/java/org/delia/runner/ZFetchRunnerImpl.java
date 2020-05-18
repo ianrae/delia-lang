@@ -87,6 +87,7 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 	}
 	private QueryExp buildOwningTypeQuery(DStructType owningType, String fieldName, DRelation drel) {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		//query Address[cust==1]
 		QueryExp exp = builderSvc.createEqQuery(owningType.getName(), fieldName, drel.getForeignKey());
 		
 		return exp;
