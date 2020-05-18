@@ -54,7 +54,7 @@ value:a:Customer {
 }
 
 ---
-title: one-to-many
+title: one-to-many2
 given:
  type Customer struct {id int unique, relation addr Address optional many } end
  type Address struct {id int unique, relation cust Customer optional one } end

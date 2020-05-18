@@ -82,7 +82,7 @@ public class RulePostProcessor extends ServiceBase {
 							RelationInfo info = new RelationInfo();
 							rr.relInfo = info;
 							TypePair farSide = DRuleHelper.findMatchingRelByType((DStructType)pair.type, structType);
-							boolean b = farSide == null ? false : isOtherSideMany(pair.type, farSide);
+							boolean b = farSide == null ? false : isOtherSideManyEarly(pair.type, farSide);
 							info.cardinality = b ? RelationCardinality.ONE_TO_MANY : RelationCardinality.ONE_TO_ONE;
 							info.farType = (DStructType) pair.type;
 							info.fieldName = rule.getSubject();
@@ -95,7 +95,7 @@ public class RulePostProcessor extends ServiceBase {
 							RelationInfo info = new RelationInfo();
 							rr.relInfo = info;
 							TypePair farSide = rr.findMatchingRel((DStructType)pair.type, structType);
-							boolean b = isOtherSideMany(pair.type, farSide);
+							boolean b = isOtherSideManyEarly(pair.type, farSide);
 							info.cardinality = b ? RelationCardinality.MANY_TO_MANY : RelationCardinality.ONE_TO_MANY;
 							info.farType = (DStructType) pair.type;
 							info.fieldName = rule.getSubject();
@@ -404,7 +404,8 @@ public class RulePostProcessor extends ServiceBase {
 	private boolean isOtherSideMany(RelationInfo info) {
 		return DRuleHelper.xfindOtherSideMany(info) != null;
 	}
-	private boolean isOtherSideMany(DType otherSide, TypePair otherRelPair) {
+	//can be called before .otherSide is hooked up
+	private boolean isOtherSideManyEarly(DType otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
 	private void checkForOtherSideDuplicates(DTypeRegistry registry, List<DeliaError> allErrors) {
