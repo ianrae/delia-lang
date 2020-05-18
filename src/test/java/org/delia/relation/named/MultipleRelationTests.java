@@ -2,6 +2,11 @@ package org.delia.relation.named;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
+import org.delia.compiler.generate.DeliaGeneratePhase;
+import org.delia.compiler.generate.SimpleFormatOutputGenerator;
+import org.delia.log.LogLevel;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
@@ -35,13 +40,49 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 		doInsert("insert Address { z:20, cust1:1, cust2:2 }");
 //		doInsert("insert Address { z:21 }");
 		
-		DValue dval2 = doQuery("Address[1]");
+		DValue dvalA = doQuery("Address[1]");
+		chkRelation(dvalA, "cust1", 1);
+		chkRelation(dvalA, "cust2", 2);
 		
-		dumpObj("payload..", dval2);
+//		dval = dvalA.asStruct().getField("cust1").asRelation().getForeignKey();
+//		assertEquals(1, dval.asInt());
+//		
+//		dval = dvalA.asStruct().getField("cust2").asRelation().getForeignKey();
+//		assertEquals(2, dval.asInt());
+//		chkRelation(dvalA, "cust2", 22);
+////		dumpObj("payload..", dval2);
 
+		dval = doQuery("Address[1].cust1.id");
+		assertEquals(1, dval.asInt());
+		dval = doQuery("Address[1].cust2.id");
+		assertEquals(2, dval.asInt());
 		
+		doInsert("insert Address { z:21, cust1:1, cust2:2 }");
+		doInsert("insert Customer { wid:11, addr1:1, addr2:2 }");
+		
+		DValue dvalC = doQuery("Customer[1]");
+		
+		List<String> list = this.generateFromDVal(dvalC);
+		for(String s: list) {
+			log(s);
+		}
+		
+		chkRelation(dvalC, "addr1", 1);
+		chkRelation(dvalC, "addr2", 2);
+		
+		
+//		dval = doQuery("Customer[2].addr1.id");
+//		assertEquals(1, dval.asInt());
 	}
+	private DValue chkRelation(DValue dvalA, String fieldName, int id) {
+		DValue inner = dvalA.asStruct().getField(fieldName);
+		DValue dval2 = inner.asRelation().getForeignKey();
+		assertEquals(id, dval2.asInt());
+		return dval2;
+	}
+	
 	private DValue doQuery(String src) {
+		log("src: " + src);
 		ResultValue res = delia.continueExecution(src, this.sess);
 		DValue dval = res.getAsDValue();
 		return dval;
@@ -51,6 +92,14 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 		ObjectRendererImpl ori = new ObjectRendererImpl();
 		String json = ori.render(obj);
 		log(json);
+	}
+	private List<String> generateFromDVal(DValue dval) {
+		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		// ErrorTracker et = new SimpleErrorTracker(log);
+		DeliaGeneratePhase phase = this.sess.getExecutionContext().generator;
+		boolean b = phase.generateValue(gen, dval, "a");
+		assertEquals(true, b);
+		return gen.outputL;
 	}
 
 	private void doInsert(String src) {
@@ -64,6 +113,7 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 	public void init() {
 		super.init();
 		enableAutoCreateTables();
+		this.log.setLevel(LogLevel.INFO);
 	}
 
 	private String create11CustomerType() {
