@@ -1,7 +1,6 @@
 package org.delia.bdd.core;
 
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.log.Log;
@@ -53,10 +52,10 @@ public class MyFakeSQLDBInterface extends InstrumentedZDBInterface {
 //		break;
 		}
 
-		if (deferFlag) {
-			DBInterfaceInternal dbi = (DBInterfaceInternal) actualInterface;
-			dbi.enablePrintStackTrace(enableSQLLoggingFlag);
-		}
+//		if (deferFlag) {
+//			DBInterfaceInternal dbi = (DBInterfaceInternal) actualInterface;
+//			dbi.enablePrintStackTrace(enableSQLLoggingFlag);
+//		}
 		
 		if (tablesToClean != null) {
 			H2TestCleaner cleaner = new H2TestCleaner(dbType);

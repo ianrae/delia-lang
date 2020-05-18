@@ -5,7 +5,6 @@ import java.sql.SQLException;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBHelper;
-import org.delia.db.DBInterfaceInternal;
 import org.delia.db.DBType;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -113,13 +112,6 @@ public class H2TestCleaner {
 			}
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
-			
-			if (dbInterface instanceof DBInterfaceInternal) {
-				DBInterfaceInternal dbi = (DBInterfaceInternal) dbInterface;
-//				dbi.enumerateAllConstraints(log);
-			}
-			
-			//e.printStackTrace();
 		}
 	}
 
