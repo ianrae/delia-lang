@@ -165,8 +165,8 @@ public class RelationOneRule extends RelationRuleBase {
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		DValue keyVal = dval.asStruct().getField(pair.name);
-		
-		RelationInfo farInfo = DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
+
+		RelationInfo farInfo = info.otherSide;
 		if (farInfo == null) {
 			return;
 		}

@@ -38,9 +38,9 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
 		
-		log.log("span:%d", span.qfeL.size());
+		log.logDebug("span:%d", span.qfeL.size());
 		for(int i = 0; i < span.qfeL.size(); i++) {
-			log.log("spantype:%s", span.dtype.getName());
+			log.logDebug("spantype:%s", span.dtype.getName());
 			QueryFuncExp qfexp = span.qfeL.get(i);
 //			ctx.pendingTrail.add(qfexp.funcName);
 			
@@ -54,7 +54,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 	}
 	private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory, QueryFuncContext ctx) {
 		String fnName = qfexp.funcName;
-		log.log("qfn: " + fnName);
+		log.logDebug("qfn: " + fnName);
 		ZQueryResponseFunction func = fnFactory.create(fnName, registry);
 		if (func == null) {
 			DeliaExceptionHelper.throwError("unknown-let-function", "Unknown let function '%s'", fnName);
@@ -66,7 +66,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 
 	private QueryResponse processField(LetSpan span, QueryFuncExp qff, QueryResponse qresp, QueryFuncContext ctx) {
 		String fieldName = qff.funcName;
-		log.log("qff: " + fieldName);
+		log.logDebug("qff: " + fieldName);
 		
 		if (CollectionUtils.isEmpty(qresp.dvalList)) {
 			return qresp; //nothing to do

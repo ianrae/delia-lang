@@ -26,7 +26,6 @@ import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.DValueImpl;

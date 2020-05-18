@@ -9,6 +9,7 @@ import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.log.LogLevel;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.ResultValue;
+import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.util.render.ObjectRendererImpl;
 import org.junit.Before;
@@ -17,7 +18,7 @@ import org.junit.Test;
 public class MultipleRelationTests extends NamedRelationTestBase {
 	
 	@Test
-	public void test11() {
+	public void test() {
 		createCustomer11TypeWithRelations();
 		RelationOneRule rr = getOneRule("Address", "cust1");
 		chkRule(rr, true, "addr1", "addr1");
@@ -35,50 +36,83 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 		res = delia.continueExecution("insert Customer { wid:10 }", this.sess);
 		dval = res.getAsDValue();
 		assertEquals(null, dval);
+	}
+	
+	@Test
+	public void test2() {
+		createCustomer11TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
-		
+		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:2 }");
-//		doInsert("insert Address { z:21 }");
 		
 		DValue dvalA = doQuery("Address[1]");
 		chkRelation(dvalA, "cust1", 1);
 		chkRelation(dvalA, "cust2", 2);
 		
-//		dval = dvalA.asStruct().getField("cust1").asRelation().getForeignKey();
-//		assertEquals(1, dval.asInt());
-//		
-//		dval = dvalA.asStruct().getField("cust2").asRelation().getForeignKey();
-//		assertEquals(2, dval.asInt());
-//		chkRelation(dvalA, "cust2", 22);
-////		dumpObj("payload..", dval2);
-
-		dval = doQuery("Address[1].cust1.id");
+		DValue dval = doQuery("Address[1].cust1.id");
 		assertEquals(1, dval.asInt());
 		dval = doQuery("Address[1].cust2.id");
 		assertEquals(2, dval.asInt());
 		
-		doInsert("insert Address { z:21, cust1:1, cust2:2 }");
-		doInsert("insert Customer { wid:11, addr1:1, addr2:2 }");
+		doInsert("insert Customer { wid:13 }");
+		doInsert("insert Customer { wid:14 }");
+		doInsert("insert Address { z:21, cust1:3, cust2:4 }");
+		dvalA = doQuery("Address[2]");
+		chkRelation(dvalA, "cust1", 3);
+		chkRelation(dvalA, "cust2", 4);
 		
-		DValue dvalC = doQuery("Customer[1]");
+		//for 1:1 parent we need fks() to get relations to get fks
+		DValue dvalC = doQuery("Customer[1].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", 1);
+		chkRelation(dvalC, "addr2", null);
 		
+		dvalC = doQuery("Customer[2].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", null);
+		chkRelation(dvalC, "addr2", 1);
+	}
+	
+	@Test
+	public void test3Fail() {
+		createCustomer11TypeWithRelations();
+		doInsert("insert Customer { wid:11 }");
+		doInsert("insert Customer { wid:12 }");
+		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
+		
+		//for 1:1 parent we need fks() to get relations to get fks
+		DValue dvalC = doQuery("Customer[1].fks()");
+		dumpDVal(dvalC);
+		chkRelation(dvalC, "addr1", 1);
+		chkRelation(dvalC, "addr2", 1);
+	}
+	
+	private void dumpDVal(DValue dvalC) {
 		List<String> list = this.generateFromDVal(dvalC);
 		for(String s: list) {
 			log(s);
 		}
-		
-		chkRelation(dvalC, "addr1", 1);
-		chkRelation(dvalC, "addr2", 2);
-		
-		
-//		dval = doQuery("Customer[2].addr1.id");
-//		assertEquals(1, dval.asInt());
 	}
-	private DValue chkRelation(DValue dvalA, String fieldName, int id) {
+
+	//------------------------
+	@Before
+	public void init() {
+		super.init();
+		enableAutoCreateTables();
+		this.log.setLevel(LogLevel.INFO);
+	}
+
+	private DValue chkRelation(DValue dvalA, String fieldName, Integer id) {
 		DValue inner = dvalA.asStruct().getField(fieldName);
-		DValue dval2 = inner.asRelation().getForeignKey();
-		assertEquals(id, dval2.asInt());
-		return dval2;
+		if (id == null) {
+			assertEquals(null, inner);
+			return null;
+		} else {
+			DRelation drel = inner.asRelation();
+			DValue dval2 = drel.getForeignKey();
+			assertEquals(id.intValue(), dval2.asInt());
+			return dval2;
+		}
 	}
 	
 	private DValue doQuery(String src) {
@@ -108,13 +142,6 @@ public class MultipleRelationTests extends NamedRelationTestBase {
 		assertEquals(null, dval);
 	}
 
-
-	@Before
-	public void init() {
-		super.init();
-		enableAutoCreateTables();
-		this.log.setLevel(LogLevel.INFO);
-	}
 
 	private String create11CustomerType() {
 		String src = String.format("type Customer struct { id int primaryKey serial, wid int, relation addr1 Address 'addr1' one optional,");
