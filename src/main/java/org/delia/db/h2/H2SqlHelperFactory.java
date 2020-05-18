@@ -1,20 +1,17 @@
 package org.delia.db.h2;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
-import org.delia.db.TableExistenceService;
 import org.delia.db.ValueHelper;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.FieldGenFactory;
-import org.delia.db.sql.table.TableCreator;
 import org.delia.db.sql.where.SqlWhereConverter;
 
 public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory {
@@ -27,10 +24,10 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	public ValueHelper createValueHelper() {
 		return new ValueHelper(factorySvc);
 	}
-	@Override
-	public FieldGenFactory createFieldGenFactory() {
-		return new FieldGenFactory(factorySvc);
-	}
+//	@Override
+//	public FieldGenFactory createFieldGenFactory() {
+//		return new FieldGenFactory(factorySvc);
+//	}
 	@Override
 	public DBErrorConverter createErrorConverter() {
 		return new H2ErrorConverter();
@@ -65,13 +62,13 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 		return sfhelper;
 	}
 	
-	//why syncrhonized?
-	@Override
-	public TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap) {
-		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
-		TableExistenceService existSvc =  null; //TODOfixnew TableExistenceServiceImpl(dbInterface, dbctx);
-		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc, datIdMap);
-	}
+//	//why syncrhonized?
+//	@Override
+//	public TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap) {
+//		SqlNameFormatter nameFormatter = createNameFormatter(dbctx); 
+//		TableExistenceService existSvc =  null; //TODOfixnew TableExistenceServiceImpl(dbInterface, dbctx);
+//		return new TableCreator(factorySvc, dbctx.registry, this.createFieldGenFactory(), nameFormatter, existSvc, datIdMap);
+//	}
 	
 	@Override
 	public QueryTypeDetector createQueryTypeDetector(DBAccessContext dbctx) {
