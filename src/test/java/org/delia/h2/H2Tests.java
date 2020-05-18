@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -165,7 +166,8 @@ public class H2Tests {
 
 	@Before
 	public void init() {
-		
+		DBTestHelper.throwIfNoSlowTests();
+
 	}
 	private void openDB() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");

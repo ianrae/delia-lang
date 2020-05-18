@@ -3,6 +3,7 @@ package org.delia.h2;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.api.DeliaFactory;
+import org.delia.base.DBTestHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
@@ -200,6 +201,8 @@ public class H2MigrationTests extends TopoTestBase {
 	
 	@Before
 	public void init() {
+		DBTestHelper.throwIfNoSlowTests();
+		
 		this.factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
 		log("here we go2..");
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
