@@ -18,6 +18,7 @@ import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
+import org.delia.runner.DeliaException;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -40,8 +41,9 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		}
 	}
 
-	@Test
+	@Test(expected=DeliaException.class)
 	public void test11() {
+		// type-dependency-cycle
 		createCustomer11TypeWithRelations("joe", null, "joe");
 		RelationOneRule rr = getOneRule("Address", "cust");
 		chkRule(rr, true, "joe", "joe");
