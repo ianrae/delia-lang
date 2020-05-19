@@ -187,9 +187,10 @@ public class SqlJoinHelper {
 		}
 		
 
-		public boolean addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
+		public int addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 			List<TypePair> joinL = genFKJoinList(hlspan);
 
+			int numAdded = 0;
 			for(TypePair pair: joinL) {
 				DStructType pairType = (DStructType) pair.type;
 				PrimaryKey pk = pairType.getPrimaryKey();
@@ -201,7 +202,8 @@ public class SqlJoinHelper {
 					break;
 				case MANY_TO_MANY:
 					doManyToManyAddFKofJoins(hlspan, fieldL, pair, relinfoA);
-					return true;
+					numAdded++;
+					continue;
 				}
 				
 				//b.id as cust
@@ -209,10 +211,9 @@ public class SqlJoinHelper {
 				String s = aliasAlloc.buildAlias(aliasInst, pk.getFieldName());
 				s = String.format("%s as %s", s, relinfoA.fieldName);
 				addField(fieldL, pairType, pk.getKey(), s); 
-			
-				return true;
+				numAdded++;
 			}
-			return false;
+			return numAdded;
 		}
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL, TypePair pair,
 				RelationInfo relinfoA) {

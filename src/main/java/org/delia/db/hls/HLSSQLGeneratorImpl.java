@@ -170,17 +170,19 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		hlspan.details = joinHelper.genJoin(sc, hlspan);
 	}
 	private void addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
-		boolean addedOne = joinHelper.addFKofJoins(hlspan, fieldL);
-		if (addedOne) {
-			int n = fieldL.size();
-			RenderedField rf = fieldL.get(n - 1);
-			String fieldStr = rf.field.trim();
-			if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
-				String asName = whereClauseHelper.asNameMap.get(fieldStr);
-				fieldStr = String.format("%s as %s", fieldStr, asName);
+		int numAdded = joinHelper.addFKofJoins(hlspan, fieldL);
+		if (numAdded > 0) {
+			for(int k = 0; k < numAdded; k++) {
+				int n = fieldL.size();
+				RenderedField rf = fieldL.get(n - (k + 1));
+				String fieldStr = rf.field.trim();
+				if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
+					String asName = whereClauseHelper.asNameMap.get(fieldStr);
+					fieldStr = String.format("%s as %s", fieldStr, asName);
 //				fieldL.remove(n - 1);
-				rf.field = fieldStr;
+					rf.field = fieldStr;
 //				fieldL.add(fieldStr);
+				}
 			}
 		}
 	}
