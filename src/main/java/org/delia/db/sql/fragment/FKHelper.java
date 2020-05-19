@@ -283,7 +283,7 @@ public class FKHelper extends ServiceBase {
 			selectFrag.joinFrag = joinFrag;
 
 			details.mergeRows = true;
-			details.mergeOnField = rule.relInfo.fieldName;
+			details.mergeOnFieldL.add(rule.relInfo.fieldName);
 		}
 	}
 
@@ -299,7 +299,7 @@ public class FKHelper extends ServiceBase {
 		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag, adjustment);
 		details.mergeRows = true;
 		details.isManyToMany = true;
-		details.mergeOnField = otherRule.relInfo.fieldName;
+		details.mergeOnFieldL.add(otherRule.relInfo.fieldName);
 	}
 
 	private void genJoin(QuerySpec spec, DStructType structType, RelationInfo info, TableInfo tblinfo, TableFragment tbl, RelationManyRule otherRule, String assocField, 

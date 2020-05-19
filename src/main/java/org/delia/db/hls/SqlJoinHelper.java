@@ -40,12 +40,12 @@ public class SqlJoinHelper {
 				case ONE_TO_MANY:
 					bHasFK = relinfoA.isParent;
 					details.mergeRows = true;
-					details.mergeOnField = relinfoA.fieldName;
+					details.mergeOnFieldL.add(relinfoA.fieldName);
 					break;
 				case MANY_TO_MANY:
 					details.mergeRows = true;
 					details.isManyToMany = true;
-					details.mergeOnField = relinfoA.fieldName;
+					details.mergeOnFieldL.add(relinfoA.fieldName);
 					doManyToMany(sc, hlspan, pair, relinfoA);
 					return details;
 				}

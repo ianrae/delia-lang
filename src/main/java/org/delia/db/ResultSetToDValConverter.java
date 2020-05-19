@@ -153,15 +153,17 @@ public class ResultSetToDValConverter extends ServiceBase {
 				pkMap.put(key, dval);
 			} else {
 				DValue mergeToVal = pkMap.get(key);
-				DValue inner1 = mergeToVal.asStruct().getField(details.mergeOnField);
-				DValue inner2 = dval.asStruct().getField(details.mergeOnField);
-				if (inner2 != null) {
-					if (inner1 == null) {
-						inner1 = this.createEmptyRelation(dbctx, dtype, details.mergeOnField);
-						mergeToVal.asMap().put(details.mergeOnField, inner1);
+				for(String mergeOnField: details.mergeOnFieldL) {
+					DValue inner1 = mergeToVal.asStruct().getField(mergeOnField);
+					DValue inner2 = dval.asStruct().getField(mergeOnField);
+					if (inner2 != null) {
+						if (inner1 == null) {
+							inner1 = this.createEmptyRelation(dbctx, dtype, mergeOnField);
+							mergeToVal.asMap().put(mergeOnField, inner1);
+						}
+						DRelation drel2 = inner2.asRelation();
+						inner1.asRelation().addKey(drel2.getForeignKey());
 					}
-					DRelation drel2 = inner2.asRelation();
-					inner1.asRelation().addKey(drel2.getForeignKey());
 				}
 			}
 		}
@@ -207,7 +209,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 				List<DValue> toMergeFetchedL = new ArrayList<>();
 				List<DValue> toMergeKeyL = new ArrayList<>();
 				for(DValue subVal: subL) {
-					DValue inner = subVal.asStruct().getField(details.mergeOnField);
+					DValue inner = subVal.asStruct().getField(details.mergeOnFieldL.get(0));
 					if (inner != null) {
 						DRelation drel = inner.asRelation();
 						if (drel.haveFetched()) {
@@ -219,11 +221,11 @@ public class ResultSetToDValConverter extends ServiceBase {
 				
 				if (!toMergeFetchedL.isEmpty() || !toMergeKeyL.isEmpty()) {
 					//and add back into dval
-					DValue inner2 = dval.asStruct().getField(details.mergeOnField);
+					DValue inner2 = dval.asStruct().getField(details.mergeOnFieldL.get(0));
 					if (inner2 == null) {
 						//fix later!! TODO
 						DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
-						TypePair pair = DValueHelper.findField(dval.getType(), details.mergeOnField);
+						TypePair pair = DValueHelper.findField(dval.getType(), details.mergeOnFieldL.get(0));
 						RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
 						builder.buildEmptyRelation();
 						boolean b = builder.finish();
@@ -231,7 +233,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 							DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
 						} else {
 							inner2 = builder.getDValue();
-							dval.asMap().put(details.mergeOnField, inner2);
+							dval.asMap().put(details.mergeOnFieldL.get(0), inner2);
 						}
 					}
 					DRelation drel2 = inner2.asRelation();
