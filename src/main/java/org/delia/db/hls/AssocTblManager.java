@@ -13,7 +13,7 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class AssocTblManager {
 	private TableExistenceService existSvc;
-	private Map<String,String> existsMap = new HashMap<>();
+	private Map<String,String> existsMap = new HashMap<>(); //assocTblName,""
 	private DatIdMap datIdMap;
 	
 	public AssocTblManager(TableExistenceService existSvc, DatIdMap datIdMap) {

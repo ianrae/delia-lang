@@ -46,6 +46,7 @@ import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.ZUpdate;
 import org.delia.zdb.ZUpsert;
+import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
 public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 
@@ -56,12 +57,16 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	private ZUpdate zupdate;
 	private ZUpsert zupsert;
 	private ZDelete zdelete;
+	private H2DeliaSessionCache cache;
+	private CacheData cacheData;
 
-	public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, H2ZDBConnection conn) {
+	public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, 
+			H2ZDBConnection conn, H2DeliaSessionCache cache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;
 		this.dbType = DBType.H2;
+		this.cache = cache;
 	}
 
 	@Override
@@ -86,6 +91,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		this.zupdate = new ZUpdate(factorySvc, registry);
 		this.zupsert = new ZUpsert(factorySvc, registry);
 		this.zdelete = new ZDelete(factorySvc, registry);
+		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
 	private ZTableCreator createPartialTableCreator() {
