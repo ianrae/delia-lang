@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryDetails;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.relation.RelationCardinality;
@@ -47,7 +48,7 @@ public class SqlJoinHelper {
 					details.isManyToMany = true;
 					details.mergeOnFieldL.add(relinfoA.fieldName);
 					doManyToMany(sc, hlspan, pair, relinfoA);
-					return details;
+					continue;
 				}
 				
 				String s;
@@ -77,10 +78,11 @@ public class SqlJoinHelper {
 		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
-			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
+			String assocTable = assocTblMgr.getDatIdMap().getAssocTblName(relinfoA.getDatId()); //assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			
 			if (true) {
-				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
+//				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTable);
 				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
 				String fff = assocTblMgr.getAssocLeftField(hlspan.fromType, (DStructType) pair.type);
@@ -106,7 +108,8 @@ public class SqlJoinHelper {
 			
 			DStructType pairType = (DStructType) pair.type; //Address
 			PrimaryKey pk = pairType.getPrimaryKey();
-			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
+//			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTable);
 			String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 			String on1 = aliasAlloc.buildAlias(aliasInst, pk.getFieldName()); //b.id
 			String fff = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
@@ -218,12 +221,14 @@ public class SqlJoinHelper {
 		}
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
-			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
+			DatIdMap datIdMap = assocTblMgr.getDatIdMap();
+			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); //assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
 //			String fieldName = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type) ? "leftv" : "rightv";
-			String fieldName = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
+			String fieldName = assocTblMgr.xgetAssocRightField(hlspan.fromType, assocTbl);
 			
 			//b.id as cust
-			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(assocTbl, pair.name, assocTbl);
+//			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(assocTbl, pair.name, true);
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTbl);
 			String s = aliasAlloc.buildAlias(aliasInst, fieldName);
 			s = String.format("%s as %s", s, relinfoA.fieldName);
 			addField(fieldL, null, fieldName, s).isAssocField = true;

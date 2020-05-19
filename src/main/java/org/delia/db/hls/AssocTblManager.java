@@ -133,4 +133,19 @@ public class AssocTblManager {
 		}
 	}
 	
+	public String xgetAssocLeftField(DStructType type1, String assocTbl) {
+		if (assocTbl.startsWith(type1.getName())) {
+			return "leftv";
+		} else {
+			return "rightv";
+		}
+	}
+	public String xgetAssocRightField(DStructType type1, String assocTbl) {
+		if (assocTbl.startsWith(type1.getName())) {
+			return "rightv";
+		} else {
+			return "leftv";
+		}
+	}
+	
 }

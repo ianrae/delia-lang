@@ -79,10 +79,13 @@ public class AliasAllocator {
 		return aliasInst;
 	}
 	//use when can have multiple joins to same table. each needs unique alias
-	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey) {
-		return findOrCreateAliasInstance(tblName, instanceKey, null);
+	public AliasInstance findOrCreateAliasInstanceAssoc(String assocTblName) {
+		return findOrCreateAliasInstance(assocTblName, assocTblName, true);
 	}
-	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey, String assocTable) {
+	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey) {
+		return findOrCreateAliasInstance(tblName, instanceKey, false);
+	}
+	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey, boolean isAssocTbl) {
 		String key = String.format("%s.%s", tblName, instanceKey);
 		if (! aliasMap.containsKey(key)) {
 			createAlias(key);
@@ -92,7 +95,7 @@ public class AliasAllocator {
 		aliasInst.alias = aliasMap.get(key);
 		aliasInst.instanceKey = instanceKey;
 		aliasInst.structType = null;
-		aliasInst.assocTbl = assocTable;
+		aliasInst.assocTbl = isAssocTbl ? tblName : null;
 		return aliasInst;
 	}
 	public String buildTblAlias(AliasInstance aliasInst) {
