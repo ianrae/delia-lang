@@ -29,15 +29,18 @@ import org.delia.util.StringUtil;
 public class RulePostProcessor extends ServiceBase {
 	private List<RelationManyRule> unresolvedManyL = new ArrayList<>();
 	private List<RelationOneRule> unresolvedOneL = new ArrayList<>();
+	private DTypeRegistry registry;
 	
 	public RulePostProcessor(FactoryService factorySvc) {
 		super(factorySvc);
 	}
 
 	public void process(DTypeRegistry registry, List<DeliaError> allErrors) {
-		
+		this.registry = registry;
 		List<DStructType> structsL = buildListAllStructs(registry);		
-		buildRelInfos(structsL);
+		buildRelInfosStep1(structsL);
+		buildRelInfosStep2(structsL);
+		
 		step1HookupNamedRelations(structsL, allErrors);
 		step2HookupNamedOtherSide(structsL, allErrors);
 		step3HookupUnNamedRelations(structsL, allErrors);
@@ -88,8 +91,8 @@ public class RulePostProcessor extends ServiceBase {
 		return list;
 	}
 	
-
-	private void buildRelInfos(List<DStructType> structsL) {
+	//create relinfo, all fields execept cardinality and isOneWay
+	private void buildRelInfosStep1(List<DStructType> structsL) {
 		for(DStructType structType: structsL) {
 			for(TypePair pair: structType.getAllFields()) {
 				if (pair.type.isStructShape()) {
@@ -103,6 +106,46 @@ public class RulePostProcessor extends ServiceBase {
 							
 							RelationInfo info = new RelationInfo();
 							rr.relInfo = info;
+							
+							info.farType = (DStructType) pair.type;
+							info.fieldName = rule.getSubject();
+							info.isParent = rr.isParent();
+							info.nearType = structType;
+							info.relationName = rr.getRelationName();
+						} else if (rule instanceof RelationManyRule) {
+							RelationManyRule rr = (RelationManyRule) rule;
+							RelationInfo info = new RelationInfo();
+							if (!rr.getSubject().equals(pair.name)) {
+								continue;
+							}
+							
+							rr.relInfo = info;
+							info.farType = (DStructType) pair.type;
+							info.fieldName = rule.getSubject();
+							info.isOneWay = false;
+							info.isParent = false; //will set after this
+							info.nearType = structType;
+							info.relationName = rr.getRelationName();
+						}
+					}
+				}
+			}
+		}
+	}
+	//set cardinality and isOneWay
+	private void buildRelInfosStep2(List<DStructType> structsL) {
+		for(DStructType structType: structsL) {
+			for(TypePair pair: structType.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					
+					for(DRule rule: structType.getRawRules()) {
+						if (rule instanceof RelationOneRule) {
+							RelationOneRule rr = (RelationOneRule) rule;
+							if (!rr.getSubject().equals(pair.name)) {
+								continue;
+							}
+							
+							RelationInfo info = rr.relInfo;
 //							TypePair farSide = DRuleHelper.findMatchingRelByType((DStructType)pair.type, structType);
 							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
 							//may be multiple possible matches here
@@ -115,20 +158,14 @@ public class RulePostProcessor extends ServiceBase {
 							}
 							
 							info.cardinality = b ? RelationCardinality.ONE_TO_MANY : RelationCardinality.ONE_TO_ONE;
-							info.farType = (DStructType) pair.type;
-							info.fieldName = rule.getSubject();
-							info.isOneWay = (farSideL.isEmpty());
-							info.isParent = rr.isParent();
-							info.nearType = structType;
-							info.relationName = rr.getRelationName();
+							info.isOneWay = !farSideL.isEmpty();
 						} else if (rule instanceof RelationManyRule) {
 							RelationManyRule rr = (RelationManyRule) rule;
-							RelationInfo info = new RelationInfo();
 							if (!rr.getSubject().equals(pair.name)) {
 								continue;
 							}
 							
-							rr.relInfo = info;
+							RelationInfo info = rr.relInfo;
 							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
 							//may be multiple possible matches here
 							boolean b = false;
@@ -140,12 +177,6 @@ public class RulePostProcessor extends ServiceBase {
 							}
 							
 							info.cardinality = b ? RelationCardinality.MANY_TO_MANY : RelationCardinality.ONE_TO_MANY;
-							info.farType = (DStructType) pair.type;
-							info.fieldName = rule.getSubject();
-							info.isOneWay = false;
-							info.isParent = false; //will set after this
-							info.nearType = structType;
-							info.relationName = rr.getRelationName();
 						}
 					}
 				}
@@ -452,6 +483,12 @@ public class RulePostProcessor extends ServiceBase {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
 	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr) {
+		//type replacement should handle this, but check anyway.
+		DType mismatch = registry.getType(otherSide.getName());
+		if (mismatch != otherSide) {
+			log.logError("ERROR: **** type replacement failed on type '%s'", otherSide.getName());
+			otherSide = mismatch;
+		}
 		
 		RelationInfo info = DRuleHelper.findMatchingByName(rr, (DStructType)otherSide);
 		if (info != null) {

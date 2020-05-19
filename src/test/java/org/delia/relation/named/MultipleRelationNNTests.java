@@ -16,13 +16,13 @@ public class MultipleRelationNNTests extends MultipleRelationTestBase {
 	@Test
 	public void test() {
 		createCustomerNNTypeWithRelations();
-		RelationOneRule rr = getOneRule("Address", "cust1");
+		RelationManyRule rr = getManyRule("Address", "cust1");
 		chkRule(rr, true, "r1", "r1");
 
 		RelationManyRule rr2 = getManyRule("Customer", "addr1");
 		chkRule(rr2, true, "r1", "r1");
 
-		rr = getOneRule("Customer", "addr2");
+		rr = getManyRule("Customer", "addr2");
 		chkRule(rr, true, "r2", "r2");
 		
 		ResultValue res = delia.continueExecution("let x = 5", this.sess);
