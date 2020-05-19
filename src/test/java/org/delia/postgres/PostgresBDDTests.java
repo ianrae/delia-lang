@@ -51,6 +51,13 @@ public class PostgresBDDTests extends BDDBase {
 		runR500File("t0-relation.txt", 2);
 	}
 	@Test
+	public void testR550() {
+		runR550File("t0-multirel-1to1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-2.txt", 1);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
+	}
+	@Test
 	public void testR600() {
 		runR600File("t0-rule-crud.txt", 3);
 		runR600File("t0-rule-maxlen.txt", 6);

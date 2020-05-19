@@ -49,7 +49,10 @@ public class AllBDDTests extends BDDBase {
 	}
 	@Test
 	public void testR550() {
-		runR550File("t0-multirel-1to-1.txt", 9);
+		runR550File("t0-multirel-1to1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-2.txt", 1);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
 	@Test
 	public void testR600() {

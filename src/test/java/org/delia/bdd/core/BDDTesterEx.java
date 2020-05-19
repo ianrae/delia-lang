@@ -88,6 +88,11 @@ public class BDDTesterEx {
 				mf.tablesToClean = cleanTables;
 			}
 		}
+		
+		if (dbInterface instanceof MyFakeSQLDBInterface) {
+			MyFakeSQLDBInterface mf = (MyFakeSQLDBInterface) dbInterface;
+			mf.init(client.getFactorySvc());
+		}
 	}
 
 	public boolean chkString(String delia, ThenValue thenVal) {
