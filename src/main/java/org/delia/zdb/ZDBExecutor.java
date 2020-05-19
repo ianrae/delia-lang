@@ -7,6 +7,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -18,6 +19,7 @@ public interface ZDBExecutor extends AutoCloseable {
 //		public Object connObject; //for internal use only
 //		ZAccessContext getContext();
 		ZDBConnection getDBConnection(); //for raw db access
+		Log getLog();
 
 		//executor holds session data regarding db
 		void init1(DTypeRegistry registry);

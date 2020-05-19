@@ -18,6 +18,7 @@ import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
+import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
@@ -49,6 +50,10 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	
 	@Override
 	public void close() {
+	}
+	@Override
+	public Log getLog() {
+		return log;
 	}
 
 	@Override

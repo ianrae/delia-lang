@@ -9,6 +9,7 @@ import org.delia.db.DBType;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.log.Log;
+import org.delia.log.LogLevel;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBExecutor;
@@ -71,8 +72,9 @@ public class H2TestCleaner {
 	
 	public void deleteTables(FactoryService factorySvc, ZDBInterfaceFactory innerInterface, String tables) {
 		try(ZDBExecutor executor = innerInterface.createExecutor()) {
-			boolean b = innerInterface.isSQLLoggingEnabled();
-			innerInterface.enableSQLLogging(false);
+			executor.getLog().setLevel(LogLevel.ERROR);
+//			boolean b = innerInterface.isSQLLoggingEnabled();
+//			innerInterface.enableSQLLogging(false);
 //		System.out.println("dropping...");
 			Log log = factorySvc.getLog();
 			
@@ -104,9 +106,10 @@ public class H2TestCleaner {
 		tblName = adjustTblName(tblName);
 		try {
 			if (executor instanceof H2ZDBExecutor) {
-				this.deleteH2TableCascade(executor, tblName);
+				if (!deleteH2TableCascade(executor, tblName)) {
+					executor.deleteTable(tblName);
+				}
 //				deleteContraintsForTable(executor, tblName);
-				executor.deleteTable(tblName);
 			} else {
 				executor.deleteTable(tblName);
 			}
@@ -151,7 +154,7 @@ public class H2TestCleaner {
 			h2exec.getDBConnection().execStatement(statement, null);
 		}
 	}
-	private void deleteH2TableCascade(ZDBExecutor executor, String tblName) throws SQLException {
+	private boolean deleteH2TableCascade(ZDBExecutor executor, String tblName) throws SQLException {
 		if (executor instanceof H2ZDBExecutor) {
 			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
@@ -159,6 +162,9 @@ public class H2TestCleaner {
 			SqlStatement statement = new SqlStatement();
 			statement.sql = sql;
 			h2exec.getDBConnection().execStatement(statement, null);
+			return true;
+		} else {
+			return false;
 		}
 	}
 

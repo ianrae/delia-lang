@@ -309,7 +309,7 @@ public class H2BDDTests extends BDDBase {
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
 	
 	//---

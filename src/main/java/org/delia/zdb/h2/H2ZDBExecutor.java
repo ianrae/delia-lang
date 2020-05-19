@@ -73,6 +73,10 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	public void close() {
 		conn.close();
 	}
+	@Override
+	public Log getLog() {
+		return log;
+	}
 
 	@Override
 	public void init1(DTypeRegistry registry) {

@@ -7,6 +7,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -24,6 +25,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	@Override
 	public void close() throws Exception {
 		zexec.close();
+	}
+	@Override
+	public Log getLog() {
+		return zexec.getLog();
 	}
 
 	@Override
