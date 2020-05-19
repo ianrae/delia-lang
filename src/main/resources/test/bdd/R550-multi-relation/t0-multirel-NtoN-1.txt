@@ -49,7 +49,7 @@ value:a:Customer {
 value:a:Customer {
  vid:3
  vname:'carol'
- vaddrHome:{101}
+ vaddrHome:{[100,101]}
    vaddrBiz:{101}
 }
 
