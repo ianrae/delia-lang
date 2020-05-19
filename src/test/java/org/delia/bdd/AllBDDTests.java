@@ -308,7 +308,9 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-		runR550File("t0-multirel-1to-1.txt", 9);
+//		runR550File("t0-multirel-1to1-1.txt", 1);
+//		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-2.txt", 1);
 
 	}
 	
