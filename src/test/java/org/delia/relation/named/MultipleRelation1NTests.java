@@ -2,26 +2,28 @@ package org.delia.relation.named;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MultipleRelationTests extends MultipleRelationTestBase {
+public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test() {
-		createCustomer11TypeWithRelations();
+		createCustomerN1TypeWithRelations();
 		RelationOneRule rr = getOneRule("Address", "cust1");
-		chkRule(rr, true, "addr1", "addr1");
+		chkRule(rr, true, "r1", "r1");
 
-		rr = getOneRule("Customer", "addr1");
-		chkRule(rr, true, "addr1", "addr1");
+		RelationManyRule rr2 = getManyRule("Customer", "addr1");
+		chkRule(rr2, true, "r1", "r1");
 
 		rr = getOneRule("Customer", "addr2");
-		chkRule(rr, true, "addr2", "addr2");
+		chkRule(rr, true, "r2", "r2");
 		
 		ResultValue res = delia.continueExecution("let x = 5", this.sess);
 		DValue dval = res.getAsDValue();
@@ -34,10 +36,11 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test2() {
-		createCustomer11TypeWithRelations();
+		createCustomerN1TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:2 }");
+		doInsert("insert Address { z:21, cust1:1 }");
 		
 		DValue dvalA = doQuery("Address[1]");
 		chkRelation(dvalA, "cust1", 1);
@@ -51,14 +54,14 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 		doInsert("insert Customer { wid:13 }");
 		doInsert("insert Customer { wid:14 }");
 		doInsert("insert Address { z:21, cust1:3, cust2:4 }");
-		dvalA = doQuery("Address[2]");
+		dvalA = doQuery("Address[3]");
 		chkRelation(dvalA, "cust1", 3);
 		chkRelation(dvalA, "cust2", 4);
 		
 		//for 1:1 parent we need fks() to get relations to get fks
 		DValue dvalC = doQuery("Customer[1].fks()");
 		dumpDVal(dvalC);
-		chkRelation(dvalC, "addr1", 1);
+		this.chkManyRelation(dvalC, "addr1", 1, 2);
 		chkRelation(dvalC, "addr2", null);
 		
 		dvalC = doQuery("Customer[2].fks()");
@@ -69,7 +72,7 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test3() {
-		createCustomer11TypeWithRelations();
+		createCustomerN1TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -83,7 +86,7 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 	
 	@Test(expected=DeliaException.class)
 	public void test4Fail() {
-		createCustomer11TypeWithRelations();
+		createCustomerN1TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -102,7 +105,7 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test5Update() {
-		createCustomer11TypeWithRelations();
+		createCustomerN1TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -124,7 +127,7 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test6Delete() {
-		createCustomer11TypeWithRelations();
+		createCustomerN1TypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -144,18 +147,34 @@ public class MultipleRelationTests extends MultipleRelationTestBase {
 	public void init() {
 		super.init();
 	}
+	
+	protected void chkManyRelation(DValue dvalA, String fieldName, Integer... ids) {
+		DValue inner = dvalA.asStruct().getField(fieldName);
+		if (ids.length == 0) {
+			assertEquals(null, inner);
+		} else {
+			DRelation drel = inner.asRelation();
+			assertEquals(ids.length, drel.getMultipleKeys().size());
+			int i = 0;
+			for(DValue dval: drel.getMultipleKeys()) {
+				assertEquals(ids[i].intValue(), dval.asInt());
+				i++;
+			}
+		}
+	}
+	
 
 	private String create11CustomerType() {
-		String src = String.format("type Customer struct { id int primaryKey serial, wid int, relation addr1 Address 'addr1' one optional,");
-		src += String.format("\n relation addr2 Address 'addr2' one optional} end");
+		String src = String.format("type Customer struct { id int primaryKey serial, wid int, relation addr1 Address 'r1' many optional,");
+		src += String.format("\n relation addr2 Address 'r2' one optional parent} end");
 		src += "\n";
-		src += String.format("\n type Address struct { id int primaryKey serial, z int, relation cust1 Customer 'addr1' one ");
-		src += String.format("\n relation cust2 Customer 'addr2' one} end");
+		src += String.format("\n type Address struct { id int primaryKey serial, z int, relation cust1 Customer 'r1' one ");
+		src += String.format("\n relation cust2 Customer 'r2' one optional} end");
 		src += "\n";
 		return src;
 	}
 
-	private void createCustomer11TypeWithRelations() {
+	private void createCustomerN1TypeWithRelations() {
 		String src = create11CustomerType();
 		log.log(src);
 		execTypeStatement(src);
