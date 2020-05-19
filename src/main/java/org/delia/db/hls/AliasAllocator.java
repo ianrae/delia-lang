@@ -62,6 +62,10 @@ public class AliasAllocator {
 
 	//use when can have multiple joins to same table. each needs unique alias
 	public AliasInstance findOrCreateAliasInstance(DStructType structType, String instanceKey) {
+		return findOrCreateAliasInstance(structType, instanceKey, null);
+	}
+
+	public AliasInstance findOrCreateAliasInstance(DStructType structType, String instanceKey, String assocTable) {
 		String key = String.format("%s.%s", structType.getName(), instanceKey);
 		if (! aliasMap.containsKey(key)) {
 			createAlias(key);
@@ -71,10 +75,14 @@ public class AliasAllocator {
 		aliasInst.alias = aliasMap.get(key);
 		aliasInst.instanceKey = instanceKey;
 		aliasInst.structType = structType;
+		aliasInst.assocTbl = assocTable;
 		return aliasInst;
 	}
 	//use when can have multiple joins to same table. each needs unique alias
 	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey) {
+		return findOrCreateAliasInstance(tblName, instanceKey, null);
+	}
+	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey, String assocTable) {
 		String key = String.format("%s.%s", tblName, instanceKey);
 		if (! aliasMap.containsKey(key)) {
 			createAlias(key);
@@ -84,10 +92,12 @@ public class AliasAllocator {
 		aliasInst.alias = aliasMap.get(key);
 		aliasInst.instanceKey = instanceKey;
 		aliasInst.structType = null;
+		aliasInst.assocTbl = assocTable;
 		return aliasInst;
 	}
 	public String buildTblAlias(AliasInstance aliasInst) {
-		String s = String.format("%s as %s", aliasInst.structType.getName(), aliasInst.alias);
+		String tbl = aliasInst.assocTbl != null ? aliasInst.assocTbl : aliasInst.structType.getName();
+		String s = String.format("%s as %s", tbl, aliasInst.alias);
 		return s;
 	}
 	public String buildAlias(AliasInstance aliasInst, String fieldName) {

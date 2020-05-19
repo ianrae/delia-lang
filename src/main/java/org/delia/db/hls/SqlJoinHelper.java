@@ -80,7 +80,7 @@ public class SqlJoinHelper {
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			
 			if (true) {
-				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
 				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
 				String fff = assocTblMgr.getAssocLeftField(hlspan.fromType, (DStructType) pair.type);
@@ -106,7 +106,7 @@ public class SqlJoinHelper {
 			
 			DStructType pairType = (DStructType) pair.type; //Address
 			PrimaryKey pk = pairType.getPrimaryKey();
-			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
 			String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 			String on1 = aliasAlloc.buildAlias(aliasInst, pk.getFieldName()); //b.id
 			String fff = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
@@ -223,7 +223,7 @@ public class SqlJoinHelper {
 			String fieldName = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
 			
 			//b.id as cust
-			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(assocTbl, pair.name);
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(assocTbl, pair.name, assocTbl);
 			String s = aliasAlloc.buildAlias(aliasInst, fieldName);
 			s = String.format("%s as %s", s, relinfoA.fieldName);
 			addField(fieldL, null, fieldName, s).isAssocField = true;
