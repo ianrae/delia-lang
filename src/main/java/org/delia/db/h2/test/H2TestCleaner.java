@@ -46,7 +46,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, "CustomerAddressAssoc");
 			safeDeleteTable(executor, "AddressCustomerAssoc");
 			safeDeleteTable(executor, "AddressCustomerDat1");
-			safeDeleteTable(executor, "CUSTOMERADDRESSDAT1");
+			safeDeleteTable(executor, "AddressCustomerDat2");
 			safeDeleteTable(executor, "Customer__BAK");
 			safeDeleteTable(executor, "Other");
 			safeDeleteTable(executor, "CustomerOtherDat1");

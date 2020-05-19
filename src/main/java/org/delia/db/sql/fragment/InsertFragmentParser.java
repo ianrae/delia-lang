@@ -171,12 +171,13 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	private boolean genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, DValue xdval, 
 			RelationInfo info, SqlStatement statement) {
 
-		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
-		assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, tblinfo.assocTblName);
+		String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(info.getDatId());
+//		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, assocTblName);
 		assocInsertFrag.paramStartIndex = insertFrag.statement.paramL.size();
 
 		//struct is Address AddressCustomerAssoc
-		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
+		if (assocTblName.startsWith(structType.getName())) {
 			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval);
 		} else {
 			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval);
