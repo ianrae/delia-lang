@@ -22,6 +22,7 @@ import org.delia.type.DValue;
 import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
+import org.delia.zdb.h2.H2DeliaSessionCache;
 import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.H2ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
@@ -60,7 +61,7 @@ public class ZDBTests  extends BDDBase {
 		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(factorySvc, connFact);
 		
 		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
-		ZDBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn);
+		ZDBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();

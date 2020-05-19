@@ -122,7 +122,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	private DValue doInsert(DValue dval, InsertContext ctx, ZTableCreator tmpTableCreator) {
-		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tmpTableCreator, this);
+		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tmpTableCreator, cacheData, this);
 
 		logStatementGroup(stgroup);
 		DType keyType = ctx.genKeytype;

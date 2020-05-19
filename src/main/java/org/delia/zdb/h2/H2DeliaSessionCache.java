@@ -1,11 +1,13 @@
 package org.delia.zdb.h2;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 //store data here that can be shared across instances of ZExecutor.
 public class H2DeliaSessionCache {
 	public static class CacheData {
+		public Map<String,String> assocTblExistMap = new ConcurrentHashMap<>(); //assocTblName,""
 		
 	}
 	

@@ -19,6 +19,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	private SimpleLog sqlLog;
 	private ConnectionFactory connFactory;
 	private DBErrorConverter errorConverter;
+	private H2DeliaSessionCache sessionCache;
 
 	public H2ZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
@@ -27,6 +28,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 		this.connFactory = connFactory;
 		this.errorConverter = new H2ErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
+		this.sessionCache = new H2DeliaSessionCache();
 	}
 
 	@Override
@@ -75,6 +77,6 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
-		return new H2ZDBExecutor(factorySvc, execLog, this, conn);
+		return new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 	}
 }

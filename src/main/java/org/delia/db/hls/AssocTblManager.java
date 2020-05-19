@@ -17,8 +17,14 @@ public class AssocTblManager {
 	private DatIdMap datIdMap;
 	
 	public AssocTblManager(TableExistenceService existSvc, DatIdMap datIdMap) {
+		this(existSvc, datIdMap, null);
+	}
+	public AssocTblManager(TableExistenceService existSvc, DatIdMap datIdMap, Map<String,String> existsMapParam) {
 		this.existSvc = existSvc;
 		this.datIdMap = datIdMap;
+		if (existsMapParam != null) {
+			this.existsMap = existsMapParam;
+		}
 	}
 	public String getTableFor(DStructType type1, DStructType type2) {
 		String assocTblName1 = buildName(type1,type2);
