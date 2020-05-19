@@ -51,25 +51,21 @@ public class SqlJoinHelper {
 				}
 				
 				String s;
+				DStructType pairType = (DStructType) pair.type; //Address
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
+				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				if (bHasFK) {
-					DStructType pairType = (DStructType) pair.type; //Address
 					RelationInfo relinfoB = findOtherSide(pair, hlspan.fromType);
 					PrimaryKey pk = hlspan.fromType.getPrimaryKey();
-//					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
-					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 					String on1 = aliasAlloc.buildAlias(hlspan.fromType, pk.getKey()); //a.id
-					String on2 = aliasAlloc.buildAlias(pairType, relinfoB.fieldName); //b.cust
+					String on2 = aliasAlloc.buildAlias(aliasInst, relinfoB.fieldName); //b.cust
 					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				} else {
-					DStructType pairType = (DStructType) pair.type; //Address
-//					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
 					PrimaryKey pk = pairType.getPrimaryKey();
-//					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
-					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 					String on1 = aliasAlloc.buildAlias(hlspan.fromType, relinfoA.fieldName); //a.addr
-					String on2 = aliasAlloc.buildAlias(pairType, pk.getKey()); //b.id
+					String on2 = aliasAlloc.buildAlias(aliasInst, pk.getKey().name); //b.id
 					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				}
 				
@@ -207,7 +203,8 @@ public class SqlJoinHelper {
 				}
 				
 				//b.id as cust
-				String s = aliasAlloc.buildAlias(pairType, pk.getFieldName());
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
+				String s = aliasAlloc.buildAlias(aliasInst, pk.getFieldName());
 				s = String.format("%s as %s", s, relinfoA.fieldName);
 //				fieldL.add(s);
 				addField(fieldL, pairType, pk.getKey(), s); 
