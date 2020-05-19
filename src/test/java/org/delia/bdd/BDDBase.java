@@ -22,7 +22,7 @@ import org.delia.log.Log;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.ZDBInterfaceFactory;
 
-public abstract class NewBDDBase implements DBInterfaceCreator {
+public abstract class BDDBase implements DBInterfaceCreator {
 	
 	public static enum BDDGroup {
 		R100_comments,
@@ -30,6 +30,7 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 		R300_scalar,
 		R400_struct,
 		R500_relation,
+		R550_multi_relation,
 		R600_rules,
 		R650_rule_fns,
 		R700_crud_insert,
@@ -100,6 +101,9 @@ public abstract class NewBDDBase implements DBInterfaceCreator {
 	}
 	protected int runR500File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R500_relation, filename, numTests);
+	}
+	protected int runR550File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R550_multi_relation, filename, numTests);
 	}
 	protected int runR600File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R600_rules, filename, numTests);

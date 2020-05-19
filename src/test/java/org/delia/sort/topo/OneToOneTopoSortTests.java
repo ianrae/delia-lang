@@ -91,7 +91,9 @@ public class OneToOneTopoSortTests extends TopoTestBase {
 		String s = String.format("relation cust Customer %s", addrModifiers);
 		if (allowed) {
 			String src2 = createTypeSrc("Address", s);
-			execTypeStatement(src + " " + src2);
+			String allSrc = src + " " + src2;
+			log(allSrc);
+			execTypeStatement(allSrc);
 		} else {
 			createTypeFail(src, "Address", s, errId);
 		}

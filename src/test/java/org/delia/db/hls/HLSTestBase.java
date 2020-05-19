@@ -9,7 +9,7 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -43,7 +43,7 @@ import org.junit.After;
  * @author Ian Rae
  *
  */
-public class HLSTestBase extends NewBDDBase {
+public class HLSTestBase extends BDDBase {
 	
 	protected HLSQueryStatement buildHLS(String src) {
 		QueryExp queryExp = compileQuery(src);

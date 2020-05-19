@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class H2BDDTests extends NewBDDBase {
+public class H2BDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200

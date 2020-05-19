@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -44,7 +44,7 @@ import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFunctionRunnerTests  extends NewBDDBase {
+public class InputFunctionRunnerTests  extends BDDBase {
 	
 	@Test
 	public void test2() {

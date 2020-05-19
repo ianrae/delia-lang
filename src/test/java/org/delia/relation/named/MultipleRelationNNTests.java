@@ -84,7 +84,7 @@ public class MultipleRelationNNTests extends MultipleRelationTestBase {
 		chkRelation(dvalC, "addr2", 1);
 	}
 	
-	@Test(expected=DeliaException.class)
+	@Test
 	public void test4Fail() {
 		createCustomerNNTypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
@@ -99,8 +99,7 @@ public class MultipleRelationNNTests extends MultipleRelationTestBase {
 		
 		doInsert("insert Customer { wid:13 }");
 		doInsert("insert Customer { wid:14 }");
-		doInsert("insert Address { z:20, cust1:1, cust2:1 }"); //should fail
-		//ERROR: rule-relationOne: relation field 'cust1' one - foreign key '1' already used -- type Address - in rule: relationOne
+		doInsert("insert Address { z:20, cust1:1, cust2:1 }"); //should not fail
 	}
 	
 	@Test

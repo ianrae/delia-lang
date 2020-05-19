@@ -1,6 +1,6 @@
 package org.delia.postgres;
 
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PostgresBDDTests extends NewBDDBase {
+public class PostgresBDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200

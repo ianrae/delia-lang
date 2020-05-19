@@ -15,7 +15,7 @@ import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NewBDDTests extends NewBDDBase {
+public class NewBDDTests extends BDDBase {
 
 	@Test
 	public void test() {

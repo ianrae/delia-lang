@@ -158,7 +158,7 @@ public class RulePostProcessor extends ServiceBase {
 							}
 							
 							info.cardinality = b ? RelationCardinality.ONE_TO_MANY : RelationCardinality.ONE_TO_ONE;
-							info.isOneWay = !farSideL.isEmpty();
+							info.isOneWay = farSideL.isEmpty();
 						} else if (rule instanceof RelationManyRule) {
 							RelationManyRule rr = (RelationManyRule) rule;
 							if (!rr.getSubject().equals(pair.name)) {

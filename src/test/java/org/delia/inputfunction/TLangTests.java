@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -40,7 +40,7 @@ import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TLangTests  extends NewBDDBase {
+public class TLangTests  extends BDDBase {
 	public static class AddXStatement extends TLangStatementBase {
 		public AddXStatement() {
 			super("addX");

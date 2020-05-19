@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AllBDDTests extends NewBDDBase {
+public class AllBDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200
@@ -46,6 +46,10 @@ public class AllBDDTests extends NewBDDBase {
 		runR500File("t0-relation-one-to-many.txt", 9);
 		runR500File("t0-relation-many-to-many.txt", 11);
 		runR500File("t0-relation.txt", 2);
+	}
+	@Test
+	public void testR550() {
+		runR550File("t0-multirel-1to-1.txt", 9);
 	}
 	@Test
 	public void testR600() {
@@ -304,10 +308,7 @@ public class AllBDDTests extends NewBDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-//		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-//		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-//		runR1600File("t0-fetch-fks.txt", 4);
-		runR500File("t0-relation-one-to-one-oneway.txt", 8);
+		runR550File("t0-multirel-1to-1.txt", 9);
 
 	}
 	

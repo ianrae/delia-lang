@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.delia.base.UnitTestLog;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.db.DBType;
@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class ReplRunnerTests extends NewBDDBase {
+public class ReplRunnerTests extends BDDBase {
 	
 	@Test
 	public void testFile() {
