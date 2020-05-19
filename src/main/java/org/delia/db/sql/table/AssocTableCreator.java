@@ -80,22 +80,22 @@ public class AssocTableCreator extends ServiceBase {
 			tblinfo.tbl1 = tbl1;
 			tblinfo.tbl2 = tbl2;
 			tblinfo.fieldName = xpair.name;
-			doGenerateAssocTable(sc, assocTableName, relinfo.nearType, relinfo.farType);
+			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.nearType, relinfo.farType);
 		} else {
 			tblinfo.tbl1 = tbl2;
 			tblinfo.tbl2 = tbl1;
 			tblinfo.fieldName = xpair.name;
-			doGenerateAssocTable(sc, assocTableName, relinfo.farType, relinfo.nearType);
+			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType);
 		}
 	}
 
-	private void doGenerateAssocTable(StrCreator sc, String assocTableName, DStructType leftType, DStructType rightType) {
+	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType) {
 		sc.o("CREATE TABLE %s (", assocTableName);
 		sc.nl();
 		int index = 0;
 		List<SqlElement> fieldL = new ArrayList<>();
 		for(TypePair pair: leftType.getAllFields()) {
-			if (isManyToManyRelation(pair, leftType)) {
+			if (pair.name.equals(xpair.name)) {
 				RelationInfo relinfo = DRuleHelper.findManyToManyRelation(pair, leftType);
 				TypePair copy = new TypePair("leftv", relinfo.nearType);
 				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false);
@@ -112,7 +112,7 @@ public class AssocTableCreator extends ServiceBase {
 		}
 		
 		for(TypePair pair: leftType.getAllFields()) {
-			if (isManyToManyRelation(pair, leftType)) {
+			if (pair.name.equals(xpair.name)) {
 				TypePair copy = new TypePair("leftv", leftType); //address
 				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, leftType, false);
 				if (constraint != null) {
