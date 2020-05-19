@@ -80,7 +80,7 @@ public class H2TestCleaner {
 			String[] ar = tables.split(",");
 			for(String tbl: ar) {
 				tbl = adjustTblName(tbl);
-				log.log("delete table: %s", tbl);
+				log.logDebug("delete table: %s", tbl);
 				safeDeleteTable(executor, tbl);
 			}
 		} catch (Exception e) {
@@ -137,7 +137,7 @@ public class H2TestCleaner {
 					s = null;
 				}
 				
-				log.log("\n%s: ndropping CONSTRAINT: %s", tblName, s);
+				log.logDebug("\n%s: ndropping CONSTRAINT: %s", tblName, s);
 				sql = String.format("ALTER TABLE %s DROP constraint %s", tblName, s);
 				SqlStatement statement2 = new SqlStatement();
 				statement2.sql = sql;
@@ -145,7 +145,7 @@ public class H2TestCleaner {
 		    }
 			
 			sql = String.format("DROP TABLE if exists %s cascade;", tblName);
-			log.log(sql);
+			log.logDebug(sql);
 			statement = new SqlStatement();
 			statement.sql = sql;
 			h2exec.getDBConnection().execStatement(statement, null);

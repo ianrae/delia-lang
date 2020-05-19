@@ -3,6 +3,7 @@ package org.delia.bdd;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
+import org.delia.db.ResultSetToDValConverter;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -305,10 +306,10 @@ public class H2BDDTests extends BDDBase {
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
-//		ResultSetToDValConverter.logResultSetDetails = true;
+		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-		runR1800File("t0-dollardollar.txt", 2);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
 	}
 	
 	//---

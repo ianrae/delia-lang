@@ -6,7 +6,7 @@ background:
 thenType: struct
 
 ---
-title: basic. mix one many-to-one and many-to-many
+title: basic. mix one many-to-one and one-to-one
 chainNextTest:true
 given:
  type Customer struct {

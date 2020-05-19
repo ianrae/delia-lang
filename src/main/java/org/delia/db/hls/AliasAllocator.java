@@ -95,4 +95,27 @@ public class AliasAllocator {
 		return s;
 	}
 
+	public AliasInstance findAliasFor(DStructType structType) {
+		String alias = aliasMap.get(structType.getName());
+		if (alias != null) {
+			AliasInstance aliasInst = new AliasInstance();
+			aliasInst.alias = alias;
+			aliasInst.instanceKey = null;
+			aliasInst.structType = structType;
+			return aliasInst;
+		} else {
+			String target = String.format("%s.", structType.getName());
+			for(String key: aliasMap.keySet()) {
+				if (key.startsWith(target)) {
+					AliasInstance aliasInst = new AliasInstance();
+					aliasInst.alias = aliasMap.get(key);
+					aliasInst.instanceKey = key;
+					aliasInst.structType = structType;
+					return aliasInst;
+				}
+			}
+		}
+		return null;
+	}
+
 }

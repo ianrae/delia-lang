@@ -158,6 +158,7 @@ public class SqlJoinHelper {
 				}
 				TypePair pair = DValueHelper.findField(hlspan.fromType, fieldName);
 				joinL.add(pair);
+				aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
 			}
 
 			//TODO: later to fk(field)
@@ -239,10 +240,10 @@ public class SqlJoinHelper {
 			DStructType fromType = (DStructType) joinType.type;
 			String pk = fromType.getPrimaryKey().getFieldName();
 			
-			
+			AliasInstance aliasInst = aliasAlloc.findAliasFor(fromType);
 			for(TypePair pair: fromType.getAllFields()) {
 				if (pair.name.equals(pk)) {
-					String s = aliasAlloc.buildAlias(fromType, pair.name);
+					String s = aliasAlloc.buildAlias(aliasInst, pair.name);
 					s = String.format("%s as %s", s, joinType.name);
 					addField(fieldL, fromType, pair, s);
 //					fieldL.add(s);
@@ -250,11 +251,11 @@ public class SqlJoinHelper {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					} else if (!relinfo.isParent) {
-						String s = aliasAlloc.buildAlias(fromType, pair.name);
+						String s = aliasAlloc.buildAlias(aliasInst, pair.name);
 						addField(fieldL, fromType, pair, s);
 					}
 				} else {
-					String s = aliasAlloc.buildAlias(fromType, pair.name);
+					String s = aliasAlloc.buildAlias(aliasInst, pair.name);
 					addField(fieldL, fromType, pair, s);
 				}
 			}
