@@ -80,10 +80,11 @@ public class SqlJoinHelper {
 			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			
 			if (true) {
-				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
+				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
 				String fff = assocTblMgr.getAssocLeftField(hlspan.fromType, (DStructType) pair.type);
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //a.id
+				String on2 = aliasAlloc.buildAlias(aliasInst, fff); //a.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 			
@@ -105,8 +106,9 @@ public class SqlJoinHelper {
 			
 			DStructType pairType = (DStructType) pair.type; //Address
 			PrimaryKey pk = pairType.getPrimaryKey();
-			String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
-			String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
+			String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
+			String on1 = aliasAlloc.buildAlias(aliasInst, pk.getFieldName()); //b.id
 			String fff = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
 			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
 			s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
@@ -206,7 +208,6 @@ public class SqlJoinHelper {
 				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
 				String s = aliasAlloc.buildAlias(aliasInst, pk.getFieldName());
 				s = String.format("%s as %s", s, relinfoA.fieldName);
-//				fieldL.add(s);
 				addField(fieldL, pairType, pk.getKey(), s); 
 			
 				return true;
@@ -220,10 +221,10 @@ public class SqlJoinHelper {
 			String fieldName = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
 			
 			//b.id as cust
-			String s = aliasAlloc.buildAliasAssoc(assocTbl, fieldName);
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(assocTbl, pair.name);
+			String s = aliasAlloc.buildAlias(aliasInst, fieldName);
 			s = String.format("%s as %s", s, relinfoA.fieldName);
 			addField(fieldL, null, fieldName, s).isAssocField = true;
-//			fieldL.add(s);
 		}
 
 		public void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {

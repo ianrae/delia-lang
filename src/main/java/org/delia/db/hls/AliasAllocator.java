@@ -73,6 +73,19 @@ public class AliasAllocator {
 		aliasInst.structType = structType;
 		return aliasInst;
 	}
+	//use when can have multiple joins to same table. each needs unique alias
+	public AliasInstance findOrCreateAliasInstance(String tblName, String instanceKey) {
+		String key = String.format("%s.%s", tblName, instanceKey);
+		if (! aliasMap.containsKey(key)) {
+			createAlias(key);
+		}
+		
+		AliasInstance aliasInst = new AliasInstance();
+		aliasInst.alias = aliasMap.get(key);
+		aliasInst.instanceKey = instanceKey;
+		aliasInst.structType = null;
+		return aliasInst;
+	}
 	public String buildTblAlias(AliasInstance aliasInst) {
 		String s = String.format("%s as %s", aliasInst.structType.getName(), aliasInst.alias);
 		return s;
