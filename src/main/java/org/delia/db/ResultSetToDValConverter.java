@@ -91,7 +91,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 				if (details.isManyToMany) {
 					list = mergeRowsManyToMany(list, dtype, details, dbctx);
 				} else {
-					list = mergeRowsOneToMany(list, dtype, details);
+					list = mergeRowsOneToMany(list, dtype, details, dbctx);
 				}
 			}
 		} catch (ValueException e) {
@@ -138,38 +138,45 @@ public class ResultSetToDValConverter extends ServiceBase {
 	 * @param rawList list of dvalues to merge
 	 * @param dtype of values
 	 * @param details query details
+	 * @param dbctx 
 	 * @return merged rows
 	 */
-	public List<DValue> mergeRowsOneToMany(List<DValue> rawList, DStructType dtype, QueryDetails details) {
-		List<DValue> list = new ArrayList<>();
-		List<DValue> foreignKeyL = new ArrayList<>();
-		DValue firstVal = null;
-		int i = 0;
+	public List<DValue> mergeRowsOneToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
+		Map<Object,DValue> pkMap = new HashMap<>(); //pk,dval
+		PrimaryKey pkType = dtype.getPrimaryKey();
+		String pkField = pkType.getFieldName();
+		
 		for(DValue dval: rawList) {
-			DValue inner = dval.asStruct().getField(details.mergeOnField);
-			if (inner != null) {
-				if (i == 0) {
-					firstVal = dval;
+			DValue pkval = dval.asStruct().getField(pkField); 
+			Object key = pkval.getObject();
+			if (! pkMap.containsKey(key)) {
+				pkMap.put(key, dval);
+			} else {
+				DValue mergeToVal = pkMap.get(key);
+				DValue inner1 = mergeToVal.asStruct().getField(details.mergeOnField);
+				DValue inner2 = dval.asStruct().getField(details.mergeOnField);
+				if (inner2 != null) {
+					if (inner1 == null) {
+						inner1 = this.createEmptyRelation(dbctx, dtype, details.mergeOnField);
+						mergeToVal.asMap().put(details.mergeOnField, inner1);
+					}
+					DRelation drel2 = inner2.asRelation();
+					inner1.asRelation().addKey(drel2.getForeignKey());
 				}
-				DRelation drel = inner.asRelation();
-				foreignKeyL.add(drel.getForeignKey());
 			}
-			i++;
 		}
-
-		if (firstVal != null) {
-			DValue inner = firstVal.asStruct().getField(details.mergeOnField);
-			if (inner != null) {
-				DRelation drel = inner.asRelation();
-				drel.getMultipleKeys().clear();
-				drel.getMultipleKeys().addAll(foreignKeyL);
-				list.add(firstVal);
+		
+		//build output list. keep same order
+		List<DValue> list = new ArrayList<>();
+		for(DValue dval: rawList) {
+			DValue pkval = dval.asStruct().getField(pkField); 
+			Object key = pkval.getObject();
+			if (pkMap.containsKey(key)) {
+				list.add(dval);
+				pkMap.remove(key);
 			}
-		} else if (! rawList.isEmpty()) {
-			//if all the parents were null then just use raw list
-			list.addAll(rawList);
 		}
-
+		
 		return list;
 	}
 	/**
@@ -240,6 +247,18 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 
 		return list;
+	}
+	
+	private DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
+		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
+		TypePair pair = DValueHelper.findField(structType, mergeOnField);
+		RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
+		builder.buildEmptyRelation();
+		boolean b = builder.finish();
+		if (!b) {
+			DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
+		} 
+		return builder.getDValue();
 	}
 
 	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
