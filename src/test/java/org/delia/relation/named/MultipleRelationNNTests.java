@@ -11,11 +11,11 @@ import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MultipleRelation1NTests extends MultipleRelationTestBase {
+public class MultipleRelationNNTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test() {
-		createCustomerN1TypeWithRelations();
+		createCustomerNNTypeWithRelations();
 		RelationOneRule rr = getOneRule("Address", "cust1");
 		chkRule(rr, true, "r1", "r1");
 
@@ -36,7 +36,7 @@ public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test2() {
-		createCustomerN1TypeWithRelations();
+		createCustomerNNTypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:2 }");
@@ -72,7 +72,7 @@ public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test3() {
-		createCustomerN1TypeWithRelations();
+		createCustomerNNTypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -86,7 +86,7 @@ public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 	@Test(expected=DeliaException.class)
 	public void test4Fail() {
-		createCustomerN1TypeWithRelations();
+		createCustomerNNTypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -105,7 +105,7 @@ public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test5Update() {
-		createCustomerN1TypeWithRelations();
+		createCustomerNNTypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -127,7 +127,7 @@ public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 	@Test
 	public void test6Delete() {
-		createCustomerN1TypeWithRelations();
+		createCustomerNNTypeWithRelations();
 		doInsert("insert Customer { wid:11 }");
 		doInsert("insert Customer { wid:12 }");
 		doInsert("insert Address { z:20, cust1:1, cust2:1 }");
@@ -165,16 +165,17 @@ public class MultipleRelation1NTests extends MultipleRelationTestBase {
 	
 
 	private String createCustomerType() {
-		String src = String.format("type Customer struct { id int primaryKey serial, wid int, relation addr1 Address 'r1' many optional,");
-		src += String.format("\n relation addr2 Address 'r2' one optional parent} end");
+		String src = String.format("type Customer struct { id int primaryKey serial, wid int,");
+		src += String.format("\n relation addr1 Address 'r1' many optional,");
+		src += String.format("\n relation addr2 Address 'r2' many optional } end");
 		src += "\n";
-		src += String.format("\n type Address struct { id int primaryKey serial, z int, relation cust1 Customer 'r1' one ");
-		src += String.format("\n relation cust2 Customer 'r2' one optional} end");
+		src += String.format("\n type Address struct { id int primaryKey serial, z int, relation cust1 Customer 'r1' many ");
+		src += String.format("\n relation cust2 Customer 'r2' many optional} end");
 		src += "\n";
 		return src;
 	}
 
-	private void createCustomerN1TypeWithRelations() {
+	private void createCustomerNNTypeWithRelations() {
 		String src = createCustomerType();
 		log.log(src);
 		execTypeStatement(src);

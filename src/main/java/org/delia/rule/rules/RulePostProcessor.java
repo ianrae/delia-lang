@@ -1,6 +1,7 @@
 package org.delia.rule.rules;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.delia.core.FactoryService;
@@ -103,7 +104,7 @@ public class RulePostProcessor extends ServiceBase {
 							RelationInfo info = new RelationInfo();
 							rr.relInfo = info;
 //							TypePair farSide = DRuleHelper.findMatchingRelByType((DStructType)pair.type, structType);
-							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType);
+							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
 							//may be multiple possible matches here
 							boolean b = false;
 							if (farSideL.size() > 1) {
@@ -128,7 +129,7 @@ public class RulePostProcessor extends ServiceBase {
 							}
 							
 							rr.relInfo = info;
-							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType);
+							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
 							//may be multiple possible matches here
 							boolean b = false;
 							if (farSideL.size() > 1) {
@@ -450,7 +451,14 @@ public class RulePostProcessor extends ServiceBase {
 	private boolean isOtherSideManyEarly(DType otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
-	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType) {
+	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr) {
+		
+		RelationInfo info = DRuleHelper.findMatchingByName(rr, (DStructType)otherSide);
+		if (info != null) {
+			TypePair pair = DRuleHelper.findMatchingPair(info.nearType, info.fieldName);
+			return Collections.singletonList(pair);
+		}
+		
 		return DRuleHelper.xfindAllMatchingRelByType((DStructType) otherSide, targetType);
 	}
 	

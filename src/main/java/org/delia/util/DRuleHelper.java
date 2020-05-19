@@ -7,6 +7,7 @@ import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.rule.rules.RelationRuleBase;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -68,6 +69,27 @@ public class DRuleHelper {
 			} else if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
 				if (rr.relInfo.fieldName.equals(pair.name)) {
+					return rr.relInfo;
+				}
+			}
+		}
+		return null;
+	}
+	public static RelationInfo findMatchingByName(RelationRuleBase rrTarget, DStructType farType) {
+		if (rrTarget.getRelationName() == null) {
+			return null;
+		}
+		String name = rrTarget.getRelationName();
+		
+		for(DRule rule: farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					return rr.relInfo;
+				}
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (name.equals(rr.getRelationName())) {
 					return rr.relInfo;
 				}
 			}
