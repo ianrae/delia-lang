@@ -6,6 +6,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.delia.api.Delia;
+import org.delia.api.DeliaSession;
 import org.delia.app.DaoTestBase;
 import org.delia.dao.DeliaDao;
 import org.delia.db.sql.StrCreator;
@@ -21,13 +23,14 @@ import org.junit.Test;
 
 
 public class CodegenTests extends DaoTestBase {
-	public interface DeliaImmutableStruct {
+	public interface DeliaImmutable {
 		DValue internalDValue();
 	}
 	public interface DeliaEntity {
 		Map<String,Object> internalSetValueMap();
+		//resetUnchangedFields();
 	}
-	public interface Flight extends DeliaImmutableStruct {
+	public interface Flight extends DeliaImmutable {
 		int getField1();
 		Integer getField2();
 	}
@@ -52,6 +55,10 @@ public class CodegenTests extends DaoTestBase {
 		public Integer getField2() {
 			return helper.getField("field2").asInt();
 		}
+//		@Override
+//		public Address getAddr() {
+//			return new AddressImmut(helper.getField("addr"));
+//		}
 		@Override
 		public DValue internalDValue() {
 			return dval;
@@ -108,34 +115,53 @@ public class CodegenTests extends DaoTestBase {
 		}
 	}
 	
-	public static class GetterInterfaceCodeGen {
-		private DTypeRegistry registry;
+	
+	public class FlightDao {
+		private DeliaDao innerDao;
+		protected String typeName;
+		
+		public FlightDao(Delia delia, DeliaSession session) {
+		}
 
-		public GetterInterfaceCodeGen(DTypeRegistry registry) {
+		public Flight queryByPrimaryKey(int primaryKey) {
+			ResultValue res = null; //innerDao.queryByPrimaryKey(typeName, primaryKey);
+			return new FlightImmut(res.getAsDValue());
+		}
+
+		public long count() {
+			return innerDao.count(typeName);
+		}
+
+		public void insert(Flight flight) {
+			//used setInsertPrebuiltValueIterator
+			//return innerDao.insertOne(typeName, fields);
+			//if flight is entity then set serial pk
+		}
+		public int mostRecentSerialPK() {
+			return 0; //from last insert()
+		}
+
+		public int update(Flight flight) {
+//			return innerDao.updateOne(typeName, primaryKey, fields);
+			return 0; //# updated rows
+		}
+		public int save(Flight flight) {
+			//if flight is entity then set serial pk
+			return 0; //insert or update
+		}
+		
+		public void delete(Flight flight) {
+		}
+	}
+	
+	//====
+	public static class CodeGenBase {
+		protected DTypeRegistry registry;
+
+		public CodeGenBase(DTypeRegistry registry) {
 			this.registry = registry;
 		}
-		
-		public String generate(DStructType structType) {
-			String typeName = structType.getName();
-
-			StrCreator sc = new StrCreator();
-			sc.o("public interface %s {", typeName);
-			sc.nl();
-			for(String fieldName: structType.getDeclaredFields().keySet()) {
-				DType ftype = structType.getDeclaredFields().get(fieldName);
-
-				String javaType = convertToJava(ftype);
-				sc.o("  %s get%s();", javaType, StringUtil.uppify(fieldName));
-				sc.nl();
-
-			}
-			sc.o("}");
-			sc.nl();
-
-			return sc.str;
-		}
-		
-		private String convertToJava(DType ftype) {
+		protected String convertToJava(DType ftype) {
 			switch(ftype.getShape()) {
 			case INTEGER:
 				return "Integer";
@@ -157,7 +183,137 @@ public class CodegenTests extends DaoTestBase {
 				return null;
 			}
 		}
+
+		protected String convertToJava(DStructType structType, String fieldName) {
+			boolean flag = !structType.fieldIsOptional(fieldName);
+			DType ftype = structType.getDeclaredFields().get(fieldName);
+			switch(ftype.getShape()) {
+			case INTEGER:
+				return flag ? "int" : "Integer";
+			case LONG:
+				return flag ? "long": "Long";
+			case NUMBER:
+				return flag ? "double" : "Double";
+			case BOOLEAN:
+				return flag ? "boolean" : "Boolean";
+			case STRING:
+				return "String";
+			case DATE:
+				return "Date";
+			case STRUCT:
+			{
+				return ftype.getName();
+			}
+			default:
+				return null;
+			}
+		}
+		
+		protected String convertToAsFn(DType ftype) {
+			switch(ftype.getShape()) {
+			case INTEGER:
+				return "asInt";
+			case LONG:
+				return "asLong";
+			case NUMBER:
+				return "asNumber";
+			case BOOLEAN:
+				return "asBoolean";
+			case STRING:
+				return "asString";
+			case DATE:
+				return "asDate";
+			case STRUCT:
+			{
+				return "TODOfix" + ftype.getName();
+			}
+			default:
+				return null;
+			}
+		}
+
+		
 	}
+	
+	public static class GetterInterfaceCodeGen extends CodeGenBase {
+
+		public GetterInterfaceCodeGen(DTypeRegistry registry) {
+			super(registry);
+		}
+		
+		public String generate(DStructType structType) {
+			String typeName = structType.getName();
+
+			StrCreator sc = new StrCreator();
+			sc.o("public interface %s {", typeName);
+			sc.nl();
+			for(String fieldName: structType.getDeclaredFields().keySet()) {
+				DType ftype = structType.getDeclaredFields().get(fieldName);
+
+				String javaType = convertToJava(structType, fieldName);
+				sc.o("  %s get%s();", javaType, StringUtil.uppify(fieldName));
+				sc.nl();
+
+			}
+			sc.o("}");
+			sc.nl();
+
+			return sc.str;
+		}
+	}
+	public static class ImmutCodeGen extends CodeGenBase {
+
+		public ImmutCodeGen(DTypeRegistry registry) {
+			super(registry);
+		}
+		
+		public String generate(DStructType structType) {
+			String typeName = structType.getName();
+
+			StrCreator sc = new StrCreator();
+			sc.o("public class %sImmut implements %s {", typeName, typeName);
+			sc.nl();
+			line(sc, "  private DValue dval;");
+			line(sc, "  private DStructHelper helper;");
+			sc.nl();
+			
+			sc.o("  %sImmut(DValue dval) {", typeName);
+			sc.nl();
+			line(sc, "  this.dval = dval;");
+			line(sc, "	this.helper = dval.asStruct();");
+			
+			line(sc, "@Override");
+			line(sc, "public DValue internalDValue() {");
+			line(sc, "  return dval;");
+			line(sc, "}");
+			
+			for(String fieldName: structType.getDeclaredFields().keySet()) {
+				DType ftype = structType.getDeclaredFields().get(fieldName);
+
+				String javaType = convertToJava(ftype);
+				String asFn = convertToAsFn(ftype);
+				sc.nl();
+				line(sc, "@Override");
+				sc.o("public %s get%s() {", javaType, StringUtil.uppify(fieldName));
+				sc.nl();
+				sc.o(" return helper.getField(\"%s\").%s();", fieldName, asFn);
+				sc.nl();
+				line(sc, "  return dval;");
+				line(sc, "}");
+
+			}
+			sc.o("}");
+			sc.nl();
+
+			return sc.str;
+		}
+
+		private void line(StrCreator sc, String str) {
+			sc.o("%s\n", str);
+		}
+		
+	}
+	
 
 	@Test
 	public void test1() {
@@ -165,14 +321,6 @@ public class CodegenTests extends DaoTestBase {
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
-		
-		String typeName = "Flight";
-		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
-		DStructType structType = (DStructType) registry.getType(typeName);
-		GetterInterfaceCodeGen gen = new GetterInterfaceCodeGen(registry);
-		String java = gen.generate(structType);
-
-		log.log(java);
 		
 		ResultValue res = dao.queryByPrimaryKey("Flight", "1");
 		assertEquals(true, res.ok);
@@ -186,6 +334,24 @@ public class CodegenTests extends DaoTestBase {
 		assertEquals(12, entity.getField1());
 	}
 
+	@Test
+	public void test2() {
+		String src = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+		
+		String typeName = "Flight";
+		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
+		DStructType structType = (DStructType) registry.getType(typeName);
+		GetterInterfaceCodeGen gen = new GetterInterfaceCodeGen(registry);
+		String java = gen.generate(structType);
+		log.log(java);
+		log.log("////");
+		ImmutCodeGen gen2 = new ImmutCodeGen(registry);
+		java = gen2.generate(structType);
+		log.log(java);
+	}
 
 	//---
 
