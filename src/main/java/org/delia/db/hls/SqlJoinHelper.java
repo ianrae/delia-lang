@@ -85,7 +85,7 @@ public class SqlJoinHelper {
 				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTable);
 				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
-				String fff = assocTblMgr.getAssocLeftField(hlspan.fromType, (DStructType) pair.type);
+				String fff = assocTblMgr.xgetAssocLeftField(hlspan.fromType, aliasInst.assocTbl);
 				String on2 = aliasAlloc.buildAlias(aliasInst, fff); //a.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
@@ -112,7 +112,7 @@ public class SqlJoinHelper {
 			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTable);
 			String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 			String on1 = aliasAlloc.buildAlias(aliasInst, pk.getFieldName()); //b.id
-			String fff = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
+			String fff = assocTblMgr.xgetAssocRightField(hlspan.fromType, aliasInst.assocTbl);
 			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
 			s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			sc.out(s);

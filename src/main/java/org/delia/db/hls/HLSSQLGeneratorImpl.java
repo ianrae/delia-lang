@@ -103,9 +103,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				}
 				case MANY_TO_MANY:
 				{
-					String assocTblName = assocTblMgr.getTableFor(hlspan1.fromType, hlspan2.fromType);
+					String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(relinfo.getDatId()); //   .getTableFor(hlspan1.fromType, hlspan2.fromType);
 					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
-					String fff = assocTblMgr.getAssocRightField(hlspan1.fromType, hlspan2.fromType);
+					String fff = assocTblMgr.xgetAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
 					String s3 = String.format("%s.%s", newAlias, fff);
 					
 					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();

@@ -301,7 +301,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
+		testIndexToRun = 0;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -309,7 +309,8 @@ public class H2BDDTests extends BDDBase {
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-		runR550File("t0-multirel-NtoN-1.txt", 1);
+//		runR550File("t0-multirel-NtoN-1.txt", 1);
+		runR1350File("t0-filter-op-relation.txt", 14);
 	}
 	
 	//---

@@ -178,18 +178,18 @@ public class InsertFragmentParser extends SelectFragmentParser {
 
 		//struct is Address AddressCustomerAssoc
 		if (assocTblName.startsWith(structType.getName())) {
-			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval);
+			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval, info);
 		} else {
-			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval);
+			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval, info);
 		}
 		return true;
 	}
 
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean notFlipped, 
-			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval) {
-		
-		String field1 = assocTblMgr.getAssocLeftField(nearType, farType);
-		String field2 = assocTblMgr.getAssocRightField(nearType, farType);
+			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval, RelationInfo info) {
+		String assocTbl = assocTblMgr.getDatIdMap().getAssocTblName(info.getDatId());
+		String field1 = assocTblMgr.xgetAssocLeftField(nearType, assocTbl);
+		String field2 = assocTblMgr.xgetAssocRightField(nearType, assocTbl);
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
