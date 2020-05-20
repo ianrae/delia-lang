@@ -6,10 +6,12 @@ import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
+import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
 public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	
@@ -26,11 +28,19 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 			actualInterface = new MemZDBInterfaceFactory(factorySvc);
 			break;
 		case H2:
+		{
 			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), factorySvc.getLog());
 			actualInterface = new H2ZDBInterfaceFactory(factorySvc, connFact);
+		}
 			break;
-			default:
-				DeliaExceptionHelper.throwError("fixthis", "arggh");
+		case POSTGRES:
+		{
+			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), factorySvc.getLog());
+			actualInterface = new PostgresZDBInterfaceFactory(factorySvc, connFact);
+		}
+			break;
+		default:
+			DeliaExceptionHelper.throwError("db not yet supported", "DBType %s not supported", dbType.name());
 		}
 	}
 	public void init(ZDBInterfaceFactory actual) {
