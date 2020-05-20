@@ -9,7 +9,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
-import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
@@ -193,12 +192,12 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
-		DValue pk = mainDVal.asStruct().getField(keyPair1.name);
-		
 		if (notFlipped) {
+			DValue pk = mainDVal.asStruct().getField(keyPair1.name);
 			genxrow(assocInsertFrag, field1, keyPair2, pk);
 			genxrow(assocInsertFrag, field2, keyPair1, xdval);
 		} else {
+			DValue pk = mainDVal.asStruct().getField(keyPair2.name);
 			genxrow(assocInsertFrag, field1, keyPair1, xdval);
 			genxrow(assocInsertFrag, field2, keyPair2, pk);
 		}
