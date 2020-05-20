@@ -112,9 +112,9 @@ public class WhereClauseHelper extends ServiceBase {
 			//TODO need more foolproof way to find other side
 			RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
 			if (otherSide != null) {
-				String tmp = aliasAlloc.findOrCreateFor(relinfo.farType);
-				af.alias = aliasAdjustmentMap.get(tmp);
 				af.name = relinfo.farType.getPrimaryKey().getFieldName();
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(relinfo.farType, pair.name);
+				af.alias = aliasInst.alias; //aliasAdjustmentMap.get(aliasInst.alias);
 				
 				String key = String.format("%s.%s", af.alias, af.name);
 				asNameMap.put(key, relinfo.fieldName);
