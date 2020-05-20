@@ -52,7 +52,7 @@ public class ZTableCreator extends ServiceBase {
 		
 		alreadyCreatedL.add(new TableInfo(typeName, null));
 		StrCreator sc = new StrCreator();
-		sc.o("CREATE TABLE %s (", typeName);
+		sc.o("CREATE TABLE %s (", tblName(typeName));
 		sc.nl();
 		int index = 0;
 		List<SqlElement> fieldL = new ArrayList<>();
@@ -86,7 +86,6 @@ public class ZTableCreator extends ServiceBase {
 		}
 		
 		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
-		
 		
 		index = 0;
 		for(SqlElement field: fieldL) {
@@ -157,7 +156,7 @@ public class ZTableCreator extends ServiceBase {
 		}
 		
 		StrCreator sc = new StrCreator();
-		sc.o("ALTER TABLE %s ADD COLUMN ", typeName);
+		sc.o("ALTER TABLE %s ADD COLUMN ", tblName(typeName));
 		sc.nl();
 		List<SqlElement> fieldL = new ArrayList<>();
 		int manyToManyFieldCount = 0;
@@ -194,7 +193,7 @@ public class ZTableCreator extends ServiceBase {
 		ListWalker<ConstraintGen> walker = new ListWalker<>(constraints);
 		while(walker.hasNext()) {
 			ConstraintGen con = walker.next();
-			sc.o("ALTER TABLE %s ADD  ", typeName);
+			sc.o("ALTER TABLE %s ADD  ", tblName(typeName));
 			con.generateField(sc);
 			walker.addIfNotLast(sc, ",", nl());
 		}
@@ -337,7 +336,7 @@ public class ZTableCreator extends ServiceBase {
 		boolean isManyToMany = datId != 0;
 		StrCreator sc = new StrCreator();
 		if (! isManyToMany) {
-			String sql = String.format("ALTER TABLE %s DROP COLUMN %s", typeName, fieldName);
+			String sql = String.format("ALTER TABLE %s DROP COLUMN %s", tblName(typeName), fieldName);
 			sc.o(sql);
 			sc.nl();
 		}
@@ -383,7 +382,7 @@ public class ZTableCreator extends ServiceBase {
 		sc.nl();
 		if (isManyToMany) {
 			String tblName = datIdMap.getAssocTblName(datId);
-			sc.o("DROP TABLE IF EXISTS %s;", tblName);
+			sc.o("DROP TABLE IF EXISTS %s;", tblName(tblName));
 		}
 		return sc.str;
 	}

@@ -65,7 +65,7 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 
 	protected ZTableCreator createPartialTableCreator(ZDBExecutor zexec) {
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-		FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
+		FieldGenFactory fieldGenFactory = createFieldGenFactory();
 		return new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, null, zexec);
 	}
 
@@ -76,8 +76,12 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		this.varEvaluator = varEvaluator;
 
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
-		FieldGenFactory fieldGenFactory = new FieldGenFactory(factorySvc);
+		FieldGenFactory fieldGenFactory = createFieldGenFactory();
 		this.tableCreator = new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
+	}
+	
+	protected FieldGenFactory createFieldGenFactory() {
+		return new FieldGenFactory(factorySvc);
 	}
 
 	protected void failIfNotInit1() {

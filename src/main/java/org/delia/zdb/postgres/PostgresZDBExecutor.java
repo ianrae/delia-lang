@@ -21,10 +21,14 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
+import org.delia.db.postgres.PostgresFieldgenFactory;
+import org.delia.db.sql.SimpleSqlNameFormatter;
+import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.log.Log;
 import org.delia.queryresponse.LetSpan;
 import org.delia.runner.FetchRunner;
@@ -98,6 +102,10 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 
 	private ZTableCreator createPartialTableCreator() {
 		return super.createPartialTableCreator(this);
+	}
+	@Override
+	protected FieldGenFactory createFieldGenFactory() {
+		return new PostgresFieldgenFactory(factorySvc);
 	}
 
 	@Override
@@ -194,7 +202,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	public boolean rawTableDetect(String tableName) {
 		failIfNotInit1(); 
 		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
-		String sql = sqlgen.generateTableDetect(tableName.toUpperCase()); //h2 tbls are UPPERCASE
+		String sql = sqlgen.generateTableDetect(tableName); //postgres tbls are lowercase
 		SqlStatement statement = createSqlStatement(sql); 
 		return execResultBoolean(conn, statement);
 	}

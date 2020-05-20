@@ -1,7 +1,5 @@
 package org.delia.zdb;
 
-import java.util.Map;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -17,7 +15,6 @@ import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 
 public class ZDelete extends ServiceBase {
 

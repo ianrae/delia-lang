@@ -11,7 +11,6 @@ import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
-import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.where.SqlWhereConverter;
 
 public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory {
