@@ -8,6 +8,7 @@ import java.util.Date;
 
 import org.delia.base.DBHelper;
 import org.delia.base.UnitTestLog;
+import org.delia.bdd.core.InstrumentedZDBInterface;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -25,7 +26,6 @@ import org.delia.runner.RunnerHelper;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.ValidationState;
-import org.delia.zdb.InstrumentedZDBInterface;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 

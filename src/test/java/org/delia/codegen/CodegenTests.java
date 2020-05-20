@@ -55,16 +55,16 @@ public class CodegenTests extends DaoTestBase {
 		public Integer getField2() {
 			return helper.getField("field2").asInt();
 		}
-//		@Override
-//		public Address getAddr() {
-//			return new AddressImmut(helper.getField("addr"));
-//		}
+		//		@Override
+		//		public Address getAddr() {
+		//			return new AddressImmut(helper.getField("addr"));
+		//		}
 		@Override
 		public DValue internalDValue() {
 			return dval;
 		}
 	}
-	
+
 	public static class FlightEntity implements Flight,FlightSetter {
 		private DValue dval;
 		private DStructHelper helper;
@@ -79,7 +79,7 @@ public class CodegenTests extends DaoTestBase {
 			this.dval = x.dval;
 			this.helper = dval.asStruct();
 		}
-		
+
 		@Override
 		public int getField1() {
 			String fieldName = "field1";
@@ -114,12 +114,12 @@ public class CodegenTests extends DaoTestBase {
 			return setMap;
 		}
 	}
-	
-	
+
+
 	public class FlightDao {
 		private DeliaDao innerDao;
 		protected String typeName;
-		
+
 		public FlightDao(Delia delia, DeliaSession session) {
 		}
 
@@ -142,18 +142,18 @@ public class CodegenTests extends DaoTestBase {
 		}
 
 		public int update(Flight flight) {
-//			return innerDao.updateOne(typeName, primaryKey, fields);
+			//			return innerDao.updateOne(typeName, primaryKey, fields);
 			return 0; //# updated rows
 		}
 		public int save(Flight flight) {
 			//if flight is entity then set serial pk
 			return 0; //insert or update
 		}
-		
+
 		public void delete(Flight flight) {
 		}
 	}
-	
+
 	//====
 	public static class CodeGenBase {
 		protected DTypeRegistry registry;
@@ -208,7 +208,7 @@ public class CodegenTests extends DaoTestBase {
 				return null;
 			}
 		}
-		
+
 		protected String convertToAsFn(DType ftype) {
 			switch(ftype.getShape()) {
 			case INTEGER:
@@ -232,15 +232,15 @@ public class CodegenTests extends DaoTestBase {
 			}
 		}
 
-		
+
 	}
-	
+
 	public static class GetterInterfaceCodeGen extends CodeGenBase {
 
 		public GetterInterfaceCodeGen(DTypeRegistry registry) {
 			super(registry);
 		}
-		
+
 		public String generate(DStructType structType) {
 			String typeName = structType.getName();
 
@@ -266,7 +266,7 @@ public class CodegenTests extends DaoTestBase {
 		public ImmutCodeGen(DTypeRegistry registry) {
 			super(registry);
 		}
-		
+
 		public String generate(DStructType structType) {
 			String typeName = structType.getName();
 
@@ -276,17 +276,17 @@ public class CodegenTests extends DaoTestBase {
 			line(sc, "  private DValue dval;");
 			line(sc, "  private DStructHelper helper;");
 			sc.nl();
-			
+
 			sc.o("  %sImmut(DValue dval) {", typeName);
 			sc.nl();
 			line(sc, "  this.dval = dval;");
 			line(sc, "	this.helper = dval.asStruct();");
-			
+
 			line(sc, "@Override");
 			line(sc, "public DValue internalDValue() {");
 			line(sc, "  return dval;");
 			line(sc, "}");
-			
+
 			for(String fieldName: structType.getDeclaredFields().keySet()) {
 				DType ftype = structType.getDeclaredFields().get(fieldName);
 
@@ -298,7 +298,6 @@ public class CodegenTests extends DaoTestBase {
 				sc.nl();
 				sc.o(" return helper.getField(\"%s\").%s();", fieldName, asFn);
 				sc.nl();
-				line(sc, "  return dval;");
 				line(sc, "}");
 
 			}
@@ -311,9 +310,9 @@ public class CodegenTests extends DaoTestBase {
 		private void line(StrCreator sc, String str) {
 			sc.o("%s\n", str);
 		}
-		
+
 	}
-	
+
 
 	@Test
 	public void test1() {
@@ -321,14 +320,14 @@ public class CodegenTests extends DaoTestBase {
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
-		
+
 		ResultValue res = dao.queryByPrimaryKey("Flight", "1");
 		assertEquals(true, res.ok);
-		
+
 		Flight flight = new FlightImmut(res.getAsDValue());
 		assertEquals(1, flight.getField1());
 		assertEquals(10, flight.getField2().intValue());
-		
+
 		FlightEntity entity = new FlightEntity(flight);
 		entity.setField1(12);
 		assertEquals(12, entity.getField1());
@@ -340,7 +339,7 @@ public class CodegenTests extends DaoTestBase {
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
-		
+
 		String typeName = "Flight";
 		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
 		DStructType structType = (DStructType) registry.getType(typeName);

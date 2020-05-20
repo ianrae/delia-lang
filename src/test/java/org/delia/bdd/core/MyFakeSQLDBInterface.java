@@ -4,7 +4,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.log.Log;
-import org.delia.zdb.InstrumentedZDBInterface;
 
 public class MyFakeSQLDBInterface extends InstrumentedZDBInterface {
 	private Log log;

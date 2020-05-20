@@ -1,4 +1,4 @@
-package org.delia.zdb;
+package org.delia.bdd.core;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBCapabilties;
@@ -9,6 +9,9 @@ import org.delia.h2.H2ConnectionHelper;
 import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.ZDBConnection;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
