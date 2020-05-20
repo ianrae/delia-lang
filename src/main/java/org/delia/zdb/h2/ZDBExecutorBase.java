@@ -69,7 +69,6 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		return new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, null, zexec);
 	}
 
-
 	public void init2(DatIdMap datIdMap, VarEvaluator varEvaluator, ZDBExecutor zexec) {
 		this.init2HasBeenDone = true;
 		this.datIdMap = datIdMap;

@@ -6,7 +6,9 @@ import org.delia.db.DBCapabilties;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.h2.H2ErrorConverter;
+import org.delia.db.postgres.PostgresErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.type.TypeReplaceSpec;
@@ -27,7 +29,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		this.capabilities = new DBCapabilties(true, true, true, true);
 		this.sqlLog = new SimpleLog();
 		this.connFactory = connFactory;
-		this.errorConverter = new H2ErrorConverter();
+		this.errorConverter = new PostgresErrorConverter(new SimpleSqlNameFormatter(true));
 		this.connFactory.setErrorConverter(errorConverter);
 		this.sessionCache = new PostgresDeliaSessionCache();
 	}

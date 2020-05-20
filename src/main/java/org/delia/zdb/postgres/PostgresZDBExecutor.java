@@ -79,7 +79,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 	@Override
 	public Log getLog() {
-		return log;
+		return sqlLog;
 	}
 
 	@Override
@@ -276,7 +276,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 				int n = conn.executeCommandStatement(statement, dbctx);
 				updateCountL.add(n);
 			}
-			updateCount = findUpdateCount("merge", updateCountL, stgroup);
+			updateCount = findUpdateCount("insert into", updateCountL, stgroup); //postgres uses 'insert into'
 		} catch (DBValidationException e) {
 			convertAndRethrow(e);
 		}

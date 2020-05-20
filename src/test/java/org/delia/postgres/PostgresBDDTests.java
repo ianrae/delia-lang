@@ -297,13 +297,13 @@ public class PostgresBDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 0;
+//		testIndexToRun = 0;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
-		runR1000File("t0-upsert.txt", 5);
+		runR400File("t0-field-unique.txt", 6);
 	}
 	
 	//---

@@ -32,6 +32,8 @@ public class H2TestCleaner {
 		
 		try(ZDBExecutor executor = innerInterface.createExecutor()) {
 			innerInterface.enableSQLLogging(false);
+			LogLevel saveLevel = executor.getLog().getLevel();
+			executor.getLog().setLevel(LogLevel.OFF);
 //			System.out.println("dropping...");
 			log.log("CLEAN tables..");
 			safeDeleteTable(executor, "cars");
@@ -66,6 +68,7 @@ public class H2TestCleaner {
 			safeDeleteTable(executor, tbl.toLowerCase());
 			tbl = SchemaMigrator.DAT_TABLE;
 			safeDeleteTable(executor, tbl.toLowerCase());
+			executor.getLog().setLevel(saveLevel);
 		} catch (Exception e1) {
 			DBHelper.handleCloseFailure(e1);
 		}

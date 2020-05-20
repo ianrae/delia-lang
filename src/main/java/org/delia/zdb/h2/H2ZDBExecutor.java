@@ -80,7 +80,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 	@Override
 	public Log getLog() {
-		return log;
+		return sqlLog;
 	}
 
 	@Override
