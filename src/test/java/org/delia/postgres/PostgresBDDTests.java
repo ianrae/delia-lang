@@ -296,16 +296,14 @@ public class PostgresBDDTests extends BDDBase {
 	}
 
 	@Test
-	public void test8Debug() {
-//		testIndexToRun = 0;
+	public void testDebug() {
+		testIndexToRun = 0;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
-//		runR1500File("t0-queryfn-ith.txt", 4);
-//		runR1500File("t0-queryfn-min-bool.txt", 0);
-		runR1600File("t0-fetch.txt", 3);
+		runR1000File("t0-upsert.txt", 5);
 	}
 	
 	//---

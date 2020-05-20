@@ -44,12 +44,16 @@ public class ZUpdate extends ServiceBase {
 		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
+		adjustParser(parser);
 		QueryDetails details = new QueryDetails();
-		UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dvalPartial, assocCrudMap);
-		stgroup = parser.renderUpdateGroup(selectFrag);
+		UpdateStatementFragment updateFrag = parser.parseUpdate(spec, details, dvalPartial, assocCrudMap);
+		stgroup = parser.renderUpdateGroup(updateFrag);
 		return stgroup;
 	}	
 	
+	protected void adjustParser(UpdateFragmentParser parser) {
+	}
+
 	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
 		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 	}
