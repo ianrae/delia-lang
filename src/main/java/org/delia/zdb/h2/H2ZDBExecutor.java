@@ -406,7 +406,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		if (deltaFlags.contains("-U")) {
 			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 			String sql = sqlgen.generateSchemaListing(DBListingType.ALL_CONSTRAINTS);
-			constraintName = conn.findConstraint(sql, typeName, fieldName, "UNIQUE");
+			constraintName = conn.findConstraint(sql, typeName, fieldName, "UNIQUE", true);
 		} else if (deltaFlags.contains("+U")) {
 			constraintName = generateUniqueConstraintName();
 		}

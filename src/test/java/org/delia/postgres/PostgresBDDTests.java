@@ -304,7 +304,8 @@ public class PostgresBDDTests extends BDDBase {
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
 //		runR550File("t0-multirel-Nto1-1.txt", 1);
-		runR2100File("t0-migration10.txt", 2);
+//		runR2100File("t0-migration10.txt", 2);
+		runR2100File("t0-migration14a.txt", 2);
 	}
 	
 	//---

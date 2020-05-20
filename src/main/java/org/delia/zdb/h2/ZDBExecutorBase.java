@@ -66,6 +66,7 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 	protected ZTableCreator createPartialTableCreator(ZDBExecutor zexec) {
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
 		FieldGenFactory fieldGenFactory = createFieldGenFactory();
+		return createZTableCreator(fieldGenFactory, nameFormatter, null, zexec);
 	}
 
 	public void init2(DatIdMap datIdMap, VarEvaluator varEvaluator, ZDBExecutor zexec) {

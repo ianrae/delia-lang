@@ -137,7 +137,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	}
 
 	@Override
-	public String findConstraint(String sql, String tableName, String fieldName, String constraintType) {
+	public String findConstraint(String sql, String tableName, String fieldName, String constraintType, boolean useFieldName) {
 		ResultSet rs = null;
 		try {
 			log.log("SQL: %s", sql);
@@ -158,11 +158,23 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 					String field = getRsValue(rs, iColumn);
 
 					//for now assume only one
-					if (tableName.equalsIgnoreCase(tbl) && fieldName.equalsIgnoreCase(field)) {
-						if (constraintType.equalsIgnoreCase(ctype)) {
-							return cname;
+					//TODO this needs to be more robust. some constrains have names like:
+					//customer_height_key  or 2200_402813_1_not_null
+					if (useFieldName) {
+						if (tableName.equalsIgnoreCase(tbl) && fieldName.equalsIgnoreCase(field)) {
+							if (constraintType.equalsIgnoreCase(ctype)) {
+								return cname;
+							}
+						}
+					} else {
+						if (tableName.equalsIgnoreCase(tbl) && field.toLowerCase().contains(field)) {
+							if (constraintType.equalsIgnoreCase(ctype)) {
+								return cname;
+							}
 						}
 					}
+					
+					
 				}
 			}        
 		} catch (SQLException e) {

@@ -10,6 +10,7 @@ import org.delia.db.sql.StrCreator;
 
 public class RawStatementGenerator extends ServiceBase {
 	private SqlNameFormatter nameFormatter;
+	private String contraintsTbl;
 
 	public RawStatementGenerator(FactoryService factorySvc, DBType dbType) {
 		super(factorySvc);
@@ -17,9 +18,11 @@ public class RawStatementGenerator extends ServiceBase {
 		switch(dbType) {
 		case H2:
 			nameFormatter = new SimpleSqlNameFormatter();
+			contraintsTbl = "information_schema.constraints";
 			break;
 		case POSTGRES:
 			nameFormatter = new SimpleSqlNameFormatter(true);
+			contraintsTbl = "information_schema.table_constraints";
 			break;
 		default:
 			break;
@@ -55,17 +58,17 @@ public class RawStatementGenerator extends ServiceBase {
 			sc.o("SELECT * FROM information_schema.tables"); 
 			boolean b = true;
 			if (b) {
-				sc.o(" WHERE  table_schema = '%s'", "PUBLIC");
+				sc.o(" WHERE  table_schema = '%s'", tblName("PUBLIC"));
 			} else {
 			}
 		}
 			break;
 		case ALL_CONSTRAINTS:
 		{
-			sc.o("SELECT * FROM information_schema.constraints"); 
+			sc.o("SELECT * FROM %s", contraintsTbl); 
 			boolean b = true;
 			if (b) {
-				sc.o(" WHERE  table_schema = '%s'", "PUBLIC");
+				sc.o(" WHERE  table_schema = '%s'", tblName("PUBLIC"));
 			} else {
 			}
 		}

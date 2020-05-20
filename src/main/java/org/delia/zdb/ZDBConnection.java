@@ -18,5 +18,5 @@ public interface ZDBConnection {
 	public int executeCommandStatementGenKey(SqlStatement statement, DType keyType, ZDBExecuteContext sqlctx);
 	
 	public void enumerateDBSchema(String sql, String title, ZDBExecuteContext dbctx);
-	public String findConstraint(String sql, String tableName, String fieldName, String constraintType);
+	public String findConstraint(String sql, String tableName, String fieldName, String constraintType, boolean useFieldName);
 }
