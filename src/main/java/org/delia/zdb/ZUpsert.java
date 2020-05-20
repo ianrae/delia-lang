@@ -54,7 +54,7 @@ public class ZUpsert extends ServiceBase {
 		
 		/////
 		
-		UpsertFragmentParser parser = new UpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+		UpsertFragmentParser parser = createUpsertFragmentParser(fpSvc, assocTblReplacer);
 
 		//hack hack hack TODO:improve this
 		//this works but is slow, and has race conditions if other thread does insert
@@ -87,4 +87,9 @@ public class ZUpsert extends ServiceBase {
 	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
 		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 	}
+	
+	protected UpsertFragmentParser createUpsertFragmentParser(FragmentParserService fpSvc, AssocTableReplacer assocTblReplacer) {
+		return new UpsertFragmentParser(factorySvc, fpSvc, assocTblReplacer);
+	}
+
 }
