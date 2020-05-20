@@ -309,7 +309,7 @@ public class H2BDDTests extends BDDBase {
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-		runR2150File("t0-migrate-many-to-many8a.txt", 3);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---

@@ -109,26 +109,34 @@ public class AliasAllocator {
 	}
 
 	public AliasInstance findAliasFor(DStructType structType) {
-		String alias = aliasMap.get(structType.getName());
+		AliasInstance aliasInst = findAliasForTable(structType.getName());
+		if (aliasInst != null) {
+			aliasInst.structType = structType;
+		}
+		return aliasInst;
+	}
+	public AliasInstance findAliasForTable(String tableName) {
+		String alias = aliasMap.get(tableName);
 		if (alias != null) {
 			AliasInstance aliasInst = new AliasInstance();
 			aliasInst.alias = alias;
 			aliasInst.instanceKey = null;
-			aliasInst.structType = structType;
+			aliasInst.structType = null;
 			return aliasInst;
 		} else {
-			String target = String.format("%s.", structType.getName());
+			String target = String.format("%s.", tableName);
 			for(String key: aliasMap.keySet()) {
 				if (key.startsWith(target)) {
 					AliasInstance aliasInst = new AliasInstance();
 					aliasInst.alias = aliasMap.get(key);
 					aliasInst.instanceKey = key;
-					aliasInst.structType = structType;
+					aliasInst.structType = null;
 					return aliasInst;
 				}
 			}
 		}
 		return null;
 	}
+	
 
 }

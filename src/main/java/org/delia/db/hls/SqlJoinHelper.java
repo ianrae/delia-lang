@@ -109,11 +109,13 @@ public class SqlJoinHelper {
 			DStructType pairType = (DStructType) pair.type; //Address
 			PrimaryKey pk = pairType.getPrimaryKey();
 //			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
-			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTable);
+			AliasInstance aliasInst = aliasAlloc.findAliasFor(pairType);
 			String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 			String on1 = aliasAlloc.buildAlias(aliasInst, pk.getFieldName()); //b.id
-			String fff = assocTblMgr.xgetAssocRightField(hlspan.fromType, aliasInst.assocTbl);
-			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
+			String fff = assocTblMgr.xgetAssocRightField(hlspan.fromType, assocTable);
+//			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
+			AliasInstance ai2 = aliasAlloc.findAliasForTable(assocTable);
+			String on2 = aliasAlloc.buildAlias(ai2, fff); //c.rightv
 			s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			sc.out(s);
 		}
