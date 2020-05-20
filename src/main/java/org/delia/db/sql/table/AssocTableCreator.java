@@ -80,57 +80,48 @@ public class AssocTableCreator extends ServiceBase {
 			tblinfo.tbl1 = tbl1;
 			tblinfo.tbl2 = tbl2;
 			tblinfo.fieldName = xpair.name;
-			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.nearType, relinfo.farType);
+			TypePair relpair = new TypePair(xpair.name, relinfo.nearType);
+			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.nearType, relinfo.farType, relpair);
 		} else {
 			tblinfo.tbl1 = tbl2;
 			tblinfo.tbl2 = tbl1;
 			tblinfo.fieldName = xpair.name;
-			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType);
+			TypePair relpair = new TypePair(xpair.name, relinfo.nearType);
+			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType, relpair);
 		}
 	}
 
-	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType) {
+	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType, TypePair relpair) {
 		sc.o("CREATE TABLE %s (", assocTableName);
 		sc.nl();
-		int index = 0;
 		List<SqlElement> fieldL = new ArrayList<>();
-		for(TypePair pair: leftType.getAllFields()) {
-			if (pair.name.equals(xpair.name)) {
-				RelationInfo relinfo = DRuleHelper.findManyToManyRelation(pair, leftType);
-				TypePair copy = new TypePair("leftv", relinfo.nearType);
-				FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false);
-				field.setIsAssocTblField(false); //rightType.fieldIsOptional(otherSide.fieldName));
-				fieldL.add(field);
+		RelationInfo relinfo = DRuleHelper.findManyToManyRelation(relpair, (DStructType) relpair.type);
+		TypePair copy = new TypePair("leftv", relinfo.nearType);
+		FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false);
+		field.setIsAssocTblField(); //rightType.fieldIsOptional(otherSide.fieldName));
+		fieldL.add(field);
 
-				copy = new TypePair("rightv", relinfo.farType);
-				field = fieldgenFactory.createFieldGen(registry, copy, rightType, false);
-				field.setIsAssocTblField(false); //leftType.fieldIsOptional(pair.name));
-				fieldL.add(field);
+		copy = new TypePair("rightv", relinfo.farType);
+		field = fieldgenFactory.createFieldGen(registry, copy, rightType, false);
+		field.setIsAssocTblField(); //leftType.fieldIsOptional(pair.name));
+		fieldL.add(field);
 
-				index++;
-			}
+		
+		copy = new TypePair("leftv", leftType); //address
+		ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, leftType, false);
+		if (constraint != null) {
+			fieldL.add(constraint);
+		}
+
+		copy = new TypePair("rightv", rightType);
+		constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, rightType, false);
+		if (constraint != null) {
+			fieldL.add(constraint);
 		}
 		
-		for(TypePair pair: leftType.getAllFields()) {
-			if (pair.name.equals(xpair.name)) {
-				TypePair copy = new TypePair("leftv", leftType); //address
-				ConstraintGen constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, leftType, false);
-				if (constraint != null) {
-					fieldL.add(constraint);
-				}
-				
-				copy = new TypePair("rightv", rightType);
-				constraint = this.fieldgenFactory.generateFKConstraint(registry, copy, rightType, false);
-				if (constraint != null) {
-					fieldL.add(constraint);
-				}
-				index++;
-			}
-		}
-		
-		index = 0;
-		for(SqlElement field: fieldL) {
-			field.generateField(sc);
+		int index = 0;
+		for(SqlElement xfield: fieldL) {
+			xfield.generateField(sc);
 			if (index + 1 < fieldL.size()) {
 				sc.o(",");
 				sc.nl();

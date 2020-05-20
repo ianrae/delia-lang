@@ -19,9 +19,9 @@ public class FieldGen extends SqlElement {
 		super(factorySvc, registry, pair, dtype, isAlter);
 	}
 	
-	public void setIsAssocTblField(boolean isOptional) {
+	public void setIsAssocTblField() {
 		this.isAssocTblField = true;
-		this.isAssocTblFieldOptional = isOptional;
+		this.isAssocTblFieldOptional = false;
 	}
 	
 	public void generateField(StrCreator sc) {

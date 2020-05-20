@@ -313,6 +313,16 @@ public class H2BDDTests extends BDDBase {
 //		runR1350File("t0-filter-op-relation.txt", 14);
 //		runR1550File("t0-queryfn-oneone-parent2.txt", 6);
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
+		runR2150File("t0-migrate-many-to-many2.txt", 2);
+		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR2150File("t0-migrate-many-to-many4.txt", 2);
+		runR2150File("t0-migrate-many-to-many6.txt", 2);
+		runR2150File("t0-migrate-many-to-many6a.txt", 2);
+		runR2150File("t0-migrate-many-to-many7.txt", 0);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	
 	//---
