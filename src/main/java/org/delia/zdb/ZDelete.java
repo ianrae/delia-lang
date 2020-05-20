@@ -18,8 +18,8 @@ import org.delia.type.DTypeRegistry;
 
 public class ZDelete extends ServiceBase {
 
-	private DTypeRegistry registry;
-	private H2SqlHelperFactory sqlHelperFactory;
+	protected DTypeRegistry registry;
+	protected H2SqlHelperFactory sqlHelperFactory;
 
 	public ZDelete(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -30,7 +30,7 @@ public class ZDelete extends ServiceBase {
 	public SqlStatementGroup generate(QuerySpec spec, VarEvaluator varEvaluator, ZTableCreator tableCreator, ZDBExecutor zexec) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
 
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, null);
@@ -46,4 +46,8 @@ public class ZDelete extends ServiceBase {
 		stgroup.statementL.add(statement);
 		return stgroup;
 	}	
+	
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	}
 }

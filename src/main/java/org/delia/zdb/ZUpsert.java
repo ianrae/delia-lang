@@ -13,8 +13,6 @@ import org.delia.db.QuerySpec;
 import org.delia.db.h2.H2SqlHelperFactory;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
-import org.delia.db.sql.fragment.UpdateFragmentParser;
-import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.db.sql.fragment.UpsertFragmentParser;
 import org.delia.db.sql.fragment.UpsertStatementFragment;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -27,8 +25,8 @@ import org.delia.type.DValue;
 
 public class ZUpsert extends ServiceBase {
 	
-	private DTypeRegistry registry;
-	private H2SqlHelperFactory sqlHelperFactory;
+	protected DTypeRegistry registry;
+	protected H2SqlHelperFactory sqlHelperFactory;
 
 	public ZUpsert(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -41,7 +39,7 @@ public class ZUpsert extends ServiceBase {
 			VarEvaluator varEvaluator, ZTableCreator tableCreator, ZDBExecutor zexec) {
 		SqlStatementGroup stgroup;
 		
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, null);
@@ -81,4 +79,8 @@ public class ZUpsert extends ServiceBase {
 		
 		return stgroup;
 	}	
+	
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	}
 }

@@ -17,8 +17,8 @@ import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
 public class ZInsert extends ServiceBase {
 	
-	private DTypeRegistry registry;
-	private H2SqlHelperFactory sqlHelperFactory;
+	protected DTypeRegistry registry;
+	protected H2SqlHelperFactory sqlHelperFactory;
 
 	public ZInsert(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);

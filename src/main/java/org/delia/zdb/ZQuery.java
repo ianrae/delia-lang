@@ -16,13 +16,14 @@ import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.queryresponse.LetSpan;
 import org.delia.runner.DoNothingVarEvaluator;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
 
 public class ZQuery extends ServiceBase {
 	
-	private DTypeRegistry registry;
-	private H2SqlHelperFactory sqlHelperFactory;
+	protected DTypeRegistry registry;
+	protected H2SqlHelperFactory sqlHelperFactory;
 
 	public ZQuery(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -30,14 +31,13 @@ public class ZQuery extends ServiceBase {
 		this.sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 	}
 
-	public SqlStatement generate(QuerySpec spec, QueryContext qtx, ZTableCreator tableCreator, List<LetSpan> spanL, QueryDetails details) {
+	public SqlStatement generate(QuerySpec spec, QueryContext qtx, ZTableCreator tableCreator, List<LetSpan> spanL, QueryDetails details, VarEvaluator varEvaluator) {
 		buildSpans(spec, qtx, spanL);
 		failIfMultiSpan(spec, qtx, spanL);
 		SqlStatement statement;
 		
-//			log.log("FRAG PARSER-QUERY....................");
 		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator());
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, spanL);
 		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
@@ -63,5 +63,8 @@ public class ZQuery extends ServiceBase {
 		spanLParam.addAll(spanL);
 	}
 	
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	}
 	
 }

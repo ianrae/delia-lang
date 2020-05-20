@@ -42,12 +42,7 @@ import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZDelete;
-import org.delia.zdb.ZInsert;
-import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
-import org.delia.zdb.ZUpdate;
-import org.delia.zdb.ZUpsert;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.ZDBExecutorBase;
@@ -56,11 +51,11 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 
 	private PostgresZDBInterfaceFactory dbInterface;
 	private H2ZDBConnection conn;
-	private ZInsert zinsert;
-	private ZQuery zquery;
-	private ZUpdate zupdate;
-	private ZUpsert zupsert;
-	private ZDelete zdelete;
+	private PostgresZInsert zinsert;
+	private PostgresZQuery zquery;
+	private PostgresZUpdate zupdate;
+	private PostgresZUpsert zupsert;
+	private PostgresZDelete zdelete;
 	private PostgresDeliaSessionCache cache;
 	private CacheData cacheData;
 
@@ -90,11 +85,11 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	@Override
 	public void init1(DTypeRegistry registry) {
 		super.init1(registry);
-		this.zinsert = new ZInsert(factorySvc, registry);
-		this.zquery = new ZQuery(factorySvc, registry);
-		this.zupdate = new ZUpdate(factorySvc, registry);
-		this.zupsert = new ZUpsert(factorySvc, registry);
-		this.zdelete = new ZDelete(factorySvc, registry);
+		this.zinsert = new PostgresZInsert(factorySvc, registry);
+		this.zquery = new PostgresZQuery(factorySvc, registry);
+		this.zupdate = new PostgresZUpdate(factorySvc, registry);
+		this.zupsert = new PostgresZUpsert(factorySvc, registry);
+		this.zdelete = new PostgresZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
@@ -170,7 +165,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		List<LetSpan> spanL = new ArrayList<>();
 		QueryDetails details = new QueryDetails();
 		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details);
+		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator);
 
 		logSql(statement);
 		ZDBExecuteContext dbctx = createContext();
