@@ -22,5 +22,13 @@ public class DRelationHelper {
 		fetchedL.add(subObj);
 		drel.setFetchedItems(fetchedL);
 	}
+
+	public static void addToFetchedItemsFromRelation(DValue inner1, DRelation drel2) {
+		if (! drel2.haveFetched()) {
+			return;
+		}
+		DRelation drel1 = inner1.asRelation();
+		addToFetchedItems(drel1, drel2.getFetchedItems());
+	}
 	
 }

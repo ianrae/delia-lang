@@ -165,6 +165,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 						DRelation drel2 = inner2.asRelation();
 						if (! alreadyExist(inner1, drel2.getForeignKey())) {
 							inner1.asRelation().addKey(drel2.getForeignKey());
+							DRelationHelper.addToFetchedItemsFromRelation(inner1, drel2);
 						}
 					}
 				}
