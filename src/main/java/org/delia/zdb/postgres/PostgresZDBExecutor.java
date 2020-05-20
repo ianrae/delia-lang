@@ -22,6 +22,8 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
+import org.delia.db.sql.SimpleSqlNameFormatter;
+import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -95,6 +97,11 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 
 	private ZTableCreator createPartialTableCreator() {
 		return super.createPartialTableCreator(this);
+	}
+	
+	@Override
+	protected ZTableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, ZDBExecutor zexec) {
+		return  new PostgresZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	@Override
 	protected FieldGenFactory createFieldGenFactory() {
