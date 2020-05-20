@@ -22,8 +22,6 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
-import org.delia.db.sql.SimpleSqlNameFormatter;
-import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -63,16 +61,16 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	private ZUpdate zupdate;
 	private ZUpsert zupsert;
 	private ZDelete zdelete;
-//	private H2DeliaSessionCache cache;
+	private PostgresDeliaSessionCache cache;
 	private CacheData cacheData;
 
 	public PostgresZDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresZDBInterfaceFactory dbInterface, 
-			H2ZDBConnection conn) {
+			H2ZDBConnection conn, PostgresDeliaSessionCache sessionCache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;
-		this.dbType = DBType.H2;
-//		this.cache = cache;
+		this.dbType = DBType.POSTGRES;
+		this.cache = sessionCache;
 	}
 
 	@Override
@@ -97,7 +95,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		this.zupdate = new ZUpdate(factorySvc, registry);
 		this.zupsert = new ZUpsert(factorySvc, registry);
 		this.zdelete = new ZDelete(factorySvc, registry);
-		//this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
+		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
 	private ZTableCreator createPartialTableCreator() {

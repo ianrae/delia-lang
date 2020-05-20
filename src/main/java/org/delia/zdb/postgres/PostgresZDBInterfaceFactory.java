@@ -20,7 +20,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 	private SimpleLog sqlLog;
 	private ConnectionFactory connFactory;
 	private DBErrorConverter errorConverter;
-//	private H2DeliaSessionCache sessionCache;
+	private PostgresDeliaSessionCache sessionCache;
 
 	public PostgresZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
@@ -29,12 +29,12 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		this.connFactory = connFactory;
 		this.errorConverter = new H2ErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
-//		this.sessionCache = new H2DeliaSessionCache();
+		this.sessionCache = new PostgresDeliaSessionCache();
 	}
 
 	@Override
 	public DBType getDBType() {
-		return DBType.H2;
+		return DBType.POSTGRES;
 	}
 
 	@Override
@@ -77,6 +77,6 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
-		return new PostgresZDBExecutor(factorySvc, execLog, this, conn); //, sessionCache);
+		return new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 	}
 }

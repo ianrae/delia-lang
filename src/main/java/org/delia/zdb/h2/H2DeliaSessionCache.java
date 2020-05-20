@@ -10,7 +10,7 @@ public class H2DeliaSessionCache {
 		
 	}
 	
-	private Map<Object,CacheData> cacheMap = new ConcurrentHashMap<>();
+	protected Map<Object,CacheData> cacheMap = new ConcurrentHashMap<>();
 	
 	public synchronized CacheData findOrCreate(Object sessionIdentifier) {
 		CacheData cache = cacheMap.get(sessionIdentifier);
