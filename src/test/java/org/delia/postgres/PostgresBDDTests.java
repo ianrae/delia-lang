@@ -262,6 +262,7 @@ public class PostgresBDDTests extends BDDBase {
 	@Test
 	public void testR2150() {
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
@@ -278,6 +279,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
 		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
 		runR2150File("t0-migrate-many-to-many2.txt", 2);
 		runR2150File("t0-migrate-many-to-many2a.txt", 2);
 		runR2150File("t0-migrate-many-to-many3.txt", 2);
@@ -285,6 +287,8 @@ public class PostgresBDDTests extends BDDBase {
 		runR2150File("t0-migrate-many-to-many6.txt", 2);
 		runR2150File("t0-migrate-many-to-many6a.txt", 2);
 		runR2150File("t0-migrate-many-to-many7.txt", 0);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	@Test
 	public void testR2200() {
@@ -305,7 +309,7 @@ public class PostgresBDDTests extends BDDBase {
 		
 //		runR550File("t0-multirel-Nto1-1.txt", 1);
 //		runR2100File("t0-migration10.txt", 2);
-		runR2100File("t0-migration14a.txt", 2);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
 	}
 	
 	//---

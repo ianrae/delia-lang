@@ -73,9 +73,6 @@ public class PostgresZTableCreator extends ZTableCreator {
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
 			constraint = generateFKConstraint(sc, pair, dtype, true);
 			constraints.add(constraint);
-			//		if (constraint != null) {
-			//			fieldL.add(constraint);
-			//		}
 		}
 
 		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
