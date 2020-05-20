@@ -166,6 +166,9 @@ public class ResultSetToDValConverter extends ServiceBase {
 						if (! alreadyExist(inner1, drel2.getForeignKey())) {
 							inner1.asRelation().addKey(drel2.getForeignKey());
 							DRelationHelper.addToFetchedItemsFromRelation(inner1, drel2);
+							
+							//TODO: add config flag for this. it's good for tests but slows perf
+							DRelationHelper.sortFKs(inner1.asRelation());
 						}
 					}
 				}
@@ -279,20 +282,20 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return builder.getDValue();
 	}
 
-	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
-		subL.clear();
-		String s2 = targetKeyVal.asString();
-		for(DValue tmp: rawList) {
-			if (tmp == skip) {
-				continue;
-			}
-			DValue keyVal = DValueHelper.findPrimaryKeyValue(tmp);
-			String s1 = keyVal.asString(); //TODO: need better way to compare dval
-			if (s1.equals(s2)) {
-				subL.add(tmp);
-			}
-		}
-	}
+//	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
+//		subL.clear();
+//		String s2 = targetKeyVal.asString();
+//		for(DValue tmp: rawList) {
+//			if (tmp == skip) {
+//				continue;
+//			}
+//			DValue keyVal = DValueHelper.findPrimaryKeyValue(tmp);
+//			String s1 = keyVal.asString(); //TODO: need better way to compare dval
+//			if (s1.equals(s2)) {
+//				subL.add(tmp);
+//			}
+//		}
+//	}
 
 	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
 		List<DValue> list = new ArrayList<>();

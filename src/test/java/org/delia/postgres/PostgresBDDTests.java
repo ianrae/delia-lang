@@ -303,7 +303,8 @@ public class PostgresBDDTests extends BDDBase {
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
-		runR400File("t0-field-unique.txt", 6);
+//		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR2100File("t0-migration10.txt", 2);
 	}
 	
 	//---
