@@ -10,6 +10,7 @@ import org.delia.app.DaoTestBase;
 import org.delia.dao.DeliaDao;
 import org.delia.db.sql.StrCreator;
 import org.delia.runner.ResultValue;
+import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -20,50 +21,65 @@ import org.junit.Test;
 
 
 public class CodegenTests extends DaoTestBase {
-	
-	public interface Flight {
-		Integer getField1();
+	public interface DeliaImmutableStruct {
+		DValue internalDValue();
+	}
+	public interface DeliaEntity {
+		Map<String,Object> internalSetValueMap();
+	}
+	public interface Flight extends DeliaImmutableStruct {
+		int getField1();
 		Integer getField2();
 	}
-	public interface FlightSetter {
-		void setField1(Integer val);
+	public interface FlightSetter extends DeliaEntity {
+		void setField1(int val);
 		void setField2(Integer val);
 	}
 	public static class FlightImmut implements Flight {
 		private DValue dval;
+		private DStructHelper helper;
 
 		public FlightImmut(DValue dval) {
 			this.dval = dval;
+			this.helper = dval.asStruct();
 		}
 		@Override
-		public Integer getField1() {
-			return dval.asStruct().getField("field1").asInt();
+		public int getField1() {
+			return helper.getField("field1").asInt();
 		}
 
 		@Override
 		public Integer getField2() {
-			return dval.asStruct().getField("field1").asInt();
+			return helper.getField("field2").asInt();
+		}
+		@Override
+		public DValue internalDValue() {
+			return dval;
 		}
 	}
 	
 	public static class FlightEntity implements Flight,FlightSetter {
 		private DValue dval;
+		private DStructHelper helper;
 		private Map<String,Object> setMap = new HashMap<>();
 
 		public FlightEntity(DValue dval) {
 			this.dval = dval;
+			this.helper = dval.asStruct();
 		}
-		public FlightEntity(FlightImmut immut) {
-			this.dval = immut.dval;
+		public FlightEntity(Flight immut) {
+			FlightImmut x = (FlightImmut) immut;
+			this.dval = x.dval;
+			this.helper = dval.asStruct();
 		}
 		
 		@Override
-		public Integer getField1() {
+		public int getField1() {
 			String fieldName = "field1";
 			if (setMap.containsKey(fieldName)) {
 				return (Integer)setMap.get(fieldName); //can return null
 			}
-			return dval.asStruct().getField(fieldName).asInt();
+			return helper.getField(fieldName).asInt();
 		}
 
 		@Override
@@ -72,15 +88,23 @@ public class CodegenTests extends DaoTestBase {
 			if (setMap.containsKey(fieldName)) {
 				return (Integer)setMap.get(fieldName); //can return null
 			}
-			return dval.asStruct().getField(fieldName).asInt();
+			return helper.getField(fieldName).asInt();
 		}
 		@Override
-		public void setField1(Integer val) {
+		public void setField1(int val) {
 			setMap.put("field1", val);
 		}
 		@Override
 		public void setField2(Integer val) {
 			setMap.put("field2", val);
+		}
+		@Override
+		public DValue internalDValue() {
+			return dval; //can be null, if disconnected entity
+		}
+		@Override
+		public Map<String, Object> internalSetValueMap() {
+			return setMap;
 		}
 	}
 	
@@ -154,8 +178,12 @@ public class CodegenTests extends DaoTestBase {
 		assertEquals(true, res.ok);
 		
 		Flight flight = new FlightImmut(res.getAsDValue());
-		assertEquals(1, flight.getField1().intValue());
-		assertEquals(20, flight.getField2().intValue());
+		assertEquals(1, flight.getField1());
+		assertEquals(10, flight.getField2().intValue());
+		
+		FlightEntity entity = new FlightEntity(flight);
+		entity.setField1(12);
+		assertEquals(12, entity.getField1());
 	}
 
 
