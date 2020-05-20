@@ -21,8 +21,8 @@ import org.delia.zdb.ZDBExecuteContext;
 public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	protected Connection conn;
 	protected ConnectionFactory connectionFactory;
-	private ValueHelper valueHelper;
-	private DBErrorConverter errorConverter;
+	protected ValueHelper valueHelper;
+	protected DBErrorConverter errorConverter;
 
 	public H2ZDBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
 		super(factorySvc);
@@ -61,10 +61,10 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 		}
 		return rs;
 	}
-	private PreparedStatement createPrepStatement(SqlStatement statement) throws SQLException {
+	protected PreparedStatement createPrepStatement(SqlStatement statement) throws SQLException {
 		return valueHelper.createPrepStatement(statement, conn);
 	}
-	private void convertAndRethrowException(SQLException e) {
+	protected void convertAndRethrowException(SQLException e) {
 		errorConverter.convertAndRethrowException(e);
 	}
 
@@ -183,7 +183,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 
 		return null;
 	}
-	private String getRsValue(ResultSet rs, int index) throws SQLException {
+	protected String getRsValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
 		return obj == null ? "" : obj.toString();
 	}

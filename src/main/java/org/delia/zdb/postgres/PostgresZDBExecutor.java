@@ -22,7 +22,6 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
-import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SelectFuncHelper;
@@ -46,13 +45,12 @@ import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
-import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.ZDBExecutorBase;
 
 public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 
 	private PostgresZDBInterfaceFactory dbInterface;
-	private H2ZDBConnection conn;
+	private PostgresZDBConnection conn;
 	private PostgresZInsert zinsert;
 	private PostgresZQuery zquery;
 	private PostgresZUpdate zupdate;
@@ -62,7 +60,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	private CacheData cacheData;
 
 	public PostgresZDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresZDBInterfaceFactory dbInterface, 
-			H2ZDBConnection conn, PostgresDeliaSessionCache sessionCache) {
+			PostgresZDBConnection conn, PostgresDeliaSessionCache sessionCache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;

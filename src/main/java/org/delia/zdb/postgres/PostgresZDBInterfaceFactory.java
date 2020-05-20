@@ -14,7 +14,6 @@ import org.delia.type.TypeReplaceSpec;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.h2.H2ZDBConnection;
 
 public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
 	private DBCapabilties capabilities;
@@ -45,7 +44,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 
 	@Override
 	public ZDBConnection openConnection() {
-		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFactory, errorConverter);
+		PostgresZDBConnection conn = new PostgresZDBConnection(factorySvc, connFactory, errorConverter);
 		conn.openDB();
 		return conn;
 	}
@@ -75,7 +74,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 
 	@Override
 	public ZDBExecutor createExecutor() {
-		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
+		PostgresZDBConnection conn = (PostgresZDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
 		return new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
