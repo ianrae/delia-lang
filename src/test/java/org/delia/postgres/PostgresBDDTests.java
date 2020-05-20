@@ -309,7 +309,6 @@ public class PostgresBDDTests extends BDDBase {
 		
 //		runR550File("t0-multirel-Nto1-1.txt", 1);
 //		runR2100File("t0-migration10.txt", 2);
-		runR2150File("t0-migrate-many-to-many8.txt", 3);
 	}
 	
 	//---
