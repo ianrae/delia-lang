@@ -46,7 +46,7 @@ public class ZUpsert extends ServiceBase {
 		ZTableExistenceService existSvc = new ZTableExistenceService(zexec);
 		fpSvc.setExistSvc(existSvc);
 		
-		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+		AssocTableReplacer assocTblReplacer = createAssocTableReplacer(fpSvc);
 //		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 //		whereGen.tableFragmentMaker = parser;
 //		UpdateStatementFragment selectFrag = parser.parseUpdate(spec, details, dvalPartial, assocCrudMap);
@@ -80,6 +80,10 @@ public class ZUpsert extends ServiceBase {
 		return stgroup;
 	}	
 	
+	protected AssocTableReplacer createAssocTableReplacer(FragmentParserService fpSvc) {
+		return new AssocTableReplacer(factorySvc, fpSvc);
+	}
+
 	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
 		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
 	}

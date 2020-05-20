@@ -41,7 +41,7 @@ public class ZUpdate extends ServiceBase {
 		ZTableExistenceService existSvc = new ZTableExistenceService(zexec);
 		fpSvc.setExistSvc(existSvc);
 		
-		AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
+		AssocTableReplacer assocTblReplacer = createAssocTableReplacer(fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);
 		whereGen.tableFragmentMaker = parser;
 		adjustParser(parser);
@@ -52,6 +52,10 @@ public class ZUpdate extends ServiceBase {
 	}	
 	
 	protected void adjustParser(UpdateFragmentParser parser) {
+	}
+	
+	protected AssocTableReplacer createAssocTableReplacer(FragmentParserService fpSvc) {
+		return new AssocTableReplacer(factorySvc, fpSvc);
 	}
 
 	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {

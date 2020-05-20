@@ -1,7 +1,10 @@
 package org.delia.zdb.postgres;
 
 import org.delia.core.FactoryService;
+import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.postgres.PostgresWhereFragmentGenerator;
+import org.delia.db.sql.fragment.AssocTableReplacer;
+import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.runner.VarEvaluator;
@@ -19,6 +22,10 @@ public class PostgresZUpdate extends ZUpdate {
 		parser.useAliases(false); //doesn't like alias in update statements
 	}
 
+	@Override
+	protected AssocTableReplacer createAssocTableReplacer(FragmentParserService fpSvc) {
+		return new PostgresAssocTablerReplacer(factorySvc, fpSvc);
+	}
 
 	@Override
 	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
