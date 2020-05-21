@@ -13,7 +13,6 @@ import org.delia.app.DaoTestBase;
 import org.delia.codegen.sample.Flight;
 import org.delia.codegen.sample.FlightEntity;
 import org.delia.codegen.sample.FlightImmut;
-import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaDao;
 import org.delia.dval.DValueConverterService;
@@ -21,9 +20,9 @@ import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -35,7 +34,6 @@ import org.junit.Test;
 public class DaoTests extends DaoTestBase {
 	
 	public static class DaoRunnerInitializer implements RunnerInitializer {
-
 		private DValueIterator iter;
 		
 		public DaoRunnerInitializer(DValueIterator iter) {
@@ -46,7 +44,6 @@ public class DaoTests extends DaoTestBase {
 		public void initialize(Runner runner) {
 			runner.setInsertPrebuiltValueIterator(iter);
 		}
-
 	}
 	
 
@@ -58,6 +55,7 @@ public class DaoTests extends DaoTestBase {
 		private DTypeRegistry registry;
 		private ScalarValueBuilder scalarBuilder;
 		private String typeName;
+		private DStructType structType;
 
 		public FlightDao(DeliaSession session) {
 			super(session.getDelia().getFactoryService());
@@ -65,7 +63,8 @@ public class DaoTests extends DaoTestBase {
 			this.session = session;
 			this.delia = session.getDelia();
     		this.registry = session.getExecutionContext().registry;
-			
+	    	this.structType = (DStructType) registry.getType(typeName);
+
 			this.dvalConverter = new DValueConverterService(factorySvc);
 			this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		}
@@ -82,23 +81,16 @@ public class DaoTests extends DaoTestBase {
 		}
 		
 		public void insert(Flight entity) {
-			List<DValue> inputL = new ArrayList<>();
-			inputL.add(createDValue(entity));
-			DValueIterator iter = new DValueIterator(inputL);	
-			DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
-			session.setRunnerIntiliazer(dri);
-			String s = String.format("insert Flight {}");
-			ResultValue res = delia.continueExecution(s, session);
-			session.setRunnerIntiliazer(null);
+			String src = String.format("insert %s {}", typeName);
+			doInsertOrUpdate(entity, src);
 		}
-		protected ResultValue doInsertOrUpdate(Flight entity, String statementType) {
+		protected ResultValue doInsertOrUpdate(Flight entity, String src) {
 			List<DValue> inputL = new ArrayList<>();
 			inputL.add(createDValue(entity));
 			DValueIterator iter = new DValueIterator(inputL);	
 			DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
 			session.setRunnerIntiliazer(dri);
-			String s = String.format("%s %s {}", statementType, typeName);
-			ResultValue res = delia.continueExecution(s, session);
+			ResultValue res = delia.continueExecution(src, session);
 			session.setRunnerIntiliazer(null);
 			return res;
 		}
@@ -106,7 +98,7 @@ public class DaoTests extends DaoTestBase {
 	    public DValue createDValue(Flight obj) {
 	    	if (obj instanceof DeliaEntity) {
 	    		DeliaEntity entity = (DeliaEntity) obj;
-	    		return this.buildFromEntity(entity, "Flight");
+	    		return this.buildFromEntity(entity, typeName);
 	    	} else {
 	    		return obj.internalDValue();
 	    	}
@@ -118,7 +110,6 @@ public class DaoTests extends DaoTestBase {
 	    		return immut.internalDValue();
 	    	}
 	    		
-	    	DStructType structType = (DStructType) registry.getType(typeName);
 	    	StructValueBuilder builder = new StructValueBuilder(structType);
 	    	for(TypePair pair: structType.getAllFields()) {
 	    		String fieldName = pair.name;
@@ -147,13 +138,14 @@ public class DaoTests extends DaoTestBase {
 	    	return finalVal;
 	    }
 		
-		
 		public int update(Flight entity) {
-			String src = String.format("update Flight[%s] {");
-			ResultValue res = doQuery(src);
-			return 0;
+			PrimaryKey pk = structType.getPrimaryKey();
+			DValue pkval = entity.internalDValue().asStruct().getField(pk.getFieldName());
+			String src = String.format("update %s[%s] {}", typeName, pkval.asString());
+			ResultValue res = this.doInsertOrUpdate(entity, src);
+			Integer updateCount = (Integer) res.val;
+			return updateCount;
 		}
-		
 		
 		protected List<Flight> createImmutList(ResultValue res) {
 			List<Flight> list = new ArrayList<>();
@@ -198,7 +190,10 @@ public class DaoTests extends DaoTestBase {
 		FlightEntity entity = new FlightEntity(flight);
 		entity.setField2(23);
 
-		dao.update(entity);
+		int n = dao.update(entity);
+		assertEquals(1, n);
+		flight = dao.findById(1);
+		assertEquals(23, flight.getField2());
 	}
 	
 	@Test
