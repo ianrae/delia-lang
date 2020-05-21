@@ -20,6 +20,9 @@ public class LetParserTests extends ScopeTestBase {
 	@Test
 	public void testInt() {
 		try {
+			this.execTypeStatement("");//start session
+			baseBeginSession(true);
+			
 			DValue dval = (DValue) runLetStatement("unique", "int", "55");
 		} catch (DeliaException e) {
 			log(e.getMessage());
