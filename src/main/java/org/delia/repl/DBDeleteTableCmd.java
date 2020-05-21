@@ -35,7 +35,6 @@ public class DBDeleteTableCmd extends CmdBase {
 				log("can't find that table: " + tableName);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

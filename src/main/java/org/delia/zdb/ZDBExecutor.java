@@ -15,9 +15,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
 public interface ZDBExecutor extends AutoCloseable {
-//		public boolean disableSqlLogging; //for internal use only
-//		public Object connObject; //for internal use only
-//		ZAccessContext getContext();
 		ZDBConnection getDBConnection(); //for raw db access
 		Log getLog();
 

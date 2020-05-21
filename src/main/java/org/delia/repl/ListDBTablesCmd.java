@@ -1,7 +1,12 @@
 package org.delia.repl;
 
 import org.delia.api.Delia;
+import org.delia.db.DBType;
+import org.delia.db.h2.DBListingType;
+import org.delia.db.sql.prepared.RawStatementGenerator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.ResultValue;
+import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class ListDBTablesCmd extends CmdBase {
@@ -24,15 +29,15 @@ public class ListDBTablesCmd extends CmdBase {
 		Delia delia = runner.getDelia();
 		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
 		
-		//TODO fix
-//		if (dbInterface instanceof H2DBInterface) {
-//			H2DBInterface h2db = (H2DBInterface) dbInterface;
-//			h2db.enumerateAllTables(delia.getLog());
-//		}
-//		if (dbInterface instanceof PostgresDBInterface) {
-//			PostgresDBInterface pgdb = (PostgresDBInterface) dbInterface;
-//			pgdb.enumerateAllTables(delia.getLog());
-//		}
+		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType());
+		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
+		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			SqlStatement statement = new SqlStatement();
+			statement.sql = sql;
+			zexec.getDBConnection().execStatement(statement, null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		return createEmptyRes();
 	}
