@@ -1,0 +1,45 @@
+
+
+t2(cname,iname,ename,immutname) ::= <<
+  public class <cname> implements <iname>,<ename> {
+    private DValue dval;
+    private DStructHelper helper;
+    private Map\<String,Object> setMap = new HashMap\<>();
+
+    public <cname>(DValue dval) {
+      this.dval = dval;
+      this.helper = dval.asStruct();
+    }
+    public <cname>(<iname> immut) {
+      <immutname> x = (<immutname>) immut;
+      this.dval = x.dval;
+      this.helper = dval.asStruct();
+    }
+
+    @Override
+    public DValue internalDValue() {
+      return dval; //can be null, if disconnected entity
+    }
+    @Override
+    public Map\<String, Object> internalSetValueMap() {
+      return setMap;
+    }
+
+>>
+
+t3(ftype,fobjname,uname,fname,asname) ::= <<
+    @Override
+    public <ftype> get<uname>() {
+      String fieldName = "<fname>";
+      if (setMap.containsKey(fieldName)) {
+        return (<fobjname>)setMap.get(fieldName); //can return null
+      }
+      return helper.getField(fieldName).<asname>();
+    }
+    @Override
+    public void set<uname>(<ftype> val) {
+      setMap.put("<fname>", val);
+    }
+    
+>>
+

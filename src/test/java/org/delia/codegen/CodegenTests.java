@@ -3,18 +3,10 @@ package org.delia.codegen;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
 import org.delia.app.DaoTestBase;
 import org.delia.dao.DeliaDao;
-import org.delia.runner.ResultValue;
-import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,7 +14,7 @@ import org.junit.Test;
 public class CodegenTests extends DaoTestBase {
 
 	@Test
-	public void test2() {
+	public void test() {
 		String src = buildSrc();
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);
@@ -41,6 +33,38 @@ public class CodegenTests extends DaoTestBase {
 		log.log(java);
 	}
 
+	@Test
+	public void test2() {
+		String src = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+
+		String typeName = "Flight";
+		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
+		DStructType structType = (DStructType) registry.getType(typeName);
+		
+		EntityCodeGen gen = new EntityCodeGen(registry);
+		String java = gen.generate(structType);
+		log.log(java);
+	}
+
+	@Test
+	public void test4() {
+		String src = buildSrc();
+		DeliaDao dao = createDao(); 
+		boolean b = dao.initialize(src);
+		assertEquals(true, b);
+
+		String typeName = "Flight";
+		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
+		DStructType structType = (DStructType) registry.getType(typeName);
+		
+		SetterInterfaceCodeGen gen = new SetterInterfaceCodeGen(registry);
+		String java = gen.generate(structType);
+		log.log(java);
+	}
+	
 	//---
 
 	@Before

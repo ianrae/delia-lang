@@ -37,6 +37,9 @@ public class CodeGenBase {
 	protected String convertToJava(DStructType structType, String fieldName) {
 		boolean flag = !structType.fieldIsOptional(fieldName);
 		DType ftype = structType.getDeclaredFields().get(fieldName);
+		return convertToJava(structType, fieldName, ftype, flag);
+	}
+	protected String convertToJava(DStructType structType, String fieldName, DType ftype, boolean flag) {
 		switch(ftype.getShape()) {
 		case INTEGER:
 			return flag ? "int" : "Integer";
