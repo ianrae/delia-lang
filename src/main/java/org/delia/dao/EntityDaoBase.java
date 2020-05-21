@@ -7,8 +7,6 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.codegen.DeliaEntity;
 import org.delia.codegen.DeliaImmutable;
-import org.delia.codegen.sample.Wing;
-import org.delia.codegen.sample.WingEntity;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DetailedError;
