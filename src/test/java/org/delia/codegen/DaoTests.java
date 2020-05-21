@@ -34,7 +34,7 @@ import org.junit.Test;
 public class DaoTests extends DaoTestBase {
 	
 	public static class DaoRunnerInitializer implements RunnerInitializer {
-		private DValueIterator iter;
+		protected DValueIterator iter;
 		
 		public DaoRunnerInitializer(DValueIterator iter) {
 			this.iter = iter;
@@ -47,19 +47,18 @@ public class DaoTests extends DaoTestBase {
 	}
 	
 
-	public static class FlightDao extends ServiceBase {
+	public static abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBase {
+		protected DeliaSession session;
+		protected Delia delia;
+		protected DValueConverterService dvalConverter;
+		protected DTypeRegistry registry;
+		protected ScalarValueBuilder scalarBuilder;
+		protected String typeName;
+		protected DStructType structType;
 
-		private DeliaSession session;
-		private Delia delia;
-		private DValueConverterService dvalConverter;
-		private DTypeRegistry registry;
-		private ScalarValueBuilder scalarBuilder;
-		private String typeName;
-		private DStructType structType;
-
-		public FlightDao(DeliaSession session) {
+		public EntityDaoBase(DeliaSession session, String typeName) {
 			super(session.getDelia().getFactoryService());
-			this.typeName = "Flight";
+			this.typeName = typeName;
 			this.session = session;
 			this.delia = session.getDelia();
     		this.registry = session.getExecutionContext().registry;
@@ -69,22 +68,7 @@ public class DaoTests extends DaoTestBase {
 			this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 		}
 		
-		public Flight findById(int id) {
-			String src = String.format("Flight[%s]", id);
-			ResultValue res = doQuery(src);
-			return createImmut(res);
-		}
-		public List<Flight> findAll() {
-			String src = String.format("Flight[true]");
-			ResultValue res = doQuery(src);
-			return createImmutList(res);
-		}
-		
-		public void insert(Flight entity) {
-			String src = String.format("insert %s {}", typeName);
-			doInsertOrUpdate(entity, src);
-		}
-		protected ResultValue doInsertOrUpdate(Flight entity, String src) {
+		protected ResultValue doInsertOrUpdate(T entity, String src) {
 			List<DValue> inputL = new ArrayList<>();
 			inputL.add(createDValue(entity));
 			DValueIterator iter = new DValueIterator(inputL);	
@@ -95,7 +79,7 @@ public class DaoTests extends DaoTestBase {
 			return res;
 		}
 		
-	    public DValue createDValue(Flight obj) {
+	    protected DValue createDValue(T obj) {
 	    	if (obj instanceof DeliaEntity) {
 	    		DeliaEntity entity = (DeliaEntity) obj;
 	    		return this.buildFromEntity(entity, typeName);
@@ -104,7 +88,7 @@ public class DaoTests extends DaoTestBase {
 	    	}
 	    }
 
-	    public DValue buildFromEntity(DeliaEntity entity, String typeName) {
+	    protected DValue buildFromEntity(DeliaEntity entity, String typeName) {
 	    	if (entity.internalSetValueMap().isEmpty()) {
 	    		DeliaImmutable immut = (DeliaImmutable) entity;
 	    		return immut.internalDValue();
@@ -138,25 +122,24 @@ public class DaoTests extends DaoTestBase {
 	    	return finalVal;
 	    }
 		
-		public int update(Flight entity) {
+	    protected DValue getPrimaryKeyValue(DeliaImmutable immut) {
 			PrimaryKey pk = structType.getPrimaryKey();
-			DValue pkval = entity.internalDValue().asStruct().getField(pk.getFieldName());
-			String src = String.format("update %s[%s] {}", typeName, pkval.asString());
-			ResultValue res = this.doInsertOrUpdate(entity, src);
-			Integer updateCount = (Integer) res.val;
-			return updateCount;
-		}
-		
-		protected List<Flight> createImmutList(ResultValue res) {
-			List<Flight> list = new ArrayList<>();
+			DValue pkval = immut.internalDValue().asStruct().getField(pk.getFieldName());
+			return pkval;
+
+	    }
+		protected List<T> createImmutList(ResultValue res) {
+			List<T> list = new ArrayList<>();
 			for(DValue dval: res.getAsDValueList()) {
-				list.add(new FlightImmut(dval));
+				list.add(createImmutFromDVal(dval));
 			}
 			return list;
 		}
-		protected Flight createImmut(ResultValue res) {
+		protected abstract T createImmutFromDVal(DValue dval);
+		
+		protected T createImmut(ResultValue res) {
 			DValue dval = res.getAsDValue();
-			return new FlightImmut(dval);
+			return createImmutFromDVal(dval);
 		}
 		protected ResultValue doQuery(String src) {
 			log.log("src: %s", src);
@@ -167,12 +150,62 @@ public class DaoTests extends DaoTestBase {
 			return res;
 		}
 		
+		
+		protected T doFindById(int id) {
+			String src = String.format("%s[%s]", typeName, id);
+			ResultValue res = doQuery(src);
+			return createImmut(res);
+		}
+		protected List<T> doFindAll() {
+			String src = String.format("%s[true]", typeName);
+			ResultValue res = doQuery(src);
+			return createImmutList(res);
+		}
+		
+		protected void doInsert(T entity) {
+			String src = String.format("insert %s {}", typeName);
+			doInsertOrUpdate(entity, src);
+		}
+		
+		protected int doUpdate(T entity) {
+			DValue pkval = getPrimaryKeyValue(entity);
+			String src = String.format("update %s[%s] {}", typeName, pkval.asString());
+			ResultValue res = doInsertOrUpdate(entity, src);
+			Integer updateCount = (Integer) res.val;
+			return updateCount;
+		}
+		
 	}
 	
+	public static class FlightDao extends EntityDaoBase<Flight> {
+
+		public FlightDao(DeliaSession session) {
+			super(session, "Flight");
+		}
+		
+		public Flight findById(int id) {
+			return doFindById(id);
+		}
+		public List<Flight> findAll() {
+			return doFindAll();
+		}
+		
+		public void insert(Flight entity) {
+			doInsert(entity);
+		}
+		
+		public int update(Flight entity) {
+			return doUpdate(entity);
+		}
+
+		@Override
+		protected Flight createImmutFromDVal(DValue dval) {
+			return new FlightImmut(dval);
+		}
+	}
 	
 	@Test
 	public void test() {
-
 		FlightDao dao = new FlightDao(xdao.getMostRecentSession());
 		Flight flight = dao.findById(1);
 		assertEquals(1, flight.getField1());
@@ -209,11 +242,10 @@ public class DaoTests extends DaoTestBase {
 		dao.insert(entity);
 		List<Flight> list = dao.findAll();
 		assertEquals(3, list.size());
-		
 	}
 	
 	//---
-	private DeliaDao xdao;
+	protected DeliaDao xdao;
 
 	@Before
 	public void init() {
@@ -223,7 +255,7 @@ public class DaoTests extends DaoTestBase {
 		assertEquals(true, b);
 	}
 
-	private String buildSrc() {
+	protected String buildSrc() {
 		String src = "type Wing struct {id int primaryKey, width int } end";
 		src += "\n type Flight struct {field1 int primaryKey, field2 int, dd date optional, relation wing Wing one optional } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
