@@ -33,7 +33,6 @@ public class DateMakeFnRule extends DRuleBase {
 	}
 	@Override
 	public boolean dependsOn(String fieldName) {
-		// TODO fix this. what are we getting the length of?
 		return false;
 	}
 	@Override

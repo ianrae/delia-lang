@@ -6,7 +6,6 @@ public class Sleep {
         try {
 			Thread.sleep(msecs);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }

@@ -20,7 +20,7 @@ public class RuleRuleOperand implements RuleOperand {
 	}
 	@Override
 	public String asString(DValue dval) {
-		return null; //11!!dval.asStruct().getField(fieldName).asString();
+		return null; 
 	}
 	@Override
 	public String getSubject() {
@@ -28,11 +28,11 @@ public class RuleRuleOperand implements RuleOperand {
 	}
 	@Override
 	public Shape getShape(DValue dval) {
-		return null; //dval.asStruct().getField(fieldName).getType().getShape();
+		return null; 
 	}
 	@Override
 	public Integer asInt(DValue dval) {
-		return null; //dval.asStruct().getField(fieldName).asInt();
+		return null; 
 	}
 	
 	public Object exec(DValue dval, DRuleContext ctx) {
@@ -67,7 +67,6 @@ public class RuleRuleOperand implements RuleOperand {
 	}
 	@Override
 	public DRelation asRelation(DValue dval) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	public String getFieldName() {

@@ -10,7 +10,6 @@ import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.DsonExp;
-import org.delia.compiler.ast.EndSourceStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
@@ -211,8 +210,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				executeDeleteStatement((DeleteStatementExp)exp, res);
 			} else if (exp instanceof UserFunctionDefStatementExp) {
 				executeUserFuncDefStatement((UserFunctionDefStatementExp)exp, res);
-			} else if (exp instanceof EndSourceStatementExp) {
-				executeEndSource((EndSourceStatementExp)exp, res); //TODO: what is this??
 			} else if (exp instanceof ConfigureStatementExp) {
 				executeConfigureStatement((ConfigureStatementExp)exp, res);
 			} else if (exp instanceof InputFunctionDefStatementExp) {
@@ -230,17 +227,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			} catch (DeliaException e) {
 				res.ok = false;
 				res.errors.add(e.getLastError());
-			}
-		}
-		private void executeEndSource(EndSourceStatementExp exp, ResultValue res) {
-			ValidationRuleRunner ruleRunner = createValidationRunner(); 
-			//TODO: hmm. need to validate insert/update dvals!!
-			if (! ruleRunner.validateEndSource()) {
-				ruleRunner.propogateErrors(res);
-			}
-			
-			if (!res.errors.isEmpty()) {
-				res.ok = false;
 			}
 		}
 		private ValidationRuleRunner createValidationRunner() {

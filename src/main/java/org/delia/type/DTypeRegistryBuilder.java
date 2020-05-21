@@ -40,10 +40,4 @@ public class DTypeRegistryBuilder {
 	public DTypeRegistry getRegistry() {
 		return registry;
 	}
-	
-//	public void addFakeTypes() {
-//		//TODO: remove this later
-//		FakeTypeCreator creator = new FakeTypeCreator();
-//		creator.createFakeTypes(registry);
-//	}
 }
