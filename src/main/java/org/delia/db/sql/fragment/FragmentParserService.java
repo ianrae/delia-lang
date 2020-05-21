@@ -49,8 +49,6 @@ public class FragmentParserService extends ServiceBase {
 		
 		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
 		
-		//TODO: this is bad. fix! should not be using dbexecutor
-//		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
 		this.existSvc = (dbInterface == null) ? null : new ZTableExistenceService(dbInterface);
 	}
 

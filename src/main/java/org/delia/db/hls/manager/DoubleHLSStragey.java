@@ -67,24 +67,24 @@ public class DoubleHLSStragey implements HLSStragey {
 		//we just need to fill in fetched items
 		//merge results from qresp into qresp2 (add Customer to Address.cust)
 		//			String field1 = hlspan1.rEl.rfieldPair.name; //.addr
-		Map<DValue,List<DValue>> todoMap = new HashMap<>();
+		Map<DValue,List<DValue>> pendingMap = new HashMap<>();
 		for(DValue dval: qresp.dvalList) {  //for each customer
 			//dval is a customer. find address in qresp2 whose .cust is pk of dval
 			DValue inner = findIn(dval, qresp2, field2); //inner is address
 			if (inner != null) {
-				List<DValue> fklist = todoMap.get(inner);
+				List<DValue> fklist = pendingMap.get(inner);
 				if (fklist == null) {
 					fklist = new ArrayList<>();
 				}
 				fklist.add(dval);
-				todoMap.put(inner, fklist); 
+				pendingMap.put(inner, fklist); 
 			}
 		}
 
-		for(DValue inner: todoMap.keySet()) {
+		for(DValue inner: pendingMap.keySet()) {
 			DValue innerInner = inner.asStruct().getField(field2); //cust
 			DRelation drel = innerInner.asRelation();
-			List<DValue> fklist = todoMap.get(inner);
+			List<DValue> fklist = pendingMap.get(inner);
 			DRelationHelper.addToFetchedItems(drel, fklist);
 		}
 

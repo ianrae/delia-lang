@@ -52,7 +52,6 @@ public class InsertStatementFragment extends StatementFragmentBase {
 		
 		@Override
 		public int getNumSqlParams() {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 		

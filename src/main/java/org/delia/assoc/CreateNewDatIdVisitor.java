@@ -84,8 +84,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		//DAT tables are named dat1,dat2, etc
 		//we need to determine how many datIds there are so we
 		//can generate new names. i.e. if there are 3 then we should
-		//generate dat4,dat5,...
-		//TODO: we could instead calc highest-datid during first visitor
+		//be generating dat4,dat5,...
 		
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());

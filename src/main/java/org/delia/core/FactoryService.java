@@ -31,7 +31,4 @@ public interface FactoryService {
 	SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
-	
-//	ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType); //TODO remove later!!
-//	ZDBInterfaceFactory getHackZdbFactory();
 }
