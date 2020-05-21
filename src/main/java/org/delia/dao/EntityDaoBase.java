@@ -60,7 +60,9 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		session.setRunnerIntiliazer(null);
 		if (extraInfo != null) {
 			ResultValue res2 = session.getExecutionContext().varMap.get(RunnerImpl.VAR_SERIAL);
-			extraInfo.generatedSerialValue = res2.ok ? res2.getAsDValue() : null;
+			if (res2 != null) {
+				extraInfo.generatedSerialValue = res2.ok ? res2.getAsDValue() : null;
+			}
 		}
 		return res;
 	}

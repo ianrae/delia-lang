@@ -65,8 +65,9 @@ public class EntitySourceCodeGenerator extends ServiceBase {
 	}
 
 	private void writeFile(String targetDir, String filename, String java) {
-		TextFileWriter w = new TextFileWriter();
 		String path = String.format("%s/%s", targetDir, filename); //TODO fix / and \
+		this.log.log("writing %s", path);
+		TextFileWriter w = new TextFileWriter();
 		w.writeFile(path, Collections.singletonList(java));
 	}
 }
