@@ -16,7 +16,9 @@ public class ManyToManyEnumerator {
 			for(DRule rule: structType.getRawRules()) {
 				if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
-					visitor.visit(structType, rr);
+					if (rr.relInfo.isManyToMany()) {
+						visitor.visit(structType, rr);
+					}
 				}
 			}
 		}

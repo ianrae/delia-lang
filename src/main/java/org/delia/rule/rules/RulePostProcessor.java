@@ -46,6 +46,7 @@ public class RulePostProcessor extends ServiceBase {
 		step3HookupUnNamedRelations(structsL, allErrors);
 		step2HookupNamedOtherSide(structsL, allErrors);
 		setParentFlagsIfNeeded(registry);
+		dumpRelations(registry);
 		
 		//fix any possible unresolved. now that we are hooked up we can set cardinality
 		for(RelationManyRule rr: unresolvedManyL) {
@@ -471,7 +472,50 @@ public class RulePostProcessor extends ServiceBase {
 			}
 		}
 	}
+	private void dumpRelations(DTypeRegistry registry) {
+		log.log("--- relations ---");
+		for(String typeName: registry.getAll()) {
+			DType dtype = registry.getType(typeName);
+			if (! dtype.isStructShape()) {
+				continue;
+			}
+			DStructType structType = (DStructType) dtype;
+			
+			for(DRule rule: structType.getRawRules()) {
+				if (rule instanceof RelationOneRule) {
+					RelationOneRule rr = (RelationOneRule) rule;
+					RelationInfo info = rr.relInfo;
+					String card = info.cardinality.name();
+					String otherField = info.otherSide == null ? "" : info.otherSide.fieldName;
+					String arrow = calcArrow(info);
+					String src = String.format("relation %s.%s", info.nearType.getName(), info.fieldName);
+					log.log("%30s %10s %s.%s (%s)", src, arrow, info.farType.getName(), otherField, card);
+				} else if (rule instanceof RelationManyRule) {
+					RelationManyRule rr = (RelationManyRule) rule;
+					RelationInfo info = rr.relInfo;
+					String card = info.cardinality.name();
+					String otherField = info.otherSide == null ? "" : info.otherSide.fieldName;
+					String arrow = calcArrow(info);
+					String src = String.format("relation %s.%s", info.nearType.getName(), info.fieldName);
+					log.log("%30s %10s %s.%s (%s)", src, arrow, info.farType.getName(), otherField, card);
+				}
+			}
+		}
+		log.log("");
+	}
 	
+	private String calcArrow(RelationInfo info) {
+		if (info.isManyToMany()) {
+			return String.format(" many <-> many ");
+		} else if (info.isOneToOne()) {
+			return String.format("  one <-> one  ");
+		} else if (info.isParent) {
+			return String.format(" many <-> one  ");
+		} else {
+			return String.format("  one <-> many ");
+		}
+	}
+
 	private boolean isOtherSideOne(RelationInfo info) {
 		return DRuleHelper.xfindOtherSideOne(info) != null;
 	}
