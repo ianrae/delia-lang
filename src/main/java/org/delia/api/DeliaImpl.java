@@ -150,6 +150,7 @@ public class DeliaImpl implements Delia {
 		session.res = res;
 		session.expL = expL;
 		session.datIdMap = extraInfo.datIdMap;
+		session.mostRecentRunner = mainRunner;
 		return session;
 	}
 
