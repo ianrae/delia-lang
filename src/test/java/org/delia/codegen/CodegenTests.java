@@ -31,6 +31,7 @@ public class CodegenTests extends DaoTestBase {
 		String typeName = "Flight";
 		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
 		DStructType structType = (DStructType) registry.getType(typeName);
+		
 		GetterInterfaceCodeGen gen = new GetterInterfaceCodeGen(registry);
 		String java = gen.generate(structType);
 		log.log(java);

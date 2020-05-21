@@ -1,20 +1,25 @@
 
 
-t2(cname,iname) ::= <%
+t2(cname,iname) ::= <<
 public static class <cname> implements <iname> {
-	private DValue dval;
-	private DStructHelper helper;
+  private DValue dval;
+  private DStructHelper helper;
 
-	public <cname>(DValue dval) {
-		this.dval = dval;
-		this.helper = dval.asStruct();
-	}
-	@Override
-	public DValue internalDValue() {
-		return dval;
-	}
-}
-%>
+  public <cname>(DValue dval) {
+    this.dval = dval;
+    this.helper = dval.asStruct();
+  }
+  @Override
+  public DValue internalDValue() {
+    return dval;
+  }
 
+>>
 
+t3(ftype,uname,fname,asname) ::= <<
+  @Override
+  public <ftype> get<uname>() {
+    return helper.getField("<fname>").<asname>();
+  }
+>>
 

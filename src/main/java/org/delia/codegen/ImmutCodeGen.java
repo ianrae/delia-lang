@@ -5,6 +5,9 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.StringUtil;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 
 public class ImmutCodeGen extends CodeGenBase {
 
@@ -14,36 +17,31 @@ public class ImmutCodeGen extends CodeGenBase {
 
 	public String generate(DStructType structType) {
 		String typeName = structType.getName();
-
+		
+		STGroup g = new STGroupFile("templates/immut.stg");
+		ST st = g.getInstanceOf("t2");
+		st.add("cname", typeName + "Immut");
+		st.add("iname", typeName);
+		
 		StrCreator sc = new StrCreator();
-		sc.o("public class %sImmut implements %s {", typeName, typeName);
+		sc.o(st.render());
 		sc.nl();
-		line(sc, "  private DValue dval;");
-		line(sc, "  private DStructHelper helper;");
-		sc.nl();
-
-		sc.o("  %sImmut(DValue dval) {", typeName);
-		sc.nl();
-		line(sc, "  this.dval = dval;");
-		line(sc, "	this.helper = dval.asStruct();");
-
-		line(sc, "@Override");
-		line(sc, "public DValue internalDValue() {");
-		line(sc, "  return dval;");
-		line(sc, "}");
-
+		
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
 			String javaType = convertToJava(ftype);
 			String asFn = convertToAsFn(ftype);
+			
+			//t3(ftype,uname,fname,asname) ::= <<
+			st = g.getInstanceOf("t3");
+			st.add("ftype", javaType);
+			st.add("uname", StringUtil.uppify(fieldName));
+			st.add("fname", fieldName);
+			st.add("asname", asFn);
+			sc.o(st.render());
+			
 			sc.nl();
-			line(sc, "@Override");
-			sc.o("public %s get%s() {", javaType, StringUtil.uppify(fieldName));
-			sc.nl();
-			sc.o(" return helper.getField(\"%s\").%s();", fieldName, asFn);
-			sc.nl();
-			line(sc, "}");
 
 		}
 		sc.o("}");
