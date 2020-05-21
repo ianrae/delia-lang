@@ -37,7 +37,7 @@ public class EntityCodeGen extends CodeGenBase {
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
-			String javaType = convertToJava(ftype);
+			String javaType = convertToJava(structType, fieldName);
 			String javaObjType = convertToJava(structType, fieldName, ftype, false);
 			String asFn = convertToAsFn(ftype);
 

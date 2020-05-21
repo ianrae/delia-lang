@@ -2,10 +2,10 @@ package org.delia.codegen.sample;
 import java.util.Date;
 import org.delia.codegen.sample.Wing;
 
-import java.util.HashMap;
-import java.util.Map;
+
 import org.delia.type.DStructHelper;
-import org.delia.type.DValue;public static class FlightImmut implements Flight {
+import org.delia.type.DValue;
+public class FlightImmut implements Flight {
   private DValue dval;
   private DStructHelper helper;
 
@@ -23,17 +23,17 @@ import org.delia.type.DValue;public static class FlightImmut implements Flight {
     return helper.getField("dd").asDate();
   }
   @Override
-  public Integer getField1() {
+  public int getField1() {
     return helper.getField("field1").asInt();
   }
   @Override
   public Wing getWing() {
     DValue inner = helper.getField("wing");
-    Wing inner = new WingImmut(inner);
-    return inner;
+    Wing immut = new WingImmut(inner);
+    return immut;
   }
   @Override
-  public Integer getField2() {
+  public int getField2() {
     return helper.getField("field2").asInt();
   }
 }

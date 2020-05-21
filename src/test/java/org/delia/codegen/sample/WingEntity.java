@@ -1,9 +1,11 @@
 package org.delia.codegen.sample;
 
+
 import java.util.HashMap;
 import java.util.Map;
 import org.delia.type.DStructHelper;
-import org.delia.type.DValue;  public class WingEntity implements Wing,WingSetter {
+import org.delia.type.DValue;
+  public class WingEntity implements Wing,WingSetter {
     private DValue dval;
     private DStructHelper helper;
     private Map<String,Object> setMap = new HashMap<>();
@@ -14,7 +16,7 @@ import org.delia.type.DValue;  public class WingEntity implements Wing,WingSette
     }
     public WingEntity(Wing immut) {
       WingImmut x = (WingImmut) immut;
-      this.dval = x.dval;
+      this.dval = x.internalDValue();
       this.helper = dval.asStruct();
     }
 
@@ -28,7 +30,7 @@ import org.delia.type.DValue;  public class WingEntity implements Wing,WingSette
     }
 
     @Override
-    public Integer getWidth() {
+    public int getWidth() {
       String fieldName = "width";
       if (setMap.containsKey(fieldName)) {
         return (Integer)setMap.get(fieldName); //can return null
@@ -36,12 +38,12 @@ import org.delia.type.DValue;  public class WingEntity implements Wing,WingSette
       return helper.getField(fieldName).asInt();
     }
     @Override
-    public void setWidth(Integer val) {
+    public void setWidth(int val) {
       setMap.put("width", val);
     }
     
     @Override
-    public Integer getId() {
+    public int getId() {
       String fieldName = "id";
       if (setMap.containsKey(fieldName)) {
         return (Integer)setMap.get(fieldName); //can return null
@@ -49,7 +51,7 @@ import org.delia.type.DValue;  public class WingEntity implements Wing,WingSette
       return helper.getField(fieldName).asInt();
     }
     @Override
-    public void setId(Integer val) {
+    public void setId(int val) {
       setMap.put("id", val);
     }
     

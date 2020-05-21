@@ -1,8 +1,9 @@
 package org.delia.codegen.sample;
 import java.util.Date;
+import org.delia.codegen.sample.Wing;
+
 
 import org.delia.codegen.DeliaEntity;
-import org.delia.codegen.sample.Wing;
 
 public interface FlightSetter extends DeliaEntity {
   void setDd(Date val);

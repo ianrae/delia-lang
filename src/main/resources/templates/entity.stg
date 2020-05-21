@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.delia.type.DStructHelper;
 import org.delia.type.DValue;
-import org.delia.codegen.DeliaImmutable;
 
 >>
 
@@ -62,8 +61,8 @@ t4(ftype,fobjname,uname,fname) ::= <<
       }
       
       DValue inner = helper.getField("<fname>");
-      <ftype> inner = new <ftype>Immut(inner);
-      return inner;
+      <ftype> immut = new <ftype>Immut(inner);
+      return immut;
     }
     @Override
     public void set<uname>(<ftype> val) {

@@ -2,10 +2,12 @@ package org.delia.codegen.sample;
 import java.util.Date;
 import org.delia.codegen.sample.Wing;
 
+
 import java.util.HashMap;
 import java.util.Map;
 import org.delia.type.DStructHelper;
-import org.delia.type.DValue;  public class FlightEntity implements Flight,FlightSetter {
+import org.delia.type.DValue;
+  public class FlightEntity implements Flight,FlightSetter {
     private DValue dval;
     private DStructHelper helper;
     private Map<String,Object> setMap = new HashMap<>();
@@ -43,7 +45,7 @@ import org.delia.type.DValue;  public class FlightEntity implements Flight,Fligh
     }
     
     @Override
-    public Integer getField1() {
+    public int getField1() {
       String fieldName = "field1";
       if (setMap.containsKey(fieldName)) {
         return (Integer)setMap.get(fieldName); //can return null
@@ -51,7 +53,7 @@ import org.delia.type.DValue;  public class FlightEntity implements Flight,Fligh
       return helper.getField(fieldName).asInt();
     }
     @Override
-    public void setField1(Integer val) {
+    public void setField1(int val) {
       setMap.put("field1", val);
     }
     
@@ -63,8 +65,8 @@ import org.delia.type.DValue;  public class FlightEntity implements Flight,Fligh
       }
 
       DValue inner = helper.getField("wing");
-      Wing inner = new WingImmut(inner);
-      return inner;
+      Wing immut = new WingImmut(inner);
+      return immut;
     }
     @Override
     public void setWing(Wing val) {
@@ -72,7 +74,7 @@ import org.delia.type.DValue;  public class FlightEntity implements Flight,Fligh
     }
     
     @Override
-    public Integer getField2() {
+    public int getField2() {
       String fieldName = "field2";
       if (setMap.containsKey(fieldName)) {
         return (Integer)setMap.get(fieldName); //can return null
@@ -80,7 +82,7 @@ import org.delia.type.DValue;  public class FlightEntity implements Flight,Fligh
       return helper.getField(fieldName).asInt();
     }
     @Override
-    public void setField2(Integer val) {
+    public void setField2(int val) {
       setMap.put("field2", val);
     }
     

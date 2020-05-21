@@ -1,9 +1,9 @@
 package org.delia.codegen.sample;
 
-import java.util.HashMap;
-import java.util.Map;
+
 import org.delia.type.DStructHelper;
-import org.delia.type.DValue;public static class WingImmut implements Wing {
+import org.delia.type.DValue;
+public class WingImmut implements Wing {
   private DValue dval;
   private DStructHelper helper;
 
@@ -17,11 +17,11 @@ import org.delia.type.DValue;public static class WingImmut implements Wing {
   }
 
   @Override
-  public Integer getWidth() {
+  public int getWidth() {
     return helper.getField("width").asInt();
   }
   @Override
-  public Integer getId() {
+  public int getId() {
     return helper.getField("id").asInt();
   }
 }

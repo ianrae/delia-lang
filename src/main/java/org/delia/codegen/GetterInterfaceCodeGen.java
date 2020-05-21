@@ -18,7 +18,10 @@ public class GetterInterfaceCodeGen extends CodeGenBase {
 
 		StrCreator sc = new StrCreator();
 		addImports(sc, structType);
-		
+		sc.o("import org.delia.codegen.DeliaImmutable;");
+		sc.nl();
+		sc.nl();
+
 		sc.o("public interface %s extends DeliaImmutable {", typeName);
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {

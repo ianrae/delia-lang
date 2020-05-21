@@ -35,7 +35,7 @@ public class ImmutCodeGen extends CodeGenBase {
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
-			String javaType = convertToJava(ftype);
+			String javaType = convertToJava(structType, fieldName);
 			String asFn = convertToAsFn(ftype);
 			
 			if (ftype.isStructShape()) {
