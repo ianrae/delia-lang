@@ -6,6 +6,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
+import org.delia.runner.Runner;
 
 public class DeliaSessionImpl implements DeliaSession {
 	public boolean ok;
@@ -19,6 +20,7 @@ public class DeliaSessionImpl implements DeliaSession {
 	private RunnerInitializer runnerInitializer;
 	private Delia delia;
 	public DatIdMap datIdMap;
+	public Runner mostRecentRunner;
 						
 	
 	public DeliaSessionImpl(Delia delia) {
@@ -58,6 +60,11 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
+	}
+
+	@Override
+	public Runner getMostRecentRunner() {
+		return mostRecentRunner;
 	}
 	
 }

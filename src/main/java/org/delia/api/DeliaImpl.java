@@ -39,7 +39,7 @@ public class DeliaImpl implements Delia {
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
-	private Runner mostRecentRunner;
+//	private Runner mostRecentRunner;
 
 	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
@@ -114,8 +114,6 @@ public class DeliaImpl implements Delia {
 			runner.setHLSManager(mgr);
 		}
 		
-		//dbInterface.init(factorySvc);
-		mostRecentRunner = runner;
 		return runner;
 	}
 
@@ -140,6 +138,7 @@ public class DeliaImpl implements Delia {
 			session.res = migrationPlanRes;
 			session.expL = expL;
 			session.datIdMap = extraInfo.datIdMap;
+			session.mostRecentRunner = mainRunner;
 			return session;
 		}
 
@@ -326,6 +325,7 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public ResultValue continueExecution(String src, DeliaSession session) {
+		Runner mostRecentRunner = session.getMostRecentRunner();
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
 		if (execCtx != null) {
 			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
@@ -348,11 +348,13 @@ public class DeliaImpl implements Delia {
 		if (session instanceof DeliaSessionImpl) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 			sessimpl.mostRecentContinueExpL = expL;
+			sessimpl.mostRecentRunner = runner;
 		}
 		return res;
 	}
 	
 	public List<Exp>  continueCompile(String src, DeliaSession session) {
+		Runner mostRecentRunner = session.getMostRecentRunner();
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
 		if (execCtx != null) {
 			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
@@ -394,9 +396,5 @@ public class DeliaImpl implements Delia {
 	//for internal use only - unit tests
 	public void setDbInterface(ZDBInterfaceFactory dbInterface) {
 		this.dbInterface = dbInterface;
-	}
-
-	public Runner getMostRecentRunner() {
-		return mostRecentRunner;
 	}
 }

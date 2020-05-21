@@ -79,28 +79,23 @@ public class NewLegacyRunner {
 		}
 	}
 	public InternalCompileState getCompileState() {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.getCompileState();
 	}
 	public DeliaGeneratePhase createGenerator() {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.createGenerator();
 	}
 	public Runner getDeliaRunner() {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner;
 	}
 	public boolean exists(String varName) {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.exists(varName);
 	}
 	public ResultValue getVar(String varName) {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.getVar(varName);
 	}
 

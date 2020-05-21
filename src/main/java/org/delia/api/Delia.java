@@ -19,13 +19,13 @@ import org.delia.zdb.ZDBInterfaceFactory;
  *
  */
 public interface Delia {
-		ResultValue execute(String src);
-		DeliaSession beginSession(String src);
-		ResultValue continueExecution(String src, DeliaSession dbsess);
-		DeliaSession executeMigrationPlan(String src, MigrationPlan plan);
-		Log getLog();
-		FactoryService getFactoryService();
-		DeliaCompiler createCompiler();
-		DeliaOptions getOptions();
-		ZDBInterfaceFactory getDBInterface();
-	}
+	ResultValue execute(String src);
+	DeliaSession beginSession(String src);
+	ResultValue continueExecution(String src, DeliaSession dbsess);
+	DeliaSession executeMigrationPlan(String src, MigrationPlan plan);
+	Log getLog();
+	FactoryService getFactoryService();
+	DeliaCompiler createCompiler();
+	DeliaOptions getOptions();
+	ZDBInterfaceFactory getDBInterface();
+}
