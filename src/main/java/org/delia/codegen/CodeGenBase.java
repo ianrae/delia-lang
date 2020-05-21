@@ -93,6 +93,31 @@ public class CodeGenBase {
 			return null;
 		}
 	}
+	protected String getNullValueFor(DStructType structType, String fieldName) {
+		boolean flag = !structType.fieldIsOptional(fieldName);
+		DType ftype = structType.getDeclaredFields().get(fieldName);
+		switch(ftype.getShape()) {
+		case INTEGER:
+			return flag ? "0" : "null";
+		case LONG:
+			return flag ? "0": "null";
+		case NUMBER:
+			return flag ? "0.0" : "null";
+		case BOOLEAN:
+			return flag ? "false" : "null";
+		case STRING:
+			return "null";
+		case DATE:
+			return "null";
+		case STRUCT:
+		{
+			return "null";
+		}
+		default:
+			return null;
+		}
+	}
+
 
 	protected List<String> getImportList(DStructType structType) {
 		List<String> list = new ArrayList<>();

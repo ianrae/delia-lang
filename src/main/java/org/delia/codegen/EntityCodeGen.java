@@ -40,6 +40,7 @@ public class EntityCodeGen extends CodeGenBase {
 			String javaType = convertToJava(structType, fieldName);
 			String javaObjType = convertToJava(structType, fieldName, ftype, false);
 			String asFn = convertToAsFn(ftype);
+			String nullValue = getNullValueFor(structType, fieldName);
 
 			if (ftype.isStructShape()) {
 				//t4(ftype,fobjname,uname,fname) ::= <<
@@ -48,6 +49,7 @@ public class EntityCodeGen extends CodeGenBase {
 				st.add("fobjname", javaObjType);
 				st.add("uname", StringUtil.uppify(fieldName));
 				st.add("fname", fieldName);
+				st.add("nullval", "null");
 				sc.o(st.render());
 			} else {
 				//t3(ftype,fobjname,uname,fname,asname) ::= <<
@@ -57,6 +59,7 @@ public class EntityCodeGen extends CodeGenBase {
 				st.add("uname", StringUtil.uppify(fieldName));
 				st.add("fname", fieldName);
 				st.add("asname", asFn);
+				st.add("nullval", nullValue);
 				sc.o(st.render());
 			}
 

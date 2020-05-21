@@ -112,8 +112,13 @@ public class DaoTests extends DaoTestBase {
 	    			}
 	    		} else {
 		    		DeliaImmutable immut = (DeliaImmutable) entity;
-	    			DValue dval = immut.internalDValue().asMap().get(fieldName); //may get null
-	    			builder.addField(fieldName, dval);
+	    			DValue internalDval = immut.internalDValue(); //can be null if disconnected
+	    			if (internalDval == null) {
+	    				builder.addField(fieldName, null);
+	    			} else {
+	    				DValue dval = immut.internalDValue().asMap().get(fieldName); //may get null
+	    				builder.addField(fieldName, dval);
+	    			}
 	    		}
 	    	}
 
@@ -248,6 +253,22 @@ public class DaoTests extends DaoTestBase {
 		List<Flight> list = dao.findAll();
 		assertEquals(3, list.size());
 	}
+	
+	@Test
+	public void test3Disconnected() {
+		FlightDao dao = new FlightDao(xdao.getMostRecentSession());
+		
+		FlightEntity entity = new FlightEntity();
+		entity.setField1(3);
+		entity.setField2(23);
+
+		dao.insert(entity);
+		List<Flight> list = dao.findAll();
+		assertEquals(3, list.size());
+		Flight flight = dao.findById(3);
+		assertEquals(23, flight.getField2());
+	}
+	
 	
 	//---
 	protected DeliaDao xdao;

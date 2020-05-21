@@ -12,6 +12,10 @@ import org.delia.type.DValue;
     private DStructHelper helper;
     private Map<String,Object> setMap = new HashMap<>();
 
+    public FlightEntity() {
+    	//you must call setter before you can call getter.
+    	//this ctor only used when creating new entity
+    }
     public FlightEntity(DValue dval) {
       this.dval = dval;
       this.helper = dval.asStruct();
