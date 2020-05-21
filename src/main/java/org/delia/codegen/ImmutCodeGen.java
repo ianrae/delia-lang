@@ -17,13 +17,14 @@ public class ImmutCodeGen extends CodeGenBase {
 
 	public String generate(DStructType structType) {
 		String typeName = structType.getName();
+		StrCreator sc = new StrCreator();
+		addImports(sc, structType);
 		
 		STGroup g = new STGroupFile("templates/immut.stg");
 		ST st = g.getInstanceOf("t2");
 		st.add("cname", typeName + "Immut");
 		st.add("iname", typeName);
 		
-		StrCreator sc = new StrCreator();
 		sc.o(st.render());
 		sc.nl();
 		

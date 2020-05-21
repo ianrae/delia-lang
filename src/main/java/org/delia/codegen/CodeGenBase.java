@@ -1,8 +1,15 @@
 package org.delia.codegen;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.Shape;
 
 //====
 public class CodeGenBase {
@@ -83,6 +90,31 @@ public class CodeGenBase {
 		default:
 			return null;
 		}
+	}
+
+	protected List<String> getImportList(DStructType structType) {
+		List<String> list = new ArrayList<>();
+		Map<String,String> alreadyMap = new HashMap<>();
+		for(String fieldName: structType.getDeclaredFields().keySet()) {
+ 			DType ftype = structType.getDeclaredFields().get(fieldName);
+			if (ftype.isShape(Shape.DATE)) {
+				if (alreadyMap.containsKey("Date")) {
+					continue;
+				}
+				String s = String.format("import java.util.Date;");
+				list.add(s);
+				alreadyMap.put("Date", "");
+			}
+		}
+		return list;
+	}
+
+	protected void addImports(StrCreator sc, DStructType structType) {
+		for(String s: getImportList(structType)) {
+			sc.o(s);
+			sc.nl();
+		}
+		sc.nl();
 	}
 
 

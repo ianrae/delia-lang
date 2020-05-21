@@ -15,14 +15,8 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 	public String generate(DStructType structType) {
 		String typeName = structType.getName();
 
-//		public interface FlightSetter extends DeliaEntity {
-//			void setField1(int val);
-//			void setField2(Integer val);
-//		}
-		
-		
-		
 		StrCreator sc = new StrCreator();
+		addImports(sc, structType);
 		sc.o("public interface %s extends DeliaEntity {", typeName + "Setter");
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {

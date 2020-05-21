@@ -17,6 +17,8 @@ public class EntityCodeGen extends CodeGenBase {
 
 	public String generate(DStructType structType) {
 		String typeName = structType.getName();
+		StrCreator sc = new StrCreator();
+		addImports(sc, structType);
 		
 		STGroup g = new STGroupFile("templates/entity.stg");
 		//t2(cname,iname,ename,immutname) ::= <<
@@ -27,7 +29,6 @@ public class EntityCodeGen extends CodeGenBase {
 		st.add("ename", typeName + "Setter");
 		st.add("immutname", typeName + "Immut");
 		
-		StrCreator sc = new StrCreator();
 		sc.o(st.render());
 		sc.nl();
 		

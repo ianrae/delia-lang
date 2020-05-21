@@ -72,7 +72,7 @@ public class CodegenTests extends DaoTestBase {
 	}
 
 	private String buildSrc() {
-		String src = "type Flight struct {field1 int unique, field2 int } end";
+		String src = "type Flight struct {field1 int unique, field2 int, dd date optional } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
