@@ -19,7 +19,7 @@ public class EntityCodeGen extends CodeGenBase {
 		String typeName = structType.getName();
 		StrCreator sc = new StrCreator();
 		addImports(sc, structType);
-		
+
 		STGroup g = new STGroupFile("templates/entity.stg");
 		//t2(cname,iname,ename,immutname) ::= <<
 
@@ -28,26 +28,36 @@ public class EntityCodeGen extends CodeGenBase {
 		st.add("iname", typeName);
 		st.add("ename", typeName + "Setter");
 		st.add("immutname", typeName + "Immut");
-		
+
 		sc.o(st.render());
 		sc.nl();
-		
+
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
 			String javaType = convertToJava(ftype);
 			String javaObjType = convertToJava(structType, fieldName, ftype, false);
 			String asFn = convertToAsFn(ftype);
-			
-//			t3(ftype,fobjname,uname,fname,asname) ::= <<
-			st = g.getInstanceOf("t3");
-			st.add("ftype", javaType);
-			st.add("fobjname", javaObjType);
-			st.add("uname", StringUtil.uppify(fieldName));
-			st.add("fname", fieldName);
-			st.add("asname", asFn);
-			sc.o(st.render());
-			
+
+			if (ftype.isStructShape()) {
+				//t4(ftype,fobjname,uname,fname) ::= <<
+				st = g.getInstanceOf("t4");
+				st.add("ftype", javaType);
+				st.add("fobjname", javaObjType);
+				st.add("uname", StringUtil.uppify(fieldName));
+				st.add("fname", fieldName);
+				sc.o(st.render());
+			} else {
+				//t3(ftype,fobjname,uname,fname,asname) ::= <<
+				st = g.getInstanceOf("t3");
+				st.add("ftype", javaType);
+				st.add("fobjname", javaObjType);
+				st.add("uname", StringUtil.uppify(fieldName));
+				st.add("fname", fieldName);
+				st.add("asname", asFn);
+				sc.o(st.render());
+			}
+
 			sc.nl();
 
 		}

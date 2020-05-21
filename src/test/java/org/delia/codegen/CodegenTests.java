@@ -52,7 +52,7 @@ public class CodegenTests extends DaoTestBase {
 	}
 
 	@Test
-	public void test4() {
+	public void test3() {
 		String src = buildSrc();
 		DeliaDao dao = createDao(); 
 		boolean b = dao.initialize(src);

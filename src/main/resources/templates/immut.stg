@@ -23,3 +23,11 @@ t3(ftype,uname,fname,asname) ::= <<
   }
 >>
 
+t4(ftype,uname,fname) ::= <<
+  @Override
+  public <ftype> get<uname>() {
+    DValue inner = helper.getField("<fname>");
+    <ftype> inner = new <ftype>Immut(inner);
+    return inner;
+  }
+>>

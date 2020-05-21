@@ -43,3 +43,22 @@ t3(ftype,fobjname,uname,fname,asname) ::= <<
     
 >>
 
+t4(ftype,fobjname,uname,fname) ::= <<
+    @Override
+    public <ftype> get<uname>() {
+      String fieldName = "<fname>";
+      if (setMap.containsKey(fieldName)) {
+        return (<fobjname>)setMap.get(fieldName); //can return null
+      }
+      
+      DValue inner = helper.getField("<fname>");
+      <ftype> inner = new <ftype>Immut(inner);
+      return inner;
+    }
+    @Override
+    public void set<uname>(<ftype> val) {
+      setMap.put("<fname>", val);
+    }
+    
+>>
+

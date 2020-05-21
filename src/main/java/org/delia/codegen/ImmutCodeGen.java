@@ -34,13 +34,22 @@ public class ImmutCodeGen extends CodeGenBase {
 			String javaType = convertToJava(ftype);
 			String asFn = convertToAsFn(ftype);
 			
-			//t3(ftype,uname,fname,asname) ::= <<
-			st = g.getInstanceOf("t3");
-			st.add("ftype", javaType);
-			st.add("uname", StringUtil.uppify(fieldName));
-			st.add("fname", fieldName);
-			st.add("asname", asFn);
-			sc.o(st.render());
+			if (ftype.isStructShape()) {
+				//t4(ftype,uname,fname) ::= <<
+				st = g.getInstanceOf("t4");
+				st.add("ftype", javaType);
+				st.add("uname", StringUtil.uppify(fieldName));
+				st.add("fname", fieldName);
+				sc.o(st.render());
+			} else {
+				//t3(ftype,uname,fname,asname) ::= <<
+				st = g.getInstanceOf("t3");
+				st.add("ftype", javaType);
+				st.add("uname", StringUtil.uppify(fieldName));
+				st.add("fname", fieldName);
+				st.add("asname", asFn);
+				sc.o(st.render());
+			}
 			
 			sc.nl();
 
