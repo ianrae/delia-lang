@@ -49,13 +49,13 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 			field2 = "? as rightv";
 		}
 		sc.o("%s, %s FROM %s) ", field1, field2, typeName);
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.earlyL.add(rawFrag);
 		
 		sc = new StrCreator();
 		sc.o(" SELECT * from cte1");
 		
-		rawFrag = new RawFragment(sc.str);
+		rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}
@@ -91,13 +91,13 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		sc.o(" FROM %s as %s", typeName, mainUpdateAlias);
 		sc.o("%s", subSelectWhere);
 		sc.o(") ");
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.earlyL.add(rawFrag);
 		
 		sc = new StrCreator();
 		sc.o(" SELECT * from cte1");
 		
-		rawFrag = new RawFragment(sc.str);
+		rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}
@@ -129,7 +129,7 @@ public class PostgresAssocTablerReplacer extends AssocTableReplacer {
 		sc.o(" VALUES(%s,%s)", field1, field2);
 		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");
 		
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}

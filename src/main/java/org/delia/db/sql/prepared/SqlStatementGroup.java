@@ -29,7 +29,7 @@ public class SqlStatementGroup {
 			sc.addStr(statement.sql);
 			walker.addIfNotLast(sc, ";\n ");
 		}
-		String sql = sc.str; 
+		String sql = sc.toString(); 
 		return sql;
 		
 	}

@@ -378,7 +378,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 				sc.o(opff.render());
 			}
 			sc.o(")");
-			RawFragment rawFrag = new RawFragment(sc.str);
+			RawFragment rawFrag = new RawFragment(sc.toString());
 	
 			assocUpdateFrag.whereL.add(rawFrag);
 			int extra = statement.paramL.size() - startingNumParams;

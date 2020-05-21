@@ -25,7 +25,7 @@ public class SelectStatementFragment extends StatementFragmentBase {
 		renderIfPresent(sc, orderByFrag);
 		renderIfPresent(sc, limitFrag);
 		renderIfPresent(sc, offsetFrag);
-		return sc.str;
+		return sc.toString();
 	}
 
 	@Override

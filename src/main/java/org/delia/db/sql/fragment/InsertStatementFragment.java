@@ -19,7 +19,7 @@ public class InsertStatementFragment extends StatementFragmentBase {
 			sc.o(" %s", tblFrag.render());
 			renderInsertFields(sc);
 			
-			return sc.str;
+			return sc.toString();
 		}
 		
 		protected void renderInsertFields(StrCreator sc) {

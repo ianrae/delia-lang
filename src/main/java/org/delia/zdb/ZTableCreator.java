@@ -108,7 +108,7 @@ public class ZTableCreator extends ServiceBase {
 				}
 			}
 		}
-		return sc.str;
+		return sc.toString();
 	}
 	
 
@@ -209,7 +209,7 @@ public class ZTableCreator extends ServiceBase {
 				alterGenerateAssocTable(sc, pair, dtype);
 			}
 		}
-		return sc.str;
+		return sc.toString();
 	}
 
 	private String nl() {
@@ -239,7 +239,7 @@ public class ZTableCreator extends ServiceBase {
 		StrCreator sc = new StrCreator();
 		sc.o("ALTER TABLE %s ALTER COLUMN %s", tblName(tableName), fieldName);
 		sc.o(" RENAME TO %s", newName); 
-		return sc.str;
+		return sc.toString();
 	}
 	
 	public String tblName(String tableName) {
@@ -257,7 +257,7 @@ public class ZTableCreator extends ServiceBase {
 		String sqlType = fieldGen.deliaToSql(pair);
 		
 		sc.o(" SET DATA TYPE %s", sqlType); 
-		return sc.str;
+		return sc.toString();
 	}
 	public String generateAlterField(String tableName, String fieldName, String deltaFlags, String constraintName) {
 		StrCreator sc = new StrCreator();
@@ -293,7 +293,7 @@ public class ZTableCreator extends ServiceBase {
 			}
 		}
 			
-		return sc.str;
+		return sc.toString();
 	}
 
 	protected void doAlterColumnUnique(StrCreator sc, String tableName, String fieldName, boolean b, String constraintName) {
@@ -384,7 +384,7 @@ public class ZTableCreator extends ServiceBase {
 			String tblName = datIdMap.getAssocTblName(datId);
 			sc.o("DROP TABLE IF EXISTS %s;", tblName(tblName));
 		}
-		return sc.str;
+		return sc.toString();
 	}
 	
 }

@@ -18,7 +18,7 @@ public class DeleteStatementFragment extends StatementFragmentBase {
 		}
 		
 		renderIfPresent(sc, limitFrag);
-		return sc.str;
+		return sc.toString();
 	}
 	
 	@Override

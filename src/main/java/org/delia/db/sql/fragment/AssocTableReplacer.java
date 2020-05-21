@@ -101,7 +101,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		
 		sc.o("\n WHEN NOT MATCHED THEN INSERT (leftv,rightv) VALUES %s", fields);
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}
@@ -128,7 +128,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		if (isForeignKeyIdNull(mmMap, fieldName)) {
 			StrCreator sc = new StrCreator();
 			sc.o("%s = ?", assocField2); //TODO should be rightv NOT IN (100) so can handle list
-			RawFragment rawFrag = new RawFragment(sc.str);
+			RawFragment rawFrag = new RawFragment(sc.toString());
 			deleteFrag.whereL.add(rawFrag);
 			
 			List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
@@ -139,11 +139,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		deleteFrag.whereL.add(rawFrag);
 		
 		//part 2. merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
-		MergeIntoStatementFragment mergeIntoFrag = generateMergeForIdOnly(assocUpdateFrag, info, assocFieldName, assocField2, sc.str);
+		MergeIntoStatementFragment mergeIntoFrag = generateMergeForIdOnly(assocUpdateFrag, info, assocFieldName, assocField2, sc.toString());
 		
 		updateFrag.assocMergeIntoFrag = mergeIntoFrag;
 		
@@ -170,7 +170,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		StrCreator sc = new StrCreator();
 		sc.o(" KEY(%s) VALUES(?,?)", assocField2);
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		mergeIntoFrag.rawFrag = rawFrag;
 		return mergeIntoFrag;
 	}
@@ -204,11 +204,11 @@ public class AssocTableReplacer extends SelectFragmentParser {
 			sc.o(opff.render());
 		}
 		sc.o(")");
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		deleteFrag.whereL.add(rawFrag);
 		
-		int pos = sc.str.indexOf(" WHERE ");
-		String subSelectWhere = sc.str.substring(pos);
+		int pos = sc.toString().indexOf(" WHERE ");
+		String subSelectWhere = sc.toString().substring(pos);
 		subSelectWhere = StringUtils.substringBeforeLast(subSelectWhere, ")");
 		
 		if (this.isForeignKeyIdNull(mmMap, fieldName)) {
@@ -373,7 +373,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		StrCreator sc = new StrCreator();
 		sc.o("%s = ? and %s = ?", "leftv", "rightv"); 
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		deleteFrag.whereL.add(rawFrag);
 		
 		if (reversed) {
@@ -404,7 +404,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		
 		StrCreator sc = new StrCreator();
 		sc.o(" %s = ? and %s = ?", "leftv", "rightv"); 
-		RawFragment rawFrag = new RawFragment(sc.str);
+		RawFragment rawFrag = new RawFragment(sc.toString());
 		innerUpdateFrag.whereL.add(rawFrag);
 		
 		innerUpdateFrag.paramStartIndex = statement.paramL.size();

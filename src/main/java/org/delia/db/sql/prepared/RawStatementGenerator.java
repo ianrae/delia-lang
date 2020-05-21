@@ -47,7 +47,7 @@ public class RawStatementGenerator extends ServiceBase {
 //			sc.o(" WHERE    table_name   = '%s' )", tableName.toLowerCase());
 			sc.o(" WHERE    table_name   = '%s' )", tblName(tableName));
 		}
-		return sc.str;
+		return sc.toString();
 	}
 	
 	public String generateSchemaListing(DBListingType listingType) {
@@ -74,7 +74,7 @@ public class RawStatementGenerator extends ServiceBase {
 		}
 			break;
 		}
-		return sc.str;
+		return sc.toString();
 	}
 
 	public String generateFieldDetect(String tableName, String fieldName) {
@@ -92,7 +92,7 @@ public class RawStatementGenerator extends ServiceBase {
 			sc.o(" WHERE    table_name   = '%s' ", tblName(tableName));
 			sc.o(" AND    column_name   = '%s' )", tblName(fieldName));
 		}
-		return sc.str;
+		return sc.toString();
 	}
 
 }

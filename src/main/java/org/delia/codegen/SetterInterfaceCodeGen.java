@@ -33,6 +33,6 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 		sc.o("}");
 		sc.nl();
 
-		return sc.str;
+		return sc.toString();
 	}
 }

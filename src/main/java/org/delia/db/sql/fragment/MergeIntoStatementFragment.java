@@ -24,7 +24,7 @@ public class MergeIntoStatementFragment extends StatementFragmentBase {
 		sc.o(rawFrag.render());
 		
 //		renderIfPresent(sc, limitFrag);
-		return sc.str;
+		return sc.toString();
 	}
 	
 	@Override

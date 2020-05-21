@@ -64,7 +64,7 @@ public class ImportToool extends ServiceBase {
 			}
 			sc.o("}");
 			
-			return sc.str;
+			return sc.toString();
 		}
 		
 		public String generateDeliaStructSourceCode(String typeName, String path, boolean addLineFeed) {
@@ -92,7 +92,7 @@ public class ImportToool extends ServiceBase {
 			
 			sc.o("} end");
 			
-			return sc.str;
+			return sc.toString();
 		}
 
 		private DStructType getType(String typeName) {

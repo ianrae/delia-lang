@@ -16,6 +16,6 @@ public class SQLCreator {
 	}
 
 	public String sql() {
-		return sc.str;
+		return sc.toString();
 	}
 }

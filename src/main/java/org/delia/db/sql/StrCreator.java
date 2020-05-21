@@ -1,7 +1,7 @@
 package org.delia.db.sql;
 
 public class StrCreator {
-	public String str = ""; //TODO use StringBuilder for perf
+	private String str = ""; //TODO use StringBuilder for perf
 	
 	public String o(String fmt, String...args) {
 		String s = String.format(fmt, args);
@@ -19,5 +19,9 @@ public class StrCreator {
 	}
 	public void nl() {
 		str += "\n";
+	}
+	@Override
+	public String toString() {
+		return str;
 	}
 }

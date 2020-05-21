@@ -61,7 +61,7 @@ public class ImmutCodeGen extends CodeGenBase {
 		sc.o("}");
 		sc.nl();
 
-		return sc.str;
+		return sc.toString();
 	}
 
 	private void line(StrCreator sc, String str) {

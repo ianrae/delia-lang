@@ -173,7 +173,7 @@ public class AssocTableCreator extends ServiceBase {
 			}
 		}
 			
-		return sc.str;
+		return sc.toString();
 	}
 
 	public AssocInfo createAssocInfoIfIsManyToMany(String tableName, String fieldName) {

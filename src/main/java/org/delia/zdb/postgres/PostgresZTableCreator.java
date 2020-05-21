@@ -30,7 +30,7 @@ public class PostgresZTableCreator extends ZTableCreator {
 		StrCreator sc = new StrCreator();
 		sc.o("ALTER TABLE %s RENAME COLUMN %s", tblName(tableName), fieldName);
 		sc.o(" TO %s", newName); 
-		return sc.str;
+		return sc.toString();
 	}
 	
 	@Override
@@ -109,7 +109,7 @@ public class PostgresZTableCreator extends ZTableCreator {
 				alterGenerateAssocTable(sc, pair, dtype);
 			}
 		}
-		return sc.str;
+		return sc.toString();
 	}
 
 	
