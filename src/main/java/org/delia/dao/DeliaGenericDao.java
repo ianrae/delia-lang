@@ -63,7 +63,6 @@ public class DeliaGenericDao  {
 		if (mostRecentSess != null) {
 			DeliaExceptionHelper.throwError("dao-init-error", "can't start a Dao more than once");
 		}
-		//TODO: ensure sess is null
 		mostRecentSess = delia.beginSession(src);
 		return mostRecentSess.getFinalResult();
 	}
