@@ -48,7 +48,7 @@ public class DaoTests extends DaoTestBase {
 	
 
 	public static abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBase {
-		protected DeliaSession session;
+		private DeliaSession mainSession; //not used directly. we create child sessions 
 		protected Delia delia;
 		protected DValueConverterService dvalConverter;
 		protected DTypeRegistry registry;
@@ -59,7 +59,7 @@ public class DaoTests extends DaoTestBase {
 		public EntityDaoBase(DeliaSession session, String typeName) {
 			super(session.getDelia().getFactoryService());
 			this.typeName = typeName;
-			this.session = session;
+			this.mainSession = session;
 			this.delia = session.getDelia();
     		this.registry = session.getExecutionContext().registry;
 	    	this.structType = (DStructType) registry.getType(typeName);
@@ -73,6 +73,9 @@ public class DaoTests extends DaoTestBase {
 			inputL.add(createDValue(entity));
 			DValueIterator iter = new DValueIterator(inputL);	
 			DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
+			
+			//use child session for thread-safety and isolation
+			DeliaSession session = mainSession.createChildSession();
 			session.setRunnerIntiliazer(dri);
 			ResultValue res = delia.continueExecution(src, session);
 			session.setRunnerIntiliazer(null);
@@ -143,6 +146,8 @@ public class DaoTests extends DaoTestBase {
 		}
 		protected ResultValue doQuery(String src) {
 			log.log("src: %s", src);
+			//use child session for thread-safety and isolation
+			DeliaSession session = mainSession.createChildSession();
 			ResultValue res = delia.continueExecution(src, session);
 			if (! res.ok) {
 				DeliaExceptionHelper.throwError("dao-error", "Query failed: %s", src);

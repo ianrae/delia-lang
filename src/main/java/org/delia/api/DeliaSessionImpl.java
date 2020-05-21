@@ -1,12 +1,14 @@
 package org.delia.api;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
+import org.delia.sprig.SprigServiceImpl;
 
 public class DeliaSessionImpl implements DeliaSession {
 	public boolean ok;
@@ -65,6 +67,36 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public Runner getMostRecentRunner() {
 		return mostRecentRunner;
+	}
+
+	@Override
+	public DeliaSession createChildSession() {
+		DeliaSessionImpl child = new DeliaSessionImpl(delia);
+		child.ok = this.ok;
+		child.execCtx = cloneExecCtx();
+		child.res = null;
+		child.expL = this.expL; 
+		child.mostRecentContinueExpL = this.mostRecentContinueExpL; 
+		child.runnerInitializer = null;
+		child.datIdMap = this.datIdMap;
+		child.mostRecentRunner = null;
+		return child;
+	}
+
+	/**
+	 * The new session needs private generator, varMap, and sprigSvc.
+	 * The rest can be shared with the parent session.
+	 * @return new execution state.
+	 */
+	private ExecutionState cloneExecCtx() {
+		ExecutionState clone = new ExecutionState();
+		clone.generator = mostRecentRunner == null ? null : mostRecentRunner.createGenerator();
+		clone.inputFnMap = execCtx.inputFnMap;
+		clone.registry = execCtx.registry;
+		clone.sprigSvc = new SprigServiceImpl(delia.getFactoryService(), execCtx.registry);
+		clone.userFnMap = execCtx.userFnMap;
+		clone.varMap = new ConcurrentHashMap<>(execCtx.varMap);
+		return clone;
 	}
 	
 }

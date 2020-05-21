@@ -28,4 +28,5 @@ public interface DeliaSession {
 	Delia getDelia();
 	DatIdMap getDatIdMap();
 	Runner getMostRecentRunner();
+	DeliaSession createChildSession();
 }
