@@ -21,7 +21,7 @@ import org.delia.type.DValue;
       this.dval = x.internalDValue();
       this.helper = dval.asStruct();
     }
-
+    
     @Override
     public DValue internalDValue() {
       return dval; //can be null, if disconnected entity
