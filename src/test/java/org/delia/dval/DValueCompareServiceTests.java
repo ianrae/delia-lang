@@ -2,6 +2,8 @@ package org.delia.dval;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Date;
+
 import org.delia.api.Delia;
 import org.delia.app.DaoTestBase;
 import org.delia.core.FactoryService;
@@ -20,14 +22,75 @@ public class DValueCompareServiceTests extends DaoTestBase {
 	public interface Handler {
 		int compare(Object obj1, Object obj2);
 	}
-	public static class Handler1 implements Handler {
-
+	public static class ComparableDValueHandler implements Handler {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public int compare(Object obj1, Object obj2) {
-			// TODO Auto-generated method stub
-			return 0;
+			DValue dval1 = (DValue) obj1;
+			DValue dval2 = (DValue) obj2;
+			
+			Comparable c1 = (Comparable) dval1.getObject();
+			Comparable c2 = (Comparable) dval2.getObject();
+			return c1.compareTo(c2);
 		}
-		
+	}
+	public static class ToIntegerHandler implements Handler {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			DValue dval1 = (DValue) obj1;
+			DValue dval2 = (DValue) obj2;
+			
+			Integer n1 = dval1.asInt();
+			Integer n2 = dval2.asInt();
+			return n1.compareTo(n2);
+		}
+	}
+	public static class ToLongHandler implements Handler {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			DValue dval1 = (DValue) obj1;
+			DValue dval2 = (DValue) obj2;
+			
+			Long n1;
+			if (dval1.getType().isShape(Shape.DATE)) {
+				n1 = dval1.asDate().getTime();
+			} else {
+				n1 = dval1.asLong();
+			}
+			Long n2;
+			if (dval2.getType().isShape(Shape.DATE)) {
+				n2 = dval2.asDate().getTime();
+			} else {
+				n2 = dval2.asLong();
+			}
+			return n1.compareTo(n2);
+		}
+	}
+	public static class ToNumberHandler implements Handler {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			DValue dval1 = (DValue) obj1;
+			DValue dval2 = (DValue) obj2;
+			
+			Double n1 = dval1.asNumber();
+			Double n2 = dval2.asNumber();
+			return n1.compareTo(n2);
+		}
+	}
+	public static class ToStringHandler implements Handler {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			DValue dval1 = (DValue) obj1;
+			DValue dval2 = (DValue) obj2;
+			
+			String n1 = dval1.asString();
+			String n2 = dval2.asString();
+			return n1.compareTo(n2);
+		}
 	}
 
 	public static class DValueCompareService extends ServiceBase {
@@ -35,7 +98,30 @@ public class DValueCompareServiceTests extends DaoTestBase {
 		
 		public DValueCompareService(FactoryService factorySvc) {
 			super(factorySvc);
-			handlerArray[0][0] = new Handler1();
+			
+//		case INTEGER: return 0;
+//		case LONG: return 1;
+//		case NUMBER: return 2;
+//		case STRING: return 3;
+//		case BOOLEAN: return 4;
+//		case DATE: return 5;
+			
+			//int
+			handlerArray[0][0] = new ComparableDValueHandler();
+			handlerArray[0][1] = new ToLongHandler();
+			handlerArray[0][2] = new ToNumberHandler();
+			handlerArray[0][3] = new ToStringHandler();
+			handlerArray[0][4] = null; //not supported
+			handlerArray[0][5] = null; //not supported
+			
+			//long
+			handlerArray[1][0] = new ToIntegerHandler();
+			handlerArray[1][1] = new ComparableDValueHandler();
+			handlerArray[1][2] = new ToNumberHandler();
+			handlerArray[1][3] = new ToStringHandler();
+			handlerArray[1][4] = null; //not supported
+			handlerArray[1][5] = new ToLongHandler();
+			
 		}
 		
 		int compare(DValue dval1, DValue dval2) {
@@ -47,7 +133,7 @@ public class DValueCompareServiceTests extends DaoTestBase {
 				DeliaExceptionHelper.throwError("cannot-compare-dval", "Can only compare scalar DValues");
 			}
 			
-			Handler handler = handlerArray[0][0];
+			Handler handler = handlerArray[i][j];
 			int n = handler.compare(dval1, dval2);
 			
 			return n;
@@ -58,20 +144,50 @@ public class DValueCompareServiceTests extends DaoTestBase {
 	
 	@Test
 	public void test() {
-		
 		DValueCompareService compareSvc = new DValueCompareService(factorySvc);
-		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue dval1 = builder.buildInt(4);
 		DValue dval2 = builder.buildInt(4);
 		int n = compareSvc.compare(dval1, dval2);
 		assertEquals(0, n);
 		
+		dval1 = builder.buildInt(3);
+		n = compareSvc.compare(dval1, dval2);
+		assertEquals(-1, n);
 	}
+	
+	@Test
+	public void testIntString() {
+		DValueCompareService compareSvc = new DValueCompareService(factorySvc);
+		DValue dval1 = builder.buildInt(4);
+		DValue dval2 = builder.buildString("4");
+		int n = compareSvc.compare(dval1, dval2);
+		assertEquals(0, n);
+		
+		dval1 = builder.buildInt(3);
+		n = compareSvc.compare(dval1, dval2);
+		assertEquals(-1, n);
+	}
+	@Test
+	public void testLong() {
+		DValueCompareService compareSvc = new DValueCompareService(factorySvc);
+		DValue dval2 = builder.buildDate("2019");
+		
+		Date dt = dval2.asDate();
+		DValue dval1 = builder.buildLong(dt.getTime());
+		int n = compareSvc.compare(dval1, dval2);
+		assertEquals(0, n);
+		
+		dval2 = builder.buildInt(3);
+		n = compareSvc.compare(dval1, dval2);
+		assertEquals(1, n);
+	}
+	
 	
 	// --
 	private FactoryService factorySvc;
 	private Delia delia;
 	private DTypeRegistry registry;
+	private ScalarValueBuilder builder;
 
 	@Before
 	public void init() {
@@ -83,6 +199,7 @@ public class DValueCompareServiceTests extends DaoTestBase {
 		this.factorySvc = dao.getFactorySvc();
 		this.delia = dao.getDelia();
 		this.registry = dao.getRegistry();
+		this.builder = factorySvc.createScalarValueBuilder(registry);
 	}
 	
 }
