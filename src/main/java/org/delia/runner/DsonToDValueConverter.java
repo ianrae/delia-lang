@@ -96,7 +96,6 @@ public class DsonToDValueConverter extends ServiceBase {
 				
 				//Customer.sid
 				if (sprigSvc.haveEnabledFor(structType.getName(), fieldName) && cres != null) {
-//					extraMap.put(fieldName, builder.buildInt(33)); //TODO fix
 					cres.extraMap.put(fieldName, builder.buildInt(fieldExp.exp.strValue()));
 					continue;
 				} 
@@ -161,7 +160,6 @@ public class DsonToDValueConverter extends ServiceBase {
 				DValue dval = builder.buildDate(input, fieldType); 
 				return dval;
 			} else if (Shape.STRUCT.equals(fieldType.getShape())) {
-				//TODO: later support multiple keys
 				DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
 				RelationValueBuilder rbuilder = new RelationValueBuilder(relType, fieldType.getName(), registry);
 				if (fieldExp.exp instanceof ListExp) {

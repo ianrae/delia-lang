@@ -17,7 +17,7 @@ public class DeliaException extends RuntimeException {
 		this.errorL = Collections.singletonList(err);
 	}
 	public DeliaException(List<DeliaError> errL) {
-		super(errL.get(0).getId() + ": " + errL.get(0).getMsg()); //TODO: what if errL empty??
+		super(errL.isEmpty() ? "no DeliaError!!" : errL.get(0).getId() + ": " + errL.get(0).getMsg()); 
 		this.errorL = errL;
 	}
 	public DeliaError getLastError() {

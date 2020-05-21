@@ -16,9 +16,8 @@ public class DeliaSessionImpl implements DeliaSession {
 	public ResultValue res;
 	
 	//only set in beginExecution, not in continueExecution
-	public List<Exp> expL; //for getting at parse results. TODO: need a flag that disables this to save memory
-	public List<Exp> mostRecentContinueExpL; //for getting at parse results. TODO: need a flag that disables this to save memory
-//	private DValueIterator insertPrebuiltValueIterator;
+	public List<Exp> expL; //for getting at parse results. see DeliaOptions.saveParseExpObjectsInSession
+	public List<Exp> mostRecentContinueExpL; //for getting at parse results. see DeliaOptions.saveParseExpObjectsInSession
 	private RunnerInitializer runnerInitializer;
 	private Delia delia;
 	public DatIdMap datIdMap;
@@ -75,8 +74,8 @@ public class DeliaSessionImpl implements DeliaSession {
 		child.ok = this.ok;
 		child.execCtx = cloneExecCtx();
 		child.res = null;
-		child.expL = this.expL; 
-		child.mostRecentContinueExpL = this.mostRecentContinueExpL; 
+		child.expL = delia.getOptions().saveParseExpObjectsInSession ? this.expL : null; 
+		child.mostRecentContinueExpL = delia.getOptions().saveParseExpObjectsInSession ? this.mostRecentContinueExpL : null; 
 		child.runnerInitializer = null;
 		child.datIdMap = this.datIdMap;
 		child.mostRecentRunner = null;

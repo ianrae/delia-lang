@@ -177,14 +177,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 						DBHelper.handleCloseFailure(e);
 					}
 				}
-//				if (zexec != null) {
-//					try {
-//						zexec.close();
-//					} catch (Exception e) {
-//						DBHelper.handleCloseFailure(e);
-//					}
-//				}
-				
 			}
 			return res;
 		}
@@ -233,14 +225,12 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
 		}
 		private void executeUserFuncDefStatement(UserFunctionDefStatementExp exp, ResultValue res) {
-			//TODO pass2 should ensure same fn not defined twice
 			userFnMap.put(exp.funcName, exp);
 			res.ok = true;
 			res.shape = null;
 			res.val = null;
 		}
 		private void executeInputFuncDefStatement(InputFunctionDefStatementExp exp, ResultValue res) {
-			//TODO pass2 should ensure same fn not defined twice
 			inputFnMap.put(exp.funcName, exp);
 			res.ok = true;
 			res.shape = null;
@@ -590,7 +580,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			if (res.val == null) {
 				return null;
 			} else if (res.val instanceof DValue) {
-				return res.getAsDValue().asString(); //TODO: handle null later
+				return res.getAsDValue().asString(); 
 			}
 			QueryResponse qresp = (QueryResponse) res.val;
 			return qresp.getOne().asString();

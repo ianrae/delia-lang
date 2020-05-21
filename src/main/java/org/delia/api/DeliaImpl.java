@@ -136,7 +136,7 @@ public class DeliaImpl implements Delia {
 			session.execCtx = mainRunner.getExecutionState();
 			session.ok = true;
 			session.res = migrationPlanRes;
-			session.expL = expL;
+			session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			session.datIdMap = extraInfo.datIdMap;
 			session.mostRecentRunner = mainRunner;
 			return session;
@@ -148,7 +148,7 @@ public class DeliaImpl implements Delia {
 		session.execCtx = mainRunner.getExecutionState();
 		session.ok = true;
 		session.res = res;
-		session.expL = expL;
+		session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 		session.datIdMap = extraInfo.datIdMap;
 		session.mostRecentRunner = mainRunner;
 		return session;
@@ -343,7 +343,7 @@ public class DeliaImpl implements Delia {
 		
 		if (session instanceof DeliaSessionImpl) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
-			sessimpl.mostRecentContinueExpL = expL;
+			sessimpl.mostRecentContinueExpL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			sessimpl.mostRecentRunner = runner;
 		}
 		return res;

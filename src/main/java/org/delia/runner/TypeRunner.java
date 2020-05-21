@@ -62,7 +62,6 @@ public class TypeRunner extends ServiceBase {
 		TypeBuilder typeBuilder = new TypeBuilder(factorySvc, registry);
 		
 		DType dtype = typeBuilder.createType(exp);
-		//TODO: if futureL not-empty then re-run to handle forward delcs
 		res.ok = dtype != null;
 		if (! res.ok) {
 			res.errors.addAll(typeBuilder.getErrorTracker().getErrors());

@@ -10,5 +10,5 @@ public interface FetchRunner {
 	public boolean queryFKExists(DRelation drel);
 	public boolean queryFKExists(DStructType owningType, String subject, DRelation drel);
 	
-	public QueryResponse loadFKOnly(String typeName, String fieldName, DValue keyVal); //TODO: later support multiplekeys
+	public QueryResponse loadFKOnly(String typeName, String fieldName, DValue keyVal); 
 }

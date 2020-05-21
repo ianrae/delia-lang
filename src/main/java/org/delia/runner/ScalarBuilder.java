@@ -96,7 +96,7 @@ public class ScalarBuilder extends ServiceBase {
 		} else if (isType("string", typeName, info)) {
 			return builder.buildString(valueExp.strValue(), info.type);
 		} else if (valueExp instanceof NullExp) {
-			return null; //TODO: is this ok?
+			return null; 
 		} else { //treat as string
 			return builder.buildString(valueExp.strValue(), info.type);
 		}
