@@ -170,8 +170,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	//Customer:struct:{id:int::O,firstName:string::,lastName:string:O:,points:int:O:}\n
-	public List<SchemaType> parseFingerprint(String fingeprint) {
-		String ar[] = fingeprint.split("\n");
+	public List<SchemaType> parseFingerprint(String fingerprint) {
+		parseVersion(fingerprint);
+		fingerprint = StringUtils.substringAfter(fingerprint, ")");
+		String ar[] = fingerprint.split("\n");
 		List<SchemaType> list = new ArrayList<>();
 		for(String line: ar) {
 			if (line.trim().isEmpty()) {
@@ -183,6 +185,17 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			list.add(schemaType);
 		}
 		return list;
+	}
+
+	private int parseVersion(String fingerprint) {
+		if (fingerprint.isEmpty()) {
+			return 0;
+		}
+		String s = StringUtils.substringBefore(fingerprint, ")");
+		s = StringUtils.substringAfter(s, "(v");
+		Integer version = Integer.parseInt(s);
+		log.log("schema-version:%d", version);
+		return version;
 	}
 
 	public String getCurrentFingerprint() {

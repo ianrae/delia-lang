@@ -14,12 +14,12 @@ import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 
 public class SchemaFingerprintGenerator {
-	
+	public static final int SCHEMA_VERSION = 1;
 	private DTypeRegistry registry;
 
 	public String createFingerprint(DTypeRegistry registry) {
 		this.registry = registry;
-		String s = "";
+		String s = String.format("(v%d)", SCHEMA_VERSION);
 		
 		//because of re-executing with forward decls some types are in registry.orderedList twice
 		//use a map to ensure only do each type once
