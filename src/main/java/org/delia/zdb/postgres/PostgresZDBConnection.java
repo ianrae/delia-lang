@@ -38,7 +38,7 @@ public class PostgresZDBConnection extends H2ZDBConnection {
 //					String field = getRsValue(rs, iColumn);
 
 					//for now assume only one
-					//TODO this needs to be more robust. some constrains have names like:
+					//TODO this needs to be more robust. some constraints have names like:
 					//customer_height_key  or 2200_402813_1_not_null
 					if (useFieldName) {
 						//not supported for postgres

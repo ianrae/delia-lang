@@ -36,7 +36,7 @@ public class LetStatementExp extends ExpBase {
 		} else if (value instanceof BooleanExp) {
 			typeName = "boolean";
 		} else if (value instanceof QueryExp) {
-			typeName = QUERY_RESPONSE_TYPE; //TODO create QueryResponse
+			typeName = QUERY_RESPONSE_TYPE; 
 		} else if (value instanceof UserFnCallExp) {
 			typeName = USER_FUNC_TYPE;
 		}

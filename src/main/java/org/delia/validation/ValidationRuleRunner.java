@@ -26,7 +26,6 @@ import org.delia.type.ValidationState;
 public class ValidationRuleRunner extends ServiceBase {
 
 		private SimpleErrorTracker localET;
-		private boolean planModeFlg; //TODO: what is this??
 		private boolean enableRelationModifierFlag;
 		private DBCapabilties dbCapabilties;
 		boolean populateFKsFlag;
@@ -190,7 +189,6 @@ public class ValidationRuleRunner extends ServiceBase {
 			
 			ErrorTracker tmpET = new SimpleErrorTracker(log);
 			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, fetchRunner); //TODO: use correct rule Text
-			ctx.setPlanModeFlg(planModeFlg);
 			boolean b = rule.validate(dval, ctx);
 			if (!b) {
 				localET.getErrors().addAll(ctx.getErrors());
@@ -233,14 +231,6 @@ public class ValidationRuleRunner extends ServiceBase {
 		public boolean validateEndSource() {
 			// TODO Auto-generated method stub
 			return false;
-		}
-
-		public boolean isPlanModeFlg() {
-			return planModeFlg;
-		}
-
-		public void setPlanModeFlg(boolean planModeFlg) {
-			this.planModeFlg = planModeFlg;
 		}
 
 		public void enableRelationModifier(boolean b) {
