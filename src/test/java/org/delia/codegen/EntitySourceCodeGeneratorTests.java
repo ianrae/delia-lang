@@ -82,7 +82,7 @@ public class EntitySourceCodeGeneratorTests extends DaoTestBase {
 	}
 	
 	
-	@Test
+//	@Test
 	public void test() {
 		String src = buildSrc();
 		DeliaDao dao = createDao(); 
