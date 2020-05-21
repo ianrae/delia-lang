@@ -19,32 +19,34 @@ import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * Represents delia access to a single database through its Delia types.
+ * This is a generic DAO that is not related to the code-gen DAOs.
+ * This DAO can be used without doing any code generation.
  * 
  * @author Ian Rae
  *
  */
-public class DeliaDao  {
+public class DeliaGenericDao  {
 	private Delia delia;
 	private ZDBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 	private FactoryService factorySvc;
 	
-	public DeliaDao(ConnectionInfo info) {
+	public DeliaGenericDao(ConnectionInfo info) {
 		this(DeliaBuilder.withConnection(info).build());
 	}
-	public DeliaDao(Delia delia) {
+	public DeliaGenericDao(Delia delia) {
 		this.dbInterface = delia.getDBInterface();
 		this.factorySvc = delia.getFactoryService();
 		this.delia = delia;
 	}
-	public DeliaDao(Delia delia, DeliaSession session) {
+	public DeliaGenericDao(Delia delia, DeliaSession session) {
 		this.dbInterface = delia.getDBInterface();
 		this.factorySvc = delia.getFactoryService();
 		this.delia = delia;
 		this.mostRecentSess = session;
 	}
 
-	public DeliaDao(ConnectionString connString, DBType dbType, Log log) {
+	public DeliaGenericDao(ConnectionString connString, DBType dbType, Log log) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		this.factorySvc = new FactoryServiceImpl(log, et);
 		delia = DeliaFactory.create(connString, dbType, log, factorySvc);

@@ -14,7 +14,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
@@ -57,10 +57,10 @@ public class FragmentParserTestBase extends BDDBase {
 	protected String sqlLine4;
 	protected String sqlLine5;
 
-	protected DeliaDao createDao() {
+	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class FragmentParserTestBase extends BDDBase {
 		}
 	}
 	
-	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaDao dao, List<TableInfo> tblinfoL) {
+	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaGenericDao dao, List<TableInfo> tblinfoL) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		if (tblinfoL == null) {
 			tblinfoL = new ArrayList<>();		

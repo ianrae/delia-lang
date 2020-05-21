@@ -6,7 +6,7 @@ import org.delia.bdd.MemBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 
 
@@ -15,10 +15,10 @@ public class DaoTestBase extends MemBDDBase {
 	
 	//---
 
-	protected DeliaDao createDao() {
+	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 }

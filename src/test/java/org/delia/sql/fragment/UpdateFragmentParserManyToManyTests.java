@@ -13,7 +13,7 @@ import org.delia.api.MigrationAction;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.TableExistenceServiceImpl;
@@ -403,7 +403,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 		return src;
 	}
 
-	private UpdateFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
+	private UpdateFragmentParser createFragmentParser(DeliaGenericDao dao, String src, List<TableInfo> tblInfoL) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -417,7 +417,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 
 		return parser;
 	}
-	private UpdateFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
+	private UpdateFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
 		
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
 		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
@@ -488,7 +488,7 @@ public class UpdateFragmentParserManyToManyTests extends FragmentParserTestBase 
 		return buildFromSrc(src, tblinfoL);
 	}
 	private UpdateStatementExp buildFromSrc(String src, List<TableInfo> tblinfoL) {
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();
 		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
 		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);

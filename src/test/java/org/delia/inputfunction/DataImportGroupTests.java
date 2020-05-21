@@ -14,7 +14,7 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
@@ -89,7 +89,7 @@ public class DataImportGroupTests  extends BDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
 
@@ -131,10 +131,10 @@ public class DataImportGroupTests  extends BDDBase {
 
 		return src;
 	}
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 	private InputFunctionResult buildAndRun(int which, String inFnName, LineObjIterator lineObjIter, int expectedRows) {
 		createDelia(which);

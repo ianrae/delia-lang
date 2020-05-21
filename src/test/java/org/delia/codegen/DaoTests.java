@@ -14,7 +14,7 @@ import org.delia.codegen.sample.Flight;
 import org.delia.codegen.sample.FlightEntity;
 import org.delia.codegen.sample.FlightImmut;
 import org.delia.core.ServiceBase;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.dval.DValueConverterService;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
@@ -271,7 +271,7 @@ public class DaoTests extends DaoTestBase {
 	
 	
 	//---
-	protected DeliaDao xdao;
+	protected DeliaGenericDao xdao;
 
 	@Before
 	public void init() {

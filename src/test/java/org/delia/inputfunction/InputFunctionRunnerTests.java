@@ -14,7 +14,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
@@ -86,7 +86,7 @@ public class InputFunctionRunnerTests  extends BDDBase {
 		assertEquals(true, res.ok);
 		session.setRunnerIntiliazer(null);
 		
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -178,7 +178,7 @@ public class InputFunctionRunnerTests  extends BDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 		String src = buildSrc();
 		this.session = delia.beginSession(src);
@@ -191,10 +191,10 @@ public class InputFunctionRunnerTests  extends BDDBase {
 		return src;
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	@Override

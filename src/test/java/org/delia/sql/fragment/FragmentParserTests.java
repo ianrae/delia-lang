@@ -17,7 +17,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
@@ -223,10 +223,10 @@ public class FragmentParserTests extends BDDBase {
 		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	private String buildSrc() {
@@ -279,7 +279,7 @@ public class FragmentParserTests extends BDDBase {
 	}
 
 	private SelectFragmentParser createFragmentParser(String src) {
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -296,7 +296,7 @@ public class FragmentParserTests extends BDDBase {
 		return parser;
 	}
 
-	private SelectFragmentParser createFragmentParser(DeliaDao dao, String src) {
+	private SelectFragmentParser createFragmentParser(DeliaGenericDao dao, String src) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -312,7 +312,7 @@ public class FragmentParserTests extends BDDBase {
 		
 		return parser;
 	}
-	private SelectFragmentParser createParser(DeliaDao dao) {
+	private SelectFragmentParser createParser(DeliaGenericDao dao) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
@@ -337,7 +337,7 @@ public class FragmentParserTests extends BDDBase {
 	}
 
 	private LetStatementExp buildFromSrc(String src) {
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();
 		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
 		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);

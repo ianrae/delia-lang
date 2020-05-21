@@ -9,7 +9,7 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.sql.ConnectionFactory;
@@ -84,7 +84,7 @@ public class ZDBTests  extends BDDBase {
 	}
 
 	// --
-	private DeliaDao dao;
+	private DeliaGenericDao dao;
 	private Delia delia;
 	private FactoryService factorySvc;
 	private DeliaSession session;
@@ -100,10 +100,10 @@ public class ZDBTests  extends BDDBase {
 		this.registry = session.getExecutionContext().registry;
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	@Override

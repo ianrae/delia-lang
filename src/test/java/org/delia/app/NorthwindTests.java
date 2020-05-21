@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -105,7 +105,7 @@ public class NorthwindTests extends DaoTestBase {
 	@Test
 	public void test1() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -134,7 +134,7 @@ public class NorthwindTests extends DaoTestBase {
 	@Test
 	public void test2() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -168,7 +168,7 @@ public class NorthwindTests extends DaoTestBase {
 	@Test
 	public void test3() {
 		String src = buildSrc2();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -249,11 +249,11 @@ public class NorthwindTests extends DaoTestBase {
 		List<String> lines = reader.readFile(path);
 		return lines;
 	}
-	private void loadCSV(String type, String filename, DeliaDao dao) {
+	private void loadCSV(String type, String filename, DeliaGenericDao dao) {
 		loadCSV(type, filename, dao, null);
 	}
 	
-	private void loadCSV(String type, String filename, DeliaDao dao, Map<String,String> replaceMap) {
+	private void loadCSV(String type, String filename, DeliaGenericDao dao, Map<String,String> replaceMap) {
 		String path = BASE_DIR + filename;
 		List<String> lines = loadCSVFile(path);
 		CSVRowConverter converter = new CSVRowConverter(dao.getRegistry(), type, replaceMap);

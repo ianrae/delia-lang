@@ -8,7 +8,7 @@ import org.delia.api.Delia;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.log.StandardLogFactory;
@@ -24,7 +24,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test
 	public void testRaw() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -69,7 +69,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test
 	public void test1() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -110,7 +110,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test(expected=DeliaException.class)
 	public void testErr() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -124,7 +124,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test
 	public void test2() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -144,7 +144,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test
 	public void testErr2() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -164,7 +164,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test
 	public void testErr3() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -191,7 +191,7 @@ public class DeliaDaoTests extends DaoTestBase {
 		Log slog = logFactory.create(this.getClass());
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).log(slog).build();
-		DeliaDao dao = new DeliaDao(delia);
+		DeliaGenericDao dao = new DeliaGenericDao(delia);
 		
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
@@ -209,7 +209,7 @@ public class DeliaDaoTests extends DaoTestBase {
 	@Test
 	public void testOp() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 

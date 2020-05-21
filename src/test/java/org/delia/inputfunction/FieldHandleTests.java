@@ -12,7 +12,7 @@ import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBType;
@@ -208,7 +208,7 @@ public class FieldHandleTests  extends BDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
 	private void createDelia(int which) {
@@ -256,10 +256,10 @@ public class FieldHandleTests  extends BDDBase {
 			return src;
 		}
 	}
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 	private InputFunctionResult buildAndRun(int which, LineObjIterator lineObjIter, int expectedNumRows) {
 		createDelia(which);
@@ -285,7 +285,7 @@ public class FieldHandleTests  extends BDDBase {
 		return result;
 	}
 	private void chkCustomer(Integer id, String expected) {
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -294,7 +294,7 @@ public class FieldHandleTests  extends BDDBase {
 		assertEquals(1L, n);
 	}
 	private void chkNoCustomer(Integer id) {
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
 		assertEquals(true, res.ok);
 		assertEquals(0, res.getAsDValueList().size());

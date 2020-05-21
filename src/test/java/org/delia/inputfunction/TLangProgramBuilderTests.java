@@ -15,7 +15,7 @@ import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.compiler.parser.InputFunctionParser;
 import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.TerminalParser;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.runner.DeliaException;
 import org.delia.tlang.TLangProgramBuilder;
@@ -91,7 +91,7 @@ public class TLangProgramBuilderTests  extends BDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 		String src = buildSrc();
 		this.session = delia.beginSession(src);
@@ -102,10 +102,10 @@ public class TLangProgramBuilderTests  extends BDDBase {
 		return src;
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 	
 	

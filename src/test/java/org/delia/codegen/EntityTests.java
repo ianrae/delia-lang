@@ -9,7 +9,7 @@ import java.util.Map;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.DaoTestBase;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.runner.ResultValue;
 import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
@@ -107,7 +107,7 @@ public class EntityTests extends DaoTestBase {
 
 
 	public class FlightDao {
-		private DeliaDao innerDao;
+		private DeliaGenericDao innerDao;
 		protected String typeName;
 
 		public FlightDao(Delia delia, DeliaSession session) {
@@ -147,7 +147,7 @@ public class EntityTests extends DaoTestBase {
 	@Test
 	public void test1() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 

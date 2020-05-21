@@ -8,7 +8,7 @@ import java.util.Collections;
 import org.delia.app.DaoTestBase;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -85,7 +85,7 @@ public class EntitySourceCodeGeneratorTests extends DaoTestBase {
 //	@Test
 	public void test() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 

@@ -14,7 +14,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.queryresponse.LetSpan;
 import org.delia.queryresponse.LetSpanEngine;
@@ -35,7 +35,7 @@ public class LetSpanEngineTests extends BDDBase {
 	@Test
 	public void testRaw() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -78,7 +78,7 @@ public class LetSpanEngineTests extends BDDBase {
 
 	private void chkRun(String src, String expected) {
 		String initialSrc = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
 
@@ -133,10 +133,10 @@ public class LetSpanEngineTests extends BDDBase {
 	public void init() {
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	private String buildSrc() {

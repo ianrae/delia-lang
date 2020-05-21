@@ -4,7 +4,7 @@ package org.delia.codegen;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.app.DaoTestBase;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.junit.Before;
@@ -16,7 +16,7 @@ public class CodegenTests extends DaoTestBase {
 	@Test
 	public void test() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -37,7 +37,7 @@ public class CodegenTests extends DaoTestBase {
 	@Test
 	public void test2() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -54,7 +54,7 @@ public class CodegenTests extends DaoTestBase {
 	@Test
 	public void test3() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 

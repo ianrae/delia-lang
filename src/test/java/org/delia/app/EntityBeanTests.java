@@ -4,7 +4,7 @@ package org.delia.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -301,7 +301,7 @@ public class EntityBeanTests extends DaoTestBase {
 	@Test
 	public void test1() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 

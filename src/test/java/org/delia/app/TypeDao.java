@@ -1,10 +1,11 @@
-package org.delia.dao;
+package org.delia.app;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
@@ -13,7 +14,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class TypeDao {
-	private DeliaDao innerDao;
+	private DeliaGenericDao innerDao;
 	protected String typeName;
 	
 	public TypeDao(String typeName, ConnectionInfo info) {
@@ -21,16 +22,16 @@ public class TypeDao {
 	}
 	public TypeDao(String typeName, Delia delia) {
 		this.typeName = typeName;
-		this.innerDao = new DeliaDao(delia);
+		this.innerDao = new DeliaGenericDao(delia);
 	}
 	public TypeDao(String typeName, Delia delia, DeliaSession session) {
 		this.typeName = typeName;
-		this.innerDao = new DeliaDao(delia, session);
+		this.innerDao = new DeliaGenericDao(delia, session);
 	}
 
 	public TypeDao(String typeName, ConnectionString connString, DBType dbType, Log log) {
 		this.typeName = typeName;
-		this.innerDao = new DeliaDao(connString, dbType, log);
+		this.innerDao = new DeliaGenericDao(connString, dbType, log);
 	}
 
 	public boolean initialize(String src) {
@@ -81,7 +82,7 @@ public class TypeDao {
 	public DTypeRegistry getRegistry() {
 		return innerDao.getRegistry();
 	}
-	public DeliaDao getInnerDao() {
+	public DeliaGenericDao getInnerDao() {
 		return innerDao;
 	}
 

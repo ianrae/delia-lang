@@ -17,7 +17,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
@@ -86,7 +86,7 @@ public class HLSTestBase extends BDDBase {
 		}
 		log.log("initial: " + initialSrc);
 		
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
 
@@ -140,7 +140,7 @@ public class HLSTestBase extends BDDBase {
 	protected TableExistenceService existsSvc;
 	protected AssocTblManager assocTblMgr;
 	
-	protected DeliaDao createDao() {
+	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
 		MemZDBInterfaceFactory memDBinterface = (MemZDBInterfaceFactory) delia.getDBInterface();
@@ -153,7 +153,7 @@ public class HLSTestBase extends BDDBase {
 			createTable(memDBinterface, "CustomerAddressDat1");
 		}
 		existsSvc = new ZTableExistenceService(delia.getDBInterface()); 
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 	
 	private void createTable(MemZDBInterfaceFactory db, String tableName) {

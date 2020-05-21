@@ -8,7 +8,6 @@ import org.delia.api.Delia;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.TypeDao;
 import org.delia.db.DBType;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;

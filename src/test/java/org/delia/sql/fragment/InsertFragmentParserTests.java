@@ -12,7 +12,7 @@ import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
 import org.delia.db.TableExistenceService;
 import org.delia.db.hls.AssocTblManager;
@@ -315,7 +315,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		return src;
 	}
 
-	private InsertFragmentParser createFragmentParser(DeliaDao dao, String src, List<TableInfo> tblInfoL) {
+	private InsertFragmentParser createFragmentParser(DeliaGenericDao dao, String src, List<TableInfo> tblInfoL) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -330,7 +330,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 
 		return parser;
 	}
-	private InsertFragmentParser createParser(DeliaDao dao, List<TableInfo> tblinfoL) {
+	private InsertFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
 		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
 		
 		DBAccessContext dbctx = new DBAccessContext(runner);
@@ -403,7 +403,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		return buildFromSrc(src, tblinfoL);
 	}
 	private InsertStatementExp buildFromSrc(String src, List<TableInfo> tblinfoL) {
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();
 		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
 		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);

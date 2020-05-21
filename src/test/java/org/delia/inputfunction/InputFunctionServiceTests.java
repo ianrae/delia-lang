@@ -11,7 +11,7 @@ import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.error.DeliaError;
 import org.delia.log.LogLevel;
@@ -51,7 +51,7 @@ public class InputFunctionServiceTests  extends BDDBase {
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(1, result.numRowsInserted);
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -85,7 +85,7 @@ public class InputFunctionServiceTests  extends BDDBase {
 		assertEquals(2, result.numRowsProcessed);
 		assertEquals(2, result.numRowsInserted);
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -121,7 +121,7 @@ public class InputFunctionServiceTests  extends BDDBase {
 		DeliaError err = result.errors.get(0);
 		assertEquals(1, err.getLineNum());
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -151,7 +151,7 @@ public class InputFunctionServiceTests  extends BDDBase {
 		DeliaError err = result.errors.get(0);
 		assertEquals(1, err.getLineNum());
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -175,7 +175,7 @@ public class InputFunctionServiceTests  extends BDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
 	private void createDelia(boolean withRules) {
@@ -198,10 +198,10 @@ public class InputFunctionServiceTests  extends BDDBase {
 
 		return src;
 	}
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	@Override
