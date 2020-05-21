@@ -91,7 +91,7 @@ public class EntitySourceCodeGeneratorTests extends DaoTestBase {
 
 		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
 		EntitySourceCodeGenerator codegen = new EntitySourceCodeGenerator(dao.getFactorySvc());
-		b = codegen.createSourceFiles(registry, "a.c.boston", "C:/tmp/delia");
+		b = codegen.createSourceFiles(registry, "org.delia.codegen.sample", "C:/tmp/delia");
 		assertEquals(true, b);
 	}
 

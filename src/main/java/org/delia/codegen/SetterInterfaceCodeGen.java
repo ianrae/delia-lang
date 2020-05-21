@@ -17,6 +17,9 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 
 		StrCreator sc = new StrCreator();
 		addImports(sc, structType);
+		sc.o("import org.delia.codegen.DeliaEntity;");
+		sc.nl();
+		
 		sc.o("public interface %s extends DeliaEntity {", typeName + "Setter");
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {

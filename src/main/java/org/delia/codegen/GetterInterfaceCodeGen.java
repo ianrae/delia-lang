@@ -1,15 +1,9 @@
 package org.delia.codegen;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.Shape;
 import org.delia.util.StringUtil;
 
 public class GetterInterfaceCodeGen extends CodeGenBase {
@@ -25,7 +19,7 @@ public class GetterInterfaceCodeGen extends CodeGenBase {
 		StrCreator sc = new StrCreator();
 		addImports(sc, structType);
 		
-		sc.o("public interface %s {", typeName);
+		sc.o("public interface %s extends DeliaImmutable {", typeName);
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);

@@ -1,5 +1,15 @@
 
 
+t1() ::= <<
+import java.util.HashMap;
+import java.util.Map;
+import org.delia.type.DStructHelper;
+import org.delia.type.DValue;
+import org.delia.codegen.DeliaImmutable;
+
+>>
+
+
 t2(cname,iname,ename,immutname) ::= <<
   public class <cname> implements <iname>,<ename> {
     private DValue dval;
@@ -12,7 +22,7 @@ t2(cname,iname,ename,immutname) ::= <<
     }
     public <cname>(<iname> immut) {
       <immutname> x = (<immutname>) immut;
-      this.dval = x.dval;
+      this.dval = x.internalDValue();
       this.helper = dval.asStruct();
     }
 

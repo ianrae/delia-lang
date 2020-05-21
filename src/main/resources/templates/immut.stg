@@ -1,4 +1,12 @@
 
+t1() ::= <<
+import java.util.HashMap;
+import java.util.Map;
+import org.delia.type.DStructHelper;
+import org.delia.type.DValue;
+import org.delia.codegen.DeliaImmutable;
+
+>>
 
 t2(cname,iname) ::= <<
 public static class <cname> implements <iname> {

@@ -21,7 +21,11 @@ public class ImmutCodeGen extends CodeGenBase {
 		addImports(sc, structType);
 		
 		STGroup g = new STGroupFile("templates/immut.stg");
-		ST st = g.getInstanceOf("t2");
+		//t1() ::= <<
+		ST st = g.getInstanceOf("t1");
+		sc.o(st.render());
+		
+		st = g.getInstanceOf("t2");
 		st.add("cname", typeName + "Immut");
 		st.add("iname", typeName);
 		

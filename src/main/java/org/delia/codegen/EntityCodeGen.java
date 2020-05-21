@@ -19,11 +19,13 @@ public class EntityCodeGen extends CodeGenBase {
 		String typeName = structType.getName();
 		StrCreator sc = new StrCreator();
 		addImports(sc, structType);
-
 		STGroup g = new STGroupFile("templates/entity.stg");
-		//t2(cname,iname,ename,immutname) ::= <<
+		//t1() ::= <<
+		ST st = g.getInstanceOf("t1");
+		sc.o(st.render());
 
-		ST st = g.getInstanceOf("t2");
+		//t2(cname,iname,ename,immutname) ::= <<
+		st = g.getInstanceOf("t2");
 		st.add("cname", typeName + "Entity");
 		st.add("iname", typeName);
 		st.add("ename", typeName + "Setter");
