@@ -1,0 +1,20 @@
+
+
+t2(cname,iname) ::= <%
+public static class <cname> implements <iname> {
+	private DValue dval;
+	private DStructHelper helper;
+
+	public <cname>(DValue dval) {
+		this.dval = dval;
+		this.helper = dval.asStruct();
+	}
+	@Override
+	public DValue internalDValue() {
+		return dval;
+	}
+}
+%>
+
+
+

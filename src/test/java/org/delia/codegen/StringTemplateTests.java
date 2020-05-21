@@ -24,7 +24,6 @@ public class StringTemplateTests extends DaoTestBase {
 	@Test
 	public void test2() {
 		STGroup g = new STGroupFile("templates/test.stg");
-//		ST hello = new ST("Hello, <name>");
 		ST hello = g.getInstanceOf("t2");
 		hello.add("name1", "Sue");
 		hello.add("name2", "Welch");
@@ -33,6 +32,18 @@ public class StringTemplateTests extends DaoTestBase {
 		System.out.println(s);
 		assertEquals("hello Sue and Welch.", s);
 	}
+	
+	@Test
+	public void test3() {
+		STGroup g = new STGroupFile("templates/immut.stg");
+		ST hello = g.getInstanceOf("t2");
+		hello.add("cname", "FlightImmut");
+		hello.add("iname", "Flight");
+		
+		String s = hello.render();
+		System.out.println(s);
+	}
+	
 
 	//---
 
