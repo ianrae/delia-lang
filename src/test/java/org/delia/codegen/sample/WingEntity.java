@@ -10,6 +10,8 @@ import org.delia.type.DValue;
     private DStructHelper helper;
     private Map<String,Object> setMap = new HashMap<>();
 
+    public WingEntity() {
+      }
     public WingEntity(DValue dval) {
       this.dval = dval;
       this.helper = dval.asStruct();

@@ -10,6 +10,9 @@ import org.delia.app.DaoTestBase;
 import org.delia.codegen.sample.Flight;
 import org.delia.codegen.sample.FlightEntity;
 import org.delia.codegen.sample.FlightImmut;
+import org.delia.codegen.sample.Wing;
+import org.delia.codegen.sample.WingEntity;
+import org.delia.codegen.sample.WingImmut;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.dao.EntityDaoBase;
 import org.delia.type.DValue;
@@ -20,7 +23,6 @@ import org.junit.Test;
 public class DaoTests extends DaoTestBase {
 	
 	public static class FlightDao extends EntityDaoBase<Flight> {
-
 		public FlightDao(DeliaSession session) {
 			super(session, "Flight");
 		}
@@ -43,6 +45,36 @@ public class DaoTests extends DaoTestBase {
 		@Override
 		protected Flight createImmutFromDVal(DValue dval) {
 			return new FlightImmut(dval);
+		}
+	}
+	public static class WingDao extends EntityDaoBase<Wing> {
+		public WingDao(DeliaSession session) {
+			super(session, "Wing");
+		}
+		
+		public Wing findById(int id) {
+			return doFindById(id);
+		}
+		public List<Wing> findAll() {
+			return doFindAll();
+		}
+		
+		public DValue insert(Wing entity) {
+			DValue serialVal = doInsert(entity);
+			if (canSetSerialId(entity, serialVal)) {
+				WingEntity we = (WingEntity) entity;
+				we.setId(serialVal.asInt());
+			}
+			return serialVal;
+		}
+		
+		public int update(Wing entity) {
+			return doUpdate(entity);
+		}
+
+		@Override
+		protected Wing createImmutFromDVal(DValue dval) {
+			return new WingImmut(dval);
 		}
 	}
 	
@@ -101,6 +133,22 @@ public class DaoTests extends DaoTestBase {
 		assertEquals(23, flight.getField2());
 	}
 	
+	@Test
+	public void test4Serial() {
+		WingDao dao = new WingDao(xdao.getMostRecentSession());
+		
+		WingEntity entity = new WingEntity();
+		entity.setWidth(40);
+
+		DValue serialVal = dao.insert(entity);
+		assertEquals(1, serialVal.asInt());
+		assertEquals(1, entity.getId()); //also gets set
+		
+		List<Wing> list = dao.findAll();
+		assertEquals(1, list.size());
+		Wing flight = dao.findById(1);
+		assertEquals(40, flight.getWidth());
+	}
 	
 	//---
 	protected DeliaGenericDao xdao;
@@ -114,7 +162,7 @@ public class DaoTests extends DaoTestBase {
 	}
 
 	protected String buildSrc() {
-		String src = "type Wing struct {id int primaryKey, width int } end";
+		String src = "type Wing struct {id int primaryKey serial, width int } end";
 		src += "\n type Flight struct {field1 int primaryKey, field2 int, dd date optional, relation wing Wing one optional } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";

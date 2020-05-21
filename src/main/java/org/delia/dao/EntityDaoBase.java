@@ -7,10 +7,14 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.codegen.DeliaEntity;
 import org.delia.codegen.DeliaImmutable;
+import org.delia.codegen.sample.Wing;
+import org.delia.codegen.sample.WingEntity;
 import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
+import org.delia.error.DetailedError;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
+import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -21,6 +25,10 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
 public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBase {
+	private static class InsertExtraInfo {
+		public DValue generatedSerialValue;
+	}
+	
 	private DeliaSession mainSession; //not used directly. we create child sessions 
 	protected Delia delia;
 	protected DValueConverterService dvalConverter;
@@ -41,7 +49,7 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 	}
 	
-	protected ResultValue doInsertOrUpdate(T entity, String src) {
+	protected ResultValue doInsertOrUpdate(T entity, String src, InsertExtraInfo extraInfo) {
 		List<DValue> inputL = new ArrayList<>();
 		inputL.add(createDValue(entity));
 		DValueIterator iter = new DValueIterator(inputL);	
@@ -52,6 +60,10 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		session.setRunnerIntiliazer(dri);
 		ResultValue res = delia.continueExecution(src, session);
 		session.setRunnerIntiliazer(null);
+		if (extraInfo != null) {
+			ResultValue res2 = session.getExecutionContext().varMap.get(RunnerImpl.VAR_SERIAL);
+			extraInfo.generatedSerialValue = res2.ok ? res2.getAsDValue() : null;
+		}
 		return res;
 	}
 	
@@ -87,7 +99,9 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 	    		DeliaImmutable immut = (DeliaImmutable) entity;
     			DValue internalDval = immut.internalDValue(); //can be null if disconnected
     			if (internalDval == null) {
-    				builder.addField(fieldName, null);
+    				if (!structType.fieldIsSerial(fieldName)) {
+    					builder.addField(fieldName, null);
+    				}
     			} else {
     				DValue dval = immut.internalDValue().asMap().get(fieldName); //may get null
     				builder.addField(fieldName, dval);
@@ -97,7 +111,8 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 
     	boolean b = builder.finish();
     	if (!b) {
-    		DeliaExceptionHelper.throwError("badsomething", "ssss");
+    		DetailedError err = builder.getValidationErrors().get(builder.getValidationErrors().size() - 1);
+    		DeliaExceptionHelper.throwError("badsomething", err.toString());
     	}
     	DValue finalVal = builder.getDValue();
     	return finalVal;
@@ -145,17 +160,26 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		return createImmutList(res);
 	}
 	
-	protected void doInsert(T entity) {
+	protected DValue doInsert(T entity) {
 		String src = String.format("insert %s {}", typeName);
-		doInsertOrUpdate(entity, src);
+		InsertExtraInfo extraInfo = new InsertExtraInfo();
+		doInsertOrUpdate(entity, src, extraInfo);
+		return extraInfo.generatedSerialValue;
+	}
+	protected boolean canSetSerialId(T entity, DValue serialVal) {
+		if (entity instanceof DeliaEntity && serialVal != null) {
+			return true;
+		}
+		return false;
 	}
 	
 	protected int doUpdate(T entity) {
 		DValue pkval = getPrimaryKeyValue(entity);
 		String src = String.format("update %s[%s] {}", typeName, pkval.asString());
-		ResultValue res = doInsertOrUpdate(entity, src);
+		ResultValue res = doInsertOrUpdate(entity, src, null);
 		Integer updateCount = (Integer) res.val;
 		return updateCount;
 	}
+	
 	
 }
