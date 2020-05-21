@@ -180,6 +180,18 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		Integer updateCount = (Integer) res.val;
 		return updateCount;
 	}
+	protected int doUpsert(T entity) {
+		DValue pkval = getPrimaryKeyValue(entity);
+		String src = String.format("upsert %s[%s] {}", typeName, pkval.asString());
+		ResultValue res = doInsertOrUpdate(entity, src, null);
+		Integer updateCount = (Integer) res.val;
+		return updateCount;
+	}
 	
+	protected void doDelete(T entity) {
+		DValue pkval = getPrimaryKeyValue(entity);
+		String src = String.format("delete %s[%s]", typeName, pkval.asString());
+		ResultValue res = doInsertOrUpdate(entity, src, null);
+	}
 	
 }
