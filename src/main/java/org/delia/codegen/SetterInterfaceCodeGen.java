@@ -8,8 +8,8 @@ import org.delia.util.StringUtil;
 
 public class SetterInterfaceCodeGen extends CodeGenBase {
 
-	public SetterInterfaceCodeGen(DTypeRegistry registry) {
-		super(registry);
+	public SetterInterfaceCodeGen(DTypeRegistry registry, String packageName) {
+		super(registry, packageName);
 	}
 
 	public String generate(DStructType structType) {

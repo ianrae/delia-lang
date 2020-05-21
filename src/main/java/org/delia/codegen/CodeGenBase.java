@@ -14,9 +14,11 @@ import org.delia.type.Shape;
 //====
 public class CodeGenBase {
 	protected DTypeRegistry registry;
+	protected String packageName;
 
-	public CodeGenBase(DTypeRegistry registry) {
+	public CodeGenBase(DTypeRegistry registry, String packageName) {
 		this.registry = registry;
+		this.packageName = packageName;
 	}
 	protected String convertToJava(DType ftype) {
 		switch(ftype.getShape()) {
@@ -104,12 +106,22 @@ public class CodeGenBase {
 				String s = String.format("import java.util.Date;");
 				list.add(s);
 				alreadyMap.put("Date", "");
+			} else if (ftype.isStructShape()) {
+				if (alreadyMap.containsKey(ftype.getName())) {
+					continue;
+				}
+				String s = String.format("import %s.%s;", packageName, ftype.getName());
+				list.add(s);
+				alreadyMap.put(ftype.getName(), "");
 			}
+
 		}
 		return list;
 	}
 
 	protected void addImports(StrCreator sc, DStructType structType) {
+		sc.o("package %s;", packageName);
+		sc.nl();
 		for(String s: getImportList(structType)) {
 			sc.o(s);
 			sc.nl();

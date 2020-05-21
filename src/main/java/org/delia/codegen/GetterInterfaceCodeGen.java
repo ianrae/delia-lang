@@ -14,8 +14,8 @@ import org.delia.util.StringUtil;
 
 public class GetterInterfaceCodeGen extends CodeGenBase {
 
-	public GetterInterfaceCodeGen(DTypeRegistry registry) {
-		super(registry);
+	public GetterInterfaceCodeGen(DTypeRegistry registry, String packageName) {
+		super(registry, packageName);
 	}
 	
 	

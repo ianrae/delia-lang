@@ -11,8 +11,8 @@ import org.stringtemplate.v4.STGroupFile;
 
 public class EntityCodeGen extends CodeGenBase {
 
-	public EntityCodeGen(DTypeRegistry registry) {
-		super(registry);
+	public EntityCodeGen(DTypeRegistry registry, String packageName) {
+		super(registry, packageName);
 	}
 
 	public String generate(DStructType structType) {

@@ -21,14 +21,15 @@ public class CodegenTests extends DaoTestBase {
 		assertEquals(true, b);
 
 		String typeName = "Flight";
+		String pkg = "a.b.argo";
 		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
 		DStructType structType = (DStructType) registry.getType(typeName);
 		
-		GetterInterfaceCodeGen gen = new GetterInterfaceCodeGen(registry);
+		GetterInterfaceCodeGen gen = new GetterInterfaceCodeGen(registry, pkg);
 		String java = gen.generate(structType);
 		log.log(java);
 		log.log("////");
-		ImmutCodeGen gen2 = new ImmutCodeGen(registry);
+		ImmutCodeGen gen2 = new ImmutCodeGen(registry, pkg);
 		java = gen2.generate(structType);
 		log.log(java);
 	}
@@ -41,10 +42,11 @@ public class CodegenTests extends DaoTestBase {
 		assertEquals(true, b);
 
 		String typeName = "Flight";
+		String pkg = "a.b.argo";
 		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
 		DStructType structType = (DStructType) registry.getType(typeName);
 		
-		EntityCodeGen gen = new EntityCodeGen(registry);
+		EntityCodeGen gen = new EntityCodeGen(registry, pkg);
 		String java = gen.generate(structType);
 		log.log(java);
 	}
@@ -57,10 +59,11 @@ public class CodegenTests extends DaoTestBase {
 		assertEquals(true, b);
 
 		String typeName = "Flight";
+		String pkg = "a.b.argo";
 		DTypeRegistry registry = dao.getMostRecentSession().getExecutionContext().registry;
 		DStructType structType = (DStructType) registry.getType(typeName);
 		
-		SetterInterfaceCodeGen gen = new SetterInterfaceCodeGen(registry);
+		SetterInterfaceCodeGen gen = new SetterInterfaceCodeGen(registry, pkg);
 		String java = gen.generate(structType);
 		log.log(java);
 	}
@@ -72,7 +75,8 @@ public class CodegenTests extends DaoTestBase {
 	}
 
 	private String buildSrc() {
-		String src = "type Flight struct {field1 int unique, field2 int, dd date optional } end";
+		String src = "type Wing struct {id int, width int } end";
+		src += "\n type Flight struct {field1 int unique, field2 int, dd date optional, relation wing Wing one optional } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;

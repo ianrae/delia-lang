@@ -11,8 +11,8 @@ import org.stringtemplate.v4.STGroupFile;
 
 public class ImmutCodeGen extends CodeGenBase {
 
-	public ImmutCodeGen(DTypeRegistry registry) {
-		super(registry);
+	public ImmutCodeGen(DTypeRegistry registry, String packageName) {
+		super(registry, packageName);
 	}
 
 	public String generate(DStructType structType) {
