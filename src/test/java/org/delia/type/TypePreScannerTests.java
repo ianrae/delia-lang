@@ -49,6 +49,21 @@ public class TypePreScannerTests extends BDDBase {
 			map.put(dtype.getName(), dtype);
 			definedMap.put(dtype.getName(), "");
 		}
+		public int size() {
+			return map.size();
+		}
+		public List<String> getUndefinedTypes() {
+			List<String> list = new ArrayList<>();
+			for(String typeName: map.keySet()) {
+				if (!definedMap.containsKey(typeName)) {
+					list.add(typeName);
+				}
+			}
+			return list;
+		}
+		public Map<String, DType> getMap() {
+			return map;
+		}
 	}
 	
 	
@@ -130,6 +145,10 @@ public class TypePreScannerTests extends BDDBase {
 				}
 			}
 		}
+
+		public PreTypeRegistry getPreRegistry() {
+			return preRegistry;
+		}
 	}	
 	
 	
@@ -144,8 +163,8 @@ public class TypePreScannerTests extends BDDBase {
 		assertEquals(DTypeRegistry.NUM_BUILTIN_TYPES + 2, registry.size());
 
 		Set<String> set = registry.getAllCustomTypes();
-		assertEquals(1, set.size());
-		assertEquals(true, set.contains("Flight"));
+		assertEquals(2, set.size());
+		assertEquals(true, set.contains("Customer"));
 	}
 
 	@Test
@@ -164,17 +183,19 @@ public class TypePreScannerTests extends BDDBase {
 		DTypeRegistry registry = registryBuilder.getRegistry();
 		
 		TypePreRunner preRunner = new TypePreRunner(delia.getFactoryService(), registry);
-		ResultValue res = new ResultValue();
 		List<DeliaError> allErrors = new ArrayList<>();
 		preRunner.executeStatements(expL, allErrors);
 		
+		PreTypeRegistry preReg = preRunner.getPreRegistry();
+		assertEquals(2, preReg.size());
+		assertEquals(0, preReg.getUndefinedTypes().size());
 		
-//		DTypeRegistry registry = dao.getRegistry();
-//		assertEquals(DTypeRegistry.NUM_BUILTIN_TYPES + 9, registry.size());
-//
-//		Set<String> set = registry.getAllCustomTypes();
-//		assertEquals(1, set.size());
-//		assertEquals(true, set.contains("Flight"));
+		for(String typeName: preReg.getMap().keySet()) {
+			DType dtype = preReg.getMap().get(typeName);
+			log.log("%s: %s", dtype.getShape().name(), typeName);
+		}
+		
+		assertEquals(DTypeRegistry.NUM_BUILTIN_TYPES + 0, registry.size());
 	}
 	
 	//---
