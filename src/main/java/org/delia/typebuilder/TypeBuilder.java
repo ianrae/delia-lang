@@ -21,11 +21,13 @@ public class TypeBuilder extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private RuleBuilder ruleBuilder;
+	private PreTypeRegistry preRegistry;
 
-	public TypeBuilder(FactoryService factorySvc, DTypeRegistry registry) {
+	public TypeBuilder(FactoryService factorySvc, DTypeRegistry registry, PreTypeRegistry preRegistry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.ruleBuilder = new RuleBuilder(factorySvc, registry);
+		this.preRegistry = preRegistry;
 	}
 	
 	public ErrorTracker getErrorTracker() {
@@ -78,13 +80,7 @@ public class TypeBuilder extends ServiceBase {
 	 * @return DType 
 	 */
 	private DStructType findOrCreateType(String typeName, DType baseType, OrderedMap omap) {
-		//now using type replacer
-//	    DType possibleStruct = registry.getType(typeName);
-//	    if (possibleStruct != null && possibleStruct.isStructShape()) {
-//	      DStructType dtype =  (DStructType) possibleStruct;
-//	      dtype.internalAdjustType(baseType, omap);
-//	      return dtype;
-//	    }
+		DType dtype = preRegistry.getType(typeName);
 		
 		List<TypePair> possibleL = new ArrayList<>();
 		TypePair pair = baseType == null ? null : findPrimaryKeyFieldPair(baseType);
@@ -117,7 +113,14 @@ public class TypeBuilder extends ServiceBase {
 		} else {
 			prikey = new PrimaryKey(possibleL);
 		}
-		return new DStructType(Shape.STRUCT, typeName, baseType, omap, prikey);
+		
+		if (dtype == null) {
+			return new DStructType(Shape.STRUCT, typeName, baseType, omap, prikey);
+		} else {
+			DStructType structType = (DStructType) dtype;
+			structType.secretCtor(baseType, omap, prikey);
+			return structType;
+		}
 	}
 	
 	private static TypePair findPrimaryKeyFieldPair(DType inner) {
@@ -157,9 +160,9 @@ public class TypeBuilder extends ServiceBase {
 			BuiltInTypes builtInType = BuiltInTypes.fromDeliaTypeName(typeStatementExp.baseTypeName);
 			baseType = registry.getType(builtInType);
 		}
-		
-		
-		DType dtype = new DType(baseType.getShape(), typeStatementExp.typeName, baseType);
+
+		DType dtype = preRegistry.getType(typeStatementExp.typeName);
+		dtype.secretScalarCtor(baseType.getShape(), typeStatementExp.typeName, baseType);
 		addRules(dtype, typeStatementExp);
 		registry.add(typeStatementExp.typeName, dtype);
 		return dtype;

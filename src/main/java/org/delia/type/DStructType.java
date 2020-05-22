@@ -18,6 +18,12 @@ public class DStructType extends DType {
 		this.orderedMap = orderedMap;
 		this.primaryKey = primaryKey;
 	}
+	//TODO move to internal API
+	public void secretCtor(DType baseType, OrderedMap orderedMap, PrimaryKey primaryKey) {
+		this.baseType = baseType;
+		this.orderedMap = orderedMap;
+		this.primaryKey = primaryKey;
+	}
 	
 	public boolean fieldIsOptional(String fieldName) {
 	    boolean b = orderedMap.isOptional(fieldName);

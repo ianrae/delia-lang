@@ -12,6 +12,7 @@ import org.delia.rule.rules.RulePostProcessor;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.typebuilder.FutureDeclError;
+import org.delia.typebuilder.PreTypeRegistry;
 import org.delia.typebuilder.TypeBuilder;
 
 /**
@@ -22,6 +23,7 @@ import org.delia.typebuilder.TypeBuilder;
 public class TypeRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private List<Exp> needReexecuteL = new ArrayList<>();
+	private PreTypeRegistry preRegistry;
 
 	public TypeRunner(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -59,7 +61,7 @@ public class TypeRunner extends ServiceBase {
 	}
 
 	private void executeTypeStatement(TypeStatementExp exp, ResultValue res) {
-		TypeBuilder typeBuilder = new TypeBuilder(factorySvc, registry);
+		TypeBuilder typeBuilder = new TypeBuilder(factorySvc, registry, preRegistry);
 		
 		DType dtype = typeBuilder.createType(exp);
 		res.ok = dtype != null;
@@ -85,6 +87,14 @@ public class TypeRunner extends ServiceBase {
 
 	public List<Exp> getNeedReexecuteL() {
 		return needReexecuteL;
+	}
+
+	public PreTypeRegistry getPreRegistry() {
+		return preRegistry;
+	}
+
+	public void setPreRegistry(PreTypeRegistry preRegistry) {
+		this.preRegistry = preRegistry;
 	}
 
 }

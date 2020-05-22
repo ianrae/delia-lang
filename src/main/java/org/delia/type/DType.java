@@ -20,14 +20,20 @@ public class DType {
 	private String name;
 	private String packageName;
 	private String completeName;
-	private DType baseType; //can be null
+	protected DType baseType; //can be null
 	private List<DRule> rules = new ArrayList<>();
 	private int bitIndex;
-	public boolean invalidFlag; //used to verify type-replacement worked.
+	public boolean invalidFlag; //used to verify type-replacement worked. TODO remove
 
 	public DType(Shape shape, String name, DType baseType) {
 		this.shape = shape;
 		this.name = name;
+		this.completeName = name;
+		this.baseType = baseType;
+	}
+	public void secretScalarCtor(Shape shape, String typeName, DType baseType) {
+		this.shape = shape;
+		this.name = typeName;
 		this.completeName = name;
 		this.baseType = baseType;
 	}

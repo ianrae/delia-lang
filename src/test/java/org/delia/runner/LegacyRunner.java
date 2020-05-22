@@ -8,6 +8,7 @@ import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.RunnerImpl;
 import org.delia.type.DType;
+import org.delia.typebuilder.PreTypeRegistry;
 import org.delia.typebuilder.TypeBuilder;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -32,7 +33,8 @@ public class LegacyRunner extends RunnerImpl {
 		
 		public boolean init(ExecutionState ctx) {
 			boolean b = super.init(ctx);
-			this.typeBuilder = new TypeBuilder(factorySvc, registry);
+			PreTypeRegistry preRegistry = new PreTypeRegistry(); //TODO use properly later
+			this.typeBuilder = new TypeBuilder(factorySvc, registry, preRegistry);
 			return b;
 		}
 		
