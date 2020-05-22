@@ -169,7 +169,7 @@ public class DValueConverterService extends ServiceBase {
 		} else if (exp instanceof StringExp) {
 			return exp.strValue();
 		} else {
-			//Do date and relation later: TODO
+			//date and relation should be handled in another layer
 			return exp.strValue();
 		}
 	}
@@ -196,7 +196,7 @@ public class DValueConverterService extends ServiceBase {
 			StringExp exp = (StringExp) valueExp;
 			return builder.buildString(exp.val);
 		} else if (valueExp instanceof NullExp) {
-			return null; //TODO: is this ok?
+			return null; 
 		} else { //treat as string
 			if (treatUnknownAsString) {
 				return builder.buildString(valueExp.strValue());

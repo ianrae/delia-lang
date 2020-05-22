@@ -139,10 +139,10 @@ public class DType {
 		return name;
 	}
 	
-	//TODO: make this into an 'internal' api with DStructTypeInternal interface
-	public void internalAdjustType(DType baseType) {
-		this.baseType = baseType;
-	}
+//	//FUTURE: make this into an 'internal' api with DStructTypeInternal interface
+//	public void internalAdjustType(DType baseType) {
+//		this.baseType = baseType;
+//	}
 
 	public void performTypeReplacement(TypeReplaceSpec spec) {
 		if (baseType != null && spec.needsReplacement(this, baseType)) {

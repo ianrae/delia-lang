@@ -34,17 +34,9 @@ public class DTypeRegistry {
 	    dtype.setBitIndex(nextBitIndex++);
 	    
 	    if (map.containsKey(typeName)) {
-	    	System.out.println("REDEF " + typeName);
+	    	System.out.println("REDEF " + typeName); //TODO remove
 	    }
-//	    //remove any existing one with same name.
-//	    //because we re-execute typerunner we may have duplicates. remove earlier version
-//	    //TODO: not sure this works.
-//	    for(DType inner: orderedList) {
-//	    	if (inner.getName().equals(name)) {
-//	    		orderedList.remove(inner);
-//	    		break;
-//	    	}
-//	    }
+	    
 	    orderedList.add(dtype);
 		map.put(typeName, dtype);
 		
