@@ -39,11 +39,10 @@ public class WhereClauseHelper extends ServiceBase {
 		this.aliasAlloc = aliasAlloc;
 	}
 
-	public void genWhere(HLSQuerySpan hlspan, QueryExp queryExp) {
+	public void genWhere(HLSQuerySpan hlspan) {
 		if (hlspan.filEl ==  null) {
 			return;
 		}
-		//TODO don't need to pass queryExp here!! remove
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = hlspan.filEl.queryExp;
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);

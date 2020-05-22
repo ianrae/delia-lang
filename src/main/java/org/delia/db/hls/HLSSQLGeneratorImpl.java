@@ -74,7 +74,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				hls.details = hlspan1.details;
 				
 				SQLCreator sc = new SQLCreator();
-				whereClauseHelper.genWhere(hlspan2, queryExp); 
+				whereClauseHelper.genWhere(hlspan2); 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
 				
@@ -140,7 +140,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		if (hlspan.fromType != null) {
 			aliasAlloc.findOrCreateFor(hlspan.fromType);
 		}
-		this.whereClauseHelper.genWhere(hlspan, queryExp); //need this to genereate "as " in fields
+		this.whereClauseHelper.genWhere(hlspan); //need this to genereate "as " in fields
 		
 		SQLCreator sc = new SQLCreator();
 		//SELECT .. from .. ..join.. ..where.. ..order..
