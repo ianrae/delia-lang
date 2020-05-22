@@ -108,7 +108,7 @@ public class QueryParser extends ParserBase {
 	}
 	
 	//fns
-	//TODO: used by LetParser - fix to use NameAndFuncParser
+	//FUTURE: used by LetParser - fix to use NameAndFuncParser
 	public static Parser<Exp> fnOperand() {
 		return Parsers.or(LetParser.explicitValue(), varName());
 	}

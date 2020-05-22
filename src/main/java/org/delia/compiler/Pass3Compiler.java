@@ -20,7 +20,7 @@ import org.delia.runner.TypeSpec;
 import org.delia.type.BuiltInTypes;
 
 //is the linking phase
-//TODO: if we tracked field types we could check that .year() was with a Date field
+//FUTURE: if we tracked field types we could check that .year() was with a Date field
 public class Pass3Compiler extends CompilerPassBase {
 	private Map<String,TypeSpec> typeMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
 	private Map<String,ResultValue> varMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
@@ -227,7 +227,7 @@ public class Pass3Compiler extends CompilerPassBase {
 		if (typeExp.baseTypeName.equals("struct")) {
 			checkPrimaryKeys(typeExp, results);
 		} else  {
-			//TODO: support forward references
+			//FUTURE: support forward references
 			if (!typeMap.containsKey(typeExp.baseTypeName)) {
 				String msg = String.format("type '%s' uses undefined base type '%s'", typeExp.typeName, typeExp.baseTypeName);
 				DeliaError err = createError("type-unknown-base-type", msg, typeExp);
@@ -313,15 +313,25 @@ public class Pass3Compiler extends CompilerPassBase {
 			return false;
 		}
 		
-		
 		if (spec.baseTypeName == null) {
 			return true;
-		} else if (BuiltInTypes.valueOf(spec.baseTypeName) != null) {
-			//TODO: fix. this won't handle double inheritance!
+		} else if (IsBuiltInType(spec.baseTypeName)) {
 			return false;
 		}
 		
-		return false;
+		return true;
+	}
+
+	private List<String> builtInTypesL = null; //create lazily
+	private boolean IsBuiltInType(String baseTypeName) {
+		if (builtInTypesL == null) {
+			builtInTypesL = new ArrayList<>();
+			for(BuiltInTypes bit: BuiltInTypes.values()) {
+				builtInTypesL.add(bit.name());
+			}
+		}
+		
+		return builtInTypesL.contains(baseTypeName);
 	}
 
 	private void buildFieldMap(String baseTypeName, Map<String, String> fieldMap) {
