@@ -77,7 +77,7 @@ public class QueryParser extends ParserBase {
 	}
 	
 	private static Parser<FilterOpFullExp> opexpr1() {
-		return Parsers.or(opexpr0(), opexprParen(), opexprNegParen());
+		return Parsers.or(queryIn(), opexpr0(), opexprParen(), opexprNegParen());
 	}
 //	public static Parser<FilterOpFullExp> opexprNeg() {
 //		return Parsers.sequence(Parsers.INDEX, term("!"), opexpr1(),
@@ -97,7 +97,6 @@ public class QueryParser extends ParserBase {
 	}
 	private static Parser<Exp> filter0() {
 		return Parsers.or(
-				queryIn(), //TODO this should be inside opexpr2 so can combine in and/or
 				opexpr2(),
 				LetParser.explicitValue(),
 				varName());
