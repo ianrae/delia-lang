@@ -3,6 +3,7 @@ package org.delia.rule.rules;
 import java.util.Date;
 
 import org.delia.core.DateFormatService;
+import org.delia.dval.compare.DValueCompareService;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
 import org.delia.rule.DValueRuleOperand;
@@ -36,51 +37,35 @@ public class CompareOpRule extends DRuleBase {
 			}
 			
 			//convert to date.
-			//TODO: can this be done during compilation? to make it faster?
+			//FUTURE: can this be done during compilation? to make it faster?
 			if (obj1 instanceof Date && obj2 instanceof String) {
 				obj2 = fmtSvc.parse((String) obj2); //will throw if can't convert
 			} else if (obj1 instanceof String && obj2 instanceof Date) {
 				obj1 = fmtSvc.parse((String) obj1); //will throw if can't convert
 			}
 			
-			//auto-promote
-			if (obj1 instanceof Long && obj2 instanceof Integer) {
-				Integer n = (Integer) obj2;
-				obj2 = new Long(n.longValue());
-			} else if (obj1 instanceof Integer && obj2 instanceof Long) {
-				Integer n = (Integer) obj1;
-				obj1 = new Long(n.longValue());
-			}
-			//more
-			if (obj1 instanceof Double && obj2 instanceof Integer) {
-				Integer n = (Integer) obj2;
-				obj2 = new Double(n.doubleValue());
-			} else if (obj1 instanceof Integer && obj2 instanceof Double) {
-				Integer n = (Integer) obj1;
-				obj1 = new Double(n.doubleValue());
-			}
-			
+			DValueCompareService compareSvc = ctx.getCompareSvc();
+			int cmp = compareSvc.compareObjs(obj1, obj2);
 			
 			boolean b = false;
 			switch(op) {
 			case "<":
-				b = obj1.compareTo(obj2) < 0;
+				b = cmp < 0;
 				break;
 			case "<=":
-				b = obj1.compareTo(obj2) <= 0;
+				b = cmp <= 0;
 				break;
 			case ">":
-				b = obj1.compareTo(obj2) > 0;
+				b = cmp > 0;
 				break;
 			case ">=":
-				b = obj1.compareTo(obj2) >= 0;
+				b = cmp >= 0;
 				break;
-			//TODO: were we going to handle == and != somewhere else?
 			case "==":
-				b = obj1.compareTo(obj2) == 0;
+				b = cmp == 0;
 				break;
 			case "!=":
-				b = obj1.compareTo(obj2) != 0;
+				b = cmp != 0;
 				break;
 				
 			default:
