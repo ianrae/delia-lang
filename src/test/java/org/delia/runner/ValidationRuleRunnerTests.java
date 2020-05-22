@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.base.FakeTypeCreator;
 import org.delia.db.DBAccessContext;
+import org.delia.dval.compare.DValueCompareService;
 import org.delia.rule.AlwaysRuleGuard;
 import org.delia.rule.DRule;
 import org.delia.rule.DRuleContext;
@@ -90,13 +91,15 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 
 	private void chkPass(DValue dval, DRule rule) {
 		FetchRunner fetchRunner = createFetchRunner();
-		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner);
+		DValueCompareService compareSvc = factorySvc.getDValueCompareService();
+		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc);
 		assertEquals(true, rule.validate(dval, ctx));
 		assertEquals(false, ctx.hasErrors());
 	}
 	private void chkFail(DValue dval, DRule rule) {
 		FetchRunner fetchRunner = createFetchRunner();
-		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner);
+		DValueCompareService compareSvc = factorySvc.getDValueCompareService();
+		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc);
 		assertEquals(false, rule.validate(dval, ctx));
 		assertEquals(true, ctx.hasErrors());
 	}

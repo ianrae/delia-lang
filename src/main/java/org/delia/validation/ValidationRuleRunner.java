@@ -6,6 +6,7 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
+import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.rule.AlwaysRuleGuard;
@@ -31,12 +32,14 @@ public class ValidationRuleRunner extends ServiceBase {
 		boolean populateFKsFlag;
 		private boolean insertFlag;
 		private FetchRunner fetchRunner;
+		private DValueCompareService compareSvc;
 
 		public ValidationRuleRunner(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
 			super(factorySvc);
 			this.localET = new SimpleErrorTracker(log);
 			this.dbCapabilties = dbCapabilties;
 			this.fetchRunner = fetchRunner;
+			this.compareSvc = factorySvc.getDValueCompareService();
 		}
 
 		public boolean validateFieldsOnly(DValue dval) {
@@ -188,7 +191,8 @@ public class ValidationRuleRunner extends ServiceBase {
 			}
 			
 			ErrorTracker tmpET = new SimpleErrorTracker(log);
-			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, fetchRunner); //TODO: use correct rule Text
+			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, 
+					fetchRunner, compareSvc); 
 			boolean b = rule.validate(dval, ctx);
 			if (!b) {
 				localET.getErrors().addAll(ctx.getErrors());

@@ -3,6 +3,7 @@ package org.delia.core;
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.VarEvaluator;
@@ -31,4 +32,5 @@ public interface FactoryService {
 	SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
+	DValueCompareService getDValueCompareService();
 }

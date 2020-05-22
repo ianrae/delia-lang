@@ -30,8 +30,10 @@ public class ScalarRuleOperand implements RuleOperand {
 			return Shape.LONG;
 		} else if (val instanceof Double) {
 			return Shape.NUMBER;
+		} else if (val instanceof Boolean) {
+			return Shape.BOOLEAN;
 		} else {
-			return Shape.STRING;
+			return Shape.STRING; //date as string
 		}
 	}
 	@Override

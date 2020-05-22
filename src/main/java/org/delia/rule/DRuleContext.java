@@ -3,6 +3,7 @@ package org.delia.rule;
 import java.util.List;
 
 import org.delia.db.DBCapabilties;
+import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
@@ -16,15 +17,17 @@ public class DRuleContext {
 	private boolean populateFKsFlag;
 	private DBCapabilties dbCapabilities;
 	private FetchRunner fetchRunner;
+	private DValueCompareService compareSvc;
 
 	public DRuleContext(ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
-					boolean populateFKsFlag, FetchRunner fetchRunner) {
+					boolean populateFKsFlag, FetchRunner fetchRunner, DValueCompareService compareSvc) {
 		this.et = et;
 		this.ruleText = ruleText;
 		this.enableRelationModifierFlag = enableRelationModifierFlag;
 		this.dbCapabilities = dbCapabilties;
 		this.populateFKsFlag = populateFKsFlag;
 		this.fetchRunner = fetchRunner;
+		this.compareSvc = compareSvc;
 	}
 	public DetailedError addError(String id, String msg) {
 		String msg2 = String.format("%s - in rule: %s", msg, ruleText);
@@ -85,5 +88,8 @@ public class DRuleContext {
 	}
 	public FetchRunner getFetchRunner() {
 		return fetchRunner;
+	}
+	public DValueCompareService getCompareSvc() {
+		return compareSvc;
 	}
 }
