@@ -48,7 +48,7 @@ public class HLSTestBase extends BDDBase {
 	protected HLSQueryStatement buildHLS(String src) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, null);
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 		
 		HLSEngine hlsEngine = new HLSEngine(delia.getFactoryService(), session.getExecutionContext().registry);

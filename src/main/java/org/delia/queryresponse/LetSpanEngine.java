@@ -9,7 +9,6 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
-import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -20,11 +19,11 @@ public class LetSpanEngine extends ServiceBase {
 	private DTypeRegistry registry;
 	private ZQueryResponseFunctionFactory fnFactory;
 
-	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry, FetchRunner fetchRunner) {
+	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		
-		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
+		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
 	}
 	
 	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {

@@ -75,7 +75,7 @@ public class LetStatementRunner extends ServiceBase {
 
 	public ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
 		this.spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
-		this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner);
+		this.letSpanEngine = new LetSpanEngine(factorySvc, registry);
 		
 		if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
 			return invokeUserFunc(exp, res);

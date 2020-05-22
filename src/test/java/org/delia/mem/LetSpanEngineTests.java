@@ -49,15 +49,14 @@ public class LetSpanEngineTests extends BDDBase {
 		LetStatementExp letStatement = findLet(sessimpl);
 		
 		LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(delia.getFactoryService(), session.getExecutionContext().registry, null);
-		FetchRunner fetchRunner = null;
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner);
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		
 		QueryExp queryExp = (QueryExp) letStatement.value;
 		QueryResponse qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp, spanRunner);
 		
 		MyLetSpanRunner myrunner = new MyLetSpanRunner();
-		letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner);
+		letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		
 		qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp, myrunner);
@@ -93,8 +92,7 @@ public class LetSpanEngineTests extends BDDBase {
 		QueryResponse qresp = (QueryResponse) res.val;
 		
 		MyLetSpanRunner myrunner = new MyLetSpanRunner();
-		FetchRunner fetchRunner = null;
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, fetchRunner);
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		
 		qresp = (QueryResponse) res.val;
 		qresp = letEngine.process(queryExp, qresp, myrunner);
