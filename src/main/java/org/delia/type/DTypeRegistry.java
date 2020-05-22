@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.delia.util.DeliaExceptionHelper;
+
 
 /**
  * Represents all the known types in a given Delia program.
@@ -34,7 +36,7 @@ public class DTypeRegistry {
 	    dtype.setBitIndex(nextBitIndex++);
 	    
 	    if (map.containsKey(typeName)) {
-	    	System.out.println("REDEF " + typeName); //TODO remove
+	    	DeliaExceptionHelper.throwError("redefine-type-not-allowed", "Type '%s' is already registered. Did you have it twice in your Delia source code?", typeName);
 	    }
 	    
 	    orderedList.add(dtype);

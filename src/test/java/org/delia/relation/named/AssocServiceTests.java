@@ -69,7 +69,7 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		MyManyToManyVisitor visitor = new MyManyToManyVisitor();
 		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-		assertEquals("Address.cust;Customer.addr1", visitor.trail.getTrail());
+		assertEquals("Customer.addr1;Address.cust", visitor.trail.getTrail());
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
 		DatIdMap datIdMap = null; //TODO is this ok?
