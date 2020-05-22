@@ -1,6 +1,5 @@
 package org.delia.db;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.runner.Runner;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
@@ -19,10 +18,7 @@ import org.delia.type.DTypeRegistry;
  */
 public class DBAccessContext {
 	public DTypeRegistry registry;
-	public VarEvaluator varEvaluator; //only used by MEMDb
-	public Object connObject; //for internal use only
-	public boolean disableSqlLogging; //for internal use only
-	public DatIdMap datIdMap;
+	public VarEvaluator varEvaluator; 
 	
 	public DBAccessContext(DTypeRegistry registry, VarEvaluator eval) {
 		this.registry = registry;
@@ -37,8 +33,6 @@ public class DBAccessContext {
 		DBAccessContext ctx = new DBAccessContext(null, null);
 		ctx.registry = this.registry;
 		ctx.varEvaluator = this.varEvaluator;
-		ctx.connObject = this.connObject;
-		ctx.datIdMap = this.datIdMap;
 		return ctx;
 	}
 }

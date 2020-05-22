@@ -57,7 +57,7 @@ public class FKHelper extends ServiceBase {
 //		this.sqlHelperFactory = sqlHelperFactory;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
-		this.nameFormatter = sqlHelperFactory.createNameFormatter(dbctx);
+		this.nameFormatter = sqlHelperFactory.createNameFormatter();
 		this.queryDetectorSvc = sqlHelperFactory.createQueryTypeDetector(dbctx);
 		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc);
 //		this.sqlgen = sqlHelperFactory.createPrepSqlGen(existSvc, dbctx);
