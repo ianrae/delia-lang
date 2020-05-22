@@ -12,7 +12,7 @@ public interface SqlHelperFactory {
 	DBErrorConverter createErrorConverter();
 //	PreparedStatementGenerator createPrepSqlGen(TableExistenceService existSvc, DBAccessContext dbctx);
 //	InsertStatementGenerator createPrepInsertSqlGen(DBAccessContext dbctx, TableExistenceService existSvc);
-	SqlNameFormatter createNameFormatter(DBAccessContext dbctx);
+	SqlNameFormatter createNameFormatter();
 //	FKSqlGenerator createFKSqlGen(List<TableInfo> tblinfoL, DBAccessContext dbctx, TableExistenceService existSvc);
 	SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx, SpanHelper spanHelper);
 //	TableCreator createTableCreator(DBAccessContext dbctx, DatIdMap datIdMap);

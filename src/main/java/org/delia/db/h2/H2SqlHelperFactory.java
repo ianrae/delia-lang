@@ -44,7 +44,7 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 //	}
 	
 	@Override
-	public SqlNameFormatter createNameFormatter(DBAccessContext dbctx) {
+	public SqlNameFormatter createNameFormatter() {
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
 		return nameFormatter;
 	}
