@@ -22,7 +22,6 @@ import org.delia.typebuilder.TypeBuilder;
  */
 public class TypeRunner extends ServiceBase {
 	private DTypeRegistry registry;
-	private List<Exp> needReexecuteL = new ArrayList<>();
 	private PreTypeRegistry preRegistry;
 
 	public TypeRunner(FactoryService factorySvc, DTypeRegistry registry) {
@@ -67,7 +66,6 @@ public class TypeRunner extends ServiceBase {
 		res.ok = dtype != null;
 		if (! res.ok) {
 			res.errors.addAll(typeBuilder.getErrorTracker().getErrors());
-			needReexecuteL.add(exp);
 		}
 	}
 
@@ -84,10 +82,6 @@ public class TypeRunner extends ServiceBase {
 		return false;
 	}
 
-
-	public List<Exp> getNeedReexecuteL() {
-		return needReexecuteL;
-	}
 
 	public PreTypeRegistry getPreRegistry() {
 		return preRegistry;

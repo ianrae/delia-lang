@@ -7,7 +7,6 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
 import org.delia.postgres.PostgresConnectionHelper;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
@@ -79,10 +78,10 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	public void enableSQLLogging(boolean b) {
 		actualInterface.enableSQLLogging(b);
 	}
-
-	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		actualInterface.performTypeReplacement(spec);
-	}
+//
+//	@Override
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		actualInterface.performTypeReplacement(spec);
+//	}
 
 }

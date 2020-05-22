@@ -306,13 +306,14 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 8;
+//		testIndexToRun = 8;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
 //		runR1350File("t0-filter-op-relation.txt", 14);
-		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR500File("t0-relation-many-to-many.txt", 11);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
 
 	}
 	

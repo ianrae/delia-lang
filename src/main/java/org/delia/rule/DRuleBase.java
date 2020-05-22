@@ -2,7 +2,6 @@ package org.delia.rule;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.type.DValue;
-import org.delia.type.TypeReplaceSpec;
 
 public abstract class DRuleBase implements DRule {
 	private boolean polarity = true;
@@ -61,9 +60,9 @@ public abstract class DRuleBase implements DRule {
 		return b;
 	}
 	
-	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		//careful. any rule that holds a dtype MUST override this!!
-	}
-
+//	@Override
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		//careful. any rule that holds a dtype MUST override this!!
+//	}
+//
 }
