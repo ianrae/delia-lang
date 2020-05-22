@@ -28,13 +28,10 @@ public class QueryParser extends ParserBase {
 		return Parsers.or(
 				LetParser.explicitValue(),
 				NameAndFuncParser.parseNameAndFuncs());
-//				varName());
 	}
 	public static Parser<StringExp> filterop() {
 		//"==", "<", ">", ">=", "<=", "!="
-		//allow = same as ==
-		//allow <> same as !=
-		return Parsers.or(term("!="), term("="), term("=="), term("<>"),
+		return Parsers.or(term("!="), term("="), term("=="),
 				term(">"), term("<"), term(">="), term("<="), term("like"))
 				.map(new org.codehaus.jparsec.functors.Map<Token, StringExp>() {
 					@Override
@@ -94,14 +91,8 @@ public class QueryParser extends ParserBase {
 		return Parsers.sequence(Parsers.INDEX, opexpr1(), term("and"), opexpr1(),
 				(Integer pos, FilterOpFullExp opexp1, Token t0, FilterOpFullExp opexp2) -> new FilterOpFullExp(pos, false, opexp1, true, opexp2));
 	}
-	//attempted workaround. kludgey but works a bit
-//	public static Parser<FilterOpFullExp> opexprZ1() {
-//		return Parsers.sequence(Parsers.INDEX, opexprAnd(), term("or"), opexpr1(),
-//				(Integer pos, FilterOpFullExp opexp1, Token t0, FilterOpFullExp opexp2) -> new FilterOpFullExp(pos, false, opexp1, true, opexp2));
-//	}
 	
 	private static Parser<FilterOpFullExp> opexpr2() {
-//		return Parsers.or(opexprZ1(), opexprOr(), opexprAnd(), opexpr1(), opexprNeg());
 		return Parsers.or(opexprOr(), opexprAnd(), opexpr1());
 	}
 	private static Parser<Exp> filter0() {

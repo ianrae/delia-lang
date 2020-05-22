@@ -17,7 +17,7 @@ public class TerminalParser {
 	public static Terminals operators = Terminals.operators(
 	        "-", "(", ")","..","!",
 			"[", "]", ",", "{", "}", ":",
-			"==", "<", ">", ">=", "<=", "!=", "<>",
+			"==", "<", ">", ">=", "<=", "!=",
 			".", "$$", "->",
 			"=")
 		.words(DeliaLexer.IDENTIFIER)

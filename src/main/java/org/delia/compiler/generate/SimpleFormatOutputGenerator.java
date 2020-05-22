@@ -75,7 +75,7 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
 
 	//--helpers--
 	private void addRules(DType dtype) {
-		//TODO: add later!
+		//FUTURE: add later!
 //        for(NRule rule: dtype.getRawRules()) {
 //            String ruleText = rule.getRuleText();
 //            if (rule instanceof UniqueRule) {

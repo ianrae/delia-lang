@@ -40,7 +40,6 @@ public class LetStatementExp extends ExpBase {
 		} else if (value instanceof UserFnCallExp) {
 			typeName = USER_FUNC_TYPE;
 		}
-		//TODO handle when can't autoset!!
 	}
 	@Override
 	public String strValue() {
