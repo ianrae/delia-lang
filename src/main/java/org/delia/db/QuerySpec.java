@@ -10,6 +10,6 @@ import org.delia.runner.FilterEvaluator;
  *
  */
 public class QuerySpec {
-		public QueryExp queryExp;
-		public FilterEvaluator evaluator;
-	}
+	public QueryExp queryExp;
+	public FilterEvaluator evaluator;
+}

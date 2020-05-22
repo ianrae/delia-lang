@@ -29,8 +29,6 @@ import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class ValueHelper extends ServiceBase {
-
-
 	private DateFormatService fmtSvc;
 	private DValueConverterService dvalConverter;
 
