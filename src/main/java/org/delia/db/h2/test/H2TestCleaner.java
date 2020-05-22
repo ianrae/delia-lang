@@ -127,7 +127,6 @@ public class H2TestCleaner {
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
 			deleteContraintsForTable(zexec, tblName);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}	

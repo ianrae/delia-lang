@@ -152,7 +152,7 @@ public class HLSManager extends ServiceBase {
 
 
 	public HLSQueryStatement buildHLS(QueryExp queryExp) {
-		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry, null, null); //TODO what are these nulls?
+		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry, null); //TODO what are these nulls?
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 
 		HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
