@@ -15,7 +15,7 @@ import org.delia.util.NameUtils;
  * @author Ian Rae
  *
  */
-public class DType {
+public class DType implements DTypeInternal {
 	private Shape shape;
 	private String name;
 	private String packageName;
@@ -31,7 +31,8 @@ public class DType {
 		this.completeName = name;
 		this.baseType = baseType;
 	}
-	public void secretScalarCtor(Shape shape, String typeName, DType baseType) {
+	@Override
+	public void finishScalarInitialization(Shape shape, String typeName, DType baseType) {
 		this.shape = shape;
 		this.name = typeName;
 		this.completeName = name;

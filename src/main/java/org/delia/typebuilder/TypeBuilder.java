@@ -118,7 +118,7 @@ public class TypeBuilder extends ServiceBase {
 			return new DStructType(Shape.STRUCT, typeName, baseType, omap, prikey);
 		} else {
 			DStructType structType = (DStructType) dtype;
-			structType.secretCtor(baseType, omap, prikey);
+			structType.finishStructInitialization(baseType, omap, prikey);
 			return structType;
 		}
 	}
@@ -162,7 +162,7 @@ public class TypeBuilder extends ServiceBase {
 		}
 
 		DType dtype = preRegistry.getType(typeStatementExp.typeName);
-		dtype.secretScalarCtor(baseType.getShape(), typeStatementExp.typeName, baseType);
+		dtype.finishScalarInitialization(baseType.getShape(), typeStatementExp.typeName, baseType);
 		addRules(dtype, typeStatementExp);
 		registry.add(typeStatementExp.typeName, dtype);
 		return dtype;
@@ -195,11 +195,15 @@ public class TypeBuilder extends ServiceBase {
 			return dateType;
 		} else {
 			//this only works if subtypes defined _before_ they are used.
-			//TODO: support any order later.
 			DType possibleStruct = registry.getType(fieldExp.typeName);
 			if (possibleStruct != null) {
 				return possibleStruct;
 			} else {
+				possibleStruct = preRegistry.getType(fieldExp.typeName);
+				if (possibleStruct != null) {
+					return possibleStruct;
+				}
+				
 				String msg = String.format("can't find field type '%s'.", fieldExp.typeName);
 				FutureDeclError future = new FutureDeclError("uknown-field-type", msg);
 				future.baseTypeName = fieldExp.typeName;
