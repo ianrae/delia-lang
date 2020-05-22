@@ -20,39 +20,60 @@ import org.junit.Test;
 public class DValueCompareServiceTests extends DaoTestBase {
 	
 	public interface Handler {
+		int compareDVal(DValue dval1, DValue dval2);
 		int compare(Object obj1, Object obj2);
 	}
 	public static class ComparableDValueHandler implements Handler {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public int compare(Object obj1, Object obj2) {
-			DValue dval1 = (DValue) obj1;
-			DValue dval2 = (DValue) obj2;
-			
+		public int compareDVal(DValue dval1, DValue dval2) {
 			Comparable c1 = (Comparable) dval1.getObject();
 			Comparable c2 = (Comparable) dval2.getObject();
 			return c1.compareTo(c2);
+		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			Comparable c1 = getComparable(obj1); 
+			Comparable c2 = getComparable(obj2); 
+			return c1.compareTo(c2);
+		}
+		private Comparable getComparable(Object obj1) {
+			if (obj1 instanceof DValue) {
+				DValue dval = (DValue) obj1;
+				return (Comparable) dval.getObject();
+			}
+			return (Comparable) obj1;
 		}
 	}
 	public static class DValueToIntegerHandler implements Handler {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public int compare(Object obj1, Object obj2) {
-			DValue dval1 = (DValue) obj1;
-			DValue dval2 = (DValue) obj2;
-			
+		public int compareDVal(DValue dval1, DValue dval2) {
 			Integer n1 = dval1.asInt();
 			Integer n2 = dval2.asInt();
 			return n1.compareTo(n2);
+		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			Integer n1 = getInteger(obj1);
+			Integer n2 = getInteger(obj2);
+			return n1.compareTo(n2);
+		}
+		private Integer getInteger(Object obj1) {
+			if (obj1 instanceof DValue) {
+				DValue dval = (DValue) obj1;
+				return dval.asInt();
+			}
+			Number n = (Number) obj1;
+			return n.intValue();
 		}
 	}
 	public static class DValueToLongHandler implements Handler {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public int compare(Object obj1, Object obj2) {
-			DValue dval1 = (DValue) obj1;
-			DValue dval2 = (DValue) obj2;
-			
+		public int compareDVal(DValue dval1, DValue dval2) {
 			Long n1;
 			if (dval1.getType().isShape(Shape.DATE)) {
 				n1 = dval1.asDate().getTime();
@@ -67,47 +88,98 @@ public class DValueCompareServiceTests extends DaoTestBase {
 			}
 			return n1.compareTo(n2);
 		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			Long n1 = getLong(obj1);
+			Long n2 = getLong(obj2);
+			return n1.compareTo(n2);
+		}
+		private Long getLong(Object obj1) {
+			if (obj1 instanceof DValue) {
+				DValue dval = (DValue) obj1;
+				if (dval.getType().isShape(Shape.DATE)) {
+					return dval.asDate().getTime();
+				} else {
+					return dval.asLong();
+				}
+			} else if (obj1 instanceof Date) {
+				Date dt = (Date) obj1;
+				return dt.getTime();
+			}
+			
+			Number n = (Number) obj1;
+			return n.longValue();
+		}
 	}
 	public static class DValueToNumberHandler implements Handler {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public int compare(Object obj1, Object obj2) {
-			DValue dval1 = (DValue) obj1;
-			DValue dval2 = (DValue) obj2;
-			
+		public int compareDVal(DValue dval1, DValue dval2) {
 			Double n1 = dval1.asNumber();
 			Double n2 = dval2.asNumber();
 			return n1.compareTo(n2);
+		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			Double n1 = getDouble(obj1);
+			Double n2 = getDouble(obj2);
+			return n1.compareTo(n2);
+		}
+		private Double getDouble(Object obj1) {
+			if (obj1 instanceof DValue) {
+				DValue dval = (DValue) obj1;
+				return dval.asNumber();
+			}
+			Number n = (Number) obj1;
+			return n.doubleValue();
 		}
 	}
 	public static class DValueToStringHandler implements Handler {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public int compare(Object obj1, Object obj2) {
-			DValue dval1 = (DValue) obj1;
-			DValue dval2 = (DValue) obj2;
-			
+		public int compareDVal(DValue dval1, DValue dval2) {
 			String n1 = dval1.asString();
 			String n2 = dval2.asString();
+			return n1.compareTo(n2);
+		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			String n1 = obj1.toString();
+			String n2 = obj2.toString();
 			return n1.compareTo(n2);
 		}
 	}
 	public static class DValueToBooleanHandler implements Handler {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
-		public int compare(Object obj1, Object obj2) {
-			DValue dval1 = (DValue) obj1;
-			DValue dval2 = (DValue) obj2;
-			
+		public int compareDVal(DValue dval1, DValue dval2) {
 			Boolean n1 = dval1.asBoolean();
 			Boolean n2 = dval2.asBoolean();
 			return n1.compareTo(n2);
+		}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public int compare(Object obj1, Object obj2) {
+			Boolean n1 = getBoolean(obj1);
+			Boolean n2 = getBoolean(obj2);
+			return n1.compareTo(n2);
+		}
+		private Boolean getBoolean(Object obj1) {
+			if (obj1 instanceof DValue) {
+				DValue dval = (DValue) obj1;
+				return dval.asBoolean();
+			}
+			
+			Boolean b = (Boolean) obj1;
+			return b;
 		}
 	}
 
 	public static class DValueCompareService extends ServiceBase {
 		private Handler[][] dvalHandlerArray = new Handler[6][6];
-		private Handler[][] objHandlerArray = new Handler[6][6];
 		
 		public DValueCompareService(FactoryService factorySvc) {
 			super(factorySvc);
@@ -167,7 +239,6 @@ public class DValueCompareServiceTests extends DaoTestBase {
 			dvalHandlerArray[5][4] = null; //not supported
 			dvalHandlerArray[5][5] = new DValueToLongHandler();
 			
-			//and now objects
 		}
 		
 		int compare(DValue dval1, DValue dval2) {
@@ -180,18 +251,24 @@ public class DValueCompareServiceTests extends DaoTestBase {
 			}
 			
 			Handler handler = dvalHandlerArray[i][j];
-			int n = handler.compare(dval1, dval2);
+			if (handler == null) {
+				DeliaExceptionHelper.throwError("cannot-compare-dval", "Cannot compare scalar shaped %d and %d", i, j);
+			}
+			int n = handler.compareDVal(dval1, dval2);
 			return n;
 		}
 		int compareObjs(Object obj1, Object obj2) {
 			int i = determineShapeIndex(obj1);
 			int j = determineShapeIndex(obj2);
 			if (i < 0 || j < 0) {
-				DeliaExceptionHelper.throwError("cannot-compare-dval", "Can only compare scalar DValues");
+				DeliaExceptionHelper.throwError("cannot-compare-objects", "Can only compare scalar DValues");
 			}
 			
 			Handler handler = dvalHandlerArray[i][j];
-			int n = 0;//handler.compare(dval1, dval2);
+			if (handler == null) {
+				DeliaExceptionHelper.throwError("cannot-compare-objects", "Cannot compare scalar shaped %d and %d", i, j);
+			}
+			int n = handler.compare(obj1, obj2);
 			return n;
 		}
 
