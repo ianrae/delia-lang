@@ -19,7 +19,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.type.TypeReplaceSpec;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
@@ -36,7 +35,7 @@ public class RelationManyRule extends RelationRuleBase {
 			if (mustHaveFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' many -  a foreign key value must be specified.", key);
-				addDetailedError(ctx, msg, getSubject());
+				addDetailedError(ctx, msg, getSubject(), dval.getType().getName());
 				return false;
 			}
 			return true; //TODO: fix later.
@@ -52,7 +51,7 @@ public class RelationManyRule extends RelationRuleBase {
 		if (! fkObjectExists) {
 			String key = drel.getForeignKey().asString();
 			String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-			addDetailedError(ctx, msg, getSubject());
+			addDetailedError(ctx, msg, getSubject(), dval.getType().getName());
 			return false;
 		} else {
 			boolean bb = ctx.isPopulateFKsFlag();
@@ -72,9 +71,10 @@ public class RelationManyRule extends RelationRuleBase {
 
 		return true;
 	}
-	private void addDetailedError(DRuleContext ctx, String msg, String fieldName) {
+	private void addDetailedError(DRuleContext ctx, String msg, String fieldName, String typeName) {
 		DetailedError err = ctx.addError(this, msg);
 		err.setFieldName(fieldName);
+		err.setTypeName(typeName);
 	}
 
 	private void populateOtherSideOfRelation(DValue dval, DRuleContext ctx, QueryResponse qrespFetch) {

@@ -22,9 +22,7 @@ import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.TypeRunner;
 import org.delia.runner.TypeSpec;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.typebuilder.TypePreRunner;
 import org.delia.util.DeliaExceptionHelper;
@@ -40,13 +38,14 @@ public class DeliaImpl implements Delia {
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
-//	private Runner mostRecentRunner;
-
+	private ErrorAdjuster errorAdjuster;
+	
 	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
 		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
+		this.errorAdjuster = new ErrorAdjuster();
 	}
 
 	@Override
@@ -76,7 +75,8 @@ public class DeliaImpl implements Delia {
 		runner.setDatIdMap(datIdMap);
 		res = runner.executeProgram(expL);
 		if (res != null && ! res.ok) {
-			throw new DeliaException(res.errors);
+			List<DeliaError> errL = errorAdjuster.adjustErrors(res.errors);
+			throw new DeliaException(errL);
 		}
 		return res;
 	}

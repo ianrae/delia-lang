@@ -24,6 +24,7 @@ public class MandatoryRule extends DRuleBase {
 					String msg = String.format("Type '%s': mandatory field '%s' is null", dtype.getName(), fieldName);
 					DetailedError err = ctx.addError(this, msg);
 					err.setFieldName(fieldName);
+					err.setTypeName(dtype.getName());
 					return false;
 				}
 			}
