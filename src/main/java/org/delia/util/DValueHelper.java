@@ -209,20 +209,6 @@ public class DValueHelper {
 		clone.setPersistenceId(inner.getPersistenceId());
 		return clone;
 	}
-	public static String findMatchingRelation(DStructType dtype, DStructType relType) {
-		//TODO: later support named relations
-		DStructType structType = (DStructType) dtype;
-		for(TypePair pair: structType.getAllFields()) {
-			//hmm why doesn't this work. are 2 Customer type object???
-//			if (pair.type.equals(relType)) {
-//				return pair.name;
-//			}
-			if (pair.type.getName().equals(relType.getName())) {
-				return pair.name;
-			}
-		}
-		return null;
-	}
 
 	public static void throwIfFieldNotExist(String msgPrefix, String fieldName, DValue dval) {
 		if (dval != null) {

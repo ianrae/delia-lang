@@ -517,7 +517,7 @@ public class RulePostProcessor extends ServiceBase {
 	}
 
 	private boolean isOtherSideOne(RelationInfo info) {
-		return DRuleHelper.xfindOtherSideOne(info) != null;
+		return DRuleHelper.findOtherSideOne(info) != null;
 	}
 //	private boolean isOtherSideMany(RelationInfo info) {
 //		return DRuleHelper.xfindOtherSideMany(info) != null;

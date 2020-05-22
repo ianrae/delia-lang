@@ -111,12 +111,11 @@ public class RelationManyRule extends RelationRuleBase {
 			return false;
 		} else {
 			DStructType relType = (DStructType) DValueHelper.findFieldType(owningType, fieldName);
-			String x = DValueHelper.findMatchingRelation(relType, owningType);
-			System.out.println("sss " + x);
-			if (relType.fieldIsOptional(x)) {
+			TypePair pair = new TypePair(fieldName, relType);
+			if (relType.fieldIsOptional(fieldName)) {
 				return false;
 			}
-			DRule someRule = findRuleFor(relType, x);
+			DRule someRule = findRuleFor(relType, fieldName);
 			if (someRule instanceof RelationOneRule) {
 				return false;
 			}

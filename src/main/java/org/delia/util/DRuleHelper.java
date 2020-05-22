@@ -117,8 +117,7 @@ public class DRuleHelper {
 		return null;
 	}
 	
-	//x is temporary marker of new safer fns
-	public static RelationInfo xfindOtherSideOne(RelationInfo relinfo) {
+	public static RelationInfo findOtherSideOne(RelationInfo relinfo) {
 		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
@@ -129,7 +128,7 @@ public class DRuleHelper {
 		}
 		return null;
 	}
-	public static RelationInfo xfindOtherSideMany(RelationInfo relinfo) {
+	public static RelationInfo findOtherSideMany(RelationInfo relinfo) {
 		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
@@ -141,24 +140,6 @@ public class DRuleHelper {
 		return null;
 	}
 
-//	public static RelationInfo findOtherSideMany(DType otherSide, DStructType structType) {
-//		for(DRule rule: otherSide.getRawRules()) {
-//			if (rule instanceof RelationManyRule) {
-//				RelationManyRule rr = (RelationManyRule) rule;
-//				if (typesAreEqual(rr.relInfo.farType, structType)) {
-//					return rr.relInfo;
-//				}
-//			}
-//		}
-//		return null;
-//	}
-//	public static RelationInfo findOtherSideOneOrMany(DType otherSide, DStructType structType) {
-//		RelationInfo farInfo = DRuleHelper.findOtherSideOne(otherSide, structType);
-//		if (farInfo == null) {
-//			farInfo = DRuleHelper.findOtherSideMany(otherSide, structType);
-//		}
-//		return farInfo;
-//	}
 	public static RelationInfo findRelinfoOneOrManyForField(DType structType, String fieldName) {
 		for(DRule rule: structType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
