@@ -1,6 +1,6 @@
 package org.delia.bdd;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +9,13 @@ import org.delia.bdd.core.BDDParser;
 import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.BDDTester;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NewBDDTests extends NewBDDBase {
+public class NewBDDTests extends BDDBase {
 
 	@Test
 	public void test() {
@@ -54,7 +54,7 @@ public class NewBDDTests extends NewBDDBase {
 		chkTestWhen(tests, 0, "let x int = 5");
 		
 		BDDTestRunner runner = new BDDTestRunner(this);
-		DBInterface dbInterface = new MemDBInterface();
+		ZDBInterfaceFactory dbInterface = new MemZDBInterfaceFactory(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		assertEquals(1, passes);
 	}
@@ -71,7 +71,7 @@ public class NewBDDTests extends NewBDDBase {
 		chkTestWhen(tests, 0, "let x int = z");
 		
 		BDDTestRunner runner = new BDDTestRunner(this);
-		DBInterface dbInterface = new MemDBInterface();
+		ZDBInterfaceFactory dbInterface = new MemZDBInterfaceFactory(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		assertEquals(1, passes);
 	}
@@ -88,7 +88,7 @@ public class NewBDDTests extends NewBDDBase {
 		chkTestWhen(tests, 0, "let x int = z");
 		
 		BDDTestRunner runner = new BDDTestRunner(this);
-		DBInterface dbInterface = new MemDBInterface();
+		ZDBInterfaceFactory dbInterface = new MemZDBInterfaceFactory(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		assertEquals(0, passes);
 	}
@@ -103,7 +103,7 @@ public class NewBDDTests extends NewBDDBase {
 		
 		List<BDDTest> tests = parser.parse(lines);
 		BDDTestRunner runner = new BDDTestRunner(this);
-		DBInterface dbInterface = new MemDBInterface();
+		ZDBInterfaceFactory dbInterface = new MemZDBInterfaceFactory(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		
 		int numTests = 10;
@@ -153,8 +153,8 @@ public class NewBDDTests extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		return new MemZDBInterfaceFactory(createFactorySvc());
 	}
 
 

@@ -7,7 +7,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBExecutor;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -18,14 +17,15 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.zdb.ZDBExecutor;
 
 public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 
 	private DTypeRegistry registry;
 	private VarEvaluator varEvaluator;
-	private DBExecutor dbexecutor;
+	private ZDBExecutor dbexecutor;
 
-	public FetchRunnerImpl(FactoryService factorySvc, DBExecutor dbexecutor, DTypeRegistry registry, VarEvaluator eval) {
+	public FetchRunnerImpl(FactoryService factorySvc, ZDBExecutor dbexecutor, DTypeRegistry registry, VarEvaluator eval) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
@@ -41,7 +41,7 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.evaluator.init(spec.queryExp);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
 		return qresp;
 	}
 
@@ -101,7 +101,7 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.evaluator.init(spec.queryExp);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
 		
 		if (!qresp.ok) {
 			return false;
@@ -119,7 +119,7 @@ public class FetchRunnerImpl extends ServiceBase implements FetchRunner {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.evaluator.init(spec.queryExp);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.executeQuery(spec, qtx);
+		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
 		return qresp;
 	}
 

@@ -9,7 +9,7 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -17,9 +17,8 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryDetails;
@@ -27,7 +26,6 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SelectStatementFragment;
@@ -39,12 +37,14 @@ import org.delia.runner.RunnerImpl;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class FragmentParserTests extends NewBDDBase {
+public class FragmentParserTests extends BDDBase {
 	
 	@Test
 	public void testPrimaryKey() {
@@ -223,10 +223,10 @@ public class FragmentParserTests extends NewBDDBase {
 		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	private String buildSrc() {
@@ -251,8 +251,9 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 	
 	private QuerySpec buildPrimaryKeyQuery(String typeName, int id) {
@@ -278,7 +279,7 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 
 	private SelectFragmentParser createFragmentParser(String src) {
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -295,7 +296,7 @@ public class FragmentParserTests extends NewBDDBase {
 		return parser;
 	}
 
-	private SelectFragmentParser createFragmentParser(DeliaDao dao, String src) {
+	private SelectFragmentParser createFragmentParser(DeliaGenericDao dao, String src) {
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -311,7 +312,7 @@ public class FragmentParserTests extends NewBDDBase {
 		
 		return parser;
 	}
-	private SelectFragmentParser createParser(DeliaDao dao) {
+	private SelectFragmentParser createParser(DeliaGenericDao dao) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
@@ -336,7 +337,7 @@ public class FragmentParserTests extends NewBDDBase {
 	}
 
 	private LetStatementExp buildFromSrc(String src) {
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		Delia xdelia = dao.getDelia();
 		xdelia.getOptions().migrationAction = MigrationAction.GENERATE_MIGRATION_PLAN;
 		dao.getDbInterface().getCapabilities().setRequiresSchemaMigration(true);

@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.DsonExp;
-import org.delia.compiler.ast.EndSourceStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
@@ -25,9 +25,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBHelper;
-import org.delia.db.DBInterface;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QuerySpec;
@@ -48,6 +46,8 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -59,8 +59,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		public static final String VAR_SERIAL = "_serial";
 		Map<String,ResultValue> varMap = new HashMap<>(); //ok for thread-safety
 		protected DTypeRegistry registry;
-		private DBInterface dbInterface;
-		private DBExecutor dbexecutor;
+		private ZDBInterfaceFactory dbInterface;
+		private ZDBExecutor dbexecutor;
+//		private ZDBExecutor zexec;
 		protected FetchRunner fetchRunner;
 		Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
 		private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //ok for thread-safety
@@ -70,8 +71,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
 		private HLSManager mgr;
+		private DatIdMap datIdMap;
 		
-		public RunnerImpl(FactoryService factorySvc, DBInterface dbInterface) {
+		public RunnerImpl(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
 		}
@@ -149,8 +151,12 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		public ResultValue executeProgram(List<Exp> expL) {
 			ResultValue res = null;
 			DBAccessContext dbctx = new DBAccessContext(registry, this);
-			this.dbexecutor = dbInterface.createExector(dbctx);
-			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner(factorySvc);
+			this.dbexecutor = dbInterface.createExecutor();
+//			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
+			dbexecutor.init1(registry);
+			dbexecutor.init2(datIdMap, this);
+			
+			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner();
 //			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());
 //			LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
 //			this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner, spanRunner);
@@ -196,8 +202,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				executeDeleteStatement((DeleteStatementExp)exp, res);
 			} else if (exp instanceof UserFunctionDefStatementExp) {
 				executeUserFuncDefStatement((UserFunctionDefStatementExp)exp, res);
-			} else if (exp instanceof EndSourceStatementExp) {
-				executeEndSource((EndSourceStatementExp)exp, res); //TODO: what is this??
 			} else if (exp instanceof ConfigureStatementExp) {
 				executeConfigureStatement((ConfigureStatementExp)exp, res);
 			} else if (exp instanceof InputFunctionDefStatementExp) {
@@ -217,29 +221,16 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				res.errors.add(e.getLastError());
 			}
 		}
-		private void executeEndSource(EndSourceStatementExp exp, ResultValue res) {
-			ValidationRuleRunner ruleRunner = createValidationRunner(); 
-			//TODO: hmm. need to validate insert/update dvals!!
-			if (! ruleRunner.validateEndSource()) {
-				ruleRunner.propogateErrors(res);
-			}
-			
-			if (!res.errors.isEmpty()) {
-				res.ok = false;
-			}
-		}
 		private ValidationRuleRunner createValidationRunner() {
 			return new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
 		}
 		private void executeUserFuncDefStatement(UserFunctionDefStatementExp exp, ResultValue res) {
-			//TODO pass2 should ensure same fn not defined twice
 			userFnMap.put(exp.funcName, exp);
 			res.ok = true;
 			res.shape = null;
 			res.val = null;
 		}
 		private void executeInputFuncDefStatement(InputFunctionDefStatementExp exp, ResultValue res) {
-			//TODO pass2 should ensure same fn not defined twice
 			inputFnMap.put(exp.funcName, exp);
 			res.ok = true;
 			res.shape = null;
@@ -527,7 +518,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, this);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
@@ -589,7 +580,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			if (res.val == null) {
 				return null;
 			} else if (res.val instanceof DValue) {
-				return res.getAsDValue().asString(); //TODO: handle null later
+				return res.getAsDValue().asString(); 
 			}
 			QueryResponse qresp = (QueryResponse) res.val;
 			return qresp.getOne().asString();
@@ -616,5 +607,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setHLSManager(HLSManager mgr) {
 			this.mgr = mgr;
+		}
+		@Override
+		public void setDatIdMap(DatIdMap datIdMap) {
+			this.datIdMap = datIdMap;
 		}
 	}

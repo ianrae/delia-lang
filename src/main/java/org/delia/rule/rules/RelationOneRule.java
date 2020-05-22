@@ -3,6 +3,7 @@ package org.delia.rule.rules;
 import java.util.Map;
 
 import org.delia.error.DetailedError;
+import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRuleContext;
 import org.delia.rule.RuleGuard;
@@ -61,6 +62,12 @@ public class RelationOneRule extends RelationRuleBase {
 		} else {
 			boolean bb = ctx.isPopulateFKsFlag();
 			if (!bb) {
+				if (relInfo.cardinality.equals(RelationCardinality.ONE_TO_ONE)) {
+					bb = chkRelationUniqueness(ctx, drel);
+					if (! bb) {
+						return false;
+					}
+				}
 				return true;
 			}
 			
@@ -74,19 +81,29 @@ public class RelationOneRule extends RelationRuleBase {
 		
 		//next ensure this is only foreign key of that value
 		if (!otherSideIsMany) {
-			boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
-			if (!exists) {
-//			qresResult.err = qrespFetch.err;
-			} else {
-				String key = drel.getForeignKey().asString();
-				String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
-				addDetailedError(ctx, msg, getSubject());
+			boolean ok = this.chkRelationUniqueness(ctx, drel);
+			if (!ok) {
 				return false;
 			}
 		}
 
 		return true;
 	}
+	
+	private boolean chkRelationUniqueness(DRuleContext ctx, DRelation drel) {
+		boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
+		if (!exists) {
+//		qresResult.err = qrespFetch.err;
+		} else {
+			String key = drel.getForeignKey().asString();
+			String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
+			addDetailedError(ctx, msg, getSubject());
+			return false;
+		}
+		return true;
+	}
+	
+	
 	private void addDetailedError(DRuleContext ctx, String msg, String fieldName) {
 		DetailedError err = ctx.addError(this, msg);
 		err.setFieldName(fieldName);
@@ -97,7 +114,7 @@ public class RelationOneRule extends RelationRuleBase {
 		//TODO: should we save results in del.setFetchedItems ??
 		//TODO: the following mutates a DValue. is this ok for multi-threading?
 		DValue otherSide = qrespFetch.dvalList.get(0);
-		TypePair otherRelPair = findMatchingRel(otherSide, dval.getType());
+		TypePair otherRelPair = findMatchingRel();
 		if (otherRelPair != null) { //one-side relations won't have otherRelPair
 
 			otherSideIsMany = isOtherSideMany(otherSide, otherRelPair);
@@ -142,10 +159,15 @@ public class RelationOneRule extends RelationRuleBase {
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		return dval.asStruct().getField(pair.name).asString();
 	}
-	private TypePair findMatchingRel(DValue otherSide, DType targetType) {
-		//TODO: later also use named relations
-		DStructType dtype = (DStructType) otherSide.getType();
-		return DRuleHelper.findMatchingRelByType(dtype, targetType);
+	private TypePair findMatchingRel() {
+		if (relInfo.otherSide == null) {
+			return null; //one-sided relation
+		}
+		String otherSideFieldName = relInfo.otherSide.fieldName;
+		return DValueHelper.findField(relInfo.farType, otherSideFieldName);
+//		//TODO: later also use named relations
+//		DStructType dtype = (DStructType) otherSide.getType();
+//		return DRuleHelper.findMatchingRelByType(dtype, targetType);
 	}
 	public boolean isParent() {
 		return isParent;
@@ -165,8 +187,8 @@ public class RelationOneRule extends RelationRuleBase {
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		DValue keyVal = dval.asStruct().getField(pair.name);
-		
-		RelationInfo farInfo = DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
+
+		RelationInfo farInfo = info.otherSide;
 		if (farInfo == null) {
 			return;
 		}

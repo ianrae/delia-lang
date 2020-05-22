@@ -11,15 +11,11 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.NewLegacyRunner;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
-import org.delia.runner.QueryResponse;
-import org.delia.runner.ResultValue;
-import org.delia.runner.Runner;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 
 public class RunnerTestBase {
@@ -27,7 +23,7 @@ public class RunnerTestBase {
 
 	// --
 	//private Runner runner;
-	protected DBInterface dbInterface;
+	protected ZDBInterfaceFactory dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper;
 	protected NewLegacyRunner runner;

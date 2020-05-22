@@ -6,8 +6,6 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBExecutor;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -29,6 +27,9 @@ import org.delia.queryresponse.LetSpanEngine;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZTableExistenceService;
 
 /**
  * Facade between Delia Runner and the db. Allows us to have different strategies
@@ -42,7 +43,7 @@ import org.delia.type.DTypeRegistry;
 public class HLSManager extends ServiceBase {
 
 	private DeliaSession session;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private DTypeRegistry registry;
 //	private AssocTblManager assocTblMgr;
 	private HLSStragey defaultStrategy = new StandardHLSStragey();
@@ -74,16 +75,16 @@ public class HLSManager extends ServiceBase {
 		}
 	}
 
-	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, DBExecutor dbexecutor) {
+	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
 		HLSQueryStatement hls = buildHLS(spec.queryExp);
 		hls.querySpec = spec;
 
-		HLSSQLGenerator sqlGenerator = chooseGenerator(dbexecutor);
+		HLSSQLGenerator sqlGenerator = chooseGenerator(zexec);
 		sqlGenerator.setRegistry(registry);
 		String sql = sqlGenerator.buildSQL(hls);
 
 		HLSStragey strategy = chooseStrategy(hls);
-		QueryResponse qresp = strategy.execute(hls, sql, qtx, dbexecutor);
+		QueryResponse qresp = strategy.execute(hls, sql, qtx, zexec);
 
 		HLSManagerResult result = new HLSManagerResult();
 		result.qresp = qresp;
@@ -91,13 +92,14 @@ public class HLSManager extends ServiceBase {
 		return result;
 	}
 
-	private HLSSQLGenerator chooseGenerator(DBExecutor dbexecutor) {
+	private HLSSQLGenerator chooseGenerator(ZDBExecutor zexec) {
 		//later we will have dbspecific ones
 		
-		TableExistenceService existSvc = dbexecutor.createTableExistService();
-		AssocTblManager assocTblMgr = new AssocTblManager(existSvc);
+//		TableExistenceService existSvc = dbexecutor.createTableExistService();
+		TableExistenceService existSvc = new ZTableExistenceService(zexec);
+		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, zexec.getDatIdMap());
 
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, existSvc);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{
@@ -110,7 +112,7 @@ public class HLSManager extends ServiceBase {
 		case H2:
 			return gen;
 		case POSTGRES:
-			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, existSvc);
+			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
 		default:
 			return null; //should never happen
 		}

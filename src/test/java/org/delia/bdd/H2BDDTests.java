@@ -2,14 +2,14 @@ package org.delia.bdd;
 
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.ResultSetToDValConverter;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class H2BDDTests extends NewBDDBase {
+public class H2BDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200
@@ -48,6 +48,13 @@ public class H2BDDTests extends NewBDDBase {
 		runR500File("t0-relation-one-to-many.txt", 9);
 		runR500File("t0-relation-many-to-many.txt", 11);
 		runR500File("t0-relation.txt", 2);
+	}
+	@Test
+	public void testR550() {
+		runR550File("t0-multirel-1to1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-2.txt", 1);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
 	@Test
 	public void testR600() {
@@ -279,7 +286,10 @@ public class H2BDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-many-to-many6.txt", 2);
 		runR2150File("t0-migrate-many-to-many6a.txt", 2);
 		runR2150File("t0-migrate-many-to-many7.txt", 0);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
+	
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
@@ -299,9 +309,7 @@ public class H2BDDTests extends NewBDDBase {
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-//		runR1600File("t0-fetch.txt", 3);
-//		runR1550File("t0-queryfn-manymany-left.txt", 6);
-		runR500File("t0-relation-many-to-many.txt", 11);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---
@@ -335,7 +343,7 @@ public class H2BDDTests extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
+	public ZDBInterfaceFactory createForTest() {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
 		dbInterfaceToUse = db;

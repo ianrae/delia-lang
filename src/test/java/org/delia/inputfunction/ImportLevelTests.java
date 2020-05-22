@@ -8,14 +8,12 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.DataImportService;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
@@ -27,10 +25,12 @@ import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImportLevelTests  extends NewBDDBase {
+public class ImportLevelTests  extends BDDBase {
 
 	@Test
 	public void testLevel1() {
@@ -136,8 +136,9 @@ public class ImportLevelTests  extends NewBDDBase {
 
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private LineObjIterator createIter(int n) {

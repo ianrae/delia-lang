@@ -6,14 +6,12 @@ import java.util.Collections;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.filter.OP;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
@@ -37,10 +35,12 @@ import org.delia.tlang.statement.VariableStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TLangTests  extends NewBDDBase {
+public class TLangTests  extends BDDBase {
 	public static class AddXStatement extends TLangStatementBase {
 		public AddXStatement() {
 			super("addX");
@@ -184,7 +184,7 @@ public class TLangTests  extends NewBDDBase {
 	
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 		String src = buildSrc();
 		this.session = delia.beginSession(src);
@@ -198,10 +198,10 @@ public class TLangTests  extends NewBDDBase {
 		return src;
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 	private TLangProgram createProgram() {
 		TLangProgram prog = new TLangProgram();
@@ -264,8 +264,9 @@ public class TLangTests  extends NewBDDBase {
 
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 

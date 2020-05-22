@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryDetails;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.relation.RelationCardinality;
@@ -40,36 +41,32 @@ public class SqlJoinHelper {
 				case ONE_TO_MANY:
 					bHasFK = relinfoA.isParent;
 					details.mergeRows = true;
-					details.mergeOnField = relinfoA.fieldName;
+					details.mergeOnFieldL.add(relinfoA.fieldName);
 					break;
 				case MANY_TO_MANY:
 					details.mergeRows = true;
 					details.isManyToMany = true;
-					details.mergeOnField = relinfoA.fieldName;
+					details.mergeOnFieldL.add(relinfoA.fieldName);
 					doManyToMany(sc, hlspan, pair, relinfoA);
-					return details;
+					continue;
 				}
 				
 				String s;
+				DStructType pairType = (DStructType) pair.type; //Address
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
+				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				if (bHasFK) {
-					DStructType pairType = (DStructType) pair.type; //Address
-					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
+					RelationInfo relinfoB = findOtherSide(pair, hlspan.fromType);
 					PrimaryKey pk = hlspan.fromType.getPrimaryKey();
-//					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
-					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 					String on1 = aliasAlloc.buildAlias(hlspan.fromType, pk.getKey()); //a.id
-					String on2 = aliasAlloc.buildAlias(pairType, relinfoB.fieldName); //b.cust
+					String on2 = aliasAlloc.buildAlias(aliasInst, relinfoB.fieldName); //b.cust
 					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				} else {
-					DStructType pairType = (DStructType) pair.type; //Address
-//					RelationInfo relinfoB = findOtherSide(pairType, hlspan.fromType);
 					PrimaryKey pk = pairType.getPrimaryKey();
-//					PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 					
-					String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
 					String on1 = aliasAlloc.buildAlias(hlspan.fromType, relinfoA.fieldName); //a.addr
-					String on2 = aliasAlloc.buildAlias(pairType, pk.getKey()); //b.id
+					String on2 = aliasAlloc.buildAlias(aliasInst, pk.getKey().name); //b.id
 					s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 				}
 				
@@ -81,13 +78,15 @@ public class SqlJoinHelper {
 		private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA) {
 			String s;
 			PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
-			String assocTable = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
+			String assocTable = assocTblMgr.getDatIdMap().getAssocTblName(relinfoA.getDatId()); //assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type); //"CustomerAddressAssoc"; //TODO fix
 			
 			if (true) {
-				String tbl1 = aliasAlloc.buildTblAliasAssoc(assocTable);
+//				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTable);
+				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
 				String on1 = aliasAlloc.buildAliasAssoc(hlspan.fromType.getName(), mainPk.getFieldName()); //b.cust
-				String fff = assocTblMgr.getAssocLeftField(hlspan.fromType, (DStructType) pair.type);
-				String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //a.id
+				String fff = assocTblMgr.xgetAssocLeftField(hlspan.fromType, aliasInst.assocTbl);
+				String on2 = aliasAlloc.buildAlias(aliasInst, fff); //a.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 			
@@ -109,24 +108,33 @@ public class SqlJoinHelper {
 			
 			DStructType pairType = (DStructType) pair.type; //Address
 			PrimaryKey pk = pairType.getPrimaryKey();
-			String tbl1 = aliasAlloc.buildTblAlias((DStructType) pair.type);
-			String on1 = aliasAlloc.buildAlias(pairType, pk.getFieldName()); //b.id
-			String fff = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
-			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
+//			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name, assocTable);
+			AliasInstance aliasInst = aliasAlloc.findAliasFor(pairType);
+			String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
+			String on1 = aliasAlloc.buildAlias(aliasInst, pk.getFieldName()); //b.id
+			String fff = assocTblMgr.xgetAssocRightField(hlspan.fromType, assocTable);
+//			String on2 = aliasAlloc.buildAliasAssoc(assocTable, fff); //c.rightv
+			AliasInstance ai2 = aliasAlloc.findAliasForTable(assocTable);
+			String on2 = aliasAlloc.buildAlias(ai2, fff); //c.rightv
 			s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			sc.out(s);
 		}
 
-		private RelationInfo findOtherSide(DStructType pairType, DStructType fromType) {
-			RelationInfo relinfo = DRuleHelper.findOtherSideOne(pairType, fromType);
-			if (relinfo != null) {
-				return relinfo;
+		private RelationInfo findOtherSide(TypePair pair, DStructType fromType) {
+			RelationInfo info = DRuleHelper.findRelinfoOneOrManyForField(fromType, pair.name);
+			if (info != null) {
+				return info.otherSide; //can be null for one-sided relation
 			}
-
-			relinfo = DRuleHelper.findOtherSideMany(pairType, fromType);
-			if (relinfo != null) {
-				return relinfo;
-			}
+			
+//			RelationInfo relinfo = DRuleHelper.findOtherSideOne(pairType, fromType);
+//			if (relinfo != null) {
+//				return relinfo;
+//			}
+//
+//			relinfo = DRuleHelper.findOtherSideMany(pairType, fromType);
+//			if (relinfo != null) {
+//				return relinfo;
+//			}
 			//err!!
 			return null;
 		}
@@ -155,6 +163,7 @@ public class SqlJoinHelper {
 				}
 				TypePair pair = DValueHelper.findField(hlspan.fromType, fieldName);
 				joinL.add(pair);
+				aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
 			}
 
 			//TODO: later to fk(field)
@@ -184,9 +193,10 @@ public class SqlJoinHelper {
 		}
 		
 
-		public boolean addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
+		public int addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 			List<TypePair> joinL = genFKJoinList(hlspan);
 
+			int numAdded = 0;
 			for(TypePair pair: joinL) {
 				DStructType pairType = (DStructType) pair.type;
 				PrimaryKey pk = pairType.getPrimaryKey();
@@ -198,30 +208,32 @@ public class SqlJoinHelper {
 					break;
 				case MANY_TO_MANY:
 					doManyToManyAddFKofJoins(hlspan, fieldL, pair, relinfoA);
-					return true;
+					numAdded++;
+					continue;
 				}
 				
 				//b.id as cust
-				String s = aliasAlloc.buildAlias(pairType, pk.getFieldName());
+				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
+				String s = aliasAlloc.buildAlias(aliasInst, pk.getFieldName());
 				s = String.format("%s as %s", s, relinfoA.fieldName);
-//				fieldL.add(s);
 				addField(fieldL, pairType, pk.getKey(), s); 
-			
-				return true;
+				numAdded++;
 			}
-			return false;
+			return numAdded;
 		}
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
-			String assocTbl = assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
+			DatIdMap datIdMap = assocTblMgr.getDatIdMap();
+			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); //assocTblMgr.getTableFor(hlspan.fromType, (DStructType) pair.type);
 //			String fieldName = assocTblMgr.isFlipped(hlspan.fromType, (DStructType) pair.type) ? "leftv" : "rightv";
-			String fieldName = assocTblMgr.getAssocRightField(hlspan.fromType, (DStructType) pair.type);
+			String fieldName = assocTblMgr.xgetAssocRightField(hlspan.fromType, assocTbl);
 			
 			//b.id as cust
-			String s = aliasAlloc.buildAliasAssoc(assocTbl, fieldName);
+//			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(assocTbl, pair.name, true);
+			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTbl);
+			String s = aliasAlloc.buildAlias(aliasInst, fieldName);
 			s = String.format("%s as %s", s, relinfoA.fieldName);
 			addField(fieldL, null, fieldName, s).isAssocField = true;
-//			fieldL.add(s);
 		}
 
 		public void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
@@ -235,10 +247,10 @@ public class SqlJoinHelper {
 			DStructType fromType = (DStructType) joinType.type;
 			String pk = fromType.getPrimaryKey().getFieldName();
 			
-			
+			AliasInstance aliasInst = aliasAlloc.findAliasFor(fromType);
 			for(TypePair pair: fromType.getAllFields()) {
 				if (pair.name.equals(pk)) {
-					String s = aliasAlloc.buildAlias(fromType, pair.name);
+					String s = aliasAlloc.buildAlias(aliasInst, pair.name);
 					s = String.format("%s as %s", s, joinType.name);
 					addField(fieldL, fromType, pair, s);
 //					fieldL.add(s);
@@ -246,11 +258,11 @@ public class SqlJoinHelper {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					} else if (!relinfo.isParent) {
-						String s = aliasAlloc.buildAlias(fromType, pair.name);
+						String s = aliasAlloc.buildAlias(aliasInst, pair.name);
 						addField(fieldL, fromType, pair, s);
 					}
 				} else {
-					String s = aliasAlloc.buildAlias(fromType, pair.name);
+					String s = aliasAlloc.buildAlias(aliasInst, pair.name);
 					addField(fieldL, fromType, pair, s);
 				}
 			}

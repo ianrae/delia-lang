@@ -7,14 +7,14 @@ import org.delia.api.DeliaFactory;
 import org.delia.api.DeliaSession;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class DeliaClientTestBase { 
 	
@@ -22,22 +22,22 @@ public class DeliaClientTestBase {
 	protected Delia delia;
 	protected DeliaSession sess = null;
 	protected boolean addIdFlag;
-	protected DBInterface dbInterface ;
+	protected ZDBInterfaceFactory dbInterface ;
 	protected int nextVarNum = 1;
 	protected Log log = new UnitTestLog();
 	protected FactoryServiceImpl factorySvc;
 	
 	public void init() {
 		addIdFlag = true;
-		dbInterface = new MemDBInterface();
 		factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
+		dbInterface = new MemZDBInterfaceFactory(factorySvc);
 		delia = DeliaFactory.create(dbInterface, log, factorySvc);
 //		DBHelper.createTable(dbInterface, "Address"); //!! fake schema
 //		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 	}
 	protected void enableAutoCreateTables() {
-		MemDBInterface memdb = (MemDBInterface) dbInterface;
-		memdb.createTablesAsNeededFlag = true;
+//		MemDBInterface memdb = (MemDBInterface) dbInterface;
+//		memdb.createTablesAsNeededFlag = true;
 	}
 	
 	protected void createType(String type, String relField) {

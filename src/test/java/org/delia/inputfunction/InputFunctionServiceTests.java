@@ -7,14 +7,12 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.log.LogLevel;
 import org.delia.runner.DeliaException;
@@ -28,10 +26,12 @@ import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFunctionServiceTests  extends NewBDDBase {
+public class InputFunctionServiceTests  extends BDDBase {
 
 	@Test
 	public void test1() {
@@ -51,7 +51,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(1, result.numRowsInserted);
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -85,7 +85,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		assertEquals(2, result.numRowsProcessed);
 		assertEquals(2, result.numRowsInserted);
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -121,7 +121,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		DeliaError err = result.errors.get(0);
 		assertEquals(1, err.getLineNum());
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -151,7 +151,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 		DeliaError err = result.errors.get(0);
 		assertEquals(1, err.getLineNum());
 
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", "1");
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -175,7 +175,7 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
 	private void createDelia(boolean withRules) {
@@ -198,15 +198,16 @@ public class InputFunctionServiceTests  extends NewBDDBase {
 
 		return src;
 	}
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 	
 	private LineObjIterator createIter(int n, boolean goodObj) {

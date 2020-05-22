@@ -25,7 +25,7 @@ public class OrderByFragment extends AliasedFragment {
 			}
 		}
 		
-		return sc.str;
+		return sc.toString();
 	}
 	
 	private String renderPhrase(OrderByFragment frag) {

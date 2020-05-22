@@ -18,8 +18,6 @@ import org.delia.bdd.core.checker.StructChecker;
 import org.delia.bdd.core.checker.ValueChecker;
 import org.delia.bdd.core.checker.ValueCheckerBase;
 import org.delia.client.ClientTests.DeliaClient;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
@@ -29,6 +27,8 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.valuebuilder.IntegerValueBuilder;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class BDDTesterEx {
 	private static class NumberChecker extends ValueCheckerBase {
@@ -56,11 +56,11 @@ public class BDDTesterEx {
 	private Log log = new UnitTestLog();
 
 	private DeliaClient client;
-	DBInterface dbInterface;
+	ZDBInterfaceFactory dbInterface;
 
 	private BDDTest currentTest;
 
-	BDDTesterEx(DBInterface retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
+	BDDTesterEx(ZDBInterfaceFactory retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
 		this.currentTest = test;
 		if (retainedDBInterface == null) {
 			dbInterface = creator.createForTest(); 
@@ -77,9 +77,9 @@ public class BDDTesterEx {
 		}
 		client = new DeliaClient(dbInterface);
 		
-		if (dbInterface instanceof MemDBInterface) {
-			MemDBInterface memdb = (MemDBInterface) dbInterface;
-			memdb.createTablesAsNeededFlag = true;
+		if (dbInterface instanceof MemZDBInterfaceFactory) {
+			MemZDBInterfaceFactory memdb = (MemZDBInterfaceFactory) dbInterface;
+			//memdb.createTablesAsNeededFlag = true;
 		}
 		
 		if (cleanTables != null) {
@@ -87,6 +87,11 @@ public class BDDTesterEx {
 				MyFakeSQLDBInterface mf = (MyFakeSQLDBInterface) dbInterface;
 				mf.tablesToClean = cleanTables;
 			}
+		}
+		
+		if (dbInterface instanceof MyFakeSQLDBInterface) {
+			MyFakeSQLDBInterface mf = (MyFakeSQLDBInterface) dbInterface;
+			mf.init(client.getFactorySvc());
 		}
 	}
 
@@ -175,7 +180,7 @@ public class BDDTesterEx {
 			String id = e.getLastError() == null ? "?" : e.getLastError().getId();
 			if (expectedErr == null) {
 				log.logError("EXCEPTION(%s): %s", id, e.getMessage());
-				throw new RuntimeException("can't find ERROR: value!");
+				throw new RuntimeException("Exception occured, and can't find ERROR: value!");
 			}
 
 			if (expectedErr.startsWith("ERROR:")) {

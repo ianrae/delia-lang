@@ -11,8 +11,6 @@ import org.delia.assoc.DatIdMap;
 import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
 import org.delia.assoc.PopulateDatIdVisitor;
-import org.delia.db.DBExecutor;
-import org.delia.db.RawDBExecutor;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
@@ -20,11 +18,13 @@ import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
+import org.delia.runner.DeliaException;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.StringTrail;
+import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,8 +41,9 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		}
 	}
 
-	@Test
+	@Test(expected=DeliaException.class)
 	public void test11() {
+		// type-dependency-cycle
 		createCustomer11TypeWithRelations("joe", null, "joe");
 		RelationOneRule rr = getOneRule("Address", "cust");
 		chkRule(rr, true, "joe", "joe");
@@ -71,7 +72,8 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		assertEquals("Address.cust;Customer.addr1", visitor.trail.getTrail());
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
-		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator());
+		DatIdMap datIdMap = null; //TODO is this ok?
+		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator(), datIdMap);
 //		schemaMigrator.dbNeedsMigration();
 		String fingerprint = schemaMigrator.calcDBFingerprint();
 		log(fingerprint);
@@ -106,14 +108,15 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		rr.relInfo.forceDatId(null);;
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
-		
-		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator())) {
+		DatIdMap datIdMap = null; //TODO is this ok?
+
+		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator(), datIdMap)) {
 			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-			DatIdMap datIdMap = visitor.getDatIdMap();
+			datIdMap = visitor.getDatIdMap();
 
-			RawDBExecutor rawExecutor = visitor.getSchemaMigrator().getRawExecutor();
+			ZDBExecutor rawExecutor = visitor.getSchemaMigrator().getZDBExecutor();
 			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);
 			enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);

@@ -4,19 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.delia.base.UnitTestLog;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class ReplRunnerTests extends NewBDDBase {
+public class ReplRunnerTests extends BDDBase {
 	
 	@Test
 	public void testFile() {
@@ -201,8 +201,9 @@ public class ReplRunnerTests extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 

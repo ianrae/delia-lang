@@ -7,15 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.delia.api.Delia;
-import org.delia.bdd.NewBDDBase;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
-import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -31,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class NorthwindTests extends NewBDDBase {
+public class NorthwindTests extends DaoTestBase {
 	
 	public static class LineObj {
 		public String[] elements;
@@ -113,7 +105,7 @@ public class NorthwindTests extends NewBDDBase {
 	@Test
 	public void test1() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -142,7 +134,7 @@ public class NorthwindTests extends NewBDDBase {
 	@Test
 	public void test2() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -176,7 +168,7 @@ public class NorthwindTests extends NewBDDBase {
 	@Test
 	public void test3() {
 		String src = buildSrc2();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 
@@ -243,12 +235,6 @@ public class NorthwindTests extends NewBDDBase {
 		String src = loadFromFile(path);
 		return src;
 	}
-	private DeliaDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-//		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).jdbcUrl("jdbc:h2:~/test").build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
-	}
 
 	public String loadFromFile(String path) {
 		log.log("FILE: %s", path);
@@ -263,11 +249,11 @@ public class NorthwindTests extends NewBDDBase {
 		List<String> lines = reader.readFile(path);
 		return lines;
 	}
-	private void loadCSV(String type, String filename, DeliaDao dao) {
+	private void loadCSV(String type, String filename, DeliaGenericDao dao) {
 		loadCSV(type, filename, dao, null);
 	}
 	
-	private void loadCSV(String type, String filename, DeliaDao dao, Map<String,String> replaceMap) {
+	private void loadCSV(String type, String filename, DeliaGenericDao dao, Map<String,String> replaceMap) {
 		String path = BASE_DIR + filename;
 		List<String> lines = loadCSVFile(path);
 		CSVRowConverter converter = new CSVRowConverter(dao.getRegistry(), type, replaceMap);
@@ -286,10 +272,4 @@ public class NorthwindTests extends NewBDDBase {
 		
 		log.log("done..");
 	}
-
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
-	}
-
 }

@@ -5,21 +5,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.delia.api.Delia;
-import org.delia.bdd.NewBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.TypeDao;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class TypeDaoTests extends NewBDDBase {
+public class TypeDaoTests extends DaoTestBase {
 	
 	@Test
 	public void test1() {
@@ -80,10 +76,4 @@ public class TypeDaoTests extends NewBDDBase {
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
 	}
-
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
-	}
-
 }

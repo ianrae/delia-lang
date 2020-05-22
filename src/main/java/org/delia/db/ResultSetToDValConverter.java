@@ -89,9 +89,10 @@ public class ResultSetToDValConverter extends ServiceBase {
 			list = doBuildDValueList(rsw, dtype, dbctx, hls);
 			if (details.mergeRows) {
 				if (details.isManyToMany) {
-					list = mergeRowsManyToMany(list, dtype, details, dbctx);
+//					list = mergeRowsManyToMany(list, dtype, details, dbctx);
+					list = mergeRowsOneToMany(list, dtype, details, dbctx);
 				} else {
-					list = mergeRowsOneToMany(list, dtype, details);
+					list = mergeRowsOneToMany(list, dtype, details, dbctx);
 				}
 			}
 		} catch (ValueException e) {
@@ -138,124 +139,163 @@ public class ResultSetToDValConverter extends ServiceBase {
 	 * @param rawList list of dvalues to merge
 	 * @param dtype of values
 	 * @param details query details
-	 * @return merged rows
-	 */
-	public List<DValue> mergeRowsOneToMany(List<DValue> rawList, DStructType dtype, QueryDetails details) {
-		List<DValue> list = new ArrayList<>();
-		List<DValue> foreignKeyL = new ArrayList<>();
-		DValue firstVal = null;
-		int i = 0;
-		for(DValue dval: rawList) {
-			DValue inner = dval.asStruct().getField(details.mergeOnField);
-			if (inner != null) {
-				if (i == 0) {
-					firstVal = dval;
-				}
-				DRelation drel = inner.asRelation();
-				foreignKeyL.add(drel.getForeignKey());
-			}
-			i++;
-		}
-
-		if (firstVal != null) {
-			DValue inner = firstVal.asStruct().getField(details.mergeOnField);
-			if (inner != null) {
-				DRelation drel = inner.asRelation();
-				drel.getMultipleKeys().clear();
-				drel.getMultipleKeys().addAll(foreignKeyL);
-				list.add(firstVal);
-			}
-		} else if (! rawList.isEmpty()) {
-			//if all the parents were null then just use raw list
-			list.addAll(rawList);
-		}
-
-		return list;
-	}
-	/**
-	 * On a Many-to-many relation our query returns multiple rows in order to get all
-	 * the 'many' ids. Merge into a single row.
-	 * @param rawList list of dvalues to merge
-	 * @param dtype of values
-	 * @param details query details
 	 * @param dbctx 
 	 * @return merged rows
 	 */
-	public List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
-		List<DValue> list = new ArrayList<>();
-		int i = 0;
-		List<DValue> subL = new ArrayList<>();
-		Map<Object,String> alreadyHandledL = new HashMap<>();
+	public List<DValue> mergeRowsOneToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
+		Map<Object,DValue> pkMap = new HashMap<>(); //pk,dval
+		PrimaryKey pkType = dtype.getPrimaryKey();
+		String pkField = pkType.getFieldName();
+		
 		for(DValue dval: rawList) {
-			DValue keyVal = DValueHelper.findPrimaryKeyValue(dval);
-			if (alreadyHandledL.containsKey(keyVal.getObject())) {
-				continue;
-			}
-			
-			fillSubL(rawList, keyVal, dval, subL); //other values with same primary key
-			if (subL.isEmpty()) {
-				list.add(dval);
+			DValue pkval = dval.asStruct().getField(pkField); 
+			Object key = pkval.getObject();
+			if (! pkMap.containsKey(key)) {
+				pkMap.put(key, dval);
 			} else {
-				alreadyHandledL.put(keyVal.getObject(), "");
-				List<DValue> toMergeFetchedL = new ArrayList<>();
-				List<DValue> toMergeKeyL = new ArrayList<>();
-				for(DValue subVal: subL) {
-					DValue inner = subVal.asStruct().getField(details.mergeOnField);
-					if (inner != null) {
-						DRelation drel = inner.asRelation();
-						if (drel.haveFetched()) {
-							toMergeFetchedL.addAll(drel.getFetchedItems());
+				DValue mergeToVal = pkMap.get(key);
+				for(String mergeOnField: details.mergeOnFieldL) {
+					DValue inner1 = mergeToVal.asStruct().getField(mergeOnField);
+					DValue inner2 = dval.asStruct().getField(mergeOnField);
+					if (inner2 != null) {
+						if (inner1 == null) {
+							inner1 = this.createEmptyRelation(dbctx, dtype, mergeOnField);
+							mergeToVal.asMap().put(mergeOnField, inner1);
 						}
-						toMergeKeyL.addAll(drel.getMultipleKeys());
-					}
-				}
-				
-				if (!toMergeFetchedL.isEmpty() || !toMergeKeyL.isEmpty()) {
-					//and add back into dval
-					DValue inner2 = dval.asStruct().getField(details.mergeOnField);
-					if (inner2 == null) {
-						//fix later!! TODO
-						DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
-						TypePair pair = DValueHelper.findField(dval.getType(), details.mergeOnField);
-						RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
-						builder.buildEmptyRelation();
-						boolean b = builder.finish();
-						if (!b) {
-							DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
-						} else {
-							inner2 = builder.getDValue();
-							dval.asMap().put(details.mergeOnField, inner2);
+						DRelation drel2 = inner2.asRelation();
+						if (! alreadyExist(inner1, drel2.getForeignKey())) {
+							inner1.asRelation().addKey(drel2.getForeignKey());
+							DRelationHelper.addToFetchedItemsFromRelation(inner1, drel2);
+							
+							//TODO: add config flag for this. it's good for tests but slows perf
+							DRelationHelper.sortFKs(inner1.asRelation());
 						}
 					}
-					DRelation drel2 = inner2.asRelation();
-					drel2.getMultipleKeys().addAll(toMergeKeyL);
-					
-					//only add each key once
-					DRelationHelper.addToFetchedItems(drel2, toMergeFetchedL);
-					list.add(dval);
 				}
 			}
-			
-			i++;
 		}
-
+		
+		//build output list. keep same order
+		List<DValue> list = new ArrayList<>();
+		for(DValue dval: rawList) {
+			DValue pkval = dval.asStruct().getField(pkField); 
+			Object key = pkval.getObject();
+			if (pkMap.containsKey(key)) {
+				list.add(dval);
+				pkMap.remove(key);
+			}
+		}
+		
 		return list;
 	}
-
-	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
-		subL.clear();
-		String s2 = targetKeyVal.asString();
-		for(DValue tmp: rawList) {
-			if (tmp == skip) {
-				continue;
-			}
-			DValue keyVal = DValueHelper.findPrimaryKeyValue(tmp);
-			String s1 = keyVal.asString(); //TODO: need better way to compare dval
-			if (s1.equals(s2)) {
-				subL.add(tmp);
+	//TODO: fix. very inefficient when many fks
+	private boolean alreadyExist(DValue inner1, DValue foreignKey) {
+		Object obj2 = foreignKey.getObject();
+		DRelation drel = inner1.asRelation();
+		for(DValue keyval: drel.getMultipleKeys()) {
+			Object obj1 = keyval.getObject();
+			if (obj1.equals(obj2)) {
+				return true;
 			}
 		}
+		return false;
 	}
+//	/**
+//	 * On a Many-to-many relation our query returns multiple rows in order to get all
+//	 * the 'many' ids. Merge into a single row.
+//	 * @param rawList list of dvalues to merge
+//	 * @param dtype of values
+//	 * @param details query details
+//	 * @param dbctx 
+//	 * @return merged rows
+//	 */
+//	public List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
+//		List<DValue> list = new ArrayList<>();
+//		int i = 0;
+//		List<DValue> subL = new ArrayList<>();
+//		Map<Object,String> alreadyHandledL = new HashMap<>();
+//		for(DValue dval: rawList) {
+//			DValue keyVal = DValueHelper.findPrimaryKeyValue(dval);
+//			if (alreadyHandledL.containsKey(keyVal.getObject())) {
+//				continue;
+//			}
+//			
+//			fillSubL(rawList, keyVal, dval, subL); //other values with same primary key
+//			if (subL.isEmpty()) {
+//				list.add(dval);
+//			} else {
+//				alreadyHandledL.put(keyVal.getObject(), "");
+//				List<DValue> toMergeFetchedL = new ArrayList<>();
+//				List<DValue> toMergeKeyL = new ArrayList<>();
+//				for(DValue subVal: subL) {
+//					DValue inner = subVal.asStruct().getField(details.mergeOnFieldL.get(0));
+//					if (inner != null) {
+//						DRelation drel = inner.asRelation();
+//						if (drel.haveFetched()) {
+//							toMergeFetchedL.addAll(drel.getFetchedItems());
+//						}
+//						toMergeKeyL.addAll(drel.getMultipleKeys());
+//					}
+//				}
+//				
+//				if (!toMergeFetchedL.isEmpty() || !toMergeKeyL.isEmpty()) {
+//					//and add back into dval
+//					DValue inner2 = dval.asStruct().getField(details.mergeOnFieldL.get(0));
+//					if (inner2 == null) {
+//						//fix later!! TODO
+//						DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
+//						TypePair pair = DValueHelper.findField(dval.getType(), details.mergeOnFieldL.get(0));
+//						RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
+//						builder.buildEmptyRelation();
+//						boolean b = builder.finish();
+//						if (!b) {
+//							DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
+//						} else {
+//							inner2 = builder.getDValue();
+//							dval.asMap().put(details.mergeOnFieldL.get(0), inner2);
+//						}
+//					}
+//					DRelation drel2 = inner2.asRelation();
+//					drel2.getMultipleKeys().addAll(toMergeKeyL);
+//					
+//					//only add each key once
+//					DRelationHelper.addToFetchedItems(drel2, toMergeFetchedL);
+//					list.add(dval);
+//				}
+//			}
+//			
+//			i++;
+//		}
+//
+//		return list;
+//	}
+	
+	private DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
+		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
+		TypePair pair = DValueHelper.findField(structType, mergeOnField);
+		RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
+		builder.buildEmptyRelation();
+		boolean b = builder.finish();
+		if (!b) {
+			DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
+		} 
+		return builder.getDValue();
+	}
+
+//	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
+//		subL.clear();
+//		String s2 = targetKeyVal.asString();
+//		for(DValue tmp: rawList) {
+//			if (tmp == skip) {
+//				continue;
+//			}
+//			DValue keyVal = DValueHelper.findPrimaryKeyValue(tmp);
+//			String s1 = keyVal.asString(); //TODO: need better way to compare dval
+//			if (s1.equals(s2)) {
+//				subL.add(tmp);
+//			}
+//		}
+//	}
 
 	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
 		List<DValue> list = new ArrayList<>();

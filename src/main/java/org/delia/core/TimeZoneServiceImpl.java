@@ -4,7 +4,6 @@ import java.util.TimeZone;
 
 public class TimeZoneServiceImpl implements TimeZoneService {
 	public static final String DEFAULT_TIMEZONE = "UTC";
-//	public static final String DEFAULT_TIMEZONE = "America/New_York"; //TODO switch to UTC
 
 	private TimeZone defaultTz;
 	

@@ -2,17 +2,16 @@ package org.delia.repl;
 
 import java.io.IOException;
 
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.h2.H2ConnectionHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.Before;
-import org.junit.Test;
 
 
-public class ReplTests extends NewBDDBase {
+public class ReplTests extends BDDBase {
 
 //	@Test
 	public void test() throws IOException {
@@ -35,7 +34,7 @@ public class ReplTests extends NewBDDBase {
 	public void init() {
 	}
 	@Override
-	public DBInterface createForTest() {
+	public ZDBInterfaceFactory createForTest() {
 		return null;
 	}
 

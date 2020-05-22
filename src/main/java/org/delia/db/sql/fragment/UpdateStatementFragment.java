@@ -35,7 +35,7 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 //			renderIfPresent(sc, orderByFrag);
 			renderIfPresent(sc, limitFrag);
 			
-			return sc.str;
+			return sc.toString();
 		}
 		
 		protected void renderUpdateFields(StrCreator sc) {

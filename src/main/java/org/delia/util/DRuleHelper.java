@@ -1,10 +1,13 @@
 package org.delia.util;
 
-import org.delia.relation.RelationCardinality;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.rule.rules.RelationRuleBase;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -23,14 +26,23 @@ public class DRuleHelper {
 		}
 		return null;
 	}
-	public static TypePair findMatchingRelByType(DStructType dtype, DType targetType) {
-		//TODO: later also use named relations
+//	public static TypePair findMatchingRelByType(DStructType dtype, DType targetType) {
+//		//TODO: later also use named relations
+//		for(TypePair pair: dtype.getAllFields()) {
+//			if (typesAreEqual(pair.type, targetType)) {
+//				return pair;
+//			}
+//		}
+//		return null;
+//	}
+	public static List<TypePair> xfindAllMatchingRelByType(DStructType dtype, DType targetType) {
+		List<TypePair> list = new ArrayList<>();
 		for(TypePair pair: dtype.getAllFields()) {
 			if (typesAreEqual(pair.type, targetType)) {
-				return pair;
+				list.add(pair);
 			}
 		}
-		return null;
+		return list;
 	}
 	
 	public static boolean typesAreEqual(DType type1, DType type2) {
@@ -63,6 +75,27 @@ public class DRuleHelper {
 		}
 		return null;
 	}
+	public static RelationInfo findMatchingByName(RelationRuleBase rrTarget, DStructType farType) {
+		if (rrTarget.getRelationName() == null) {
+			return null;
+		}
+		String name = rrTarget.getRelationName();
+		
+		for(DRule rule: farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					return rr.relInfo;
+				}
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					return rr.relInfo;
+				}
+			}
+		}
+		return null;
+	}
 
 	public static RelationOneRule findOneRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);
@@ -85,7 +118,6 @@ public class DRuleHelper {
 	public static RelationManyRule findManyRule(DStructType dtype, String fieldName) {
 		for(DRule rule: dtype.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
-				RelationManyRule rr = (RelationManyRule) rule;
 				if (rule.getSubject().equals(fieldName)) {
 					return (RelationManyRule) rule;
 				}
@@ -94,41 +126,65 @@ public class DRuleHelper {
 		return null;
 	}
 	
-	public static boolean isOtherSideOne(DType otherSide, DStructType structType) {
-		RelationInfo info = findOtherSideOne(otherSide, structType);
-		return (info != null);
-	}
-	public static RelationInfo findOtherSideOne(DType otherSide, DStructType structType) {
-		for(DRule rule: otherSide.getRawRules()) {
+//	public static boolean isOtherSideOne(DType otherSide, DStructType structType) {
+//		RelationInfo info = findOtherSideOne(otherSide, structType);
+//		return (info != null);
+//	}
+//	public static RelationInfo findOtherSideOne(DType otherSide, DStructType structType) {
+//		for(DRule rule: otherSide.getRawRules()) {
+//			if (rule instanceof RelationOneRule) {
+//				RelationOneRule rr = (RelationOneRule) rule;
+//				//TODO not correct should also check fieldName. may be multiple relations of same type.
+//				if (typesAreEqual(rr.relInfo.farType, structType)) {
+//					return rr.relInfo;
+//				}
+//			}
+//		}
+//		return null;
+//	}
+	//x is temporary marker of new safer fns
+	public static RelationInfo xfindOtherSideOne(RelationInfo relinfo) {
+		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
-				//TODO not correct should also check fieldName. may be multiple relations of same type.
-				if (typesAreEqual(rr.relInfo.farType, structType)) {
+				if (rr.relInfo.otherSide == relinfo) {
 					return rr.relInfo;
 				}
 			}
 		}
 		return null;
 	}
-	public static RelationInfo findOtherSideMany(DType otherSide, DStructType structType) {
-		for(DRule rule: otherSide.getRawRules()) {
+	public static RelationInfo xfindOtherSideMany(RelationInfo relinfo) {
+		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
-				if (typesAreEqual(rr.relInfo.farType, structType)) {
+				if (rr.relInfo.otherSide == relinfo) {
 					return rr.relInfo;
 				}
 			}
 		}
 		return null;
 	}
-	public static RelationInfo findOtherSideOneOrMany(DType otherSide, DStructType structType) {
-		RelationInfo farInfo = DRuleHelper.findOtherSideOne(otherSide, structType);
-		if (farInfo == null) {
-			farInfo = DRuleHelper.findOtherSideMany(otherSide, structType);
-		}
-		return farInfo;
-	}
-	public static RelationInfo findOtherSideOneOrManyForField(DType structType, String fieldName) {
+
+//	public static RelationInfo findOtherSideMany(DType otherSide, DStructType structType) {
+//		for(DRule rule: otherSide.getRawRules()) {
+//			if (rule instanceof RelationManyRule) {
+//				RelationManyRule rr = (RelationManyRule) rule;
+//				if (typesAreEqual(rr.relInfo.farType, structType)) {
+//					return rr.relInfo;
+//				}
+//			}
+//		}
+//		return null;
+//	}
+//	public static RelationInfo findOtherSideOneOrMany(DType otherSide, DStructType structType) {
+//		RelationInfo farInfo = DRuleHelper.findOtherSideOne(otherSide, structType);
+//		if (farInfo == null) {
+//			farInfo = DRuleHelper.findOtherSideMany(otherSide, structType);
+//		}
+//		return farInfo;
+//	}
+	public static RelationInfo findRelinfoOneOrManyForField(DType structType, String fieldName) {
 		for(DRule rule: structType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
@@ -158,7 +214,7 @@ public class DRuleHelper {
 		}
 		//key goes in child only
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
-		if (info != null && info.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+		if (info != null && info.isManyToMany()) {
 			return true;
 		}
 		return false;
@@ -169,7 +225,7 @@ public class DRuleHelper {
 		}
 		//key goes in child only
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
-		if (info != null && info.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+		if (info != null && info.isManyToMany()) {
 			return info;
 		}
 		return null;

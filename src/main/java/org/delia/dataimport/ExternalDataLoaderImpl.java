@@ -4,10 +4,7 @@ import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
 import org.delia.db.DBHelper;
-import org.delia.db.DBInterface;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -17,12 +14,14 @@ import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.type.DRelation;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataLoader {
 
 	private DeliaSession externalSession;
 	private DTypeRegistry externalRegistry;
-	private DBInterface externalDBInterface;
+	private ZDBInterfaceFactory externalDBInterface;
 	private DoNothingVarEvaluator varEvaluator;
 
 	public ExternalDataLoaderImpl(FactoryService factorySvc, DeliaSession externalSession) {
@@ -39,9 +38,10 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		
 		QueryResponse qresp = null;
 		QueryContext qtx = new QueryContext();
-		DBAccessContext dbctx = new DBAccessContext(externalRegistry, varEvaluator);
-		try(DBExecutor dbexecutor = externalDBInterface.createExector(dbctx)) {
-			qresp = dbexecutor.executeQuery(spec, qtx);
+		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+			dbexecutor.init1(externalSession.getExecutionContext().registry);
+			dbexecutor.init2(externalSession.getDatIdMap(), varEvaluator);
+			qresp = dbexecutor.rawQuery(spec, qtx);
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
@@ -55,9 +55,8 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		
 		QueryResponse qresp = null;
 		QueryContext qtx = new QueryContext();
-		DBAccessContext dbctx = new DBAccessContext(externalRegistry, varEvaluator);
-		try(DBExecutor dbexecutor = externalDBInterface.createExector(dbctx)) {
-			qresp = dbexecutor.executeQuery(spec, qtx);
+		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+			qresp = dbexecutor.rawQuery(spec, qtx);
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}

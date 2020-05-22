@@ -18,6 +18,7 @@ postalCode string optional,
 country string,
 phone string,
 fax string
+relation orders Order many optional
 }
 end
 
@@ -40,6 +41,7 @@ photo string,
 notes string,
 reportsTo string optional,
 photoPath string
+relation orders Order many optional
 }
 end
 

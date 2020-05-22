@@ -14,4 +14,5 @@ public class DeliaOptions {
 	public boolean useSafeMigrationPolicy = true;
 	public boolean enableAutomaticMigrations = true;
 	public boolean useHLS = false;
+	public boolean saveParseExpObjectsInSession = true; //can be helpful for troubleshooting. not needed by Delia
 }

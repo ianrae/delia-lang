@@ -1,7 +1,5 @@
 package org.delia.db.hls;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -30,10 +28,10 @@ public class RenderedFieldHelper {
 				sc.o(".%s", rf.pair.name);
 			}
 			
-			joiner.add(sc.str);
+			joiner.add(sc.toString());
 		}
 		scx.o(joiner.toString());
-		log.log(scx.str);
+		log.log(scx.toString());
 	}
 
 }

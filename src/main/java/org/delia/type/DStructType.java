@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.util.DeliaExceptionHelper;
+
 public class DStructType extends DType {
+	
+	private static final int MAX_INHERITANCE_DEPTH = 1000;
     private OrderedMap orderedMap;
-	//!! add String naturalKeyField, for db query. eg. 'code'
     private List<TypePair> allFields; //lazy-created
     private PrimaryKey primaryKey; //can be null
 	
@@ -16,81 +19,85 @@ public class DStructType extends DType {
 		this.primaryKey = primaryKey;
 	}
 	
-	public boolean fieldIsOptional(String fieldname) {
-	    boolean b = orderedMap.isOptional(fieldname);
+	public boolean fieldIsOptional(String fieldName) {
+	    boolean b = orderedMap.isOptional(fieldName);
 	    if (b) {
 	    	return true;
 	    }
 	    
-	    //TODO: fix runaway risk
 	    DStructType baseType = (DStructType) this.getBaseType();
-	    while(true) {
+	    for(int k = 0; k < MAX_INHERITANCE_DEPTH; k++) { //don't try forever
 	    	if (baseType == null) {
 	    		return false;
 	    	}
-		    b = baseType.orderedMap.isOptional(fieldname);
+		    b = baseType.orderedMap.isOptional(fieldName);
 		    if (b) {
 		    	return true;
 		    }
 		    baseType = (DStructType) baseType.getBaseType();
 	    }
+	    DeliaExceptionHelper.throwError("struct-type-runaway", "Too many base types for field: %s", fieldName);
+	    return false;
 	}
-    public boolean fieldIsUnique(String fieldname) {
-	    boolean b = orderedMap.isUnique(fieldname);
+    public boolean fieldIsUnique(String fieldName) {
+	    boolean b = orderedMap.isUnique(fieldName);
 	    if (b) {
 	    	return true;
 	    }
 	    
-	    //TODO: fix runaway risk
 	    DStructType baseType = (DStructType) this.getBaseType();
-	    while(true) {
+	    for(int k = 0; k < MAX_INHERITANCE_DEPTH; k++) { //don't try forever
 	    	if (baseType == null) {
 	    		return false;
 	    	}
-		    b = baseType.orderedMap.isUnique(fieldname);
+		    b = baseType.orderedMap.isUnique(fieldName);
 		    if (b) {
 		    	return true;
 		    }
 		    baseType = (DStructType) baseType.getBaseType();
 	    }
+	    DeliaExceptionHelper.throwError("struct-type-runaway", "Too many base types for field: %s", fieldName);
+	    return false;
     }
-    public boolean fieldIsPrimaryKey(String fieldname) {
-	    boolean b = orderedMap.isPrimaryKey(fieldname);
+    public boolean fieldIsPrimaryKey(String fieldName) {
+	    boolean b = orderedMap.isPrimaryKey(fieldName);
 	    if (b) {
 	    	return true;
 	    }
 	    
-	    //TODO: fix runaway risk
 	    DStructType baseType = (DStructType) this.getBaseType();
-	    while(true) {
+	    for(int k = 0; k < MAX_INHERITANCE_DEPTH; k++) { //don't try forever
 	    	if (baseType == null) {
 	    		return false;
 	    	}
-		    b = baseType.orderedMap.isPrimaryKey(fieldname);
+		    b = baseType.orderedMap.isPrimaryKey(fieldName);
 		    if (b) {
 		    	return true;
 		    }
 		    baseType = (DStructType) baseType.getBaseType();
 	    }
+	    DeliaExceptionHelper.throwError("struct-type-runaway", "Too many base types for field: %s", fieldName);
+	    return false;
     }
-	public boolean fieldIsSerial(String fieldname) {
-	    boolean b = orderedMap.isSerial(fieldname);
+	public boolean fieldIsSerial(String fieldName) {
+	    boolean b = orderedMap.isSerial(fieldName);
 	    if (b) {
 	    	return true;
 	    }
 	    
-	    //TODO: fix runaway risk
 	    DStructType baseType = (DStructType) this.getBaseType();
-	    while(true) {
+	    for(int k = 0; k < MAX_INHERITANCE_DEPTH; k++) { //don't try forever
 	    	if (baseType == null) {
 	    		return false;
 	    	}
-		    b = baseType.orderedMap.isSerial(fieldname);
+		    b = baseType.orderedMap.isSerial(fieldName);
 		    if (b) {
 		    	return true;
 		    }
 		    baseType = (DStructType) baseType.getBaseType();
 	    }
+	    DeliaExceptionHelper.throwError("struct-type-runaway", "Too many base types for field: %s", fieldName);
+	    return false;
 	}
 
 	public Map<String, DType> getDeclaredFields() {
@@ -131,13 +138,6 @@ public class DStructType extends DType {
 	@Override
 	public String toString() {
 		return super.toString();
-	}
-
-	//TODO: make this into an 'internal' api with DStructTypeInternal interface
-	public void internalAdjustType(DType baseType, OrderedMap omap) {
-		allFields = null; //reset
-		internalAdjustType(baseType);
-		this.orderedMap = omap;
 	}
 
 	@Override

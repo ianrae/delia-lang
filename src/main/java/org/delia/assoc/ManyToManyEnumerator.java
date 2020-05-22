@@ -8,8 +8,7 @@ import org.delia.type.DTypeRegistry;
 
 public class ManyToManyEnumerator {
 	public void visitTypes(DTypeRegistry registry, ManyToManyVisitor visitor) {
-		for(String typeName: registry.getAll()) {
-			DType dtype = registry.getType(typeName);
+		for(DType dtype: registry.getOrderedList()) {
 			if (! dtype.isStructShape()) {
 				continue;
 			}
@@ -17,7 +16,9 @@ public class ManyToManyEnumerator {
 			for(DRule rule: structType.getRawRules()) {
 				if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
-					visitor.visit(structType, rr);
+					if (rr.relInfo.isManyToMany()) {
+						visitor.visit(structType, rr);
+					}
 				}
 			}
 		}

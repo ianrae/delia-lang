@@ -6,25 +6,25 @@ import static org.junit.Assert.assertEquals;
 import java.util.Set;
 
 import org.delia.api.Delia;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
 
-public class DTypeRegistryTests extends NewBDDBase {
+public class DTypeRegistryTests extends BDDBase {
 	
 	
 	@Test
 	public void test2() {
 		String src = buildSrc();
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
 		
@@ -43,10 +43,10 @@ public class DTypeRegistryTests extends NewBDDBase {
 	public void init() {
 	}
 
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	private String buildSrc() {
@@ -57,8 +57,9 @@ public class DTypeRegistryTests extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 }

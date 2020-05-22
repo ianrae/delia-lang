@@ -12,7 +12,6 @@ import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.DBExecutor;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQuerySpan;
@@ -28,6 +27,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.util.DRuleHelper;
+import org.delia.zdb.ZDBExecutor;
 
 //normally we just call db directly. one 'let' statement = one call to db
 public class DoubleHLSStragey implements HLSStragey {
@@ -43,7 +43,7 @@ public class DoubleHLSStragey implements HLSStragey {
 	}
 
 	@Override
-	public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, DBExecutor dbexecutor) {
+	public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, ZDBExecutor dbexecutor) {
 		HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
 		HLSQuerySpan hlspan2 = hls.hlspanL.get(0); //Customer
 		QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
@@ -67,24 +67,24 @@ public class DoubleHLSStragey implements HLSStragey {
 		//we just need to fill in fetched items
 		//merge results from qresp into qresp2 (add Customer to Address.cust)
 		//			String field1 = hlspan1.rEl.rfieldPair.name; //.addr
-		Map<DValue,List<DValue>> todoMap = new HashMap<>();
+		Map<DValue,List<DValue>> pendingMap = new HashMap<>();
 		for(DValue dval: qresp.dvalList) {  //for each customer
 			//dval is a customer. find address in qresp2 whose .cust is pk of dval
 			DValue inner = findIn(dval, qresp2, field2); //inner is address
 			if (inner != null) {
-				List<DValue> fklist = todoMap.get(inner);
+				List<DValue> fklist = pendingMap.get(inner);
 				if (fklist == null) {
 					fklist = new ArrayList<>();
 				}
 				fklist.add(dval);
-				todoMap.put(inner, fklist); 
+				pendingMap.put(inner, fklist); 
 			}
 		}
 
-		for(DValue inner: todoMap.keySet()) {
+		for(DValue inner: pendingMap.keySet()) {
 			DValue innerInner = inner.asStruct().getField(field2); //cust
 			DRelation drel = innerInner.asRelation();
-			List<DValue> fklist = todoMap.get(inner);
+			List<DValue> fklist = pendingMap.get(inner);
 			DRelationHelper.addToFetchedItems(drel, fklist);
 		}
 
@@ -144,12 +144,14 @@ public class DoubleHLSStragey implements HLSStragey {
 		String field1 = hlspan1.rEl.rfieldPair.name;
 		RelationOneRule ruleOne = DRuleHelper.findOneRule(hlspan2.fromType, field1);
 		if (ruleOne != null) {
-			RelationInfo relinfo = DRuleHelper.findOtherSideOne(ruleOne.relInfo.farType, hlspan1.fromType);
-			return relinfo.fieldName;
+			return ruleOne.relInfo.otherSide.fieldName; //can fail if one-sided
+//			RelationInfo relinfo = DRuleHelper.findOtherSideOne(ruleOne.relInfo.farType, hlspan1.fromType);
+//			return relinfo.fieldName;
 		} else {
 			RelationManyRule ruleMany = DRuleHelper.findManyRule(hlspan2.fromType, field1);
-			RelationInfo relinfo = DRuleHelper.findOtherSideMany(ruleMany.relInfo.farType, hlspan2.fromType);
-			return relinfo.fieldName;
+			return ruleMany.relInfo.otherSide.fieldName; //many always has otherSide
+//			RelationInfo relinfo = DRuleHelper.findOtherSideMany(ruleMany.relInfo.farType, hlspan2.fromType);
+//			return relinfo.fieldName;
 		}
 	}
 

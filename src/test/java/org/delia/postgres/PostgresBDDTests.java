@@ -1,16 +1,16 @@
 package org.delia.postgres;
 
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.ResultSetToDValConverter;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PostgresBDDTests extends NewBDDBase {
+public class PostgresBDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200
@@ -49,6 +49,13 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR500File("t0-relation-one-to-many.txt", 9);
 		runR500File("t0-relation-many-to-many.txt", 11);
 		runR500File("t0-relation.txt", 2);
+	}
+	@Test
+	public void testR550() {
+		runR550File("t0-multirel-1to1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-2.txt", 1);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
 	@Test
 	public void testR600() {
@@ -255,6 +262,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	@Test
 	public void testR2150() {
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
 		runR2150File("t0-migrate-one-to-one2a.txt", 2);
 		runR2150File("t0-migrate-one-to-one3.txt", 2);
@@ -271,6 +279,7 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
 		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
 		runR2150File("t0-migrate-many-to-many2.txt", 2);
 		runR2150File("t0-migrate-many-to-many2a.txt", 2);
 		runR2150File("t0-migrate-many-to-many3.txt", 2);
@@ -278,6 +287,8 @@ public class PostgresBDDTests extends NewBDDBase {
 		runR2150File("t0-migrate-many-to-many6.txt", 2);
 		runR2150File("t0-migrate-many-to-many6a.txt", 2);
 		runR2150File("t0-migrate-many-to-many7.txt", 0);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	@Test
 	public void testR2200() {
@@ -289,16 +300,15 @@ public class PostgresBDDTests extends NewBDDBase {
 	}
 
 	@Test
-	public void test8Debug() {
+	public void testDebug() {
 //		testIndexToRun = 0;
 //		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
-//		runR1500File("t0-queryfn-ith.txt", 4);
-//		runR1500File("t0-queryfn-min-bool.txt", 0);
-		runR1600File("t0-fetch.txt", 3);
+//		runR550File("t0-multirel-Nto1-1.txt", 1);
+//		runR2100File("t0-migration10.txt", 2);
 	}
 	
 	//---
@@ -331,7 +341,7 @@ public class PostgresBDDTests extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
+	public ZDBInterfaceFactory createForTest() {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
 		dbInterfaceToUse = db;

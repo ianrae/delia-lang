@@ -7,25 +7,24 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
-import org.delia.db.memdb.MemDBInterface;
-import org.delia.h2.H2ConnectionHelper;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PostgresImportTests  extends NewBDDBase {
+public class PostgresImportTests  extends BDDBase {
 	
 	
 	@Test
@@ -125,7 +124,8 @@ public class PostgresImportTests  extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 }

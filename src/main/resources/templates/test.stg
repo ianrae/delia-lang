@@ -1,0 +1,5 @@
+
+t2(name1,name2) ::= <%
+hello <name1> and <name2>.
+%>
+

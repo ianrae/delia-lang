@@ -136,10 +136,9 @@ public class RelationManyRule extends RelationRuleBase {
 		return dval.asStruct().getField(pair.name).asString();
 	}
 	private TypePair findMatchingRel(DValue otherSide, DType targetType) {
-		return findMatchingRel(otherSide.getType(), targetType);
-	}
-	public TypePair findMatchingRel(DType otherSide, DType targetType) {
-		return DRuleHelper.findMatchingRelByType((DStructType) otherSide, targetType);
+		//.otherSide never null for many relations
+		String otherSideFieldName = relInfo.otherSide.fieldName;
+		return DValueHelper.findField(relInfo.farType, otherSideFieldName);
 	}
 	
 	//Customer. find address
@@ -154,7 +153,7 @@ public class RelationManyRule extends RelationRuleBase {
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		DValue keyVal = dval.asStruct().getField(pair.name);
 		
-		RelationInfo farInfo = DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
+		RelationInfo farInfo = info.otherSide;// DRuleHelper.findOtherSideOneOrMany(info.farType, info.nearType);
 		
 //		QueryResponse qresp = fetchRunner.load(info.farType.getName(), farInfo.fieldName, keyVal);
 		QueryResponse qresp = fetchRunner.loadFKOnly(info.farType.getName(), farInfo.fieldName, keyVal);

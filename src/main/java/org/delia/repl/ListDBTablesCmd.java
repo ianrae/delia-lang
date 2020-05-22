@@ -1,10 +1,13 @@
 package org.delia.repl;
 
 import org.delia.api.Delia;
-import org.delia.db.DBInterface;
-import org.delia.db.h2.H2DBInterface;
-import org.delia.db.postgres.PostgresDBInterface;
+import org.delia.db.DBType;
+import org.delia.db.h2.DBListingType;
+import org.delia.db.sql.prepared.RawStatementGenerator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.ResultValue;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class ListDBTablesCmd extends CmdBase {
 	public ListDBTablesCmd() {
@@ -24,15 +27,16 @@ public class ListDBTablesCmd extends CmdBase {
 	@Override
 	public ResultValue runCmd(Cmd cmd, ReplRunner runner) {
 		Delia delia = runner.getDelia();
-		DBInterface dbInterface = delia.getDBInterface();
+		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
 		
-		if (dbInterface instanceof H2DBInterface) {
-			H2DBInterface h2db = (H2DBInterface) dbInterface;
-			h2db.enumerateAllTables(delia.getLog());
-		}
-		if (dbInterface instanceof PostgresDBInterface) {
-			PostgresDBInterface pgdb = (PostgresDBInterface) dbInterface;
-			pgdb.enumerateAllTables(delia.getLog());
+		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType());
+		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
+		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+			SqlStatement statement = new SqlStatement();
+			statement.sql = sql;
+			zexec.getDBConnection().execStatement(statement, null);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return createEmptyRes();

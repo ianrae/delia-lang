@@ -7,23 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlHelperFactory;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.h2.H2SqlHelperFactory;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -40,9 +37,11 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 
-public class FragmentParserTestBase extends NewBDDBase {
+public class FragmentParserTestBase extends BDDBase {
 
 	//---
 	protected Delia delia;
@@ -58,15 +57,16 @@ public class FragmentParserTestBase extends NewBDDBase {
 	protected String sqlLine4;
 	protected String sqlLine5;
 
-	protected DeliaDao createDao() {
+	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	protected QuerySpec buildQuery(QueryExp exp) {
@@ -76,9 +76,9 @@ public class FragmentParserTestBase extends NewBDDBase {
 
 
 	protected List<TableInfo> createTblInfoL() {
-		TableExistenceServiceImpl.hackYesFlag = true;
+//		TableExistenceServiceImpl.hackYesFlag = true;
 		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Address", "AddressCustomerAssoc");
+		TableInfo info = new  TableInfo("Address", "AddressCustomerDat1");
 		info.tbl1 = "Address";
 		info.tbl2 = "Customer";
 		//public String fieldName;
@@ -86,9 +86,9 @@ public class FragmentParserTestBase extends NewBDDBase {
 		return tblinfoL;
 	}
 	protected List<TableInfo> createTblInfoLOtherWay() {
-		TableExistenceServiceImpl.hackYesFlag = true;
+//		TableExistenceServiceImpl.hackYesFlag = true;
 		List<TableInfo> tblinfoL = new ArrayList<>();
-		TableInfo info = new  TableInfo("Customer", "CustomerAddressAssoc");
+		TableInfo info = new  TableInfo("Customer", "CustomerAddressDat1");
 		info.tbl1 = "Customer";
 		info.tbl2 = "Address";
 		//public String fieldName;
@@ -153,7 +153,7 @@ public class FragmentParserTestBase extends NewBDDBase {
 		}
 	}
 	
-	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaDao dao, List<TableInfo> tblinfoL) {
+	protected FragmentParserService createFragmentParserService(WhereFragmentGenerator whereGen, DeliaGenericDao dao, List<TableInfo> tblinfoL) {
 		SqlHelperFactory sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 		if (tblinfoL == null) {
 			tblinfoL = new ArrayList<>();		

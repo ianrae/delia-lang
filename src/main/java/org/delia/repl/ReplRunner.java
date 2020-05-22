@@ -11,8 +11,6 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
@@ -26,13 +24,14 @@ import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.h2.store.fs.FileUtils;
 
 public class ReplRunner  {
 	private Log log = new SimpleLog();
 
 	private Delia delia;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 
 	private DeliaException mostRecentException;
@@ -69,10 +68,10 @@ public class ReplRunner  {
 		dbInterface = delia.getDBInterface();
 		dbInterface.getCapabilities().setRequiresSchemaMigration(true);
 		dbInterface.enableSQLLogging(false);
-		if (dbInterface instanceof MemDBInterface) {
-			MemDBInterface memdb = (MemDBInterface) dbInterface;
-			memdb.createTablesAsNeededFlag = true;
-		}
+//		if (dbInterface instanceof MemZDBInterfaceFactory) {
+//			MemDBInterface memdb = (MemDBInterface) dbInterface;
+//			memdb.createTablesAsNeededFlag = true;
+//		}
 		
 		for(Cmd cmdx: allCmdsL) {
 			CmdBase cmd = (CmdBase) cmdx;

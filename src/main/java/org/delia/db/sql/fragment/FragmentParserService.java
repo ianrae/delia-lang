@@ -5,16 +5,17 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
-import org.delia.db.TableExistenceServiceImpl;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.queryresponse.LetSpan;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZTableExistenceService;
 
 public class FragmentParserService extends ServiceBase {
 	public int nextAliasIndex = 0;
@@ -22,18 +23,18 @@ public class FragmentParserService extends ServiceBase {
 	public DTypeRegistry registry;
 	public WhereFragmentGenerator whereGen;
 	public SelectFuncHelper selectFnHelper;
-	public TableExistenceServiceImpl existSvc;
+	public TableExistenceService existSvc;
 	public FKHelper fkHelper;
 	public JoinFragment savedJoinedFrag;
 	public List<TableInfo> tblinfoL;
 	public VarEvaluator varEvaluator;
-	public DBInterface dbInterface;
+	public ZDBInterfaceFactory dbInterface;
 	public DBAccessContext dbctx;
 	public SqlHelperFactory sqlHelperFactory;
 	public SpanHelper spanHelper;
 	
 	public FragmentParserService(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
-			DBInterface dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
+			ZDBInterfaceFactory dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -47,7 +48,8 @@ public class FragmentParserService extends ServiceBase {
 
 		
 		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-		this.existSvc = new TableExistenceServiceImpl(dbInterface, dbctx);
+		
+		this.existSvc = (dbInterface == null) ? null : new ZTableExistenceService(dbInterface);
 	}
 
 	public QueryTypeDetector createQueryTypeDetector() {
@@ -55,8 +57,8 @@ public class FragmentParserService extends ServiceBase {
 		return this.queryDetectorSvc;
 	}
 
-	public TableExistenceServiceImpl createTableExistenceService() {
-		return new TableExistenceServiceImpl(dbInterface, dbctx);
+	public TableExistenceService createTableExistenceService() {
+		return existSvc;
 	}
 
 	public FKHelper createFKHelper() {
@@ -65,6 +67,10 @@ public class FragmentParserService extends ServiceBase {
 
 	public SelectFuncHelper createSelectFuncHelper() {
 		return new SelectFuncHelper(factorySvc, registry, spanHelper);
+	}
+
+	public void setExistSvc(TableExistenceService existSvc) {
+		this.existSvc = existSvc;
 	}
 
 }

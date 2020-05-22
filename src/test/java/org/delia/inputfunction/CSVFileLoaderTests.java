@@ -8,17 +8,15 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
-import org.delia.dao.DeliaDao;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -26,10 +24,12 @@ import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CSVFileLoaderTests  extends NewBDDBase {
+public class CSVFileLoaderTests  extends BDDBase {
 
 	@Test
 	public void test1() {
@@ -57,7 +57,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 
 	@Before
 	public void init() {
-		DeliaDao dao = this.createDao();
+		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
 	private void createDelia(boolean inOrder) {
@@ -90,10 +90,10 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 			return src;
 		}
 	}
-	private DeliaDao createDao() {
+	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaDao(delia);
+		return new DeliaGenericDao(delia);
 	}
 	private InputFunctionResult buildAndRun(boolean inOrder, LineObjIterator lineObjIter, int expectedNumRows) {
 		createDelia(inOrder);
@@ -119,7 +119,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		return result;
 	}
 	private void chkCustomer(Integer id, String expected) {
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
 		assertEquals(true, res.ok);
 		DValue dval = res.getAsDValue();
@@ -128,7 +128,7 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 		assertEquals(1L, n);
 	}
 	private void chkNoCustomer(Integer id) {
-		DeliaDao dao = new DeliaDao(delia, session);
+		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
 		assertEquals(true, res.ok);
 		assertEquals(0, res.getAsDValueList().size());
@@ -138,8 +138,9 @@ public class CSVFileLoaderTests  extends NewBDDBase {
 	
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private LineObjIterator createIter(int n) {

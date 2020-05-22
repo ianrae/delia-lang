@@ -1,11 +1,11 @@
 package org.delia.db.sql;
 
 public class StrCreator {
-	public String str = ""; //TODO use StringBuilder for perf
+	private StringBuilder sb = new StringBuilder();
 	
 	public String o(String fmt, String...args) {
 		String s = String.format(fmt, args);
-		str += s;
+		sb.append(s);
 		return s;
 	}
 	/**
@@ -14,10 +14,14 @@ public class StrCreator {
 	 * @return the input string s
 	 */
 	public String addStr(String s) {
-		str += s;
+		sb.append(s);
 		return s;
 	}
 	public void nl() {
-		str += "\n";
+		sb.append('\n');
+	}
+	@Override
+	public String toString() {
+		return sb.toString();
 	}
 }

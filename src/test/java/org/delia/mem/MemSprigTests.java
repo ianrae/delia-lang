@@ -2,7 +2,6 @@ package org.delia.mem;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.memdb.SerialProvider;
 import org.delia.runner.ResultValue;
 import org.delia.sort.topo.TopoTestBase;

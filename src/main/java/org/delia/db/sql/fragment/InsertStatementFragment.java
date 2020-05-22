@@ -19,7 +19,7 @@ public class InsertStatementFragment extends StatementFragmentBase {
 			sc.o(" %s", tblFrag.render());
 			renderInsertFields(sc);
 			
-			return sc.str;
+			return sc.toString();
 		}
 		
 		protected void renderInsertFields(StrCreator sc) {
@@ -52,7 +52,6 @@ public class InsertStatementFragment extends StatementFragmentBase {
 		
 		@Override
 		public int getNumSqlParams() {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 		

@@ -11,7 +11,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -26,7 +25,6 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
 
-//	private DTypeRegistry registry;
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
 	private AliasAllocator aliasAlloc = new AliasAllocator();
@@ -34,16 +32,12 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
 	public Map<String,String> asNameMap = new HashMap<>();
-//	private MiniSelectFragmentParser miniSelectParser;
-//	private TableExistenceService existSvc;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, TableExistenceService existSvc) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
 		this.assocTblMgr = assocTblMgr;
-//		this.miniSelectParser = miniSelectParser;
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasAlloc);
-//		this.existSvc = existSvc;
 	}
 
 	@Override
@@ -92,11 +86,11 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				{
 					if (isQueryPKOnly(hlspan1)) {
 						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
-						RelationInfo relinfo1 = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						RelationInfo relinfo1 = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
 						sql = String.format("%s WHERE %s.%s=?", sql, alias, relinfo1.fieldName);
 						return sql;
 					} else {
-						RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
 						String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
 						s2 = StringUtils.substringAfter(s2, "WHERE ");
 						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
@@ -109,9 +103,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				}
 				case MANY_TO_MANY:
 				{
-					String assocTblName = assocTblMgr.getTableFor(hlspan1.fromType, hlspan2.fromType);
+					String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(relinfo.getDatId()); //   .getTableFor(hlspan1.fromType, hlspan2.fromType);
 					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
-					String fff = assocTblMgr.getAssocRightField(hlspan1.fromType, hlspan2.fromType);
+					String fff = assocTblMgr.xgetAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
 					String s3 = String.format("%s.%s", newAlias, fff);
 					
 					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
@@ -176,17 +170,19 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		hlspan.details = joinHelper.genJoin(sc, hlspan);
 	}
 	private void addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
-		boolean addedOne = joinHelper.addFKofJoins(hlspan, fieldL);
-		if (addedOne) {
-			int n = fieldL.size();
-			RenderedField rf = fieldL.get(n - 1);
-			String fieldStr = rf.field.trim();
-			if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
-				String asName = whereClauseHelper.asNameMap.get(fieldStr);
-				fieldStr = String.format("%s as %s", fieldStr, asName);
+		int numAdded = joinHelper.addFKofJoins(hlspan, fieldL);
+		if (numAdded > 0) {
+			for(int k = 0; k < numAdded; k++) {
+				int n = fieldL.size();
+				RenderedField rf = fieldL.get(n - (k + 1));
+				String fieldStr = rf.field.trim();
+				if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
+					String asName = whereClauseHelper.asNameMap.get(fieldStr);
+					fieldStr = String.format("%s as %s", fieldStr, asName);
 //				fieldL.remove(n - 1);
-				rf.field = fieldStr;
+					rf.field = fieldStr;
 //				fieldL.add(fieldStr);
+				}
 			}
 		}
 	}

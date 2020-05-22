@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBExecutor;
+import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
@@ -17,6 +17,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,7 +95,7 @@ public class HLSManagerTests extends HLSTestBase {
 	
 	@Before
 	public void init() {
-		createDao();
+		//createDao();
 	}
 
 	private QueryResponse sqlchk(String src, String sqlExpected) {
@@ -107,9 +108,13 @@ public class HLSManagerTests extends HLSTestBase {
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = queryExp;
 		QueryContext qtx = new QueryContext();
-		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, null);
-		DBExecutor dbexecutor = delia.getDBInterface().createExector(dbctx);
-		HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
+//		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, null);
+//		DBExecutor dbexecutor = delia.getDBInterface().createExector(dbctx);
+//		ZDBExecutor zexec = delia.getFactoryService().hackGetZDB(session.getExecutionContext().registry, DBType.MEM);
+		ZDBExecutor zexec = delia.getDBInterface().createExecutor();
+		zexec.init1(session.getExecutionContext().registry);
+		zexec.init2(session.getDatIdMap(), varEvaluator);
+		HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 		assertEquals(sqlExpected, result.sql);
 		return result.qresp;
 	}

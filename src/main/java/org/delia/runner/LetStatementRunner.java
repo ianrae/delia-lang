@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.NullExp;
@@ -13,8 +14,6 @@ import org.delia.compiler.ast.UserFunctionDefStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBExecutor;
-import org.delia.db.DBInterface;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
@@ -30,6 +29,8 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.validation.ValidationRuleRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -39,25 +40,26 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 public class LetStatementRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
-	private DBInterface dbInterface;
-	private DBExecutor dbexecutor;
+	private ZDBInterfaceFactory dbInterface;
+	private ZDBExecutor zexec;
 	private LetSpanEngine letSpanEngine;
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
 	private HLSManager mgr;
+	private DatIdMap datIdMap;
 
-	public LetStatementRunner(FactoryService factorySvc, DBInterface dbInterface, DBExecutor dbexecutor, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner) {
+	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
+			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
-		this.dbexecutor = dbexecutor;
+		this.zexec = zexec;
 		this.mgr = mgr;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
-
+		this.datIdMap = datIdMap;
 	}
 
 	private ValidationRuleRunner createValidationRunner() {
@@ -146,10 +148,10 @@ public class LetStatementRunner extends ServiceBase {
 		QueryResponse qresp;
 		if (flag) {
 			spec.queryExp = queryExp;
-			HLSManagerResult result = mgr.execute(spec, qtx, dbexecutor);
+			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 			qresp = result.qresp;
 		} else {
-			qresp = dbexecutor.executeQuery(spec, qtx);
+			qresp = zexec.rawQuery(spec, qtx);
 		}
 		return qresp;
 	}
@@ -191,7 +193,7 @@ public class LetStatementRunner extends ServiceBase {
 			//err
 			return resParam;
 		}
-
+		innerRunner.setDatIdMap(datIdMap);
 		UserFnCallExp callExp = (UserFnCallExp) exp.value;
 
 		UserFunctionDefStatementExp userFnExp = runner.userFnMap.get(callExp.funcName);

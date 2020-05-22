@@ -1,14 +1,6 @@
 package org.delia.db.sql.prepared;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.IdentExp;
-import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
@@ -16,7 +8,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.SpanHelper;
-import org.delia.db.sql.StrCreator;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;

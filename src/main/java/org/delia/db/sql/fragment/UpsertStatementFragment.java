@@ -29,7 +29,7 @@ public class UpsertStatementFragment extends UpdateStatementFragment {
 			addOnConflictPhrase(sc);
 		}
 
-		return sc.str;
+		return sc.toString();
 	}
 
 	//		sc.o(" ON CONFLICT (leftv,rightv) DO UPDATE SET leftv = ?,rightv=?");

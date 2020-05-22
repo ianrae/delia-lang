@@ -7,7 +7,7 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -17,19 +17,19 @@ import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupBuilder;
 import org.delia.dataimport.ImportLevel;
 import org.delia.dataimport.ImportToool;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImportToolTests  extends NewBDDBase {
+public class ImportToolTests  extends BDDBase {
 	
 	@Test
 	public void testTool1Category() {
@@ -284,8 +284,9 @@ public class ImportToolTests  extends NewBDDBase {
 	
 	
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 
 	private LineObj createLineObj(int id, String nameStr) {

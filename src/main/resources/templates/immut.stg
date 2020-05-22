@@ -1,0 +1,38 @@
+
+t1() ::= <<
+import org.delia.type.DStructHelper;
+import org.delia.type.DValue;
+
+>>
+
+t2(cname,iname) ::= <<
+public class <cname> implements <iname> {
+  private DValue dval;
+  private DStructHelper helper;
+
+  public <cname>(DValue dval) {
+    this.dval = dval;
+    this.helper = dval.asStruct();
+  }
+  @Override
+  public DValue internalDValue() {
+    return dval;
+  }
+
+>>
+
+t3(ftype,uname,fname,asname) ::= <<
+  @Override
+  public <ftype> get<uname>() {
+    return helper.getField("<fname>").<asname>();
+  }
+>>
+
+t4(ftype,uname,fname) ::= <<
+  @Override
+  public <ftype> get<uname>() {
+    DValue inner = helper.getField("<fname>");
+    <ftype> immut = new <ftype>Immut(inner);
+    return immut;
+  }
+>>

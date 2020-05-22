@@ -8,7 +8,8 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
-import org.delia.bdd.NewBDDBase;
+import org.delia.assoc.CreateNewDatIdVisitor;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -16,13 +17,10 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.dao.DeliaDao;
-import org.delia.db.DBInterface;
+import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.SchemaContext;
 import org.delia.db.TableExistenceService;
 import org.delia.db.TableExistenceServiceImpl;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.queryresponse.LetSpan;
@@ -33,6 +31,11 @@ import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.StringTrail;
+import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.ZTableExistenceService;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.junit.After;
 
 /**
  * 
@@ -40,7 +43,7 @@ import org.delia.util.StringTrail;
  * @author Ian Rae
  *
  */
-public class HLSTestBase extends NewBDDBase {
+public class HLSTestBase extends BDDBase {
 	
 	protected HLSQueryStatement buildHLS(String src) {
 		QueryExp queryExp = compileQuery(src);
@@ -83,7 +86,7 @@ public class HLSTestBase extends NewBDDBase {
 		}
 		log.log("initial: " + initialSrc);
 		
-		DeliaDao dao = createDao(); 
+		DeliaGenericDao dao = createDao(); 
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
 
@@ -137,19 +140,24 @@ public class HLSTestBase extends NewBDDBase {
 	protected TableExistenceService existsSvc;
 	protected AssocTblManager assocTblMgr;
 	
-	protected DeliaDao createDao() {
+	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
-		SchemaContext ctx = new SchemaContext();
+		MemZDBInterfaceFactory memDBinterface = (MemZDBInterfaceFactory) delia.getDBInterface();
+		memDBinterface.createSingleMemDB();
+		CreateNewDatIdVisitor.hackFlag = true;
 		
 		if (flipAssocTbl) {
-			delia.getDBInterface().createTable("AddressCustomerAssoc", null, ctx);
+			createTable(memDBinterface, "AddressCustomerDat1");
 		} else {
-			delia.getDBInterface().createTable("CustomerAddressAssoc", null, ctx);
+			createTable(memDBinterface, "CustomerAddressDat1");
 		}
-		existsSvc = new TableExistenceServiceImpl(delia.getDBInterface(), null); //2nd param not needed for MEM
-		assocTblMgr = new AssocTblManager(existsSvc);
-		return new DeliaDao(delia);
+		existsSvc = new ZTableExistenceService(delia.getDBInterface()); 
+		return new DeliaGenericDao(delia);
+	}
+	
+	private void createTable(MemZDBInterfaceFactory db, String tableName) {
+		TestCreatorHelper.createTable(db, tableName);
 	}
 
 	protected String buildSrc() {
@@ -192,15 +200,19 @@ public class HLSTestBase extends NewBDDBase {
 	}
 
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		return null;
+//		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+//		db.createSingleMemDB();
+//		return db;
 	}
 	
 	protected HLSSQLGenerator createGen() {
 		DTypeRegistry registry = session.getExecutionContext().registry;
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null);
 		MiniSelectFragmentParser mini = new MiniSelectFragmentParser(delia.getFactoryService(), registry, whereGen);
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null, existsSvc);
+		assocTblMgr = new AssocTblManager(existsSvc, session.getDatIdMap());
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null);
 		gen.setRegistry(session.getExecutionContext().registry);
 		return gen;
 	}
@@ -239,5 +251,12 @@ public class HLSTestBase extends NewBDDBase {
 				assertEquals(true, rf.isAssocField || rf.structType != null || rf.field.equals("*"));
 			}
 		}
+	}
+	
+	@After
+	public void shutdown() {
+//		System.out.println("sdfffffffffffffffffffffffffffffff");
+//		TableExistenceServiceImpl.hackYesFlag = false;
+		CreateNewDatIdVisitor.hackFlag = false;
 	}
 }

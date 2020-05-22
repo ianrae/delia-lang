@@ -139,14 +139,14 @@ public class RuleBuilder extends ServiceBase {
 				StructFieldExp fieldExp = getFieldExp(typeStatementExp, pair.name);
 				if (fieldExp.isPrimaryKey || fieldExp.isOne) {
 					StructDValueRuleOperand oper = new StructDValueRuleOperand(pair.name);
-					RuleGuard guard = new AlwaysRuleGuard(); //TODO: is this correct?
+					RuleGuard guard = new AlwaysRuleGuard(); 
 					String relName = getRelationName(fieldExp, pair.name);
 					RelationOneRule rule = new RelationOneRule(guard, oper, dtype, registry, fieldExp.isParent, relName);
 					rule.nameIsExplicit = fieldExp.relationName != null;
 					dtype.getRawRules().add(rule);
 				} else if (fieldExp.isMany) {
 					StructDValueRuleOperand oper = new StructDValueRuleOperand(pair.name);
-					RuleGuard guard = new AlwaysRuleGuard(); //TODO: is this correct?
+					RuleGuard guard = new AlwaysRuleGuard(); 
 					String relName = getRelationName(fieldExp, pair.name);
 					RelationManyRule rule = new RelationManyRule(guard, oper, dtype, registry, relName);
 					rule.nameIsExplicit = fieldExp.relationName != null;

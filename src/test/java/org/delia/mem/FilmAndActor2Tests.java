@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -14,18 +14,18 @@ import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.dataimport.ImportToool;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.type.DValue;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FilmAndActor2Tests  extends NewBDDBase {
+public class FilmAndActor2Tests  extends BDDBase {
 	
 	@Test
 	public void testTool() {
@@ -160,7 +160,8 @@ public class FilmAndActor2Tests  extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 }

@@ -56,7 +56,7 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 				return details.mostRecentInsertedPrimaryKey;
 			}
 		}
-		return null; //TODOinfo.mostRecentInsertedPrimaryKey;
+		return null; 
 	}
 
 	@Override

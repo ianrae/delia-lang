@@ -47,7 +47,7 @@ public enum BuiltInTypes {
     	case DATE_SHAPE: return Shape.DATE;
     	case LONG_SHAPE: return Shape.LONG;
     	case STRING_SHAPE: return Shape.STRING;
-    	case RELATION_SHAPE: return Shape.STRUCT; //TODO: is this ok?
+    	case RELATION_SHAPE: return Shape.RELATION; 
     	default: return null;
     	}
     }

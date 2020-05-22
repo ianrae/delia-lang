@@ -208,7 +208,6 @@ public class Pass3Compiler extends CompilerPassBase {
 			return null;
 		}
 		
-		//TODO: support named relations
 		if (tt.typeExp.structExp != null) {
 			for(StructFieldExp sfe: tt.typeExp.structExp.argL) {
 				if (sfe.typeName.equals(typeExp.typeName)) {
@@ -248,8 +247,7 @@ public class Pass3Compiler extends CompilerPassBase {
 	}
 
 	private void checkPrimaryKeys(TypeStatementExp typeExp, CompilerResults results) {
-		// TODO Auto-generated method stub
-		
+		//what goes here?
 	}
 
 	private boolean isScalarType(TypeStatementExp typeExp, CompilerResults results, boolean doTypeChecks) {

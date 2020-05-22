@@ -299,6 +299,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		//struct is Address AddressCustomerAssoc
 		String field1;
 		String field2;
+//		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
 		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
 			field1 = "rightv";
 			field2 = "leftv";
@@ -377,7 +378,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 				sc.o(opff.render());
 			}
 			sc.o(")");
-			RawFragment rawFrag = new RawFragment(sc.str);
+			RawFragment rawFrag = new RawFragment(sc.toString());
 	
 			assocUpdateFrag.whereL.add(rawFrag);
 			int extra = statement.paramL.size() - startingNumParams;
@@ -404,7 +405,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		DRelation drel = mmMap.get(fieldName); //100
 		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
 
-		RelationInfo farInfo = DRuleHelper.findOtherSideMany(info.farType, structType);
+		RelationInfo farInfo = info.otherSide; //DRuleHelper.findOtherSideMany(info.farType, structType);
 		TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
 		TypePair rightPair = new TypePair(assocFieldName, pair2.type);
 		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);

@@ -67,7 +67,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		case INTEGER:
 		{
 			Integer foreignKey = keyValue.asInt();
-			//TODO string keys later
 			FilterExp filter = new FilterExp(99, new IntegerExp(foreignKey));
 			QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
 			return exp;
@@ -75,7 +74,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		case LONG:
 		{
 			Long foreignKey = keyValue.asLong();
-			//TODO string keys later
 			FilterExp filter = new FilterExp(99, new LongExp(foreignKey));
 			QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
 			return exp;
@@ -83,7 +81,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		case STRING:
 		{
 			String foreignKey = keyValue.asString();
-			//TODO string keys later
 			FilterExp filter = new FilterExp(99, new StringExp(foreignKey));
 			QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
 			return exp;

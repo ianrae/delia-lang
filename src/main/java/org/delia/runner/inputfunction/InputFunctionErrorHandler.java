@@ -42,7 +42,7 @@ public class InputFunctionErrorHandler extends ServiceBase {
 		} else if (errIdIs(err, "duplicate-unique-value")) {
 			if (metricsObserver != null && err instanceof DetailedError) {
 				DetailedError derr = (DetailedError) err;
-				//TODO this will fails for h2 and postgres. fix them!
+				//TODO this will fail for h2 and postgres. fix them!
 				ImportSpec ispec = findImportSpec(request, structType);
 				metricsObserver.onDuplicateError(ispec, derr.getFieldName());
 			}

@@ -22,6 +22,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.PrimaryKey;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.valuebuilder.PartialStructValueBuilder;
@@ -84,24 +85,23 @@ public class DsonToDValueConverter extends ServiceBase {
 			DValue dval = doBuildValue(dtype, dsonExp, structBuilder, cres);
 			return dval;
 		}
-		private DValue doBuildValue(DStructType dtype, DsonExp dsonExp, StructValueBuilder structBuilder, ConversionResult cres) {
+		private DValue doBuildValue(DStructType structType, DsonExp dsonExp, StructValueBuilder structBuilder, ConversionResult cres) {
 			for(Exp exp: dsonExp.argL) {
 				DsonFieldExp fieldExp = (DsonFieldExp) exp;
 				String fieldName = fieldExp.getFieldName();
-				DType fieldType = findFieldType(dtype, fieldName); 
+				DType fieldType = findFieldType(structType, fieldName); 
 				if (assocCrudMap != null && fieldExp.assocCrudAction != null) {
 					assocCrudMap.put(fieldName, fieldExp.assocCrudAction.strValue());
 				}
 				
 				//Customer.sid
-				if (sprigSvc.haveEnabledFor(dtype.getName(), fieldName) && cres != null) {
-//					extraMap.put(fieldName, builder.buildInt(33)); //TODO fix
+				if (sprigSvc.haveEnabledFor(structType.getName(), fieldName) && cres != null) {
 					cres.extraMap.put(fieldName, builder.buildInt(fieldExp.exp.strValue()));
 					continue;
 				} 
 				
 				if (fieldType == null) {
-					et.add("field-not-found", String.format("type '%s': can't find field '%s'", dtype.getName(), fieldName));
+					et.add("field-not-found", String.format("type '%s': can't find field '%s'", structType.getName(), fieldName));
 					//throw new ValueException(err);
 					return null;
 				}
@@ -160,12 +160,13 @@ public class DsonToDValueConverter extends ServiceBase {
 				DValue dval = builder.buildDate(input, fieldType); 
 				return dval;
 			} else if (Shape.STRUCT.equals(fieldType.getShape())) {
-				//TODO: later support multiple keys
 				DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
 				RelationValueBuilder rbuilder = new RelationValueBuilder(relType, fieldType.getName(), registry);
 				if (fieldExp.exp instanceof ListExp) {
+					DStructType relStructType = (DStructType) registry.getType(fieldType.getName());
+					PrimaryKey pk = relStructType.getPrimaryKey();
 					//TODO should use input here not fieldExp???
-					List<DValue> elementL = buildList((ListExp)fieldExp.exp, fieldType.getName());
+					List<DValue> elementL = buildList((ListExp)fieldExp.exp, fieldType.getName(), pk.getKeyType());
 					rbuilder.buildFromList(elementL);
 				} else {
 					rbuilder.buildFromString(input); 
@@ -184,20 +185,12 @@ public class DsonToDValueConverter extends ServiceBase {
 			}
 		}
 
-		private List<DValue> buildList(ListExp listExp, String typeName) {
+		private List<DValue> buildList(ListExp listExp, String typeName, DType dtype) {
 			List<DValue> resultL = new ArrayList<>();
 			
 			for(Exp exp: listExp.valueL) {
-				
-				DValue dval = dvalConverter.createDValFromExp(exp, this.builder);
-//				String s;
-//				if (exp instanceof IdentExp) {
-//					s = varEvaluator.evalVarAsString(exp.strValue(), typeName);
-//				} else {
-//					s = exp.strValue();
-//				}
-//				
-//				DValue dval = builder.buildInt(s);
+				Object rawValue = dvalConverter.extractObj(exp);
+				DValue dval = dvalConverter.buildFromObject(rawValue, dtype.getShape(), this.builder);
 				resultL.add(dval);
 			}
 			return resultL;

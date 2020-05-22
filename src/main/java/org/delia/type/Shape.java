@@ -29,4 +29,15 @@ public enum Shape {
 		}
     }
 	
+	public static int getScalarIndex(Shape shape) {
+		switch(shape) {
+		case INTEGER: return 0;
+		case LONG: return 1;
+		case NUMBER: return 2;
+		case STRING: return 3;
+		case BOOLEAN: return 4;
+		case DATE: return 5;
+		default: return -1;
+		}
+    }
 }

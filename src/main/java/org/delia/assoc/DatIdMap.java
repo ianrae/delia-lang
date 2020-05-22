@@ -1,7 +1,10 @@
 package org.delia.assoc;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.delia.type.DType;
 
 public class DatIdMap {
 	private Map<String,Integer> datIdMap = new ConcurrentHashMap<>(); //key(type.field),datId
@@ -30,6 +33,21 @@ public class DatIdMap {
 	
 	public String getAssocTblName(int datId) {
 		return tblNameMap.get(datId);
+	}
+
+	//AddressCustomerDat1, so "Address" is left type
+	public boolean isLeftType(String assocTblName, DType dtype) {
+		return assocTblName.startsWith(dtype.getName());
+	}
+	
+	//used for consistency check
+	public int getNumUniqueDatIds() {
+		Map<Integer,String> tmp = new HashMap<>();
+		for(String key: datIdMap.keySet()) {
+			Integer id = datIdMap.get(key);
+			tmp.put(id, "");
+		}
+		return tmp.size();
 	}
 
 }

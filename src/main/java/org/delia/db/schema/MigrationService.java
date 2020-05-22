@@ -5,16 +5,16 @@ import org.delia.assoc.AssocServiceImpl;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBInterface;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MigrationService extends ServiceBase {
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private MigrationPolicy policy;
 
-	public MigrationService(DBInterface dbInterface, FactoryService factorySvc) {
+	public MigrationService(ZDBInterfaceFactory dbInterface, FactoryService factorySvc) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
@@ -30,7 +30,7 @@ public class MigrationService extends ServiceBase {
 	 * @return success flag
 	 */
 	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
 			log.logDebug("MIGRATION needed: %b", b);
@@ -38,7 +38,7 @@ public class MigrationService extends ServiceBase {
 				MigrationPlan plan = migrator.generateMigrationPlan();
 				if (policy.shouldMigrationOccur(plan)) {
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
-					b = migrator.performMigrations(performRiskChecks, datIdMap);
+					b = migrator.performMigrations(performRiskChecks);
 					if (! b) {
 						return false;
 					}
@@ -55,8 +55,8 @@ public class MigrationService extends ServiceBase {
 		}
 		return true;
 	}
-	public MigrationPlan createMigrationPlan(DTypeRegistry registry, VarEvaluator varEvaluator) {
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
+	public MigrationPlan createMigrationPlan(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
 			log.log("MIGRATION PLAN: %b", b);
@@ -74,11 +74,11 @@ public class MigrationService extends ServiceBase {
 	 * @return plan
 	 */
 	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator, DatIdMap datIdMap) {
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
 			migrator.createSchemaTableIfNeeded();
 			boolean b = migrator.dbNeedsMigration();
 			log.log("RUN MIGRATION PLAN: %b", b);
-			plan = migrator.runMigrationPlan(plan, datIdMap);
+			plan = migrator.runMigrationPlan(plan);
 			return plan;
 		}
 	}
@@ -93,13 +93,16 @@ public class MigrationService extends ServiceBase {
 		}
 	}
 
-	public DatIdMap loadDATData(DTypeRegistry registry) {
+	public DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator) {
 		DatIdMap datIdMap = null;
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator())) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null)) {
 			migrator.createSchemaTableIfNeeded();
 			AssocService assocSvc = new AssocServiceImpl(migrator, factorySvc, factorySvc.getErrorTracker());
 			assocSvc.assignDATIds(registry);
 			datIdMap = assocSvc.getDatIdMap();
+			
+//			//ok we can init db executor now
+//			migrator.getZDBExecutor().init2(datIdMap, varEvaluator);
 		}
 		return datIdMap;
 	}

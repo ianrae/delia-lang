@@ -8,20 +8,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.InstrumentedDBInterface;
-import org.delia.db.h2.H2DBConnection;
+import org.delia.db.DBType;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
+import org.delia.db.sql.prepared.RawStatementGenerator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
+import org.delia.zdb.h2.H2ZDBConnection;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,19 +39,21 @@ public class H2Tests {
 	@Test
 	public void test2() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
+		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, new H2ErrorConverter());
 		log.log("here we go..");
 		conn.openDB();
 		
 		log.log("and..");
-		conn.executeRawSql("DROP TABLE IF EXISTS cars;");
-		conn.executeRawSql("CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
+		execStatement(conn, "DROP TABLE IF EXISTS cars;");
+		execStatement(conn, "CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
 
-		conn.executeRawSql("INSERT INTO cars(name, price) VALUES('Audi', 52642);");
-		conn.executeRawSql("INSERT INTO cars(name, price) VALUES('Mercedes', 57127);");       
+		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Audi', 52642);");
+		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Mercedes', 57127);");       
 
 		log.log("and query..");
-		ResultSet rs = conn.execRawQuery("SELECT * from cars;");
+		SqlStatement statement = new SqlStatement();
+		statement.sql = "SELECT count(*) from cars;";
+		ResultSet rs = conn.execQueryStatement(statement, null);
 		if (rs.next()) {
 			System.out.println(rs.getInt(1));
 			System.out.println(rs.getString(2));
@@ -61,15 +66,19 @@ public class H2Tests {
 		log.log("end.");
 	}
 	
-	private void dumpSchema(H2DBConnection conn) throws SQLException {
+	private void dumpSchema(H2ZDBConnection conn) throws SQLException {
 		log.log("dump schema: TABLES...");
-		ResultSet rs = conn.execRawQuery("SELECT * from information_schema.tables where TABLE_SCHEMA='PUBLIC';");
+		SqlStatement statement = new SqlStatement();
+		statement.sql = "SELECT * from information_schema.tables where TABLE_SCHEMA='PUBLIC';";
+		ResultSet rs = conn.execQueryStatement(statement, null);
 		while (rs.next()) {
 			System.out.println(rs.getString("TABLE_NAME"));
 		}        
 		log.log("CARS columns...");
 
-		rs = conn.execRawQuery("SELECT * FROM INFORMATION_SCHEMA.COLUMNS where table_name = 'CARS';");
+		statement = new SqlStatement();
+		statement.sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS where table_name = 'CARS';";
+		rs = conn.execQueryStatement(statement, null);
 		while (rs.next()) {
 			String s1 = rs.getString("COLUMN_NAME");
 			Boolean b2 = rs.getBoolean("IS_NULLABLE");
@@ -77,23 +86,23 @@ public class H2Tests {
 			String s4 = rs.getString("TYPE_NAME");
 			System.out.println(String.format("%s %b %s %s", s1, b2, s3, s4));
 		}        
-				
-				
 	}
 
 	@Test
 	public void testDetectTblManual() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
+		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, new H2ErrorConverter());
 		log.log("here we gox..");
 		conn.openDB();
 		
 		log.log("and..");
-		conn.executeRawSql("DROP TABLE IF EXISTS cars;");
-		conn.executeRawSql("CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
+		execStatement(conn, "DROP TABLE IF EXISTS cars;");
+		execStatement(conn, "CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
 
 		log.log("and query..");
-		ResultSet rs = conn.execRawQuery("SELECT count(*) from cars;");
+		SqlStatement statement = new SqlStatement();
+		statement.sql = "SELECT count(*) from cars;";
+		ResultSet rs = conn.execQueryStatement(statement, null);
 		if (rs.next()) {
 			System.out.println(rs.getInt(1));
 		}        
@@ -108,16 +117,16 @@ public class H2Tests {
 	@Test
 	public void testDetectTbl() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
+		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, new H2ErrorConverter());
 		log.log("here we gox..");
 		conn.openDB();
 		
 		log.log("and..");
-		conn.executeRawSql("DROP TABLE IF EXISTS cars;");
-		conn.executeRawSql("CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
+		execStatement(conn, "DROP TABLE IF EXISTS cars;");
+		execStatement(conn, "CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
 
 		log.log("and query..");
-		boolean exists = conn.execTableDetect("cars");
+		boolean exists = doTableDetect(conn, "cars");
 		assertEquals(true, exists);
 		
 //		log.log("and query Airport..");
@@ -128,8 +137,26 @@ public class H2Tests {
 		log.log("end.");
 	}
 	
+	private void execStatement(H2ZDBConnection conn, String sql) {
+		SqlStatement statement = new SqlStatement();
+		statement.sql = sql;
+		conn.execStatement(statement, null);
+	}
+	private boolean doTableDetect(H2ZDBConnection conn, String tblName) throws SQLException {
+		RawStatementGenerator gen = new RawStatementGenerator(factorySvc, DBType.H2);
+		SqlStatement statement = new SqlStatement();
+		statement.sql = gen.generateTableDetect(tblName.toUpperCase());
+		ResultSet rs = conn.execQueryStatement(statement, null);
+		boolean tblExists = false;
+		if (rs != null && rs.next()) {
+			Boolean b = rs.getBoolean(1);
+//			System.out.println(b);
+			tblExists = b;
+		}        
+		return tblExists;
+	}
+
 	//--
-	protected InstrumentedDBInterface dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected Runner runner;
 	protected Log log = new UnitTestLog();
@@ -139,7 +166,8 @@ public class H2Tests {
 
 	@Before
 	public void init() {
-		
+		DBTestHelper.throwIfNoSlowTests();
+
 	}
 	private void openDB() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");

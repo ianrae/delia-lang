@@ -1,13 +1,13 @@
 package org.delia.bdd;
 
 import org.delia.bdd.core.BDDTesterEx;
-import org.delia.db.DBInterface;
-import org.delia.db.memdb.MemDBInterface;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AllBDDTests extends NewBDDBase {
+public class AllBDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200
@@ -46,6 +46,13 @@ public class AllBDDTests extends NewBDDBase {
 		runR500File("t0-relation-one-to-many.txt", 9);
 		runR500File("t0-relation-many-to-many.txt", 11);
 		runR500File("t0-relation.txt", 2);
+	}
+	@Test
+	public void testR550() {
+		runR550File("t0-multirel-1to1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-2.txt", 1);
+		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
 	@Test
 	public void testR600() {
@@ -257,6 +264,7 @@ public class AllBDDTests extends NewBDDBase {
 	@Test
 	public void testR2150() {
 		enableAllFileCheck = false;
+		enableMigration = true;
 		runR2150File("t0-migrate-one-to-one1.txt", 3);
 		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 		runR2150File("t0-migrate-one-to-one2.txt", 2);
@@ -297,13 +305,13 @@ public class AllBDDTests extends NewBDDBase {
 	
 	
 	@Test
-	public void test8Debug() {
-//		testIndexToRun = 0;
+	public void testDebug() {
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-		runR2150File("t0-migrate-one-to-many1.txt", 3);
+		runR1300File("t0-let-query.txt", 7);
 
 	}
 	
@@ -322,8 +330,8 @@ public class AllBDDTests extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
-		MemDBInterface db = new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);
 		}

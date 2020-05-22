@@ -7,24 +7,24 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class H2ImportTests  extends NewBDDBase {
+public class H2ImportTests  extends BDDBase {
 	
 	
 	@Test
@@ -79,7 +79,7 @@ public class H2ImportTests  extends NewBDDBase {
 		cleaner.deleteTables(delia.getFactoryService(), delia.getDBInterface(), "Category,Product");
 	}
 	
-	@Test
+//	@Test
 	public void testLevel4() {
 		List<ImportGroupSpec> groupList = new ArrayList<>();
 		ImportGroupSpec gspec = new ImportGroupSpec();
@@ -113,6 +113,10 @@ public class H2ImportTests  extends NewBDDBase {
 	private Delia createDelia() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB()).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
+		
+		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
+		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
+		cleaner.deleteContraintsForTable("CATEGORY");
 		return delia;
 	}
 	// --
@@ -126,7 +130,8 @@ public class H2ImportTests  extends NewBDDBase {
 	}
 	
 	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
+	public ZDBInterfaceFactory createForTest() {
+		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		return db;
 	}
 }

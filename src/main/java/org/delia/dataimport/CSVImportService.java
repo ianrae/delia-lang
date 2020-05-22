@@ -14,6 +14,7 @@ import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 import sun.rmi.runtime.Log;
 
@@ -58,6 +59,8 @@ public class CSVImportService  {
 		if (options.logLevel != null) {
 			delia.getLog().setLevel(options.logLevel);
 		}
+		MemZDBInterfaceFactory memdb = (MemZDBInterfaceFactory) delia.getDBInterface();
+		memdb.createSingleMemDB();
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 

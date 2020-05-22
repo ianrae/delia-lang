@@ -1,0 +1,55 @@
+# multi-relation tests
+
+FEATURE: multiple N:N relations
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: basic. 2 one many-to-many relations
+chainNextTest:true
+given:
+ type Customer struct {
+ id long primaryKey, 
+ name string, 
+ relation addrHome Address 'home' optional many,
+ relation addrBiz Address 'biz' optional many  
+ } end
+ type Address struct {
+  aid string primaryKey, 
+  city string,
+  relation cust1 Customer 'home' many optional,
+  relation cust2 Customer 'biz' many optional
+ } end
+
+when:
+  insert Customer { id: 1, name:'art' }
+  insert Customer { id: 2, name:'bob' }
+  insert Customer { id: 3, name:'carol' }
+  
+  insert Address { aid: 100, city:'athens', cust1:[1,3], cust2:2 }
+  insert Address { aid: 101, city:'boston', cust1:3, cust2:3 }
+  insert Address { aid: 102, city:'cornwall', cust1:1 }
+  insert Address { aid: 103, city:'devon', cust2:2 }
+  
+  let x = Customer[true].orderBy('id').fks()
+then:
+value:a:Customer {
+ vid:1
+ vname:'art'
+ vaddrHome:{[100,102]}
+   vaddrBiz:null
+  }
+value:a:Customer {
+ vid:2
+ vname:'bob'
+ vaddrHome:null
+ vaddrBiz:{[100,103]}
+  }
+value:a:Customer {
+ vid:3
+ vname:'carol'
+ vaddrHome:{[100,101]}
+   vaddrBiz:{101}
+}
+

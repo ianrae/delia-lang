@@ -8,7 +8,6 @@ import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
-import org.delia.db.DBInterface;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
@@ -28,6 +27,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class DeliaImpl implements Delia {
 	private static class MigrationExtraInfo {
@@ -35,13 +35,13 @@ public class DeliaImpl implements Delia {
 	}
 	
 	private Log log;
-	private DBInterface dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
-	private Runner mostRecentRunner;
+//	private Runner mostRecentRunner;
 
-	public DeliaImpl(DBInterface dbInterface, Log log, FactoryService factorySvc) {
+	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
@@ -61,10 +61,10 @@ public class DeliaImpl implements Delia {
 			return migrationPlanRes;
 		}
 
-		return doExecute(runner, expL);
+		return doExecute(runner, expL, extraInfo.datIdMap);
 	}
 
-	private ResultValue doExecute(Runner runner, List<Exp> expL) {
+	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap) {
 		ResultValue res = null;
 		if (!deliaOptions.enableExecution) {
 			res = new ResultValue();
@@ -72,6 +72,7 @@ public class DeliaImpl implements Delia {
 			return res;
 		}
 
+		runner.setDatIdMap(datIdMap);
 		res = runner.executeProgram(expL);
 		if (res != null && ! res.ok) {
 			throw new DeliaException(res.errors);
@@ -113,8 +114,6 @@ public class DeliaImpl implements Delia {
 			runner.setHLSManager(mgr);
 		}
 		
-		dbInterface.init(factorySvc);
-		mostRecentRunner = runner;
 		return runner;
 	}
 
@@ -137,19 +136,21 @@ public class DeliaImpl implements Delia {
 			session.execCtx = mainRunner.getExecutionState();
 			session.ok = true;
 			session.res = migrationPlanRes;
-			session.expL = expL;
+			session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			session.datIdMap = extraInfo.datIdMap;
+			session.mostRecentRunner = mainRunner;
 			return session;
 		}
 
-		ResultValue res = doExecute(mainRunner, expL);
+		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap);
 
 		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();
 		session.ok = true;
 		session.res = res;
-		session.expL = expL;
+		session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 		session.datIdMap = extraInfo.datIdMap;
+		session.mostRecentRunner = mainRunner;
 		return session;
 	}
 
@@ -209,6 +210,7 @@ public class DeliaImpl implements Delia {
 			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
 				dbInterface.performTypeReplacement(spec);
 			}
+			
 		}
 		
 		//and check that we did all replacement
@@ -221,7 +223,6 @@ public class DeliaImpl implements Delia {
 		
 		typeRunner.executeRulePostProcessor(allErrors);
 		
-		//TODO: are 2 passes enough?
 		if (allErrors.isEmpty()) {
 			return;
 		} else {
@@ -249,7 +250,7 @@ public class DeliaImpl implements Delia {
 		compiler.executePass4(src, extL, mainRunner.getRegistry());
 		
 		//load or assign DAT ids. must do this even if don't do migration
-		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry());
+		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry(), mainRunner);
 		DatIdMap datIdMap = extraInfo.datIdMap;
 		
 		//now that we know the types, do a flyway-style schema migration
@@ -279,7 +280,7 @@ public class DeliaImpl implements Delia {
 			{
 				ResultValue res = new ResultValue();
 				res.ok = true;
-				res.val = migrationSvc.createMigrationPlan(mainRunner.getRegistry(), mainRunner);
+				res.val = migrationSvc.createMigrationPlan(mainRunner.getRegistry(), mainRunner, datIdMap);
 				return res;
 			}
 			case RUN_MIGRATION_PLAN:
@@ -320,6 +321,7 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public ResultValue continueExecution(String src, DeliaSession session) {
+		Runner mostRecentRunner = session.getMostRecentRunner();
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
 		if (execCtx != null) {
 			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
@@ -337,16 +339,18 @@ public class DeliaImpl implements Delia {
 		}
 
 		Runner runner = createRunner(session);
-		ResultValue res = doExecute(runner, expL);
+		ResultValue res = doExecute(runner, expL, session.getDatIdMap());
 		
 		if (session instanceof DeliaSessionImpl) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
-			sessimpl.mostRecentContinueExpL = expL;
+			sessimpl.mostRecentContinueExpL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
+			sessimpl.mostRecentRunner = runner;
 		}
 		return res;
 	}
 	
 	public List<Exp>  continueCompile(String src, DeliaSession session) {
+		Runner mostRecentRunner = session.getMostRecentRunner();
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
 		if (execCtx != null) {
 			execCtx.delcaredVarMap.remove(RunnerImpl.DOLLAR_DOLLAR);
@@ -382,15 +386,11 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public DBInterface getDBInterface() {
+	public ZDBInterfaceFactory getDBInterface() {
 		return dbInterface;
 	}
 	//for internal use only - unit tests
-	public void setDbInterface(DBInterface dbInterface) {
+	public void setDbInterface(ZDBInterfaceFactory dbInterface) {
 		this.dbInterface = dbInterface;
-	}
-
-	public Runner getMostRecentRunner() {
-		return mostRecentRunner;
 	}
 }

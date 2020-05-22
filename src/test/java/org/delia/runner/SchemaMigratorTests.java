@@ -4,18 +4,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.base.DBHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
-import org.delia.runner.Runner;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Test;
 
 /**
@@ -47,12 +45,11 @@ public class SchemaMigratorTests {
 		assertEquals(1, diffL.size());
 		assertEquals("Customer", diffL.get(0).typeName);
 
-		DatIdMap datIdMap = new DatIdMap();
-		b = migrator.performMigrations(diffL, true, datIdMap);
+		b = migrator.performMigrations(diffL, true);
 		assertEquals(true, b);
 
 		String fingerprint = migrator.calcDBFingerprint();
-		assertEquals("Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
+		assertEquals("(v1)Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
 		
 		//and migrate again (should be nothing to do)
 		b = migrator.dbNeedsMigration();
@@ -73,20 +70,20 @@ public class SchemaMigratorTests {
 
 	// --
 	//private Runner runner;
-	private MemDBInterface dbInterface;
+	private MemZDBInterfaceFactory dbInterface;
 	private SchemaMigrator migrator;
 	private RunnerHelper helper = new RunnerHelper();
 
 	private Runner initRunner()  {
 		Log log = new SimpleLog();
 		ErrorTracker et = new SimpleErrorTracker(log);
-		dbInterface = new MemDBInterface();
+		FactoryService factorySvc = new FactoryServiceImpl(log, et);
+		dbInterface = new MemZDBInterfaceFactory(factorySvc);
 		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 
-		FactoryService factorySvc = new FactoryServiceImpl(log, et);
 		Runner runner = helper.create(factorySvc, dbInterface);
 
-		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner);
+		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner, null);
 		return runner;
 	}
 

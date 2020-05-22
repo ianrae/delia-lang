@@ -16,7 +16,7 @@ public class JoinFragment implements SqlFragment {
 		sc.o(arg1.render());
 		sc.o("=");
 		sc.o(arg2.render());
-		return sc.str;
+		return sc.toString();
 	}
 
 	@Override

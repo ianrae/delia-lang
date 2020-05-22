@@ -6,23 +6,21 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.app.NorthwindHelper;
-import org.delia.bdd.NewBDDBase;
+import org.delia.bdd.MemBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
-import org.delia.db.memdb.MemDBInterface;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CSVImportServiceTests  extends NewBDDBase {
+public class CSVImportServiceTests  extends MemBDDBase {
 	
 	@Test
 	public void testLevel1Category() {
@@ -147,10 +145,5 @@ public class CSVImportServiceTests  extends NewBDDBase {
 
 	@Before
 	public void init() {
-	}
-	
-	@Override
-	public DBInterface createForTest() {
-		return new MemDBInterface();
 	}
 }

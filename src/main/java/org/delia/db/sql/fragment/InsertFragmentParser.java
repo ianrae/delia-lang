@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.core.FactoryService;
+import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
-import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
@@ -24,9 +24,11 @@ import org.delia.util.DeliaExceptionHelper;
 public class InsertFragmentParser extends SelectFragmentParser {
 
 	private boolean useAliases = false;
+	private AssocTblManager assocTblMgr;
 
-	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc) {
+	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, AssocTblManager assocTblMgr) {
 		super(factorySvc, fpSvc);
+		this.assocTblMgr = assocTblMgr;
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {
@@ -162,18 +164,19 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	}
 
 	private int fillTableInfoIfNeeded(List<TableInfo> tblinfoL, RelationInfo info) {
-		return existSvc.fillTableInfoIfNeeded(tblinfoL, info);
+		return existSvc.fillTableInfoIfNeeded(tblinfoL, info, assocTblMgr.getDatIdMap());
 	}
 
 	private boolean genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, DValue xdval, 
 			RelationInfo info, SqlStatement statement) {
 
-		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
-		assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, tblinfo.assocTblName);
+		String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(info.getDatId());
+//		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
+		assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, assocTblName);
 		assocInsertFrag.paramStartIndex = insertFrag.statement.paramL.size();
 
 		//struct is Address AddressCustomerAssoc
-		if (tblinfo.tbl1.equalsIgnoreCase(structType.getName())) {
+		if (assocTblName.startsWith(structType.getName())) {
 			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval, info);
 		} else {
 			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval, info);
@@ -181,16 +184,22 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		return true;
 	}
 
-	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
-			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
-		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-		if (mainDValFirst) {
-			genxrow(assocInsertFrag, "leftv", keyPair1, mainDVal);
-			genxrow(assocInsertFrag, "rightv", keyPair2, xdval);
+	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean notFlipped, 
+			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval, RelationInfo info) {
+		String assocTbl = assocTblMgr.getDatIdMap().getAssocTblName(info.getDatId());
+		String field1 = assocTblMgr.xgetAssocLeftField(nearType, assocTbl);
+		String field2 = assocTblMgr.xgetAssocRightField(nearType, assocTbl);
+		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
+		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
+		
+		if (notFlipped) {
+			DValue pk = mainDVal.asStruct().getField(keyPair1.name);
+			genxrow(assocInsertFrag, field1, keyPair2, pk);
+			genxrow(assocInsertFrag, field2, keyPair1, xdval);
 		} else {
-			genxrow(assocInsertFrag, "leftv", keyPair1, xdval);
-			genxrow(assocInsertFrag, "rightv", keyPair2, mainDVal);
+			DValue pk = mainDVal.asStruct().getField(keyPair2.name);
+			genxrow(assocInsertFrag, field1, keyPair1, xdval);
+			genxrow(assocInsertFrag, field2, keyPair2, pk);
 		}
 	}
 

@@ -3,14 +3,12 @@ package org.delia.db.sql;
 import org.delia.api.Delia;
 import org.delia.api.DeliaImpl;
 import org.delia.api.DeliaSession;
-import org.delia.api.DeliaSessionImpl;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBInterface;
 import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -18,6 +16,7 @@ import org.delia.runner.InternalCompileState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class NewLegacyRunner {
 	private Delia delia;
@@ -65,7 +64,7 @@ public class NewLegacyRunner {
 	public Delia getDelia() {
 		return delia;
 	}
-	public void forceDBInterface(DBInterface dbInter) {
+	public void forceDBInterface(ZDBInterfaceFactory dbInter) {
 		DeliaImpl deliaimpl = (DeliaImpl) delia;
 		deliaimpl.setDbInterface(dbInter);
 	}
@@ -80,28 +79,23 @@ public class NewLegacyRunner {
 		}
 	}
 	public InternalCompileState getCompileState() {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.getCompileState();
 	}
 	public DeliaGeneratePhase createGenerator() {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.createGenerator();
 	}
 	public Runner getDeliaRunner() {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner;
 	}
 	public boolean exists(String varName) {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.exists(varName);
 	}
 	public ResultValue getVar(String varName) {
-		DeliaImpl deliaimpl = (DeliaImpl) delia;
-		Runner runner = deliaimpl.getMostRecentRunner();
+		Runner runner = session.getMostRecentRunner();
 		return runner.getVar(varName);
 	}
 

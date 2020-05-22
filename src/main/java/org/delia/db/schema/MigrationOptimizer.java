@@ -6,12 +6,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBInterface;
+import org.delia.db.DBType;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
-import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -19,14 +18,13 @@ import org.delia.util.DRuleHelper;
 
 public class MigrationOptimizer extends ServiceBase {
 
-	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	private DTypeRegistry registry;
-//	private DBAccessContext dbctx;
+	private boolean isMemDB;
 
-	public MigrationOptimizer(FactoryService factorySvc, DBInterface dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public MigrationOptimizer(FactoryService factorySvc, DTypeRegistry registry, DBType dbType) {
 		super(factorySvc);
-//		this.dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		this.registry = registry;
+		this.isMemDB = DBType.MEM.equals(dbType);
 	}
 	
 	public List<SchemaType> optimizeDiffs(List<SchemaType> diffL) {
@@ -46,6 +44,10 @@ public class MigrationOptimizer extends ServiceBase {
 	 * @return
 	 */
 	private List<SchemaType> removeParentRelations(List<SchemaType> diffL) {
+		if (isMemDB) {
+			return diffL; //we need to modify parent relations too in MEM db
+		}
+		
 		List<SchemaType> newlist = new ArrayList<>();
 		List<SchemaType> manyToManyList = new ArrayList<>();
 		for(SchemaType st: diffL) {
@@ -120,7 +122,7 @@ public class MigrationOptimizer extends ServiceBase {
 					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, st.field, registry);
 					DType farType = ruleMany.relInfo.farType;
 					DStructType nearType = ruleMany.relInfo.nearType;
-					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+					RelationInfo otherSide = ruleMany.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
 
 					st.action = "A";
 					st.field = otherSide.fieldName;
@@ -132,7 +134,7 @@ public class MigrationOptimizer extends ServiceBase {
 					RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, st.field, registry);
 					DType farType = ruleOne.relInfo.farType;
 					DStructType nearType = ruleOne.relInfo.nearType;
-					RelationInfo otherSide = DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+					RelationInfo otherSide = ruleOne.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
 
 					st.action = "A";
 					st.field = otherSide.fieldName;

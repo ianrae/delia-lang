@@ -7,7 +7,6 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.RawDBExecutor;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;
@@ -19,8 +18,11 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
+import org.delia.zdb.ZDBExecutor;
 
 public class CreateNewDatIdVisitor implements ManyToManyVisitor {
+	public static boolean hackFlag = false; //for unit tests
+	
 	private FactoryService factorySvc;
 	private DTypeRegistry registry;
 	private Log log;
@@ -29,11 +31,11 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
-	private RawDBExecutor dbexecutor;
+	private ZDBExecutor dbexecutor;
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, RawDBExecutor dbexecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, ZDBExecutor zdbExecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
-		this.dbexecutor = dbexecutor;
+		this.dbexecutor = zdbExecutor;
 		this.registry = registry;
 		this.log = log;
 		this.queryBuilder = factorySvc.getQueryBuilderService();
@@ -60,7 +62,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		InsertContext ictx = new InsertContext();
 		ictx.extractGeneratedKeys = true;
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		DValue newDatIdValue = dbexecutor.executeInsert(dval, ictx);
+		DValue newDatIdValue = dbexecutor.rawInsert(dval, ictx);
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();
@@ -82,13 +84,12 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		//DAT tables are named dat1,dat2, etc
 		//we need to determine how many datIds there are so we
 		//can generate new names. i.e. if there are 3 then we should
-		//generate dat4,dat5,...
-		//TODO: we could instead calc highest-datid during first visitor
+		//be generating dat4,dat5,...
 		
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
 		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
-		QueryResponse qresp = dbexecutor.executeQuery(spec, new QueryContext());
+		QueryResponse qresp = dbexecutor.rawQuery(spec, new QueryContext());
 		
 		int maxDatId = loadDATRows(qresp);
 		log.log("DAT: max id %d.", maxDatId);
@@ -117,6 +118,21 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private String createAssocTableName(RelationInfo relInfo) {
 		String s1 = relInfo.nearType.getName();
 		String s2 = relInfo.farType.getName();
+		
+		if (hackFlag) {
+			String tblName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt);
+			if (this.dbexecutor.doesTableExist(tblName)) {
+				nextAssocNameInt++;
+				return tblName;
+			} else {
+				tblName = String.format("%s%sDat%d", s2, s1, nextAssocNameInt);
+				if (this.dbexecutor.doesTableExist(tblName)) {
+					nextAssocNameInt++;
+					return tblName;
+				}
+			}
+		}
+		
 		String tlbName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt++);
 		return tlbName;
 	}

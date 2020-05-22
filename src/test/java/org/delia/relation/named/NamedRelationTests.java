@@ -1,6 +1,7 @@
 package org.delia.relation.named;
 
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,8 +15,10 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	 * get rid of DRuleHelper find other side fn
 	 */
 	
+	// type-dependency-cycle occurs because we have one-sided relation in Customer
+	// so its a child. So Customer depends on Addres but Addres depends on Customer!!
 	
-	@Test
+	@Test(expected=DeliaException.class)
 	public void test0() {
 		createCustomerTypeWithRelations(null, null, "addr1");
 		
@@ -50,7 +53,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	@Test
 	public void testBadNameFail2() {
 		//better syntax
-		expectException("ambiguous-relation", (s) -> {
+		expectException("type-dependency-cycle", (s) -> {
 			createCustomerTypeWithRelations(null, null, "x");
 		});
 	}
@@ -84,7 +87,7 @@ public class NamedRelationTests extends NamedRelationTestBase {
 	
 	@Test
 	public void testUnknown() {
-		expectException("ambiguous-relation", (s) -> {
+		expectException("type-dependency-cycle", (s) -> {
 			createCustomerTypeWithRelations("addr1", null, "x");
 		});
 	}
@@ -95,8 +98,9 @@ public class NamedRelationTests extends NamedRelationTestBase {
 		});
 	}
 	
-	@Test
+	@Test(expected=DeliaException.class)
 	public void testOK() {
+		// type-dependency-cycle
 		createCustomerTypeWithRelations("joe", null, "joe");
 		RelationOneRule rr = getOneRule("Address", "cust");
 		chkRule(rr, true, "joe", "joe");
