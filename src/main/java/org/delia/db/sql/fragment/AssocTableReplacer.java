@@ -254,7 +254,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 
 	protected void addForeignKeyId(Map<String, DRelation> mmMap, String fieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
-		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+		DValue dvalToUse  = drel.getForeignKey(); 
 		statement.paramL.add(dvalToUse);
 	}
 	protected boolean isForeignKeyIdNull(Map<String, DRelation> mmMap, String fieldName) {
@@ -303,7 +303,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
-		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+		DValue dvalToUse  = drel.getForeignKey(); 
 
 		RelationInfo farInfo = info.otherSide;// DRuleHelper.findOtherSideMany(info.farType, structType);
 		TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);

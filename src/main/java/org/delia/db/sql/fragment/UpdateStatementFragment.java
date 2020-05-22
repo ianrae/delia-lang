@@ -10,9 +10,9 @@ public class UpdateStatementFragment extends SelectStatementFragment {
 
 		//parallel arrays
 		public List<String> setValuesL = new ArrayList<>();
-		public UpdateStatementFragment assocUpdateFrag; //TODO later support multiple
-		public DeleteStatementFragment assocDeleteFrag; //TODO later support multiple
-		public MergeIntoStatementFragment assocMergeIntoFrag; //TODO later support multiple
+		public UpdateStatementFragment assocUpdateFrag; //FUTURE later support multiple
+		public DeleteStatementFragment assocDeleteFrag; //FUTURE later support multiple
+		public MergeIntoStatementFragment assocMergeIntoFrag; //FUTURE later support multiple
 		public boolean doUpdateLast = false;
 		public List<InsertStatementFragment> assocCrudInsertL = new ArrayList<>();
 		public List<DeleteStatementFragment> assocCrudDeleteL = new ArrayList<>();

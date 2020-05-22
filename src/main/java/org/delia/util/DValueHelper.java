@@ -45,7 +45,6 @@ public class DValueHelper {
 //		return inner;
 	}
 	
-	//TODO: support composite keys later
 	public static TypePair findPrimaryKeyFieldPair(DType inner) {
 		if (! inner.isStructShape()) {
 			return null;

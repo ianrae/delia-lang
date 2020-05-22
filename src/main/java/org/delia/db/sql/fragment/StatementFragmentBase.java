@@ -16,7 +16,7 @@ public abstract class StatementFragmentBase implements SqlFragment {
 	public List<SqlFragment> earlyL = new ArrayList<>();
 	public List<FieldFragment> fieldL = new ArrayList<>();
 	public TableFragment tblFrag;
-	public JoinFragment joinFrag; //TODO later a list
+	public JoinFragment joinFrag; //FUTURE later a list
 	public List<SqlFragment> whereL = new ArrayList<>();
 	public LimitFragment limitFrag = null;
 	public int paramStartIndex; //used with SqlStatementGroup
