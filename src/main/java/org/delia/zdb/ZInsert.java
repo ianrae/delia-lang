@@ -33,7 +33,7 @@ public class ZInsert extends ServiceBase {
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, null, null);
 		ZTableExistenceService existSvc = new ZTableExistenceService(zexec);
 		fpSvc.setExistSvc(existSvc);
-		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, zexec.getDatIdMap(), cacheData.assocTblExistMap);
+		AssocTblManager assocTblMgr = new AssocTblManager(zexec.getDatIdMap(), cacheData.assocTblExistMap);
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
 		String typeName = dval.getType().getName();
 		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);

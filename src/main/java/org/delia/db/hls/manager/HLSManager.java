@@ -9,7 +9,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceService;
 import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.HLSEngine;
 import org.delia.db.hls.HLSQuerySpan;
@@ -29,7 +28,6 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZTableExistenceService;
 
 /**
  * Facade between Delia Runner and the db. Allows us to have different strategies
@@ -94,10 +92,7 @@ public class HLSManager extends ServiceBase {
 
 	private HLSSQLGenerator chooseGenerator(ZDBExecutor zexec) {
 		//later we will have dbspecific ones
-		
-//		TableExistenceService existSvc = dbexecutor.createTableExistService();
-		TableExistenceService existSvc = new ZTableExistenceService(zexec);
-		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, zexec.getDatIdMap());
+		AssocTblManager assocTblMgr = new AssocTblManager(zexec.getDatIdMap());
 
 		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
 		switch(dbInterface.getDBType()) {

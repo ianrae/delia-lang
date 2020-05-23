@@ -23,13 +23,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * HLS = High Level SQL
- * 
- * 
- * @author Ian Rae
- *
- */
 public class AliasManagerTests extends HLSTestBase {
 	
 	public static class AliasInfo {
@@ -143,6 +136,19 @@ public class AliasManagerTests extends HLSTestBase {
 					}
 				}
 			}
+		}
+		
+		public AliasInfo getMainTableAlias(DStructType structType) {
+			String key = String.format("%s", structType.getName());
+			return map.get(key);
+		}
+		public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
+			String key = String.format("%s.%s", structType.getName(), fieldName);
+			return map.get(key);
+		}
+		public AliasInfo getAssocAlias(DStructType structType, String fieldName, String assocTbl) {
+			String key = String.format("%s.%s", structType.getName(), fieldName);
+			return assocMap.get(key);
 		}
 		
 	}
