@@ -48,6 +48,7 @@ public class ZTableExistenceService implements TableExistenceService {
 		}
 		index = tblInfoL.size();
 		
+		
 		//try tbl1 tbl2 Assoc
 		String assocTblName = datIdMap.getAssocTblName(info.getDatId());
 		if (doesTableExist(assocTblName)) {
