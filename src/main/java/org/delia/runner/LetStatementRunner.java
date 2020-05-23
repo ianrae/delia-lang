@@ -296,14 +296,6 @@ public class LetStatementRunner extends ServiceBase {
 		runner.varMap.put(varName, res);
 		runner.varMap.put(RunnerImpl.DOLLAR_DOLLAR, res);
 	}
-	private void assignSerialVar(DValue generatedId) {
-		ResultValue res = new ResultValue();
-		res.ok = true;
-		res.shape = generatedId.getType().getShape();
-		res.val = generatedId;
-		res.varName = RunnerImpl.VAR_SERIAL;
-		runner.varMap.put(RunnerImpl.VAR_SERIAL, res);
-	}
 
 	private VarRef resolveScalarVarReference(QueryExp queryExp) {
 		ResultValue res = runner.varMap.get(queryExp.typeName);
