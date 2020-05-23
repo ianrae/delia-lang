@@ -81,13 +81,10 @@ public class HLSSQLTests extends HLSTestBase {
 
 	@Test
 	public void testDebugSQL() {
-		//		useCustomerManyToManySrc = true;
+		useCustomerManyToManySrc = true;
 		//		assocTblMgr.flip = false;
 
-		//		useCustomerManyToManySrc = true;
-		//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-
-		sqlchkP("let x = Flight[55]", 			"SELECT * FROM Flight as a WHERE a.field1 = ?", "55");
+		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
 	}
 
 	@Before

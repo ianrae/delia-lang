@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.delia.util.DeliaExceptionHelper;
 
@@ -21,7 +22,7 @@ import org.delia.util.DeliaExceptionHelper;
 public class DTypeRegistry {
 	private Map<String,DType> map = new ConcurrentHashMap<>(); 
 	private List<DType> orderedList = new ArrayList<>();
-	private int nextBitIndex; //TODO !! atomic thing later for thread safety
+	private static AtomicInteger nextBitIndex = new AtomicInteger(0); //thread-safe
 	private DTypeHierarchy th;
 	private DStructType schemaVersionType;
 	private DStructType datType;
@@ -33,7 +34,7 @@ public class DTypeRegistry {
             throw new IllegalArgumentException("name or type were null");
         }
 		
-	    dtype.setBitIndex(nextBitIndex++);
+	    dtype.setBitIndex(nextBitIndex.incrementAndGet());
 	    
 	    if (map.containsKey(typeName)) {
 	    	DeliaExceptionHelper.throwError("redefine-type-not-allowed", "Type '%s' is already registered. Did you have it twice in your Delia source code?", typeName);
