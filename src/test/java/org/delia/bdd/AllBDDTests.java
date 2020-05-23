@@ -313,7 +313,8 @@ public class AllBDDTests extends BDDBase {
 		
 //		runR1350File("t0-filter-op-relation.txt", 14);
 //		runR500File("t0-relation-many-to-many.txt", 11);
-		runR550File("t0-multirel-NtoN-1.txt", 1);
+//		runR550File("t0-multirel-NtoN-1.txt", 1);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 
 	}
 	

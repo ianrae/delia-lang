@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
@@ -75,7 +76,7 @@ public class HLSManager extends ServiceBase {
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
-		HLSQueryStatement hls = buildHLS(spec.queryExp);
+		HLSQueryStatement hls = buildHLS(spec.queryExp, zexec.getDatIdMap());
 		hls.querySpec = spec;
 
 		HLSSQLGenerator sqlGenerator = chooseGenerator(zexec);
@@ -95,7 +96,7 @@ public class HLSManager extends ServiceBase {
 		//later we will have dbspecific ones
 		AssocTblManager assocTblMgr = new AssocTblManager(zexec.getDatIdMap());
 
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, aliasManager);
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{
@@ -108,7 +109,7 @@ public class HLSManager extends ServiceBase {
 		case H2:
 			return gen;
 		case POSTGRES:
-			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
+			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, aliasManager);
 		default:
 			return null; //should never happen
 		}
@@ -147,7 +148,7 @@ public class HLSManager extends ServiceBase {
 	}
 
 
-	public HLSQueryStatement buildHLS(QueryExp queryExp) {
+	public HLSQueryStatement buildHLS(QueryExp queryExp, DatIdMap datIdMap) {
 		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry); 
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 
@@ -155,10 +156,13 @@ public class HLSManager extends ServiceBase {
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
 
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			aliasManager.buildAliases(hlspan, datIdMap);
+		}
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			String hlstr = hlspan.toString();
 			log.log(hlstr);
-			aliasManager.buildAliases(hlspan, session.getDatIdMap());
 		}
+		log.log("alias: %s", aliasManager.dumpToString());
 		return hls;
 	}
 

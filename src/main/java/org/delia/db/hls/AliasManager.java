@@ -40,7 +40,7 @@ public class AliasManager extends ServiceBase {
 			list.add(map.get(key));
 		}
 		for(String key: assocMap.keySet()) {
-			list.add(map.get(key));
+			list.add(assocMap.get(key));
 		}
 		List<AliasInfo> sortedList = list.stream()
         .sorted(Comparator.comparing(AliasInfo::getAlias))
@@ -61,7 +61,11 @@ public class AliasManager extends ServiceBase {
 	}
 	
 	public void createMainTableAlias(DStructType structType) {
-		AliasInfo info = new AliasInfo();
+		AliasInfo info = getMainTableAlias(structType);
+		if (info != null) {
+			return;
+		}
+		info = new AliasInfo();
 		info.alias = createAlias();
 		info.structType = structType;
 		info.fieldName = null;
@@ -73,7 +77,11 @@ public class AliasManager extends ServiceBase {
 		map.put(key, info);
 	}
 	public void createFieldAlias(DStructType structType, String fieldName) {
-		AliasInfo info = new AliasInfo();
+		AliasInfo info = getFieldAlias(structType, fieldName);
+		if (info != null) {
+			return;
+		}
+		info = new AliasInfo();
 		info.alias = createAlias();
 		info.structType = structType;
 		info.fieldName = fieldName;
@@ -86,7 +94,11 @@ public class AliasManager extends ServiceBase {
 		map.put(key, info);
 	}
 	public void createAssocAlias(DStructType structType, String fieldName, String assocTbl) {
-		AliasInfo info = new AliasInfo();
+		AliasInfo info = getAssocAlias(structType, fieldName, assocTbl);
+		if (info != null) {
+			return;
+		}
+		info = new AliasInfo();
 		info.alias = createAlias();
 		info.structType = structType;
 		info.fieldName = fieldName;

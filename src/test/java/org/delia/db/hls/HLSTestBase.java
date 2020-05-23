@@ -212,7 +212,8 @@ public class HLSTestBase extends BDDBase {
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null);
 		MiniSelectFragmentParser mini = new MiniSelectFragmentParser(delia.getFactoryService(), registry, whereGen);
 		assocTblMgr = new AssocTblManager(session.getDatIdMap());
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null);
+		AliasManager aliasManager = new AliasManager(delia.getFactoryService());
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null, aliasManager);
 		gen.setRegistry(session.getExecutionContext().registry);
 		return gen;
 	}
