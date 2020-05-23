@@ -27,7 +27,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
-	private AliasAllocator aliasAlloc = new AliasAllocator();
 	private SqlJoinHelper joinHelper;
 	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
@@ -36,7 +35,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager) {
 		super(factorySvc);
-		this.joinHelper = new SqlJoinHelper(aliasManager, aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
+		this.joinHelper = new SqlJoinHelper(aliasManager, assocTblMgr, asNameMap, miniSelectParser);
 		this.assocTblMgr = assocTblMgr;
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasManager);
 		this.aliasManager = aliasManager;
@@ -96,10 +95,12 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 						RelationInfo otherSide = relinfo.otherSide; 
 						String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
 						s2 = StringUtils.substringAfter(s2, "WHERE ");
-						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
-						String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+//						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
+//						String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+						AliasInfo alias1 = aliasManager.getFieldAlias(relinfo.nearType, relinfo.fieldName);
+						AliasInfo alias2 = aliasManager.getMainTableAlias(hlspan2.fromType);
 						
-						sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2, pkField);
+						sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2.alias, pkField);
 						
 						return sql;
 					}

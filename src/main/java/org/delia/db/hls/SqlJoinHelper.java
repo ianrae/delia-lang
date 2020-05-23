@@ -16,14 +16,12 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 public class SqlJoinHelper {
-		private AliasAllocator aliasAlloc;
 		private AssocTblManager assocTblMgr;
 		private AliasManager aliasManager;
 //		private MiniSelectFragmentParser miniSelectParser;
 		
-		public SqlJoinHelper(AliasManager aliasManager, AliasAllocator aliasAlloc, AssocTblManager assocTblMgr, Map<String, String> asNameMap, MiniSelectFragmentParser miniSelectParser) {
+		public SqlJoinHelper(AliasManager aliasManager, AssocTblManager assocTblMgr, Map<String, String> asNameMap, MiniSelectFragmentParser miniSelectParser) {
 			this.aliasManager = aliasManager;
-			this.aliasAlloc = aliasAlloc;
 			this.assocTblMgr = assocTblMgr;
 //			this.miniSelectParser = miniSelectParser;
 		}
@@ -303,15 +301,18 @@ public class SqlJoinHelper {
 			}
 		}
 		public void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
+			AliasInfo info = aliasManager.getMainTableAlias(fromType);
+			
 			for(TypePair pair: fromType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					} else if (!relinfo.isParent) {
-						addField(fieldL, fromType, pair, aliasAlloc.buildAlias(fromType, pair.name));
+//						addField(fieldL, fromType, pair, aliasAlloc.buildAlias(fromType, pair.name));
+						addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name));
 					}
 				} else {
-					addField(fieldL, fromType, pair, aliasAlloc.buildAlias(fromType, pair.name));
+					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name));
 				}
 			}
 		}

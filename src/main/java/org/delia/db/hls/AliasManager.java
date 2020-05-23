@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.type.DStructType;
@@ -65,6 +66,7 @@ public class AliasManager extends ServiceBase {
 		if (info != null) {
 			return;
 		}
+		
 		info = new AliasInfo();
 		info.alias = createAlias();
 		info.structType = structType;
@@ -98,6 +100,15 @@ public class AliasManager extends ServiceBase {
 		if (info != null) {
 			return;
 		}
+		//if is other side of same relation we don't need to add it again
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+		if (relinfo != null && relinfo.otherSide != null) {
+			if (getAssocAlias(relinfo.otherSide.nearType, relinfo.otherSide.fieldName, assocTbl) != null) {
+				return;
+			}
+		}
+				
 		info = new AliasInfo();
 		info.alias = createAlias();
 		info.structType = structType;
@@ -115,7 +126,7 @@ public class AliasManager extends ServiceBase {
 		
 		for(TypePair pair: hlspan.fromType.getAllFields()) {
 			RelationOneRule oneRule = DRuleHelper.findOneRule(hlspan.fromType, pair.name);
-			if (oneRule != null && oneRule.relInfo.isParent) {
+			if (oneRule != null && (oneRule.relInfo.isParent || isFetched(hlspan, pair.name))) {
 				createFieldAlias(hlspan.fromType, pair.name);
 			} else {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(hlspan.fromType, pair.name);
@@ -131,6 +142,13 @@ public class AliasManager extends ServiceBase {
 		}
 	}
 	
+	private boolean isFetched(HLSQuerySpan hlspan, String fieldName) {
+		if (hlspan.subEl != null) {
+			return hlspan.subEl.fetchL.contains(fieldName);
+		}
+		return false;
+	}
+
 	public AliasInfo getMainTableAlias(DStructType structType) {
 		String key = String.format("%s", structType.getName());
 		return map.get(key);
@@ -141,7 +159,22 @@ public class AliasManager extends ServiceBase {
 	}
 	public AliasInfo getAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
-		return assocMap.get(key);
+		AliasInfo info = assocMap.get(key);
+		if (info != null) {
+			return info;
+		}
+
+		//check other side
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+		if (relinfo != null && relinfo.otherSide != null) {
+			key = String.format("%s.%s", relinfo.otherSide.nearType.getName(), relinfo.otherSide.fieldName);
+			info = assocMap.get(key);
+			if (info != null) {
+				return info;
+			}
+		}
+		return null;
 	}
 	public String buildTblAlias(AliasInfo info) {
 		String s = String.format("%s as %s", info.tblName, info.alias);

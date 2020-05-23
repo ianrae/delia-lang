@@ -72,10 +72,10 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testAssocTableFlip() {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = true;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerDat1 as b ON a.cid=b.rightv");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,c.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerDat1 as c ON a.cid=c.rightv");
 
 		flipAssocTbl = false;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as b ON a.cid=b.leftv");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv");
 	}
 
 
@@ -84,7 +84,7 @@ public class HLSSQLTests extends HLSTestBase {
 		useCustomerManyToManySrc = true;
 		//		assocTblMgr.flip = false;
 
-		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
+		sqlchkP("let x = Customer[55].addr", "SELECT d.id,d.y,c.leftv as cust FROM Address as d LEFT JOIN CustomerAddressDat1 as c ON d.id=c.rightv WHERE c.leftv = ?", "55");
 	}
 
 	@Before

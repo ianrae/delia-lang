@@ -64,16 +64,21 @@ public class WhereClauseHelper extends ServiceBase {
 //		}
 		
 		//now do adjustment
+		AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
 		for(SqlFragment z: selectFrag.whereL) {
 			OpFragment op = (OpFragment) z;
 			if (op.left != null) {
 				if (!remapParentFieldIfNeeded(op.left, selectFrag)) {
-//					op.left.alias = realAlias;
+					if (op.left.alias != null) {
+						op.left.alias = aliasInfo.alias;
+					}
 				}
 			}
 			if (op.right != null) {
 				if (!remapParentFieldIfNeeded(op.right, selectFrag)) {
-//					op.right.alias = realAlias;
+					if (op.right.alias != null) {
+						op.right.alias = aliasInfo.alias;
+					}
 				}
 			}
 		}
