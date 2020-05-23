@@ -168,7 +168,7 @@ public class HLSTestBase extends BDDBase {
 	}
 
 	protected String buildSrc() {
-		String src = "type Flight struct {field1 int unique, field2 int } end";
+		String src = "type Flight struct {field1 int primaryKey, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;

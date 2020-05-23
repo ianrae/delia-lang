@@ -47,7 +47,8 @@ public class SqlJoinHelper {
 					details.mergeRows = true;
 					details.isManyToMany = true;
 					details.mergeOnFieldL.add(relinfoA.fieldName);
-					doManyToMany(sc, hlspan, pair, relinfoA, pair);
+					TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
+					doManyToMany(sc, hlspan, pair, relinfoA, actualPair);
 					continue;
 				}
 				

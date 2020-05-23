@@ -163,16 +163,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return sc.sql();
 	}
 
-
-//	private String buildTblAlias(DStructType structType) {
-//		return aliasAlloc.buildTblAlias(structType);
-//	}
-//	private String buildAlias(DStructType pairType, TypePair pair) {
-//		return aliasAlloc.buildAlias(pairType, pair);
-//	}
 	private String buildAlias(DStructType pairType, String fieldName) {
 //		return aliasAlloc.buildAlias(pairType, fieldName);
 		return aliasManager.getFieldAlias(pairType, fieldName).alias;
+	}
+	private String buildMainAlias(DStructType fromType, String fieldName) {
+		AliasInfo info = aliasManager.getMainTableAlias(fromType);
+		return aliasManager.buildFieldAlias(info, fieldName);
 	}
 
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -210,7 +207,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				//implicitly add sort by pk (if there is one)
 				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
 				if (pk != null) {
-					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
+					String ss = buildMainAlias(hlspan.fromType, pk.getFieldName());
 					sc.out("ORDER BY %s desc",ss);
 				}
 			}
@@ -219,7 +216,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				//implicitly add sort by pk (if there is one)
 				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
 				if (pk != null) {
-					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
+					String ss = buildMainAlias(hlspan.fromType, pk.getFieldName());
 					Integer iOffset = gel.getIntArg(0);
 					sc.out("ORDER BY %s LIMIT 1 OFFSET %s",ss, iOffset.toString());
 				}
