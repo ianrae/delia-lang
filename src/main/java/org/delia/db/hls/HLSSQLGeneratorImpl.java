@@ -235,7 +235,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				isAsc = false;
 			}
 			String asc = isAsc ? "" : " desc";
-			String ss = buildAlias(hlspan.fromType, hlspan.oloEl.orderBy);
+			//TODO later support order by doing implicit fetch. orderBy(addr.city)
+			AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
+			String ss = aliasManager.buildFieldAlias(aliasInfo, hlspan.oloEl.orderBy);
 			sc.out("ORDER BY %s%s",ss, asc);
 		}
 
@@ -285,7 +287,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		boolean isJustFieldName = false;
 		if (hlspan.fEl != null) {
 			String fieldName = hlspan.fEl.getFieldName();
-			String aa = buildAlias(hlspan.fromType, fieldName);
+			AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
+			String aa = aliasManager.buildFieldAlias(aliasInfo, fieldName);
 			if (hlspan.hasFunction("count")) {
 				String s = String.format("COUNT(%s)", aa);
 				addField(fieldL, s);
