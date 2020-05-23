@@ -147,5 +147,9 @@ public class AliasManager extends ServiceBase {
 		String s = String.format("%s as %s", info.tblName, info.alias);
 		return s;
 	}
+	public String buildFieldAlias(AliasInfo info, String fieldName) {
+		String s = String.format("%s.%s", info.alias, fieldName);
+		return s;
+	}
 	
 }
