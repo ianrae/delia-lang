@@ -217,8 +217,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33", "100", "55");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33", "55", "100");
 		chkNumParams(2, 2);
 	}
 	@Test
@@ -233,9 +233,9 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33", "100", "55", "101", "55");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33", "55", "100", "55", "101");
 		chkNumParams(2, 2, 2);
 	}
 
@@ -250,8 +250,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "100", "5", "100", "55");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "100", "5", "55", "100");
 		chkNumParams(2, 2);
 	}
 
@@ -266,9 +266,9 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "100", "5", "100", "55", "100", "56");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "100", "5", "55", "100", "56", "100");
 		chkNumParams(2, 2, 2);
 	}
 
@@ -326,7 +326,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 
 		InsertFragmentParser parser = createParser(dao, tblInfoL); 
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
-		TestCreatorHelper.createTable(dao.getDbInterface(), "AddressCustomerDat1");
+		TestCreatorHelper.createTable(dao.getDbInterface(), "CustomerAddressDat1");
 
 		return parser;
 	}

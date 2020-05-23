@@ -46,11 +46,9 @@ public class ZTableExistenceService implements TableExistenceService {
 			}
 			index++;
 		}
-		
 		index = tblInfoL.size();
 		
 		//try tbl1 tbl2 Assoc
-//		String assocTblName = AssocTableCreator.createAssocTableName(tbl1, tbl2);
 		String assocTblName = datIdMap.getAssocTblName(info.getDatId());
 		if (doesTableExist(assocTblName)) {
 			TableInfo tblinfo = new TableInfo(tbl1, assocTblName);
@@ -60,15 +58,14 @@ public class ZTableExistenceService implements TableExistenceService {
 			return index;
 		}
 		
-//		//try other way around
-//		assocTblName = AssocTableCreator.createAssocTableName(tbl2, tbl1);
-//		if (doesTableExist(assocTblName)) {
-//			TableInfo tblinfo = new TableInfo(tbl2, assocTblName);
-//			tblinfo.tbl1 = tbl2;
-//			tblinfo.tbl2 = tbl1;
-//			tblInfoL.add(tblinfo);
-//			return index;
-//		}
+		//try other way around
+		if (doesTableExist(assocTblName)) {
+			TableInfo tblinfo = new TableInfo(tbl2, assocTblName);
+			tblinfo.tbl1 = tbl2;
+			tblinfo.tbl2 = tbl1;
+			tblInfoL.add(tblinfo);
+			return index;
+		}
 		return -1;
 	}
 	
