@@ -9,6 +9,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.AliasManager;
 import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.HLSEngine;
 import org.delia.db.hls.HLSQuerySpan;
@@ -43,13 +44,12 @@ public class HLSManager extends ServiceBase {
 	private DeliaSession session;
 	private ZDBInterfaceFactory dbInterface;
 	private DTypeRegistry registry;
-//	private AssocTblManager assocTblMgr;
 	private HLSStragey defaultStrategy = new StandardHLSStragey();
 	private boolean generateSQLforMemFlag;
 	private Delia delia;
 	private VarEvaluator varEvaluator;
 	private MiniSelectFragmentParser miniSelectParser;
-//	private TableExistenceService existSvc;
+	private AliasManager aliasManager;
 
 	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
@@ -61,6 +61,7 @@ public class HLSManager extends ServiceBase {
 		WhereFragmentGenerator whereGen = createWhereGen();
 		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
 		whereGen.tableFragmentMaker = miniSelectParser;
+		this.aliasManager = new AliasManager(factorySvc);
 	}
 	
 	private WhereFragmentGenerator createWhereGen() {
@@ -156,6 +157,7 @@ public class HLSManager extends ServiceBase {
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			String hlstr = hlspan.toString();
 			log.log(hlstr);
+			aliasManager.buildAliases(hlspan, session.getDatIdMap());
 		}
 		return hls;
 	}
