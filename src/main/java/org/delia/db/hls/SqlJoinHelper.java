@@ -55,8 +55,9 @@ public class SqlJoinHelper {
 				
 				String s;
 				DStructType pairType = (DStructType) pair.type; //Address
-				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
-				String tbl1 = aliasAlloc.buildTblAlias(aliasInst);
+//				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
+				AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfoA.nearType, relinfoA.fieldName);
+				String tbl1 = aliasManager.buildTblAlias(aliasInfo);
 				if (bHasFK) {
 					RelationInfo relinfoB = findOtherSide(pair, hlspan.fromType);
 					PrimaryKey pk = hlspan.fromType.getPrimaryKey();
