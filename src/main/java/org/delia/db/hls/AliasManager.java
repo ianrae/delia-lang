@@ -143,5 +143,9 @@ public class AliasManager extends ServiceBase {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
 		return assocMap.get(key);
 	}
+	public String buildTblAlias(AliasInfo info) {
+		String s = String.format("%s as %s", info.tblName, info.alias);
+		return s;
+	}
 	
 }

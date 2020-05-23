@@ -87,12 +87,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				case ONE_TO_MANY:
 				{
 					if (isQueryPKOnly(hlspan1)) {
-						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
-						RelationInfo relinfo1 = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+//						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
+						String alias = aliasManager.getMainTableAlias(hlspan1.fromType).alias;
+						RelationInfo relinfo1 = relinfo.otherSide; 
 						sql = String.format("%s WHERE %s.%s=?", sql, alias, relinfo1.fieldName);
 						return sql;
 					} else {
-						RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						RelationInfo otherSide = relinfo.otherSide; 
 						String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
 						s2 = StringUtils.substringAfter(s2, "WHERE ");
 						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
@@ -105,13 +106,15 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				}
 				case MANY_TO_MANY:
 				{
-					String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(relinfo.getDatId()); //   .getTableFor(hlspan1.fromType, hlspan2.fromType);
-					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
+					String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(relinfo.getDatId()); 
+//					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
+					String newAlias = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTblName).alias;
 					String fff = assocTblMgr.xgetAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
 					String s3 = String.format("%s.%s", newAlias, fff);
 					
 					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
-					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+//					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+					String alias2 = aliasManager.getMainTableAlias(hlspan2.fromType).alias;
 					String target = String.format("%s.%s", alias2, pkField);
 					s2 = s2.replace(target, s3);		
 					return sql + " " + s2;
@@ -139,16 +142,18 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	@Override
 	public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
-		if (hlspan.fromType != null) {
-			aliasAlloc.findOrCreateFor(hlspan.fromType);
-		}
+//		if (hlspan.fromType != null) {
+//			aliasAlloc.findOrCreateFor(hlspan.fromType);
+//		}
 		this.whereClauseHelper.genWhere(hlspan); //need this to genereate "as " in fields
 		
 		SQLCreator sc = new SQLCreator();
 		//SELECT .. from .. ..join.. ..where.. ..order..
 		sc.out("SELECT");
 		genFields(sc, hlspan, forceAllFields);
-		sc.out("FROM %s", buildTblAlias(hlspan.mtEl.structType));
+		
+		AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.mtEl.structType);
+		sc.out("FROM %s", aliasManager.buildTblAlias(aliasInfo));
 		genJoin(sc, hlspan);
 		genWhere(sc, hlspan);
 
@@ -158,14 +163,15 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	}
 
 
-	private String buildTblAlias(DStructType structType) {
-		return aliasAlloc.buildTblAlias(structType);
-	}
+//	private String buildTblAlias(DStructType structType) {
+//		return aliasAlloc.buildTblAlias(structType);
+//	}
 //	private String buildAlias(DStructType pairType, TypePair pair) {
 //		return aliasAlloc.buildAlias(pairType, pair);
 //	}
 	private String buildAlias(DStructType pairType, String fieldName) {
-		return aliasAlloc.buildAlias(pairType, fieldName);
+//		return aliasAlloc.buildAlias(pairType, fieldName);
+		return aliasManager.getFieldAlias(pairType, fieldName).alias;
 	}
 
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -364,7 +370,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	}
 	@Override
 	public void setRegistry(DTypeRegistry registry) {
-//		this.registry = registry;
 		this.queryTypeDetector = new QueryTypeDetector(factorySvc, registry);
 	}
 }

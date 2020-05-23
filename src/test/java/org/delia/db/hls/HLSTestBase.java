@@ -55,9 +55,13 @@ public class HLSTestBase extends BDDBase {
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
 		
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			aliasManager.buildAliases(hlspan, session.getDatIdMap());
+		}
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			String hlstr = hlspan.toString();
 			log.log(hlstr);
 		}
+		log.log("alias: %s", aliasManager.dumpToString());
 		return hls;
 	}
 
@@ -139,7 +143,8 @@ public class HLSTestBase extends BDDBase {
 	//---
 	protected TableExistenceService existsSvc;
 	protected AssocTblManager assocTblMgr;
-	
+	protected AliasManager aliasManager;
+
 	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
@@ -153,6 +158,8 @@ public class HLSTestBase extends BDDBase {
 			createTable(memDBinterface, "CustomerAddressDat1");
 		}
 		existsSvc = new ZTableExistenceService(delia.getDBInterface()); 
+		aliasManager = new AliasManager(delia.getFactoryService());
+		
 		return new DeliaGenericDao(delia);
 	}
 	
@@ -212,7 +219,6 @@ public class HLSTestBase extends BDDBase {
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null);
 		MiniSelectFragmentParser mini = new MiniSelectFragmentParser(delia.getFactoryService(), registry, whereGen);
 		assocTblMgr = new AssocTblManager(session.getDatIdMap());
-		AliasManager aliasManager = new AliasManager(delia.getFactoryService());
 		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null, aliasManager);
 		gen.setRegistry(session.getExecutionContext().registry);
 		return gen;
