@@ -140,6 +140,7 @@ public class DeliaImpl implements Delia {
 			session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			session.datIdMap = extraInfo.datIdMap;
 			session.mostRecentRunner = mainRunner;
+			session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
 			return session;
 		}
 
@@ -152,6 +153,7 @@ public class DeliaImpl implements Delia {
 		session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 		session.datIdMap = extraInfo.datIdMap;
 		session.mostRecentRunner = mainRunner;
+		session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
 		return session;
 	}
 

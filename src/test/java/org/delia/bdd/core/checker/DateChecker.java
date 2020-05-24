@@ -26,6 +26,8 @@ public class DateChecker extends ValueCheckerBase {
 
 		@Override
 		public boolean compareObj(ThenValue thenVal, DValue dval, Log log) {
+			tzSvc.setDefaultTimeZone(sess.getDefaultTimezone());
+			
 			if (! thenVal.expected.startsWith("date(")) {
 				String err = String.format("then must use date()", thenVal.expected);
 				log.logError(err);
