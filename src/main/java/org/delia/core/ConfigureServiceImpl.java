@@ -1,5 +1,6 @@
 package org.delia.core;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
@@ -34,12 +35,12 @@ public class ConfigureServiceImpl implements ConfigureService {
 		case TIMEZONE:
 		{
 			String tzName = exp.value.strValue();
-			TimeZone tz = TimeZone.getTimeZone(tzName);
+			ZoneId tz = ZoneId.of(tzName);
 			//TODO: fix the issue that if tzName is unknown, TimeZone passes back UTC anyway
 			if (tz == null) {
 				throwError("configure-error-timezone", "unknown timezone: " + tzName);
 			} else {
-				factorySvc.getLog().log("configure setting timezone=%s (%s)", tzName, tz.getID());
+				factorySvc.getLog().log("configure setting timezone=%s (%s)", tzName, tz.getId());
 				TimeZoneService tzSvc = factorySvc.getTimeZoneService();
 				tzSvc.setDefaultTimeZone(tz);
 			}

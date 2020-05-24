@@ -1,23 +1,23 @@
 package org.delia.core;
 
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 public class TimeZoneServiceImpl implements TimeZoneService {
 	public static final String DEFAULT_TIMEZONE = "UTC";
 
-	private TimeZone defaultTz;
+	private ZoneId defaultTz;
 	
 	public TimeZoneServiceImpl() {
-		this.defaultTz = TimeZone.getTimeZone(DEFAULT_TIMEZONE);
+		this.defaultTz = ZoneId.of(DEFAULT_TIMEZONE);
 	}
 	
 	@Override
-	public void setDefaultTimeZone(TimeZone tz) {
+	public void setDefaultTimeZone(ZoneId tz) {
 		defaultTz = tz;
 	}
 
 	@Override
-	public TimeZone getDefaultTimeZone() {
+	public ZoneId getDefaultTimeZone() {
 		return defaultTz;
 	}
 

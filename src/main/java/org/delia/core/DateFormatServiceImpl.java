@@ -3,6 +3,7 @@ package org.delia.core;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -48,8 +49,8 @@ public class DateFormatServiceImpl implements DateFormatService {
 	}
 
 	private void applyTimeZone(DateFormat df) {
-		TimeZone tz = tzSvc.getDefaultTimeZone();
-		df.setTimeZone(tz);
+//TZ		TimeZone tz = tzSvc.getDefaultTimeZone();
+//		df.setTimeZone(tz);
 	}
 
 	@Override
@@ -83,7 +84,7 @@ public class DateFormatServiceImpl implements DateFormatService {
 	}
 
 	@Override
-	public TimeZone detectTimezone(String input) {
+	public ZoneId detectTimezone(String input) {
 		//		//        String string1 = "2001-07-04T12:08:56.235-0700";
 		int n = input.length();
 		if (n < 5) {
@@ -92,9 +93,10 @@ public class DateFormatServiceImpl implements DateFormatService {
 			int index = input.lastIndexOf('-');
 			if (index == n - 5) {
 				String s = input.substring(index);
-				String ss = String.format("GMT%s", s);
-				TimeZone tz2 = TimeZone.getTimeZone(ss);
-				return tz2;
+				String ss = String.format("GMT%s", s); //TODO does this work??
+//				TimeZone tz2 = TimeZone.getTimeZone(ss);
+				ZoneId zoneId = ZoneId.of(ss);
+				return zoneId;
 			} else {
 				return tzSvc.getDefaultTimeZone();
 			}
@@ -104,13 +106,13 @@ public class DateFormatServiceImpl implements DateFormatService {
 	@Override
 	public DateFormatter createFormatter(String input) {
 //		DateFormat df = getDateFormat(input);
-		TimeZone tz = detectTimezone(input);
-		return new DateFormatter(tz, dfFull);
+		ZoneId tz = detectTimezone(input);
+		return new DateFormatter(TimeZone.getDefault(), dfFull);
 	}
 
 	@Override
 	public DateFormatter createFormatter() {
-		TimeZone tz = tzSvc.getDefaultTimeZone();
-		return new DateFormatter(tz, this.dfFull);
+//		TimeZone tz = tzSvc.getDefaultTimeZone();
+		return new DateFormatter(TimeZone.getDefault(), this.dfFull);
 	}
 }

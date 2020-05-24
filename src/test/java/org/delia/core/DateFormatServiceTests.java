@@ -26,9 +26,9 @@ public class DateFormatServiceTests {
 	    DateTimeFormatter df4 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH");
 	    DateTimeFormatter df5 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 	    DateTimeFormatter df6 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-	    DateTimeFormatter df6a = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssVV");
+	    DateTimeFormatter df6a = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 	    DateTimeFormatter df7 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	    DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
+	    DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		//http://stackoverflow.com/questions/2201925/converting-iso-8601-compliant-string-to-java-util-date
 
 		@Override
@@ -84,9 +84,16 @@ public class DateFormatServiceTests {
 		}
 
 		@Override
-		public TimeZone detectTimezone(String input) {
-			// TODO Auto-generated method stub
-			return null;
+		public ZoneId detectTimezone(String input) {
+			ZonedDateTime ldt = null;
+			try {
+				DateTimeFormatter formatter = getDateFormat(input);
+				ldt = ZonedDateTime.parse(input, formatter);
+			} catch (DateTimeParseException  e) {
+				DeliaError err = new DeliaError("date-parse-error", e.getMessage());
+				throw new DeliaException(err);
+			}  
+			return ldt == null ? null : ldt.getZone();
 		}
 
 		@Override
@@ -117,7 +124,9 @@ public class DateFormatServiceTests {
 	@Test
 	public void test2() {
 		DateFormatService fmtSvc = createSvc();
-		TimeZone tz = TimeZone.getTimeZone("US/Pacific");
+//		TimeZone tz = TimeZone.getTimeZone("US/Pacific");
+//		tzSvc.setDefaultTimeZone(tz);
+		ZoneId tz = ZoneId.of("US/Pacific");
 		tzSvc.setDefaultTimeZone(tz);
 		Date dt = new Date();
 		String s = fmtSvc.format(dt);
@@ -130,7 +139,8 @@ public class DateFormatServiceTests {
 	public void test3() {
 		DateFormatService fmtSvc = createSvc();
 		
-		TimeZone tz = fmtSvc.detectTimezone("2001-07-04T12:08:56.235-0700");
+		ZoneId tz = fmtSvc.detectTimezone("2001-07-04T12:08:56.235-0700");
+		log.log(tz.getId());
 		tzSvc.setDefaultTimeZone(tz);
 		Date dt = new Date();
 		String s = fmtSvc.format(dt);

@@ -1,6 +1,9 @@
 package org.delia.db.sql;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -51,12 +54,17 @@ public class SqlDateGenerator extends ServiceBase {
 	 */
 	private String convertDateToSQLTimestamp(Date dt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
+//		TimeZone tz = tzSvc.getDefaultTimeZone();
+//		sdf.setTimeZone(tz);
+//		String s = sdf.format(dt);
+		
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-		TimeZone tz = tzSvc.getDefaultTimeZone();
-		sdf.setTimeZone(tz);
-
-		String s = sdf.format(dt);
+		ZoneId tz = tzSvc.getDefaultTimeZone();
+		LocalDateTime ldt = LocalDateTime.ofInstant(dt.toInstant(), tz);
+		String s = ldt.format(sdf);
 		return String.format("'%s'", s);
 	}
 

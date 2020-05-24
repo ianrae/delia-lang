@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -166,4 +167,13 @@ public class TimezoneTests {
 		dt = Date.from(instant);
 		System.out.println("dt: " + dt.toString());
 	}
+	
+	@Test
+	public void testJava8b() throws ParseException {
+		
+		for(String zone: ZoneId.getAvailableZoneIds()) {
+			System.out.println(zone);
+		}
+	}
+	
 }

@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -79,10 +82,11 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			cal.setTime(dval.asDate());
-			Date dt = cal.getTime();
+			Date dt = dval.asDate();
 			Timestamp ts = new Timestamp(dt.getTime());
 			stm.setTimestamp(index++, ts, cal);
 		}
@@ -172,7 +176,8 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			Date x = rs.getTimestamp(pair.name, cal);
 			if (rs.wasNull()) {
@@ -235,7 +240,8 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			Date x = rs.getTimestamp(index, cal);
 			if (rs.wasNull()) {
@@ -303,7 +309,8 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			Date x = rs.getTimestamp(rsIndex, cal);
 			if (rs.wasNull()) {
@@ -402,12 +409,18 @@ public class ValueHelper extends ServiceBase {
 	 */
 	private String convertDateToSQLTimestamp(Date dt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
+//		TimeZone tz = tzSvc.getDefaultTimeZone();
+//		sdf.setTimeZone(tz);
+//		String s = sdf.format(dt);
+		
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-		TimeZone tz = tzSvc.getDefaultTimeZone();
-		sdf.setTimeZone(tz);
-
-		String s = sdf.format(dt);
+		ZoneId tz = tzSvc.getDefaultTimeZone();
+		LocalDateTime ldt = LocalDateTime.ofInstant(dt.toInstant(), tz);
+		String s = ldt.format(sdf);
+		
 		return String.format("'%s'", s);
 	}
 
