@@ -10,6 +10,7 @@ import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 
 public class ConfigureServiceImpl implements ConfigureService {
 	private static final String TIMEZONE = "timezone";
@@ -34,7 +35,12 @@ public class ConfigureServiceImpl implements ConfigureService {
 		case TIMEZONE:
 		{
 			String tzName = exp.value.strValue();
-			ZoneId tz = ZoneId.of(tzName);
+			ZoneId tz = null;
+			try {
+				tz = ZoneId.of(tzName);
+			} catch (Exception e) {
+				DeliaExceptionHelper.throwError("bad-timezone", e.getMessage());
+			}
 			//TODO: fix the issue that if tzName is unknown, TimeZone passes back UTC anyway
 			if (tz == null) {
 				throwError("configure-error-timezone", "unknown timezone: " + tzName);
