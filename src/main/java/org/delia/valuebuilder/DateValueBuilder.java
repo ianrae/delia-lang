@@ -40,7 +40,8 @@ public class DateValueBuilder extends DValueBuilder {
 			return;
 		}
 		
-		DateFormatter formatter = fmtSvc.createFormatter(input);
+//		DateFormatter formatter = fmtSvc.createFormatter(input);
+		DateFormatter formatter = fmtSvc.createFormatter(); //always use dfFull
 		WrappedDate wdt = new WrappedDate(dt, formatter);
 		this.newDVal = new DValueImpl(type, wdt);
 	}

@@ -5,6 +5,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -173,6 +175,11 @@ public class TimezoneTests {
 		String s = "2020-01-31T09:59:51.000-0700";
 		DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		ZonedDateTime zdt = ZonedDateTime.parse(s, dfFull);
+		
+		LocalDate today = LocalDate.now();
+		LocalDateTime ldt = today.atStartOfDay();
+		System.out.println("today: " + today.toString());
+		System.out.println("today: " + ldt.toString());
 	}
 	
 	@Test

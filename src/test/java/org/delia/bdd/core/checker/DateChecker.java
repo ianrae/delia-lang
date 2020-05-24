@@ -2,8 +2,8 @@ package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.delia.bdd.core.ThenValue;
 import org.delia.core.DateFormatService;
@@ -41,8 +41,8 @@ public class DateChecker extends ValueCheckerBase {
 //			log.log(ss2);
 			
 			if (! compareTimezones(wdtExpected, wdt)) { 
-				String s1 = wdtExpected.getTimeZone().getID();
-				String s2 = wdt.getTimeZone().getID();
+				String s1 = wdtExpected.getTimeZone().getId();
+				String s2 = wdt.getTimeZone().getId();
 				String err = String.format("value-mismatch: TimeZone expected '%s' but got '%s'", s1, s2);
 				log.logError(err);
 				return false;
@@ -57,9 +57,9 @@ public class DateChecker extends ValueCheckerBase {
 		}
 
 		private boolean compareTimezones(WrappedDate wdtExpected, WrappedDate wdt) {
-			TimeZone tz1 = wdtExpected.getTimeZone();
-			TimeZone tz2 = wdt.getTimeZone();
-			boolean b = tz1.hasSameRules(tz2);
+			ZoneId tz1 = wdtExpected.getTimeZone();
+			ZoneId tz2 = wdt.getTimeZone();
+			boolean b = tz1.equals(tz2); //TODO: or use normalize?
 			return b;
 		}
 

@@ -1,7 +1,5 @@
 package org.delia.core;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
@@ -34,7 +31,7 @@ public class DateFormatServiceImpl implements DateFormatService {
     private DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	//http://stackoverflow.com/questions/2201925/converting-iso-8601-compliant-string-to-java-util-date
     
-	private final DateFormat dfFullOld = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+//	private final DateFormat dfFullOld = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 	private TimeZoneService tzSvc;
 
@@ -45,6 +42,7 @@ public class DateFormatServiceImpl implements DateFormatService {
 
 	@Override
 	public Date parse(String input) {
+//		input = input.trim();
 		try {
 			DateTimeFormatter formatter = getDateFormat(input);
 			if (containsTimeZone(formatter)) {
@@ -123,6 +121,8 @@ public class DateFormatServiceImpl implements DateFormatService {
 			return df6;
 		case 24:
 			return df6a;
+		case 27:
+			return df7;
 		default:
 			return dfFull;
 		}
@@ -157,12 +157,12 @@ public class DateFormatServiceImpl implements DateFormatService {
 
 	@Override
 	public DateFormatter createFormatter(String input) {
-		//TODO fix
-		return createFormatter();
+		DateTimeFormatter formatter = getDateFormat(input);
+		return new DateFormatter(tzSvc.getDefaultTimeZone(), formatter);
 	}
 
 	@Override
 	public DateFormatter createFormatter() {
-		return new DateFormatter(TimeZone.getDefault(), this.dfFullOld);
+		return new DateFormatter(tzSvc.getDefaultTimeZone(), this.dfFull);
 	}
 }

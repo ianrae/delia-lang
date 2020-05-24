@@ -1,26 +1,30 @@
 package org.delia.core;
 
-import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.TimeZone;
 
 
 public class DateFormatter {
-	private TimeZone tz;
-	private DateFormat formatter;
+	private ZoneId zoneId;
+	private DateTimeFormatter formatter;
 
-	public DateFormatter(TimeZone tz, DateFormat df) {
-		this.tz = tz;
+	public DateFormatter(ZoneId zoneId, DateTimeFormatter df) {
+		this.zoneId = zoneId;
 		this.formatter = df;
-		this.formatter.setTimeZone(tz);
+//		this.formatter.setTimeZone(tz);
 	}
 
 	public String format(Date dt) {
-		return formatter.format(dt);
+//		LocalDateTime ldt = LocalDateTime.ofInstant(dt.toInstant(), zoneId);
+		ZonedDateTime ldt = ZonedDateTime.ofInstant(dt.toInstant(), zoneId);
+		return ldt.format(formatter);
 	}
 
-	public TimeZone getTimeZone() {
-		return tz;
+	public ZoneId getTimeZone() {
+		return zoneId;
 	}
 
 }

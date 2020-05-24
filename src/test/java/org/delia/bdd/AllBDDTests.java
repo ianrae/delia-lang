@@ -306,14 +306,15 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 4;
+		testIndexToRun = 4;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
 //		runR300File("t0-date-timezone.txt",10);
 //		runR300File("t0-date.txt", 8);
-		runR300File("t0-date-custom.txt", 6);
+//		runR300File("t0-date-custom.txt", 6);
+		runR300File("t0-date-timezone.txt",10);
 
 	}
 	

@@ -2,116 +2,15 @@ package org.delia.core;
 
 import static org.junit.Assert.assertEquals;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.delia.base.UnitTestLog;
-import org.delia.error.DeliaError;
 import org.delia.log.Log;
-import org.delia.runner.DeliaException;
 import org.delia.type.WrappedDate;
 import org.junit.Test;
 
 public class DateFormatServiceTests {
-	
-	public static class NewDateFormatServiceImpl implements DateFormatService {
-	    DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy");
-	    DateTimeFormatter df2 = DateTimeFormatter.ofPattern("yyyy-MM");
-	    DateTimeFormatter df3 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-	    DateTimeFormatter df4 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH");
-	    DateTimeFormatter df5 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-	    DateTimeFormatter df6 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-	    DateTimeFormatter df6a = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
-	    DateTimeFormatter df7 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	    DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-		//http://stackoverflow.com/questions/2201925/converting-iso-8601-compliant-string-to-java-util-date
-	    
-		private final DateFormat dfFullOld = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-
-
-		@Override
-		public Date parse(String input) {
-			ZonedDateTime ldt = null;
-			try {
-				DateTimeFormatter formatter = getDateFormat(input);
-				ldt = ZonedDateTime.parse(input, formatter);
-			} catch (DateTimeParseException  e) {
-				DeliaError err = new DeliaError("date-parse-error", e.getMessage());
-				throw new DeliaException(err);
-			}  
-			return java.util.Date.from(ldt.toInstant());
-		}
-
-		private DateTimeFormatter getDateFormat(String input) {
-			int len = input.length();
-			switch(len) {
-			case 4:
-				return df1;
-			case 7:
-				return df2;
-			case 10:
-				return df3;
-			case 13:
-				return df4;
-			case 16:
-				return df5;
-			case 19:
-				return df6;
-			case 23:
-				return df6;
-			case 24:
-				return df6a;
-			default:
-				return dfFull;
-			}
-		}
-
-		@Override
-		public String format(Date dt) {
-			String s = null;
-			try {
-				ZonedDateTime ldt = ZonedDateTime.ofInstant(dt.toInstant(), ZoneId.systemDefault());
-			    s = ldt.format(dfFull);
-			}
-			catch (DateTimeException exc) {
-			    System.out.printf("%s can't be formatted!", dt);
-			    throw exc;
-			}			
-			return s;
-		}
-
-		@Override
-		public ZoneId detectTimezone(String input) {
-			ZonedDateTime ldt = null;
-			try {
-				DateTimeFormatter formatter = getDateFormat(input);
-				ldt = ZonedDateTime.parse(input, formatter);
-			} catch (DateTimeParseException  e) {
-				DeliaError err = new DeliaError("date-parse-error", e.getMessage());
-				throw new DeliaException(err);
-			}  
-			return ldt == null ? null : ldt.getZone();
-		}
-
-		@Override
-		public DateFormatter createFormatter(String input) {
-			//TODO fix
-			return createFormatter();
-		}
-
-		@Override
-		public DateFormatter createFormatter() {
-			return new DateFormatter(TimeZone.getDefault(), this.dfFullOld);
-		}
-		
-	}
 	
 	@Test
 	public void test() {
@@ -157,7 +56,7 @@ public class DateFormatServiceTests {
 		DateFormatService fmtSvc = createSvc();
 		
 		Date dt = fmtSvc.parse("2019");
-		DateFormatter formatter = fmtSvc.createFormatter();
+		DateFormatter formatter = fmtSvc.createFormatter("2019");
 		WrappedDate wdt = new WrappedDate(dt, formatter);
 		String s = wdt.asString();
 		log(s);
@@ -174,8 +73,7 @@ public class DateFormatServiceTests {
 	TimeZoneService tzSvc = new TimeZoneServiceImpl();
 
 	private DateFormatService createSvc() {
-//		return new DateFormatServiceImpl(tzSvc);
-		return new NewDateFormatServiceImpl();
+		return new DateFormatServiceImpl(tzSvc);
 	}
 
 	protected void log(String s) {

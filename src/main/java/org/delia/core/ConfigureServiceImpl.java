@@ -3,7 +3,6 @@ package org.delia.core;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.ConfigureStatementExp;

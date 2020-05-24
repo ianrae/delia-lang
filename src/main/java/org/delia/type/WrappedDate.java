@@ -1,7 +1,7 @@
 package org.delia.type;
 
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.delia.core.DateFormatter;
 
@@ -29,7 +29,7 @@ public class WrappedDate {
 	public Date getDate() {
 		return dt;
 	}
-	public TimeZone getTimeZone() {
+	public ZoneId getTimeZone() {
 		return dateFormatter.getTimeZone();
 	}
 }
