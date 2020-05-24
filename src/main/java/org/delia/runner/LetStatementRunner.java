@@ -159,12 +159,9 @@ public class LetStatementRunner extends ServiceBase {
 
 	private QueryContext buildQueryContext(QuerySpec spec) {
 		QueryFuncContext ctx = new QueryFuncContext();
-		//			this.qffRunner.buildPendingTrail(ctx, spec.queryExp);
 
 		QueryContext qtx = new QueryContext();
 		qtx.letSpanEngine = letSpanEngine;
-		//TODO: fix buglet that is other fn contains 'fks' this won't work
-		//			qtx.loadFKs = ctx.pendingTrail.getTrail().contains("fks");
 		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
 		if (!qtx.loadFKs) {
 			ConfigureService configSvc = factorySvc.getConfigureService();

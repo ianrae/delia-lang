@@ -114,7 +114,7 @@ public class CompareOpRule extends DRuleBase {
 		
 		private Comparable<?> getRelationKeyAsObject(RuleOperand oper, DValue dval, DRuleContext ctx) {
 			DRelation drel = oper.asRelation(dval);
-			DValue keyVal = drel.getForeignKey(); //TODO support multiple keys later
+			DValue keyVal = drel.getForeignKey(); 
 			
 			Shape shape = keyVal.getType().getShape();
 			if (shape == null) {

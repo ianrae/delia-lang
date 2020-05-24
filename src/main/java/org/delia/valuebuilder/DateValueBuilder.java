@@ -34,15 +34,12 @@ public class DateValueBuilder extends DValueBuilder {
 			return;
 		}
 
-		ZonedDateTime zdt = null;
-		//TODO: fix!!
-		zdt = fmtSvc.parseDateTime(input);
+		ZonedDateTime zdt = fmtSvc.parseDateTime(input);
 		if (zdt == null) {
 			this.addParsingError(String.format("Can't convert '%s' to date", input), input);
 			return;
 		}
 		
-//		DateFormatter formatter = fmtSvc.createFormatter(input);
 		DateFormatter formatter = fmtSvc.createFormatter(); //always use dfFull
 		WrappedDate wdt = new WrappedDate(zdt, formatter);
 		this.newDVal = new DValueImpl(type, wdt);

@@ -164,9 +164,6 @@ public class RelationOneRule extends RelationRuleBase {
 		}
 		String otherSideFieldName = relInfo.otherSide.fieldName;
 		return DValueHelper.findField(relInfo.farType, otherSideFieldName);
-//		//TODO: later also use named relations
-//		DStructType dtype = (DStructType) otherSide.getType();
-//		return DRuleHelper.findMatchingRelByType(dtype, targetType);
 	}
 	public boolean isParent() {
 		return isParent;

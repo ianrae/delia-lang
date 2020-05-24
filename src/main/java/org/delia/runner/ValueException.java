@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.delia.error.DeliaError;
 
-//TODO: remove this class. not needed
 public class ValueException extends RuntimeException {
 	/**
 	 * 

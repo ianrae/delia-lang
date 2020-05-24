@@ -98,12 +98,6 @@ public class DValueImpl implements DValue, DValueInternal {
         return dt;
     }
 
-//    @Override
-//    @SuppressWarnings("unchecked")
-//    public List<DValue> asList() {
-//        return (List<DValue>) object;
-//    }
-    
     @Override
     @SuppressWarnings("unchecked")
     public Map<String,DValue> asMap() {

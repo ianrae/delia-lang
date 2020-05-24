@@ -45,7 +45,6 @@ public class RelationManyRule extends RelationRuleBase {
 		}
 
 		//first ensure foreign key points to existing record
-//		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 		boolean fkObjectExists = ctx.getFetchRunner().queryFKExists(drel);
 		if (! fkObjectExists) {
 			String key = drel.getForeignKey().asString();
