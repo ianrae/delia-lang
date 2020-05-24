@@ -9,6 +9,7 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
+import org.delia.assoc.DatIdMap;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
@@ -17,6 +18,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
+import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.TableExistenceService;
@@ -28,6 +30,7 @@ import org.delia.queryresponse.LetSpanEngine;
 import org.delia.queryresponse.LetSpanRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.StringTrail;
@@ -142,7 +145,6 @@ public class HLSTestBase extends BDDBase {
 	
 	//---
 	protected TableExistenceService existsSvc;
-	protected AssocTblManager assocTblMgr;
 	protected AliasManager aliasManager;
 
 	protected DeliaGenericDao createDao() {
@@ -218,8 +220,8 @@ public class HLSTestBase extends BDDBase {
 		DTypeRegistry registry = session.getExecutionContext().registry;
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null);
 		MiniSelectFragmentParser mini = new MiniSelectFragmentParser(delia.getFactoryService(), registry, whereGen);
-		assocTblMgr = new AssocTblManager(session.getDatIdMap());
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null, aliasManager);
+		
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), mini, null, aliasManager, session.getDatIdMap());
 		gen.setRegistry(session.getExecutionContext().registry);
 		return gen;
 	}

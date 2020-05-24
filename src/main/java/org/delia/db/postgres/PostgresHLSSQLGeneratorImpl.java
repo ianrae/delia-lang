@@ -1,8 +1,8 @@
 package org.delia.db.postgres;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.hls.AliasManager;
-import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSSQLGeneratorImpl;
 import org.delia.db.hls.SQLCreator;
@@ -10,9 +10,9 @@ import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.runner.VarEvaluator;
 
 public class PostgresHLSSQLGeneratorImpl extends HLSSQLGeneratorImpl {
-	public PostgresHLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr,
+	public PostgresHLSSQLGeneratorImpl(FactoryService factorySvc, DatIdMap datIdMap,
 			MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager) {
-		super(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, aliasManager);
+		super(factorySvc, miniSelectParser, varEvaluator, aliasManager, datIdMap);
 	}
 
 

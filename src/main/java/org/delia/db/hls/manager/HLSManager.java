@@ -11,7 +11,6 @@ import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.AliasManager;
-import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.HLSEngine;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
@@ -94,9 +93,7 @@ public class HLSManager extends ServiceBase {
 
 	private HLSSQLGenerator chooseGenerator(ZDBExecutor zexec) {
 		//later we will have dbspecific ones
-		AssocTblManager assocTblMgr = new AssocTblManager(zexec.getDatIdMap());
-
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, aliasManager);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, miniSelectParser, varEvaluator, aliasManager, zexec.getDatIdMap());
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{
@@ -109,7 +106,7 @@ public class HLSManager extends ServiceBase {
 		case H2:
 			return gen;
 		case POSTGRES:
-			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, aliasManager);
+			return new PostgresHLSSQLGeneratorImpl(factorySvc, zexec.getDatIdMap(), miniSelectParser, varEvaluator, aliasManager);
 		default:
 			return null; //should never happen
 		}

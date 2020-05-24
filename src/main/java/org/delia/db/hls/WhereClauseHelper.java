@@ -28,7 +28,7 @@ public class WhereClauseHelper extends ServiceBase {
 	private AliasManager aliasManager;
 //	private String realAlias;
 	
-	public WhereClauseHelper(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
+	public WhereClauseHelper(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
 				Map<String, String> asNameMap, AliasManager aliasManager) {
 		super(factorySvc);
 		this.miniSelectParser = miniSelectParser;

@@ -5,7 +5,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.InsertContext;
 import org.delia.db.h2.H2SqlHelperFactory;
-import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
@@ -33,8 +32,7 @@ public class ZInsert extends ServiceBase {
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, null, null);
 		ZTableExistenceService existSvc = new ZTableExistenceService(zexec);
 		fpSvc.setExistSvc(existSvc);
-		AssocTblManager assocTblMgr = new AssocTblManager(zexec.getDatIdMap(), cacheData.assocTblExistMap);
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, zexec.getDatIdMap());
 		String typeName = dval.getType().getName();
 		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
 		SqlStatementGroup stgroup = parser.renderInsertGroup(selectFrag);

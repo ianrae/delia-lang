@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -28,17 +30,17 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
 	private SqlJoinHelper joinHelper;
-	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
 	public Map<String,String> asNameMap = new HashMap<>();
 	private AliasManager aliasManager;
+	private DatIdMap datIdMap;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
-		this.joinHelper = new SqlJoinHelper(aliasManager, assocTblMgr, asNameMap, miniSelectParser);
-		this.assocTblMgr = assocTblMgr;
-		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasManager);
+		this.joinHelper = new SqlJoinHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
+		this.whereClauseHelper = new WhereClauseHelper(factorySvc, miniSelectParser, varEvaluator, asNameMap, aliasManager);
 		this.aliasManager = aliasManager;
+		this.datIdMap = datIdMap;
 	}
 
 	@Override
@@ -107,10 +109,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				}
 				case MANY_TO_MANY:
 				{
-					String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(relinfo.getDatId()); 
+					String assocTblName = datIdMap.getAssocTblName(relinfo.getDatId()); 
 //					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
 					String newAlias = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTblName).alias;
-					String fff = assocTblMgr.xgetAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
+					String fff = DatIdMapHelper.getAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
 					String s3 = String.format("%s.%s", newAlias, fff);
 					
 					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();

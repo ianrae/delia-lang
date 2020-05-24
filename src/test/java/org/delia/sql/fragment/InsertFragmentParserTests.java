@@ -14,7 +14,6 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.TestCreatorHelper;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
@@ -333,8 +332,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		ZDBExecutor zexec = dao.getDbInterface().createExecutor(); //don't worry about closing, is MME
-		AssocTblManager assocTblMgr = new AssocTblManager(dao.getMostRecentSession().getDatIdMap());
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, dao.getMostRecentSession().getDatIdMap());
 		return parser;
 	}
 

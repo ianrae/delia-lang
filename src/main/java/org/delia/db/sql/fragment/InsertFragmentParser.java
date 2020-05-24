@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMapHelper;
 import org.delia.core.FactoryService;
-import org.delia.db.hls.AssocTblManager;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -24,11 +25,11 @@ import org.delia.util.DeliaExceptionHelper;
 public class InsertFragmentParser extends SelectFragmentParser {
 
 	private boolean useAliases = false;
-	private AssocTblManager assocTblMgr;
+	private DatIdMap datIdMap;
 
-	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, AssocTblManager assocTblMgr) {
+	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, DatIdMap datIdMap) {
 		super(factorySvc, fpSvc);
-		this.assocTblMgr = assocTblMgr;
+		this.datIdMap = datIdMap;
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {
@@ -164,13 +165,13 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	}
 
 	private int fillTableInfoIfNeeded(List<TableInfo> tblinfoL, RelationInfo info) {
-		return existSvc.fillTableInfoIfNeeded(tblinfoL, info, assocTblMgr.getDatIdMap());
+		return existSvc.fillTableInfoIfNeeded(tblinfoL, info, datIdMap);
 	}
 
 	private boolean genAssocField(InsertStatementFragment insertFrag, InsertStatementFragment assocInsertFrag, DStructType structType, DValue mainDVal, DValue xdval, 
 			RelationInfo info, SqlStatement statement) {
 
-		String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(info.getDatId());
+		String assocTblName = datIdMap.getAssocTblName(info.getDatId());
 //		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 		assocInsertFrag.tblFrag = this.createAssocTable(assocInsertFrag, assocTblName);
 		assocInsertFrag.paramStartIndex = insertFrag.statement.paramL.size();
@@ -186,9 +187,9 @@ public class InsertFragmentParser extends SelectFragmentParser {
 
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean notFlipped, 
 			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval, RelationInfo info) {
-		String assocTbl = assocTblMgr.getDatIdMap().getAssocTblName(info.getDatId());
-		String field1 = assocTblMgr.xgetAssocLeftField(nearType, assocTbl);
-		String field2 = assocTblMgr.xgetAssocRightField(nearType, assocTbl);
+		String assocTbl = datIdMap.getAssocTblName(info.getDatId());
+		String field1 = DatIdMapHelper.getAssocLeftField(nearType, assocTbl);
+		String field2 = DatIdMapHelper.getAssocRightField(nearType, assocTbl);
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
