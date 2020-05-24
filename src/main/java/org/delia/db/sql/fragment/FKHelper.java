@@ -41,20 +41,14 @@ public class FKHelper extends ServiceBase {
 	private QueryTypeDetector queryDetectorSvc;
 	private SqlWhereConverter whereConverter;
 	private SqlNameFormatter nameFormatter;
-//	private PreparedStatementGenerator sqlgen;
-//	private WhereFragmentGenerator pwheregen;
-//	private SqlHelperFactory sqlHelperFactory;
 	private SelectFuncHelper selectFnHelper;
 	private TableFragmentMaker tableFragmentMaker;
-	private SpanHelper spanHelper;
 
 	public FKHelper(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
-			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc, SpanHelper spanHelper) {
+			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, SpanHelper spanHelper) {
 		super(factorySvc);
 		this.registry = registry;
 		this.tblinfoL = tblinfoL;
-		this.spanHelper = spanHelper;
-//		this.sqlHelperFactory = sqlHelperFactory;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		this.nameFormatter = sqlHelperFactory.createNameFormatter();

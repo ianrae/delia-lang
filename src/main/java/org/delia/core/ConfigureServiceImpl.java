@@ -41,7 +41,6 @@ public class ConfigureServiceImpl implements ConfigureService {
 			} catch (Exception e) {
 				DeliaExceptionHelper.throwError("bad-timezone", e.getMessage());
 			}
-			//TODO: fix the issue that if tzName is unknown, TimeZone passes back UTC anyway
 			if (tz == null) {
 				throwError("configure-error-timezone", "unknown timezone: " + tzName);
 			} else {
@@ -53,9 +52,7 @@ public class ConfigureServiceImpl implements ConfigureService {
 			break;
 		case LOAD_FKS:
 		{
-			//TODO: should be case-insentive and accept 'true'
 			BooleanExp bexp = (BooleanExp) exp.value;
-//			Boolean bb = Boolean.parseBoolean(exp.value.strValue());
 			this.populateFKsFlag = bexp.val;
 		}
 			break;

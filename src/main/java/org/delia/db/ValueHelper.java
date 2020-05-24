@@ -275,7 +275,7 @@ public class ValueHelper extends ServiceBase {
 	public DValue readIndexedField(DType type, int rsIndex, ResultSet rs, DBAccessContext dbctx) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 
-		boolean b = rs.next(); //assume rsIndex always 1. TODO fix if needed
+		boolean b = rs.next(); //assume we're reading 1st record
 		if (!b) {
 			return null;
 		}
@@ -398,20 +398,13 @@ public class ValueHelper extends ServiceBase {
 	}
 
 	/**
-	 * TODO: this probably needs to become db-specific
+	 * FUTURE: this probably needs to become db-specific
 	 * @param dt date
 	 * @return date as string in sql format
 	 */
 	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-//		TimeZone tz = tzSvc.getDefaultTimeZone();
-//		sdf.setTimeZone(tz);
-//		String s = sdf.format(dt);
-		
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
 		String s = zdt.format(sdf);
 		
 		return String.format("'%s'", s);

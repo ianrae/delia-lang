@@ -62,7 +62,7 @@ public class FragmentParserService extends ServiceBase {
 	}
 
 	public FKHelper createFKHelper() {
-		return new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, existSvc, spanHelper);
+		return new FKHelper(factorySvc, registry, tblinfoL, sqlHelperFactory, varEvaluator, spanHelper);
 	}
 
 	public SelectFuncHelper createSelectFuncHelper() {

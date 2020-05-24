@@ -9,7 +9,6 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
-import org.delia.assoc.DatIdMap;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
@@ -18,11 +17,8 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.queryresponse.LetSpan;
@@ -30,13 +26,10 @@ import org.delia.queryresponse.LetSpanEngine;
 import org.delia.queryresponse.LetSpanRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
-import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.StringTrail;
-import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZTableExistenceService;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 
@@ -144,7 +137,6 @@ public class HLSTestBase extends BDDBase {
 	protected boolean flipAssocTbl = false; //mosts tests assume CustomerAddressAssoc
 	
 	//---
-	protected TableExistenceService existsSvc;
 	protected AliasManager aliasManager;
 
 	protected DeliaGenericDao createDao() {
@@ -159,7 +151,6 @@ public class HLSTestBase extends BDDBase {
 		} else {
 			createTable(memDBinterface, "CustomerAddressDat1");
 		}
-		existsSvc = new ZTableExistenceService(delia.getDBInterface()); 
 		aliasManager = new AliasManager(delia.getFactoryService());
 		
 		return new DeliaGenericDao(delia);
