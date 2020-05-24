@@ -39,7 +39,7 @@ public class ConfigureServiceImpl implements ConfigureService {
 			if (tz == null) {
 				throwError("configure-error-timezone", "unknown timezone: " + tzName);
 			} else {
-				factorySvc.getLog().log("configure setting %s=%s", tzName, tz.getID());
+				factorySvc.getLog().log("configure setting timezone=%s (%s)", tzName, tz.getID());
 				TimeZoneService tzSvc = factorySvc.getTimeZoneService();
 				tzSvc.setDefaultTimeZone(tz);
 			}
