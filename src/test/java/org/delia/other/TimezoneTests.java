@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -166,6 +168,11 @@ public class TimezoneTests {
 		
 		dt = Date.from(instant);
 		System.out.println("dt: " + dt.toString());
+		
+//		String s = "2020-01-31T09:59:51.000PST";
+		String s = "2020-01-31T09:59:51.000-0700";
+		DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		ZonedDateTime zdt = ZonedDateTime.parse(s, dfFull);
 	}
 	
 	@Test

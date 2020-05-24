@@ -27,9 +27,9 @@ public class H2BDDTests extends BDDBase {
 		runR300File("t0-number-custom.txt", 13);
 		runR300File("t0-string.txt", 12);
 		runR300File("t0-string-custom.txt", 5);
-		runR300File("t0-date.txt", 6);
+		runR300File("t0-date.txt", 8);
 		runR300File("t0-date-custom.txt", 6);
-		runR300File("t0-date-timezone.txt",7);
+		runR300File("t0-date-timezone.txt",10);
 	}
 	@Test
 	public void testR400() {

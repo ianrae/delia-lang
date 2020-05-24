@@ -2,6 +2,8 @@ package org.delia.core;
 
 import static org.junit.Assert.assertEquals;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,10 +32,12 @@ public class DateFormatServiceTests {
 	    DateTimeFormatter df7 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	    DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		//http://stackoverflow.com/questions/2201925/converting-iso-8601-compliant-string-to-java-util-date
+	    
+		private final DateFormat dfFullOld = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
 
 		@Override
 		public Date parse(String input) {
-//			ZoneId zoneId = ZoneId.systemDefault();
 			ZonedDateTime ldt = null;
 			try {
 				DateTimeFormatter formatter = getDateFormat(input);
@@ -98,14 +102,13 @@ public class DateFormatServiceTests {
 
 		@Override
 		public DateFormatter createFormatter(String input) {
-			// TODO Auto-generated method stub
-			return null;
+			//TODO fix
+			return createFormatter();
 		}
 
 		@Override
 		public DateFormatter createFormatter() {
-			// TODO Auto-generated method stub
-			return null;
+			return new DateFormatter(TimeZone.getDefault(), this.dfFullOld);
 		}
 		
 	}

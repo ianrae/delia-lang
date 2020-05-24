@@ -1,9 +1,19 @@
 package org.delia.core;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.MonthDay;
+import java.time.Year;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -12,19 +22,20 @@ import org.delia.runner.DeliaException;
 
 
 public class DateFormatServiceImpl implements DateFormatService {
-
+	//new version using Java 8 time
+    private DateTimeFormatter df1 = DateTimeFormatter.ofPattern("yyyy");
+    private DateTimeFormatter df2 = DateTimeFormatter.ofPattern("yyyy-MM");
+    private DateTimeFormatter df3 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private DateTimeFormatter df4 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH");
+    private DateTimeFormatter df5 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private DateTimeFormatter df6 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private DateTimeFormatter df6a = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+    private DateTimeFormatter df7 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	//http://stackoverflow.com/questions/2201925/converting-iso-8601-compliant-string-to-java-util-date
-	private final DateFormat df1 = new SimpleDateFormat("yyyy");
-	private final DateFormat df2 = new SimpleDateFormat("yyyy-MM");
-	private final DateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");
-	private final DateFormat df4 = new SimpleDateFormat("yyyy-MM-dd'T'HH");
-	private final DateFormat df5 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-	private final DateFormat df6 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	private final DateFormat df6a = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-	private final DateFormat df7 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	private final DateFormat dfFull = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                                                        //	yyyy-MM-dd'T'HH:mm:ss.SSSZ
-	
+    
+	private final DateFormat dfFullOld = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
 	private TimeZoneService tzSvc;
 
 
@@ -34,32 +45,66 @@ public class DateFormatServiceImpl implements DateFormatService {
 
 	@Override
 	public Date parse(String input) {
-		//support all forms of iso 8601!!
-		//        String string1 = "2001-07-04T12:08:56.235-0700";
-		Date dt = null;
 		try {
-			DateFormat df = getDateFormat(input);
-			applyTimeZone(df);
-			dt = df.parse(input);
-		} catch (ParseException e) {
+			DateTimeFormatter formatter = getDateFormat(input);
+			if (containsTimeZone(formatter)) {
+				ZonedDateTime ldt = null;
+				ldt = ZonedDateTime.parse(input, formatter);
+				return java.util.Date.from(ldt.toInstant());
+			} else if (isYearOnly(formatter)) {
+				LocalDate ldt = null;
+				TemporalAccessor parsed = formatter.parse(input);	
+				Year yr = Year.from(parsed);
+				ldt = LocalDate.of(yr.getValue(), 1, 1);
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				return java.util.Date.from(ldt.atStartOfDay(zone).toInstant());
+			} else if (isMonthDayOnly(formatter)) {
+				LocalDate ldt = null;
+				TemporalAccessor parsed = formatter.parse(input);	
+				Year yr = Year.from(parsed);
+				if (formatter == df2) {
+					Month month = Month.from(parsed);
+					ldt = LocalDate.of(yr.getValue(), month.getValue(), 1);
+				} else {
+					MonthDay md = MonthDay.from(parsed);
+					ldt = LocalDate.of(yr.getValue(), md.getMonthValue(), md.getDayOfMonth());
+				}
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				return java.util.Date.from(ldt.atStartOfDay(zone).toInstant());
+			} else {
+				LocalDateTime ldt = null;
+				
+				ldt = LocalDateTime.parse(input, formatter);
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				ZoneOffset zo = zone.getRules().getOffset(ldt); 
+				return java.util.Date.from(ldt.toInstant(zo));
+			}
+		} catch (DateTimeParseException  e) {
 			DeliaError err = new DeliaError("date-parse-error", e.getMessage());
 			throw new DeliaException(err);
 		}  
-		return dt;
 	}
 
-	private void applyTimeZone(DateFormat df) {
-//TZ		TimeZone tz = tzSvc.getDefaultTimeZone();
-//		df.setTimeZone(tz);
+	private boolean containsTimeZone(DateTimeFormatter formatter) {
+		if (formatter == dfFull || formatter == df6a) {
+			return true;
+		}
+		return false;
+	}
+	private boolean isYearOnly(DateTimeFormatter formatter) {
+		if (formatter == df1) {
+			return true;
+		}
+		return false;
+	}
+	private boolean isMonthDayOnly(DateTimeFormatter formatter) {
+		if (formatter == df2 || formatter == df3) {
+			return true;
+		}
+		return false;
 	}
 
-	@Override
-	public String format(Date dt) {
-		applyTimeZone(dfFull);
-		return dfFull.format(dt);
-	}
-
-	private DateFormat getDateFormat(String input) {
+	private DateTimeFormatter getDateFormat(String input) {
 		int len = input.length();
 		switch(len) {
 		case 4:
@@ -84,35 +129,40 @@ public class DateFormatServiceImpl implements DateFormatService {
 	}
 
 	@Override
-	public ZoneId detectTimezone(String input) {
-		//		//        String string1 = "2001-07-04T12:08:56.235-0700";
-		int n = input.length();
-		if (n < 5) {
-			return tzSvc.getDefaultTimeZone();
-		} else {
-			int index = input.lastIndexOf('-');
-			if (index == n - 5) {
-				String s = input.substring(index);
-				String ss = String.format("GMT%s", s); //TODO does this work??
-//				TimeZone tz2 = TimeZone.getTimeZone(ss);
-				ZoneId zoneId = ZoneId.of(ss);
-				return zoneId;
-			} else {
-				return tzSvc.getDefaultTimeZone();
-			}
+	public String format(Date dt) {
+		String s = null;
+		try {
+			ZonedDateTime ldt = ZonedDateTime.ofInstant(dt.toInstant(), ZoneId.systemDefault());
+		    s = ldt.format(dfFull);
 		}
+		catch (DateTimeException exc) {
+		    System.out.printf("%s can't be formatted!", dt);
+		    throw exc;
+		}			
+		return s;
+	}
+
+	@Override
+	public ZoneId detectTimezone(String input) {
+		ZonedDateTime ldt = null;
+		try {
+			DateTimeFormatter formatter = getDateFormat(input);
+			ldt = ZonedDateTime.parse(input, formatter);
+		} catch (DateTimeParseException  e) {
+			DeliaError err = new DeliaError("date-parse-error", e.getMessage());
+			throw new DeliaException(err);
+		}  
+		return ldt == null ? null : ldt.getZone();
 	}
 
 	@Override
 	public DateFormatter createFormatter(String input) {
-//		DateFormat df = getDateFormat(input);
-		ZoneId tz = detectTimezone(input);
-		return new DateFormatter(TimeZone.getDefault(), dfFull);
+		//TODO fix
+		return createFormatter();
 	}
 
 	@Override
 	public DateFormatter createFormatter() {
-//		TimeZone tz = tzSvc.getDefaultTimeZone();
-		return new DateFormatter(TimeZone.getDefault(), this.dfFull);
+		return new DateFormatter(TimeZone.getDefault(), this.dfFullOld);
 	}
 }
