@@ -200,75 +200,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 		return false;
 	}
-//	/**
-//	 * On a Many-to-many relation our query returns multiple rows in order to get all
-//	 * the 'many' ids. Merge into a single row.
-//	 * @param rawList list of dvalues to merge
-//	 * @param dtype of values
-//	 * @param details query details
-//	 * @param dbctx 
-//	 * @return merged rows
-//	 */
-//	public List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
-//		List<DValue> list = new ArrayList<>();
-//		int i = 0;
-//		List<DValue> subL = new ArrayList<>();
-//		Map<Object,String> alreadyHandledL = new HashMap<>();
-//		for(DValue dval: rawList) {
-//			DValue keyVal = DValueHelper.findPrimaryKeyValue(dval);
-//			if (alreadyHandledL.containsKey(keyVal.getObject())) {
-//				continue;
-//			}
-//			
-//			fillSubL(rawList, keyVal, dval, subL); //other values with same primary key
-//			if (subL.isEmpty()) {
-//				list.add(dval);
-//			} else {
-//				alreadyHandledL.put(keyVal.getObject(), "");
-//				List<DValue> toMergeFetchedL = new ArrayList<>();
-//				List<DValue> toMergeKeyL = new ArrayList<>();
-//				for(DValue subVal: subL) {
-//					DValue inner = subVal.asStruct().getField(details.mergeOnFieldL.get(0));
-//					if (inner != null) {
-//						DRelation drel = inner.asRelation();
-//						if (drel.haveFetched()) {
-//							toMergeFetchedL.addAll(drel.getFetchedItems());
-//						}
-//						toMergeKeyL.addAll(drel.getMultipleKeys());
-//					}
-//				}
-//				
-//				if (!toMergeFetchedL.isEmpty() || !toMergeKeyL.isEmpty()) {
-//					//and add back into dval
-//					DValue inner2 = dval.asStruct().getField(details.mergeOnFieldL.get(0));
-//					if (inner2 == null) {
-//						//fix later!! TODO
-//						DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
-//						TypePair pair = DValueHelper.findField(dval.getType(), details.mergeOnFieldL.get(0));
-//						RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
-//						builder.buildEmptyRelation();
-//						boolean b = builder.finish();
-//						if (!b) {
-//							DeliaExceptionHelper.throwError("relation-create-failed-assocCrud", "Type '%s': Failed to create empty relation", pair.type);
-//						} else {
-//							inner2 = builder.getDValue();
-//							dval.asMap().put(details.mergeOnFieldL.get(0), inner2);
-//						}
-//					}
-//					DRelation drel2 = inner2.asRelation();
-//					drel2.getMultipleKeys().addAll(toMergeKeyL);
-//					
-//					//only add each key once
-//					DRelationHelper.addToFetchedItems(drel2, toMergeFetchedL);
-//					list.add(dval);
-//				}
-//			}
-//			
-//			i++;
-//		}
-//
-//		return list;
-//	}
 	
 	private DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
@@ -281,21 +212,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 		} 
 		return builder.getDValue();
 	}
-
-//	private void fillSubL(List<DValue> rawList, DValue targetKeyVal, DValue skip, List<DValue> subL) {
-//		subL.clear();
-//		String s2 = targetKeyVal.asString();
-//		for(DValue tmp: rawList) {
-//			if (tmp == skip) {
-//				continue;
-//			}
-//			DValue keyVal = DValueHelper.findPrimaryKeyValue(tmp);
-//			String s1 = keyVal.asString(); //TODO: need better way to compare dval
-//			if (s1.equals(s2)) {
-//				subL.add(tmp);
-//			}
-//		}
-//	}
 
 	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
 		List<DValue> list = new ArrayList<>();
@@ -327,7 +243,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 				//look for sub-objects to the right the main object
 				for(int k = columnReadInfo.numColumnsRead; k < rfList.size(); k++) {
 					RenderedField rff =  rfList.get(k);
-					if (rff.structType != null && rff.structType != dtype) { //TODO: full name compare later
+					if (rff.structType != null && rff.structType != dtype) { //FUTURE: full name compare later
 						DValue subDVal= readStructDValueUsingIndex(rsw, dbctx, rff, rfList);
 						if (subDVal != null) {
 							addAsSubOjbect(dval, subDVal, rff, rfList);
@@ -343,8 +259,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 	private void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
 		//rff is something like b.id as addr
 		String targetAlias = getAlias(rff.field);
-		
-		//TODO: fix for multiple relations. this code only works if Customer has single relation to Address
 		
 		for(RenderedField rf: rfList) {
 			String alias = getAlias(rf.field);
@@ -393,7 +307,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 		boolean b = structBuilder.finish();
 		if (! b) {
 			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
-			//TODO: why does the err not have fieldname and typename set? fix.
 			throw new ValueException(err); 
 		}
 		DValue dval = structBuilder.getDValue();
@@ -426,7 +339,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 		boolean b = structBuilder.finish();
 		if (! b) {
 			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
-			//TODO: why does the err not have fieldname and typename set? fix.
 			throw new ValueException(err); 
 		}
 		DValue dval = structBuilder.getDValue();

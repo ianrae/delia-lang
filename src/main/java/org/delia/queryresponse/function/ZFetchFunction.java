@@ -26,7 +26,7 @@ public class ZFetchFunction extends ZQueryResponseFunctionBase {
 		String targetFieldName = getStringArg(qfe, ctx); 
 
 		//find type of targetFieldName. Address
-		//query Address[addr-id] for each DValue in qresp.dvalList
+		//query Address[addrId] for each DValue in qresp.dvalList
 		//TODO later use IN so can do single query
 		
 		QueryResponse qresResult = new QueryResponse();
@@ -56,21 +56,10 @@ public class ZFetchFunction extends ZQueryResponseFunctionBase {
 				qresResult.dvalList.addAll(qrespFetch.dvalList);
 				newScopeList.addAll(qrespFetch.dvalList);
 				
-				//not sure if we need this bind flag
-//				if (qresp.bindFetchFlag) {
-					drel.setFetchedItems(qrespFetch.dvalList);
-//				}
+				drel.setFetchedItems(qrespFetch.dvalList);
 			}
 		}
 
-		//no. now the relation field itself does the scope change
-//		QueryResponse newRes = new QueryResponse();
-//		newRes.ok = true;
-//		newRes.dvalList = newScopeList;
-//		ctx.scope.changeScope(newRes);
-		
-		//fetches changes the list. it's not just a hint to load sub-objects
-//		qresp.dvalList = newScopeList;
 		return qresp;
 	}
 

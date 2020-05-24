@@ -47,18 +47,12 @@ public class SqlDateGenerator extends ServiceBase {
 	}
 
 	/**
-	 * TODO: this probably needs to become db-specific
+	 * FUTURE: this probably needs to become db-specific
 	 * @param dt date
 	 * @return string representing date in sql format
 	 */
 	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-//		TimeZone tz = tzSvc.getDefaultTimeZone();
-//		sdf.setTimeZone(tz);
-//		String s = sdf.format(dt);
-		
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
 		String s = zdt.format(sdf);

@@ -23,6 +23,7 @@ import org.delia.db.sql.where.WherePhrase;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 
 public class QueryTypeDetector extends ServiceBase {
 
@@ -68,7 +69,6 @@ public class QueryTypeDetector extends ServiceBase {
 		} else if (express instanceof InPhrase) {
 			s += doInPhrase(sc, (InPhrase) express, tbl);
 		}
-		//TODO: others??
 		
 		sc.addStr(s);
 	}
@@ -201,7 +201,8 @@ public class QueryTypeDetector extends ServiceBase {
 			//err!!
 			break;
 		}
-		return "KKKKKKKKKKK"; //TODO fix
+		DeliaExceptionHelper.throwError("unknown-where-function", "Unknown filter function '%s'", val.fnName);
+		return null;
 	}
 	
 	private String getColumnName(Exp op1) {

@@ -53,7 +53,7 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 		protected void setSingletonResult(QueryResponse qresp, DValue dval) {
 			qresp.dvalList = new ArrayList<>();
 			qresp.dvalList.add(dval);
-			//TODO: should we create a new qresp obj??
+			//should we create a new qresp obj??. current impl seems fine.
 		}
 		
 		protected DValue buildIntVal(int max) {
