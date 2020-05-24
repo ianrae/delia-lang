@@ -59,11 +59,6 @@ public class AssocTableCreator extends ServiceBase {
 		generateAssocTable(sc, pair, dtype);
 	}
 	
-//	//TODO delete this!
-//	public static String createAssocTableName(String tbl1, String tbl2) {
-//		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
-//		return assocTableName;
-//	}
 	public void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 		String tbl1 = relinfo.nearType.getName();

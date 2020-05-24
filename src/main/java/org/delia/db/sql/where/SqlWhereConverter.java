@@ -23,6 +23,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 public class SqlWhereConverter extends ServiceBase {
 
@@ -78,7 +79,9 @@ public class SqlWhereConverter extends ServiceBase {
 			lphrase.express2 = doFullExp(fullexp2, typeName);
 			return lphrase;
 		} else {
-			return null; //TODO fix
+			String name = fexp.opexp1 == null ? "nul" : fexp.opexp1.getClass().getSimpleName();
+			DeliaExceptionHelper.throwError("unsupported-where-type", "Unsupported filter type '%s'", name);
+			return null; 
 		}
 	}
 

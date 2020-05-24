@@ -12,7 +12,6 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
-import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
@@ -114,19 +113,15 @@ public class FKHelper extends ServiceBase {
 
 		TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 		genFields(structType, tbl, tbl2, rule.relInfo.fieldName, nearField, selectFrag, adjustment);
-//		sc.o("SELECT %s FROM %s", fields, tbl.name);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
 		RelationOneRule farRule = farL.isEmpty() ? null : farL.get(0);
-//		String onstr = String.format("%s.%s=%s.%s", tbl2.alias, farRule.relInfo.fieldName, tbl.alias, nearField.name);
 
-//		sc.o(" as %s LEFT JOIN %s ON %s", tbl.alias, tbl2.fmtAsStr(), onstr);
 		JoinFragment joinFrag = new JoinFragment();
 		joinFrag.joinTblFrag = tbl2;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
 		joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tbl, selectFrag, new TypePair(nearField.name, null));
 		selectFrag.joinFrag = joinFrag;
-//		sqlgen.generateQueryFns(sc, spec, exp.typeName);
 		
 		//Customer[addr = 100]. can't do this because customer is parent and doesn't have fk
 		//must transform into Customer[b.cust
@@ -148,13 +143,8 @@ public class FKHelper extends ServiceBase {
 					phrase.op1 = replacement;
 				}
 			}
-			//this.queryDetectorSvc.addWhereClauseOpFromPhrase(sc, phrase, tbl);
-//			pwheregen.addWhereClauseOpFromPhrase(spec, phrase, selectFrag.statement, selectFrag);
 		} else {
-//			this.pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), tbl, statement);
 		}
-//		sc.o(";");
-//		statement.sql = sc.str;
 		return;
 	}
 

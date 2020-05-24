@@ -127,7 +127,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		updateFrag.assocDeleteFrag = deleteFrag;
 		if (isForeignKeyIdNull(mmMap, fieldName)) {
 			StrCreator sc = new StrCreator();
-			sc.o("%s = ?", assocField2); //TODO should be rightv NOT IN (100) so can handle list
+			sc.o("%s = ?", assocField2); 
 			RawFragment rawFrag = new RawFragment(sc.toString());
 			deleteFrag.whereL.add(rawFrag);
 			
@@ -138,7 +138,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		
 		StrCreator sc = new StrCreator();
-		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
+		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); 
 		RawFragment rawFrag = new RawFragment(sc.toString());
 		deleteFrag.whereL.add(rawFrag);
 		
@@ -335,7 +335,6 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		statement.paramL.addAll(insertFrag.statement.paramL);
 		insertFrag.statement.paramL.clear();
 	}
-	//TODO move to helper
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
 			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);
