@@ -134,7 +134,7 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 			DValue dvalToUse = inner;
 			if (inner.getType().isRelationShape()) {
 				DRelation drel = inner.asRelation();
-				dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+				dvalToUse  = drel.getForeignKey(); 
 			}
 
 			FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);

@@ -51,7 +51,7 @@ public class PostgresFieldGen extends FieldGen {
 			return "BOOLEAN";
 		case STRUCT:
 		{
-			TypePair innerPair = DValueHelper.findPrimaryKeyFieldPair(pair.type); //TODO: support multiple keys later
+			TypePair innerPair = DValueHelper.findPrimaryKeyFieldPair(pair.type); 
 			return deliaToSql(innerPair);
 		}
 		default:

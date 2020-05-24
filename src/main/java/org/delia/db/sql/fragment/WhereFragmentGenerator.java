@@ -138,7 +138,6 @@ public class WhereFragmentGenerator extends ServiceBase {
 		} else if (express instanceof InPhrase) {
 			opFrag = doInPhrase((InPhrase) express, statement, selectFrag);
 		}
-		//TODO: others??
 		
 		if (opFrag != null) {
 			selectFrag.whereL.add(opFrag);
@@ -205,7 +204,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		
 		String snot = (phrase.notFlag) ? "NOT " : "";
 		if (tbl == null) {
-			return null; //String.format("%s%s %s %s", snot, op1, op, op2); //TODO; remove?
+			return null; 
 		} else {
 			String alias;
 			if (!phrase.op1.isValue) {

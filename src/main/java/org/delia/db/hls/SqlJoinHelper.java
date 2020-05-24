@@ -194,7 +194,7 @@ public class SqlJoinHelper {
 				//aliasAlloc.findOrCreateAliasInstance((DStructType) pair.type, pair.name);
 			}
 
-			//TODO: later to fk(field)
+			//TODO: later support fk(field)
 			return joinL;
 		}
 		private List<TypePair> genFKJoinList(HLSQuerySpan hlspan) {

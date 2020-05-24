@@ -74,22 +74,12 @@ public class FKHelper extends ServiceBase {
 		if (adjustment != null && adjustment.joinNotNeeded) {
 			return; 
 		}
-//		if (adjustment != null && adjustment.isFirst) {
-//			spec = this.selectFnHelper.doFirstFixup(spec, exp.typeName, tbl.alias);
-//		} else if (adjustment != null && adjustment.isLast) {
-//			spec = this.selectFnHelper.doLastFixup(spec, exp.typeName, tbl.alias);
-//		}
-		
-//		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
+
 		RelationOneRule rule = oneL.isEmpty() ? null : oneL.get(0);
 		if (rule == null) {
-//			RelationManyRule manyRule = DRuleHelper.findManyRule(exp.getTypeName(), registry);
 			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
 				generateFKsQueryMany(spec, structType, exp, tbl, manyRule, details, selectFrag, adjustment);
-//				sc.o(sql);
-//				sqlgen.generateQueryFns(sc, spec, exp.typeName);
-//				sc.o(";");
 				return;
 			}
 			return; 
@@ -202,7 +192,6 @@ public class FKHelper extends ServiceBase {
 		return null;
 	}
 
-	//TOOD: fix this limitation!!!
 	private List<RelationOneRule> findAllOneRules(String typeName) {
 		List<RelationOneRule> rulesL = new ArrayList<>();
 		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
@@ -244,22 +233,15 @@ public class FKHelper extends ServiceBase {
 		TableFragment tbl2 = tableFragmentMaker.createTable(rule.relInfo.farType, selectFrag);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
-//		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
 		RelationOneRule farRule = farL.isEmpty() ? null : farL.get(0);
 		if (farRule == null) {
 			List<RelationManyRule> xfarL = findAllManyRules(rule.relInfo.farType.getName());
-//			RelationManyRule xfarRule = DRuleHelper.findManyRule(rule.relInfo.farType.getName(), registry);
 			RelationManyRule xfarRule = xfarL.isEmpty() ? null : xfarL.get(0);
 			doManyToMany(spec, structType, exp, xfarRule, tbl, tbl2, rule, details, selectFrag, adjustment);
 		} else {
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 			genFields(structType, tbl, tbl2, rule.relInfo.fieldName, nearField, selectFrag, adjustment);
 			
-//			sc.o("SELECT %s FROM %s", fields, tbl.name);
-//			String onstr = String.format("%s.%s=%s.%s", tbl2.alias, farRule.relInfo.fieldName, tbl.alias, nearField.name);
-
-//			sc.o(" as %s LEFT JOIN %s ON %s", tbl.alias, tbl2.fmtAsStr(), onstr);
-//			pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), tbl, statement);
 			JoinFragment joinFrag = new JoinFragment();
 			joinFrag.joinTblFrag = tbl2;
 			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
@@ -277,7 +259,6 @@ public class FKHelper extends ServiceBase {
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 
 		String actualTblName1 = this.tblName(tblinfo.tbl1); //postgres tables are lower-case
-//		String actualTblName2 = this.tblName(tblinfo.tbl2);
 		String assocField = actualTblName1.equalsIgnoreCase(tbl.name) ? "rightv" : "leftv";
 		String assocField2 = actualTblName1.equalsIgnoreCase(tbl.name) ? "leftv" : "rightv";
 		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag, adjustment);
@@ -290,22 +271,15 @@ public class FKHelper extends ServiceBase {
 					String assocField2, QueryExp exp, StatementFragmentBase selectFrag, QueryAdjustment adjustment) {
 		TableFragment tblAssoc = tableFragmentMaker.createAssocTable(selectFrag, tblinfo.assocTblName);
 		TypePair copy = new TypePair(assocField, null);
-		//TODO: fix adjustment
 		genFields(structType, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, selectFrag, adjustment);
 		
-		//sc.o("SELECT %s FROM %s", fields, tbl.name);
-
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-//		String onstr = String.format("%s.%s=%s.%s", tbl.alias, pair.name, tblAssoc.alias, assocField2);
-//		sc.o(" as %s LEFT JOIN %s as %s ON %s", tbl.alias, tblAssoc.name, tblAssoc.alias, onstr);
 		JoinFragment joinFrag = new JoinFragment();
 		joinFrag.joinTblFrag = tblAssoc;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, pair.name);
 		TypePair p2 = new TypePair(assocField2, null); //TODO: fill in type later
 		joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tblAssoc, selectFrag, p2);
 		selectFrag.joinFrag = joinFrag;
-		
-		//pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, typeName, tbl, statement);
 	}
 	
 

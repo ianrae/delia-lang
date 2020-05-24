@@ -59,8 +59,6 @@ import org.delia.util.DValueHelper;
 		protected boolean needJoinBase(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag, QueryDetails details) {
 			QueryFuncExp qfexp = selectFnHelper.findFn(spec, "fetch");
 			QueryFuncExp qfexp2 = selectFnHelper.findFn(spec, "fks");
-			//TODO: later add fk
-			//TODO: we need to distinguish which join. fix later
 			if (qfexp != null || qfexp2 != null || selectFrag.aliasMap.size() > 1) {
 				return true;
 			}
@@ -209,8 +207,6 @@ import org.delia.util.DValueHelper;
 
 		protected void addOrReplace(StatementFragmentBase selectFrag, FieldFragment fieldF) {
 			selectFrag.fieldL.add(fieldF);
-			// TODO Auto-generated method stub
-			
 		}
 
 		protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
@@ -219,17 +215,14 @@ import org.delia.util.DValueHelper;
 			switch(queryType) {
 			case ALL_ROWS:
 			{
-//				addWhereExist(sc, spec);
 			}
 				break;
 			case OP:
-//				addWhereClauseOp(sc, spec, typeName, tbl, statement);
 				whereGen.addWhereClauseOp(spec, structType, selectFrag);
 				break;
 			case PRIMARY_KEY:
 			default:
 			{
-//				addWhereClausePrimaryKey(sc, spec, spec.queryExp.filter, typeName, tbl, statement);
 				whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
 			}
 				break;

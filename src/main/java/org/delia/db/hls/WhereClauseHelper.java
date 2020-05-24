@@ -111,14 +111,11 @@ public class WhereClauseHelper extends ServiceBase {
 		TypePair pair = new TypePair(ff.name, ff.fieldType);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(ff.structType, pair);
 		if (relinfo != null && relinfo.isParent) {
-			//TODO need more foolproof way to find other side
-			RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
+			RelationInfo otherSide = relinfo.otherSide; 
 			if (otherSide != null) {
 				af.name = relinfo.farType.getPrimaryKey().getFieldName();
-//				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(relinfo.farType, pair.name);
 				AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfo.nearType, pair.name);
 				af.alias = aliasInfo.alias; 
-//				realAlias = aliasInfo.alias;
 				
 				String key = String.format("%s.%s", af.alias, af.name);
 				asNameMap.put(key, relinfo.fieldName);

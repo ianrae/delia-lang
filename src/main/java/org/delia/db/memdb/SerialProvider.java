@@ -9,6 +9,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class SerialProvider extends ServiceBase {
@@ -83,7 +84,8 @@ public class SerialProvider extends ServiceBase {
 		case STRING:
 			return new StringSerialGen();
 		default:
-			return null; //error!! TODO fix
+			DeliaExceptionHelper.throwError("unsupported-serial-type", "Unsupported serial type '%s'", pair.type.getShape().name());
+			return null; 
 		}
 	}
 
