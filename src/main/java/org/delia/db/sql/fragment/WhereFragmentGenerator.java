@@ -320,12 +320,6 @@ public class WhereFragmentGenerator extends ServiceBase {
 			return "?";
 		}
 		
-//		if (val.exp instanceof StringExp) {
-////			String s = String.format("'%s'", val.exp.strValue());
-//			statement.paramL.add(dvalBuilder.buildString(val.exp.strValue()));
-//			return "?";
-//		}
-		
 		Object obj = extractObj(val.exp);
 		DValue dval = valueInSql(val.typeDetails.dtype.getShape(), obj);
 		statement.paramL.add(dval);
@@ -383,7 +377,8 @@ public class WhereFragmentGenerator extends ServiceBase {
 			//err!!
 			break;
 		}
-		return "KKKKKKKKKKK"; //TODO fix
+		DeliaExceptionHelper.throwError("unknown-where-function", "Unknown filter function '%s'", val.fnName);
+		return null;
 	}
 	
 	protected String getColumnName(Exp op1) {

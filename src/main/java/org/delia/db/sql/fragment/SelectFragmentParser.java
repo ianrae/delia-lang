@@ -187,7 +187,6 @@ public class SelectFragmentParser extends FragmentParserBase {
 
 
 	protected void addFns(QuerySpec spec, DStructType structType, SelectStatementFragment selectFrag) {
-		//TODO: for now we implement exist using count(*). improve later
 		if (selectFnHelper.isCountPresent(spec) || selectFnHelper.isExistsPresent(spec)) {
 			genCount(spec, structType, selectFrag);
 		} else if (selectFnHelper.isMinPresent(spec)) {
@@ -198,8 +197,6 @@ public class SelectFragmentParser extends FragmentParserBase {
 			genFirst(spec, structType, selectFrag);
 		} else if (selectFnHelper.isLastPresent(spec)) {
 			genLast(spec, structType, selectFrag);
-		} else {
-			//				sc.o("SELECT * FROM %s", typeName);
 		}
 	}
 

@@ -5,6 +5,7 @@ import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 
 public class PostgresWhereFragmentGenerator extends WhereFragmentGenerator {
 
@@ -51,6 +52,7 @@ public class PostgresWhereFragmentGenerator extends WhereFragmentGenerator {
 			//err!!
 			break;
 		}
-		return "KKKKKKKKKKK"; //TODO fix
+		DeliaExceptionHelper.throwError("unknown-where-function", "Unknown filter function '%s'", val.fnName);
+		return null;
 	}
 }

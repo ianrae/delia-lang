@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.FilterOpFullExp;
@@ -61,34 +60,6 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 		fixupForParentFields(structType, upsertFrag);
 		
 		return upsertFrag;
-	}
-
-	private void logParams(String title, UpsertStatementFragment upsertFrag) {
-		StringJoiner joiner = new StringJoiner(",");
-		for(DValue dval: upsertFrag.statement.paramL) {
-			joiner.add(dval.asString());
-		}
-		log.log("%s: %s", title, joiner.toString());
-	}
-
-	/**
-	 * Postgres doesn't like alias in UPDATE statements
-	 * @param selectFrag
-	 */
-	private void removeAllAliasesUpsert(UpsertStatementFragment selectFrag) {
-		for(FieldFragment ff: selectFrag.fieldL) {
-			ff.alias = null;
-		}
-		//			public List<SqlFragment> earlyL = new ArrayList<>();
-		selectFrag.tblFrag.alias = null;
-		//			public JoinFragment joinFrag; //TODO later a list
-		for(SqlFragment ff: selectFrag.whereL) {
-			if (ff instanceof OpFragment) {
-				OpFragment opff = (OpFragment) ff;
-				opff.left.alias = null;
-				opff.right.alias = null;
-			}
-		}
 	}
 
 	protected void generateKey(QuerySpec spec, UpsertStatementFragment updateFrag, DValue partialVal) {
