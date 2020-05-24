@@ -311,7 +311,9 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-		runR550File("t0-multirel-NtoN-1.txt", 1);
+		runR300File("t0-date.txt", 8);
+//		runR300File("t0-date-custom.txt", 6);
+//		runR300File("t0-date-timezone.txt",10);
 
 	}
 	

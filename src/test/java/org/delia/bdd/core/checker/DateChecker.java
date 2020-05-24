@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import org.delia.bdd.core.ThenValue;
 import org.delia.core.DateFormatService;
@@ -49,7 +48,7 @@ public class DateChecker extends ValueCheckerBase {
 				String err = String.format("value-mismatch: TimeZone expected '%s' but got '%s'", s1, s2);
 				log.logError(err);
 				return false;
-			} else if (! wdtExpected.getDate().equals(wdt.getDate())) {
+			} else if (! wdtExpected.asString().equals(wdt.asString())) {
 				String s1 = wdtExpected.asString();
 				String s2 = wdt.asString();
 				String err = String.format("value-mismatch: Date expected '%s' but got '%s'", s1, s2);
@@ -62,7 +61,9 @@ public class DateChecker extends ValueCheckerBase {
 		private boolean compareTimezones(WrappedDate wdtExpected, WrappedDate wdt) {
 			ZoneId tz1 = wdtExpected.getTimeZone();
 			ZoneId tz2 = wdt.getTimeZone();
-			boolean b = tz1.equals(tz2); //TODO: or use normalize?
+			tz1 = tz1.normalized();
+			tz2 = tz1.normalized();
+			boolean b = tz1.equals(tz2); 
 			return b;
 		}
 
