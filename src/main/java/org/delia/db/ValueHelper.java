@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -182,7 +182,7 @@ public class ValueHelper extends ServiceBase {
 			if (rs.wasNull()) {
 				return null;
 			}
-			return dvalBuilder.buildDate(x, pair.type);
+			return dvalBuilder.buildLegacyDate(x, pair.type);
 			//				DValue tmp = dvalBuilder.buildDate(x, pair.type);;
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
@@ -246,7 +246,7 @@ public class ValueHelper extends ServiceBase {
 			if (rs.wasNull()) {
 				return null;
 			}
-			return dvalBuilder.buildDate(x, pair.type);
+			return dvalBuilder.buildLegacyDate(x, pair.type);
 			//				DValue tmp = dvalBuilder.buildDate(x, pair.type);;
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
@@ -315,7 +315,7 @@ public class ValueHelper extends ServiceBase {
 			if (rs.wasNull()) {
 				return null;
 			}
-			return dvalBuilder.buildDate(x, type);
+			return dvalBuilder.buildLegacyDate(x, type);
 		}
 		case BOOLEAN:
 		{
@@ -396,17 +396,13 @@ public class ValueHelper extends ServiceBase {
 			return dvalBuilder.buildString("");
 		}
 	}
-	private String convertDateStringToSQLTimestamp(String value) {
-		Date dt = fmtSvc.parse(value);
-		return convertDateToSQLTimestamp(dt);
-	}
 
 	/**
 	 * TODO: this probably needs to become db-specific
 	 * @param dt date
 	 * @return date as string in sql format
 	 */
-	private String convertDateToSQLTimestamp(Date dt) {
+	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
 //		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
@@ -416,9 +412,7 @@ public class ValueHelper extends ServiceBase {
 		
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-		ZoneId tz = tzSvc.getDefaultTimeZone();
-		LocalDateTime ldt = LocalDateTime.ofInstant(dt.toInstant(), tz);
-		String s = ldt.format(sdf);
+		String s = zdt.format(sdf);
 		
 		return String.format("'%s'", s);
 	}

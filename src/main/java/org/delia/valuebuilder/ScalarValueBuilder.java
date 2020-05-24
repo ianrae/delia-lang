@@ -1,5 +1,6 @@
 package org.delia.valuebuilder;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.delia.core.FactoryService;
@@ -73,15 +74,23 @@ public class ScalarValueBuilder extends ServiceBase {
 	public DValue buildDate(String input) {
 		return buildDate(input, registry.getType(BuiltInTypes.DATE_SHAPE));
 	}
-	public DValue buildDate(Date value) {
-		return buildDate(value, registry.getType(BuiltInTypes.DATE_SHAPE));
+	public DValue buildLegacyDate(Date value) {
+		return buildLegacyDate(value, registry.getType(BuiltInTypes.DATE_SHAPE));
 	}
 	public DValue buildDate(String input, DType dtype) {
 		DateValueBuilder builder = new DateValueBuilder(factorySvc, dtype);
 		builder.buildFromString(input); 
 		return finish(builder, "date", input);
 	}
-	public DValue buildDate(Date value, DType dtype) {
+	public DValue buildLegacyDate(Date value, DType dtype) {
+		DateValueBuilder builder = new DateValueBuilder(factorySvc, dtype);
+		builder.buildFromLegacy(value);
+		return finish(builder, "date", value);
+	}
+	public DValue buildDate(ZonedDateTime value) {
+		return buildDate(value, registry.getType(BuiltInTypes.DATE_SHAPE));
+	}
+	public DValue buildDate(ZonedDateTime value, DType dtype) {
 		DateValueBuilder builder = new DateValueBuilder(factorySvc, dtype);
 		builder.buildFrom(value);
 		return finish(builder, "date", value);

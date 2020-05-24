@@ -41,7 +41,7 @@ public class DateFormatServiceImpl implements DateFormatService {
 	}
 
 	@Override
-	public Date parse(String input) {
+	public Date parseLegacy(String input) {
 //		input = input.trim();
 		try {
 			DateTimeFormatter formatter = getDateFormat(input);
@@ -164,5 +164,58 @@ public class DateFormatServiceImpl implements DateFormatService {
 	@Override
 	public DateFormatter createFormatter() {
 		return new DateFormatter(tzSvc.getDefaultTimeZone(), this.dfFull);
+	}
+
+	@Override
+	public ZonedDateTime parseDateTime(String input) {
+//		input = input.trim();
+		try {
+			DateTimeFormatter formatter = getDateFormat(input);
+			if (containsTimeZone(formatter)) {
+				ZonedDateTime ldt = null;
+				ldt = ZonedDateTime.parse(input, formatter);
+				return ldt;
+			} else if (isYearOnly(formatter)) {
+				LocalDate ldt = null;
+				TemporalAccessor parsed = formatter.parse(input);	
+				Year yr = Year.from(parsed);
+				ldt = LocalDate.of(yr.getValue(), 1, 1);
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				return ZonedDateTime.of(ldt.atStartOfDay(), zone);
+			} else if (isMonthDayOnly(formatter)) {
+				LocalDate ldt = null;
+				TemporalAccessor parsed = formatter.parse(input);	
+				Year yr = Year.from(parsed);
+				if (formatter == df2) {
+					Month month = Month.from(parsed);
+					ldt = LocalDate.of(yr.getValue(), month.getValue(), 1);
+				} else {
+					MonthDay md = MonthDay.from(parsed);
+					ldt = LocalDate.of(yr.getValue(), md.getMonthValue(), md.getDayOfMonth());
+				}
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				return ZonedDateTime.of(ldt.atStartOfDay(), zone);
+			} else {
+				LocalDateTime ldt = null;
+				
+				ldt = LocalDateTime.parse(input, formatter);
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				return ZonedDateTime.of(ldt, zone);
+			}
+		} catch (DateTimeParseException  e) {
+			DeliaError err = new DeliaError("date-parse-error", e.getMessage());
+			throw new DeliaException(err);
+		}  
+	}
+
+	@Override
+	public String format(ZonedDateTime ldt) {
+		return ldt.format(dfFull);
+	}
+
+	@Override
+	public String format(LocalDateTime ldt, ZoneId zoneId) {
+		ZonedDateTime zdt = ZonedDateTime.of(ldt, zoneId);
+		return zdt.format(dfFull);
 	}
 }

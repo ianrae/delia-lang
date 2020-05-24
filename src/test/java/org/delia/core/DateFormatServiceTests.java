@@ -3,6 +3,7 @@ package org.delia.core;
 import static org.junit.Assert.assertEquals;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.delia.base.UnitTestLog;
@@ -19,7 +20,7 @@ public class DateFormatServiceTests {
 		Date dt = new Date();
 		String s = fmtSvc.format(dt);
 		log(s);
-		Date dt2 = fmtSvc.parse(s);
+		Date dt2 = fmtSvc.parseLegacy(s);
 		assertEquals(dt, dt2);
 	}
 	
@@ -33,7 +34,7 @@ public class DateFormatServiceTests {
 		Date dt = new Date();
 		String s = fmtSvc.format(dt);
 		log(s);
-		Date dt2 = fmtSvc.parse(s);
+		Date dt2 = fmtSvc.parseLegacy(s);
 		assertEquals(dt, dt2);
 	}
 	
@@ -47,7 +48,7 @@ public class DateFormatServiceTests {
 		Date dt = new Date();
 		String s = fmtSvc.format(dt);
 		log(s);
-		Date dt2 = fmtSvc.parse(s);
+		Date dt2 = fmtSvc.parseLegacy(s);
 		assertEquals(dt, dt2);
 	}
 
@@ -55,9 +56,9 @@ public class DateFormatServiceTests {
 	public void test4() {
 		DateFormatService fmtSvc = createSvc();
 		
-		Date dt = fmtSvc.parse("2019");
+		ZonedDateTime zdt = fmtSvc.parseDateTime("2019");
 		DateFormatter formatter = fmtSvc.createFormatter("2019");
-		WrappedDate wdt = new WrappedDate(dt, formatter);
+		WrappedDate wdt = new WrappedDate(zdt, formatter);
 		String s = wdt.asString();
 		log(s);
 //		

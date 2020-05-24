@@ -1,6 +1,7 @@
 package org.delia.type;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.delia.core.DateFormatter;
@@ -15,21 +16,25 @@ import org.delia.core.DateFormatter;
  *
  */
 public class WrappedDate {
-	private Date dt;
+	private ZonedDateTime zdt;
 	private DateFormatter dateFormatter;
 
-	public WrappedDate(Date dt, DateFormatter dateFormatter) {
-		this.dt = dt;
+	public WrappedDate(ZonedDateTime zdt, DateFormatter dateFormatter) {
+		this.zdt = zdt;
 		this.dateFormatter = dateFormatter;
 	}
 	
 	public String asString() {
-		return dateFormatter.format(dt);
+		return dateFormatter.format(zdt);
 	}
-	public Date getDate() {
+	public Date getLegacyDate() {
+		Date dt = Date.from(zdt.toInstant());
 		return dt;
 	}
+	public ZonedDateTime getDate() {
+		return zdt;
+	}
 	public ZoneId getTimeZone() {
-		return dateFormatter.getTimeZone();
+		return zdt.getZone();
 	}
 }

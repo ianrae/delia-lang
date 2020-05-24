@@ -3,6 +3,7 @@ package org.delia.bdd.core.checker;
 import static org.junit.Assert.assertEquals;
 
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.delia.bdd.core.ThenValue;
@@ -69,7 +70,7 @@ public class DateChecker extends ValueCheckerBase {
 			String ss = thenStr.trim();
 			String input = ss.substring(5, ss.length() - 1);
 
-			Date dt = fmtSvc.parse(input);
-			return new WrappedDate(dt, fmtSvc.createFormatter(input));
+			ZonedDateTime zdt = fmtSvc.parseDateTime(input);
+			return new WrappedDate(zdt, fmtSvc.createFormatter(input));
 		}
 	}

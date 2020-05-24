@@ -38,6 +38,6 @@ public class AsDateStatement implements TLangStatement {
 		} catch (ParseException e) {
 			DeliaExceptionHelper.throwError("asdate-failed", "ffff");
 		}
-		result.val = ctx.builder.buildDate(dt);
+		result.val = ctx.builder.buildLegacyDate(dt);
 	}
 }

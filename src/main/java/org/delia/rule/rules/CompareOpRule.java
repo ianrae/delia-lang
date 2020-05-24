@@ -39,9 +39,9 @@ public class CompareOpRule extends DRuleBase {
 			//convert to date.
 			//FUTURE: can this be done during compilation? to make it faster?
 			if (obj1 instanceof Date && obj2 instanceof String) {
-				obj2 = fmtSvc.parse((String) obj2); //will throw if can't convert
+				obj2 = fmtSvc.parseLegacy((String) obj2); //will throw if can't convert
 			} else if (obj1 instanceof String && obj2 instanceof Date) {
-				obj1 = fmtSvc.parse((String) obj1); //will throw if can't convert
+				obj1 = fmtSvc.parseLegacy((String) obj1); //will throw if can't convert
 			}
 			
 			DValueCompareService compareSvc = ctx.getCompareSvc();

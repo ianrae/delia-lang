@@ -28,7 +28,7 @@ public class DateMakeFnRule extends DRuleBase {
 	}
 	@Override
 	public Object exec(DValue dval, DRuleContext ctx) {
-		Date dt = fmtSvc.parse(arg.strValue());
+		Date dt = fmtSvc.parseLegacy(arg.strValue());
 		return dt;
 	}
 	@Override

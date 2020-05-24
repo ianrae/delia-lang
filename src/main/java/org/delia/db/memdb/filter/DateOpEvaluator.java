@@ -27,7 +27,7 @@ public class DateOpEvaluator extends OpEvaluatorBase {
 		}
 		Date n1 = getFieldValue(dval).asDate();
 		String s = ((StringExp)rightVar).strValue();
-		Date n2 = fmtSvc.parse(s);
+		Date n2 = fmtSvc.parseLegacy(s);
 
 		switch(op) {
 		case LT:

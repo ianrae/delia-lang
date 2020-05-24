@@ -1,6 +1,5 @@
 package org.delia.core;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,13 +13,14 @@ public class DateFormatter {
 	public DateFormatter(ZoneId zoneId, DateTimeFormatter df) {
 		this.zoneId = zoneId;
 		this.formatter = df;
-//		this.formatter.setTimeZone(tz);
 	}
 
 	public String format(Date dt) {
-//		LocalDateTime ldt = LocalDateTime.ofInstant(dt.toInstant(), zoneId);
 		ZonedDateTime ldt = ZonedDateTime.ofInstant(dt.toInstant(), zoneId);
 		return ldt.format(formatter);
+	}
+	public String format(ZonedDateTime zdt) {
+		return zdt.format(formatter);
 	}
 
 	public ZoneId getTimeZone() {

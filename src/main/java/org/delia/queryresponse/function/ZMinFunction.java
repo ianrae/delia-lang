@@ -153,7 +153,7 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 			}
 		}
 		
-		DValue dval = buildDateVal(min, factorySvc);
+		DValue dval = buildLegacyDateVal(min, factorySvc);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
