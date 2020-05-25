@@ -1,7 +1,6 @@
 package org.delia.dval;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
@@ -119,10 +118,7 @@ public class DValueConverterService extends ServiceBase {
 			return null;
 		}
 
-		if (input instanceof Date) {
-			Date value = (Date) input; 
-			return builder.buildLegacyDate(value);
-		} else if (input instanceof ZonedDateTime) {
+		if (input instanceof ZonedDateTime) {
 			ZonedDateTime value = (ZonedDateTime) input; 
 			return builder.buildDate(value);
 		} else {
