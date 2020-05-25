@@ -5,6 +5,10 @@ import static org.junit.Assert.assertEquals;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.StringExp;
+import org.delia.core.DateFormatService;
+import org.delia.core.DateFormatServiceImpl;
+import org.delia.core.TimeZoneService;
+import org.delia.core.TimeZoneServiceImpl;
 import org.delia.db.memdb.filter.OpEvaluator;
 import org.delia.db.memdb.filter.OpFactory;
 import org.delia.type.DValue;
@@ -17,7 +21,8 @@ public class OpEvaluatorTests {
 	public void testStr() {
 		DValue dval = createCustomer();
 		StringExp exp2 = new StringExp("def");
-		OpFactory factory = new OpFactory(null); //don't need registry for this test
+		DateFormatService fmtSvc = new DateFormatServiceImpl(new TimeZoneServiceImpl());
+		OpFactory factory = new OpFactory(null, fmtSvc); //don't need registry for this test
 		IdentExp exp = new IdentExp("firstName");
 		OpEvaluator eval = factory.create("<", exp, exp2, null, null, false);
 		evaluate(eval, false, dval, new StringExp("aob"));
@@ -49,7 +54,8 @@ public class OpEvaluatorTests {
 	public void testInt() {
 		DValue dval = createCustomer();
 		IntegerExp exp2 = new IntegerExp(55);
-		OpFactory factory = new OpFactory(null); //don't need registry for this test
+		DateFormatService fmtSvc = new DateFormatServiceImpl(new TimeZoneServiceImpl());
+		OpFactory factory = new OpFactory(null, fmtSvc); //don't need registry for this test
 		IdentExp exp = new IdentExp("id");
 		OpEvaluator eval = factory.create("<", exp, exp2, null, null, false);
 		IntegerExp n43 = new IntegerExp(43);

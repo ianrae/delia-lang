@@ -234,4 +234,9 @@ public class DateFormatServiceImpl implements DateFormatService {
 		ZonedDateTime zdt = ZonedDateTime.of(ldt, zoneId);
 		return zdt.format(dfFull);
 	}
+
+	@Override
+	public TimeZoneService getTimezoneService() {
+		return tzSvc;
+	}
 }

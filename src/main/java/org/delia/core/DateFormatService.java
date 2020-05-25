@@ -21,4 +21,5 @@ public interface DateFormatService {
     ZoneId detectTimezone(String input);
     DateFormatter createFormatter(String input);
     DateFormatter createFormatter(); //use default tz
+    TimeZoneService getTimezoneService();
 }

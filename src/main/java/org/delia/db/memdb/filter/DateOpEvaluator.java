@@ -4,18 +4,18 @@ import java.time.ZonedDateTime;
 
 import org.delia.compiler.ast.StringExp;
 import org.delia.core.DateFormatService;
-import org.delia.core.DateFormatServiceImpl;
 import org.delia.core.TimeZoneService;
 import org.delia.core.TimeZoneServiceImpl;
 import org.delia.type.DValue;
 
 public class DateOpEvaluator extends OpEvaluatorBase {
-	//TODO: need to inject tzSvc!!
 	TimeZoneService tzSvc = new TimeZoneServiceImpl();
-	private DateFormatService fmtSvc = new DateFormatServiceImpl(tzSvc);
+	private DateFormatService fmtSvc;
 
-	public DateOpEvaluator(OP op, String fieldName) {
+	public DateOpEvaluator(OP op, String fieldName, DateFormatService fmtSvc) {
 		super(op, fieldName);
+		this.fmtSvc = fmtSvc;
+		this.tzSvc = fmtSvc.getTimezoneService();
 	}
 
 	@Override
