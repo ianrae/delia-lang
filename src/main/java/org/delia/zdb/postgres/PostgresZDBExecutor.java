@@ -135,7 +135,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		logStatementGroup(stgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;
-		ZDBExecuteContext dbctxMain = null; //assume only one. TODO fix
+		ZDBExecuteContext dbctxMain = null; //only one statement is allowed to generate keys
 		try {
 			ZDBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {

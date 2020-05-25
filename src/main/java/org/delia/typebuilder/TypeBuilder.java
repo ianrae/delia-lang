@@ -34,8 +34,6 @@ public class TypeBuilder extends ServiceBase {
 		return et;
 	}
 	
-	//TODO: later support custom scalar types such as type Person string {}...
-	
 	public DType createType(TypeStatementExp typeStatementExp) {
 		et.clear();
 		if (typeStatementExp.structExp == null ) {
