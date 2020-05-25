@@ -125,7 +125,8 @@ public class WhereFragmentGenerator extends ServiceBase {
 				addWhereClauseOpFromPhrase(spec, express, statement, selectFrag);
 			}
 		} else {
-			//sc.o("JJJJJJJJJJJJJJJ"); //TODO
+			String s = filter == null ? "null" : filter.getClass().getSimpleName();
+			DeliaExceptionHelper.throwError("bad-where-filter", "unknown filter class '%s'", s);
 		}
 	}
 	public void addWhereClauseOpFromPhrase(QuerySpec spec, WhereExpression express, SqlStatement statement, StatementFragmentBase selectFrag) {
@@ -160,12 +161,9 @@ public class WhereFragmentGenerator extends ServiceBase {
 
 		TableFragment tbl = selectFrag.tblFrag;
 		if (tbl == null) {
-			return null; //sc.o("%s IN (%s)", op1, joiner.toString()); //TODO can we remove???
+			return null; 
 		} else {
-			//TODO: how do we know which op1 or op2 needs the alias???
 			String alias = phrase.op1.alias == null ? tbl.alias : phrase.op1.alias; 
-//			Table tmp = new Table(alias, op1);
-			//sc.o("%s IN (%s)", tmp.toString(), joiner.toString());
 			String tmp = String.format("(%s)", joiner.toString());
 			
 			OpFragment opFrag = new OpFragment("IN");

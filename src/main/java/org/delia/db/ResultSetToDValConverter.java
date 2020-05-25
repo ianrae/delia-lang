@@ -89,7 +89,6 @@ public class ResultSetToDValConverter extends ServiceBase {
 			list = doBuildDValueList(rsw, dtype, dbctx, hls);
 			if (details.mergeRows) {
 				if (details.isManyToMany) {
-//					list = mergeRowsManyToMany(list, dtype, details, dbctx);
 					list = mergeRowsOneToMany(list, dtype, details, dbctx);
 				} else {
 					list = mergeRowsOneToMany(list, dtype, details, dbctx);
@@ -360,11 +359,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}			
 			
 		DValue keyVal;
-		if (shape != null) {
-			keyVal = dvalConverter.buildFromObject(s, shape, xbuilder);
-		} else {
-			keyVal = xbuilder.buildInt(s); //guess. TODO: fix
-		}
+		keyVal = dvalConverter.buildFromObject(s, shape, xbuilder);
 		
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
 		String typeName = targetPair.type.getName();

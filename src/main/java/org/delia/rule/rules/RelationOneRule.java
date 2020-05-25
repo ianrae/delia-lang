@@ -31,12 +31,9 @@ public class RelationOneRule extends RelationRuleBase {
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
-//		if (ctx.isPlanModeFlg()) {
-//			return true;
-//		}
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (mustHaveFK()) {
+			if (isMandatoryFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' one -  a foreign key value must be specified.", key);
 				addDetailedError(ctx, msg, getSubject());
@@ -50,7 +47,6 @@ public class RelationOneRule extends RelationRuleBase {
 		}
 		
 		//first ensure foreign key points to existing record
-//		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 		boolean fkObjectExists = ctx.getFetchRunner().queryFKExists(drel);
 		boolean otherSideIsMany = false;
 		if (! fkObjectExists) {
@@ -107,11 +103,8 @@ public class RelationOneRule extends RelationRuleBase {
 		DetailedError err = ctx.addError(this, msg);
 		err.setFieldName(fieldName);
 	}
-	//TODO: should we save results in del.setFetchedItems ??
-	//TODO: the following mutates a DValue. is this ok for multi-threading?
+	//FUTURE: the following mutates a DValue. is this ok for multi-threading?
 	private boolean populateOtherSideOfRelation(DValue dval, DRuleContext ctx, QueryResponse qrespFetch, boolean otherSideIsMany) {
-		//TODO: should we save results in del.setFetchedItems ??
-		//TODO: the following mutates a DValue. is this ok for multi-threading?
 		DValue otherSide = qrespFetch.dvalList.get(0);
 		TypePair otherRelPair = findMatchingRel();
 		if (otherRelPair != null) { //one-side relations won't have otherRelPair
@@ -146,7 +139,7 @@ public class RelationOneRule extends RelationRuleBase {
 	private boolean isOtherSideMany(DValue otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide.getType(), otherRelPair);
 	}
-	private boolean mustHaveFK() {
+	private boolean isMandatoryFK() {
 		String fieldName = oper1.getSubject();
 		boolean optional = owningType.fieldIsOptional(fieldName);
 		if (optional || isParent) {
@@ -211,15 +204,4 @@ public class RelationOneRule extends RelationRuleBase {
 			map.put(relInfo.fieldName, builder.getDValue());
 		}
 	}
-	
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		if (spec.needsReplacement(this, owningType)) {
-//			owningType = (DStructType) spec.newType;
-//		}
-//		
-//		if (relInfo != null) {
-//			relInfo.performTypeReplacement(spec);
-//		}
-//	}
 }

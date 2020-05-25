@@ -31,13 +31,13 @@ public class RelationManyRule extends RelationRuleBase {
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (mustHaveFK()) {
+			if (isMandatoryFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' many -  a foreign key value must be specified.", key);
 				addDetailedError(ctx, msg, getSubject(), dval.getType().getName());
 				return false;
 			}
-			return true; //TODO: fix later.
+			return true; 
 		}
 		
 		if (ctx.getDBCapabilities().supportsReferentialIntegrity()) {
@@ -57,8 +57,7 @@ public class RelationManyRule extends RelationRuleBase {
 				return true;
 			}
 			
-			//TODO: should we save results in del.setFetchedItems ??
-			//TODO: the following mutates a DValue. is this ok for multi-threading?
+			//FUTURE: the following mutates a DValue. is this ok for multi-threading?
 			if (ctx.isEnableRelationModifierFlag()) {
 				//Note: we use queryFKExists above (for perf during import)
 				//then if needed use load here to get entire object
@@ -102,14 +101,13 @@ public class RelationManyRule extends RelationRuleBase {
 			}
 		}
 	}
-	private boolean mustHaveFK() {
+	private boolean isMandatoryFK() {
 		String fieldName = oper1.getSubject();
 		boolean optional = owningType.fieldIsOptional(fieldName);
 		if (optional) {
 			return false;
 		} else {
 			DStructType relType = (DStructType) DValueHelper.findFieldType(owningType, fieldName);
-			TypePair pair = new TypePair(fieldName, relType);
 			if (relType.fieldIsOptional(fieldName)) {
 				return false;
 			}
@@ -174,14 +172,4 @@ public class RelationManyRule extends RelationRuleBase {
 			map.put(relInfo.fieldName, builder.getDValue());
 		}
 	}
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		if (spec.needsReplacement(this, owningType)) {
-//			owningType = (DStructType) spec.newType;
-//		}
-//		
-//		if (relInfo != null) {
-//			relInfo.performTypeReplacement(spec);
-//		}
-//	}
 }
