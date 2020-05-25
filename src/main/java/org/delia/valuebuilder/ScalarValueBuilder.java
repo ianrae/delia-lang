@@ -125,7 +125,7 @@ public class ScalarValueBuilder extends ServiceBase {
 	protected DValue finish(DValueBuilder builder, String typeStr, Object value) {
 		boolean b = builder.finish();
 		if (!b) {
-			//TODO propogate errors from inner builder
+			//FUTURE propogate errors from inner builder
 			String s = value == null ? "NULL" : value.toString();
 			DeliaExceptionHelper.throwError("value-builder-failed", "Failed to create %s from '%s'", "int", s);
 		}

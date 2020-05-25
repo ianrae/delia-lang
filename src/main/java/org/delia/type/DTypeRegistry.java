@@ -125,7 +125,7 @@ public class DTypeRegistry {
 
 	@Override
 	public String toString() {
-		//TODO: later limit to at most 50 type names
+		//FUTURE: later limit to at most 50 type names
 		StringJoiner joiner = new StringJoiner(",");
 		for(DType type: orderedList) {
 			joiner.add(type.getName());

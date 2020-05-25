@@ -15,15 +15,13 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 
 /**
- * 		public QueryExp queryExp;
-	public DValue resolvedFilterVars; //set at runtime. not-thread-safe. TODO -fix
 
  * @author Ian Rae
  *
  */
 public class FilterEvaluator extends ServiceBase {
 	public QueryExp queryExp;
-	public DValue resolvedFilterVars; //set at runtime. not-thread-safe. TODO -fix
+	public DValue resolvedFilterVars; 
 	private VarEvaluator varEvaluator;
 	private DateFormatService fmtSvc;
 
@@ -39,7 +37,7 @@ public class FilterEvaluator extends ServiceBase {
 			String varName = queryExp.filter.cond.strValue();
 			
 			List<DValue> list = varEvaluator.lookupVar(varName);
-			if (list.isEmpty() || list.size() > 1) { //TODO later support 0 and > 1!!
+			if (list.isEmpty() || list.size() > 1) { //FUTURE later support 0 and > 1!!
 				String msg = String.format("var eval failed: %s", varName);
 				DeliaError err = et.add("var-eval-failed", msg);
 				throw new DeliaException(err);
@@ -52,7 +50,7 @@ public class FilterEvaluator extends ServiceBase {
 	public boolean isEqualTo(DValue dval) {
 		Object target = queryExp.filter.cond.strValue();
 		if (resolvedFilterVars != null) {
-			//TODO support int and other types
+			//string comparison should work for int,long,string (PKs)
 			target = resolvedFilterVars.asString();
 		}
 		return doIsEqualTo(dval, target);

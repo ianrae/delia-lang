@@ -235,7 +235,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				isAsc = false;
 			}
 			String asc = isAsc ? "" : " desc";
-			//TODO later support order by doing implicit fetch. orderBy(addr.city)
+			//FUTURE later support order by doing implicit fetch. orderBy(addr.city)
 			AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
 			String ss = aliasManager.buildFieldAlias(aliasInfo, hlspan.oloEl.orderBy);
 			sc.out("ORDER BY %s%s",ss, asc);

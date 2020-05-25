@@ -26,7 +26,6 @@ public abstract class DRuleBase implements DRule {
 		if (! polarity) {
 			pass = !pass;
 			if (! pass) {
-				//TODO. do we need a better error message here?
 				String subj = getSubject();
 				subj = StringUtils.isEmpty(subj) ? "" : subj + "."; 
 				String msg = String.format("NOT %s%s() failed", subj, name);
@@ -34,9 +33,6 @@ public abstract class DRuleBase implements DRule {
 			}
 		}
 
-		//can't do at this level, because may be multiple rules for this dval
-//		DValueInternal dvi = (DValueInternal) dval;
-//		dvi.setValidationState(pass ? ValidationState.VALID : ValidationState.INVALID);
 		return pass;
 	}
 

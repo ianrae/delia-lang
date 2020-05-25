@@ -27,7 +27,7 @@ public class ZFetchFunction extends ZQueryResponseFunctionBase {
 
 		//find type of targetFieldName. Address
 		//query Address[addrId] for each DValue in qresp.dvalList
-		//TODO later use IN so can do single query
+		//FUTURE later use IN so can do single query
 		
 		QueryResponse qresResult = new QueryResponse();
 		qresResult.ok = true;

@@ -492,8 +492,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				return cres;
 			}
 			
-			//TODO need local error tracker!!
-			
 			VarEvaluator varEvaluator = this;
 //			if (sprigSvc.haveEnabledFor(dtype.getName())) {
 				varEvaluator = new SprigVarEvaluator(factorySvc, this);

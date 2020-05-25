@@ -23,7 +23,6 @@ public class DType implements DTypeInternal {
 	protected DType baseType; //can be null
 	private List<DRule> rules = new ArrayList<>();
 	private int bitIndex;
-	public boolean invalidFlag; //used to verify type-replacement worked. TODO remove
 
 	public DType(Shape shape, String name, DType baseType) {
 		this.shape = shape;
