@@ -6,6 +6,7 @@ import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
+import org.delia.core.DateFormatService;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -13,7 +14,7 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class RelationOpEvaluator extends OpEvaluatorBase {
 
-	public RelationOpEvaluator(OP op, String fieldName) {
+	public RelationOpEvaluator(OP op, String fieldName, DateFormatService fmtSvc) {
 		super(op, fieldName);
 	}
 
@@ -55,25 +56,7 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 		default:
 			DeliaExceptionHelper.throwError("unsupported-fk-type", "Shape %s not supported", shape.name());
 		}
-		Integer n1 = keyVal.asInt(); //TODO: string later
-		Integer n2 = ((IntegerExp)rightVar).val;
-
-		switch(op) {
-		case LT:
-			return n1.compareTo(n2) < 0; 
-		case LE:
-			return n1.compareTo(n2) <= 0; 
-		case GT:
-			return n1.compareTo(n2) > 0; 
-		case GE:
-			return n1.compareTo(n2) >= 0; 
-		case EQ:
-			return n1.compareTo(n2) == 0; 
-		case NEQ:
-			return n1.compareTo(n2) != 0; 
-		default:
-			return false; //err!
-		}
+		return false;
 	}
 
 	private boolean doInnerMatchInt(DValue keyVal) {

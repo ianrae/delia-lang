@@ -89,7 +89,7 @@ public class OpFactory {
 		case DATE:
 			return new DateOpEvaluator(op, fieldName, fmtSvc);
 		case STRUCT:
-			return new RelationOpEvaluator(op, fieldName);
+			return new RelationOpEvaluator(op, fieldName, fmtSvc);
 		default:
 			return new StringOpEvaluator(op, fieldName);
 		}
