@@ -29,7 +29,7 @@ public class ZInsert extends ServiceBase {
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
-				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, null, null);
+				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, null, null);
 		ZTableExistenceService existSvc = new ZTableExistenceService();
 		fpSvc.setExistSvc(existSvc);
 		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, zexec.getDatIdMap());

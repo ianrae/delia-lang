@@ -34,22 +34,18 @@ public class FragmentParserService extends ServiceBase {
 	public SpanHelper spanHelper;
 	
 	public FragmentParserService(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, List<TableInfo> tblinfoL, 
-			ZDBInterfaceFactory dbInterface, DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
+			DBAccessContext dbctx, SqlHelperFactory sqlHelperFactory, WhereFragmentGenerator whereGen, List<LetSpan> spanL) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
 		this.varEvaluator = varEvaluator;
 		this.tblinfoL = tblinfoL;
-		this.dbInterface = dbInterface;
 		this.dbctx = dbctx;
 		this.sqlHelperFactory = sqlHelperFactory;
 		this.whereGen = whereGen; 
 		this.spanHelper = spanL == null ? null : new SpanHelper(spanL);
-
-		
 		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-		
-		this.existSvc = (dbInterface == null) ? null : new ZTableExistenceService();
+		this.existSvc = new ZTableExistenceService();
 	}
 
 	public QueryTypeDetector createQueryTypeDetector() {

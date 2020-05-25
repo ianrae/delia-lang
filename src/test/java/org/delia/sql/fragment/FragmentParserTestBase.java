@@ -160,7 +160,7 @@ public class FragmentParserTestBase extends BDDBase {
 			tblinfoL = new ArrayList<>();		
 		}
 		DBAccessContext dbctx = new DBAccessContext(runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dbctx, sqlHelperFactory, whereGen, null);
 		return fpSvc;
 	}
 

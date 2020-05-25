@@ -315,7 +315,7 @@ public class FragmentParserTests extends BDDBase {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dao.getDbInterface(), dbctx, sqlHelperFactory, whereGen, null);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, runner, tblinfoL, dbctx, sqlHelperFactory, whereGen, null);
 		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		return parser;

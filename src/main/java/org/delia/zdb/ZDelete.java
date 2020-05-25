@@ -33,7 +33,7 @@ public class ZDelete extends ServiceBase {
 		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
-				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, null);
+				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
 		ZTableExistenceService existSvc = new ZTableExistenceService();
 		fpSvc.setExistSvc(existSvc);
 

@@ -38,7 +38,7 @@ public class ZQuery extends ServiceBase {
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, spanL);
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, spanL);
 		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
