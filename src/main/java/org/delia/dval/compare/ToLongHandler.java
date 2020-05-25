@@ -11,7 +11,7 @@ public class ToLongHandler implements Handler {
 	public int compareDVal(DValue dval1, DValue dval2) {
 		Long n1;
 		if (dval1.getType().isShape(Shape.DATE)) {
-			n1 = dval1.asLegacyDate().getTime(); //TODO: we are ignoring nanoseconds here.
+			n1 = dval1.asDate().toEpochSecond(); //TODO: we are ignoring nanoseconds here.
 		} else {
 			n1 = dval1.asLong();
 		}
@@ -34,7 +34,7 @@ public class ToLongHandler implements Handler {
 		if (obj1 instanceof DValue) {
 			DValue dval = (DValue) obj1;
 			if (dval.getType().isShape(Shape.DATE)) {
-				return dval.asLegacyDate().getTime();
+				return dval.asDate().toEpochSecond();
 			} else {
 				return dval.asLong();
 			}

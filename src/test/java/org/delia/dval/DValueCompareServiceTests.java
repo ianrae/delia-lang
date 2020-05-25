@@ -2,6 +2,7 @@ package org.delia.dval;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.delia.api.Delia;
@@ -44,8 +45,8 @@ public class DValueCompareServiceTests extends DaoTestBase {
 	public void testLong() {
 		DValue dval2 = builder.buildDate("2019");
 		
-		Date dt = dval2.asLegacyDate();
-		DValue dval1 = builder.buildLong(dt.getTime());
+		ZonedDateTime dt = dval2.asDate();
+		DValue dval1 = builder.buildLong(dt.toEpochSecond());
 		int n = compareSvc.compare(dval1, dval2);
 		assertEquals(0, n);
 		

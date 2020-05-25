@@ -77,8 +77,8 @@ public class DValueOpEvaluator implements OpEvaluator {
 		{
 			EvalSpec espec = new EvalSpec();
 			espec.op = op;
-			espec.left = leftval.asLegacyDate();
-			espec.right = rightval.asLegacyDate();
+			espec.left = leftval.asDate();
+			espec.right = rightval.asDate();
 			return espec;
 		}
 		case STRING:

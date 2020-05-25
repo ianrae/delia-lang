@@ -1,5 +1,6 @@
 package org.delia.rule.fns;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.delia.rule.DRuleBase;
@@ -27,8 +28,8 @@ public class DateYearFnRule extends DRuleBase {
 				return false;
 			}
 			
-			Date dt = dval.asLegacyDate();
-			int yr = dt.getYear() + 1900; //TODO fix
+			ZonedDateTime zdt = dval.asDate();
+			int yr = zdt.getYear();
 			return yr;
 		}
 		@Override

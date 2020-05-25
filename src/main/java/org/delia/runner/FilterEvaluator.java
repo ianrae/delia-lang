@@ -1,6 +1,6 @@
 package org.delia.runner;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.delia.compiler.ast.Exp;
@@ -59,8 +59,8 @@ public class FilterEvaluator extends ServiceBase {
 	}
 	private boolean doIsEqualTo(DValue dval, Object target) {
 		if (dval.getType().isShape(Shape.DATE)) {
-			Date dt = fmtSvc.parseLegacy(target.toString());
-			return dval.asLegacyDate().equals(dt);
+			ZonedDateTime zdt = fmtSvc.parseDateTime(target.toString());
+			return dval.asDate().equals(zdt);
 		} else {
 			String tmp = dval.asString();
 			if(tmp != null && tmp.equals(target)) {

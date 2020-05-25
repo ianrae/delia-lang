@@ -175,7 +175,7 @@ public class TimezoneTests {
 		String s = "2020-01-31T09:59:51.000-0700";
 		DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 		ZonedDateTime zdt = ZonedDateTime.parse(s, dfFull);
-		
+		System.out.println("yr:" + zdt.getYear());
 		LocalDate today = LocalDate.now();
 		LocalDateTime ldt = today.atStartOfDay();
 		System.out.println("today: " + today.toString());

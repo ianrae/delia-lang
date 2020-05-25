@@ -1,6 +1,7 @@
 package org.delia.rule.rules;
 
-import java.util.Date;
+
+import java.time.ZonedDateTime;
 
 import org.delia.core.DateFormatService;
 import org.delia.dval.compare.DValueCompareService;
@@ -38,10 +39,10 @@ public class CompareOpRule extends DRuleBase {
 			
 			//convert to date.
 			//FUTURE: can this be done during compilation? to make it faster?
-			if (obj1 instanceof Date && obj2 instanceof String) {
-				obj2 = fmtSvc.parseLegacy((String) obj2); //will throw if can't convert
-			} else if (obj1 instanceof String && obj2 instanceof Date) {
-				obj1 = fmtSvc.parseLegacy((String) obj1); //will throw if can't convert
+			if (obj1 instanceof ZonedDateTime && obj2 instanceof String) {
+				obj2 = fmtSvc.parseDateTime((String) obj2); //will throw if can't convert
+			} else if (obj1 instanceof String && obj2 instanceof ZonedDateTime) {
+				obj1 = fmtSvc.parseDateTime((String) obj1); //will throw if can't convert
 			}
 			
 			DValueCompareService compareSvc = ctx.getCompareSvc();
@@ -128,7 +129,7 @@ public class CompareOpRule extends DRuleBase {
 			case NUMBER:
 				return keyVal.asNumber();
 			case DATE:
-				return keyVal.asLegacyDate();
+				return keyVal.asDate();
 			default:
 				return keyVal.asString();
 			}
