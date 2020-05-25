@@ -38,7 +38,7 @@ public class ZUpdate extends ServiceBase {
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, null);
-		ZTableExistenceService existSvc = new ZTableExistenceService(zexec);
+		ZTableExistenceService existSvc = new ZTableExistenceService();
 		fpSvc.setExistSvc(existSvc);
 		
 		AssocTableReplacer assocTblReplacer = createAssocTableReplacer(fpSvc);

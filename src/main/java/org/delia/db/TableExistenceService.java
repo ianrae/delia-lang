@@ -8,7 +8,7 @@ import org.delia.relation.RelationInfo;
 
 public interface TableExistenceService {
 
-	boolean doesTableExist(String tableName);
+//	boolean doesTableExist(String tableName);
 	int fillTableInfoIfNeeded(List<TableInfo> tblInfoL, RelationInfo info, DatIdMap datIdMap);
 	
 }

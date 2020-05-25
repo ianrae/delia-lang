@@ -49,7 +49,7 @@ public class FragmentParserService extends ServiceBase {
 		
 		this.selectFnHelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
 		
-		this.existSvc = (dbInterface == null) ? null : new ZTableExistenceService(dbInterface);
+		this.existSvc = (dbInterface == null) ? null : new ZTableExistenceService();
 	}
 
 	public QueryTypeDetector createQueryTypeDetector() {

@@ -40,7 +40,7 @@ public class ZTableCreator extends ServiceBase {
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		
-		TableExistenceService existSvc = new ZTableExistenceService(zexec);
+		TableExistenceService existSvc = new ZTableExistenceService();
 		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
 		this.datIdMap = datIdMap;
 	}
