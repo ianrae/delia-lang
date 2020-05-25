@@ -1,6 +1,7 @@
 package org.delia.dao;
 
 import org.delia.api.DeliaSession;
+import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.api.Delia;
@@ -30,6 +31,14 @@ public class DeliaGenericDao  {
 	private ZDBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 	private FactoryService factorySvc;
+	
+	public DeliaGenericDao() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		Delia delia = DeliaBuilder.withConnection(info).build();
+		this.dbInterface = delia.getDBInterface();
+		this.factorySvc = delia.getFactoryService();
+		this.delia = delia;
+	}
 	
 	public DeliaGenericDao(ConnectionInfo info) {
 		this(DeliaBuilder.withConnection(info).build());

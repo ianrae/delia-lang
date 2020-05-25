@@ -33,7 +33,7 @@ public class CodeGenBase {
 		case STRING:
 			return "String";
 		case DATE:
-			return "Date";
+			return "ZonedDateTime";
 		case STRUCT:
 		{
 			return ftype.getName();
@@ -61,7 +61,7 @@ public class CodeGenBase {
 		case STRING:
 			return "String";
 		case DATE:
-			return "Date";
+			return "ZonedDateTime";
 		case STRUCT:
 		{
 			return ftype.getName();

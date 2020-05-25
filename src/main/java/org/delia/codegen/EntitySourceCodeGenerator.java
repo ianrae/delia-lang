@@ -16,7 +16,6 @@ public class EntitySourceCodeGenerator extends ServiceBase {
 	}
 	
 	public boolean createSourceFiles(DTypeRegistry registry, String packageName, String targetDir) {
-		
 		for(DType dtype: registry.getOrderedList()) {
 			if (! dtype.isStructShape()) {
 				continue;
