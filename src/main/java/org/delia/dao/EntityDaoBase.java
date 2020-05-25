@@ -194,4 +194,19 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		ResultValue res = doInsertOrUpdate(entity, src, null);
 	}
 	
+	//--derived classes can override these if necessary--
+	public List<T> findAll() {
+		return doFindAll();
+	}
+	//not insert because may or may not return generated id
+	public int update(T entity) {
+		return doUpdate(entity);
+	}
+	public int upsert(T entity) {
+		return doUpsert(entity);
+	}
+	public void delete(T entity) {
+		doDelete(entity);
+	}
+
 }
