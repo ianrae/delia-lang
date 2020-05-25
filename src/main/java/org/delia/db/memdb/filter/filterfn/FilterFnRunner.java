@@ -92,7 +92,7 @@ public class FilterFnRunner {
 	}
 
 	private LocalDateTime convertDate(DValue fieldval) {
-		Date dt = fieldval.asDate();
+		Date dt = fieldval.asLegacyDate();
 		//TODO: need to take proper timezone into effect!1
 		LocalDateTime ldt = DateUtils.convertToUTCLocalTime(dt);
 		return ldt;

@@ -161,7 +161,7 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 		}
 	}	
 	private boolean doInnerMatchDate(DValue keyVal) {
-		Date n1 = keyVal.asDate();
+		Date n1 = keyVal.asLegacyDate();
 		Date n2 = null; //TOD fix this ((StringExp)rightVar).val; //TODO: can this sometimes be IntegerExp
 
 		switch(op) {

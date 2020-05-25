@@ -128,7 +128,7 @@ public class CompareOpRule extends DRuleBase {
 			case NUMBER:
 				return keyVal.asNumber();
 			case DATE:
-				return keyVal.asDate();
+				return keyVal.asLegacyDate();
 			default:
 				return keyVal.asString();
 			}

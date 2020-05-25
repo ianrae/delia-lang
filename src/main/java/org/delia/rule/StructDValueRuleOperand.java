@@ -48,7 +48,7 @@ public class StructDValueRuleOperand implements RuleOperand {
 	}
 	@Override
 	public Date asDate(DValue dval) {
-		return dval.asStruct().getField(fieldName).asDate();
+		return dval.asStruct().getField(fieldName).asLegacyDate();
 	}
 	@Override
 	public DRelation asRelation(DValue dval) {

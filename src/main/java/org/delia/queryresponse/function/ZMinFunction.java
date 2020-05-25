@@ -144,7 +144,7 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 			if (dval == null) {
 				continue;
 			}
-			Date k = dval.asDate();
+			Date k = dval.asLegacyDate();
 			
 			if (min == null) {
 				min = k;

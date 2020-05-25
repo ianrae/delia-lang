@@ -22,7 +22,7 @@ public interface DValue {
 	long asLong();
 	String asString();
 	boolean asBoolean();
-	Date asDate();
+	Date asLegacyDate();
 	Map<String,DValue> asMap();
 	DStructHelper asStruct();
 	DRelation asRelation();

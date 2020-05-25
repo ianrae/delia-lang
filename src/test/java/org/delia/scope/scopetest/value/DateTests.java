@@ -246,7 +246,7 @@ public class DateTests extends TypeLayerTestBase {
 		}
 	}
 	private void chkScalarValue(Date dt, DValue dval) {
-		assertEquals(dt, dval.asDate());
+		assertEquals(dt, dval.asLegacyDate());
 	}
 	protected void chkDateString(String valStr, Date expected) {
 		chkDateString(valStr, "", expected);
@@ -275,7 +275,7 @@ public class DateTests extends TypeLayerTestBase {
 		chkFieldValue(dval, expected);
 	}
 	private void chkFieldValue(DValue dval, Date expected) {
-		assertEquals(expected, dval.asStruct().getField("field1").asDate());
+		assertEquals(expected, dval.asStruct().getField("field1").asLegacyDate());
 	}
 
 	protected void chkUpdateFieldDate(String str, Date expected) {
@@ -295,7 +295,7 @@ public class DateTests extends TypeLayerTestBase {
 	}
 	protected void chkLetFieldOrFnDate(String valStr, Date expected) {
 		DValue dval = doChkLetFieldOrFn(valStr, BuiltInTypes.DATE_SHAPE.name());
-		assertEquals(expected, dval.asDate());
+		assertEquals(expected, dval.asLegacyDate());
 	}
 
 }

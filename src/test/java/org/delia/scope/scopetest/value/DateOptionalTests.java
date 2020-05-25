@@ -177,7 +177,7 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		}
 	}
 	private void chkScalarValue(Date dt, DValue dval) {
-		assertEquals(dt, dval.asDate());
+		assertEquals(dt, dval.asLegacyDate());
 	}
 	protected void chkDateString(String valStr, Date expected) {
 		chkDateString(valStr, "", expected);
@@ -209,7 +209,7 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		if (expected == null) {
 			assertEquals(null, dval.asStruct().getField("field1"));
 		} else {
-			assertEquals(expected, dval.asStruct().getField("field1").asDate());
+			assertEquals(expected, dval.asStruct().getField("field1").asLegacyDate());
 		}
 	}
 

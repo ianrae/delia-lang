@@ -84,8 +84,8 @@ public class ValueHelper extends ServiceBase {
 			ZoneId zoneId = tzSvc.getDefaultTimeZone();
 			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
-			cal.setTime(dval.asDate());
-			Date dt = dval.asDate();
+			cal.setTime(dval.asLegacyDate());
+			Date dt = dval.asLegacyDate();
 			Timestamp ts = new Timestamp(dt.getTime());
 			stm.setTimestamp(index++, ts, cal);
 		}

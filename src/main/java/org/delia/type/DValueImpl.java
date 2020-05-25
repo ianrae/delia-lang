@@ -92,7 +92,7 @@ public class DValueImpl implements DValue, DValueInternal {
         return bool;
     }
     @Override
-    public Date asDate() {
+    public Date asLegacyDate() {
 		WrappedDate wdt = (WrappedDate) object;
         Date dt = wdt.getLegacyDate();
         return dt;

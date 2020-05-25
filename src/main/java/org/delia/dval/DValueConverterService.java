@@ -146,7 +146,7 @@ public class DValueConverterService extends ServiceBase {
 			return new BooleanExp(inner.asBoolean());
 		case DATE:
 		{
-			String s = fmtSvc.format(inner.asDate());
+			String s = fmtSvc.format(inner.asLegacyDate());
 			return new StringExp(s);
 		}
 		default:

@@ -41,7 +41,7 @@ import org.delia.type.DValue;
       if (setMap.containsKey(fieldName)) {
         return (Date)setMap.get(fieldName); //can return null
       }
-      return helper.getField(fieldName).asDate();
+      return helper.getField(fieldName).asLegacyDate();
     }
     @Override
     public void setDd(Date val) {

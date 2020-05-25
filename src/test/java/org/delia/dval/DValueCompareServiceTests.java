@@ -44,7 +44,7 @@ public class DValueCompareServiceTests extends DaoTestBase {
 	public void testLong() {
 		DValue dval2 = builder.buildDate("2019");
 		
-		Date dt = dval2.asDate();
+		Date dt = dval2.asLegacyDate();
 		DValue dval1 = builder.buildLong(dt.getTime());
 		int n = compareSvc.compare(dval1, dval2);
 		assertEquals(0, n);

@@ -45,7 +45,7 @@ public class DValueRuleOperand implements RuleOperand {
 	}
 	@Override
 	public Date asDate(DValue dval) {
-		return dval.asDate();
+		return dval.asLegacyDate();
 	}
 	@Override
 	public DRelation asRelation(DValue dval) {

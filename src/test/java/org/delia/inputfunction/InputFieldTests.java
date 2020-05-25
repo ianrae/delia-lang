@@ -99,7 +99,7 @@ public class InputFieldTests  extends BDDBase {
 		chkCustomer(1, "bob");
 		DValue dval = getCustomerExtra(1);
 		assertEquals("2019-01-01T00:00:00.000+0000", dval.asString());
-		Date dt = dval.asDate();
+		Date dt = dval.asLegacyDate();
 	}
 	
 	

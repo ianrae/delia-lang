@@ -60,7 +60,7 @@ public class FilterEvaluator extends ServiceBase {
 	private boolean doIsEqualTo(DValue dval, Object target) {
 		if (dval.getType().isShape(Shape.DATE)) {
 			Date dt = fmtSvc.parseLegacy(target.toString());
-			return dval.asDate().equals(dt);
+			return dval.asLegacyDate().equals(dt);
 		} else {
 			String tmp = dval.asString();
 			if(tmp != null && tmp.equals(target)) {

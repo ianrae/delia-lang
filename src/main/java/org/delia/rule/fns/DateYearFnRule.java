@@ -27,7 +27,7 @@ public class DateYearFnRule extends DRuleBase {
 				return false;
 			}
 			
-			Date dt = dval.asDate();
+			Date dt = dval.asLegacyDate();
 			int yr = dt.getYear() + 1900; //TODO fix
 			return yr;
 		}

@@ -11,13 +11,13 @@ public class ToLongHandler implements Handler {
 	public int compareDVal(DValue dval1, DValue dval2) {
 		Long n1;
 		if (dval1.getType().isShape(Shape.DATE)) {
-			n1 = dval1.asDate().getTime();
+			n1 = dval1.asLegacyDate().getTime();
 		} else {
 			n1 = dval1.asLong();
 		}
 		Long n2;
 		if (dval2.getType().isShape(Shape.DATE)) {
-			n2 = dval2.asDate().getTime();
+			n2 = dval2.asLegacyDate().getTime();
 		} else {
 			n2 = dval2.asLong();
 		}
@@ -34,7 +34,7 @@ public class ToLongHandler implements Handler {
 		if (obj1 instanceof DValue) {
 			DValue dval = (DValue) obj1;
 			if (dval.getType().isShape(Shape.DATE)) {
-				return dval.asDate().getTime();
+				return dval.asLegacyDate().getTime();
 			} else {
 				return dval.asLong();
 			}
