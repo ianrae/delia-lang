@@ -1,5 +1,7 @@
 package org.delia.queryresponse.function;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -138,21 +140,25 @@ public class ZMaxFunction extends ZQueryResponseFunctionBase {
 		return qresp;
 	}
 	private QueryResponse processDate(QueryResponse qresp, List<DValue> dvalList) {
-		Date min = new Date(Long.MIN_VALUE);
+		Instant min = Instant.MIN;
+		ZonedDateTime maxZdt = null;
+		
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
-			Date k = dval.asLegacyDate();
+			ZonedDateTime zdt = dval.asDate();
 			
 			if (min == null) {
-				min = k;
-			} else if (k.compareTo(min) > 0) {
-				min = k;
+				min = zdt.toInstant();
+				maxZdt = zdt;
+			} else if (zdt.toInstant().compareTo(min) > 0) {
+				min = zdt.toInstant();
+				maxZdt = zdt;
 			}
 		}
 		
-		DValue dval = buildLegacyDateVal(min, factorySvc);
+		DValue dval = buildDateVal(maxZdt, factorySvc);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}

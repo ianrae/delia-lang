@@ -35,13 +35,6 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 			return nexp.val;
 		}
 		
-//		protected void ensureFieldExists(QueryResponse qresp, String fnName, String fieldName) {
-//			if (CollectionUtils.isEmpty(qresp.dvalList)) {
-//				return;
-//			}
-//			DValue dval = qresp.dvalList.get(0);
-//			DValueHelper.throwIfFieldNotExist(fnName, fieldName, dval);
-//		}
 		protected void ensureFieldExists(List<DValue> dvalList, String fnName, String fieldName) {
 			if (CollectionUtils.isEmpty(dvalList)) {
 				return;

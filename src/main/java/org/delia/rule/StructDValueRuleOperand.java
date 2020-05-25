@@ -1,7 +1,7 @@
 package org.delia.rule;
 
+import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.delia.type.DRelation;
@@ -47,8 +47,8 @@ public class StructDValueRuleOperand implements RuleOperand {
 		return dval.asStruct().getField(fieldName).asNumber();
 	}
 	@Override
-	public Date asDate(DValue dval) {
-		return dval.asStruct().getField(fieldName).asLegacyDate();
+	public ZonedDateTime asDate(DValue dval) {
+		return dval.asStruct().getField(fieldName).asDate();
 	}
 	@Override
 	public DRelation asRelation(DValue dval) {

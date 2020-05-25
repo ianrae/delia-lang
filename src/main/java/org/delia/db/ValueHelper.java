@@ -99,6 +99,8 @@ public class ValueHelper extends ServiceBase {
 		//			case RELATION:
 		//				//FIX
 		//				break;
+		default:
+			break;
 		}
 		return index;
 	}

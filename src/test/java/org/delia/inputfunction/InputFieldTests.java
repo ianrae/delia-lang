@@ -2,6 +2,7 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -99,7 +100,7 @@ public class InputFieldTests  extends BDDBase {
 		chkCustomer(1, "bob");
 		DValue dval = getCustomerExtra(1);
 		assertEquals("2019-01-01T00:00:00.000+0000", dval.asString());
-		Date dt = dval.asLegacyDate();
+		ZonedDateTime zdt = dval.asDate();
 	}
 	
 	

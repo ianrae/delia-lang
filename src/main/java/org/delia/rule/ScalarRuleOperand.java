@@ -1,6 +1,6 @@
 package org.delia.rule;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.delia.type.DRelation;
@@ -60,8 +60,8 @@ public class ScalarRuleOperand implements RuleOperand {
 		return n;
 	}
 	@Override
-	public Date asDate(DValue dval) {
-		Date dt = (Date)val;
+	public ZonedDateTime asDate(DValue dval) {
+		ZonedDateTime dt = (ZonedDateTime)val;
 		return dt;
 	}
 	@Override

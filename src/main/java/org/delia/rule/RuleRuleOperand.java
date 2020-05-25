@@ -1,7 +1,7 @@
 package org.delia.rule;
 
+import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.delia.type.DRelation;
@@ -62,7 +62,7 @@ public class RuleRuleOperand implements RuleOperand {
 		return null;
 	}
 	@Override
-	public Date asDate(DValue dval) {
+	public ZonedDateTime asDate(DValue dval) {
 		return null;
 	}
 	@Override
