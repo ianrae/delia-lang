@@ -93,7 +93,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	@Override
 	public QueryExp createInQuery(String typeName, List<DValue> list, DType relType) {
-		//TODO fix this. hack hack hack it is WRONG
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(relType);
 		QueryInExp inExp = new QueryInExp(99, new IdentExp(keyPair.name), null);
 		FilterOpFullExp fullExp = new FilterOpFullExp(99, inExp);

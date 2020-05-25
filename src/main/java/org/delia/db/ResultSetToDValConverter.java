@@ -96,9 +96,8 @@ public class ResultSetToDValConverter extends ServiceBase {
 				}
 			}
 		} catch (ValueException e) {
-			//				e.printStackTrace();
-			DeliaError err = ((ValueException)e).errL.get(0);
-			throw new DBException(err);
+			ValueException ve = (ValueException)e;
+			throw new DBException(ve.errL);
 		} catch (Exception e) {
 						e.printStackTrace();
 			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
@@ -121,9 +120,8 @@ public class ResultSetToDValConverter extends ServiceBase {
 				list.add(dval);
 			}
 		} catch (ValueException e) {
-			//				e.printStackTrace();
-			DeliaError err = ((ValueException)e).errL.get(0);
-			throw new DBException(err);
+			ValueException ve = (ValueException)e;
+			throw new DBException(ve.errL);
 		} catch (Exception e) {
 			//			e.printStackTrace();
 			DeliaError err = new DeliaError("db-resultset-error2", e.getMessage());
@@ -306,8 +304,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		
 		boolean b = structBuilder.finish();
 		if (! b) {
-			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
-			throw new ValueException(err); 
+			throw new ValueException(structBuilder.getValidationErrors()); 
 		}
 		DValue dval = structBuilder.getDValue();
 		return dval;
@@ -338,8 +335,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		}
 		boolean b = structBuilder.finish();
 		if (! b) {
-			DeliaError err = structBuilder.getValidationErrors().get(0); //TODO: support multiple later
-			throw new ValueException(err); 
+			throw new ValueException(structBuilder.getValidationErrors()); 
 		}
 		DValue dval = structBuilder.getDValue();
 		return dval;

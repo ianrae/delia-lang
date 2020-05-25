@@ -59,27 +59,11 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 
 	private QueryExp buildQuery(DRelation drel) {
 		if (drel.isMultipleKey()) {
-			//TODO fix this. hack hack hack it is WRONG
 			DType relType = registry.getType(drel.getTypeName());
-//			String keyFieldName = DValueHelper.findUniqueField(relType);
-//			QueryInExp inExp = new QueryInExp(99, new IdentExp(keyFieldName), null);
-//			FilterOpFullExp fullExp = new FilterOpFullExp(99, inExp);
-//			for(DValue dval: drel.getMultipleKeys()) {
-//				//int only for now
-//				//TODO support string,long later
-//				Integer foreignKey = dval.asInt();
-//				IntegerExp exp = new IntegerExp(foreignKey);
-//				inExp.listExp.valueL.add(exp);
-//			}
-//			FilterExp filter = new FilterExp(99, fullExp); 
-//			QueryExp exp = new QueryExp(0, new IdentExp(drel.getTypeName()), filter, null);
 			QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 			QueryExp exp = builderSvc.createInQuery(drel.getTypeName(), drel.getMultipleKeys(), relType);
 			return exp;
 		} else {
-//			Integer foreignKey = drel.getForeignKey().asInt();
-//			//TODO string keys later
-//			FilterExp filter = new FilterExp(99, new IntegerExp(foreignKey));
 			QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 			QueryExp exp = builderSvc.createPrimaryKeyQuery(drel.getTypeName(), drel.getForeignKey());
 			return exp;
