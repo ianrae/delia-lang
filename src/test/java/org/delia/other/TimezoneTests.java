@@ -181,7 +181,6 @@ public class TimezoneTests {
 		System.out.println("today: " + today.toString());
 		System.out.println("today: " + ldt.toString());
 	}
-	
 	@Test
 	public void testJava8b() throws ParseException {
 		
@@ -189,5 +188,9 @@ public class TimezoneTests {
 			System.out.println(zone);
 		}
 	}
-	
+	@Test
+	public void testJava8c() throws ParseException {
+		LocalDateTime ldt = LocalDateTime.now();
+		System.out.println("ldt: " + ldt.toString());
+	}	
 }

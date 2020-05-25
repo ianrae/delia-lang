@@ -2,7 +2,6 @@ package org.delia.queryresponse;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -72,11 +71,6 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 		protected DValue buildStringVal(String s) {
 			ScalarValueBuilder builder = new ScalarValueBuilder(null, registry);
 			DValue dval = builder.buildString(s);
-			return dval;
-		}
-		protected DValue buildLegacyDateVal(Date dt, FactoryService factorySvc) {
-			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, registry);
-			DValue dval = builder.buildLegacyDate(dt);
 			return dval;
 		}
 		protected DValue buildDateVal(ZonedDateTime zdt, FactoryService factorySvc) {

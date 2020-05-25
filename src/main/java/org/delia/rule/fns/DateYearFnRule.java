@@ -1,7 +1,6 @@
 package org.delia.rule.fns;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;

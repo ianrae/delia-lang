@@ -1,6 +1,6 @@
 package org.delia.db.memdb.filter;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
@@ -161,8 +161,8 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 		}
 	}	
 	private boolean doInnerMatchDate(DValue keyVal) {
-		Date n1 = keyVal.asLegacyDate();
-		Date n2 = null; //TOD fix this ((StringExp)rightVar).val; //TODO: can this sometimes be IntegerExp
+		ZonedDateTime n1 = keyVal.asDate();
+		ZonedDateTime n2 = null; //TOD fix this ((StringExp)rightVar).val; //TODO: can this sometimes be IntegerExp
 
 		switch(op) {
 		case LT:

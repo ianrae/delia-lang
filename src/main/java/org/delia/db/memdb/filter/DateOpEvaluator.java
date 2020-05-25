@@ -1,6 +1,6 @@
 package org.delia.db.memdb.filter;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.delia.compiler.ast.StringExp;
 import org.delia.core.DateFormatService;
@@ -25,9 +25,9 @@ public class DateOpEvaluator extends OpEvaluatorBase {
 		if (b != null) {
 			return b;
 		}
-		Date n1 = getFieldValue(dval).asLegacyDate();
+		ZonedDateTime n1 = getFieldValue(dval).asDate();
 		String s = ((StringExp)rightVar).strValue();
-		Date n2 = fmtSvc.parseLegacy(s);
+		ZonedDateTime n2 = fmtSvc.parseDateTime(s);
 
 		switch(op) {
 		case LT:

@@ -17,7 +17,7 @@ public class ToLongHandler implements Handler {
 		}
 		Long n2;
 		if (dval2.getType().isShape(Shape.DATE)) {
-			n2 = dval2.asLegacyDate().getTime();
+			n2 = dval2.asDate().toEpochSecond();
 		} else {
 			n2 = dval2.asLong();
 		}

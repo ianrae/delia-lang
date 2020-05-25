@@ -1,7 +1,6 @@
 package org.delia.rule;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 
 import org.delia.type.DRelation;

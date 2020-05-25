@@ -1,15 +1,11 @@
 package org.delia.db.sql;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.core.TimeZoneService;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -41,10 +37,6 @@ public class SqlDateGenerator extends ServiceBase {
 		ZonedDateTime zdt = fmtSvc.parseDateTime(value);
 		return convertDateToSQLTimestamp(zdt);
 	}
-	public String convertDateStringToSQLTimestamp2(String value) {
-		Date dt = fmtSvc.parseLegacy(value);
-		return fmtSvc.format(dt);
-	}
 
 	/**
 	 * FUTURE: this probably needs to become db-specific
@@ -54,7 +46,6 @@ public class SqlDateGenerator extends ServiceBase {
 	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
 		String s = zdt.format(sdf);
 		return String.format("'%s'", s);
 	}

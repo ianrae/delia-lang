@@ -1,6 +1,6 @@
 package org.delia.rule.fns;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.delia.compiler.ast.Exp;
 import org.delia.core.DateFormatService;
@@ -28,8 +28,8 @@ public class DateMakeFnRule extends DRuleBase {
 	}
 	@Override
 	public Object exec(DValue dval, DRuleContext ctx) {
-		Date dt = fmtSvc.parseLegacy(arg.strValue());
-		return dt;
+		ZonedDateTime zdt = fmtSvc.parseDateTime(arg.strValue());
+		return zdt;
 	}
 	@Override
 	public boolean dependsOn(String fieldName) {

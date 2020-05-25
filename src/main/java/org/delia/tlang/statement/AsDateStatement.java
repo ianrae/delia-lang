@@ -1,8 +1,8 @@
 package org.delia.tlang.statement;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.StringExp;
@@ -14,12 +14,12 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class AsDateStatement implements TLangStatement {
 	private String format;
-	private SimpleDateFormat sdf;
+	private DateTimeFormatter sdf;
 	
 	public AsDateStatement(Exp arg1) {
 		StringExp nexp = (StringExp) arg1;
 		this.format = nexp.val;
-		this.sdf = new SimpleDateFormat(format);
+		this.sdf = DateTimeFormatter.ofPattern(format);
 	}
 	@Override
 	public String getName() {
@@ -32,12 +32,12 @@ public class AsDateStatement implements TLangStatement {
 	@Override
 	public void execute(DValue value, TLangResult result, TLangContext ctx) {
 		String s = value.asString();
-		Date dt = null;
+		ZonedDateTime dt = null;
 		try {
-			dt = sdf.parse(s);
-		} catch (ParseException e) {
+			dt = ZonedDateTime.parse(s, sdf);
+		} catch (DateTimeParseException e) {
 			DeliaExceptionHelper.throwError("asdate-failed", "ffff");
 		}
-		result.val = ctx.builder.buildLegacyDate(dt);
+		result.val = ctx.builder.buildDate(dt);
 	}
 }

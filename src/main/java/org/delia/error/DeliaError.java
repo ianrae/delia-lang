@@ -1,6 +1,6 @@
 package org.delia.error;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * An error in the Delia language. Includes syntax errors and runtime errors.
@@ -11,7 +11,7 @@ import java.util.Date;
 public class DeliaError {
 	private String id;
 	private String msg;
-	private Date timestamp = new Date();
+	private LocalDateTime timestamp = LocalDateTime.now();
 	private String area; //descriptive name. eg. pipeline name
 	private String arg1;
 	private String arg2;
@@ -39,7 +39,7 @@ public class DeliaError {
 	public String getMsg() {
 		return msg;
 	}
-	public Date getTimestamp() {
+	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}
 	public String getArea() {
