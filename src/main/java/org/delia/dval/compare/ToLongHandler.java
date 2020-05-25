@@ -1,6 +1,6 @@
 package org.delia.dval.compare;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -38,9 +38,9 @@ public class ToLongHandler implements Handler {
 			} else {
 				return dval.asLong();
 			}
-		} else if (obj1 instanceof Date) {
-			Date dt = (Date) obj1;
-			return dt.getTime();
+		} else if (obj1 instanceof ZonedDateTime) {
+			ZonedDateTime dt = (ZonedDateTime) obj1;
+			return dt.toEpochSecond();
 		}
 		
 		Number n = (Number) obj1;

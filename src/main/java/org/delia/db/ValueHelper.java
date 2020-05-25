@@ -86,7 +86,7 @@ public class ValueHelper extends ServiceBase {
 			Calendar cal = Calendar.getInstance(tz);
 			cal.setTime(dval.asLegacyDate());
 			Date dt = dval.asLegacyDate();
-			Timestamp ts = new Timestamp(dt.getTime());
+			Timestamp ts = new Timestamp(dt.getTime()); //TODO find way that doesn't lose nano seconds
 			stm.setTimestamp(index++, ts, cal);
 		}
 		break;

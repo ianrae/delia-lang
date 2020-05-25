@@ -168,13 +168,23 @@ public class DateFormatServiceImpl implements DateFormatService {
 
 	@Override
 	public ZonedDateTime parseDateTime(String input) {
-//		input = input.trim();
 		try {
 			DateTimeFormatter formatter = getDateFormat(input);
 			if (containsTimeZone(formatter)) {
-				ZonedDateTime ldt = null;
-				ldt = ZonedDateTime.parse(input, formatter);
-				return ldt;
+				ZonedDateTime zdt = null;
+				zdt = ZonedDateTime.parse(input, formatter);
+				
+				//https://stackoverflow.com/questions/39506891/why-is-zoneoffset-utc-zoneid-ofutc
+				//sometimes zdt has zone 'Z' which is not considered equal to 'UTC'.
+				//so we'll normalize zdt's zone and compare to tzSvc's zone
+				//and use zone if they are equal. 
+				ZoneId normalized1 = zdt.getZone().normalized();
+				ZoneId zone = tzSvc.getDefaultTimeZone();
+				ZoneId normalized2 = zone.normalized();
+				if (normalized1.equals(normalized2)) {
+					return ZonedDateTime.of(zdt.toLocalDateTime(), zone);
+				}
+				return zdt;
 			} else if (isYearOnly(formatter)) {
 				LocalDate ldt = null;
 				TemporalAccessor parsed = formatter.parse(input);	

@@ -28,6 +28,11 @@ public class DateOpEvaluator extends OpEvaluatorBase {
 		ZonedDateTime n1 = getFieldValue(dval).asDate();
 		String s = ((StringExp)rightVar).strValue();
 		ZonedDateTime n2 = fmtSvc.parseDateTime(s);
+		
+//		System.out.println(n1.toInstant().getEpochSecond());
+//		System.out.println(n2.toInstant().getEpochSecond());
+//		System.out.println(n1.toInstant().getNano());
+//		System.out.println(n2.toInstant().getNano());
 
 		switch(op) {
 		case LT:
