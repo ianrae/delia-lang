@@ -183,6 +183,12 @@ public class DateFormatServiceImpl implements DateFormatService {
 				ZoneId normalized2 = zone.normalized();
 				if (normalized1.equals(normalized2)) {
 					return ZonedDateTime.of(zdt.toLocalDateTime(), zone);
+				} else {
+					ZoneOffset zo1 = zdt.getOffset();
+					ZoneOffset zo2 = zone.getRules().getOffset(zdt.toInstant());
+					if (zo1.equals(zo2)) {
+						return ZonedDateTime.of(zdt.toLocalDateTime(), zone);
+					}
 				}
 				return zdt;
 			} else if (isYearOnly(formatter)) {

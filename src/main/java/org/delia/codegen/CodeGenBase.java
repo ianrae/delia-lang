@@ -128,7 +128,7 @@ public class CodeGenBase {
 				if (alreadyMap.containsKey("Date")) {
 					continue;
 				}
-				String s = String.format("import java.util.Date;");
+				String s = String.format("import java.time.ZonedDateTime;");
 				list.add(s);
 				alreadyMap.put("Date", "");
 			} else if (ftype.isStructShape()) {
