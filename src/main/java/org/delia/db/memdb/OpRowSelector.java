@@ -9,6 +9,7 @@ import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.core.DateFormatService;
+import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
 import org.delia.db.memdb.filter.InEvaluator;
 import org.delia.db.memdb.filter.MultiOpEvaluator;
@@ -24,9 +25,11 @@ import org.delia.util.DValueHelper;
 public class OpRowSelector extends RowSelectorBase {
 		private OpEvaluator evaluator;
 		private DateFormatService fmtSvc;
+		private FactoryService factorySvc;
 		
-		public OpRowSelector(DateFormatService fmtSvc) {
+		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc) {
 			this.fmtSvc = fmtSvc;
+			this.factorySvc = factorySvc;
 		}
 
 		@Override
@@ -46,7 +49,7 @@ public class OpRowSelector extends RowSelectorBase {
 		}
 		
 		private void initMultipleOpExpression(FilterOpFullExp fullexp, DStructType dtype) {
-			this.evaluator = new MultiOpEvaluator(fullexp, dtype, registry, fmtSvc);
+			this.evaluator = new MultiOpEvaluator(fullexp, dtype, registry, fmtSvc, factorySvc);
 		}
 
 		private void initSingleOpExpression(FilterOpFullExp fullexp, DStructType dtype) {
@@ -67,7 +70,7 @@ public class OpRowSelector extends RowSelectorBase {
 				op2HintType = DValueHelper.findFieldType(dtype, fieldOrVarOrFn);
 			}
 			
-			OpFactory factory = new OpFactory(registry, fmtSvc);
+			OpFactory factory = new OpFactory(registry, fmtSvc, factorySvc);
 			this.evaluator = factory.create(foexp.op, xop1, xop2, op1HintType, op2HintType, fullexp.negFlag);
 			//support id < 10 and also 10 < id
 			boolean reversed = (xop2 instanceof IdentExp) || (xop2 instanceof XNAFMultiExp);

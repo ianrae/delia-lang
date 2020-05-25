@@ -7,6 +7,7 @@ import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.core.DateFormatService;
+import org.delia.core.FactoryService;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 
@@ -14,10 +15,12 @@ public class OpFactory {
 	
 	private DTypeRegistry registry;
 	private DateFormatService fmtSvc;
+	private FactoryService factorySvc;
 
-	public OpFactory(DTypeRegistry registry, DateFormatService fmtSvc) {
+	public OpFactory(DTypeRegistry registry, DateFormatService fmtSvc, FactoryService factorySvc) {
 		this.registry = registry;
 		this.fmtSvc = fmtSvc;
+		this.factorySvc = factorySvc;
 	}
 
 	public OpEvaluator create(String opStr, Object op1, Object op2, DType op1HintType, DType op2HintType, boolean negFlag) {
@@ -89,7 +92,7 @@ public class OpFactory {
 		case DATE:
 			return new DateOpEvaluator(op, fieldName, fmtSvc);
 		case STRUCT:
-			return new RelationOpEvaluator(op, fieldName, fmtSvc);
+			return new RelationOpEvaluator(op, fieldName, factorySvc);
 		default:
 			return new StringOpEvaluator(op, fieldName);
 		}
