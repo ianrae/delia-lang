@@ -2,6 +2,7 @@
 t1() ::= <<
 import org.delia.type.DStructHelper;
 import org.delia.type.DValue;
+import org.delia.type.DRelation;
 
 >>
 
