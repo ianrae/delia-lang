@@ -31,8 +31,27 @@ t3(ftype,uname,fname,asname) ::= <<
 t4(ftype,uname,fname) ::= <<
   @Override
   public <ftype> get<uname>() {
-    DValue inner = helper.getField("<fname>");
-    <ftype> immut = new <ftype>Immut(inner);
-    return immut;
+	DValue inner = helper.getField("<fname>");
+	if (inner == null) return null;
+	DRelation drel =  inner.asRelation();
+	if (drel.haveFetched()) {
+		DValue fetched = drel.getFetchedItems().get(0);
+		<ftype> immut = new <ftype>Immut(fetched);
+		return immut;
+	} else {
+		return null;
+	}
   }
 >>
+
+t5(ftype,uname,fname,pktype,asname) ::= <<
+  @Override
+  public <pktype> get<uname>PK() {
+    DValue inner = helper.getField("<fname>");
+    if (inner == null) return 0;
+    DRelation drel =  inner.asRelation();
+    DValue fk = drel.getForeignKey();
+    return fk.<asname>();
+  }
+>>
+

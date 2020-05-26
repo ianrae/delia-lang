@@ -10,6 +10,8 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.Shape;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 //====
 public class CodeGenBase {
@@ -118,7 +120,6 @@ public class CodeGenBase {
 		}
 	}
 
-
 	protected List<String> getImportList(DStructType structType) {
 		List<String> list = new ArrayList<>();
 		Map<String,String> alreadyMap = new HashMap<>();
@@ -155,5 +156,15 @@ public class CodeGenBase {
 		sc.nl();
 	}
 
+
+	protected boolean hasPK(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return pkPair != null;
+	}
+
+	protected String getPKType(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return convertToJava(pkPair.type);
+	}
 
 }

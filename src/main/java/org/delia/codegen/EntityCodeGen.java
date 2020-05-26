@@ -51,6 +51,15 @@ public class EntityCodeGen extends CodeGenBase {
 				st.add("fname", fieldName);
 				st.add("nullval", "null");
 				sc.o(st.render());
+				
+				if (hasPK(ftype)) {
+					//t5(ftype,uname,pktype) ::= <<
+					st = g.getInstanceOf("t5");
+					st.add("ftype", javaType);
+					st.add("uname", StringUtil.uppify(fieldName));
+					st.add("pktype", getPKType(ftype));
+					sc.o(st.render());
+				}
 			} else {
 				//t3(ftype,fobjname,uname,fname,asname) ::= <<
 				st = g.getInstanceOf("t3");

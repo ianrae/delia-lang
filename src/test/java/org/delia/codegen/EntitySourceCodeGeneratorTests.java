@@ -33,8 +33,8 @@ public class EntitySourceCodeGeneratorTests extends DaoTestBase {
 	}
 
 	private String buildSrc() {
-		String src = "type Wing struct {id int, width int } end";
-		src += "\n type Flight struct {field1 int unique, field2 int, dd date optional, relation wing Wing one optional } end";
+		String src = "type Wing struct {id int primaryKey, width int } end";
+		src += "\n type Flight struct {field1 int primaryKey, field2 int, dd date optional, relation wing Wing one optional } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;

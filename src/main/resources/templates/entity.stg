@@ -65,8 +65,15 @@ t4(ftype,fobjname,uname,fname,nullval) ::= <<
       
       if (helper == null) return <nullval>;
       DValue inner = helper.getField("<fname>");
-      <ftype> immut = new <ftype>Immut(inner);
-      return immut;
+	  if (inner == null) return null;
+      DRelation drel =  inner.asRelation();
+      if (drel.haveFetched()) {
+       DValue fetched = drel.getFetchedItems().get(0);
+         <ftype> immut = new <ftype>Immut(fetched);
+         return immut;
+       } else {
+         return null;
+       }
     }
     @Override
     public void set<uname>(<ftype> val) {
@@ -75,3 +82,10 @@ t4(ftype,fobjname,uname,fname,nullval) ::= <<
     
 >>
 
+t5(ftype,uname,pktype) ::= <<
+  @Override
+  public <pktype> get<uname>PK() {
+    <ftype> immut = get<ftype>();
+	return immut.get<uname>();
+  }
+>>

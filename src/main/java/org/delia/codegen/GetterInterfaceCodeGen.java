@@ -30,6 +30,12 @@ public class GetterInterfaceCodeGen extends CodeGenBase {
 			String javaType = convertToJava(structType, fieldName);
 			sc.o("  %s get%s();", javaType, StringUtil.uppify(fieldName));
 			sc.nl();
+			
+			if (hasPK(ftype)) {
+				String pkType = getPKType(ftype);
+				sc.o("  %s get%sPK();", pkType, StringUtil.uppify(fieldName));
+				sc.nl();
+			}
 
 		}
 		sc.o("}");
