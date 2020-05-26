@@ -4,9 +4,6 @@ import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.PrimaryKey;
-import org.delia.type.TypePair;
-import org.delia.util.DValueHelper;
 import org.delia.util.StringUtil;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -56,7 +53,7 @@ public class ImmutCodeGen extends CodeGenBase {
 					st.add("uname", StringUtil.uppify(fieldName));
 					st.add("fname", fieldName);
 					st.add("pktype", getPKType(ftype));
-					st.add("asname", asFn);
+					st.add("asname", getPKTypeAsFn(ftype));
 					sc.o(st.render());
 				}
 			} else {

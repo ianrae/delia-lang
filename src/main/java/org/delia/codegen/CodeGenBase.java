@@ -12,6 +12,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.StringUtil;
 
 //====
 public class CodeGenBase {
@@ -165,6 +166,15 @@ public class CodeGenBase {
 	protected String getPKType(DType ftype) {
 		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
 		return convertToJava(pkPair.type);
+	}
+	protected String getPKField(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return StringUtil.uppify(pkPair.name);
+	}
+
+	protected String getPKTypeAsFn(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return convertToAsFn(pkPair.type);
 	}
 
 }

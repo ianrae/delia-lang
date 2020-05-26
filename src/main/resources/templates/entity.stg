@@ -82,10 +82,10 @@ t4(ftype,fobjname,uname,fname,nullval) ::= <<
     
 >>
 
-t5(ftype,uname,pktype) ::= <<
+t5(ftype,uname,pktype,pkfield) ::= <<
   @Override
   public <pktype> get<uname>PK() {
     <ftype> immut = get<ftype>();
-	return immut.get<uname>();
+	return immut.get<pkfield>();
   }
 >>
