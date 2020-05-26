@@ -55,6 +55,10 @@ public class AllBDDTests extends BDDBase {
 		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
 	@Test
+	public void testR560() {
+		runR550File("t0-self-11.txt", 1);
+	}
+	@Test
 	public void testR600() {
 		runR600File("t0-rule-crud.txt", 3);
 		runR600File("t0-rule-maxlen.txt", 6);
@@ -311,9 +315,8 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
-		runR300File("t0-date.txt", 8);
-//		runR300File("t0-date-custom.txt", 6);
-//		runR300File("t0-date-timezone.txt",10);
+//		runR1350File("t0-filter-in-twitter.txt", 13);
+		runR550File("t0-self-11.txt", 1);
 
 	}
 	

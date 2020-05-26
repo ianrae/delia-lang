@@ -1,0 +1,25 @@
+# let query filter like tests
+
+FEATURE: filter- in expression for twitter. self-join
+background:
+  type Customer struct {id int primaryKey, name string,
+      relation manager User 'r1' one optional parent,
+      relation worker User 'r1' one optional,
+  }  end
+thenType: struct
+
+---
+title: in
+given:
+  insert User {id: 55, wid: 'art' }
+  insert User {id: 56, wid: 'bob' }
+  insert User {id: 57, wid: 'cam' }
+when:
+  let x = User[55]
+then:
+value:a:User {
+ vid:55
+ vname:'art'
+ vworker:null
+}
+

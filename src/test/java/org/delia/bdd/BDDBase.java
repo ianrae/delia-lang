@@ -31,6 +31,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R400_struct,
 		R500_relation,
 		R550_multi_relation,
+		R560_self_relation,
 		R600_rules,
 		R650_rule_fns,
 		R700_crud_insert,
@@ -104,6 +105,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR550File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R550_multi_relation, filename, numTests);
+	}
+	protected int runR560File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R560_self_relation, filename, numTests);
 	}
 	protected int runR600File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R600_rules, filename, numTests);
