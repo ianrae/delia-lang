@@ -56,7 +56,7 @@ public class AllBDDTests extends BDDBase {
 	}
 	@Test
 	public void testR560() {
-		runR550File("t0-self-11.txt", 1);
+		runR560File("t0-self-11.txt", 1);
 	}
 	@Test
 	public void testR600() {
@@ -316,7 +316,7 @@ public class AllBDDTests extends BDDBase {
 		enableMigration = true;
 		
 //		runR1350File("t0-filter-in-twitter.txt", 13);
-		runR550File("t0-self-11.txt", 1);
+		runR560File("t0-self-11.txt", 1);
 
 	}
 	

@@ -20,6 +20,9 @@ public class DeliaException extends RuntimeException {
 		super(errL.isEmpty() ? "no DeliaError!!" : errL.get(0).getId() + ": " + errL.get(0).getMsg()); 
 		this.errorL = errL;
 	}
+	public DeliaError getFirstError() {
+		return errorL.get(0);
+	}
 	public DeliaError getLastError() {
 		return errorL.get(errorL.size() - 1);
 	}

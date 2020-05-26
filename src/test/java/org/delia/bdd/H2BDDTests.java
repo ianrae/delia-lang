@@ -58,7 +58,7 @@ public class H2BDDTests extends BDDBase {
 	}
 	@Test
 	public void testR560() {
-		runR550File("t0-self-11.txt", 1);
+		runR560File("t0-self-11.txt", 1);
 	}
 	@Test
 	public void testR600() {

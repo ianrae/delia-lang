@@ -193,7 +193,7 @@ public class RulePostProcessor extends ServiceBase {
 					RelationInfo info = rr.relInfo;
 					if (rr.nameIsExplicit) {
 						if (info.otherSide == null) {
-							info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+							info.otherSide = findOtherSideNamed(rr.relInfo, rr.getRelationName(), info.farType, info.nearType, allErrors);
 							logIfSet("step1", rr.getRelationName(), info);
 						}
 					}
@@ -202,7 +202,7 @@ public class RulePostProcessor extends ServiceBase {
 					RelationInfo info = rr.relInfo;
 					if (rr.nameIsExplicit) {
 						if (info.otherSide == null) {
-							info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+							info.otherSide = findOtherSideNamed(rr.relInfo, rr.getRelationName(), info.farType, info.nearType, allErrors);
 							logIfSet("step1", rr.getRelationName(), info);
 						}
 					}
@@ -216,7 +216,7 @@ public class RulePostProcessor extends ServiceBase {
 		}
 	}
 
-	private RelationInfo findOtherSideNamed(DRule rrSrc, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
+	private RelationInfo findOtherSideNamed(RelationInfo rrSrcInfo, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
 		List<RelationInfo> nameRelL = new ArrayList<>();
 		List<RelationInfo> relL = new ArrayList<>();
 		for(DRule rule: farType.getRawRules()) {
@@ -245,6 +245,19 @@ public class RulePostProcessor extends ServiceBase {
 		}
 		
 		if (!nameRelL.isEmpty()) {
+			//detect self-join
+			if (nameRelL.size() == 2) {
+				RelationInfo inf1 = nameRelL.get(0);
+				RelationInfo inf2 = nameRelL.get(1);
+				if (inf1.nearType == inf1.farType && inf2.nearType == inf2.farType) {
+					if (inf1 == rrSrcInfo) {
+						return inf2;
+					} else {
+						return inf1;
+					}
+				}
+			}
+			
 			if (nameRelL.size() > 1) {
 				String s = nameRelL.get(0).relationName;
 				String msg = String.format("Relation name '%s' used more than once (%d)", s, nameRelL.size());
@@ -276,7 +289,7 @@ public class RulePostProcessor extends ServiceBase {
 							otherSide.otherSide = info;
 						} else if (otherSide.otherSide == info) {
 						} else {
-							String msg = String.format("Relation name '%s' already assigned", otherSide.relationName);
+							String msg = String.format("(step 2) Relation name '%s' already assigned", otherSide.relationName);
 							DeliaError err = new DeliaError("relation-already-assigned", msg);
 							allErrors.add(err);
 						}
@@ -290,7 +303,7 @@ public class RulePostProcessor extends ServiceBase {
 							otherSide.otherSide = info;
 						} else if (otherSide.otherSide == info) {
 						} else {
-							String msg = String.format("Relation name '%s' already assigned", otherSide.relationName);
+							String msg = String.format("(step 2) Relation name '%s' already assigned", otherSide.relationName);
 							DeliaError err = new DeliaError("relation-already-assigned", msg);
 							allErrors.add(err);
 						}
