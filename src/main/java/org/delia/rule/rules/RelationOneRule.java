@@ -90,6 +90,9 @@ public class RelationOneRule extends RelationRuleBase {
 		if (!exists) {
 //		qresResult.err = qrespFetch.err;
 		} else {
+//			DValue keyVal = drel.getForeignKey();
+//			QueryResponse qq = ctx.getFetchRunner().loadFKOnly(owningType.getName(), oper1.getSubject(), keyVal);
+			
 			String key = drel.getForeignKey().asString();
 			String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
 			addDetailedError(ctx, msg, getSubject());

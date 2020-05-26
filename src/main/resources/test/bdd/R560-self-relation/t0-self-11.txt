@@ -6,20 +6,38 @@ background:
       relation manager Customer 'r1' one optional parent,
       relation worker Customer 'r1' one optional,
   }  end
+  insert Customer {id: 55, name: 'art' }
 thenType: struct
 
 ---
-title: in
+title: basic
 given:
-  insert Customer {id: 55, wid: 'art' }
-  insert Customer {id: 56, wid: 'bob' }
-  insert Customer {id: 57, wid: 'cam' }
 when:
   let x = Customer[55]
 then:
 value:a:Customer {
  vid:55
  vname:'art'
+ vmanager:null
  vworker:null
 }
 
+---
+title: basic
+given:
+  insert Customer {id: 56, name: 'bob', worker: 55 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworker:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:null
+  vworker:{55}
+}

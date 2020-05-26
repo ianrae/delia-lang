@@ -211,6 +211,9 @@ public class Pass3Compiler extends CompilerPassBase {
 		if (tt.typeExp.structExp != null) {
 			for(StructFieldExp sfe: tt.typeExp.structExp.argL) {
 				if (sfe.typeName.equals(typeExp.typeName)) {
+					if (sfe == sfeTarget) {
+						continue; //self-join
+					}
 					return sfe;
 				}
 			}
