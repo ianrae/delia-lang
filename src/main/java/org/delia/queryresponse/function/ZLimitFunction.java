@@ -24,7 +24,8 @@ public class ZLimitFunction extends ZOffsetFunction {
 		int limit = getIntArg(qfe, ctx);
 		ctx.currentPgSize = limit;
 		
-		doLimitAndOffset(ctx, qresp);
+		ctx.offsetLimitDirtyFlag = true;
+		doLimitAndOffset(ctx, qresp, dvalList);
 		return qresp;
 	}
 }
