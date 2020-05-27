@@ -1,5 +1,6 @@
 package org.delia.rule.rules;
 
+import java.util.List;
 import java.util.Map;
 
 import org.delia.error.DetailedError;
@@ -58,7 +59,7 @@ public class RelationOneRule extends RelationRuleBase {
 			boolean bb = ctx.isPopulateFKsFlag();
 			if (!bb) {
 				if (relInfo.cardinality.equals(RelationCardinality.ONE_TO_ONE)) {
-					bb = chkRelationUniqueness(ctx, drel);
+					bb = chkRelationUniqueness(ctx, drel, dval);
 					if (! bb) {
 						return false;
 					}
@@ -76,7 +77,7 @@ public class RelationOneRule extends RelationRuleBase {
 		
 		//next ensure this is only foreign key of that value
 		if (!otherSideIsMany) {
-			boolean ok = this.chkRelationUniqueness(ctx, drel);
+			boolean ok = this.chkRelationUniqueness(ctx, drel, dval);
 			if (!ok) {
 				return false;
 			}
@@ -85,13 +86,19 @@ public class RelationOneRule extends RelationRuleBase {
 		return true;
 	}
 	
-	private boolean chkRelationUniqueness(DRuleContext ctx, DRelation drel) {
-		boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
-		if (!exists) {
+	private boolean chkRelationUniqueness(DRuleContext ctx, DRelation drel, DValue dvalBeingValidated) {
+		List<DValue> dvalL = ctx.getFetchRunner().queryFKs(owningType, oper1.getSubject(), drel);
+		if (dvalL.isEmpty()) {
 //		qresResult.err = qrespFetch.err;
 		} else {
-//			DValue keyVal = drel.getForeignKey();
-//			QueryResponse qq = ctx.getFetchRunner().loadFKOnly(owningType.getName(), oper1.getSubject(), keyVal);
+			if (dvalL.size() == 1) { //detect and ignore self-join
+				DValue tmp = dvalL.get(0);
+				DValue pk1 = DValueHelper.findPrimaryKeyValue(tmp);
+				DValue pk2 = DValueHelper.findPrimaryKeyValue(dvalBeingValidated);
+				if (pk1 != null && pk1.asString().equals(pk2.asString())) {
+					return true; //ok
+				}
+			}
 			
 			String key = drel.getForeignKey().asString();
 			String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());

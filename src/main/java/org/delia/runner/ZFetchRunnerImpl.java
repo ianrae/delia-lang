@@ -1,6 +1,7 @@
 package org.delia.runner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -79,6 +80,12 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 
 	@Override
 	public boolean queryFKExists(DStructType owningType, String fieldName, DRelation drel) {
+		List<DValue> dvalList = queryFKs(owningType, fieldName, drel);
+		return !CollectionUtils.isEmpty(dvalList);
+	}
+
+	@Override
+	public List<DValue> queryFKs(DStructType owningType, String fieldName, DRelation drel) {
 		QueryExp queryExp = buildOwningTypeQuery(owningType, fieldName, drel);
 		//TODO resolve vars such as foo(id)
 		QuerySpec spec = new QuerySpec();
@@ -89,9 +96,9 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
 		
 		if (!qresp.ok) {
-			return false;
+			return Collections.emptyList();
 		} else {
-			return !CollectionUtils.isEmpty(qresp.dvalList);
+			return qresp.dvalList;
 		}
 	}
 

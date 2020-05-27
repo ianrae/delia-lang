@@ -1,5 +1,7 @@
 package org.delia.runner.inputfunction;
 
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.core.FactoryService;
 import org.delia.log.Log;
@@ -72,6 +74,12 @@ public class FetchRunnerFacade implements FetchRunner {
 		}
 		
 		return exists;
+	}
+
+	@Override
+	public List<DValue> queryFKs(DStructType owningType, String subject, DRelation drel) {
+		log.logDebug("FRFFFFFFFFFFFFFFF2");
+		return inner.queryFKs(owningType, subject, drel);
 	}
 
 }
