@@ -81,6 +81,10 @@ public class DatIdMap {
 		return tmp.size();
 	}
 
+	public boolean isFlipped(RelationInfo relinfo) {
+		String field = getAssocFieldFor(relinfo);
+		return field.equals("rightv");
+	}
 	
 	public String getAssocFieldFor(RelationInfo relinfo) {
 		Integer datId = relinfo.getDatId();

@@ -95,7 +95,7 @@ public class RelationOneRule extends RelationRuleBase {
 				DValue tmp = dvalL.get(0);
 				DValue pk1 = DValueHelper.findPrimaryKeyValue(tmp);
 				DValue pk2 = DValueHelper.findPrimaryKeyValue(dvalBeingValidated);
-				if (pk1 != null && pk1.asString().equals(pk2.asString())) {
+				if (pk1 != null && pk2 != null && pk1.asString().equals(pk2.asString())) {
 					return true; //ok
 				}
 			}
