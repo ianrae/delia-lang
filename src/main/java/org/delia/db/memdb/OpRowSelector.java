@@ -16,6 +16,7 @@ import org.delia.db.memdb.filter.MultiOpEvaluator;
 import org.delia.db.memdb.filter.OpEvaluator;
 import org.delia.db.memdb.filter.OpFactory;
 import org.delia.error.ErrorTracker;
+import org.delia.runner.FilterEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -26,10 +27,12 @@ public class OpRowSelector extends RowSelectorBase {
 		private OpEvaluator evaluator;
 		private DateFormatService fmtSvc;
 		private FactoryService factorySvc;
+		private FilterEvaluator filterEvaluator;
 		
-		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc) {
+		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc, FilterEvaluator evaluator2) {
 			this.fmtSvc = fmtSvc;
 			this.factorySvc = factorySvc;
+			this.filterEvaluator = evaluator2;
 		}
 
 		@Override
@@ -81,7 +84,7 @@ public class OpRowSelector extends RowSelectorBase {
 			}
 		}
 		private void initSingleInExpression(FilterOpFullExp fullexp, DStructType dtype) {
-			this.evaluator = new InEvaluator(fullexp, dtype);
+			this.evaluator = new InEvaluator(fullexp, dtype, filterEvaluator);
 		}
 
 

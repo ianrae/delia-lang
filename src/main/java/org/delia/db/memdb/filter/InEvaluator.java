@@ -1,9 +1,12 @@
 package org.delia.db.memdb.filter;
 
+import java.util.List;
+
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.ListExp;
 import org.delia.compiler.ast.QueryInExp;
+import org.delia.runner.FilterEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
@@ -13,10 +16,12 @@ public class InEvaluator implements OpEvaluator {
 	private DStructType dtype;
 	private QueryInExp inExp;
 	private String keyField;
+	private FilterEvaluator filterEvaluator;
 	
-	public InEvaluator(FilterOpFullExp fullexp, DStructType dtype) {
+	public InEvaluator(FilterOpFullExp fullexp, DStructType dtype, FilterEvaluator filterEvaluator) {
 		this.fullExp = fullexp;
 		this.dtype = dtype;
+		this.filterEvaluator = filterEvaluator;
 		
 		this.inExp = (QueryInExp) fullexp.opexp1;
 		this.keyField = inExp.fieldName;
@@ -45,6 +50,16 @@ public class InEvaluator implements OpEvaluator {
 			DValue dval = (DValue) left;
 			DValue key = dval.asStruct().getField(keyField);
 			if (key == null) {
+				//try as var
+				List<DValue> varValueL = filterEvaluator.lookupVar(keyField);
+				if (varValueL != null) {
+					for(DValue vv: varValueL) {
+						if (isIn(vv, inExp.listExp)) {
+							return true;
+						}
+					}
+					return false;
+				}
 //				wasError = true;
 				//err!!
 				return false;

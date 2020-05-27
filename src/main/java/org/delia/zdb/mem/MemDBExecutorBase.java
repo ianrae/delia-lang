@@ -152,7 +152,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			selector = new AllRowSelector();
 			break;
 		case OP:
-			selector = new OpRowSelector(fmtSvc, factorySvc);
+			selector = new OpRowSelector(fmtSvc, factorySvc, spec.evaluator);
 			break;
 		case PRIMARY_KEY:
 		default:

@@ -81,5 +81,10 @@ public class FilterEvaluator extends ServiceBase {
 		String target = queryExp.filter.cond.strValue();
 		return target;
 	}
+	
+	public List<DValue> lookupVar(String varName) {
+		List<DValue> list = varEvaluator.lookupVar(varName);
+		return list;
+	}
 
 }

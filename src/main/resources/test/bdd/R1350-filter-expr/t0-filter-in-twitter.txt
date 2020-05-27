@@ -13,14 +13,14 @@ background:
       relation sender Customer one,
   }  end
   insert Customer {id: 55, name: 'art' }
-  insert Customer {id: 56, name: 'bob' }
-  insert Customer {id: 57, name: 'cam' }
+  insert Customer {id: 56, name: 'bob', followers:55 }
+  insert Customer {id: 57, name: 'cam', followers:55 }
   
   
 thenType: struct
 
 ---
-title: in
+title: simple in
 given:
   insert Address {id: 1, text: 'tweet1', sender: 55 }
 when:
@@ -32,3 +32,34 @@ value:a:Address {
  vsender:{55}
 }
 
+---
+title: simple in2
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vfollowers:null
+ vfollowees:{[56,57]}
+ vtweets:{1}
+}
+
+---
+title: simple in2
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+#left side of IN must be ident. TODO fix later and allow 55 in [followers]
+  let u = 55
+  let x = Customer[u in [followers]].fks()
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vfollowers:null
+ vfollowees:{[56,57]}
+ vtweets:{1}
+}
