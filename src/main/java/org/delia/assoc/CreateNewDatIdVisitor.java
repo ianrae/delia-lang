@@ -159,6 +159,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		
 		structBuilder.addField("left", left);
 		structBuilder.addField("right", right);
+		//TODO: schema migrator needs to track rename-field and update DAT table too
 
 		boolean b = structBuilder.finish();
 		if (! b) {

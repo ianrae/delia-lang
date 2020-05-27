@@ -2,7 +2,9 @@ package org.delia.rule.rules;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -487,6 +489,8 @@ public class RulePostProcessor extends ServiceBase {
 	}
 	private void dumpRelations(DTypeRegistry registry) {
 		log.log("--- relations ---");
+		Map<String,String> onlyOnceMap = new HashMap<>();
+		
 		for(String typeName: registry.getAll()) {
 			DType dtype = registry.getType(typeName);
 			if (! dtype.isStructShape()) {
@@ -508,6 +512,13 @@ public class RulePostProcessor extends ServiceBase {
 						otherSideIsParent = "*";
 					}
 					
+					String onceKey = String.format("%s.%s", info.nearType.getName(), info.fieldName);
+					if (onlyOnceMap.containsKey(onceKey)) {
+						continue;
+					}
+					onceKey = String.format("%s.%s", info.farType.getName(), otherField);
+					onlyOnceMap.put(onceKey,  "");
+					
 					String src = String.format("relation %s.%s%s", info.nearType.getName(), info.fieldName, isParent);
 					log.log("%30s %10s %s.%s%s (%s)", src, arrow, info.farType.getName(), otherField, otherSideIsParent, card);
 				} else if (rule instanceof RelationManyRule) {
@@ -517,6 +528,14 @@ public class RulePostProcessor extends ServiceBase {
 					String otherField = info.otherSide == null ? "" : info.otherSide.fieldName;
 					String arrow = calcArrow(info);
 					String src = String.format("relation %s.%s", info.nearType.getName(), info.fieldName);
+					
+					String onceKey = String.format("%s.%s", info.nearType.getName(), info.fieldName);
+					if (onlyOnceMap.containsKey(onceKey)) {
+						continue;
+					}
+					onceKey = String.format("%s.%s", info.farType.getName(), otherField);
+					onlyOnceMap.put(onceKey,  "");
+					
 					log.log("%30s %10s %s.%s (%s)", src, arrow, info.farType.getName(), otherField, card);
 				}
 			}

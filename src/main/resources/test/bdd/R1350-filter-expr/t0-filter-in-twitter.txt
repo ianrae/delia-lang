@@ -1,30 +1,34 @@
 # let query filter like tests
 
 FEATURE: filter- in expression for twitter. self-join
+# Customer = Customer
+# Address = Address 
 background:
-  type User struct {id int primaryKey, name string,
-      relation followers User 'r1' many optional,
-      relation followees User 'r1' many optional,
-      relation tweets Tweet many optional
+  type Customer struct {id int primaryKey, name string,
+      relation followers Customer 'r1' many optional,
+      relation followees Customer 'r1' many optional,
+      relation tweets Address many optional
       }  end
-  type Tweet struct {id int primaryKey, text string 
-      relation sender User one,
+  type Address struct {id int primaryKey, text string 
+      relation sender Customer one,
   }  end
+  insert Customer {id: 55, name: 'art' }
+  insert Customer {id: 56, name: 'bob' }
+  insert Customer {id: 57, name: 'cam' }
+  
+  
 thenType: struct
 
 ---
 title: in
 given:
-  insert User {id: 55, wid: 'art' }
-  insert User {id: 56, wid: 'bob' }
-  insert User {id: 57, wid: 'cam' }
-  insert Tweet {id: 1, text: 'tweet1', sender: 55 }
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
 when:
-  let x = Tweet[sender in [55]]
+  let x = Address[sender in [55]]
 then:
-value:a:Tweet {
+value:a:Address {
  vid:1
  vtext:'tweet1'
- vsender:55
+ vsender:{55}
 }
 
