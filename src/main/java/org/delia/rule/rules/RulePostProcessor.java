@@ -519,7 +519,8 @@ public class RulePostProcessor extends ServiceBase {
 					onceKey = String.format("%s.%s", info.farType.getName(), otherField);
 					onlyOnceMap.put(onceKey,  "");
 					
-					String src = String.format("relation %s.%s%s", info.nearType.getName(), info.fieldName, isParent);
+					String name = rr.nameIsExplicit ? String.format(" '%s'", info.relationName) : "";
+					String src = String.format("relation%s %s.%s%s", name, info.nearType.getName(), info.fieldName, isParent);
 					log.log("%30s %10s %s.%s%s (%s)", src, arrow, info.farType.getName(), otherField, otherSideIsParent, card);
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
@@ -527,7 +528,8 @@ public class RulePostProcessor extends ServiceBase {
 					String card = info.cardinality.name();
 					String otherField = info.otherSide == null ? "" : info.otherSide.fieldName;
 					String arrow = calcArrow(info);
-					String src = String.format("relation %s.%s", info.nearType.getName(), info.fieldName);
+					String name = rr.nameIsExplicit ? String.format(" '%s'", info.relationName) : "";
+					String src = String.format("relation%s %s.%s", name, info.nearType.getName(), info.fieldName);
 					
 					String onceKey = String.format("%s.%s", info.nearType.getName(), info.fieldName);
 					if (onlyOnceMap.containsKey(onceKey)) {

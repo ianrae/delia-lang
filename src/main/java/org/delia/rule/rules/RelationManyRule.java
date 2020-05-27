@@ -78,27 +78,32 @@ public class RelationManyRule extends RelationRuleBase {
 		DValue otherSide = qrespFetch.dvalList.get(0);
 		TypePair otherRelPair = findMatchingRel(otherSide, dval.getType());
 		if (otherRelPair != null) { //one-side relations won't have otherRelPair
-			DValue otherRel = otherSide.asStruct().getField(otherRelPair.name);
-			if (otherRel == null) {
-				DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
-				String typeName = dval.getType().getName();
-				RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
-				String keyValString = getPrimaryKey(dval);
-				builder.buildFromString(keyValString);
-				boolean b = builder.finish();
-				if (!b) {
-					//err
-				} else {
-					Map<String,DValue> map = otherSide.asMap();
-					map.put(otherRelPair.name, builder.getDValue());
-				}
-			} else {
-				DRelation drelx = otherRel.asRelation();
-				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-				String keyValString = pair.name;
-				DValue primaryKeyVal = dval.asStruct().getField(keyValString);
-				drelx.addKey(primaryKeyVal);
+			for(DValue other: qrespFetch.dvalList) {
+				populateAllFKs(dval, other, otherRelPair);
 			}
+		}
+	}
+	private void populateAllFKs(DValue dval, DValue otherSide, TypePair otherRelPair) {
+		DValue otherRel = otherSide.asStruct().getField(otherRelPair.name);
+		if (otherRel == null) {
+			DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
+			String typeName = dval.getType().getName();
+			RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
+			String keyValString = getPrimaryKey(dval);
+			builder.buildFromString(keyValString);
+			boolean b = builder.finish();
+			if (!b) {
+				//err
+			} else {
+				Map<String,DValue> map = otherSide.asMap();
+				map.put(otherRelPair.name, builder.getDValue());
+			}
+		} else {
+			DRelation drelx = otherRel.asRelation();
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			String keyValString = pair.name;
+			DValue primaryKeyVal = dval.asStruct().getField(keyValString);
+			drelx.addKey(primaryKeyVal);
 		}
 	}
 	private boolean isMandatoryFK() {
