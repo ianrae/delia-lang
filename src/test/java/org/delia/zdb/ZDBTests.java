@@ -118,6 +118,8 @@ public class ZDBTests  extends BDDBase {
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue dval = builder.buildString(datTableName);
 		structBuilder.addField("tblName", dval);
+		structBuilder.addField("leftName", dval); //not really correct
+		structBuilder.addField("rightName", dval);
 
 		boolean b = structBuilder.finish();
 		if (! b) {

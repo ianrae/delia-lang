@@ -72,8 +72,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
 			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
 			datIdCounter++;
-			datIdMap.putFull(key, datId, tblName, dval.asStruct().getField("left").asString(),
-					dval.asStruct().getField("right").asString());
+			datIdMap.putFull(key, datId, tblName, dval.asStruct().getField("leftName").asString(),
+					dval.asStruct().getField("rightName").asString());
 		}
 	}
 	
@@ -111,8 +111,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			}
 			
 			String tblName = dval.asStruct().getField("tblName").asString();
-			String left = dval.asStruct().getField("left").asString();
-			String right = dval.asStruct().getField("right").asString();
+			String left = dval.asStruct().getField(DatIdMapHelper.LEFTNAME).asString();
+			String right = dval.asStruct().getField(DatIdMapHelper.RIGHTNAME).asString();
 			datIdMap.attachTblName(id, tblName, left, right);
 		}
 
@@ -157,13 +157,13 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			right = tmp;
 		}
 		
-		structBuilder.addField("left", left);
-		structBuilder.addField("right", right);
+		structBuilder.addField(DatIdMapHelper.LEFTNAME, left);
+		structBuilder.addField(DatIdMapHelper.RIGHTNAME, right);
 		//TODO: schema migrator needs to track rename-field and update DAT table too
 
 		boolean b = structBuilder.finish();
 		if (! b) {
-			log.logError("failed to be DAT row for type '%s'", type.getName());
+			log.logError("failed to build DAT row for type '%s'", type.getName());
 			return null;
 		}
 		dval = structBuilder.getDValue();
