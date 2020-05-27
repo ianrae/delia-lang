@@ -11,6 +11,7 @@ public class InsertStatementFragment extends StatementFragmentBase {
 		//parallel arrays
 		public List<String> setValuesL = new ArrayList<>();
 		public List<InsertStatementFragment> assocInsertFragL; 
+		public List<UpdateStatementFragment> fkUpdateFragL; 
 		
 		@Override
 		public String render() {

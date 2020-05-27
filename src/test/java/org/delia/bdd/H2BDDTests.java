@@ -92,6 +92,7 @@ public class H2BDDTests extends BDDBase {
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
+		runR700File("t0-insert-parent.txt", 4);
 	}
 	
 	@Test
@@ -322,7 +323,8 @@ public class H2BDDTests extends BDDBase {
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-		runR560File("t0-self-N1.txt", 4);
+//		runR560File("t0-self-N1.txt", 4);
+		runR700File("t0-insert-parent.txt", 4);
 	}
 	
 	//---

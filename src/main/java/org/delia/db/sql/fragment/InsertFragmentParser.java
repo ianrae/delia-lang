@@ -238,6 +238,12 @@ public class InsertFragmentParser extends SelectFragmentParser {
 				initMainParams(mainStatement, save, assocFrag);
 			}
 		}
+		if (insertFrag.fkUpdateFragL != null) {
+			for(UpdateStatementFragment assocFrag: insertFrag.fkUpdateFragL) {
+				initMainParams(mainStatement, save, assocFrag);
+			}
+		}
+		
 		if (mainStatement.paramL.isEmpty()) {
 			mainStatement.paramL.addAll(save);
 			return stgroup; //no inner frags
@@ -249,10 +255,16 @@ public class InsertFragmentParser extends SelectFragmentParser {
 				initMainParams(mainStatement, save, assocFrag);
 			}
 		}
+		if (insertFrag.fkUpdateFragL != null) {
+			for(UpdateStatementFragment assocFrag: insertFrag.fkUpdateFragL) {
+				addIfNotNull(stgroup, assocFrag, save, nextStartIndex(insertFrag.fkUpdateFragL));
+				initMainParams(mainStatement, save, assocFrag);
+			}
+		}
 
 		return stgroup;
 	}
-	private int nextStartIndex(List<InsertStatementFragment> fragL) {
+	private int nextStartIndex(List<? extends StatementFragmentBase> fragL) {
 		for(StatementFragmentBase frag: fragL) {
 			if (frag != null) {
 				return frag.paramStartIndex;
@@ -309,20 +321,35 @@ public class InsertFragmentParser extends SelectFragmentParser {
 					} else {
 						RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, pair.name);
 						if (ruleMany != null) {
-							UpdateStatementFragment updateFrag = new UpdateStatementFragment();
+							RelationInfo info = ruleMany.relInfo;
 							RelationInfo otherSide = ruleMany.relInfo.otherSide;
-							PrimaryKey pk = ruleMany.relInfo.nearType.getPrimaryKey();
-							FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);
+							PrimaryKey pk = info.nearType.getPrimaryKey();
+							PrimaryKey OtherPk = otherSide.nearType.getPrimaryKey();
+							TypePair tmp = new TypePair(otherSide.fieldName, pk.getKeyType());
+							
+							UpdateStatementFragment updateFrag = new UpdateStatementFragment();
+							TableFragment tblFrag = createTable(info.farType, insertFrag);
+							updateFrag.tblFrag = tblFrag;
+							
+							FieldFragment ff = FragmentHelper.buildFieldFrag(info.farType, insertFrag, tmp);
 							updateFrag.setValuesL.add("?");
 							updateFrag.fieldL.add(ff);
 							updateFrag.statement.paramL.add(null);
 							
+							addFKUpdateFrag(insertFrag, updateFrag);
 						}						
 					}
 				} 
 			}
 		}
 		
+	}
+
+	private void addFKUpdateFrag(InsertStatementFragment insertFrag, UpdateStatementFragment updateFrag) {
+		if (insertFrag.fkUpdateFragL == null) {
+			insertFrag.fkUpdateFragL = new ArrayList<>();
+		}
+		insertFrag.fkUpdateFragL.add(updateFrag);
 	}
 
 	
