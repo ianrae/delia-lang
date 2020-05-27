@@ -48,7 +48,7 @@ public class TLangStatementFactory extends ServiceBase {
 		case "asDate":
 		{
 			Exp arg1 = getArg(fieldOrFn, 0, true);
-			return new AsDateStatement(arg1);
+			return new AsDateStatement(arg1, factorySvc.getTimeZoneService());
 		}
 		case "combine":
 		{
