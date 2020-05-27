@@ -76,6 +76,12 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	private BDDGroup currentGroup;
 	protected boolean enableAllFileCheck = true;
 	protected boolean disableAllSlowTests = DBTestHelper.disableAllSlowTests;
+	
+	//a test that is part of a group but will be tested separately
+	protected void ignoreTest(String filename) {
+		filesExecutedL.add(filename);
+	}
+	
 
 	/**
 	 * When we want to run all unit tests but not have to wait
