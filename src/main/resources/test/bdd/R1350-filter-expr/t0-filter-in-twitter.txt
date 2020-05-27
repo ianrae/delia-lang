@@ -53,7 +53,6 @@ given:
   insert Address {id: 1, text: 'tweet1', sender: 55 }
 when:
 #left side of IN must be ident. TODO fix later and allow 55 in [followers]
-#  let x = Customer[true].followers
   let u = 55
   let x = Customer[u in [followers]].fks()
 then:
@@ -78,3 +77,29 @@ value:a:Customer {
    vfollowees:null
    vtweets:null
   }
+  
+---
+title: followers
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+#we should be doing .distinct() but it won't hurt for IN
+  let u = 55
+  let x = Customer[true].followers
+then:
+value:a:Customer {
+  vid:55
+  vname:'art'
+  vfollowers:null
+  vfollowees:null
+  vtweets:null
+ }
+ value:a:Customer {
+  vid:55
+  vname:'art'
+  vfollowers:null
+  vfollowees:null
+  vtweets:null
+ }
+
+  
