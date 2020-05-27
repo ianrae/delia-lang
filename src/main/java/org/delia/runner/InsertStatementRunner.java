@@ -5,6 +5,7 @@ import java.util.Map;
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.core.ConfigureService;
+import org.delia.core.DiagnosticService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
@@ -107,6 +108,9 @@ public class InsertStatementRunner extends ServiceBase {
 			return;
 		}
 
+		DiagnosticService diagnosticSvc = factorySvc.getDiagnosticService();
+		diagnosticSvc.log(registry, cres.dval);
+		
 		//INSERT has no return value
 		res.ok = true;
 		res.shape = null;

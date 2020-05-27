@@ -33,4 +33,5 @@ public interface FactoryService {
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();
+	DiagnosticService getDiagnosticService();
 }
