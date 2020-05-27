@@ -1,4 +1,4 @@
-# let query filter like tests
+# self-join relations
 
 FEATURE: same as 11 but without self join
 background:

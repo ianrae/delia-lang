@@ -310,14 +310,15 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
 		
 //		runR1350File("t0-filter-in-twitter.txt", 13);
-		runR560File("t0-self-11.txt", 1);
+//		runR560File("t0-self-11.txt", 3);
 //		runR560File("t0-self-11a.txt", 3);
+		runR560File("t0-self-N1.txt", 3);
 
 	}
 	

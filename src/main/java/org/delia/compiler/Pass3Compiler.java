@@ -176,6 +176,10 @@ public class Pass3Compiler extends CompilerPassBase {
 								String msg = String.format("type '%s' - relation field '%s'. Only one side of relation can use 'parent'", typeExp.typeName, sfe.fieldName);
 								DeliaError err = createError("relation-parent-not-allowed", msg, typeExp);
 								results.errors.add(err);
+							} else if (otherSideExp.isMany) {
+								String msg = String.format("type '%s' - relation field '%s'. The 'many side of relation canno be 'parent'", typeExp.typeName, sfe.fieldName);
+								DeliaError err = createError("relation-parent-not-allowed-in-many", msg, typeExp);
+								results.errors.add(err);
 							}
 							
 							if (sfe.isMany) {

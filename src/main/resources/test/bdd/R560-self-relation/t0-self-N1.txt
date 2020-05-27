@@ -1,10 +1,10 @@
 # self-join relations
 
-FEATURE: self-join
+FEATURE: self-join N to 1
 background:
   type Customer struct {id int primaryKey, name string,
-      relation manager Customer 'r1' one optional parent,
-      relation worker Customer 'r1' one optional,
+      relation manager Customer 'r1' one optional,
+      relation workers Customer 'r1' many optional,
   }  end
   insert Customer {id: 55, name: 'art' }
 thenType: struct
@@ -19,13 +19,13 @@ value:a:Customer {
  vid:55
  vname:'art'
  vmanager:null
- vworker:null
+ vworkers:null
 }
 
 ---
 title: add worker,fks
 given:
-  insert Customer {id: 56, name: 'bob', worker: 55 }
+  insert Customer {id: 56, name: 'bob', workers: 55 }
 when:
   let x = Customer[true].fks().orderBy('id')
 then:
@@ -33,19 +33,19 @@ value:a:Customer {
  vid:55
  vname:'art'
  vmanager:{56}
- vworker:null
+ vworkers:null
 }
 value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworker:{55}
+  vworkers:{55}
 }
 
 ---
 title: add worker
 given:
-  insert Customer {id: 56, name: 'bob', worker: 55 }
+  insert Customer {id: 56, name: 'bob', workers: 55 }
 when:
   let x = Customer[true].orderBy('id')
 then:
@@ -53,11 +53,31 @@ value:a:Customer {
  vid:55
  vname:'art'
  vmanager:null
- vworker:null
+ vworkers:null
 }
 value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworker:{55}
+  vworkers:null
+}
+
+---
+title: add manager
+given:
+  insert Customer {id: 56, name: 'bob', manager: 55 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworkers:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:{55}
+  vworkers:null
 }
