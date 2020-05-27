@@ -32,6 +32,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
 	private ZDBExecutor dbexecutor;
+	private boolean flippedByHackFlag; //for unit tests only
 
 	public CreateNewDatIdVisitor(FactoryService factorySvc, ZDBExecutor zdbExecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
@@ -126,11 +127,13 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String tblName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt);
 			if (this.dbexecutor.doesTableExist(tblName)) {
 				nextAssocNameInt++;
+				this.flippedByHackFlag = false;
 				return tblName;
 			} else {
 				tblName = String.format("%s%sDat%d", s2, s1, nextAssocNameInt);
 				if (this.dbexecutor.doesTableExist(tblName)) {
 					nextAssocNameInt++;
+					this.flippedByHackFlag = true;
 					return tblName;
 				}
 			}
@@ -146,8 +149,16 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue dval = builder.buildString(datTableName);
 		structBuilder.addField("tblName", dval);
-		structBuilder.addField("left", buildLRString(builder, relInfo));
-		structBuilder.addField("right", buildLRString(builder, relInfo.otherSide));
+		DValue left = buildLRString(builder, relInfo);
+		DValue right = buildLRString(builder, relInfo.otherSide);
+		if (flippedByHackFlag) {
+			DValue tmp = left;
+			left = right;
+			right = tmp;
+		}
+		
+		structBuilder.addField("left", left);
+		structBuilder.addField("right", right);
 
 		boolean b = structBuilder.finish();
 		if (! b) {

@@ -82,10 +82,9 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testDebugSQL() {
 		useCustomerManyToManySrc = true;
-		//		assocTblMgr.flip = false;
-
-//		sqlchkP("let x = Customer[55].addr", "SELECT d.id,d.y,c.leftv as cust FROM Address as d LEFT JOIN CustomerAddressDat1 as c ON d.id=c.rightv WHERE c.leftv = ?", "55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
+		flipAssocTbl = true;
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,c.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerDat1 as c ON a.cid=c.rightv");
+		
 	}
 
 	@Before

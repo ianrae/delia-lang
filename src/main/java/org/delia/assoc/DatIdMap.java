@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.relation.RelationInfo;
-import org.delia.type.DStructType;
 import org.delia.util.DeliaExceptionHelper;
 
 public class DatIdMap {
@@ -83,7 +82,7 @@ public class DatIdMap {
 	}
 
 	
-	public String getAssocLeftField(RelationInfo relinfo) {
+	public String getAssocFieldFor(RelationInfo relinfo) {
 		Integer datId = relinfo.getDatId();
 		if (datId == null) {
 			DeliaExceptionHelper.throwError("bad-dat-id2", "no DAT id for field %s", relinfo.fieldName);
@@ -95,7 +94,8 @@ public class DatIdMap {
 			return "rightv";
 		}
 	}
-	public String getAssocRightField(RelationInfo relinfo) {
+	//other field
+	public String getAssocOtherField(RelationInfo relinfo) {
 		Integer datId = relinfo.getDatId();
 		if (datId == null) {
 			DeliaExceptionHelper.throwError("bad-dat-id3", "no DAT id for field %s", relinfo.fieldName);

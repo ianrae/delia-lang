@@ -189,8 +189,8 @@ public class InsertFragmentParser extends SelectFragmentParser {
 			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval, RelationInfo info) {
 //		String assocTbl = datIdMap.getAssocTblName(info.getDatId());
 //		String field1 = DatIdMapHelper.getAssocLeftField(nearType, assocTbl);
-		String field1 = datIdMap.getAssocLeftField(info);
-		String field2 = datIdMap.getAssocRightField(info);
+		String field1 = datIdMap.getAssocFieldFor(info);
+		String field2 = datIdMap.getAssocOtherField(info);
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
