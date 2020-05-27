@@ -29,6 +29,8 @@ public class InternalTypeCreator {
 		OrderedMap omap = new OrderedMap();
 		omap.add("id", intType, false, true, false, true); //serial
 		omap.add("tblName", strType, false, false, false, false);
+		omap.add("left", strType, false, false, false, false);
+		omap.add("right", strType, false, false, false, false);
 		PrimaryKey prikey = new PrimaryKey(new TypePair("id", intType));
 		DStructType dtype = new DStructType(Shape.STRUCT, typeName, null, omap, prikey);
 		return dtype;

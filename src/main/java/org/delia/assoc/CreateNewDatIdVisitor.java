@@ -54,7 +54,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		//write new schema to db
 		DStructType dtype = registry.getDATType();
 		String tblName = createAssocTableName(rr.relInfo);
-		DValue dval = createDatTableObj(dtype, tblName);
+		DValue dval = createDatTableObj(dtype, tblName, rr.relInfo);
 		if (dval == null) {
 			return;
 		}
@@ -71,7 +71,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
 			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
 			datIdCounter++;
-			datIdMap.putFull(key, datId, tblName);
+			datIdMap.putFull(key, datId, tblName, dval.asStruct().getField("left").asString(),
+					dval.asStruct().getField("right").asString());
 		}
 	}
 	
@@ -109,7 +110,9 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			}
 			
 			String tblName = dval.asStruct().getField("tblName").asString();
-			datIdMap.attachTblName(id, tblName);
+			String left = dval.asStruct().getField("left").asString();
+			String right = dval.asStruct().getField("right").asString();
+			datIdMap.attachTblName(id, tblName, left, right);
 		}
 
 		return maxId;
@@ -137,19 +140,27 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		return tlbName;
 	}
 
-	private DValue createDatTableObj(DStructType type, String datTableName) {
+	private DValue createDatTableObj(DStructType type, String datTableName, RelationInfo relInfo) {
 		StructValueBuilder structBuilder = new StructValueBuilder(type);
 
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue dval = builder.buildString(datTableName);
 		structBuilder.addField("tblName", dval);
+		structBuilder.addField("left", buildLRString(builder, relInfo));
+		structBuilder.addField("right", buildLRString(builder, relInfo.otherSide));
 
 		boolean b = structBuilder.finish();
 		if (! b) {
+			log.logError("failed to be DAT row for type '%s'", type.getName());
 			return null;
 		}
 		dval = structBuilder.getDValue();
 		return dval;
+	}
+
+	private DValue buildLRString(ScalarValueBuilder builder, RelationInfo relInfo) {
+		String left = String.format("%s.%s", relInfo.nearType, relInfo.fieldName);
+		return builder.buildString(left);
 	}
 
 	private String createKey(String typeName, String fieldName) {

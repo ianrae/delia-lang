@@ -56,7 +56,10 @@ public class AllBDDTests extends BDDBase {
 	}
 	@Test
 	public void testR560() {
-		runR560File("t0-self-11.txt", 1);
+		runR560File("t0-self-11.txt", 3);
+		runR560File("t0-self-11a.txt", 3);
+		runR560File("t0-self-N1.txt", 4);
+		runR560File("t0-self-NN.txt", 4);
 	}
 	@Test
 	public void testR600() {
@@ -310,7 +313,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 2;
+		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableMigration = true;
@@ -318,7 +321,8 @@ public class AllBDDTests extends BDDBase {
 //		runR1350File("t0-filter-in-twitter.txt", 13);
 //		runR560File("t0-self-11.txt", 3);
 //		runR560File("t0-self-11a.txt", 3);
-		runR560File("t0-self-N1.txt", 3);
+//		runR560File("t0-self-N1.txt", 4);
+		runR560File("t0-self-NN.txt", 4);
 
 	}
 	
