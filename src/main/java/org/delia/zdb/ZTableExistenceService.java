@@ -32,6 +32,8 @@ public class ZTableExistenceService implements TableExistenceService {
 		
 		
 		//try tbl1 tbl2 Assoc
+		//careful. with self-join tbl1 and tbl2 are the same. 
+		//TODO: review this. i think this code is ok.
 		String assocTblName = datIdMap.getAssocTblName(info.getDatId());
 		if (assocTblName.startsWith(tbl1)) {
 			TableInfo tblinfo = new TableInfo(tbl1, assocTblName);

@@ -194,7 +194,6 @@ public class AllBDDTests extends BDDBase {
 		runR1500File("t0-queryfn-limit.txt", 5);
 		runR1500File("t0-queryfn-offset.txt", 5);
 	}
-	
 	@Test
 	public void testR1500a() {
 		enableAllFileCheck = false;

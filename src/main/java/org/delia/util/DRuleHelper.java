@@ -87,6 +87,29 @@ public class DRuleHelper {
 		}
 		return null;
 	}
+	//needed due to self-join
+	public static List<RelationInfo> findAllMatchingByName(RelationRuleBase rrTarget, DStructType farType) {
+		if (rrTarget.getRelationName() == null) {
+			return null;
+		}
+		String name = rrTarget.getRelationName();
+		List<RelationInfo> resultL = new ArrayList<>();
+		
+		for(DRule rule: farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					resultL.add(rr.relInfo);
+				}
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					resultL.add(rr.relInfo);
+				}
+			}
+		}
+		return resultL;
+	}
 
 	public static RelationOneRule findOneRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);

@@ -58,7 +58,10 @@ public class H2BDDTests extends BDDBase {
 	}
 	@Test
 	public void testR560() {
-		runR560File("t0-self-11.txt", 1);
+		runR560File("t0-self-11.txt", 3);
+		runR560File("t0-self-11a.txt", 3);
+		runR560File("t0-self-N1.txt", 4);
+		runR560File("t0-self-NN.txt", 4);
 	}
 	@Test
 	public void testR600() {
@@ -151,6 +154,7 @@ public class H2BDDTests extends BDDBase {
 		runR1350File("t0-filter-like.txt", 6);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);
+		runR1350File("t0-filter-in-twitter.txt", 4);
 	}
 	
 	@Test
@@ -160,8 +164,8 @@ public class H2BDDTests extends BDDBase {
 	
 	@Test
 	public void testR1500() {
+		ignoreTest("t0-queryfn-orderby-2span.txt");
 		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 		runR1500File("t0-queryfn-distinct.txt", 3);
 		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 		runR1500File("t0-queryfn-flatten.txt", 0);
@@ -192,7 +196,12 @@ public class H2BDDTests extends BDDBase {
 		runR1500File("t0-queryfn-limit.txt", 5);
 		runR1500File("t0-queryfn-offset.txt", 5);
 	}
-	
+	@Test
+	public void testR1500a() {
+		enableAllFileCheck = false;
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+	}
+
 	@Test
 	public void testR1550() {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
@@ -305,16 +314,15 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void test8Debug() {
-//		testIndexToRun = 0;
-		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+		testIndexToRun = 1;
+//		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		cleanTables = true;
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-//		runR1500File("t0-queryfn-count.txt", 2);
-		runR800File("t0-delete.txt", 4);
+		runR560File("t0-self-N1.txt", 4);
 	}
 	
 	//---

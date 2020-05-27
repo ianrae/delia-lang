@@ -49,7 +49,7 @@ public class InsertStatementRunner extends ServiceBase {
 
 	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, ZDBExecutor dbexecutor, FetchRunner fetchRunner, 
 			DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {
-		//find DType for typename Actor
+
 		DType dtype = registry.getType(exp.getTypeName());
 		if (failIfNull(dtype, exp.typeName, res)) {
 			return;

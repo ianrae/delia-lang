@@ -6,16 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
-import org.delia.assoc.DatIdMapHelper;
 import org.delia.core.FactoryService;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -43,6 +44,7 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		insertFrag.tblFrag = tblFrag;
 
 		generateSetFields(structType, insertFrag, dval, mmMap);
+		generateParentUpdateIfNeeded(structType, insertFrag, dval);
 		generateAssocUpdateIfNeeded(structType, insertFrag, dval, mmMap);
 
 		if (! useAliases) {
@@ -222,17 +224,17 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		return selectFrag.statement.sql;
 	}
 
-	public SqlStatementGroup renderInsertGroup(InsertStatementFragment selectFrag) {
+	public SqlStatementGroup renderInsertGroup(InsertStatementFragment insertFrag) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
 
-		SqlStatement mainStatement = selectFrag.statement;
-		mainStatement.sql = selectFrag.render();
+		SqlStatement mainStatement = insertFrag.statement;
+		mainStatement.sql = insertFrag.render();
 		List<DValue> save = new ArrayList<>(mainStatement.paramL); //copy
 
 		mainStatement.paramL.clear();
-		stgroup.add(selectFrag.statement);
-		if (selectFrag.assocInsertFragL != null) {
-			for(InsertStatementFragment assocFrag: selectFrag.assocInsertFragL) {
+		stgroup.add(insertFrag.statement);
+		if (insertFrag.assocInsertFragL != null) {
+			for(InsertStatementFragment assocFrag: insertFrag.assocInsertFragL) {
 				initMainParams(mainStatement, save, assocFrag);
 			}
 		}
@@ -241,9 +243,9 @@ public class InsertFragmentParser extends SelectFragmentParser {
 			return stgroup; //no inner frags
 		}
 
-		if (selectFrag.assocInsertFragL != null) {
-			for(InsertStatementFragment assocFrag: selectFrag.assocInsertFragL) {
-				addIfNotNull(stgroup, assocFrag, save, nextStartIndex(selectFrag.assocInsertFragL));
+		if (insertFrag.assocInsertFragL != null) {
+			for(InsertStatementFragment assocFrag: insertFrag.assocInsertFragL) {
+				addIfNotNull(stgroup, assocFrag, save, nextStartIndex(insertFrag.assocInsertFragL));
 				initMainParams(mainStatement, save, assocFrag);
 			}
 		}
@@ -285,4 +287,43 @@ public class InsertFragmentParser extends SelectFragmentParser {
 			stgroup.add(stat);
 		}
 	}
+	
+	private void generateParentUpdateIfNeeded(DStructType structType, InsertStatementFragment insertFrag, DValue dval) {
+
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				if (inner == null) {
+					continue;
+				}
+				
+				if (! shouldGenerateFKConstraint(pair, structType)) {
+					RelationOneRule ruleOne = DRuleHelper.findOneRule(structType, pair.name);
+					if (ruleOne != null) {
+						UpdateStatementFragment updateFrag = new UpdateStatementFragment();
+//						FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);
+//						updateFrag.setValuesL.add("?");
+//						updateFrag.fieldL.add(ff);
+//						updateFrag.statement.paramL.add(dvalToUse);
+
+					} else {
+						RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, pair.name);
+						if (ruleMany != null) {
+							UpdateStatementFragment updateFrag = new UpdateStatementFragment();
+							RelationInfo otherSide = ruleMany.relInfo.otherSide;
+							PrimaryKey pk = ruleMany.relInfo.nearType.getPrimaryKey();
+							FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);
+							updateFrag.setValuesL.add("?");
+							updateFrag.fieldL.add(ff);
+							updateFrag.statement.paramL.add(null);
+							
+						}						
+					}
+				} 
+			}
+		}
+		
+	}
+
+	
 }

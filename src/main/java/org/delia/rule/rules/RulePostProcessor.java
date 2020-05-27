@@ -1,7 +1,6 @@
 package org.delia.rule.rules;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,7 +149,7 @@ public class RulePostProcessor extends ServiceBase {
 							
 							RelationInfo info = rr.relInfo;
 //							TypePair farSide = DRuleHelper.findMatchingRelByType((DStructType)pair.type, structType);
-							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
+							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr, pair);
 							//may be multiple possible matches here
 							boolean b = false;
 							if (farSideL.size() > 1) {
@@ -169,7 +168,7 @@ public class RulePostProcessor extends ServiceBase {
 							}
 							
 							RelationInfo info = rr.relInfo;
-							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
+							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr, pair);
 							//may be multiple possible matches here
 							boolean b = false;
 							if (farSideL.size() > 1) {
@@ -567,7 +566,18 @@ public class RulePostProcessor extends ServiceBase {
 	private boolean isOtherSideManyEarly(DType otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
-	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr) {
+	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr, TypePair currentPair) {
+		List<TypePair> list = doFindAllMatchingRel(otherSide, targetType, rr);
+		List<TypePair> newlist = new ArrayList<>();
+		for(TypePair p: list) {
+			if (p != currentPair) {
+				newlist.add(p);
+			}
+		}
+		return newlist;
+	}
+	
+	private List<TypePair> doFindAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr) {
 		//type replacement should handle this, but check anyway.
 		DType mismatch = registry.getType(otherSide.getName());
 		if (mismatch != otherSide) {
@@ -575,15 +585,18 @@ public class RulePostProcessor extends ServiceBase {
 			otherSide = mismatch;
 		}
 		
-		RelationInfo info = DRuleHelper.findMatchingByName(rr, (DStructType)otherSide);
-		if (info != null) {
-			TypePair pair = DRuleHelper.findMatchingPair(info.nearType, info.fieldName);
-			return Collections.singletonList(pair);
+		List<RelationInfo> infos = DRuleHelper.findAllMatchingByName(rr, (DStructType)otherSide);
+		if (! infos.isEmpty()) {
+			List<TypePair> pairs = new ArrayList<>();
+			for(RelationInfo info: infos) {
+				TypePair pair = DRuleHelper.findMatchingPair(info.nearType, info.fieldName);
+				pairs.add(pair);
+			}
+			return pairs;
 		}
 		
 		return DRuleHelper.xfindAllMatchingRelByType((DStructType) otherSide, targetType);
 	}
-	
 	
 	
 //	private void checkForOtherSideDuplicates(DTypeRegistry registry, List<DeliaError> allErrors) {
