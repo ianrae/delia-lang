@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.delia.type.DType;
+import org.delia.relation.RelationInfo;
+import org.delia.type.DStructType;
+import org.delia.util.DeliaExceptionHelper;
 
 public class DatIdMap {
 	private static class DatInfo {
@@ -18,6 +20,14 @@ public class DatIdMap {
 			this.tableName = tableName;
 			this.left = left;
 			this.right = right;
+		}
+		public boolean matchesLeft(RelationInfo relinfo) {
+			String s = String.format("%s.%s", relinfo.nearType, relinfo.fieldName);
+			return s.equals(left);
+		}
+		public boolean matchesRight(RelationInfo relinfo) {
+			String s = String.format("%s.%s", relinfo.nearType, relinfo.fieldName);
+			return s.equals(right);
 		}
 	}
 	
@@ -53,8 +63,13 @@ public class DatIdMap {
 	}
 
 	//AddressCustomerDat1, so "Address" is left type
-	public boolean isLeftType(String assocTblName, DType dtype) {
-		return assocTblName.startsWith(dtype.getName());
+	public boolean isLeftType(String assocTblName, RelationInfo relinfo) {
+		Integer datId = relinfo.getDatId();
+		if (datId == null) {
+			DeliaExceptionHelper.throwError("bad-dat-id", "no DAT id for %s", assocTblName);
+		}
+		DatInfo info = tblNameMap.get(datId);
+		return info.matchesLeft(relinfo);
 	}
 	
 	//used for consistency check
@@ -65,6 +80,32 @@ public class DatIdMap {
 			tmp.put(id, "");
 		}
 		return tmp.size();
+	}
+
+	
+	public String getAssocLeftField(RelationInfo relinfo) {
+		Integer datId = relinfo.getDatId();
+		if (datId == null) {
+			DeliaExceptionHelper.throwError("bad-dat-id2", "no DAT id for field %s", relinfo.fieldName);
+		}
+		DatInfo info = tblNameMap.get(datId);
+		if (info.matchesLeft(relinfo)) {
+			return "leftv";
+		} else {
+			return "rightv";
+		}
+	}
+	public String getAssocRightField(RelationInfo relinfo) {
+		Integer datId = relinfo.getDatId();
+		if (datId == null) {
+			DeliaExceptionHelper.throwError("bad-dat-id3", "no DAT id for field %s", relinfo.fieldName);
+		}
+		DatInfo info = tblNameMap.get(datId);
+		if (info.matchesLeft(relinfo)) {
+			return "rightv";
+		} else {
+			return "leftv";
+		}
 	}
 
 }

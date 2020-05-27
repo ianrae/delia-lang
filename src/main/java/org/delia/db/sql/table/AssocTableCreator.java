@@ -71,7 +71,7 @@ public class AssocTableCreator extends ServiceBase {
 		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
 		tblinfo.assocTblName = assocTableName;
 		
-		if (datIdMap.isLeftType(assocTableName, relinfo.nearType)) {
+		if (datIdMap.isLeftType(assocTableName, relinfo)) {
 			tblinfo.tbl1 = tbl1;
 			tblinfo.tbl2 = tbl2;
 			tblinfo.fieldName = xpair.name;

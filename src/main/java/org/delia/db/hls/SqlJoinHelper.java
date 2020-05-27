@@ -105,7 +105,8 @@ public class SqlJoinHelper {
 				AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTable);
 				String tbl1 = aliasManager.buildTblAlias(aliasInfo);
 				String on1 = buildMainAlias(hlspan, mainPk.getFieldName()); //b.cust
-				String fff = DatIdMapHelper.getAssocLeftField(hlspan.fromType, assocTable);
+//				String fffx = DatIdMapHelper.getAssocLeftField(hlspan.fromType, assocTable);
+				String fff = datIdMap.getAssocLeftField(relinfoA);
 				String on2 = aliasManager.buildFieldAlias(aliasInfo, fff); //a.id
 				
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
@@ -140,7 +141,8 @@ public class SqlJoinHelper {
 			AliasInfo aliasInfo = aliasManager.getFieldAlias((DStructType) actualPair.type, actualPair.name);
 			String tbl1 = aliasManager.buildTblAlias(aliasInfo);
 			String on1 = aliasManager.buildFieldAlias(aliasInfo, pk.getFieldName()); //b.id
-			String fff = DatIdMapHelper.getAssocRightField(hlspan.fromType, assocTable);
+//			String fff = DatIdMapHelper.getAssocRightField(hlspan.fromType, assocTable);
+			String fff = datIdMap.getAssocRightField(relinfoA);
 			AliasInfo ai2 = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTable);
 			String on2 = aliasManager.buildFieldAlias(ai2, fff); //c.rightv
 			
@@ -254,7 +256,7 @@ public class SqlJoinHelper {
 		private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL, TypePair pair,
 				RelationInfo relinfoA) {
 			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-			String fieldName = DatIdMapHelper.getAssocRightField(hlspan.fromType, assocTbl);
+			String fieldName = datIdMap.getAssocRightField(relinfoA);
 			
 			//b.id as cust
 //			AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstanceAssoc(assocTbl);

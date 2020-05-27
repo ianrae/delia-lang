@@ -112,7 +112,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 					String assocTblName = datIdMap.getAssocTblName(relinfo.getDatId()); 
 //					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
 					String newAlias = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTblName).alias;
-					String fff = DatIdMapHelper.getAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
+					String fff = datIdMap.getAssocRightField(relinfo); //hlspan2.fromType);
 					String s3 = String.format("%s.%s", newAlias, fff);
 					
 					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
