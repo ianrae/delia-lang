@@ -24,12 +24,12 @@ public class DiagnosticServiceImpl extends ServiceBase implements DiagnosticServ
 	}
 
 	@Override
-	public boolean isActive(String filterIdStr) {
-		return filterStr.contains(filterIdStr);
+	public boolean isActive(String filterId) {
+		return filterStr.contains(filterId);
 	}
 
 	@Override
-	public void log(DTypeRegistry registry, DValue dval) {
+	public void log(String filterId, DValue dval, DTypeRegistry registry) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
 		gen.includeVPrefix = false;
 		DeliaGeneratePhase phase = new DeliaGeneratePhase(factorySvc, registry);
@@ -37,7 +37,7 @@ public class DiagnosticServiceImpl extends ServiceBase implements DiagnosticServ
 		String s = StringUtil.flattenNoComma(gen.outputL);
 		int pos = s.indexOf('{');
 		String ss = s.substring(pos);
-		log.log("dval: %s", ss);
+		log.log("dval(%s): %s", filterId, ss);
 	}
 	
 }

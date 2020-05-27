@@ -109,7 +109,9 @@ public class InsertStatementRunner extends ServiceBase {
 		}
 
 		DiagnosticService diagnosticSvc = factorySvc.getDiagnosticService();
-		diagnosticSvc.log(registry, cres.dval);
+		if (diagnosticSvc.isActive("I")) {
+			diagnosticSvc.log("I", cres.dval, registry);
+		}
 		
 		//INSERT has no return value
 		res.ok = true;

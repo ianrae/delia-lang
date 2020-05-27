@@ -7,6 +7,6 @@ public interface DiagnosticService {
 	void configure(String filter);
 	String getConfigue();
 	
-	boolean isActive(String filterIdStr);
-	void log(DTypeRegistry registry, DValue dval);
+	boolean isActive(String filterId);
+	void log(String filterId, DValue dval, DTypeRegistry registry);
 }

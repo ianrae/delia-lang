@@ -321,6 +321,7 @@ public class AllBDDTests extends BDDBase {
 //		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+//		diagnosticFilter = "I"; //log insert statements
 		
 		runR550File("t0-multirel-NtoN-1.txt", 1);
 

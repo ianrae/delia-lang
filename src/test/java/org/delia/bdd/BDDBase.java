@@ -71,6 +71,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
 	protected ZDBInterfaceFactory dbInterfaceToUse;
+	protected String diagnosticFilter = "";
 	
 	protected List<String> filesExecutedL = new ArrayList<>();
 	private BDDGroup currentGroup;
@@ -195,6 +196,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		
 		List<BDDTest> tests = parser.parse(lines);
 		BDDTestRunner runner = new BDDTestRunner(this);
+		runner.diagnosticFilter = diagnosticFilter;
 		if (testIndexToRun >= 0) {
 			runner.setTestToRun(testIndexToRun);
 		}
