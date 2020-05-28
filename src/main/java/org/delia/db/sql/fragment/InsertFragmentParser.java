@@ -326,22 +326,23 @@ public class InsertFragmentParser extends SelectFragmentParser {
 					} else {
 						RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, pair.name);
 						if (ruleMany != null) {
+							DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
 							RelationInfo info = ruleMany.relInfo;
 							RelationInfo otherSide = ruleMany.relInfo.otherSide;
 							PrimaryKey pk = info.nearType.getPrimaryKey();
-							TypePair tmp = new TypePair(otherSide.fieldName, pk.getKeyType());
-							DValue fkval = inner.asRelation().getForeignKey();
-							DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
-							UpdateStatementFragment updateFrag = new UpdateStatementFragment();
-							TableFragment tblFrag = createTable(info.farType, insertFrag);
-							updateFrag.tblFrag = tblFrag;
-							updateFrag.paramStartIndex = insertFrag.statement.paramL.size();
-							FieldFragment ff = FragmentHelper.buildFieldFrag(info.farType, insertFrag, tmp);
-							updateFrag.setValuesL.add("?");
-							updateFrag.fieldL.add(ff);
-							updateFrag.statement.paramL.add(pkval); //TODO later add all fks in list
-							doWhere(insertFrag, info.farType, fkval, updateFrag);
-							addFKUpdateFrag(insertFrag, updateFrag);
+
+							for(DValue fkval: inner.asRelation().getMultipleKeys()) {
+								UpdateStatementFragment updateFrag = createUpdateFrag(info, insertFrag); 
+								
+								TypePair tmp = new TypePair(otherSide.fieldName, pk.getKeyType());
+								FieldFragment ff = FragmentHelper.buildFieldFrag(info.farType, insertFrag, tmp);
+								updateFrag.setValuesL.add("?");
+								updateFrag.fieldL.add(ff);
+								updateFrag.statement.paramL.add(pkval); 
+								addWhere(insertFrag, info.farType, fkval, updateFrag);
+								addFKUpdateFrag(insertFrag, updateFrag);
+								
+							}
 						}						
 					}
 				} 
@@ -350,13 +351,21 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		
 	}
 
+	private UpdateStatementFragment createUpdateFrag(RelationInfo info, InsertStatementFragment insertFrag) {
+		UpdateStatementFragment updateFrag = new UpdateStatementFragment();
+		TableFragment tblFrag = createTable(info.farType, insertFrag);
+		updateFrag.tblFrag = tblFrag;
+		updateFrag.paramStartIndex = insertFrag.statement.paramL.size();
+		return updateFrag;
+	}
+
 	private void addFKUpdateFrag(InsertStatementFragment insertFrag, UpdateStatementFragment updateFrag) {
 		if (insertFrag.fkUpdateFragL == null) {
 			insertFrag.fkUpdateFragL = new ArrayList<>();
 		}
 		insertFrag.fkUpdateFragL.add(updateFrag);
 	}
-	private void doWhere(InsertStatementFragment insertFrag, DStructType structType, DValue pkval, UpdateStatementFragment updateFrag) {
+	private void addWhere(InsertStatementFragment insertFrag, DStructType structType, DValue pkval, UpdateStatementFragment updateFrag) {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp = builderSvc.createPrimaryKeyQuery(structType.getName(), pkval);
 		QuerySpec spec = builderSvc.buildSpec(exp, new DoNothingVarEvaluator());

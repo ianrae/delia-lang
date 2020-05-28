@@ -315,7 +315,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void test8Debug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -324,7 +324,7 @@ public class H2BDDTests extends BDDBase {
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
 //		runR560File("t0-self-N1.txt", 4);
-		runR700File("t0-insert-parent.txt", 4);
+		runR700File("t0-insert-parent.txt", 2);
 	}
 	
 	//---

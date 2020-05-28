@@ -13,73 +13,28 @@ background:
 thenType: struct
 
 ---
-title: basic
-given:
-when:
-  let x = Customer[55]
-then:
-value:a:Customer {
- vid:55
- vname:'art'
- vmanager:null
- vworkers:null
-}
-
----
-title: add worker,fks
-given:
-  insert Customer {id: 56, name: 'bob', workers: '100' }
-when:
-  let x = Customer[55].fks().orderBy('id')
-then:
-value:a:Customer {
- vid:55
- vname:'art'
- vworkers:{'100'}
-}
-value:a:Customer {
- vid:56
- vname:'bob'
- vmanager:null
-  vworkers:{55}
-}
-
----
 title: add worker
 given:
   insert Customer {id: 56, name: 'bob', workers: '100' }
 when:
-  let x = Customer[55].orderBy('id')
+  let x = Address['100']
 then:
-value:a:Customer {
- vid:55
- vname:'art'
- vmanager:null
- vworkers:null
-}
-value:a:Customer {
- vid:56
- vname:'bob'
- vmanager:null
-  vworkers:null
+value:a:Address {
+ vsid:'100'
+ vcity:'kingston'
+ vmanager:{56}
 }
 
 ---
-title: add manager
+title: add workers
 given:
-  insert Address {id: '101', city: 'ottawa', manager: 55 }
+  insert Address  {sid: '101', city: 'ottawa' }
+  insert Customer {id: 56, name: 'bob', workers: ['100','101'] }
 when:
-  let x = Customer[55].orderBy('id')
+  let x = Address['100']
 then:
-value:a:Customer {
- vid:55
- vname:'art'
- vmanager:null
- vworkers:null
-}
-value:a:Customer {
- vid:56
- vname:'bob'
- vmanager:{55}
-  vworkers:null
+value:a:Address {
+ vsid:'100'
+ vcity:'kingston'
+ vmanager:{56}
 }
