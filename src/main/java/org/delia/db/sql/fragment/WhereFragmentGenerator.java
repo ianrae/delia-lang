@@ -148,13 +148,14 @@ public class WhereFragmentGenerator extends ServiceBase {
 		String op1 = operandToSql(phrase.op1, statement);
 		StringJoiner joiner = new StringJoiner(",");
 		for(Exp exp: phrase.valueL) {
-//			joiner.add(exp.strValue());
-//			String s = operandToSql(phrase.op1, statement);
-			
 			WhereOperand tmp = new WhereOperand();
 			tmp.exp = exp;
-			tmp.isValue = true;
 			tmp.typeDetails = phrase.op1.typeDetails;
+			if (exp instanceof IdentExp) {
+				tmp.isValue = false;
+			} else {
+				tmp.isValue = true;
+			}
 			String s = operandToSql(tmp, statement);
 			joiner.add(s);
 		}

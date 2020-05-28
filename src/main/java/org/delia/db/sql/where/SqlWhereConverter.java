@@ -88,6 +88,7 @@ public class SqlWhereConverter extends ServiceBase {
 				phrase.op1 = new WhereOperand();
 				phrase.op1.typeDetails = details1;
 				phrase.op1.exp = leftArg;
+				phrase.op1.isValue = true;
 				return phrase;
 			}
 		} else if (fexp.opexp1 instanceof FilterOpFullExp) {
