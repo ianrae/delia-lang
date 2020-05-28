@@ -104,7 +104,8 @@ public class AliasManager extends ServiceBase {
 		TypePair pair = DValueHelper.findField(structType, fieldName);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 		if (relinfo != null && relinfo.otherSide != null) {
-			if (getAssocAlias(relinfo.otherSide.nearType, relinfo.otherSide.fieldName, assocTbl) != null) {
+			boolean isSelfJoin = relinfo.nearType == relinfo.farType;
+			if (! isSelfJoin && getAssocAlias(relinfo.otherSide.nearType, relinfo.otherSide.fieldName, assocTbl) != null) {
 				return;
 			}
 		}
@@ -168,6 +169,9 @@ public class AliasManager extends ServiceBase {
 		TypePair pair = DValueHelper.findField(structType, fieldName);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 		if (relinfo != null && relinfo.otherSide != null) {
+			boolean isSelfJoin = relinfo.nearType == relinfo.farType;
+			if (isSelfJoin) return null;
+			
 			key = String.format("%s.%s", relinfo.otherSide.nearType.getName(), relinfo.otherSide.fieldName);
 			info = assocMap.get(key);
 			if (info != null) {

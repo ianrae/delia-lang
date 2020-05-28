@@ -325,10 +325,9 @@ public class H2BDDTests extends BDDBase {
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-//		runR560File("t0-self-11.txt", 3);
-//		runR560File("t0-self-11a.txt", 3);
-//		runR560File("t0-self-N1.txt", 4);
-		runR560File("t0-self-NN.txt", 4);
+//		runR560File("t0-self-NN.txt", 4);
+//		runR700File("t0-insert-parent.txt", 2);
+		runR1350File("t0-filter-in-twitter.txt", 4);
 	}
 	
 	//---

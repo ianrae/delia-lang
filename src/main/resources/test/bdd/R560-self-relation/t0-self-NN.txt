@@ -59,7 +59,7 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworkers:{55}
+  vworkers:null
 }
 
 ---
@@ -78,6 +78,6 @@ value:a:Customer {
 value:a:Customer {
  vid:56
  vname:'bob'
- vmanager:{55}
+ vmanager:null
   vworkers:null
 }
