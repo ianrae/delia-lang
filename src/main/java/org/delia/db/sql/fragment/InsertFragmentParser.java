@@ -19,7 +19,6 @@ import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
@@ -59,6 +58,11 @@ public class InsertFragmentParser extends SelectFragmentParser {
 					removeAllAliases(assocFrag);
 				}
 			}
+			if (insertFrag.fkUpdateFragL != null) {
+				for(UpdateStatementFragment assocFrag: insertFrag.fkUpdateFragL) {
+					removeAllAliases(assocFrag);
+				}
+			}
 		}
 
 		return insertFrag;
@@ -68,11 +72,18 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	 * Postgres doesn't like alias in UPDATE statements
 	 * @param insertFrag
 	 */
-	private void removeAllAliases(InsertStatementFragment insertFrag) {
+	private void removeAllAliases(StatementFragmentBase insertFrag) {
 		for(FieldFragment ff: insertFrag.fieldL) {
 			ff.alias = null;
 		}
 		insertFrag.tblFrag.alias = null;
+		for(SqlFragment ff: insertFrag.whereL) {
+			if (ff instanceof OpFragment) {
+				OpFragment opff = (OpFragment) ff;
+				opff.left.alias = null;
+				opff.right.alias = null;
+			}
+		}
 	}
 
 	private void generateSetFields(DStructType structType, InsertStatementFragment insertFrag,
@@ -305,6 +316,13 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		}
 	}
 	
+	/**
+	 * if insert statement include values for parent relations we need to add an update
+	 * statement.
+	 * @param structType - main type being inserted
+	 * @param insertFrag - insert frag
+	 * @param dval - values
+	 */
 	private void generateParentUpdateIfNeeded(DStructType structType, InsertStatementFragment insertFrag, DValue dval) {
 
 		for(TypePair pair: structType.getAllFields()) {
@@ -317,12 +335,12 @@ public class InsertFragmentParser extends SelectFragmentParser {
 				if (! shouldGenerateFKConstraint(pair, structType)) {
 					RelationOneRule ruleOne = DRuleHelper.findOneRule(structType, pair.name);
 					if (ruleOne != null) {
-						UpdateStatementFragment updateFrag = new UpdateStatementFragment();
-//						FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);
-//						updateFrag.setValuesL.add("?");
-//						updateFrag.fieldL.add(ff);
-//						updateFrag.statement.paramL.add(dvalToUse);
-
+						DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+						RelationInfo info = ruleOne.relInfo;
+						RelationInfo otherSide = ruleOne.relInfo.otherSide;
+						DValue fkval = inner.asRelation().getForeignKey();
+						
+						addFkUpdateStatement(insertFrag, info, otherSide, pkval, fkval);
 					} else {
 						RelationManyRule ruleMany = DRuleHelper.findManyRule(structType, pair.name);
 						if (ruleMany != null) {
@@ -332,16 +350,7 @@ public class InsertFragmentParser extends SelectFragmentParser {
 							PrimaryKey pk = info.nearType.getPrimaryKey();
 
 							for(DValue fkval: inner.asRelation().getMultipleKeys()) {
-								UpdateStatementFragment updateFrag = createUpdateFrag(info, insertFrag); 
-								
-								TypePair tmp = new TypePair(otherSide.fieldName, pk.getKeyType());
-								FieldFragment ff = FragmentHelper.buildFieldFrag(info.farType, insertFrag, tmp);
-								updateFrag.setValuesL.add("?");
-								updateFrag.fieldL.add(ff);
-								updateFrag.statement.paramL.add(pkval); 
-								addWhere(insertFrag, info.farType, fkval, updateFrag);
-								addFKUpdateFrag(insertFrag, updateFrag);
-								
+								addFkUpdateStatement(insertFrag, info, otherSide, pkval, fkval);
 							}
 						}						
 					}
@@ -351,9 +360,26 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		
 	}
 
+	private void addFkUpdateStatement(InsertStatementFragment insertFrag, RelationInfo info, RelationInfo otherSide,
+			DValue pkval, DValue fkval) {
+		UpdateStatementFragment updateFrag = createUpdateFrag(info, insertFrag); 
+
+		PrimaryKey pk = info.nearType.getPrimaryKey();
+		TypePair tmp = new TypePair(otherSide.fieldName, pk.getKeyType());
+		FieldFragment ff = FragmentHelper.buildFieldFrag(info.farType, insertFrag, tmp);
+		updateFrag.setValuesL.add("?");
+		updateFrag.fieldL.add(ff);
+		updateFrag.statement.paramL.add(pkval); 
+		
+		addWhere(insertFrag, info.farType, fkval, updateFrag);
+		addFKUpdateFrag(insertFrag, updateFrag);
+	}
+
 	private UpdateStatementFragment createUpdateFrag(RelationInfo info, InsertStatementFragment insertFrag) {
 		UpdateStatementFragment updateFrag = new UpdateStatementFragment();
 		TableFragment tblFrag = createTable(info.farType, insertFrag);
+//		updateFrag.aliasMap.put(tblFrag.name, tblFrag);
+
 		updateFrag.tblFrag = tblFrag;
 		updateFrag.paramStartIndex = insertFrag.statement.paramL.size();
 		return updateFrag;
