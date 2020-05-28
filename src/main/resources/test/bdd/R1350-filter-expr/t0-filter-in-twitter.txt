@@ -53,7 +53,7 @@ given:
   insert Address {id: 1, text: 'tweet1', sender: 55 }
 when:
 #left side of IN must be ident. TODO fix later and allow 55 in [followers]
-  let u = 55
+  let u = 56
   let x = Customer[u in [followers]].fks()
 then:
 value:a:Customer {

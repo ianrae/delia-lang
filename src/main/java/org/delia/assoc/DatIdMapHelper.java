@@ -11,6 +11,6 @@ public class DatIdMapHelper {
 	}
 	
 	public static String getAssocTblField(boolean isLeft) {
-		return isLeft ? LEFTNAME : RIGHTNAME;
+		return isLeft ? "leftv" : "rightv";
 	}
 }
