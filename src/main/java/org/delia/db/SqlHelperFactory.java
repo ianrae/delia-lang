@@ -4,6 +4,7 @@ import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.where.SqlWhereConverter;
+import org.delia.runner.VarEvaluator;
 
 public interface SqlHelperFactory {
 
@@ -12,5 +13,5 @@ public interface SqlHelperFactory {
 	SqlNameFormatter createNameFormatter();
 	SelectFuncHelper createSelectFuncHelper(DBAccessContext dbctx, SpanHelper spanHelper);
 	QueryTypeDetector createQueryTypeDetector(DBAccessContext dbctx);
-	SqlWhereConverter createSqlWhereConverter(DBAccessContext dbctx, QueryTypeDetector queryDetectorSvc);
+	SqlWhereConverter createSqlWhereConverter(DBAccessContext dbctx, QueryTypeDetector queryDetectorSvc, VarEvaluator varEvaluator);
 }

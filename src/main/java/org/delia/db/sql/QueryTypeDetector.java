@@ -29,14 +29,12 @@ public class QueryTypeDetector extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private SqlDateGenerator dateGenerator;
-	private SqlWhereConverter whereConverter;
 	private FilterFnRunner filterRunner;
 
 	public QueryTypeDetector(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.dateGenerator = new SqlDateGenerator(factorySvc, registry);
-		this.whereConverter = new SqlWhereConverter(factorySvc, registry, this);
 		this.filterRunner = new FilterFnRunner(registry);
 	}
 

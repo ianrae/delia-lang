@@ -13,6 +13,7 @@ import org.delia.db.sql.where.InPhrase;
 import org.delia.db.sql.where.LogicalPhrase;
 import org.delia.db.sql.where.SqlWhereConverter;
 import org.delia.db.sql.where.WherePhrase;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.sort.topo.TopoTestBase;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,7 +82,7 @@ public class SqlWhereConverterTests extends TopoTestBase {
 	@Test
 	public void testIn() {
 		QuerySpec spec = genSpec2("OO", "let z = Customer[x in [5,6]]");
-		SqlWhereConverter whereConverter = new SqlWhereConverter(delia.getFactoryService(), this.sess.getExecutionContext().registry, null);
+		SqlWhereConverter whereConverter = createWhereConverter();
 		InPhrase phrase = (InPhrase) whereConverter.convert(spec);
 		
 		chkInPhrase(phrase, "INTEGER_SHAPE", "x", "5,6");
@@ -122,13 +123,16 @@ public class SqlWhereConverterTests extends TopoTestBase {
 		return spec;
 	}
 	
+	private SqlWhereConverter createWhereConverter() {
+		return new SqlWhereConverter(delia.getFactoryService(), this.sess.getExecutionContext().registry, null, new DoNothingVarEvaluator());
+	}
 	private LogicalPhrase genPhrase(QuerySpec spec) {
-		SqlWhereConverter whereConverter = new SqlWhereConverter(delia.getFactoryService(), this.sess.getExecutionContext().registry, null);
+		SqlWhereConverter whereConverter = createWhereConverter();
 		return (LogicalPhrase) whereConverter.convert(spec);
 	}
 
 	private void chkPhrase(QuerySpec spec, String op, String type1, String v1, String type2, String v2) {
-		SqlWhereConverter whereConverter = new SqlWhereConverter(delia.getFactoryService(), this.sess.getExecutionContext().registry, null);
+		SqlWhereConverter whereConverter = createWhereConverter();
 		wherephrase = (WherePhrase) whereConverter.convert(spec);
 		chkPhrase(op, type1, v1, type2, v2);
 	}

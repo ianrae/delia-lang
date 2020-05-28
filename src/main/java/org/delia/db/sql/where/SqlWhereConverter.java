@@ -1,5 +1,7 @@
 package org.delia.db.sql.where;
 
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
@@ -17,10 +19,13 @@ import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlValue;
 import org.delia.db.sql.SqlValuePair;
+import org.delia.dval.DValueConverterService;
 import org.delia.relation.RelationInfo;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
@@ -29,11 +34,15 @@ public class SqlWhereConverter extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private QueryTypeDetector queryDetector;
+	private VarEvaluator varEvaluator;
+	private DValueConverterService dvalConverterSvc;
 
-	public SqlWhereConverter(FactoryService factorySvc, DTypeRegistry registry, QueryTypeDetector queryTypeDetector) {
+	public SqlWhereConverter(FactoryService factorySvc, DTypeRegistry registry, QueryTypeDetector queryTypeDetector, VarEvaluator varEvaluator) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetector = queryTypeDetector == null ? new QueryTypeDetector(factorySvc, registry) : queryTypeDetector;
+		this.varEvaluator = varEvaluator;
+		this.dvalConverterSvc = new DValueConverterService(factorySvc);
 	}
 	
 	public WhereExpression convert(QuerySpec spec) {
@@ -61,13 +70,26 @@ public class SqlWhereConverter extends ServiceBase {
 			InPhrase phrase = new InPhrase();
 			phrase.valueL = inexp.listExp.valueL;
 			
-			TypeDetails details1 = new TypeDetails();
-			getFromOpByFieldName(typeName, inexp.fieldName, details1);
-
-			phrase.op1 = new WhereOperand();
-			phrase.op1.typeDetails = details1;
-			phrase.op1.exp = new IdentExp(inexp.fieldName);
-			return phrase;
+			Exp leftArg = resolveLeftArg(inexp);
+			if (leftArg instanceof IdentExp) {
+				TypeDetails details1 = new TypeDetails();
+				getFromOpByFieldName(typeName, inexp.fieldName, details1);
+				
+				phrase.op1 = new WhereOperand();
+				phrase.op1.typeDetails = details1;
+				phrase.op1.exp = leftArg;
+				return phrase;
+			} else {
+				TypeDetails details1 = new TypeDetails();
+				//TODO this is hardcoded for u in [followers]. fix!!
+				String fieldName = inexp.listExp.valueL.get(0).strValue(); 
+				getFromOpByFieldName(typeName, fieldName, details1);
+				
+				phrase.op1 = new WhereOperand();
+				phrase.op1.typeDetails = details1;
+				phrase.op1.exp = leftArg;
+				return phrase;
+			}
 		} else if (fexp.opexp1 instanceof FilterOpFullExp) {
 			LogicalPhrase lphrase = new LogicalPhrase();
 			lphrase.isAnd = fexp.isAnd;
@@ -82,6 +104,21 @@ public class SqlWhereConverter extends ServiceBase {
 			String name = fexp.opexp1 == null ? "nul" : fexp.opexp1.getClass().getSimpleName();
 			DeliaExceptionHelper.throwError("unsupported-where-type", "Unsupported filter type '%s'", name);
 			return null; 
+		}
+	}
+	
+	private Exp resolveLeftArg(QueryInExp inexp) {
+		String varName = inexp.fieldName;
+		List<DValue> dvalL = varEvaluator.lookupVar(varName);
+		if (dvalL == null) {
+			return new IdentExp(inexp.fieldName);
+		} else if (dvalL.size() > 1) {
+			String msg = String.format("too many values (%d) in 'in' expression '%s'", dvalL.size(), inexp.strValue());
+			DeliaExceptionHelper.throwError("to-many-primary-key-vaues", msg);
+			return null;
+		} else {
+			DValue dval = dvalL.get(0);
+			return dvalConverterSvc.createExpFor(dval);
 		}
 	}
 

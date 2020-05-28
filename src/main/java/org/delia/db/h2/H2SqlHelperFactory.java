@@ -12,6 +12,7 @@ import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.where.SqlWhereConverter;
+import org.delia.runner.VarEvaluator;
 
 public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory {
 
@@ -46,8 +47,8 @@ public class H2SqlHelperFactory extends ServiceBase implements SqlHelperFactory 
 	}
 	
 	@Override
-	public SqlWhereConverter createSqlWhereConverter(DBAccessContext dbctx, QueryTypeDetector queryDetectorSvc) {
-		return new SqlWhereConverter(factorySvc, dbctx.registry, queryDetectorSvc);
+	public SqlWhereConverter createSqlWhereConverter(DBAccessContext dbctx, QueryTypeDetector queryDetectorSvc, VarEvaluator varEvaluator) {
+		return new SqlWhereConverter(factorySvc, dbctx.registry, queryDetectorSvc, varEvaluator);
 	}
 	
 }

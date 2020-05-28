@@ -53,7 +53,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
 		this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
-		this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc);
+		this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc, varEvaluator);
 		this.filterRunner = new FilterFnRunner(registry);
 		this.valueHelper = new ValueHelper(factorySvc);
 		this.varEvaluator = varEvaluator;
