@@ -38,7 +38,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.joinHelper = new SqlJoinHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
-		this.whereClauseHelper = new WhereClauseHelper(factorySvc, miniSelectParser, varEvaluator, asNameMap, aliasManager);
+		this.whereClauseHelper = new WhereClauseHelper(factorySvc, miniSelectParser, varEvaluator, asNameMap, aliasManager, datIdMap);
 		this.aliasManager = aliasManager;
 		this.datIdMap = datIdMap;
 	}

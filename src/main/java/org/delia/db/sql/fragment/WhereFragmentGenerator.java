@@ -153,7 +153,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 	}
 	protected OpFragment doInPhrase(InPhrase phrase, DStructType structType, SqlStatement statement, StatementFragmentBase selectFrag) {
 		String op1 = operandToSql(phrase.op1, statement);
-		OpFragment opFK = handleInPhraseFK(structType, phrase, op1);
+		OpFragment opFK = handleInPhraseFK(structType, phrase, op1, selectFrag);
 		if (opFK != null) {
 			return opFK;
 		}
@@ -185,20 +185,23 @@ public class WhereFragmentGenerator extends ServiceBase {
 			return opFrag;
 		}
 	}
-	private OpFragment handleInPhraseFK(DStructType structType, InPhrase inphrase, String op1) {
+	private OpFragment handleInPhraseFK(DStructType structType, InPhrase inphrase, String op1, StatementFragmentBase selectFrag) {
 		for(Exp exp: inphrase.valueL) {
 			if (exp instanceof IdentExp) {
 				TypePair pair = DValueHelper.findField(structType, exp.strValue());
 				if (pair != null) {
 					RelationInfo info = DRuleHelper.findMatchingRuleInfo(structType, pair);
 					if (info != null) {
-						String assocTbl = datIdMap.getAssocTblName(info.getDatId());
-						boolean isLeft = datIdMap.isLeftType(assocTbl, info);
-						String assocField = DatIdMapHelper.getAssocTblField(isLeft);
-						
-						OpFragment opFrag = new OpFragment("==");
+						OpFragment opFrag = new OpFragment("=");
 						opFrag.left = FragmentHelper.buildAliasedFrag(null, op1);
-						opFrag.right = FragmentHelper.buildAliasedFrag("zzz", assocField);
+						
+						FieldFragment ff = new FieldFragment();
+						ff.name = exp.strValue();
+						ff.structType = structType;
+						ff.alias = "zzz"; //tbl.alias;
+//						selectFrag.hlsRemapList.add(ff);
+						opFrag.right = ff; //FragmentHelper.buildAliasedFrag(null, exp.strValue());
+						
 						return opFrag; //FUTURE handle more than one later. eg [followers,otherField]
 					}
 				}

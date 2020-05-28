@@ -58,23 +58,28 @@ public class HLSManager extends ServiceBase {
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
-		WhereFragmentGenerator whereGen = createWhereGen();
-		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
-		whereGen.tableFragmentMaker = miniSelectParser;
 		this.aliasManager = new AliasManager(factorySvc);
 	}
 	
-	private WhereFragmentGenerator createWhereGen() {
+	private void initMiniParser(DatIdMap datIdMap) {
+		WhereFragmentGenerator whereGen = createWhereGen(datIdMap);
+		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
+		whereGen.tableFragmentMaker = miniSelectParser;
+		
+	}
+	
+	private WhereFragmentGenerator createWhereGen(DatIdMap datIdMap) {
 		DBType dbType = delia.getDBInterface().getDBType();
 		switch(dbType) {
 		case POSTGRES:
-			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator, session.getDatIdMap());
+			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 		default:
-			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, session.getDatIdMap());
+			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 		}
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
+		initMiniParser(zexec.getDatIdMap());
 		HLSQueryStatement hls = buildHLS(spec.queryExp, zexec.getDatIdMap());
 		hls.querySpec = spec;
 
@@ -170,5 +175,4 @@ public class HLSManager extends ServiceBase {
 	public void setGenerateSQLforMemFlag(boolean generateSQLforMemFlag) {
 		this.generateSQLforMemFlag = generateSQLforMemFlag;
 	}
-
 }

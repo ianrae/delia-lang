@@ -3,6 +3,8 @@ package org.delia.db.hls;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMapHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
@@ -27,14 +29,16 @@ public class WhereClauseHelper extends ServiceBase {
 	public Map<String,String> asNameMap;
 	private AliasManager aliasManager;
 //	private String realAlias;
+	private DatIdMap datIdMap;
 	
 	public WhereClauseHelper(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
-				Map<String, String> asNameMap, AliasManager aliasManager) {
+				Map<String, String> asNameMap, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.miniSelectParser = miniSelectParser;
 		this.varEvaluator = varEvaluator;
 		this.asNameMap = asNameMap;
 		this.aliasManager = aliasManager;
+		this.datIdMap = datIdMap;
 	}
 
 	public void genWhere(HLSQuerySpan hlspan) {
@@ -110,13 +114,27 @@ public class WhereClauseHelper extends ServiceBase {
 	private boolean remapParentFieldIfNeeded(FieldFragment ff, AliasedFragment af) {
 		TypePair pair = new TypePair(ff.name, ff.fieldType);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(ff.structType, pair);
-		if (relinfo != null && relinfo.isParent) {
+		if (relinfo == null) {
+			return false;
+		} else if (relinfo.isManyToMany()) {
+			String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+			boolean isLeft = datIdMap.isLeftType(assocTbl, relinfo);
+			
+			af.name = DatIdMapHelper.getAssocTblField(isLeft);
+			AliasInfo aliasInfo = aliasManager.getAssocAlias(ff.structType, pair.name, assocTbl);
+			af.alias = aliasInfo.alias; 
+			
+//			String key = String.format("%s.%s", af.alias, af.name);
+//			asNameMap.put(key, relinfo.fieldName);
+			return true;
+
+		} else if (relinfo.isParent) {
 			RelationInfo otherSide = relinfo.otherSide; 
 			if (otherSide != null) {
 				af.name = relinfo.farType.getPrimaryKey().getFieldName();
 				AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfo.nearType, pair.name);
 				af.alias = aliasInfo.alias; 
-				
+
 				String key = String.format("%s.%s", af.alias, af.name);
 				asNameMap.put(key, relinfo.fieldName);
 				return true;
