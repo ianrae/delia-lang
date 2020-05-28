@@ -6,15 +6,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.QueryBuilderService;
+import org.delia.db.QuerySpec;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
@@ -324,18 +329,18 @@ public class InsertFragmentParser extends SelectFragmentParser {
 							RelationInfo info = ruleMany.relInfo;
 							RelationInfo otherSide = ruleMany.relInfo.otherSide;
 							PrimaryKey pk = info.nearType.getPrimaryKey();
-							PrimaryKey OtherPk = otherSide.nearType.getPrimaryKey();
 							TypePair tmp = new TypePair(otherSide.fieldName, pk.getKeyType());
-							
+							DValue fkval = inner.asRelation().getForeignKey();
+							DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
 							UpdateStatementFragment updateFrag = new UpdateStatementFragment();
 							TableFragment tblFrag = createTable(info.farType, insertFrag);
 							updateFrag.tblFrag = tblFrag;
-							
+							updateFrag.paramStartIndex = insertFrag.statement.paramL.size();
 							FieldFragment ff = FragmentHelper.buildFieldFrag(info.farType, insertFrag, tmp);
 							updateFrag.setValuesL.add("?");
 							updateFrag.fieldL.add(ff);
-							updateFrag.statement.paramL.add(null);
-							
+							updateFrag.statement.paramL.add(pkval); //TODO later add all fks in list
+							doWhere(insertFrag, info.farType, fkval, updateFrag);
 							addFKUpdateFrag(insertFrag, updateFrag);
 						}						
 					}
@@ -350,6 +355,17 @@ public class InsertFragmentParser extends SelectFragmentParser {
 			insertFrag.fkUpdateFragL = new ArrayList<>();
 		}
 		insertFrag.fkUpdateFragL.add(updateFrag);
+	}
+	private void doWhere(InsertStatementFragment insertFrag, DStructType structType, DValue pkval, UpdateStatementFragment updateFrag) {
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp = builderSvc.createPrimaryKeyQuery(structType.getName(), pkval);
+		QuerySpec spec = builderSvc.buildSpec(exp, new DoNothingVarEvaluator());
+		
+		initWhere(spec, structType, insertFrag);
+		int n = insertFrag.whereL.size();
+		SqlFragment opFrag = insertFrag.whereL.remove(n - 1);
+		updateFrag.whereL.add(opFrag);
+		updateFrag.statement.paramL.add(pkval); 
 	}
 
 	
