@@ -1,5 +1,6 @@
 package org.delia.db.postgres;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.where.WhereOperand;
@@ -9,8 +10,8 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class PostgresWhereFragmentGenerator extends WhereFragmentGenerator {
 
-	public PostgresWhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
-		super(factorySvc, registry, varEvaluator);
+	public PostgresWhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		super(factorySvc, registry, varEvaluator, datIdMap);
 	}
 
 	protected String doFn(WhereOperand val) {

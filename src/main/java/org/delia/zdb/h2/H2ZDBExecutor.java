@@ -162,7 +162,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		List<LetSpan> spanL = new ArrayList<>();
 		QueryDetails details = new QueryDetails();
 		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator);
+		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
 
 		logSql(statement);
 		ZDBExecuteContext dbctx = createContext();

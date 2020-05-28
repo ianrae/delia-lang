@@ -1,5 +1,6 @@
 package org.delia.zdb;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -30,7 +31,7 @@ public class ZInsert extends ServiceBase {
 	public SqlStatementGroup generate(DValue dval, InsertContext ctx, ZTableCreator tableCreator, CacheData cacheData, ZDBExecutor zexec) {
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(dbctx.varEvaluator);
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(dbctx.varEvaluator, zexec.getDatIdMap());
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
 		ZTableExistenceService existSvc = new ZTableExistenceService();
@@ -42,8 +43,8 @@ public class ZInsert extends ServiceBase {
 		
 		return stgroup;
 	}
-	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
-		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 	}
 
 }

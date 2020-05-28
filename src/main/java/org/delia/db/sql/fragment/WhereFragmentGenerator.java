@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpFullExp;
@@ -23,6 +25,7 @@ import org.delia.db.sql.where.SqlWhereConverter;
 import org.delia.db.sql.where.WhereExpression;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.db.sql.where.WherePhrase;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.VarEvaluator;
@@ -47,8 +50,9 @@ public class WhereFragmentGenerator extends ServiceBase {
 	private ValueHelper valueHelper;
 	private VarEvaluator varEvaluator;
 	public TableFragmentMaker tableFragmentMaker;
+	private DatIdMap datIdMap;
 
-	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
@@ -57,6 +61,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		this.filterRunner = new FilterFnRunner(registry);
 		this.valueHelper = new ValueHelper(factorySvc);
 		this.varEvaluator = varEvaluator;
+		this.datIdMap = datIdMap;
 	}
 
 
@@ -122,14 +127,16 @@ public class WhereFragmentGenerator extends ServiceBase {
 		if (filter != null && filter.cond instanceof FilterOpFullExp) {
 			WhereExpression express = whereConverter.addWhereClauseOp(filter, typeName);
 			if (express != null) {
-				addWhereClauseOpFromPhrase(spec, express, statement, selectFrag);
+				addWhereClauseOpFromPhrase(spec, structType, express, statement, selectFrag);
 			}
 		} else {
 			String s = filter == null ? "null" : filter.getClass().getSimpleName();
 			DeliaExceptionHelper.throwError("bad-where-filter", "unknown filter class '%s'", s);
 		}
 	}
-	public void addWhereClauseOpFromPhrase(QuerySpec spec, WhereExpression express, SqlStatement statement, StatementFragmentBase selectFrag) {
+
+
+	public void addWhereClauseOpFromPhrase(QuerySpec spec, DStructType structType, WhereExpression express, SqlStatement statement, StatementFragmentBase selectFrag) {
 		OpFragment opFrag = null;
 		
 		if (express instanceof WherePhrase) {
@@ -137,15 +144,20 @@ public class WhereFragmentGenerator extends ServiceBase {
 		} else if (express instanceof LogicalPhrase) {
 			opFrag = doLogicalPhrase((LogicalPhrase) express, statement, selectFrag);
 		} else if (express instanceof InPhrase) {
-			opFrag = doInPhrase((InPhrase) express, statement, selectFrag);
+			opFrag = doInPhrase((InPhrase) express, structType, statement, selectFrag);
 		}
 		
 		if (opFrag != null) {
 			selectFrag.whereL.add(opFrag);
 		}
 	}
-	protected OpFragment doInPhrase(InPhrase phrase, SqlStatement statement, StatementFragmentBase selectFrag) {
+	protected OpFragment doInPhrase(InPhrase phrase, DStructType structType, SqlStatement statement, StatementFragmentBase selectFrag) {
 		String op1 = operandToSql(phrase.op1, statement);
+		OpFragment opFK = handleInPhraseFK(structType, phrase, op1);
+		if (opFK != null) {
+			return opFK;
+		}
+		
 		StringJoiner joiner = new StringJoiner(",");
 		for(Exp exp: phrase.valueL) {
 			WhereOperand tmp = new WhereOperand();
@@ -172,8 +184,27 @@ public class WhereFragmentGenerator extends ServiceBase {
 			opFrag.right = FragmentHelper.buildAliasedFrag(null, tmp);
 			return opFrag;
 		}
-		
-		
+	}
+	private OpFragment handleInPhraseFK(DStructType structType, InPhrase inphrase, String op1) {
+		for(Exp exp: inphrase.valueL) {
+			if (exp instanceof IdentExp) {
+				TypePair pair = DValueHelper.findField(structType, exp.strValue());
+				if (pair != null) {
+					RelationInfo info = DRuleHelper.findMatchingRuleInfo(structType, pair);
+					if (info != null) {
+						String assocTbl = datIdMap.getAssocTblName(info.getDatId());
+						boolean isLeft = datIdMap.isLeftType(assocTbl, info);
+						String assocField = DatIdMapHelper.getAssocTblField(isLeft);
+						
+						OpFragment opFrag = new OpFragment("==");
+						opFrag.left = FragmentHelper.buildAliasedFrag(null, op1);
+						opFrag.right = FragmentHelper.buildAliasedFrag("zzz", assocField);
+						return opFrag; //FUTURE handle more than one later. eg [followers,otherField]
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	protected OpFragment doLogicalPhrase(LogicalPhrase lphrase, SqlStatement statement, StatementFragmentBase selectFrag) {

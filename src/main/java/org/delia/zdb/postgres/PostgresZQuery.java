@@ -1,5 +1,6 @@
 package org.delia.zdb.postgres;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.postgres.PostgresWhereFragmentGenerator;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
@@ -14,8 +15,8 @@ public class PostgresZQuery extends ZQuery {
 	}
 
 	@Override
-	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
-		return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 	}
 
 }

@@ -1,6 +1,8 @@
 package org.delia.db.hls;
 
+import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.QueryInExp;
 
 public class FILElement implements HLSElement {
 	public QueryExp queryExp;
@@ -12,6 +14,15 @@ public class FILElement implements HLSElement {
 	public boolean isAll() {
 		String s = queryExp.filter.cond.strValue();
 		return s.equals("true");
+	}
+	public QueryInExp getAsInQuery() {
+		if (queryExp.filter != null && queryExp.filter.cond instanceof FilterOpFullExp) {
+			FilterOpFullExp fexp = (FilterOpFullExp) queryExp.filter.cond;
+			if (fexp.opexp1 instanceof QueryInExp) {
+				return (QueryInExp)fexp.opexp1;
+			}
+		}
+		return null;
 	}
 
 	@Override

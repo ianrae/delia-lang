@@ -174,7 +174,7 @@ public class DeleteFragementParserTests extends FragmentParserTestBase {
 	}
 	private DeleteFragmentParser createParser(DeliaGenericDao dao) {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
 		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;

@@ -2,6 +2,7 @@ package org.delia.zdb;
 
 import java.util.Map;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -39,7 +40,7 @@ public class ZUpsert extends ServiceBase {
 			VarEvaluator varEvaluator, ZTableCreator tableCreator, ZDBExecutor zexec) {
 		SqlStatementGroup stgroup;
 		
-		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator, zexec.getDatIdMap());
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
@@ -84,8 +85,8 @@ public class ZUpsert extends ServiceBase {
 		return new AssocTableReplacer(factorySvc, fpSvc);
 	}
 
-	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
-		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 	}
 	
 	protected UpsertFragmentParser createUpsertFragmentParser(FragmentParserService fpSvc, AssocTableReplacer assocTblReplacer) {

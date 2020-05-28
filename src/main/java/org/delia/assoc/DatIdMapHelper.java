@@ -9,4 +9,8 @@ public class DatIdMapHelper {
 		String key = String.format("%s.%s", typeName, fieldName);
 		return key;
 	}
+	
+	public static String getAssocTblField(boolean isLeft) {
+		return isLeft ? LEFTNAME : RIGHTNAME;
+	}
 }

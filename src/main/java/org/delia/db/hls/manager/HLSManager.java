@@ -68,9 +68,9 @@ public class HLSManager extends ServiceBase {
 		DBType dbType = delia.getDBInterface().getDBType();
 		switch(dbType) {
 		case POSTGRES:
-			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator);
+			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator, session.getDatIdMap());
 		default:
-			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, session.getDatIdMap());
 		}
 	}
 

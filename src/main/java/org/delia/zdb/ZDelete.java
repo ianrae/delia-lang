@@ -1,5 +1,6 @@
 package org.delia.zdb;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -30,7 +31,7 @@ public class ZDelete extends ServiceBase {
 	public SqlStatementGroup generate(QuerySpec spec, VarEvaluator varEvaluator, ZTableCreator tableCreator, ZDBExecutor zexec) {
 		SqlStatementGroup stgroup = new SqlStatementGroup();
 
-		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator, zexec.getDatIdMap());
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
 		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
 				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
@@ -47,7 +48,7 @@ public class ZDelete extends ServiceBase {
 		return stgroup;
 	}	
 	
-	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
-		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 	}
 }

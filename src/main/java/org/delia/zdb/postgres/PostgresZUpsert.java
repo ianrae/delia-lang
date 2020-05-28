@@ -1,5 +1,6 @@
 package org.delia.zdb.postgres;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.postgres.PostgresUpsertFragmentParser;
@@ -24,8 +25,8 @@ public class PostgresZUpsert extends ZUpsert {
 	}
 
 	@Override
-	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
-		return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 	}
 
 	@Override
