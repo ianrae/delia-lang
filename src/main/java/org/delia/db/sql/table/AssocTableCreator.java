@@ -59,12 +59,12 @@ public class AssocTableCreator extends ServiceBase {
 		generateAssocTable(sc, pair, dtype);
 	}
 	
-	public void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
+	public String generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 		String tbl1 = relinfo.nearType.getName();
 		String tbl2 = relinfo.farType.getName();
 		if (!(haveCreatedTable(tbl1) && haveCreatedTable(tbl2))) {
-			return;
+			return null;
 		}
 		
 		String assocTableName = datIdMap.getAssocTblName(relinfo.getDatId());
@@ -84,6 +84,7 @@ public class AssocTableCreator extends ServiceBase {
 			TypePair relpair = new TypePair(xpair.name, relinfo.nearType);
 			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType, relpair);
 		}
+		return assocTableName;
 	}
 
 	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType, TypePair relpair) {

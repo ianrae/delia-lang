@@ -21,6 +21,7 @@ import org.delia.sort.topo.TopoTestBase;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.junit.Before;
@@ -189,7 +190,11 @@ public class H2MigrationTests extends TopoTestBase {
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
 			SqlStatement statement = new SqlStatement();
 			statement.sql = sql;
-			zexec.getDBConnection().execStatement(statement, null);
+//			zexec.getDBConnection().execStatement(statement, null);
+			ZDBExecuteContext dbctx = new ZDBExecuteContext();
+			dbctx.logToUse = log;
+
+			zexec.getDBConnection().enumerateDBSchema(sql, "all tables", dbctx);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
