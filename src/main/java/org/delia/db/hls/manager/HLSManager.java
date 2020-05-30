@@ -1,5 +1,6 @@
 package org.delia.db.hls.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
@@ -50,7 +51,8 @@ public class HLSManager extends ServiceBase {
 	private VarEvaluator varEvaluator;
 	private MiniSelectFragmentParser miniSelectParser;
 	private AliasManager aliasManager;
-
+	private List<HLSPipelineStep> pipelineL = new ArrayList<>();
+	
 	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
 		this.session = session;
@@ -59,6 +61,7 @@ public class HLSManager extends ServiceBase {
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
 		this.aliasManager = new AliasManager(factorySvc);
+		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
 	
 	private void initMiniParser(DatIdMap datIdMap) {
@@ -156,6 +159,8 @@ public class HLSManager extends ServiceBase {
 
 		HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
+		
+		hls = runPipeline(hls, queryExp, datIdMap);
 
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			aliasManager.buildAliases(hlspan, datIdMap);
@@ -165,6 +170,13 @@ public class HLSManager extends ServiceBase {
 			log.log(hlstr);
 		}
 		log.log("alias: %s", aliasManager.dumpToString());
+		return hls;
+	}
+
+	private HLSQueryStatement runPipeline(HLSQueryStatement hls, QueryExp queryExp, DatIdMap datIdMap) {
+		for(HLSPipelineStep step: pipelineL) {
+			hls = step.execute(hls, queryExp, datIdMap);
+		}
 		return hls;
 	}
 

@@ -5,7 +5,6 @@ import java.util.StringJoiner;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.assoc.DatIdMap;
-import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpFullExp;
@@ -50,7 +49,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 	private ValueHelper valueHelper;
 	private VarEvaluator varEvaluator;
 	public TableFragmentMaker tableFragmentMaker;
-	private DatIdMap datIdMap;
+//	private DatIdMap datIdMap;
 
 	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
@@ -61,7 +60,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		this.filterRunner = new FilterFnRunner(registry);
 		this.valueHelper = new ValueHelper(factorySvc);
 		this.varEvaluator = varEvaluator;
-		this.datIdMap = datIdMap;
+//		this.datIdMap = datIdMap;
 	}
 
 

@@ -33,7 +33,7 @@ value:a:Address {
 }
 
 ---
-title: simple in2
+title: simple query
 given:
   insert Address {id: 1, text: 'tweet1', sender: 55 }
 when:
@@ -57,22 +57,8 @@ when:
   let x = Customer[u in [followers]].fks()
 then:
 value:a:Customer {
- vid:55
- vname:'art'
- vfollowers:null
- vfollowees:{[56,57]}
-   vtweets:{1}
-  }
-value:a:Customer {
  vid:56
  vname:'bob'
- vfollowers:{55}
-   vfollowees:null
-   vtweets:null
-  }
-value:a:Customer {
- vid:57
- vname:'cam'
  vfollowers:{55}
    vfollowees:null
    vtweets:null
