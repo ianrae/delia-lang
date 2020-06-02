@@ -182,10 +182,20 @@ public class SqlJoinHelper {
 		List<TypePair> join2L = genFKJoinList(hlspan);
 		joinL.addAll(join2L);
 		List<TypePair> join3L = genINJoinList(hlspan);
-		
 		List<TypePair> finalL = Stream.concat(joinL.stream(), join3L.stream()).distinct().collect(Collectors.toList());
+//		TypePair relFieldPair = genRelField(hlspan);
+//		if (relFieldPair != null) {
+//			finalL.add(relFieldPair);
+//		}
 		return finalL;
 	}
+	private TypePair genRelField(HLSQuerySpan hlspan) {
+		if (hlspan.rEl != null) {
+			return hlspan.rEl.rfieldPair;
+		}
+		return null;
+	}
+
 	private List<TypePair> genFullJoinList(HLSQuerySpan hlspan) {
 		List<TypePair> joinL = new ArrayList<>();
 

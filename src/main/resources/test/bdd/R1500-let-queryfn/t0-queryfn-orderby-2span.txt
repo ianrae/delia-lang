@@ -70,7 +70,7 @@ value:a:Customer {
 }
 }
 ---
-SKIP: 2 orderby
+title: 2 orderby
 #db-multiple-spans-not-supported
 given:
 when:

@@ -317,7 +317,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+		testIndexToRun = 1;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -326,7 +326,8 @@ public class H2BDDTests extends BDDBase {
 		
 //		runR560File("t0-self-NN.txt", 4);
 //		runR700File("t0-insert-parent.txt", 2);
-		runR1350File("t0-filter-in-twitter.txt", 4);
+//		runR1350File("t0-filter-in-twitter.txt", 4);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---

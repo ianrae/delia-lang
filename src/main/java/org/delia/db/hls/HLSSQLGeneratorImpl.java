@@ -327,6 +327,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			addStructFields(hlspan.fromType, fieldL);
 			addFKofJoins(hlspan, fieldL);
 			addFullofJoins(hlspan, fieldL);
+			addRelFieldJoin(hlspan);
 		} else if (isJustFieldName) {
 			addFKofJoins(hlspan, fieldL);
 		}
@@ -343,6 +344,11 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 		hlspan.renderedFieldL = fieldL;
 		sc.out(joiner.toString());
+	}
+
+	private void addRelFieldJoin(HLSQuerySpan hlspan) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	protected void doFirst(SQLCreator sc, HLSQuerySpan hlspan) {
