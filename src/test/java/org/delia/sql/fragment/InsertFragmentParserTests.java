@@ -18,6 +18,7 @@ import org.delia.db.hls.TestCreatorHelper;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -119,7 +120,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33");
+		chkParams(selectFrag, "55", "33", "100");  //100 is part of 2nd sql statement
 	}
 	@Test
 	public void testOneToOneChild() {
@@ -157,7 +158,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33");
+		chkParams(selectFrag, "55", "33", "100"); //100 is part of 2nd sql statement
 	}
 	@Test
 	public void testOneToManyParentWithChild2() {
@@ -169,7 +170,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33");
+		chkParams(selectFrag, "55", "33", "100", "101"); //100,101 is part of 2nd sql statement
 	}
 	@Test
 	public void testOneToManyChild() {
@@ -328,7 +329,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		return parser;
 	}
 	private InsertFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
-		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
+		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		ZDBExecutor zexec = dao.getDbInterface().createExecutor(); //don't worry about closing, is MME
