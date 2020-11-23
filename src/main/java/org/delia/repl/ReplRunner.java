@@ -52,14 +52,14 @@ public class ReplRunner  {
 	public ReplRunner(ConnectionInfo info, ReplOutputWriter outWriter) {
 		this.connectionInfo = info;
 		this.outWriter = outWriter;
-		restart(null);
 		addAllCmds();
+		restart(null);
 	}
 	public ReplRunner(DeliaSession externalDeliaSession, ReplOutputWriter outWriter) {
 		this.connectionInfo = null; //TODO: will this be a problem?
 		this.outWriter = outWriter;
-		restart(externalDeliaSession);
 		addAllCmds();
+		restart(externalDeliaSession);
 	}
 	private void addAllCmds() {
 		allCmdsL.add(new LoadCmd());
