@@ -51,8 +51,8 @@ public class ReplRunner  {
 		restart();
 
 		allCmdsL.add(new LoadCmd());
+		allCmdsL.add(new RunFromResourceCmd()); //must be before runcmd
 		allCmdsL.add(new RunCmd());
-		allCmdsL.add(new RunFromResourceCmd());
 		allCmdsL.add(new GenerateMigrationPlanCmd());
 		allCmdsL.add(new RunMigrationPlanCmd());
 		allCmdsL.add(new ListTypesCmd());
