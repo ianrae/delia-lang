@@ -22,6 +22,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.ResourceTextFileReader;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -51,6 +52,7 @@ public class ReplRunner  {
 
 		allCmdsL.add(new LoadCmd());
 		allCmdsL.add(new RunCmd());
+		allCmdsL.add(new RunFromResourceCmd());
 		allCmdsL.add(new GenerateMigrationPlanCmd());
 		allCmdsL.add(new RunMigrationPlanCmd());
 		allCmdsL.add(new ListTypesCmd());
@@ -101,6 +103,15 @@ public class ReplRunner  {
 		String src = StringUtil.convertToSingleString(lines);
 
 		return this.continueDelia(src);
+	}
+	public ResultValue runFromResource(String resPath) {
+		log.log("reading: %s", resPath);
+		ResourceTextFileReader r = new ResourceTextFileReader();
+		String src = r.readAsSingleString(resPath);
+//		String src = StringUtil.convertToSingleString(lines);
+		this.sessionName = createSessionName(resPath);
+
+		return this.executeReplCmdOrDelia(src);
 	}
 
 	public ResultValue loadFromFile(String path) {
