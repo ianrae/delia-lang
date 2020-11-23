@@ -36,7 +36,7 @@ public class ReplRunner  {
 	private DeliaSession mostRecentSess;
 
 	private DeliaException mostRecentException;
-	private List<Cmd> allCmdsL = new ArrayList<>();
+	protected List<Cmd> allCmdsL = new ArrayList<>();
 	private String loadSrc;
 
 	private MigrationPlan currentMigrationPlan;
