@@ -32,6 +32,7 @@ public class ReplRunner  {
 	private Log log = new SimpleLog();
 
 	private Delia delia;
+	private boolean isExternalDelia = false;
 	private ZDBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 
@@ -48,8 +49,15 @@ public class ReplRunner  {
 
 	public ReplRunner(ConnectionInfo info) {
 		this.connectionInfo = info;
-		restart();
-
+		restart(null);
+		addAllCmds();
+	}
+	public ReplRunner(DeliaSession externalDeliaSession) {
+		this.connectionInfo = null; //TODO: will this be a problem?
+		restart(externalDeliaSession);
+		addAllCmds();
+	}
+	private void addAllCmds() {
 		allCmdsL.add(new LoadCmd());
 		allCmdsL.add(new RunFromResourceCmd()); //must be before runcmd
 		allCmdsL.add(new RunCmd());
@@ -65,9 +73,17 @@ public class ReplRunner  {
 		allCmdsL.add(new DBLoggingCmd());
 	}
 
-	public void restart() {
-		this.delia = DeliaBuilder.withConnection(connectionInfo).build();
+	public void restart(DeliaSession externalDeliaSession) {
+		if (externalDeliaSession == null) {
+			this.delia = DeliaBuilder.withConnection(connectionInfo).build();
+		} else {
+			this.delia = externalDeliaSession.getDelia();
+			this.mostRecentSess = externalDeliaSession;
+			this.isExternalDelia = true;
+		}
+		
 		dbInterface = delia.getDBInterface();
+		//TODO: are these ok for external delia? or do we need to reset at the end?
 		dbInterface.getCapabilities().setRequiresSchemaMigration(true);
 		dbInterface.enableSQLLogging(false);
 //		if (dbInterface instanceof MemZDBInterfaceFactory) {
@@ -80,7 +96,9 @@ public class ReplRunner  {
 			cmd.setFactorySvc(delia.getFactoryService());
 		}
 		
-		mostRecentSess = null;
+		if (externalDeliaSession == null) {
+			mostRecentSess = null;
+		}
 		mostRecentException = null;
 		loadSrc = null;
 		currentMigrationPlan = null;

@@ -48,7 +48,7 @@ public class DeliaRepl {
 		}
 
 		if (input.equals("restart")) {
-			runner.restart();
+			runner.restart(null);
 			return;
 		}
 
