@@ -6,10 +6,13 @@ public class RunCmd extends CmdBase {
 	public RunCmd() {
 		super("run", "r");
 	}
+	public RunCmd(RunCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new RunCmd();
+			Cmd cmd = new RunCmd(this);
 			cmd.cmd = name;
 			cmd.arg1 = parseArg1(src);
 			return cmd;

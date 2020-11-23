@@ -45,15 +45,19 @@ public class ReplRunner  {
 	private ConnectionInfo connectionInfo;
 
 	private String sessionName;
+
+	protected ReplOutputWriter outWriter;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
 
-	public ReplRunner(ConnectionInfo info) {
+	public ReplRunner(ConnectionInfo info, ReplOutputWriter outWriter) {
 		this.connectionInfo = info;
+		this.outWriter = outWriter;
 		restart(null);
 		addAllCmds();
 	}
-	public ReplRunner(DeliaSession externalDeliaSession) {
+	public ReplRunner(DeliaSession externalDeliaSession, ReplOutputWriter outWriter) {
 		this.connectionInfo = null; //TODO: will this be a problem?
+		this.outWriter = outWriter;
 		restart(externalDeliaSession);
 		addAllCmds();
 	}
@@ -94,6 +98,7 @@ public class ReplRunner  {
 		for(Cmd cmdx: allCmdsL) {
 			CmdBase cmd = (CmdBase) cmdx;
 			cmd.setFactorySvc(delia.getFactoryService());
+			cmd.setOutputWriter(outWriter);
 		}
 		
 		if (externalDeliaSession == null) {

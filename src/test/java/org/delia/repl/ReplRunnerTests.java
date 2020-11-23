@@ -145,7 +145,7 @@ public class ReplRunnerTests extends BDDBase {
 	@Before
 	public void init() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		runner = new ReplRunner(info);
+		runner = new ReplRunner(info, new ConsoleOutputWriter());
 	}
 	
 	int currentLineNum = 0;

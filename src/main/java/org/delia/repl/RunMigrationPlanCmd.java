@@ -5,9 +5,7 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.MigrationAction;
-import org.delia.core.FactoryService;
 import org.delia.db.schema.MigrationPlan;
-import org.delia.db.schema.SchemaType;
 import org.delia.repl.migration.MigrationParser;
 import org.delia.repl.migration.MigrationStep;
 import org.delia.runner.ResultValue;
@@ -19,10 +17,13 @@ public class RunMigrationPlanCmd extends CmdBase {
 		super("migration run", "mr");
 		expectSpace = false;
 	}
+	public RunMigrationPlanCmd(RunMigrationPlanCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new RunMigrationPlanCmd();
+			Cmd cmd = new RunMigrationPlanCmd(this);
 			cmd.cmd = name;
 			if (iParmStart > 0 && src.length() > iParmStart) {
 				cmd.arg1 = parseArg1(src);

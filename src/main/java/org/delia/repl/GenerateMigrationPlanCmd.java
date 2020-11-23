@@ -12,10 +12,13 @@ public class GenerateMigrationPlanCmd extends CmdBase {
 		super("migration generate", "mg");
 		expectSpace = false;
 	}
+	public GenerateMigrationPlanCmd(GenerateMigrationPlanCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new GenerateMigrationPlanCmd();
+			Cmd cmd = new GenerateMigrationPlanCmd(this);
 			cmd.cmd = name;
 			return cmd;
 		}

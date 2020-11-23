@@ -6,6 +6,9 @@ public class RunFromResourceCmd extends CmdBase {
 	public RunFromResourceCmd() {
 		super("runres", "rr");
 	}
+	public RunFromResourceCmd(RunFromResourceCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {

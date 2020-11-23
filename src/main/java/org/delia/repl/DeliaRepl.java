@@ -16,7 +16,7 @@ public class DeliaRepl {
 	public DeliaRepl(ConnectionInfo info, String baseDir) {
 		this.baseDir = baseDir;
 		this.connectionInfo = info;
-		this.runner = new ReplRunner(info);
+		this.runner = new ReplRunner(info, new ConsoleOutputWriter());
 	}
 
 	public void run()  {

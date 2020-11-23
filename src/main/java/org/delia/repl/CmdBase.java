@@ -6,13 +6,21 @@ import org.delia.runner.ResultValue;
 public abstract class CmdBase extends Cmd {
 	public String name;
 	protected boolean expectSpace = true;
-	private String shortName;
+	protected String shortName;
 	protected int iParmStart;
 	protected FactoryService factorySvc;
+	private ReplOutputWriter outWriter;
 	
 	public CmdBase(String name, String shortformName) {
 		this.name = name;
 		this.shortName = shortformName;
+	}
+	public CmdBase(CmdBase obj) {
+		this.name = obj.name;
+		this.shortName = obj.shortName;
+		this.expectSpace = obj.expectSpace;
+		this.factorySvc = obj.factorySvc;
+		this.outWriter = obj.outWriter;
 	}
 	protected boolean isMatch(String src) {
 		String s = name;
@@ -42,7 +50,7 @@ public abstract class CmdBase extends Cmd {
 	}
 	
 	protected void log(String s) {
-		System.out.println(s);
+		outWriter.output(s);
 	}
 	
 	protected ResultValue createEmptyRes() {
@@ -55,5 +63,8 @@ public abstract class CmdBase extends Cmd {
 	}
 	public void setFactorySvc(FactoryService factorySvc) {
 		this.factorySvc = factorySvc;
+	}
+	public void setOutputWriter(ReplOutputWriter outWriter) {
+		this.outWriter = outWriter;
 	}
 }
