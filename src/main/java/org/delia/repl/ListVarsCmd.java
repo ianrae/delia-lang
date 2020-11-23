@@ -13,6 +13,9 @@ public class ListVarsCmd extends CmdBase {
 		super("list vars", "lv");
 		expectSpace = false;
 	}
+	public ListVarsCmd(ListVarsCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {

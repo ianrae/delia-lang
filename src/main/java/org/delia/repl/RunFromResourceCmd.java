@@ -12,7 +12,7 @@ public class RunFromResourceCmd extends CmdBase {
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new RunFromResourceCmd();
+			Cmd cmd = new RunFromResourceCmd(this);
 			cmd.cmd = name;
 			cmd.arg1 = parseArg1(src);
 			return cmd;

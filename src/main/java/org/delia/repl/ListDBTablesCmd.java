@@ -14,10 +14,13 @@ public class ListDBTablesCmd extends CmdBase {
 		super("db table list", "ldb");
 		expectSpace = false;
 	}
+	public ListDBTablesCmd(ListDBTablesCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new ListDBTablesCmd();
+			Cmd cmd = new ListDBTablesCmd(this);
 			cmd.cmd = name;
 			return cmd;
 		}
