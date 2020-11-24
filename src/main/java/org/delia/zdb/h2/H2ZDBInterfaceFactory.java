@@ -84,7 +84,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	public ZDBExecutor createExecutor() {
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
 		Log execLog = createNewLog();
-		execLog.setLevel(log.getLevel());
+		execLog.setLevel(sqlLog.getLevel());
 		return new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 	}
 }
