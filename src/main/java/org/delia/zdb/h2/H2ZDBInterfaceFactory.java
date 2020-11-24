@@ -7,6 +7,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.zdb.ZDBConnection;
@@ -15,7 +16,7 @@ import org.delia.zdb.ZDBInterfaceFactory;
 
 public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
 	private DBCapabilties capabilities;
-	private SimpleLog sqlLog;
+	private Log sqlLog;
 	private ConnectionFactory connFactory;
 	private DBErrorConverter errorConverter;
 	private H2DeliaSessionCache sessionCache;
@@ -23,11 +24,19 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	public H2ZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(true, true, true, true);
-		this.sqlLog = new SimpleLog();
+		this.sqlLog = createNewLog();
 		this.connFactory = connFactory;
 		this.errorConverter = new H2ErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
 		this.sessionCache = new H2DeliaSessionCache();
+	}
+	
+	private Log createNewLog() {
+		if (factorySvc != null) {
+			return factorySvc.getLogFactory().create("sqlH2");
+		} else {
+			return new SimpleLog();
+		}
 	}
 
 	@Override
@@ -74,7 +83,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	@Override
 	public ZDBExecutor createExecutor() {
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
-		SimpleLog execLog = new SimpleLog();
+		Log execLog = createNewLog();
 		execLog.setLevel(log.getLevel());
 		return new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 	}

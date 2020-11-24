@@ -55,7 +55,7 @@ public class DeliaBuilder {
 			}
 		}
 		ErrorTracker et = new SimpleErrorTracker(log);
-		FactoryService factorySvc = new FactoryServiceImpl(log, et);
+		FactoryService factorySvc = new FactoryServiceImpl(log, et, logFactory);
 		if (info != null) {
 			Delia delia = DeliaFactory.create(info, log, factorySvc);
 			return delia;

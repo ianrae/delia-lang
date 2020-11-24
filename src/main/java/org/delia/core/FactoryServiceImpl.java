@@ -7,6 +7,7 @@ import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
+import org.delia.log.LogFactory;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -22,8 +23,12 @@ public class FactoryServiceImpl implements FactoryService {
 	private int nextGeneratedRuleId = 1;
 	private DValueCompareService compareSvc;
 	private DiagnosticServiceImpl diagnosticSvc;
+	private LogFactory logFactory;
 	
 	public FactoryServiceImpl(Log log, ErrorTracker et) {
+		this(log, et, null);
+	}
+	public FactoryServiceImpl(Log log, ErrorTracker et, LogFactory logFactory) {
 		this.log = log;
 		this.et = et;
 		this.tzSvc = new TimeZoneServiceImpl();
@@ -32,6 +37,7 @@ public class FactoryServiceImpl implements FactoryService {
 		this.queryBuilderSvc = new QueryBuilderServiceImpl(this);
 		this.compareSvc = new DValueCompareService(this);
 		this.diagnosticSvc = new DiagnosticServiceImpl(this);
+		this.logFactory = logFactory;
 	}
 
 	@Override
@@ -88,6 +94,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public DiagnosticService getDiagnosticService() {
 		return diagnosticSvc;
+	}
+	@Override
+	public LogFactory getLogFactory() {
+		return logFactory;
 	}
 
 }
