@@ -19,7 +19,7 @@ public class ListVarsCmd extends CmdBase {
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new ListVarsCmd();
+			Cmd cmd = new ListVarsCmd(this);
 			cmd.cmd = name;
 			return cmd;
 		}

@@ -61,7 +61,7 @@ public class ReplRunner  {
 		addAllCmds();
 		restart(externalDeliaSession);
 	}
-	private void addAllCmds() {
+	protected void addAllCmds() {
 		allCmdsL.add(new LoadCmd());
 		allCmdsL.add(new RunFromResourceCmd()); //must be before runcmd
 		allCmdsL.add(new RunCmd());
