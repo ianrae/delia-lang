@@ -63,7 +63,7 @@ public class FieldGen extends SqlElement {
 		case DATE:
 			return "TIMESTAMP";
 		case STRING:
-			return "VARCHAR(4096)"; //FUTURE: should be this bigger? or configurable?
+			return "VARCHAR(65536)"; //FUTURE: should be this bigger? or configurable?
 		case BOOLEAN:
 			return "BOOLEAN";
 		case STRUCT:

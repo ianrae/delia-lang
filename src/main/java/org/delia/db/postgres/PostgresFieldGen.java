@@ -46,7 +46,7 @@ public class PostgresFieldGen extends FieldGen {
 		case DATE:
 			return "TIMESTAMP";
 		case STRING:
-			return "VARCHAR(4096)"; //TODO: should be this bigger? or configurable?
+			return "VARCHAR(65536)"; //TODO: should be this bigger? or configurable?
 		case BOOLEAN:
 			return "BOOLEAN";
 		case STRUCT:
