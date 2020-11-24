@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.delia.error.DetailedError;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
@@ -112,6 +113,10 @@ public class StructValueBuilder extends DValueBuilder {
 			}
 			
 			newDVal = new DValueImpl(type, map);
+		}
+		
+		for(DetailedError err : getValidationErrors()){
+			err.setTypeName(structType.getName());
 		}
 	}
 

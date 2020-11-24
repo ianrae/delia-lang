@@ -1,0 +1,83 @@
+# self-join relations
+
+FEATURE: self-join N to N
+background:
+  type Customer struct {id int primaryKey, name string,
+      relation manager Customer 'r1' many optional,
+      relation workers Customer 'r1' many optional,
+  }  end
+  insert Customer {id: 55, name: 'art' }
+thenType: struct
+
+---
+title: basic
+given:
+when:
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworkers:null
+}
+
+---
+title: add worker,fks
+given:
+  insert Customer {id: 56, name: 'bob', workers: 55 }
+when:
+  let x = Customer[true].fks().orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:{56}
+ vworkers:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:null
+  vworkers:{55}
+}
+
+---
+title: add worker
+given:
+  insert Customer {id: 56, name: 'bob', workers: 55 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworkers:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:null
+  vworkers:null
+}
+
+---
+title: add manager
+given:
+  insert Customer {id: 56, name: 'bob', manager: 55 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworkers:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:null
+  vworkers:null
+}

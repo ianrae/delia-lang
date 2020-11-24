@@ -1,0 +1,98 @@
+# let query filter like tests
+
+FEATURE: filter- in expression for twitter. self-join
+# Customer = Customer
+# Address = Address 
+background:
+  type Customer struct {id int primaryKey, name string,
+      relation followers Customer 'r1' many optional,
+      relation followees Customer 'r1' many optional,
+      relation tweets Address many optional
+      }  end
+  type Address struct {id int primaryKey, text string 
+      relation sender Customer one,
+  }  end
+  insert Customer {id: 55, name: 'art' }
+  insert Customer {id: 56, name: 'bob', followers:55 }
+  insert Customer {id: 57, name: 'cam', followers:55 }
+  
+  
+thenType: struct
+
+---
+title: simple in
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+  let x = Address[sender in [55]]
+then:
+value:a:Address {
+ vid:1
+ vtext:'tweet1'
+ vsender:{55}
+}
+
+---
+title: simple query
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vfollowers:null
+ vfollowees:{[56,57]}
+ vtweets:{1}
+}
+
+---
+title: simple in2
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+#left side of IN must be ident. TODO fix later and allow 55 in [followers]
+  let u = 56
+  let x = Customer[u in [followers]].fks()
+then:
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vfollowers:{55}
+   vfollowees:null
+   vtweets:null
+  }
+  
+---
+title: followers
+given:
+  insert Address {id: 1, text: 'tweet1', sender: 55 }
+when:
+#we should be doing .distinct() but it won't hurt for IN
+  let u = 55
+  let x = Customer[true].followers
+then:
+value:a:Customer {
+vid:55
+vname:'art'
+vfollowers:null
+vfollowees:{[56,57]}
+  vtweets:{1}
+ }
+value:a:Customer {
+vid:56
+vname:'bob'
+ vfollowers:{55}
+   vfollowees:null
+   vtweets:null
+  }
+value:a:Customer {
+ vid:57
+ vname:'cam'
+ vfollowers:{55}
+   vfollowees:null
+   vtweets:null
+  }
+
+  

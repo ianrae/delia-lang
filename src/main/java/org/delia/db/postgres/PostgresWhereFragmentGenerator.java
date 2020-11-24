@@ -1,15 +1,17 @@
 package org.delia.db.postgres;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 
 public class PostgresWhereFragmentGenerator extends WhereFragmentGenerator {
 
-	public PostgresWhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
-		super(factorySvc, registry, varEvaluator);
+	public PostgresWhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		super(factorySvc, registry, varEvaluator, datIdMap);
 	}
 
 	protected String doFn(WhereOperand val) {
@@ -51,6 +53,7 @@ public class PostgresWhereFragmentGenerator extends WhereFragmentGenerator {
 			//err!!
 			break;
 		}
-		return "KKKKKKKKKKK"; //TODO fix
+		DeliaExceptionHelper.throwError("unknown-where-function", "Unknown filter function '%s'", val.fnName);
+		return null;
 	}
 }

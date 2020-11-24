@@ -11,10 +11,13 @@ public class StatusCmd extends CmdBase {
 		super("status", null);
 		expectSpace = false;
 	}
+	public StatusCmd(StatusCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new StatusCmd();
+			Cmd cmd = new StatusCmd(this);
 			cmd.cmd = name;
 			return cmd;
 		}

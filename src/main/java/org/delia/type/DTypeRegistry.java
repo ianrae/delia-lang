@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.delia.util.DeliaExceptionHelper;
 
 
 /**
@@ -19,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DTypeRegistry {
 	private Map<String,DType> map = new ConcurrentHashMap<>(); 
 	private List<DType> orderedList = new ArrayList<>();
-	private int nextBitIndex; //TODO !! atomic thing later for thread safety
+	private static AtomicInteger nextBitIndex = new AtomicInteger(0); //thread-safe
 	private DTypeHierarchy th;
 	private DStructType schemaVersionType;
 	private DStructType datType;
@@ -31,20 +34,12 @@ public class DTypeRegistry {
             throw new IllegalArgumentException("name or type were null");
         }
 		
-	    dtype.setBitIndex(nextBitIndex++);
+	    dtype.setBitIndex(nextBitIndex.incrementAndGet());
 	    
 	    if (map.containsKey(typeName)) {
-	    	System.out.println("REDEF " + typeName);
+	    	DeliaExceptionHelper.throwError("redefine-type-not-allowed", "Type '%s' is already registered. Did you have it twice in your Delia source code?", typeName);
 	    }
-//	    //remove any existing one with same name.
-//	    //because we re-execute typerunner we may have duplicates. remove earlier version
-//	    //TODO: not sure this works.
-//	    for(DType inner: orderedList) {
-//	    	if (inner.getName().equals(name)) {
-//	    		orderedList.remove(inner);
-//	    		break;
-//	    	}
-//	    }
+	    
 	    orderedList.add(dtype);
 		map.put(typeName, dtype);
 		
@@ -130,7 +125,7 @@ public class DTypeRegistry {
 
 	@Override
 	public String toString() {
-		//TODO: later limit to at most 50 type names
+		//FUTURE: later limit to at most 50 type names
 		StringJoiner joiner = new StringJoiner(",");
 		for(DType type: orderedList) {
 			joiner.add(type.getName());
@@ -138,11 +133,11 @@ public class DTypeRegistry {
 		return joiner.toString();
 	}
 
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		for(String typeName: this.getAll()) {
-			DType currentType = getType(typeName);
-			currentType.performTypeReplacement(spec);
-		}
-	}
-    
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		for(String typeName: this.getAll()) {
+//			DType currentType = getType(typeName);
+//			currentType.performTypeReplacement(spec);
+//		}
+//	}
+//    
 }

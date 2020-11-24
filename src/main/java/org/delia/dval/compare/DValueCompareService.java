@@ -1,6 +1,6 @@
 package org.delia.dval.compare;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -116,7 +116,7 @@ public class DValueCompareService extends ServiceBase {
 				return 3;
 			} else if (obj instanceof Boolean) {
 				return 4;
-			} else if (obj instanceof Date) {
+			} else if (obj instanceof ZonedDateTime) {
 				return 5;
 			} else {
 				return -1;

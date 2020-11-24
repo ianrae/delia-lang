@@ -1,7 +1,6 @@
 package org.delia.repl;
 
 import org.delia.api.Delia;
-import org.delia.db.DBAccessContext;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -10,10 +9,13 @@ public class DBDeleteTableCmd extends CmdBase {
 	public DBDeleteTableCmd() {
 		super("db table delete", null);
 	}
+	public DBDeleteTableCmd(DBDeleteTableCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new DBDeleteTableCmd();
+			Cmd cmd = new DBDeleteTableCmd(this);
 			cmd.cmd = name;
 			cmd.arg1 = parseArg1(src);
 			return cmd;

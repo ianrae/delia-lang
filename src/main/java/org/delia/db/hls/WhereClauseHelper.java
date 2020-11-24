@@ -1,10 +1,10 @@
 package org.delia.db.hls;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.compiler.ast.QueryExp;
+import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMapHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
@@ -15,7 +15,6 @@ import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.OpFragment;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.SqlFragment;
-import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.FilterEvaluator;
@@ -25,25 +24,27 @@ import org.delia.util.DRuleHelper;
 
 public class WhereClauseHelper extends ServiceBase {
 
-	private AliasAllocator aliasAlloc;
 	private MiniSelectFragmentParser miniSelectParser;
 	private VarEvaluator varEvaluator;
 	public Map<String,String> asNameMap;
+	private AliasManager aliasManager;
+//	private String realAlias;
+	private DatIdMap datIdMap;
 	
-	public WhereClauseHelper(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
-				Map<String, String> asNameMap, AliasAllocator aliasAlloc) {
+	public WhereClauseHelper(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
+				Map<String, String> asNameMap, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.miniSelectParser = miniSelectParser;
 		this.varEvaluator = varEvaluator;
 		this.asNameMap = asNameMap;
-		this.aliasAlloc = aliasAlloc;
+		this.aliasManager = aliasManager;
+		this.datIdMap = datIdMap;
 	}
 
-	public void genWhere(HLSQuerySpan hlspan, QueryExp queryExp) {
+	public void genWhere(HLSQuerySpan hlspan) {
 		if (hlspan.filEl ==  null) {
 			return;
 		}
-		//TODO don't need to pass queryExp here!! remove
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = hlspan.filEl.queryExp;
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
@@ -54,29 +55,34 @@ public class WhereClauseHelper extends ServiceBase {
 		//if it contains any parent relation fields (Customer.addr)
 		//we need to change them to other side's pk.
 		//Also need to merge fragment parsers' table aliases with ours.
-		Map<String,String> aliasAdjustmentMap = new HashMap<>();
-		for(String x: selectFrag.aliasMap.keySet()) {
-			TableFragment tblfrag = selectFrag.aliasMap.get(x);
-			if (tblfrag.structType != null) {
-				String alias = this.aliasAlloc.findOrCreateFor(tblfrag.structType);
-				aliasAdjustmentMap.put(tblfrag.alias,  alias);
-			} else {
-				String alias = this.aliasAlloc.buildTblAliasAssoc(tblfrag.name);
-				aliasAdjustmentMap.put(tblfrag.alias,  alias);
-			}
-		}
+//		Map<String,String> aliasAdjustmentMap = new HashMap<>();
+//		for(String x: selectFrag.aliasMap.keySet()) {
+//			TableFragment tblfrag = selectFrag.aliasMap.get(x);
+//			if (tblfrag.structType != null) {
+//				String alias = this.aliasAlloc.findOrCreateFor(tblfrag.structType);
+//				aliasAdjustmentMap.put(tblfrag.alias,  alias);
+//			} else {
+//				String alias = this.aliasAlloc.buildTblAliasAssoc(tblfrag.name);
+//				aliasAdjustmentMap.put(tblfrag.alias,  alias);
+//			}
+//		}
 		
 		//now do adjustment
+		AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
 		for(SqlFragment z: selectFrag.whereL) {
 			OpFragment op = (OpFragment) z;
 			if (op.left != null) {
-				if (!remapParentFieldIfNeeded(op.left, selectFrag, aliasAdjustmentMap)) {
-					op.left.alias = aliasAdjustmentMap.get(op.left.alias);
+				if (!remapParentFieldIfNeeded(op.left, selectFrag)) {
+					if (op.left.alias != null) {
+						op.left.alias = aliasInfo.alias;
+					}
 				}
 			}
 			if (op.right != null) {
-				if (!remapParentFieldIfNeeded(op.right, selectFrag, aliasAdjustmentMap)) {
-					op.right.alias = aliasAdjustmentMap.get(op.right.alias);
+				if (!remapParentFieldIfNeeded(op.right, selectFrag)) {
+					if (op.right.alias != null) {
+						op.right.alias = aliasInfo.alias;
+					}
 				}
 			}
 		}
@@ -92,30 +98,43 @@ public class WhereClauseHelper extends ServiceBase {
 		}
 	}
 	
-	private boolean remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag, Map<String, String> aliasAdjustmentMap) {
+	private boolean remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag) {
 		if (af instanceof FieldFragment) {
 			FieldFragment ff = (FieldFragment) af;
-			return remapParentFieldIfNeeded(ff, af, aliasAdjustmentMap);
+			return remapParentFieldIfNeeded(ff, af);
 		} else {
 			for (FieldFragment ff: selectFrag.hlsRemapList) {
 				if (ff.alias.equals(af.alias) && ff.name.equals(af.name)) {
-					return remapParentFieldIfNeeded(ff, af, aliasAdjustmentMap);
+					return remapParentFieldIfNeeded(ff, af);
 				}
 			}
 		}
 		return false;
 	}
-	private boolean remapParentFieldIfNeeded(FieldFragment ff, AliasedFragment af, Map<String,String> aliasAdjustmentMap) {
+	private boolean remapParentFieldIfNeeded(FieldFragment ff, AliasedFragment af) {
 		TypePair pair = new TypePair(ff.name, ff.fieldType);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(ff.structType, pair);
-		if (relinfo != null && relinfo.isParent) {
-			//TODO need more foolproof way to find other side
-			RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, ff.structType);
+		if (relinfo == null) {
+			return false;
+		} else if (relinfo.isManyToMany()) {
+			String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+			boolean isLeft = datIdMap.isLeftType(assocTbl, relinfo);
+			
+			af.name = DatIdMapHelper.getAssocTblField(isLeft);
+			AliasInfo aliasInfo = aliasManager.getAssocAlias(ff.structType, pair.name, assocTbl);
+			af.alias = aliasInfo.alias; 
+			
+//			String key = String.format("%s.%s", af.alias, af.name);
+//			asNameMap.put(key, relinfo.fieldName);
+			return true;
+
+		} else if (relinfo.isParent) {
+			RelationInfo otherSide = relinfo.otherSide; 
 			if (otherSide != null) {
 				af.name = relinfo.farType.getPrimaryKey().getFieldName();
-				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(relinfo.farType, pair.name);
-				af.alias = aliasInst.alias; //aliasAdjustmentMap.get(aliasInst.alias);
-				
+				AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfo.nearType, pair.name);
+				af.alias = aliasInfo.alias; 
+
 				String key = String.format("%s.%s", af.alias, af.name);
 				asNameMap.put(key, relinfo.fieldName);
 				return true;

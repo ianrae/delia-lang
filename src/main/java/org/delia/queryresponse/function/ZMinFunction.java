@@ -1,10 +1,10 @@
 package org.delia.queryresponse.function;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.queryresponse.QueryFuncContext;
@@ -139,21 +139,24 @@ public class ZMinFunction extends ZQueryResponseFunctionBase {
 		return qresp;
 	}
 	private QueryResponse processDate(QueryResponse qresp, List<DValue> dvalList) {
-		Date min = new Date(Long.MAX_VALUE); //max possible string
+		Instant min = Instant.MAX;
+		ZonedDateTime minZdt = null;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
-			Date k = dval.asDate();
+			ZonedDateTime zdt = dval.asDate();
 			
 			if (min == null) {
-				min = k;
-			} else if (k.compareTo(min) < 0) {
-				min = k;
+				min = zdt.toInstant();
+				minZdt = zdt;
+			} else if (zdt.toInstant().compareTo(min) < 0) {
+				min = zdt.toInstant();
+				minZdt = zdt;
 			}
 		}
 		
-		DValue dval = buildDateVal(min, factorySvc);
+		DValue dval = buildDateVal(minZdt, factorySvc);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}

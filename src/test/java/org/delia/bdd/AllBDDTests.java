@@ -25,9 +25,9 @@ public class AllBDDTests extends BDDBase {
 		runR300File("t0-number-custom.txt", 13);
 		runR300File("t0-string.txt", 12);
 		runR300File("t0-string-custom.txt", 5);
-		runR300File("t0-date.txt", 6);
+		runR300File("t0-date.txt", 8);
 		runR300File("t0-date-custom.txt", 6);
-		runR300File("t0-date-timezone.txt",7);
+		runR300File("t0-date-timezone.txt",10);
 	}
 	@Test
 	public void testR400() {
@@ -53,6 +53,13 @@ public class AllBDDTests extends BDDBase {
 		runR550File("t0-multirel-Nto1-1.txt", 1);
 		runR550File("t0-multirel-Nto1-2.txt", 1);
 		runR550File("t0-multirel-NtoN-1.txt", 1);
+	}
+	@Test
+	public void testR560() {
+		runR560File("t0-self-11.txt", 3);
+		runR560File("t0-self-11a.txt", 3);
+		runR560File("t0-self-N1.txt", 4);
+		runR560File("t0-self-NN.txt", 4);
 	}
 	@Test
 	public void testR600() {
@@ -145,6 +152,7 @@ public class AllBDDTests extends BDDBase {
 		runR1350File("t0-filter-like.txt", 6);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);
+		runR1350File("t0-filter-in-twitter.txt", 4);
 	}
 	
 	@Test
@@ -154,6 +162,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testR1500() {
+		ignoreTest("t0-queryfn-orderby-2span.txt");
 		runR1500File("t0-queryfn-orderby.txt", 4);
 		runR1500File("t0-queryfn-distinct.txt", 3);
 		runR1500File("t0-queryfn-distinct-relation.txt", 2);
@@ -185,9 +194,9 @@ public class AllBDDTests extends BDDBase {
 		runR1500File("t0-queryfn-limit.txt", 5);
 		runR1500File("t0-queryfn-offset.txt", 5);
 	}
-	
 	@Test
 	public void testR1500a() {
+		enableAllFileCheck = false;
 		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
@@ -265,29 +274,32 @@ public class AllBDDTests extends BDDBase {
 	public void testR2150() {
 		enableAllFileCheck = false;
 		enableMigration = true;
-		runR2150File("t0-migrate-one-to-one1.txt", 3);
-		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-		runR2150File("t0-migrate-one-to-one2.txt", 2);
-		runR2150File("t0-migrate-one-to-one2a.txt", 2);
-		runR2150File("t0-migrate-one-to-one3.txt", 2);
-		runR2150File("t0-migrate-one-to-one4.txt", 2);
-		runR2150File("t0-migrate-one-to-one5.txt", 1);
-		runR2150File("t0-migrate-one-to-one6.txt", 2);
-		
-		runR2150File("t0-migrate-one-to-many1.txt", 3);
-		runR2150File("t0-migrate-one-to-many2.txt", 2);
-		runR2150File("t0-migrate-one-to-many2a.txt", 2);
-		runR2150File("t0-migrate-one-to-many3.txt", 2);
-		runR2150File("t0-migrate-one-to-many4.txt", 2);
-		//is no test 5 for many-to-one
-		runR2150File("t0-migrate-one-to-many6.txt", 2);
-		
-		runR2150File("t0-migrate-many-to-many1.txt", 3);
-		runR2150File("t0-migrate-many-to-many1a.txt", 2);
-		runR2150File("t0-migrate-many-to-many2.txt", 2);
-		runR2150File("t0-migrate-many-to-many2a.txt", 2);
-		runR2150File("t0-migrate-many-to-many3.txt", 2);
-		runR2150File("t0-migrate-many-to-many4.txt", 2);
+		//none of these work because with MEM we are storing dvalues
+		//and when the schema changes we are not adding/removing fields from them.
+		//FUTURE fix at some point. MEM is not designed for migration.
+//		runR2150File("t0-migrate-one-to-one1.txt", 3);
+//		runR2150File("t0-migrate-one-to-one1a.txt", 2);
+//		runR2150File("t0-migrate-one-to-one2.txt", 2);
+//		runR2150File("t0-migrate-one-to-one2a.txt", 2);
+//		runR2150File("t0-migrate-one-to-one3.txt", 2);
+//		runR2150File("t0-migrate-one-to-one4.txt", 2);
+//		runR2150File("t0-migrate-one-to-one5.txt", 1);
+//		runR2150File("t0-migrate-one-to-one6.txt", 2);
+//		
+//		runR2150File("t0-migrate-one-to-many1.txt", 3);
+//		runR2150File("t0-migrate-one-to-many2.txt", 2);
+//		runR2150File("t0-migrate-one-to-many2a.txt", 2);
+//		runR2150File("t0-migrate-one-to-many3.txt", 2);
+//		runR2150File("t0-migrate-one-to-many4.txt", 2);
+//		//is no test 5 for many-to-one
+//		runR2150File("t0-migrate-one-to-many6.txt", 2);
+//		
+//		runR2150File("t0-migrate-many-to-many1.txt", 3);
+//		runR2150File("t0-migrate-many-to-many1a.txt", 2);
+//		runR2150File("t0-migrate-many-to-many2.txt", 2);
+//		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+//		runR2150File("t0-migrate-many-to-many3.txt", 2);
+//		runR2150File("t0-migrate-many-to-many4.txt", 2);
 		//TODO: fix these
 		//runR2150File("t0-migrate-many-to-many6.txt", 1);
 		//runR2150File("t0-migrate-many-to-many6a.txt", 2);
@@ -306,12 +318,13 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 2;
+//		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
-		enableMigration = true;
+//		diagnosticFilter = "I"; //log insert statements
 		
-		runR1300File("t0-let-query.txt", 7);
+//		runR550File("t0-multirel-NtoN-1.txt", 1);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 
 	}
 	

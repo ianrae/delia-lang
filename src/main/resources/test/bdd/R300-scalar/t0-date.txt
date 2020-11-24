@@ -15,10 +15,23 @@ let x date = "2020-01-31";date(2020-01-31T00:00:00.000-0000)
 let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0000)
 
 ---
+title: year
 given:
  let z date = '2020'
 when:
  let x date = z;date(2020-01-01T00:00:00.000-0000)
+---
+title: year,month
+given:
+ let z date = '2020-03'
+when:
+ let x date = z;date(2020-03-01T00:00:00.000-0000)
+---
+title: year month day
+given:
+ let z date = '2020-03-25'
+when:
+ let x date = z;date(2020-03-25T00:00:00.000-0000)
 ---
 given:
  let z date = null

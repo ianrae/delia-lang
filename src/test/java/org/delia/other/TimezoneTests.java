@@ -1,7 +1,16 @@
 package org.delia.other;
+import static org.junit.Assert.*;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -127,7 +136,61 @@ public class TimezoneTests {
 		dfFull.setTimeZone(tz2);
 		s = dfFull.format(result1);
 		System.out.println("cxb: " + s);
-		
 	}
 	
+	@Test
+	public void test6() throws ParseException {
+		TimeZone tz = TimeZone.getTimeZone("US/SOMEWHEREPacific");
+		assertNotNull(tz);
+		
+		System.out.println("cxb: " + tz.getDisplayName());
+		
+		SimpleDateFormat dfFull = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		String s ="2020-01-31T09:59:51.000-0000"; //;date(2020-01-31T09:59:51.000Z)
+		Date dt = dfFull.parse(s);
+		System.out.println("cxb: " + dt.toString());
+	}
+	@Test
+	public void testJava8() throws ParseException {
+		
+		java.util.Date dt = Date.from( Instant.parse( "2014-12-12T10:39:40Z" ));
+		System.out.println("cxb: " + dt.toString());
+		
+		OffsetDateTime odt = OffsetDateTime.parse( "2010-01-01T12:00:00+01:00" );
+		Instant instant = odt.toInstant();  // Instant is always in UTC.
+		dt = java.util.Date.from( instant );
+		System.out.println("cxb: " + dt.toString());
+
+		dt = new Date();
+		instant = Instant.now();
+		long n1 = instant.getEpochSecond();
+		int nano = instant.getNano();
+		System.out.println(String.format("instant: %d %d", n1, nano));
+		System.out.println(String.format("     dt: %d ", dt.getTime()));
+		
+		dt = Date.from(instant);
+		System.out.println("dt: " + dt.toString());
+		
+//		String s = "2020-01-31T09:59:51.000PST";
+		String s = "2020-01-31T09:59:51.000-0700";
+		DateTimeFormatter dfFull = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		ZonedDateTime zdt = ZonedDateTime.parse(s, dfFull);
+		System.out.println("yr:" + zdt.getYear());
+		LocalDate today = LocalDate.now();
+		LocalDateTime ldt = today.atStartOfDay();
+		System.out.println("today: " + today.toString());
+		System.out.println("today: " + ldt.toString());
+	}
+	@Test
+	public void testJava8b() throws ParseException {
+		
+		for(String zone: ZoneId.getAvailableZoneIds()) {
+			System.out.println(zone);
+		}
+	}
+	@Test
+	public void testJava8c() throws ParseException {
+		LocalDateTime ldt = LocalDateTime.now();
+		System.out.println("ldt: " + ldt.toString());
+	}	
 }

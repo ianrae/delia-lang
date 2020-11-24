@@ -12,7 +12,6 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SpanHelper;
 import org.delia.db.SqlHelperFactory;
-import org.delia.db.TableExistenceService;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SelectFuncHelper;
@@ -41,25 +40,19 @@ public class FKHelper extends ServiceBase {
 	private QueryTypeDetector queryDetectorSvc;
 	private SqlWhereConverter whereConverter;
 	private SqlNameFormatter nameFormatter;
-//	private PreparedStatementGenerator sqlgen;
-//	private WhereFragmentGenerator pwheregen;
-//	private SqlHelperFactory sqlHelperFactory;
 	private SelectFuncHelper selectFnHelper;
 	private TableFragmentMaker tableFragmentMaker;
-	private SpanHelper spanHelper;
 
 	public FKHelper(FactoryService factorySvc, DTypeRegistry registry, List<TableInfo> tblinfoL, 
-			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, TableExistenceService existSvc, SpanHelper spanHelper) {
+			SqlHelperFactory sqlHelperFactory, VarEvaluator varEvaluator, SpanHelper spanHelper) {
 		super(factorySvc);
 		this.registry = registry;
 		this.tblinfoL = tblinfoL;
-		this.spanHelper = spanHelper;
-//		this.sqlHelperFactory = sqlHelperFactory;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, varEvaluator);
-		this.nameFormatter = sqlHelperFactory.createNameFormatter(dbctx);
+		this.nameFormatter = sqlHelperFactory.createNameFormatter();
 		this.queryDetectorSvc = sqlHelperFactory.createQueryTypeDetector(dbctx);
-		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc);
+		this.whereConverter = sqlHelperFactory.createSqlWhereConverter(dbctx, queryDetectorSvc, varEvaluator);
 //		this.sqlgen = sqlHelperFactory.createPrepSqlGen(existSvc, dbctx);
 		this.selectFnHelper = sqlHelperFactory.createSelectFuncHelper(dbctx, spanHelper);
 //		this.pwheregen = new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
@@ -81,22 +74,12 @@ public class FKHelper extends ServiceBase {
 		if (adjustment != null && adjustment.joinNotNeeded) {
 			return; 
 		}
-//		if (adjustment != null && adjustment.isFirst) {
-//			spec = this.selectFnHelper.doFirstFixup(spec, exp.typeName, tbl.alias);
-//		} else if (adjustment != null && adjustment.isLast) {
-//			spec = this.selectFnHelper.doLastFixup(spec, exp.typeName, tbl.alias);
-//		}
-		
-//		RelationOneRule rule = DRuleHelper.findOneRule(exp.getTypeName(), registry);
+
 		RelationOneRule rule = oneL.isEmpty() ? null : oneL.get(0);
 		if (rule == null) {
-//			RelationManyRule manyRule = DRuleHelper.findManyRule(exp.getTypeName(), registry);
 			RelationManyRule manyRule = manyL.isEmpty() ? null : manyL.get(0);
 			if (manyRule != null) {
 				generateFKsQueryMany(spec, structType, exp, tbl, manyRule, details, selectFrag, adjustment);
-//				sc.o(sql);
-//				sqlgen.generateQueryFns(sc, spec, exp.typeName);
-//				sc.o(";");
 				return;
 			}
 			return; 
@@ -120,19 +103,15 @@ public class FKHelper extends ServiceBase {
 
 		TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 		genFields(structType, tbl, tbl2, rule.relInfo.fieldName, nearField, selectFrag, adjustment);
-//		sc.o("SELECT %s FROM %s", fields, tbl.name);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
 		RelationOneRule farRule = farL.isEmpty() ? null : farL.get(0);
-//		String onstr = String.format("%s.%s=%s.%s", tbl2.alias, farRule.relInfo.fieldName, tbl.alias, nearField.name);
 
-//		sc.o(" as %s LEFT JOIN %s ON %s", tbl.alias, tbl2.fmtAsStr(), onstr);
 		JoinFragment joinFrag = new JoinFragment();
 		joinFrag.joinTblFrag = tbl2;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
 		joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tbl, selectFrag, new TypePair(nearField.name, null));
 		selectFrag.joinFrag = joinFrag;
-//		sqlgen.generateQueryFns(sc, spec, exp.typeName);
 		
 		//Customer[addr = 100]. can't do this because customer is parent and doesn't have fk
 		//must transform into Customer[b.cust
@@ -154,13 +133,8 @@ public class FKHelper extends ServiceBase {
 					phrase.op1 = replacement;
 				}
 			}
-			//this.queryDetectorSvc.addWhereClauseOpFromPhrase(sc, phrase, tbl);
-//			pwheregen.addWhereClauseOpFromPhrase(spec, phrase, selectFrag.statement, selectFrag);
 		} else {
-//			this.pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), tbl, statement);
 		}
-//		sc.o(";");
-//		statement.sql = sc.str;
 		return;
 	}
 
@@ -218,7 +192,6 @@ public class FKHelper extends ServiceBase {
 		return null;
 	}
 
-	//TOOD: fix this limitation!!!
 	private List<RelationOneRule> findAllOneRules(String typeName) {
 		List<RelationOneRule> rulesL = new ArrayList<>();
 		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
@@ -260,22 +233,15 @@ public class FKHelper extends ServiceBase {
 		TableFragment tbl2 = tableFragmentMaker.createTable(rule.relInfo.farType, selectFrag);
 
 		List<RelationOneRule> farL = findAllOneRules(rule.relInfo.farType.getName());
-//		RelationOneRule farRule = DRuleHelper.findOneRule(rule.relInfo.farType.getName(), registry);
 		RelationOneRule farRule = farL.isEmpty() ? null : farL.get(0);
 		if (farRule == null) {
 			List<RelationManyRule> xfarL = findAllManyRules(rule.relInfo.farType.getName());
-//			RelationManyRule xfarRule = DRuleHelper.findManyRule(rule.relInfo.farType.getName(), registry);
 			RelationManyRule xfarRule = xfarL.isEmpty() ? null : xfarL.get(0);
 			doManyToMany(spec, structType, exp, xfarRule, tbl, tbl2, rule, details, selectFrag, adjustment);
 		} else {
 			TypePair nearField = DValueHelper.findPrimaryKeyFieldPair(rule.relInfo.nearType);
 			genFields(structType, tbl, tbl2, rule.relInfo.fieldName, nearField, selectFrag, adjustment);
 			
-//			sc.o("SELECT %s FROM %s", fields, tbl.name);
-//			String onstr = String.format("%s.%s=%s.%s", tbl2.alias, farRule.relInfo.fieldName, tbl.alias, nearField.name);
-
-//			sc.o(" as %s LEFT JOIN %s ON %s", tbl.alias, tbl2.fmtAsStr(), onstr);
-//			pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, exp.getTypeName(), tbl, statement);
 			JoinFragment joinFrag = new JoinFragment();
 			joinFrag.joinTblFrag = tbl2;
 			joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl2.structType, selectFrag, farRule.relInfo.fieldName);
@@ -293,7 +259,6 @@ public class FKHelper extends ServiceBase {
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
 
 		String actualTblName1 = this.tblName(tblinfo.tbl1); //postgres tables are lower-case
-//		String actualTblName2 = this.tblName(tblinfo.tbl2);
 		String assocField = actualTblName1.equalsIgnoreCase(tbl.name) ? "rightv" : "leftv";
 		String assocField2 = actualTblName1.equalsIgnoreCase(tbl.name) ? "leftv" : "rightv";
 		genJoin(spec, structType, info, tblinfo, tbl, otherRule, assocField, assocField2, exp, selectFrag, adjustment);
@@ -306,22 +271,15 @@ public class FKHelper extends ServiceBase {
 					String assocField2, QueryExp exp, StatementFragmentBase selectFrag, QueryAdjustment adjustment) {
 		TableFragment tblAssoc = tableFragmentMaker.createAssocTable(selectFrag, tblinfo.assocTblName);
 		TypePair copy = new TypePair(assocField, null);
-		//TODO: fix adjustment
 		genFields(structType, tbl, tblAssoc, otherRule.relInfo.fieldName, copy, selectFrag, adjustment);
 		
-		//sc.o("SELECT %s FROM %s", fields, tbl.name);
-
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(info.farType);
-//		String onstr = String.format("%s.%s=%s.%s", tbl.alias, pair.name, tblAssoc.alias, assocField2);
-//		sc.o(" as %s LEFT JOIN %s as %s ON %s", tbl.alias, tblAssoc.name, tblAssoc.alias, onstr);
 		JoinFragment joinFrag = new JoinFragment();
 		joinFrag.joinTblFrag = tblAssoc;
 		joinFrag.arg1 = FragmentHelper.buildFieldFrag(tbl.structType, selectFrag, pair.name);
 		TypePair p2 = new TypePair(assocField2, null); //TODO: fill in type later
 		joinFrag.arg2 = FragmentHelper.buildFieldFragForTable(tblAssoc, selectFrag, p2);
 		selectFrag.joinFrag = joinFrag;
-		
-		//pwheregen.addWhereClauseIfNeeded(sc, spec, exp.filter, typeName, tbl, statement);
 	}
 	
 

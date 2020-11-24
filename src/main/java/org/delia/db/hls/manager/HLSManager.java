@@ -1,16 +1,17 @@
 package org.delia.db.hls.manager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceService;
-import org.delia.db.hls.AssocTblManager;
+import org.delia.db.hls.AliasManager;
 import org.delia.db.hls.HLSEngine;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
@@ -29,7 +30,6 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZTableExistenceService;
 
 /**
  * Facade between Delia Runner and the db. Allows us to have different strategies
@@ -45,14 +45,14 @@ public class HLSManager extends ServiceBase {
 	private DeliaSession session;
 	private ZDBInterfaceFactory dbInterface;
 	private DTypeRegistry registry;
-//	private AssocTblManager assocTblMgr;
 	private HLSStragey defaultStrategy = new StandardHLSStragey();
 	private boolean generateSQLforMemFlag;
 	private Delia delia;
 	private VarEvaluator varEvaluator;
 	private MiniSelectFragmentParser miniSelectParser;
-//	private TableExistenceService existSvc;
-
+	private AliasManager aliasManager;
+	private List<HLSPipelineStep> pipelineL = new ArrayList<>();
+	
 	public HLSManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
 		this.session = session;
@@ -60,23 +60,29 @@ public class HLSManager extends ServiceBase {
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
-		WhereFragmentGenerator whereGen = createWhereGen();
+		this.aliasManager = new AliasManager(factorySvc);
+		this.pipelineL.add(new InQueryStep(factorySvc));
+	}
+	
+	private void initMiniParser(DatIdMap datIdMap) {
+		WhereFragmentGenerator whereGen = createWhereGen(datIdMap);
 		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
 		whereGen.tableFragmentMaker = miniSelectParser;
 	}
 	
-	private WhereFragmentGenerator createWhereGen() {
+	private WhereFragmentGenerator createWhereGen(DatIdMap datIdMap) {
 		DBType dbType = delia.getDBInterface().getDBType();
 		switch(dbType) {
 		case POSTGRES:
-			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator);
+			return new PostgresWhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 		default:
-			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+			return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 		}
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
-		HLSQueryStatement hls = buildHLS(spec.queryExp);
+		initMiniParser(zexec.getDatIdMap());
+		HLSQueryStatement hls = buildHLS(spec.queryExp, zexec.getDatIdMap());
 		hls.querySpec = spec;
 
 		HLSSQLGenerator sqlGenerator = chooseGenerator(zexec);
@@ -94,12 +100,7 @@ public class HLSManager extends ServiceBase {
 
 	private HLSSQLGenerator chooseGenerator(ZDBExecutor zexec) {
 		//later we will have dbspecific ones
-		
-//		TableExistenceService existSvc = dbexecutor.createTableExistService();
-		TableExistenceService existSvc = new ZTableExistenceService(zexec);
-		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, zexec.getDatIdMap());
-
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, miniSelectParser, varEvaluator, aliasManager, zexec.getDatIdMap());
 		switch(dbInterface.getDBType()) {
 		case MEM:
 		{
@@ -112,7 +113,7 @@ public class HLSManager extends ServiceBase {
 		case H2:
 			return gen;
 		case POSTGRES:
-			return new PostgresHLSSQLGeneratorImpl(factorySvc, assocTblMgr, miniSelectParser, varEvaluator);
+			return new PostgresHLSSQLGeneratorImpl(factorySvc, zexec.getDatIdMap(), miniSelectParser, varEvaluator, aliasManager);
 		default:
 			return null; //should never happen
 		}
@@ -151,16 +152,29 @@ public class HLSManager extends ServiceBase {
 	}
 
 
-	public HLSQueryStatement buildHLS(QueryExp queryExp) {
-		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry, null, null); //TODO what are these nulls?
+	public HLSQueryStatement buildHLS(QueryExp queryExp, DatIdMap datIdMap) {
+		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry); 
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 
 		HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
+		
+		hls = runPipeline(hls, queryExp, datIdMap);
 
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			aliasManager.buildAliases(hlspan, datIdMap);
+		}
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			String hlstr = hlspan.toString();
 			log.log(hlstr);
+		}
+		log.log("alias: %s", aliasManager.dumpToString());
+		return hls;
+	}
+
+	private HLSQueryStatement runPipeline(HLSQueryStatement hls, QueryExp queryExp, DatIdMap datIdMap) {
+		for(HLSPipelineStep step: pipelineL) {
+			hls = step.execute(hls, queryExp, datIdMap);
 		}
 		return hls;
 	}
@@ -172,5 +186,4 @@ public class HLSManager extends ServiceBase {
 	public void setGenerateSQLforMemFlag(boolean generateSQLforMemFlag) {
 		this.generateSQLforMemFlag = generateSQLforMemFlag;
 	}
-
 }

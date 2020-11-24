@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -27,17 +29,18 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
-	private AliasAllocator aliasAlloc = new AliasAllocator();
 	private SqlJoinHelper joinHelper;
-	private AssocTblManager assocTblMgr;
 	private WhereClauseHelper whereClauseHelper;
 	public Map<String,String> asNameMap = new HashMap<>();
+	private AliasManager aliasManager;
+	private DatIdMap datIdMap;
 
-	public HLSSQLGeneratorImpl(FactoryService factorySvc, AssocTblManager assocTblMgr, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator) {
+	public HLSSQLGeneratorImpl(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
-		this.joinHelper = new SqlJoinHelper(aliasAlloc, assocTblMgr, asNameMap, miniSelectParser);
-		this.assocTblMgr = assocTblMgr;
-		this.whereClauseHelper = new WhereClauseHelper(factorySvc, assocTblMgr, miniSelectParser, varEvaluator, asNameMap, aliasAlloc);
+		this.joinHelper = new SqlJoinHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
+		this.whereClauseHelper = new WhereClauseHelper(factorySvc, miniSelectParser, varEvaluator, asNameMap, aliasManager, datIdMap);
+		this.aliasManager = aliasManager;
+		this.datIdMap = datIdMap;
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				hls.details = hlspan1.details;
 				
 				SQLCreator sc = new SQLCreator();
-				whereClauseHelper.genWhere(hlspan2, queryExp); 
+				whereClauseHelper.genWhere(hlspan2); 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
 				
@@ -85,31 +88,36 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				case ONE_TO_MANY:
 				{
 					if (isQueryPKOnly(hlspan1)) {
-						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
-						RelationInfo relinfo1 = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+//						String alias = aliasAlloc.findOrCreateFor(hlspan1.fromType);
+						String alias = aliasManager.getMainTableAlias(hlspan1.fromType).alias;
+						RelationInfo relinfo1 = relinfo.otherSide; 
 						sql = String.format("%s WHERE %s.%s=?", sql, alias, relinfo1.fieldName);
 						return sql;
 					} else {
-						RelationInfo otherSide = relinfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(relinfo.farType, hlspan2.fromType);
+						RelationInfo otherSide = relinfo.otherSide; 
 						String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
 						s2 = StringUtils.substringAfter(s2, "WHERE ");
-						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
-						String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+//						String alias1 = aliasAlloc.findOrCreateFor(relinfo.farType);
+//						String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+						AliasInfo alias1 = aliasManager.getFieldAlias(relinfo.nearType, relinfo.fieldName);
+						AliasInfo alias2 = aliasManager.getMainTableAlias(hlspan2.fromType);
 						
-						sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2, pkField);
+						sql = String.format("%s AND %s WHERE %s.%s=%s.%s", sql, s2, alias1, otherSide.fieldName, alias2.alias, pkField);
 						
 						return sql;
 					}
 				}
 				case MANY_TO_MANY:
 				{
-					String assocTblName = assocTblMgr.getDatIdMap().getAssocTblName(relinfo.getDatId()); //   .getTableFor(hlspan1.fromType, hlspan2.fromType);
-					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
-					String fff = assocTblMgr.xgetAssocRightField(hlspan1.fromType, assocTblName); //hlspan2.fromType);
+					String assocTblName = datIdMap.getAssocTblName(relinfo.getDatId()); 
+//					String newAlias = aliasAlloc.findOrCreateForAssoc(assocTblName);
+					String newAlias = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTblName).alias;
+					String fff = datIdMap.getAssocFieldFor(relinfo); //hlspan2.fromType);
 					String s3 = String.format("%s.%s", newAlias, fff);
 					
 					String pkField = hlspan2.fromType.getPrimaryKey().getFieldName();
-					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+//					String alias2 = aliasAlloc.findOrCreateFor(hlspan2.fromType);
+					String alias2 = aliasManager.getMainTableAlias(hlspan2.fromType).alias;
 					String target = String.format("%s.%s", alias2, pkField);
 					s2 = s2.replace(target, s3);		
 					return sql + " " + s2;
@@ -137,16 +145,18 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	@Override
 	public String processOneStatement(HLSQuerySpan hlspan, boolean forceAllFields) {
-		if (hlspan.fromType != null) {
-			aliasAlloc.findOrCreateFor(hlspan.fromType);
-		}
-		this.whereClauseHelper.genWhere(hlspan, queryExp); //need this to genereate "as " in fields
+//		if (hlspan.fromType != null) {
+//			aliasAlloc.findOrCreateFor(hlspan.fromType);
+//		}
+		this.whereClauseHelper.genWhere(hlspan); //need this to genereate "as " in fields
 		
 		SQLCreator sc = new SQLCreator();
 		//SELECT .. from .. ..join.. ..where.. ..order..
 		sc.out("SELECT");
 		genFields(sc, hlspan, forceAllFields);
-		sc.out("FROM %s", buildTblAlias(hlspan.mtEl.structType));
+		
+		AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.mtEl.structType);
+		sc.out("FROM %s", aliasManager.buildTblAlias(aliasInfo));
 		genJoin(sc, hlspan);
 		genWhere(sc, hlspan);
 
@@ -155,15 +165,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return sc.sql();
 	}
 
-
-	private String buildTblAlias(DStructType structType) {
-		return aliasAlloc.buildTblAlias(structType);
-	}
-//	private String buildAlias(DStructType pairType, TypePair pair) {
-//		return aliasAlloc.buildAlias(pairType, pair);
-//	}
 	private String buildAlias(DStructType pairType, String fieldName) {
-		return aliasAlloc.buildAlias(pairType, fieldName);
+//		return aliasAlloc.buildAlias(pairType, fieldName);
+		return aliasManager.getFieldAlias(pairType, fieldName).alias;
+	}
+	private String buildMainAlias(DStructType fromType, String fieldName) {
+		AliasInfo info = aliasManager.getMainTableAlias(fromType);
+		return aliasManager.buildFieldAlias(info, fieldName);
 	}
 
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -201,7 +209,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				//implicitly add sort by pk (if there is one)
 				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
 				if (pk != null) {
-					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
+					String ss = buildMainAlias(hlspan.fromType, pk.getFieldName());
 					sc.out("ORDER BY %s desc",ss);
 				}
 			}
@@ -210,7 +218,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				//implicitly add sort by pk (if there is one)
 				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
 				if (pk != null) {
-					String ss = buildAlias(hlspan.fromType, pk.getFieldName());
+					String ss = buildMainAlias(hlspan.fromType, pk.getFieldName());
 					Integer iOffset = gel.getIntArg(0);
 					sc.out("ORDER BY %s LIMIT 1 OFFSET %s",ss, iOffset.toString());
 				}
@@ -227,7 +235,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				isAsc = false;
 			}
 			String asc = isAsc ? "" : " desc";
-			String ss = buildAlias(hlspan.fromType, hlspan.oloEl.orderBy);
+			//FUTURE later support order by doing implicit fetch. orderBy(addr.city)
+			AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
+			String ss = aliasManager.buildFieldAlias(aliasInfo, hlspan.oloEl.orderBy);
 			sc.out("ORDER BY %s%s",ss, asc);
 		}
 
@@ -277,7 +287,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		boolean isJustFieldName = false;
 		if (hlspan.fEl != null) {
 			String fieldName = hlspan.fEl.getFieldName();
-			String aa = buildAlias(hlspan.fromType, fieldName);
+			AliasInfo aliasInfo = aliasManager.getMainTableAlias(hlspan.fromType);
+			String aa = aliasManager.buildFieldAlias(aliasInfo, fieldName);
 			if (hlspan.hasFunction("count")) {
 				String s = String.format("COUNT(%s)", aa);
 				addField(fieldL, s);
@@ -316,6 +327,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			addStructFields(hlspan.fromType, fieldL);
 			addFKofJoins(hlspan, fieldL);
 			addFullofJoins(hlspan, fieldL);
+			addRelFieldJoin(hlspan);
 		} else if (isJustFieldName) {
 			addFKofJoins(hlspan, fieldL);
 		}
@@ -332,6 +344,11 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 		hlspan.renderedFieldL = fieldL;
 		sc.out(joiner.toString());
+	}
+
+	private void addRelFieldJoin(HLSQuerySpan hlspan) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	protected void doFirst(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -362,7 +379,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 	}
 	@Override
 	public void setRegistry(DTypeRegistry registry) {
-//		this.registry = registry;
 		this.queryTypeDetector = new QueryTypeDetector(factorySvc, registry);
 	}
 }

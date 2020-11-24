@@ -23,19 +23,18 @@ import org.delia.db.sql.where.WherePhrase;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 
 public class QueryTypeDetector extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private SqlDateGenerator dateGenerator;
-	private SqlWhereConverter whereConverter;
 	private FilterFnRunner filterRunner;
 
 	public QueryTypeDetector(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.dateGenerator = new SqlDateGenerator(factorySvc, registry);
-		this.whereConverter = new SqlWhereConverter(factorySvc, registry, this);
 		this.filterRunner = new FilterFnRunner(registry);
 	}
 
@@ -68,7 +67,6 @@ public class QueryTypeDetector extends ServiceBase {
 		} else if (express instanceof InPhrase) {
 			s += doInPhrase(sc, (InPhrase) express, tbl);
 		}
-		//TODO: others??
 		
 		sc.addStr(s);
 	}
@@ -201,7 +199,8 @@ public class QueryTypeDetector extends ServiceBase {
 			//err!!
 			break;
 		}
-		return "KKKKKKKKKKK"; //TODO fix
+		DeliaExceptionHelper.throwError("unknown-where-function", "Unknown filter function '%s'", val.fnName);
+		return null;
 	}
 	
 	private String getColumnName(Exp op1) {

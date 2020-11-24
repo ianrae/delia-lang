@@ -232,11 +232,6 @@ public class ValidationRuleRunner extends ServiceBase {
 			return localET.areNoErrors();
 		}
 
-		public boolean validateEndSource() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
 		public void enableRelationModifier(boolean b) {
 			this.enableRelationModifierFlag = b;
 		}

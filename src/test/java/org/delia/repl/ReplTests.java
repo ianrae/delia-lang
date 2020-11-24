@@ -9,6 +9,7 @@ import org.delia.db.DBType;
 import org.delia.h2.H2ConnectionHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.Before;
+import org.junit.Test;
 
 
 public class ReplTests extends BDDBase {

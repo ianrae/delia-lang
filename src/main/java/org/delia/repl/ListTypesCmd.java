@@ -14,10 +14,13 @@ public class ListTypesCmd extends CmdBase {
 		super("list types", "lt");
 		expectSpace = false;
 	}
+	public ListTypesCmd(ListTypesCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new ListTypesCmd();
+			Cmd cmd = new ListTypesCmd(this);
 			cmd.cmd = name;
 			return cmd;
 		}

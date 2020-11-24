@@ -17,7 +17,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
@@ -44,7 +43,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcOneToOne();
 		src += "\n  update Customer[true] {wid: 333, insert addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -64,7 +63,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		src += "\n  update Customer[true] {wid: 333, insert addr:100}";
 		src += "\n  update Address[true] {z:5, cust:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -83,7 +82,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, insert addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -102,7 +101,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, insert addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -118,7 +117,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, insert addr:[100,101]}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -135,7 +134,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, insert addr:[100,101]}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -153,7 +152,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, insert cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -169,7 +168,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, insert cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -185,7 +184,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, insert addr:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -204,7 +203,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, insert addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -224,7 +223,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, delete addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -240,7 +239,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, delete addr:[100,101]}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -257,7 +256,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, delete addr:[100,101]}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -275,7 +274,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, delete cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -291,7 +290,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, delete cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -307,7 +306,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, delete addr:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -326,7 +325,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, update addr:[100]}"; 
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -336,7 +335,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, update addr:[100,222]}"; 
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -352,7 +351,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, update addr:[100,222,101,223]}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -369,7 +368,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, update addr:[100,222,101,223]}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -387,7 +386,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, update cust:[55,56]}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -403,7 +402,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, update cust:[55,56]}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -419,7 +418,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, update addr:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval, recentCres.assocCrudMap); 
@@ -438,7 +437,6 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	}
 	@After
 	public void shutdown() {
-		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 	
 
@@ -474,7 +472,7 @@ public class AssocCrudTests extends FragmentParserTestBase {
 	}
 	private UpdateFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
 		
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
 		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);

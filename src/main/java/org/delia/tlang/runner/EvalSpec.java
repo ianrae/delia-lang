@@ -1,6 +1,6 @@
 package org.delia.tlang.runner;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import org.delia.db.memdb.filter.OP;
 import org.delia.util.DeliaExceptionHelper;
@@ -21,8 +21,8 @@ public class EvalSpec {
 			return doString((String)left, (String) right);
 		} else if (left instanceof Boolean) {
 			return doBoolean((Boolean)left, (Boolean)right);
-		} else if (left instanceof Date) {
-			return doDate((Date)left, (Date)right);
+		} else if (left instanceof ZonedDateTime) {
+			return doDate((ZonedDateTime)left, (ZonedDateTime)right);
 		} else {
 			DeliaExceptionHelper.throwError("tlang-unknown-type", "TLANG unkown type: %s", left.getClass().getSimpleName());
 			return false;
@@ -117,9 +117,9 @@ public class EvalSpec {
 			return false;
 		}
 	}
-	public boolean doDate(Date left, Date right) {
-		long n1 = left.getTime();
-		long n2 = right.getTime();
+	public boolean doDate(ZonedDateTime left, ZonedDateTime right) {
+		long n1 = left.toEpochSecond(); //TODO ignores nano seconds
+		long n2 = right.toEpochSecond();
 		return doLong(n1, n2);
 	}
 }

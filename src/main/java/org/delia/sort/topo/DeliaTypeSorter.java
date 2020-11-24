@@ -30,7 +30,6 @@ public class DeliaTypeSorter {
 			graph.addNode(structType.getName());
 			extset.add(structType);
 			
-			
 			for(DRule rule: structType.getRawRules()) {
 				if (rule instanceof RelationOneRule) {
 					RelationOneRule rr = (RelationOneRule) rule;
@@ -44,6 +43,15 @@ public class DeliaTypeSorter {
 						graph.addNode(pair.type.getName());
 						extset.add(pair.type);
 					}
+					
+					if (structType == pair.type) {
+						//System.out.println(String.format("%s self-join", structType.getName()));
+						if (info.otherSide != null && info.relationName.equals(info.otherSide.relationName)) {
+							System.out.println(String.format("skipping self-join %s on %s", structType.getName(), pair.type.getName()));
+							continue;
+						}
+					}
+					
 					System.out.println(String.format("%s depends on %s", structType.getName(), pair.type.getName()));
 					graph.addEdge(structType.getName(), pair.type.getName()); //structType depends on pair type
 				} else if (rule instanceof RelationManyRule) {
@@ -61,6 +69,15 @@ public class DeliaTypeSorter {
 						graph.addNode(pair.type.getName());
 						extset.add(pair.type);
 					}
+					
+					if (structType == pair.type) {
+						//System.out.println(String.format("%s self-join", structType.getName()));
+						if (info.otherSide != null && info.relationName.equals(info.otherSide.relationName)) {
+							System.out.println(String.format("skipping self-join %s on %s", structType.getName(), pair.type.getName()));
+							continue;
+						}
+					}
+					
 					System.out.println(String.format("%s depends on %s", structType.getName(), pair.type.getName()));
 					graph.addEdge(structType.getName(), pair.type.getName()); //structType depends on pair type
 					

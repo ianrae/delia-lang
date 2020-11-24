@@ -37,12 +37,12 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		QueryResponse qresp = span.qresp;
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
+		ctx.offsetLimitDirtyFlag = initOffsetLimitDirtyFlag(span);
 		
 		log.logDebug("span:%d", span.qfeL.size());
 		for(int i = 0; i < span.qfeL.size(); i++) {
 			log.logDebug("spantype:%s", span.dtype.getName());
 			QueryFuncExp qfexp = span.qfeL.get(i);
-//			ctx.pendingTrail.add(qfexp.funcName);
 			
 			if (qfexp instanceof QueryFieldExp) {
 				qresp = processField(span, qfexp, qresp, ctx);
@@ -51,6 +51,18 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 			}
 		}
 		return qresp;
+	}
+	private boolean initOffsetLimitDirtyFlag(LetSpan span) {
+		for(int i = 0; i < span.qfeL.size(); i++) {
+			QueryFuncExp qfexp = span.qfeL.get(i);
+			if (qfexp instanceof QueryFieldExp) {
+			} else {
+				if (qfexp.funcName.equals("limit")) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	private QueryResponse executeFunc(QueryResponse qresp, QueryFuncExp qfexp, ZQueryResponseFunctionFactory fnFactory, QueryFuncContext ctx) {
 		String fnName = qfexp.funcName;
@@ -110,8 +122,19 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 		}
 		span.startsWithScopeChange = false;
 
-		DValue dval = qresp.dvalList.get(0);
-		if (dval == null) {
+		//find any dval whose .field is non null
+		DValue nonNullDVal = null;
+		for(DValue dval: qresp.dvalList) {
+			if (dval != null) {
+				DValue inner = dval.asStruct().getField(fieldName); 
+				if (inner != null) {
+					nonNullDVal = dval;
+					break;
+				}
+			}
+		}
+		
+		if (nonNullDVal == null) {
 			List<DValue> newList = new ArrayList<>();
 			QueryResponse newRes = new QueryResponse();
 			newRes.ok = true;
@@ -122,7 +145,7 @@ public class LetSpanRunnerImpl extends ServiceBase implements LetSpanRunner {
 			return null;
 		}
 		
-		DValue inner = dval.asStruct().getField(fieldName); 
+		DValue inner = nonNullDVal.asStruct().getField(fieldName); 
 		return inner;
 	}
 	

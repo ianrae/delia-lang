@@ -15,19 +15,25 @@ import org.delia.util.NameUtils;
  * @author Ian Rae
  *
  */
-public class DType {
+public class DType implements DTypeInternal {
 	private Shape shape;
 	private String name;
 	private String packageName;
 	private String completeName;
-	private DType baseType; //can be null
+	protected DType baseType; //can be null
 	private List<DRule> rules = new ArrayList<>();
 	private int bitIndex;
-	public boolean invalidFlag; //used to verify type-replacement worked.
 
 	public DType(Shape shape, String name, DType baseType) {
 		this.shape = shape;
 		this.name = name;
+		this.completeName = name;
+		this.baseType = baseType;
+	}
+	@Override
+	public void finishScalarInitialization(Shape shape, String typeName, DType baseType) {
+		this.shape = shape;
+		this.name = typeName;
 		this.completeName = name;
 		this.baseType = baseType;
 	}
@@ -139,19 +145,14 @@ public class DType {
 		return name;
 	}
 	
-	//TODO: make this into an 'internal' api with DStructTypeInternal interface
-	public void internalAdjustType(DType baseType) {
-		this.baseType = baseType;
-	}
-
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		if (baseType != null && spec.needsReplacement(this, baseType)) {
-			baseType = spec.newType;
-		}
-		
-		for(DRule rule: this.rules) {
-			rule.performTypeReplacement(spec);
-		}
-	}
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		if (baseType != null && spec.needsReplacement(this, baseType)) {
+//			baseType = spec.newType;
+//		}
+//		
+//		for(DRule rule: this.rules) {
+//			rule.performTypeReplacement(spec);
+//		}
+//	}
 }
 

@@ -44,8 +44,23 @@ when:
 let x date = "2020-01-31T09:59:51-0800";date(2020-01-31T09:59:51.000-0800)
 
 ---
-SKIP: default-timezone daylight-savings. EDT not same as -0500. fix!!
+title: default-timezone daylight-savings. EDT not same as -0500. TODO fix!!
 given:
 configure timezone="US/Eastern"
 when:
 let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0500)
+
+---
+title: US/Pacific
+#can only parse timezones like -0800. not PST
+given:
+configure timezone="US/Pacific"
+when:
+let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000-0800)
+
+---
+title: Z
+given:
+configure timezone="UTC"
+when:
+let x date = "2020-01-31T09:59:51";date(2020-01-31T09:59:51.000+0000)

@@ -26,35 +26,22 @@ public class ZOffsetFunction extends ZQueryResponseFunctionBase {
 			int offset = getIntArg(qfe, ctx);
 			ctx.currentOffset = offset;
 			
-			ctx.offsetLimitDirtyFlag = true;
-			doLimitAndOffset(ctx, qresp);
+			if (ctx.offsetLimitDirtyFlag) {
+				doLimitAndOffset(ctx, qresp, dvalList);
+			}
 			return qresp;
 		}
 		
-//		protected boolean canExecuteInGivenOrder(QueryFuncContext ctx) {
-//			//Flight[true].offset(1).limit(2) is ok
-//			int pos1 = ctx.pendingTrail.getTrail().indexOf("offset");
-//			int pos2 = ctx.pendingTrail.getTrail().indexOf("limit");
-//			if (pos1 < 0 || pos2 < 0) {
-//				return true;
-//			} else if (pos1 < pos2) {
-//				return true;
-//			} else {
-//				return false;
-//			}
-//		}
-
-		protected void doLimitAndOffset(QueryFuncContext ctx, QueryResponse qresp) {
+		protected void doLimitAndOffset(QueryFuncContext ctx, QueryResponse qresp, List<DValue> dvalList) {
 			int offset = ctx.currentOffset;
 			int pgSize = ctx.currentPgSize;
 			
 			ctx.currentOffset = 0; //reset
 			
 			if (ctx.offsetLimitDirtyFlag) {
-				ctx.offsetLimitDirtyFlag = true;
+				ctx.offsetLimitDirtyFlag = false;
 				List<DValue> newlist = new ArrayList<>();
 				int i = 0;
-				List<DValue> dvalList = ctx.getDValList();
 				for(DValue dval: dvalList) {
 					if (offset > 0) {
 						offset--;

@@ -4,6 +4,8 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
+import org.delia.core.DateFormatService;
+import org.delia.core.FactoryService;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -16,12 +18,16 @@ public class MultiOpEvaluator implements OpEvaluator {
 	private OpEvaluator eval1;
 	private OpEvaluator eval2;
 	private DTypeRegistry registry;
+	private DateFormatService fmtSvc;
+	private FactoryService factorySvc;
 
 	
-	public MultiOpEvaluator(FilterOpFullExp fullexp, DStructType dtype, DTypeRegistry registry) {
+	public MultiOpEvaluator(FilterOpFullExp fullexp, DStructType dtype, DTypeRegistry registry, DateFormatService fmtSvc, FactoryService factorySvc) {
 		this.fullExp = fullexp;
 		this.dtype = dtype;
 		this.registry = registry;
+		this.fmtSvc = fmtSvc;
+		this.factorySvc = factorySvc;
 		
 		FilterOpFullExp f1 = (FilterOpFullExp) fullexp.opexp1;
 		FilterOpFullExp f2 = (FilterOpFullExp) fullexp.opexp2;
@@ -67,7 +73,7 @@ public class MultiOpEvaluator implements OpEvaluator {
 			op2HintType = DValueHelper.findFieldType(dtype, fieldOrVarOrFn);
 		}
 		
-		OpFactory factory = new OpFactory(registry);
+		OpFactory factory = new OpFactory(registry, fmtSvc, factorySvc);
 		OpEvaluator evaluator = factory.create(foexp.op, xop1, xop2, op1HintType, op2HintType,negFlag);
 //		//TODO: this support id < 10. later support 10 < id too!!
 		evaluator.setRightVar(xop2);

@@ -40,7 +40,7 @@ public class ZTableCreator extends ServiceBase {
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		
-		TableExistenceService existSvc = new ZTableExistenceService(zexec);
+		TableExistenceService existSvc = new ZTableExistenceService();
 		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
 		this.datIdMap = datIdMap;
 	}
@@ -102,9 +102,20 @@ public class ZTableCreator extends ServiceBase {
 		sc.nl();
 		if (manyToManyFieldCount > 0) {
 			sc.nl();
+			List<String> createdTables = new ArrayList<>();
 			for(TypePair pair: dtype.getAllFields()) {
 				if (isManyToManyRelation(pair, dtype)) {
-					generateAssocTable(sc, pair, dtype);
+					
+					StrCreator tmpSc = new StrCreator();
+					String tblName = generateAssocTable(tmpSc, pair, dtype);
+					if (tblName != null) {
+						if (createdTables.contains(tblName)) {
+							//skip self-join
+						} else {
+							sc.o(tmpSc.toString());
+						}
+						createdTables.add(tblName);
+					}
 				}
 			}
 		}
@@ -146,8 +157,8 @@ public class ZTableCreator extends ServiceBase {
 		assocTblCreator.alterGenerateAssocTable(sc, pair, dtype);
 	}
 	
-	protected void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
-		assocTblCreator.generateAssocTable(sc, xpair, dtype);
+	protected String generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
+		return assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
 	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {

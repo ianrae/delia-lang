@@ -28,9 +28,9 @@ public class PostgresBDDTests extends BDDBase {
 		runR300File("t0-number-custom.txt", 13);
 		runR300File("t0-string.txt", 12);
 		runR300File("t0-string-custom.txt", 5);
-		runR300File("t0-date.txt", 6);
+		runR300File("t0-date.txt", 8);
 		runR300File("t0-date-custom.txt", 6);
-		runR300File("t0-date-timezone.txt",7);
+		runR300File("t0-date-timezone.txt",10);
 	}
 	@Test
 	public void testR400() {
@@ -56,6 +56,10 @@ public class PostgresBDDTests extends BDDBase {
 		runR550File("t0-multirel-Nto1-1.txt", 1);
 		runR550File("t0-multirel-Nto1-2.txt", 1);
 		runR550File("t0-multirel-NtoN-1.txt", 1);
+	}
+	@Test
+	public void testR560() {
+		runR560File("t0-self-11.txt", 1);
 	}
 	@Test
 	public void testR600() {

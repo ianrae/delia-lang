@@ -68,7 +68,7 @@ public class ErrorFormatterServiceImpl implements ErrorFormatterService {
 	public String formatValidationError(ValidationError err, Locale locale) {
 		String textMessage = getTextMessage(err, locale);
 		String s = String.format("%s", textMessage);
-		//todo: maybe include arg1,...
+		//FUTURE: maybe include arg1,...
 		return s;
 	}
 }

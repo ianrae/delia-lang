@@ -28,7 +28,7 @@ value:a:Customer {
    {
    vid:101
    vy:21
-   vcust:null
+   vcust:{[55,56,57]}
   }
 }
 }
@@ -39,12 +39,12 @@ value:a:Customer {
    {
    vid:101
    vy:21
-   vcust:null
+   vcust:{[55,56,57]}
   }
    {
    vid:102
    vy:22
-   vcust:null
+   vcust:{[55,56]}
   }
 }
 }
@@ -55,22 +55,22 @@ value:a:Customer {
    {
    vid:100
    vy:20
-   vcust:null
+   vcust:{55}
   }
    {
    vid:101
    vy:21
-   vcust:null
+   vcust:{[55,56,57]}
   }
    {
    vid:102
    vy:22
-   vcust:null
+   vcust:{[55,56]}
   }
 }
 }
 ---
-SKIP: 2 orderby
+title: 2 orderby
 #db-multiple-spans-not-supported
 given:
 when:

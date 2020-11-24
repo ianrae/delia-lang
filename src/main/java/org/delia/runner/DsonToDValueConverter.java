@@ -165,7 +165,6 @@ public class DsonToDValueConverter extends ServiceBase {
 				if (fieldExp.exp instanceof ListExp) {
 					DStructType relStructType = (DStructType) registry.getType(fieldType.getName());
 					PrimaryKey pk = relStructType.getPrimaryKey();
-					//TODO should use input here not fieldExp???
 					List<DValue> elementL = buildList((ListExp)fieldExp.exp, fieldType.getName(), pk.getKeyType());
 					rbuilder.buildFromList(elementL);
 				} else {

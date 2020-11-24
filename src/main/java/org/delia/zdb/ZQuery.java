@@ -2,6 +2,7 @@ package org.delia.zdb;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -31,14 +32,15 @@ public class ZQuery extends ServiceBase {
 		this.sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
 	}
 
-	public SqlStatement generate(QuerySpec spec, QueryContext qtx, ZTableCreator tableCreator, List<LetSpan> spanL, QueryDetails details, VarEvaluator varEvaluator) {
+	public SqlStatement generate(QuerySpec spec, QueryContext qtx, ZTableCreator tableCreator, List<LetSpan> spanL, 
+			QueryDetails details, VarEvaluator varEvaluator, ZDBExecutor zexec) {
 		buildSpans(spec, qtx, spanL);
 		failIfMultiSpan(spec, qtx, spanL);
 		SqlStatement statement;
 		
 		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator);
-		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, null, dbctx, sqlHelperFactory, whereGen, spanL);
+		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(varEvaluator, zexec.getDatIdMap());
+		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, spanL);
 		SelectFragmentParser parser = new SelectFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;
 		SelectStatementFragment selectFrag = parser.parseSelect(spec, details);
@@ -63,8 +65,8 @@ public class ZQuery extends ServiceBase {
 		spanLParam.addAll(spanL);
 	}
 	
-	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator) {
-		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator);
+	protected WhereFragmentGenerator createWhereFragmentGenerator(VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		return new WhereFragmentGenerator(factorySvc, registry, varEvaluator, datIdMap);
 	}
 	
 }

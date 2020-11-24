@@ -22,10 +22,9 @@ import org.delia.runner.Runner;
 import org.delia.runner.RunnerImpl;
 import org.delia.runner.TypeRunner;
 import org.delia.runner.TypeSpec;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.typebuilder.FutureDeclError;
+import org.delia.typebuilder.TypePreRunner;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -39,13 +38,14 @@ public class DeliaImpl implements Delia {
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
-//	private Runner mostRecentRunner;
-
+	private ErrorAdjuster errorAdjuster;
+	
 	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
 		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
+		this.errorAdjuster = new ErrorAdjuster();
 	}
 
 	@Override
@@ -75,7 +75,8 @@ public class DeliaImpl implements Delia {
 		runner.setDatIdMap(datIdMap);
 		res = runner.executeProgram(expL);
 		if (res != null && ! res.ok) {
-			throw new DeliaException(res.errors);
+			List<DeliaError> errL = errorAdjuster.adjustErrors(res.errors);
+			throw new DeliaException(errL);
 		}
 		return res;
 	}
@@ -139,6 +140,7 @@ public class DeliaImpl implements Delia {
 			session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			session.datIdMap = extraInfo.datIdMap;
 			session.mostRecentRunner = mainRunner;
+			session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
 			return session;
 		}
 
@@ -151,6 +153,7 @@ public class DeliaImpl implements Delia {
 		session.expL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 		session.datIdMap = extraInfo.datIdMap;
 		session.mostRecentRunner = mainRunner;
+		session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
 		return session;
 	}
 
@@ -163,27 +166,34 @@ public class DeliaImpl implements Delia {
 		List<DeliaError> allErrors = new ArrayList<>();
 
 		//1st pass
+		DTypeRegistry registry = mainRunner.getRegistry();
+		TypePreRunner preRunner = new TypePreRunner(factorySvc, registry);
+		preRunner.executeStatements(extL, allErrors);
+		if (!allErrors.isEmpty()) {
+			//something went wrong
+			throw new DeliaException(allErrors);
+		}
+		
+		//2nd pass
 		TypeRunner typeRunner = mainRunner.createTypeRunner();
+		typeRunner.setPreRegistry(preRunner.getPreRegistry());
 		typeRunner.executeStatements(extL, allErrors, true);
 		
-		if (allErrors.isEmpty()) {
-			return;
-		} else if (numFutureDeclErrors(allErrors) != allErrors.size()) {
-			//something else went wrong
-			throw new DeliaException(getNonFutureDeclErrors(allErrors));
+		if (!allErrors.isEmpty()) {
+			//something went wrong
+			throw new DeliaException(allErrors);
 		}
-		log.log("%d forward decls found - re-executing.", numFutureDeclErrors(allErrors));
 		
-		//2nd pass - for future decls
-		allErrors.clear();
-		List<Exp> newExtL = typeRunner.getNeedReexecuteL(); //only re-exec the failed types
-		DTypeRegistry registry = typeRunner.getRegistry();
-		List<DType> oldTypeL = new ArrayList<>();
-		for(Exp exp: newExtL) {
-			TypeStatementExp texp = (TypeStatementExp) exp;
-			DType dtype = registry.getType(texp.typeName);
-			oldTypeL.add(dtype);
-		}
+//		//2nd pass - for future decls
+//		allErrors.clear();
+//		List<Exp> newExtL = typeRunner.getNeedReexecuteL(); //only re-exec the failed types
+//		DTypeRegistry registry = typeRunner.getRegistry();
+//		List<DType> oldTypeL = new ArrayList<>();
+//		for(Exp exp: newExtL) {
+//			TypeStatementExp texp = (TypeStatementExp) exp;
+//			DType dtype = registry.getType(texp.typeName);
+//			oldTypeL.add(dtype);
+//		}
 		
 		//Type Replacement - because of the after-you-after-you problem with relations, 
 		//newExtL will contain types that could fully be built because of forward declarations
@@ -192,43 +202,43 @@ public class DeliaImpl implements Delia {
 		//themselves with the new (correct) version of the type.
 		
 		//prepare the type replacer
-		List<TypeReplaceSpec> replacerL = new ArrayList<>();
-		for(DType oldtype: oldTypeL) {
-			TypeReplaceSpec spec = new TypeReplaceSpec();
-			spec.oldType = oldtype;
-			replacerL.add(spec);
-		}
+//		List<TypeReplaceSpec> replacerL = new ArrayList<>();
+//		for(DType oldtype: oldTypeL) {
+//			TypeReplaceSpec spec = new TypeReplaceSpec();
+//			spec.oldType = oldtype;
+//			replacerL.add(spec);
+//		}
+//		
+//		typeRunner.executeStatements(newExtL, allErrors, false);
+//		
+//		//now update all types
+//		for(TypeReplaceSpec spec: replacerL) {
+//			spec.newType = registry.getType(spec.oldType.getName());
+//			registry.performTypeReplacement(spec);
+//			log.log("type-replacement '%s' %d", spec.newType.getName(), spec.counter);
+//			
+//			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
+//				dbInterface.performTypeReplacement(spec);
+//			}
+//			
+//		}
 		
-		typeRunner.executeStatements(newExtL, allErrors, false);
-		
-		//now update all types
-		for(TypeReplaceSpec spec: replacerL) {
-			spec.newType = registry.getType(spec.oldType.getName());
-			registry.performTypeReplacement(spec);
-			log.log("type-replacement '%s' %d", spec.newType.getName(), spec.counter);
-			
-			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
-				dbInterface.performTypeReplacement(spec);
-			}
-			
-		}
-		
-		//and check that we did all replacement
-		for(String typeName: typeRunner.getRegistry().getAll()) {
-			DType dtype = registry.getType(typeName);
-			if (dtype.invalidFlag) {
-				log.logError("ERROR1: type %s invalid", dtype.getName());
-			}
-		}
-		
-		typeRunner.executeRulePostProcessor(allErrors);
-		
-		if (allErrors.isEmpty()) {
-			return;
-		} else {
-			//something else went wrong
-			throw new DeliaException(allErrors);
-		}
+//		//and check that we did all replacement
+//		for(String typeName: typeRunner.getRegistry().getAll()) {
+//			DType dtype = registry.getType(typeName);
+//			if (dtype.invalidFlag) {
+//				log.logError("ERROR1: type %s invalid", dtype.getName());
+//			}
+//		}
+//		
+//		typeRunner.executeRulePostProcessor(allErrors);
+//		
+//		if (allErrors.isEmpty()) {
+//			return;
+//		} else {
+//			//something else went wrong
+//			throw new DeliaException(allErrors);
+//		}
 	}
 
 	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {

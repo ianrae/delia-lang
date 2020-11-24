@@ -14,7 +14,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
@@ -220,7 +219,6 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 	}
 	@After
 	public void shutdown() {
-		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
 	private String buildSrc() {
@@ -279,7 +277,7 @@ public class UpdateFragmentParserTests extends FragmentParserTestBase {
 	}
 	private UpdateFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
 		
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
 		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 	    AssocTableReplacer assocTblReplacer = new AssocTableReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);

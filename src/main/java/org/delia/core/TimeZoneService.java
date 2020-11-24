@@ -1,6 +1,6 @@
 package org.delia.core;
 
-import java.util.TimeZone;
+import java.time.ZoneId;
 
 /**
  * Service that manages Delia's default timezone.
@@ -9,6 +9,6 @@ import java.util.TimeZone;
  */
 public interface TimeZoneService {
 
-	void setDefaultTimeZone(TimeZone tz);
-	TimeZone getDefaultTimeZone();
+	void setDefaultTimeZone(ZoneId tz);
+	ZoneId getDefaultTimeZone();
 }

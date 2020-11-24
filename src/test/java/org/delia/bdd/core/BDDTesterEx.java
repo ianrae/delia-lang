@@ -57,11 +57,12 @@ public class BDDTesterEx {
 
 	private DeliaClient client;
 	ZDBInterfaceFactory dbInterface;
-
+	private String diagnosticFilter;
 	private BDDTest currentTest;
 
-	BDDTesterEx(ZDBInterfaceFactory retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables) {
+	BDDTesterEx(ZDBInterfaceFactory retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables, String diagnosticFilter) {
 		this.currentTest = test;
+		this.diagnosticFilter = diagnosticFilter;
 		if (retainedDBInterface == null) {
 			dbInterface = creator.createForTest(); 
 		} else {
@@ -177,7 +178,7 @@ public class BDDTesterEx {
 			bddres.ok = true;
 		} catch (DeliaException e) {
 			String expectedErr = findExpectedError(thenVal);
-			String id = e.getLastError() == null ? "?" : e.getLastError().getId();
+			String id = e.getFirstError() == null ? "?" : e.getFirstError().getId();
 			if (expectedErr == null) {
 				log.logError("EXCEPTION(%s): %s", id, e.getMessage());
 				throw new RuntimeException("Exception occured, and can't find ERROR: value!");
@@ -225,6 +226,7 @@ public class BDDTesterEx {
 		if (useHLS) {
 			client.getOptions().useHLS = true;
 		}
+		client.getFactorySvc().getDiagnosticService().configure(diagnosticFilter);
 		
 		ResultValue res = client.beginExecution(src);
 		assertEquals(true, res.ok);

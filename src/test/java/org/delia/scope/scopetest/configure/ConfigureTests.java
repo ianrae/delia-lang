@@ -8,6 +8,7 @@ import org.delia.scope.scopetest.ScopeTestBase;
 import org.junit.Before;
 import org.junit.Test;
 
+
 public class ConfigureTests extends ScopeTestBase {
 
 	@Test(expected=DeliaException.class)
@@ -21,8 +22,7 @@ public class ConfigureTests extends ScopeTestBase {
 		//TODO: also test -0500 format too
 	}
 	
-	//TODO should throw.
-	@Test //(expected=DangException.class)
+	@Test(expected=DeliaException.class)
 	public void testTimezoneBad() {
 		runConfigureStatement("timezone", "zzzzz");
 	}

@@ -1,11 +1,15 @@
 package org.delia.db.memdb.filter;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
+import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
+import org.delia.core.DateFormatService;
+import org.delia.core.FactoryService;
+import org.delia.dval.DValueConverterService;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -13,8 +17,11 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class RelationOpEvaluator extends OpEvaluatorBase {
 
-	public RelationOpEvaluator(OP op, String fieldName) {
+	private DValueConverterService converterSvc;
+	
+	public RelationOpEvaluator(OP op, String fieldName, FactoryService factorySvc) {
 		super(op, fieldName);
+		this.converterSvc = new DValueConverterService(factorySvc);
 	}
 
 	@Override
@@ -55,30 +62,17 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 		default:
 			DeliaExceptionHelper.throwError("unsupported-fk-type", "Shape %s not supported", shape.name());
 		}
-		Integer n1 = keyVal.asInt(); //TODO: string later
-		Integer n2 = ((IntegerExp)rightVar).val;
-
-		switch(op) {
-		case LT:
-			return n1.compareTo(n2) < 0; 
-		case LE:
-			return n1.compareTo(n2) <= 0; 
-		case GT:
-			return n1.compareTo(n2) > 0; 
-		case GE:
-			return n1.compareTo(n2) >= 0; 
-		case EQ:
-			return n1.compareTo(n2) == 0; 
-		case NEQ:
-			return n1.compareTo(n2) != 0; 
-		default:
-			return false; //err!
-		}
+		return false;
+	}
+	
+	private Number getRightValAsNumber() {
+		Object obj = converterSvc.extractObj((Exp)rightVar);
+		return (Number) obj;
 	}
 
 	private boolean doInnerMatchInt(DValue keyVal) {
 		Integer n1 = keyVal.asInt(); 
-		Integer n2 = ((IntegerExp)rightVar).val;
+		Integer n2 = getRightValAsNumber().intValue();
 
 		switch(op) {
 		case LT:
@@ -99,7 +93,7 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 	}
 	private boolean doInnerMatchLong(DValue keyVal) {
 		Long n1 = keyVal.asLong();
-		Long n2 = ((LongExp)rightVar).val; //TODO: can this sometimes be IntegerExp
+		Long n2 = getRightValAsNumber().longValue();
 
 		switch(op) {
 		case LT:
@@ -120,7 +114,7 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 	}	
 	private boolean doInnerMatchNumber(DValue keyVal) {
 		Double n1 = keyVal.asNumber();
-		Double n2 = ((NumberExp)rightVar).val; //TODO: can this sometimes be IntegerExp
+		Double n2 = getRightValAsNumber().doubleValue();
 
 		switch(op) {
 		case LT:
@@ -141,7 +135,7 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 	}	
 	private boolean doInnerMatchString(DValue keyVal) {
 		String n1 = keyVal.asString();
-		String n2 = ((StringExp)rightVar).val; //TODO: can this sometimes be IntegerExp
+		String n2 = ((Exp)rightVar).strValue();
 
 		switch(op) {
 		case LT:
@@ -161,8 +155,8 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 		}
 	}	
 	private boolean doInnerMatchDate(DValue keyVal) {
-		Date n1 = keyVal.asDate();
-		Date n2 = null; //TOD fix this ((StringExp)rightVar).val; //TODO: can this sometimes be IntegerExp
+		ZonedDateTime n1 = keyVal.asDate();
+		ZonedDateTime n2 = null; //TOD fix this ((StringExp)rightVar).val; //TODO: can this sometimes be IntegerExp
 
 		switch(op) {
 		case LT:

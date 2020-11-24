@@ -59,24 +59,19 @@ public class AssocTableCreator extends ServiceBase {
 		generateAssocTable(sc, pair, dtype);
 	}
 	
-//	//TODO delete this!
-//	public static String createAssocTableName(String tbl1, String tbl2) {
-//		String assocTableName = String.format("%s%sAssoc", tbl1, tbl2);
-//		return assocTableName;
-//	}
-	public void generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
+	public String generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(dtype, xpair);
 		String tbl1 = relinfo.nearType.getName();
 		String tbl2 = relinfo.farType.getName();
 		if (!(haveCreatedTable(tbl1) && haveCreatedTable(tbl2))) {
-			return;
+			return null;
 		}
 		
 		String assocTableName = datIdMap.getAssocTblName(relinfo.getDatId());
 		TableInfo tblinfo = alreadyCreatedL.get(alreadyCreatedL.size() - 1);
 		tblinfo.assocTblName = assocTableName;
 		
-		if (datIdMap.isLeftType(assocTableName, relinfo.nearType)) {
+		if (datIdMap.isLeftType(assocTableName, relinfo)) {
 			tblinfo.tbl1 = tbl1;
 			tblinfo.tbl2 = tbl2;
 			tblinfo.fieldName = xpair.name;
@@ -89,6 +84,7 @@ public class AssocTableCreator extends ServiceBase {
 			TypePair relpair = new TypePair(xpair.name, relinfo.nearType);
 			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType, relpair);
 		}
+		return assocTableName;
 	}
 
 	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType, TypePair relpair) {

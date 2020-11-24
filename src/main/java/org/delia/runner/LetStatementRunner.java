@@ -48,6 +48,7 @@ public class LetStatementRunner extends ServiceBase {
 	private RunnerImpl runner;
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
+	private LetSpanRunnerImpl spanRunner;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
@@ -73,8 +74,8 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	public ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-		LetSpanRunnerImpl spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
-		this.letSpanEngine = new LetSpanEngine(factorySvc, registry, fetchRunner, spanRunner);
+		this.spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
+		this.letSpanEngine = new LetSpanEngine(factorySvc, registry);
 		
 		if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
 			return invokeUserFunc(exp, res);
@@ -158,12 +159,9 @@ public class LetStatementRunner extends ServiceBase {
 
 	private QueryContext buildQueryContext(QuerySpec spec) {
 		QueryFuncContext ctx = new QueryFuncContext();
-		//			this.qffRunner.buildPendingTrail(ctx, spec.queryExp);
 
 		QueryContext qtx = new QueryContext();
 		qtx.letSpanEngine = letSpanEngine;
-		//TODO: fix buglet that is other fn contains 'fks' this won't work
-		//			qtx.loadFKs = ctx.pendingTrail.getTrail().contains("fks");
 		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
 		if (!qtx.loadFKs) {
 			ConfigureService configSvc = factorySvc.getConfigureService();
@@ -260,7 +258,7 @@ public class LetStatementRunner extends ServiceBase {
 		}
 		//			boolean flag = true;
 		//			if (flag) {
-		QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp);
+		QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp, spanRunner);
 		return qresp2;
 		//			} else {
 		//				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
@@ -295,14 +293,6 @@ public class LetStatementRunner extends ServiceBase {
 		runner.varMap.put(varName, res);
 		runner.varMap.put(RunnerImpl.DOLLAR_DOLLAR, res);
 	}
-	private void assignSerialVar(DValue generatedId) {
-		ResultValue res = new ResultValue();
-		res.ok = true;
-		res.shape = generatedId.getType().getShape();
-		res.val = generatedId;
-		res.varName = RunnerImpl.VAR_SERIAL;
-		runner.varMap.put(RunnerImpl.VAR_SERIAL, res);
-	}
 
 	private VarRef resolveScalarVarReference(QueryExp queryExp) {
 		ResultValue res = runner.varMap.get(queryExp.typeName);
@@ -321,7 +311,7 @@ public class LetStatementRunner extends ServiceBase {
 				QueryResponse qresp = (QueryResponse) res.val;
 				//extract fields or invoke fns (optional)
 				qresp.bindFetchFlag = true;
-				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp);
+				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp, spanRunner);
 				qresp.bindFetchFlag = false;
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {

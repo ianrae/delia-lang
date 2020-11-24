@@ -1,5 +1,6 @@
 package org.delia.api;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +23,7 @@ public class DeliaSessionImpl implements DeliaSession {
 	private Delia delia;
 	public DatIdMap datIdMap;
 	public Runner mostRecentRunner;
-						
+	public ZoneId zoneId;
 	
 	public DeliaSessionImpl(Delia delia) {
 		this.delia = delia;
@@ -79,6 +80,7 @@ public class DeliaSessionImpl implements DeliaSession {
 		child.runnerInitializer = null;
 		child.datIdMap = this.datIdMap;
 		child.mostRecentRunner = null;
+		child.zoneId = zoneId;
 		return child;
 	}
 
@@ -96,6 +98,11 @@ public class DeliaSessionImpl implements DeliaSession {
 		clone.userFnMap = execCtx.userFnMap;
 		clone.varMap = new ConcurrentHashMap<>(execCtx.varMap);
 		return clone;
+	}
+
+	@Override
+	public ZoneId getDefaultTimezone() {
+		return zoneId;
 	}
 	
 }

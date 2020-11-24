@@ -159,9 +159,9 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		super.init();
 		TimeZoneService tzSvc = new TimeZoneServiceImpl();
 		DateFormatService fmtSvc = new DateFormatServiceImpl(tzSvc);
-		actualDateVal = fmtSvc.parse("1955");
+		actualDateVal = fmtSvc.parseLegacy("1955");
 		actualStr = String.format("'%s'", fmtSvc.format(this.actualDateVal));
-		actualDateVal2 = fmtSvc.parse("1956");
+		actualDateVal2 = fmtSvc.parseLegacy("1956");
 		actualStr2 = String.format("'%s'", fmtSvc.format(this.actualDateVal2));
 	}
 
@@ -177,7 +177,7 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		}
 	}
 	private void chkScalarValue(Date dt, DValue dval) {
-		assertEquals(dt, dval.asDate());
+		assertEquals(dt, dval.asLegacyDate());
 	}
 	protected void chkDateString(String valStr, Date expected) {
 		chkDateString(valStr, "", expected);
@@ -209,7 +209,7 @@ public class DateOptionalTests extends TypeLayerTestBase {
 		if (expected == null) {
 			assertEquals(null, dval.asStruct().getField("field1"));
 		} else {
-			assertEquals(expected, dval.asStruct().getField("field1").asDate());
+			assertEquals(expected, dval.asStruct().getField("field1").asLegacyDate());
 		}
 	}
 

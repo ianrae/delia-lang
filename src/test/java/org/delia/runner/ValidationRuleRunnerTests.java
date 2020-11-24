@@ -105,10 +105,9 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 	}
 
 	private FetchRunner createFetchRunner() {
-		DBAccessContext dbctx = runner.createDBAccessContext();
 		ZDBExecutor dbexecutor = dbInterface.createExecutor();
 		Runner run = runner.getDeliaRunner();
-		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), run);
+		FetchRunner fetchRunner = new ZFetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), run);
 		return fetchRunner;
 	}
 

@@ -20,7 +20,7 @@ public class FlightImmut implements Flight {
 
   @Override
   public Date getDd() {
-    return helper.getField("dd").asDate();
+    return helper.getField("dd").asLegacyDate();
   }
   @Override
   public int getField1() {

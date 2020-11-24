@@ -38,12 +38,12 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testOneSpanSubSQL() {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = false;
-		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as b ON a.cid=b.leftv WHERE a.cid = ?", "55");
+		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv WHERE a.cid = ?", "55");
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
 		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as b ON a.cid=b.leftv");
+		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv");
 	}
 
 	@Test
@@ -51,10 +51,10 @@ public class HLSSQLTests extends HLSTestBase {
 		useCustomerManyToManySrc = true;
 
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv 
-		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv");
+		sqlchk("let x = Customer[true].addr", "SELECT d.id,d.y,c.leftv as cust FROM Address as d LEFT JOIN CustomerAddressDat1 as c ON d.id=c.rightv");
 
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv WHERE b.leftv=55 
-		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,b.leftv as cust FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv WHERE b.leftv = ?", "55");
+		sqlchkP("let x = Customer[55].addr", "SELECT d.id,d.y,c.leftv as cust FROM Address as d LEFT JOIN CustomerAddressDat1 as c ON d.id=c.rightv WHERE c.leftv = ?", "55");
 
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv LEFT JOIN Customer as c ON b.leftv=c.id AND c.x > 10 
 		//			sqlchk("let x = Customer[x > 10].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
@@ -72,22 +72,19 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testAssocTableFlip() {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = true;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerDat1 as b ON a.cid=b.rightv");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,c.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerDat1 as c ON a.cid=c.rightv");
 
 		flipAssocTbl = false;
-		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as b ON a.cid=b.leftv");
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv");
 	}
 
 
 	@Test
 	public void testDebugSQL() {
-		//		useCustomerManyToManySrc = true;
-		//		assocTblMgr.flip = false;
-
-		//		useCustomerManyToManySrc = true;
-		//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-
-		sqlchkP("let x = Flight[55]", 			"SELECT * FROM Flight as a WHERE a.field1 = ?", "55");
+		useCustomerManyToManySrc = true;
+		flipAssocTbl = true;
+		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,c.leftv as addr FROM Customer as a LEFT JOIN AddressCustomerDat1 as c ON a.cid=c.rightv");
+		
 	}
 
 	@Before

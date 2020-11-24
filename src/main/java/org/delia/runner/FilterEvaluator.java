@@ -1,6 +1,6 @@
 package org.delia.runner;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.delia.compiler.ast.Exp;
@@ -15,15 +15,13 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 
 /**
- * 		public QueryExp queryExp;
-	public DValue resolvedFilterVars; //set at runtime. not-thread-safe. TODO -fix
 
  * @author Ian Rae
  *
  */
 public class FilterEvaluator extends ServiceBase {
 	public QueryExp queryExp;
-	public DValue resolvedFilterVars; //set at runtime. not-thread-safe. TODO -fix
+	public DValue resolvedFilterVars; 
 	private VarEvaluator varEvaluator;
 	private DateFormatService fmtSvc;
 
@@ -39,7 +37,7 @@ public class FilterEvaluator extends ServiceBase {
 			String varName = queryExp.filter.cond.strValue();
 			
 			List<DValue> list = varEvaluator.lookupVar(varName);
-			if (list.isEmpty() || list.size() > 1) { //TODO later support 0 and > 1!!
+			if (list.isEmpty() || list.size() > 1) { //FUTURE later support 0 and > 1!!
 				String msg = String.format("var eval failed: %s", varName);
 				DeliaError err = et.add("var-eval-failed", msg);
 				throw new DeliaException(err);
@@ -52,15 +50,15 @@ public class FilterEvaluator extends ServiceBase {
 	public boolean isEqualTo(DValue dval) {
 		Object target = queryExp.filter.cond.strValue();
 		if (resolvedFilterVars != null) {
-			//TODO support int and other types
+			//string comparison should work for int,long,string (PKs)
 			target = resolvedFilterVars.asString();
 		}
 		return doIsEqualTo(dval, target);
 	}
 	private boolean doIsEqualTo(DValue dval, Object target) {
 		if (dval.getType().isShape(Shape.DATE)) {
-			Date dt = fmtSvc.parse(target.toString());
-			return dval.asDate().equals(dt);
+			ZonedDateTime zdt = fmtSvc.parseDateTime(target.toString());
+			return dval.asDate().equals(zdt);
 		} else {
 			String tmp = dval.asString();
 			if(tmp != null && tmp.equals(target)) {
@@ -82,6 +80,11 @@ public class FilterEvaluator extends ServiceBase {
 	public String getRawValue() {
 		String target = queryExp.filter.cond.strValue();
 		return target;
+	}
+	
+	public List<DValue> lookupVar(String varName) {
+		List<DValue> list = varEvaluator.lookupVar(varName);
+		return list;
 	}
 
 }

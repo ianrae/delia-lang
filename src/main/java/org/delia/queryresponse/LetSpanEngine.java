@@ -9,7 +9,6 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
-import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -18,20 +17,16 @@ import org.delia.util.DValueHelper;
 
 public class LetSpanEngine extends ServiceBase {
 	private DTypeRegistry registry;
-	private LetSpanRunner runner;
 	private ZQueryResponseFunctionFactory fnFactory;
-	private FetchRunner fetchRunner;
 
-	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry, FetchRunner fetchRunner, LetSpanRunner runner) {
+	public LetSpanEngine(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
-		this.fetchRunner = fetchRunner;
-		this.runner = runner;
 		
-		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, fetchRunner);
+		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
 	}
 	
-	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial) {
+	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
 		if (qrespInitial.emptyResults()) {
 			return qrespInitial;
 		}
@@ -50,7 +45,7 @@ public class LetSpanEngine extends ServiceBase {
 		
 		return qresp;
 	}
-	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial) {
+	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
 		DType dtype = registry.getType(queryExp.typeName);
 		List<LetSpan> spanL = buildSpans(queryExp, dtype);
 		

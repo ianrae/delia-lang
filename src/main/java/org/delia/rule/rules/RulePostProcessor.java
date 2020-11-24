@@ -1,8 +1,9 @@
 package org.delia.rule.rules;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -148,7 +149,7 @@ public class RulePostProcessor extends ServiceBase {
 							
 							RelationInfo info = rr.relInfo;
 //							TypePair farSide = DRuleHelper.findMatchingRelByType((DStructType)pair.type, structType);
-							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
+							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr, pair);
 							//may be multiple possible matches here
 							boolean b = false;
 							if (farSideL.size() > 1) {
@@ -167,7 +168,7 @@ public class RulePostProcessor extends ServiceBase {
 							}
 							
 							RelationInfo info = rr.relInfo;
-							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr);
+							List<TypePair> farSideL = findAllMatchingRel((DStructType)pair.type, structType, rr, pair);
 							//may be multiple possible matches here
 							boolean b = false;
 							if (farSideL.size() > 1) {
@@ -193,7 +194,7 @@ public class RulePostProcessor extends ServiceBase {
 					RelationInfo info = rr.relInfo;
 					if (rr.nameIsExplicit) {
 						if (info.otherSide == null) {
-							info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+							info.otherSide = findOtherSideNamed(rr.relInfo, rr.getRelationName(), info.farType, info.nearType, allErrors);
 							logIfSet("step1", rr.getRelationName(), info);
 						}
 					}
@@ -202,7 +203,7 @@ public class RulePostProcessor extends ServiceBase {
 					RelationInfo info = rr.relInfo;
 					if (rr.nameIsExplicit) {
 						if (info.otherSide == null) {
-							info.otherSide = findOtherSideNamed(rr, rr.getRelationName(), info.farType, info.nearType, allErrors);
+							info.otherSide = findOtherSideNamed(rr.relInfo, rr.getRelationName(), info.farType, info.nearType, allErrors);
 							logIfSet("step1", rr.getRelationName(), info);
 						}
 					}
@@ -216,7 +217,7 @@ public class RulePostProcessor extends ServiceBase {
 		}
 	}
 
-	private RelationInfo findOtherSideNamed(DRule rrSrc, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
+	private RelationInfo findOtherSideNamed(RelationInfo rrSrcInfo, String relationName, DStructType farType, DStructType nearType, List<DeliaError> allErrors) {
 		List<RelationInfo> nameRelL = new ArrayList<>();
 		List<RelationInfo> relL = new ArrayList<>();
 		for(DRule rule: farType.getRawRules()) {
@@ -245,6 +246,19 @@ public class RulePostProcessor extends ServiceBase {
 		}
 		
 		if (!nameRelL.isEmpty()) {
+			//detect self-join
+			if (nameRelL.size() == 2) {
+				RelationInfo inf1 = nameRelL.get(0);
+				RelationInfo inf2 = nameRelL.get(1);
+				if (inf1.nearType == inf1.farType && inf2.nearType == inf2.farType) {
+					if (inf1 == rrSrcInfo) {
+						return inf2;
+					} else {
+						return inf1;
+					}
+				}
+			}
+			
 			if (nameRelL.size() > 1) {
 				String s = nameRelL.get(0).relationName;
 				String msg = String.format("Relation name '%s' used more than once (%d)", s, nameRelL.size());
@@ -276,7 +290,7 @@ public class RulePostProcessor extends ServiceBase {
 							otherSide.otherSide = info;
 						} else if (otherSide.otherSide == info) {
 						} else {
-							String msg = String.format("Relation name '%s' already assigned", otherSide.relationName);
+							String msg = String.format("(step 2) Relation name '%s' already assigned", otherSide.relationName);
 							DeliaError err = new DeliaError("relation-already-assigned", msg);
 							allErrors.add(err);
 						}
@@ -290,7 +304,7 @@ public class RulePostProcessor extends ServiceBase {
 							otherSide.otherSide = info;
 						} else if (otherSide.otherSide == info) {
 						} else {
-							String msg = String.format("Relation name '%s' already assigned", otherSide.relationName);
+							String msg = String.format("(step 2) Relation name '%s' already assigned", otherSide.relationName);
 							DeliaError err = new DeliaError("relation-already-assigned", msg);
 							allErrors.add(err);
 						}
@@ -474,6 +488,8 @@ public class RulePostProcessor extends ServiceBase {
 	}
 	private void dumpRelations(DTypeRegistry registry) {
 		log.log("--- relations ---");
+		Map<String,String> onlyOnceMap = new HashMap<>();
+		
 		for(String typeName: registry.getAll()) {
 			DType dtype = registry.getType(typeName);
 			if (! dtype.isStructShape()) {
@@ -488,15 +504,39 @@ public class RulePostProcessor extends ServiceBase {
 					String card = info.cardinality.name();
 					String otherField = info.otherSide == null ? "" : info.otherSide.fieldName;
 					String arrow = calcArrow(info);
-					String src = String.format("relation %s.%s", info.nearType.getName(), info.fieldName);
-					log.log("%30s %10s %s.%s (%s)", src, arrow, info.farType.getName(), otherField, card);
+					String isParent = info.isParent ? "*" : "";
+					
+					String otherSideIsParent = "";
+					if (info.otherSide != null && info.otherSide.isParent) {
+						otherSideIsParent = "*";
+					}
+					
+					String onceKey = String.format("%s.%s", info.nearType.getName(), info.fieldName);
+					if (onlyOnceMap.containsKey(onceKey)) {
+						continue;
+					}
+					onceKey = String.format("%s.%s", info.farType.getName(), otherField);
+					onlyOnceMap.put(onceKey,  "");
+					
+					String name = rr.nameIsExplicit ? String.format(" '%s'", info.relationName) : "";
+					String src = String.format("relation%s %s.%s%s", name, info.nearType.getName(), info.fieldName, isParent);
+					log.log("%30s %10s %s.%s%s (%s)", src, arrow, info.farType.getName(), otherField, otherSideIsParent, card);
 				} else if (rule instanceof RelationManyRule) {
 					RelationManyRule rr = (RelationManyRule) rule;
 					RelationInfo info = rr.relInfo;
 					String card = info.cardinality.name();
 					String otherField = info.otherSide == null ? "" : info.otherSide.fieldName;
 					String arrow = calcArrow(info);
-					String src = String.format("relation %s.%s", info.nearType.getName(), info.fieldName);
+					String name = rr.nameIsExplicit ? String.format(" '%s'", info.relationName) : "";
+					String src = String.format("relation%s %s.%s", name, info.nearType.getName(), info.fieldName);
+					
+					String onceKey = String.format("%s.%s", info.nearType.getName(), info.fieldName);
+					if (onlyOnceMap.containsKey(onceKey)) {
+						continue;
+					}
+					onceKey = String.format("%s.%s", info.farType.getName(), otherField);
+					onlyOnceMap.put(onceKey,  "");
+					
 					log.log("%30s %10s %s.%s (%s)", src, arrow, info.farType.getName(), otherField, card);
 				}
 			}
@@ -517,7 +557,7 @@ public class RulePostProcessor extends ServiceBase {
 	}
 
 	private boolean isOtherSideOne(RelationInfo info) {
-		return DRuleHelper.xfindOtherSideOne(info) != null;
+		return DRuleHelper.findOtherSideOne(info) != null;
 	}
 //	private boolean isOtherSideMany(RelationInfo info) {
 //		return DRuleHelper.xfindOtherSideMany(info) != null;
@@ -526,7 +566,18 @@ public class RulePostProcessor extends ServiceBase {
 	private boolean isOtherSideManyEarly(DType otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide, otherRelPair);
 	}
-	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr) {
+	public List<TypePair> findAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr, TypePair currentPair) {
+		List<TypePair> list = doFindAllMatchingRel(otherSide, targetType, rr);
+		List<TypePair> newlist = new ArrayList<>();
+		for(TypePair p: list) {
+			if (p != currentPair) {
+				newlist.add(p);
+			}
+		}
+		return newlist;
+	}
+	
+	private List<TypePair> doFindAllMatchingRel(DType otherSide, DType targetType, RelationRuleBase rr) {
 		//type replacement should handle this, but check anyway.
 		DType mismatch = registry.getType(otherSide.getName());
 		if (mismatch != otherSide) {
@@ -534,15 +585,18 @@ public class RulePostProcessor extends ServiceBase {
 			otherSide = mismatch;
 		}
 		
-		RelationInfo info = DRuleHelper.findMatchingByName(rr, (DStructType)otherSide);
-		if (info != null) {
-			TypePair pair = DRuleHelper.findMatchingPair(info.nearType, info.fieldName);
-			return Collections.singletonList(pair);
+		List<RelationInfo> infos = DRuleHelper.findAllMatchingByName(rr, (DStructType)otherSide);
+		if (! infos.isEmpty()) {
+			List<TypePair> pairs = new ArrayList<>();
+			for(RelationInfo info: infos) {
+				TypePair pair = DRuleHelper.findMatchingPair(info.nearType, info.fieldName);
+				pairs.add(pair);
+			}
+			return pairs;
 		}
 		
 		return DRuleHelper.xfindAllMatchingRelByType((DStructType) otherSide, targetType);
 	}
-	
 	
 	
 //	private void checkForOtherSideDuplicates(DTypeRegistry registry, List<DeliaError> allErrors) {

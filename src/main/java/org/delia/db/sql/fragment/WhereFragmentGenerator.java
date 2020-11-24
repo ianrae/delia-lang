@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpFullExp;
@@ -23,6 +24,7 @@ import org.delia.db.sql.where.SqlWhereConverter;
 import org.delia.db.sql.where.WhereExpression;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.db.sql.where.WherePhrase;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.VarEvaluator;
@@ -47,16 +49,18 @@ public class WhereFragmentGenerator extends ServiceBase {
 	private ValueHelper valueHelper;
 	private VarEvaluator varEvaluator;
 	public TableFragmentMaker tableFragmentMaker;
+//	private DatIdMap datIdMap;
 
-	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public WhereFragmentGenerator(FactoryService factorySvc, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.registry = registry;
 		this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
 		this.dvalBuilder = factorySvc.createScalarValueBuilder(registry);
-		this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc);
+		this.whereConverter = new SqlWhereConverter(factorySvc, registry, queryDetectorSvc, varEvaluator);
 		this.filterRunner = new FilterFnRunner(registry);
 		this.valueHelper = new ValueHelper(factorySvc);
 		this.varEvaluator = varEvaluator;
+//		this.datIdMap = datIdMap;
 	}
 
 
@@ -122,13 +126,16 @@ public class WhereFragmentGenerator extends ServiceBase {
 		if (filter != null && filter.cond instanceof FilterOpFullExp) {
 			WhereExpression express = whereConverter.addWhereClauseOp(filter, typeName);
 			if (express != null) {
-				addWhereClauseOpFromPhrase(spec, express, statement, selectFrag);
+				addWhereClauseOpFromPhrase(spec, structType, express, statement, selectFrag);
 			}
 		} else {
-			//sc.o("JJJJJJJJJJJJJJJ"); //TODO
+			String s = filter == null ? "null" : filter.getClass().getSimpleName();
+			DeliaExceptionHelper.throwError("bad-where-filter", "unknown filter class '%s'", s);
 		}
 	}
-	public void addWhereClauseOpFromPhrase(QuerySpec spec, WhereExpression express, SqlStatement statement, StatementFragmentBase selectFrag) {
+
+
+	public void addWhereClauseOpFromPhrase(QuerySpec spec, DStructType structType, WhereExpression express, SqlStatement statement, StatementFragmentBase selectFrag) {
 		OpFragment opFrag = null;
 		
 		if (express instanceof WherePhrase) {
@@ -136,37 +143,39 @@ public class WhereFragmentGenerator extends ServiceBase {
 		} else if (express instanceof LogicalPhrase) {
 			opFrag = doLogicalPhrase((LogicalPhrase) express, statement, selectFrag);
 		} else if (express instanceof InPhrase) {
-			opFrag = doInPhrase((InPhrase) express, statement, selectFrag);
+			opFrag = doInPhrase((InPhrase) express, structType, statement, selectFrag);
 		}
-		//TODO: others??
 		
 		if (opFrag != null) {
 			selectFrag.whereL.add(opFrag);
 		}
 	}
-	protected OpFragment doInPhrase(InPhrase phrase, SqlStatement statement, StatementFragmentBase selectFrag) {
+	protected OpFragment doInPhrase(InPhrase phrase, DStructType structType, SqlStatement statement, StatementFragmentBase selectFrag) {
 		String op1 = operandToSql(phrase.op1, statement);
+		OpFragment opFK = handleInPhraseFK(structType, phrase, op1, selectFrag);
+		if (opFK != null) {
+			return opFK;
+		}
+		
 		StringJoiner joiner = new StringJoiner(",");
 		for(Exp exp: phrase.valueL) {
-//			joiner.add(exp.strValue());
-//			String s = operandToSql(phrase.op1, statement);
-			
 			WhereOperand tmp = new WhereOperand();
 			tmp.exp = exp;
-			tmp.isValue = true;
 			tmp.typeDetails = phrase.op1.typeDetails;
+			if (exp instanceof IdentExp) {
+				tmp.isValue = false;
+			} else {
+				tmp.isValue = true;
+			}
 			String s = operandToSql(tmp, statement);
 			joiner.add(s);
 		}
 
 		TableFragment tbl = selectFrag.tblFrag;
 		if (tbl == null) {
-			return null; //sc.o("%s IN (%s)", op1, joiner.toString()); //TODO can we remove???
+			return null; 
 		} else {
-			//TODO: how do we know which op1 or op2 needs the alias???
 			String alias = phrase.op1.alias == null ? tbl.alias : phrase.op1.alias; 
-//			Table tmp = new Table(alias, op1);
-			//sc.o("%s IN (%s)", tmp.toString(), joiner.toString());
 			String tmp = String.format("(%s)", joiner.toString());
 			
 			OpFragment opFrag = new OpFragment("IN");
@@ -174,8 +183,30 @@ public class WhereFragmentGenerator extends ServiceBase {
 			opFrag.right = FragmentHelper.buildAliasedFrag(null, tmp);
 			return opFrag;
 		}
-		
-		
+	}
+	private OpFragment handleInPhraseFK(DStructType structType, InPhrase inphrase, String op1, StatementFragmentBase selectFrag) {
+		for(Exp exp: inphrase.valueL) {
+			if (exp instanceof IdentExp) {
+				TypePair pair = DValueHelper.findField(structType, exp.strValue());
+				if (pair != null) {
+					RelationInfo info = DRuleHelper.findMatchingRuleInfo(structType, pair);
+					if (info != null) {
+						OpFragment opFrag = new OpFragment("=");
+						opFrag.left = FragmentHelper.buildAliasedFrag(null, op1);
+						
+						FieldFragment ff = new FieldFragment();
+						ff.name = exp.strValue();
+						ff.structType = structType;
+						ff.alias = "zzz"; //tbl.alias;
+//						selectFrag.hlsRemapList.add(ff);
+						opFrag.right = ff; //FragmentHelper.buildAliasedFrag(null, exp.strValue());
+						
+						return opFrag; //FUTURE handle more than one later. eg [followers,otherField]
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	protected OpFragment doLogicalPhrase(LogicalPhrase lphrase, SqlStatement statement, StatementFragmentBase selectFrag) {
@@ -205,7 +236,7 @@ public class WhereFragmentGenerator extends ServiceBase {
 		
 		String snot = (phrase.notFlag) ? "NOT " : "";
 		if (tbl == null) {
-			return null; //String.format("%s%s %s %s", snot, op1, op, op2); //TODO; remove?
+			return null; 
 		} else {
 			String alias;
 			if (!phrase.op1.isValue) {
@@ -320,12 +351,6 @@ public class WhereFragmentGenerator extends ServiceBase {
 			return "?";
 		}
 		
-//		if (val.exp instanceof StringExp) {
-////			String s = String.format("'%s'", val.exp.strValue());
-//			statement.paramL.add(dvalBuilder.buildString(val.exp.strValue()));
-//			return "?";
-//		}
-		
 		Object obj = extractObj(val.exp);
 		DValue dval = valueInSql(val.typeDetails.dtype.getShape(), obj);
 		statement.paramL.add(dval);
@@ -383,7 +408,8 @@ public class WhereFragmentGenerator extends ServiceBase {
 			//err!!
 			break;
 		}
-		return "KKKKKKKKKKK"; //TODO fix
+		DeliaExceptionHelper.throwError("unknown-where-function", "Unknown filter function '%s'", val.fnName);
+		return null;
 	}
 	
 	protected String getColumnName(Exp op1) {

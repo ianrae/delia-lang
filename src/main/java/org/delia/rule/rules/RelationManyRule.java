@@ -18,8 +18,6 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
-import org.delia.type.TypeReplaceSpec;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
@@ -33,13 +31,13 @@ public class RelationManyRule extends RelationRuleBase {
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (mustHaveFK()) {
+			if (isMandatoryFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' many -  a foreign key value must be specified.", key);
-				addDetailedError(ctx, msg, getSubject());
+				addDetailedError(ctx, msg, getSubject(), dval.getType().getName());
 				return false;
 			}
-			return true; //TODO: fix later.
+			return true; 
 		}
 		
 		if (ctx.getDBCapabilities().supportsReferentialIntegrity()) {
@@ -47,12 +45,11 @@ public class RelationManyRule extends RelationRuleBase {
 		}
 
 		//first ensure foreign key points to existing record
-//		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 		boolean fkObjectExists = ctx.getFetchRunner().queryFKExists(drel);
 		if (! fkObjectExists) {
 			String key = drel.getForeignKey().asString();
 			String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", getSubject(), key);
-			addDetailedError(ctx, msg, getSubject());
+			addDetailedError(ctx, msg, getSubject(), dval.getType().getName());
 			return false;
 		} else {
 			boolean bb = ctx.isPopulateFKsFlag();
@@ -60,8 +57,7 @@ public class RelationManyRule extends RelationRuleBase {
 				return true;
 			}
 			
-			//TODO: should we save results in del.setFetchedItems ??
-			//TODO: the following mutates a DValue. is this ok for multi-threading?
+			//FUTURE: the following mutates a DValue. is this ok for multi-threading?
 			if (ctx.isEnableRelationModifierFlag()) {
 				//Note: we use queryFKExists above (for perf during import)
 				//then if needed use load here to get entire object
@@ -72,51 +68,55 @@ public class RelationManyRule extends RelationRuleBase {
 
 		return true;
 	}
-	private void addDetailedError(DRuleContext ctx, String msg, String fieldName) {
+	private void addDetailedError(DRuleContext ctx, String msg, String fieldName, String typeName) {
 		DetailedError err = ctx.addError(this, msg);
 		err.setFieldName(fieldName);
+		err.setTypeName(typeName);
 	}
 
 	private void populateOtherSideOfRelation(DValue dval, DRuleContext ctx, QueryResponse qrespFetch) {
 		DValue otherSide = qrespFetch.dvalList.get(0);
 		TypePair otherRelPair = findMatchingRel(otherSide, dval.getType());
 		if (otherRelPair != null) { //one-side relations won't have otherRelPair
-			DValue otherRel = otherSide.asStruct().getField(otherRelPair.name);
-			if (otherRel == null) {
-				DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
-				String typeName = dval.getType().getName();
-				RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
-				String keyValString = getPrimaryKey(dval);
-				builder.buildFromString(keyValString);
-				boolean b = builder.finish();
-				if (!b) {
-					//err
-				} else {
-					Map<String,DValue> map = otherSide.asMap();
-					map.put(otherRelPair.name, builder.getDValue());
-				}
-			} else {
-				DRelation drelx = otherRel.asRelation();
-				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-				String keyValString = pair.name;
-				DValue primaryKeyVal = dval.asStruct().getField(keyValString);
-				drelx.addKey(primaryKeyVal);
+			for(DValue other: qrespFetch.dvalList) {
+				populateAllFKs(dval, other, otherRelPair);
 			}
 		}
 	}
-	private boolean mustHaveFK() {
+	private void populateAllFKs(DValue dval, DValue otherSide, TypePair otherRelPair) {
+		DValue otherRel = otherSide.asStruct().getField(otherRelPair.name);
+		if (otherRel == null) {
+			DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
+			String typeName = dval.getType().getName();
+			RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
+			String keyValString = getPrimaryKey(dval);
+			builder.buildFromString(keyValString);
+			boolean b = builder.finish();
+			if (!b) {
+				//err
+			} else {
+				Map<String,DValue> map = otherSide.asMap();
+				map.put(otherRelPair.name, builder.getDValue());
+			}
+		} else {
+			DRelation drelx = otherRel.asRelation();
+			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			String keyValString = pair.name;
+			DValue primaryKeyVal = dval.asStruct().getField(keyValString);
+			drelx.addKey(primaryKeyVal);
+		}
+	}
+	private boolean isMandatoryFK() {
 		String fieldName = oper1.getSubject();
 		boolean optional = owningType.fieldIsOptional(fieldName);
 		if (optional) {
 			return false;
 		} else {
 			DStructType relType = (DStructType) DValueHelper.findFieldType(owningType, fieldName);
-			String x = DValueHelper.findMatchingRelation(relType, owningType);
-			System.out.println("sss " + x);
-			if (relType.fieldIsOptional(x)) {
+			if (relType.fieldIsOptional(fieldName)) {
 				return false;
 			}
-			DRule someRule = findRuleFor(relType, x);
+			DRule someRule = findRuleFor(relType, fieldName);
 			if (someRule instanceof RelationOneRule) {
 				return false;
 			}
@@ -175,16 +175,6 @@ public class RelationManyRule extends RelationRuleBase {
 		} else {
 			Map<String,DValue> map = dval.asMap();
 			map.put(relInfo.fieldName, builder.getDValue());
-		}
-	}
-	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		if (spec.needsReplacement(this, owningType)) {
-			owningType = (DStructType) spec.newType;
-		}
-		
-		if (relInfo != null) {
-			relInfo.performTypeReplacement(spec);
 		}
 	}
 }

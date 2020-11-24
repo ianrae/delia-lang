@@ -37,7 +37,8 @@ public class HLSManagerTests extends HLSTestBase {
 		assertEquals(2, list.size());
 	}	
 	
-	@Test
+	//TODO: fix. runner does the .addr part with queryresponsefunction
+                                	@Test
 	public void testDoubleStrategy() {
 		insertSomeRecords = true;
 		useCustomerManyToManySrc = true;

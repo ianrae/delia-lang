@@ -1,8 +1,8 @@
 package org.delia.db.memdb.filter.filterfn;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.delia.compiler.astx.XNAFMultiExp;
@@ -11,7 +11,6 @@ import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.util.DateUtils;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class FilterFnRunner {
@@ -92,10 +91,8 @@ public class FilterFnRunner {
 	}
 
 	private LocalDateTime convertDate(DValue fieldval) {
-		Date dt = fieldval.asDate();
-		//TODO: need to take proper timezone into effect!1
-		LocalDateTime ldt = DateUtils.convertToUTCLocalTime(dt);
-		return ldt;
+		ZonedDateTime zdt = fieldval.asDate();
+		return zdt.toLocalDateTime();
 	}
 
 

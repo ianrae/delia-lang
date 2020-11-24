@@ -6,6 +6,7 @@ import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
+import org.delia.log.LogFactory;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -27,10 +28,12 @@ public interface FactoryService {
 	TimeZoneService getTimeZoneService();
 	DateFormatService getDateFormatService();
 	Log getLog();
+	LogFactory getLogFactory(); //may return null if not set in DeliaBuilder
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
 	SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();
+	DiagnosticService getDiagnosticService();
 }

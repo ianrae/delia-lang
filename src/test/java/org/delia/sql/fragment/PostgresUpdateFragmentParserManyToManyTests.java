@@ -16,7 +16,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.postgres.PostgresAssocTablerReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpdateFragmentParser;
@@ -58,7 +57,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -75,7 +74,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -92,7 +91,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[true] {z: 7, cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -109,7 +108,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[true] {z: 7, cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -126,7 +125,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -141,7 +140,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[true] {wid: 333, addr:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -159,7 +158,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -176,7 +175,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[55] {wid: 333, addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -193,7 +192,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -210,7 +209,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -227,7 +226,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -242,7 +241,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[100] {z: 7, cust:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -260,7 +259,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -284,7 +283,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Customer[wid > 10 and id < 500] {wid: 333, addr:100}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Customer");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -308,7 +307,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -332,7 +331,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:55}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -356,7 +355,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoL();
+		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -376,7 +375,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		String src = buildSrcManyToMany();
 		src += "\n  update Address[z > 10] {z: 7, cust:null}";
 
-		List<TableInfo> tblinfoL = createTblInfoLOtherWay();
+		List<TableInfo> tblinfoL = createTblInfoL();
 		UpdateStatementExp updateStatementExp = buildFromSrc(src, tblinfoL);
 		DValue dval = convertToDVal(updateStatementExp, "Address");
 		UpdateStatementFragment selectFrag = buildUpdateFragment(updateStatementExp, dval); 
@@ -406,7 +405,6 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 	}
 	@After
 	public void shutdown() {
-		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
 	private String buildSrcManyToMany() {
@@ -439,7 +437,7 @@ public class PostgresUpdateFragmentParserManyToManyTests extends FragmentParserT
 		return parser;
 	}
 	private UpdateFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
 		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		PostgresAssocTablerReplacer assocTblReplacer = new PostgresAssocTablerReplacer(factorySvc, fpSvc);
 		UpdateFragmentParser parser = new UpdateFragmentParser(factorySvc, fpSvc, assocTblReplacer);

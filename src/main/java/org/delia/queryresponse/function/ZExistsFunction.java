@@ -29,7 +29,6 @@ public class ZExistsFunction extends ZQueryResponseFunctionBase {
 		if (CollectionUtils.isEmpty(dvalList)) {
 			return true;
 		}
-		//TODO: we need to concern ourselves with null values??
 		return false;
 	}
 

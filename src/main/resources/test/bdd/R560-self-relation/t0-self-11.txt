@@ -1,0 +1,63 @@
+# self-join relations
+
+FEATURE: self-join
+background:
+  type Customer struct {id int primaryKey, name string,
+      relation manager Customer 'r1' one optional parent,
+      relation worker Customer 'r1' one optional,
+  }  end
+  insert Customer {id: 55, name: 'art' }
+thenType: struct
+
+---
+title: basic
+given:
+when:
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworker:null
+}
+
+---
+title: add worker,fks
+given:
+  insert Customer {id: 56, name: 'bob', worker: 55 }
+when:
+  let x = Customer[true].fks().orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:{56}
+ vworker:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:null
+  vworker:{55}
+}
+
+---
+title: add worker
+given:
+  insert Customer {id: 56, name: 'bob', worker: 55 }
+when:
+  let x = Customer[true].orderBy('id')
+then:
+value:a:Customer {
+ vid:55
+ vname:'art'
+ vmanager:null
+ vworker:null
+}
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vmanager:null
+  vworker:{55}
+}

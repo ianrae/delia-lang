@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.error.DeliaError;
+import org.delia.error.DetailedError;
 
-//TODO: remove this class. not needed
 public class ValueException extends RuntimeException {
 	/**
 	 * 
@@ -18,8 +18,10 @@ public class ValueException extends RuntimeException {
 		errL = new ArrayList<>();
 		this.errL.add(err);
 	}
-	public ValueException(List<DeliaError> errL) {
-		super(errL.get(0).getMsg());
-		this.errL = errL;
+	public ValueException(List<DetailedError> detailedErrL) {
+		super(detailedErrL.get(0).getMsg());
+		for(DeliaError err: detailedErrL) {
+			errL.add(err);
+		}
 	}
 }

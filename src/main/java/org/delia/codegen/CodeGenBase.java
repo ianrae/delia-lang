@@ -10,6 +10,9 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.Shape;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
+import org.delia.util.StringUtil;
 
 //====
 public class CodeGenBase {
@@ -33,7 +36,7 @@ public class CodeGenBase {
 		case STRING:
 			return "String";
 		case DATE:
-			return "Date";
+			return "ZonedDateTime";
 		case STRUCT:
 		{
 			return ftype.getName();
@@ -61,7 +64,7 @@ public class CodeGenBase {
 		case STRING:
 			return "String";
 		case DATE:
-			return "Date";
+			return "ZonedDateTime";
 		case STRUCT:
 		{
 			return ftype.getName();
@@ -118,7 +121,6 @@ public class CodeGenBase {
 		}
 	}
 
-
 	protected List<String> getImportList(DStructType structType) {
 		List<String> list = new ArrayList<>();
 		Map<String,String> alreadyMap = new HashMap<>();
@@ -128,7 +130,7 @@ public class CodeGenBase {
 				if (alreadyMap.containsKey("Date")) {
 					continue;
 				}
-				String s = String.format("import java.util.Date;");
+				String s = String.format("import java.time.ZonedDateTime;");
 				list.add(s);
 				alreadyMap.put("Date", "");
 			} else if (ftype.isStructShape()) {
@@ -155,5 +157,24 @@ public class CodeGenBase {
 		sc.nl();
 	}
 
+
+	protected boolean hasPK(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return pkPair != null;
+	}
+
+	protected String getPKType(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return convertToJava(pkPair.type);
+	}
+	protected String getPKField(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return StringUtil.uppify(pkPair.name);
+	}
+
+	protected String getPKTypeAsFn(DType ftype) {
+		TypePair pkPair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+		return convertToAsFn(pkPair.type);
+	}
 
 }

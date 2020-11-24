@@ -17,7 +17,7 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
 		super.init(et, spec, dtype, registry);
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dtype); 
-		this.keyField = findKeyField(pair); //TODO support multiple key fields later
+		this.keyField = findKeyField(pair); 
 		if (this.keyField == null) {
 			//err!!
 			et.add("struct-missing-primary-key-field", "struct needs a unique or primaryKey field");

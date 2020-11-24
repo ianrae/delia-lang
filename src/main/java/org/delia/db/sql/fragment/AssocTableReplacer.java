@@ -127,7 +127,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		updateFrag.assocDeleteFrag = deleteFrag;
 		if (isForeignKeyIdNull(mmMap, fieldName)) {
 			StrCreator sc = new StrCreator();
-			sc.o("%s = ?", assocField2); //TODO should be rightv NOT IN (100) so can handle list
+			sc.o("%s = ?", assocField2); 
 			RawFragment rawFrag = new RawFragment(sc.toString());
 			deleteFrag.whereL.add(rawFrag);
 			
@@ -138,7 +138,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		}
 		
 		StrCreator sc = new StrCreator();
-		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); //TODO should be rightv NOT IN (100) so can handle list
+		sc.o("%s = ? and %s <> ?", assocField2, assocFieldName); 
 		RawFragment rawFrag = new RawFragment(sc.toString());
 		deleteFrag.whereL.add(rawFrag);
 		
@@ -254,7 +254,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 
 	protected void addForeignKeyId(Map<String, DRelation> mmMap, String fieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
-		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+		DValue dvalToUse  = drel.getForeignKey(); 
 		statement.paramL.add(dvalToUse);
 	}
 	protected boolean isForeignKeyIdNull(Map<String, DRelation> mmMap, String fieldName) {
@@ -303,7 +303,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 	}
 	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
-		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+		DValue dvalToUse  = drel.getForeignKey(); 
 
 		RelationInfo farInfo = info.otherSide;// DRuleHelper.findOtherSideMany(info.farType, structType);
 		TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
@@ -335,7 +335,6 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		statement.paramL.addAll(insertFrag.statement.paramL);
 		insertFrag.statement.paramL.clear();
 	}
-	//TODO move to helper
 	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean mainDValFirst, 
 			DValue mainDVal, DStructType farType, DStructType nearType, DValue xdval, RelationInfo info) {
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(info.farType);

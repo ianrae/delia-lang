@@ -23,11 +23,8 @@ import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.DBHelper;
-import org.delia.db.DBValidationException;
-import org.delia.db.InsertContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.error.DeliaError;
@@ -35,14 +32,12 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
-import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DTypeRegistryBuilder;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRuleRunner;
@@ -70,6 +65,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private DValueIterator insertPrebuiltValueIterator;
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
+		private InsertStatementRunner insertStatementRunner;
 		private HLSManager mgr;
 		private DatIdMap datIdMap;
 		
@@ -137,7 +133,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				this.inputFnMap = ctx.inputFnMap;
 				this.sprigSvc = ctx.sprigSvc;
 			}
-			
+			this.insertStatementRunner = new InsertStatementRunner(factorySvc, dbInterface, this, registry, varMap);
+
 			return true;
 		}
 		
@@ -150,7 +147,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public ResultValue executeProgram(List<Exp> expL) {
 			ResultValue res = null;
-			DBAccessContext dbctx = new DBAccessContext(registry, this);
 			this.dbexecutor = dbInterface.createExecutor();
 //			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
 			dbexecutor.init1(registry);
@@ -406,69 +402,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeInsertStatement(InsertStatementExp exp, ResultValue res) {
-			//find DType for typename Actor
-			DType dtype = registry.getType(exp.getTypeName());
-			if (failIfNull(dtype, exp.typeName, res)) {
-				return;
-			} else if (failIfNotStruct(dtype, exp.typeName, res)) {
-				return;
-			}
-			
-			//execute db insert
-			ConversionResult cres = buildValue((DStructType) dtype, exp.dsonExp);
-			if (cres.dval == null) {
-				res.errors.addAll(cres.localET.getErrors());
-				res.ok = false;
-				return;
-			} else {
-				ValidationRuleRunner ruleRunner = createValidationRunner();
-				ruleRunner.enableRelationModifier(true);
-				ruleRunner.enableInsertFlag(true);
-				ConfigureService configSvc = factorySvc.getConfigureService();
-
-				ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
-				if (! ruleRunner.validateDVal(cres.dval)) {
-					ruleRunner.propogateErrors(res);
-				}
-				
-				if (!res.errors.isEmpty()) {
-					res.ok = false;
-					return;
-				}
-			}
-			
-			try {
-				String typeName = cres.dval.getType().getName();
-				InsertContext ctx = new InsertContext();
-				boolean hasSerialId = DValueHelper.typeHasSerialPrimaryKey(cres.dval.getType());
-				if (hasSerialId) {
-					ctx.extractGeneratedKeys = true;
-					ctx.genKeytype = DValueHelper.findPrimaryKeyFieldPair(cres.dval.getType()).type;
-					DValue generatedId = dbexecutor.executeInsert(cres.dval, ctx);
-					assignSerialVar(generatedId);
-					boolean sprigFlag = sprigSvc.haveEnabledFor(typeName);
-					if (sprigFlag) {
-						sprigSvc.rememberSynthId(typeName, cres.dval, generatedId, cres.extraMap);
-					}
-				} else {
-					dbexecutor.executeInsert(cres.dval, ctx);
-				}
-				
-			} catch (DBException e) {
-				res.errors.add(e.getLastError());
-				res.ok = false;
-				return;
-			} catch (DBValidationException e) {
-				//TODO detect which field(s) failed and convert to a validation error
-				res.errors.add(e.getLastError());
-				res.ok = false;
-				return;
-			}
-			
-			//INSERT has no return value
-			res.ok = true;
-			res.shape = null;
-			res.val = null;
+			insertStatementRunner.executeInsertStatement(exp, res, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private boolean failIfNotStruct(DType dtype, String typeName, ResultValue res) {
 			if (! dtype.isStructShape()) {
@@ -483,25 +417,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				return true;
 			}
 			return false;
-		}
-		private ConversionResult buildValue(DStructType dtype, DsonExp dsonExp) {
-			ConversionResult cres = new ConversionResult();
-			cres.localET = new SimpleErrorTracker(log);
-			if (insertPrebuiltValueIterator != null) {
-				cres.dval = insertPrebuiltValueIterator.next();
-				return cres;
-			}
-			
-			//TODO need local error tracker!!
-			
-			VarEvaluator varEvaluator = this;
-//			if (sprigSvc.haveEnabledFor(dtype.getName())) {
-				varEvaluator = new SprigVarEvaluator(factorySvc, this);
-//			}
-			
-			DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, varEvaluator, sprigSvc);
-			cres.dval = converter.convertOne(dtype.getName(), dsonExp, cres);
-			return cres;
 		}
 		private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
 			ConversionResult cres = new ConversionResult();
@@ -528,14 +443,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			spec.evaluator = new FilterEvaluator(factorySvc, this);
 			spec.evaluator.init(queryExp);
 			return spec;
-		}
-		private void assignSerialVar(DValue generatedId) {
-			ResultValue res = new ResultValue();
-			res.ok = true;
-			res.shape = generatedId.getType().getShape();
-			res.val = generatedId;
-			res.varName = VAR_SERIAL;
-			varMap.put(VAR_SERIAL, res);
 		}
 
 		

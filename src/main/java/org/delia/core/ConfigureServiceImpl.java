@@ -1,8 +1,8 @@
 package org.delia.core;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.ConfigureStatementExp;
@@ -10,6 +10,7 @@ import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 
 public class ConfigureServiceImpl implements ConfigureService {
 	private static final String TIMEZONE = "timezone";
@@ -34,12 +35,16 @@ public class ConfigureServiceImpl implements ConfigureService {
 		case TIMEZONE:
 		{
 			String tzName = exp.value.strValue();
-			TimeZone tz = TimeZone.getTimeZone(tzName);
-			//TODO: fix the issue that if tzName is unknown, TimeZone passes back UTC anyway
+			ZoneId tz = null;
+			try {
+				tz = ZoneId.of(tzName);
+			} catch (Exception e) {
+				DeliaExceptionHelper.throwError("bad-timezone", e.getMessage());
+			}
 			if (tz == null) {
 				throwError("configure-error-timezone", "unknown timezone: " + tzName);
 			} else {
-				factorySvc.getLog().log("configure setting %s=%s", tzName, tz.getID());
+				factorySvc.getLog().log("configure setting timezone=%s (%s)", tzName, tz.getId());
 				TimeZoneService tzSvc = factorySvc.getTimeZoneService();
 				tzSvc.setDefaultTimeZone(tz);
 			}
@@ -47,9 +52,7 @@ public class ConfigureServiceImpl implements ConfigureService {
 			break;
 		case LOAD_FKS:
 		{
-			//TODO: should be case-insentive and accept 'true'
 			BooleanExp bexp = (BooleanExp) exp.value;
-//			Boolean bb = Boolean.parseBoolean(exp.value.strValue());
 			this.populateFKsFlag = bexp.val;
 		}
 			break;

@@ -32,6 +32,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
 	private ZDBExecutor dbexecutor;
+	private boolean flippedByHackFlag; //for unit tests only
 
 	public CreateNewDatIdVisitor(FactoryService factorySvc, ZDBExecutor zdbExecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
@@ -54,7 +55,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		//write new schema to db
 		DStructType dtype = registry.getDATType();
 		String tblName = createAssocTableName(rr.relInfo);
-		DValue dval = createDatTableObj(dtype, tblName);
+		DValue dval = createDatTableObj(dtype, tblName, rr.relInfo);
 		if (dval == null) {
 			return;
 		}
@@ -71,7 +72,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
 			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
 			datIdCounter++;
-			datIdMap.putFull(key, datId, tblName);
+			datIdMap.putFull(key, datId, tblName, dval.asStruct().getField("leftName").asString(),
+					dval.asStruct().getField("rightName").asString());
 		}
 	}
 	
@@ -109,7 +111,9 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			}
 			
 			String tblName = dval.asStruct().getField("tblName").asString();
-			datIdMap.attachTblName(id, tblName);
+			String left = dval.asStruct().getField(DatIdMapHelper.LEFTNAME).asString();
+			String right = dval.asStruct().getField(DatIdMapHelper.RIGHTNAME).asString();
+			datIdMap.attachTblName(id, tblName, left, right);
 		}
 
 		return maxId;
@@ -123,11 +127,13 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			String tblName = String.format("%s%sDat%d", s1, s2, nextAssocNameInt);
 			if (this.dbexecutor.doesTableExist(tblName)) {
 				nextAssocNameInt++;
+				this.flippedByHackFlag = false;
 				return tblName;
 			} else {
 				tblName = String.format("%s%sDat%d", s2, s1, nextAssocNameInt);
 				if (this.dbexecutor.doesTableExist(tblName)) {
 					nextAssocNameInt++;
+					this.flippedByHackFlag = true;
 					return tblName;
 				}
 			}
@@ -137,19 +143,36 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		return tlbName;
 	}
 
-	private DValue createDatTableObj(DStructType type, String datTableName) {
+	private DValue createDatTableObj(DStructType type, String datTableName, RelationInfo relInfo) {
 		StructValueBuilder structBuilder = new StructValueBuilder(type);
 
 		ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
 		DValue dval = builder.buildString(datTableName);
 		structBuilder.addField("tblName", dval);
+		DValue left = buildLRString(builder, relInfo);
+		DValue right = buildLRString(builder, relInfo.otherSide);
+		if (flippedByHackFlag) {
+			DValue tmp = left;
+			left = right;
+			right = tmp;
+		}
+		
+		structBuilder.addField(DatIdMapHelper.LEFTNAME, left);
+		structBuilder.addField(DatIdMapHelper.RIGHTNAME, right);
+		//TODO: schema migrator needs to track rename-field and update DAT table too
 
 		boolean b = structBuilder.finish();
 		if (! b) {
+			log.logError("failed to build DAT row for type '%s'", type.getName());
 			return null;
 		}
 		dval = structBuilder.getDValue();
 		return dval;
+	}
+
+	private DValue buildLRString(ScalarValueBuilder builder, RelationInfo relInfo) {
+		String left = String.format("%s.%s", relInfo.nearType, relInfo.fieldName);
+		return builder.buildString(left);
 	}
 
 	private String createKey(String typeName, String fieldName) {

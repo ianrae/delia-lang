@@ -59,12 +59,12 @@ public class OrderedMap {
         Boolean bb = serialMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		for(String field: map.keySet()) {
-			DType dtype = map.get(field);
-			if (spec.needsReplacement(this, dtype)) {
-				map.put(field, spec.newType);
-			}
-		}
-	}
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		for(String field: map.keySet()) {
+//			DType dtype = map.get(field);
+//			if (spec.needsReplacement(this, dtype)) {
+//				map.put(field, spec.newType);
+//			}
+//		}
+//	}
 }

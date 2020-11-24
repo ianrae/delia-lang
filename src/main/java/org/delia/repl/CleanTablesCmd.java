@@ -10,10 +10,13 @@ public class CleanTablesCmd extends CmdBase {
 		super("clean tables", null);
 		expectSpace = false;
 	}
+	public CleanTablesCmd(CleanTablesCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new CleanTablesCmd();
+			Cmd cmd = new CleanTablesCmd(this);
 			cmd.cmd = name;
 			return cmd;
 		}

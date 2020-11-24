@@ -19,8 +19,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.TableExistenceService;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.queryresponse.LetSpan;
@@ -31,9 +29,7 @@ import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.StringTrail;
-import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZTableExistenceService;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 
@@ -48,16 +44,20 @@ public class HLSTestBase extends BDDBase {
 	protected HLSQueryStatement buildHLS(String src) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry, null, null);
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 		
 		HLSEngine hlsEngine = new HLSEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
 		
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
+			aliasManager.buildAliases(hlspan, session.getDatIdMap());
+		}
+		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			String hlstr = hlspan.toString();
 			log.log(hlstr);
 		}
+		log.log("alias: %s", aliasManager.dumpToString());
 		return hls;
 	}
 
@@ -137,9 +137,8 @@ public class HLSTestBase extends BDDBase {
 	protected boolean flipAssocTbl = false; //mosts tests assume CustomerAddressAssoc
 	
 	//---
-	protected TableExistenceService existsSvc;
-	protected AssocTblManager assocTblMgr;
-	
+	protected AliasManager aliasManager;
+
 	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
@@ -152,7 +151,8 @@ public class HLSTestBase extends BDDBase {
 		} else {
 			createTable(memDBinterface, "CustomerAddressDat1");
 		}
-		existsSvc = new ZTableExistenceService(delia.getDBInterface()); 
+		aliasManager = new AliasManager(delia.getFactoryService());
+		
 		return new DeliaGenericDao(delia);
 	}
 	
@@ -161,7 +161,7 @@ public class HLSTestBase extends BDDBase {
 	}
 
 	protected String buildSrc() {
-		String src = "type Flight struct {field1 int unique, field2 int } end";
+		String src = "type Flight struct {field1 int primaryKey, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
@@ -209,10 +209,10 @@ public class HLSTestBase extends BDDBase {
 	
 	protected HLSSQLGenerator createGen() {
 		DTypeRegistry registry = session.getExecutionContext().registry;
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(delia.getFactoryService(), registry, null, session.getDatIdMap());
 		MiniSelectFragmentParser mini = new MiniSelectFragmentParser(delia.getFactoryService(), registry, whereGen);
-		assocTblMgr = new AssocTblManager(existsSvc, session.getDatIdMap());
-		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), assocTblMgr, mini, null);
+		
+		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(delia.getFactoryService(), mini, null, aliasManager, session.getDatIdMap());
 		gen.setRegistry(session.getExecutionContext().registry);
 		return gen;
 	}

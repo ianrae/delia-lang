@@ -45,6 +45,17 @@ public class ImmutCodeGen extends CodeGenBase {
 				st.add("uname", StringUtil.uppify(fieldName));
 				st.add("fname", fieldName);
 				sc.o(st.render());
+				
+				if (hasPK(ftype)) {
+					//t5(ftype,uname,fname,pktype,asname) ::= <<
+					st = g.getInstanceOf("t5");
+					st.add("ftype", javaType);
+					st.add("uname", StringUtil.uppify(fieldName));
+					st.add("fname", fieldName);
+					st.add("pktype", getPKType(ftype));
+					st.add("asname", getPKTypeAsFn(ftype));
+					sc.o(st.render());
+				}
 			} else {
 				//t3(ftype,uname,fname,asname) ::= <<
 				st = g.getInstanceOf("t3");

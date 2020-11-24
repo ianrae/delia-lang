@@ -16,6 +16,7 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
+import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.log.Log;
@@ -37,10 +38,12 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
+	private DValueCompareService compareSvc;
 
 
 	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc, dbInterface);
+		this.compareSvc = new DValueCompareService(factorySvc);
 	}
 
 	@Override
@@ -296,7 +299,6 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	void checkUniqueness(DValue dval, MemDBTable tbl, String typeName, DValue existing, boolean allowMissing) {
-		//TODO: later support types without primarykey
 		List<TypePair> candidates = DValueHelper.findAllUniqueFieldPair(dval.getType());
 		if (CollectionUtils.isEmpty(candidates)) {
 			return;
@@ -320,11 +322,9 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
 			if (existing != null) {
 				DValue oldVal = DValueHelper.getFieldValue(existing, uniqueField);
-				//TODO: need way to compare dvals
 				if (oldVal != null) {
-					String ss1 = inner.asString();
-					String ss2 = oldVal.asString();
-					if (ss1.equals(ss2)) {
+					int n = compareSvc.compare(oldVal, inner);
+					if (n == 0) {
 						continue;
 					}
 				}

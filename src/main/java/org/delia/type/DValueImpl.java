@@ -1,5 +1,6 @@
 package org.delia.type;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -91,19 +92,20 @@ public class DValueImpl implements DValue, DValueInternal {
         Boolean bool = (Boolean) object;
         return bool;
     }
-    @Override
-    public Date asDate() {
+    
+
+	@Override
+	public ZonedDateTime asDate() {
 		WrappedDate wdt = (WrappedDate) object;
-        Date dt = wdt.getDate();
+		return wdt.getDate();
+	}
+    @Override
+    public Date asLegacyDate() {
+		WrappedDate wdt = (WrappedDate) object;
+        Date dt = wdt.getLegacyDate();
         return dt;
     }
 
-//    @Override
-//    @SuppressWarnings("unchecked")
-//    public List<DValue> asList() {
-//        return (List<DValue>) object;
-//    }
-    
     @Override
     @SuppressWarnings("unchecked")
     public Map<String,DValue> asMap() {

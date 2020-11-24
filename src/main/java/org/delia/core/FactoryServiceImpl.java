@@ -7,6 +7,7 @@ import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
+import org.delia.log.LogFactory;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -21,8 +22,13 @@ public class FactoryServiceImpl implements FactoryService {
 	private QueryBuilderServiceImpl queryBuilderSvc;
 	private int nextGeneratedRuleId = 1;
 	private DValueCompareService compareSvc;
+	private DiagnosticServiceImpl diagnosticSvc;
+	private LogFactory logFactory;
 	
 	public FactoryServiceImpl(Log log, ErrorTracker et) {
+		this(log, et, null);
+	}
+	public FactoryServiceImpl(Log log, ErrorTracker et, LogFactory logFactory) {
 		this.log = log;
 		this.et = et;
 		this.tzSvc = new TimeZoneServiceImpl();
@@ -30,6 +36,8 @@ public class FactoryServiceImpl implements FactoryService {
 		this.fmtSvc = new DateFormatServiceImpl(tzSvc);
 		this.queryBuilderSvc = new QueryBuilderServiceImpl(this);
 		this.compareSvc = new DValueCompareService(this);
+		this.diagnosticSvc = new DiagnosticServiceImpl(this);
+		this.logFactory = logFactory;
 	}
 
 	@Override
@@ -83,40 +91,13 @@ public class FactoryServiceImpl implements FactoryService {
 		return compareSvc;
 	}
 
-//	private ZDBInterfaceFactory zdbFactory = null; //just one
-//	public static ZDBInterfaceFactory retainedZDBFactory = null; //for bdd
-//	public static ZDBInterfaceFactory nextZDBToUse = null; //for bdd
-//
-//	@Override
-//	public ZDBExecutor hackGetZDB(DTypeRegistry registry, DBType dbType) {
-//		if (DBType.MEM.equals(dbType)) {
-//			if (zdbFactory == null) {
-//				if (nextZDBToUse != null) {
-//					zdbFactory = nextZDBToUse;
-//					nextZDBToUse = null;
-//				} else {
-//					zdbFactory = new MemZDBInterfaceFactory(this);
-//				}
-//				retainedZDBFactory = zdbFactory;
-//			}
-//			MemZDBExecutor dbexec = new MemZDBExecutor(this, (MemZDBInterfaceFactory) zdbFactory);
-//			dbexec.init1(registry);
-//			return dbexec;
-//		} else if (DBType.H2.equals(dbType)) {
-//			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-//			H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(this, connFact);
-//			
-//			H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
-//			ZDBExecutor dbexec = new H2ZDBExecutor(this, log, dbFactory, conn);
-//			dbexec.init1(registry);
-//			return dbexec;
-//		} else {
-//			return null; //not yet supported
-//		}
-//	}
-//
-//	@Override
-//	public ZDBInterfaceFactory getHackZdbFactory() {
-//		return zdbFactory;
-//	}
+	@Override
+	public DiagnosticService getDiagnosticService() {
+		return diagnosticSvc;
+	}
+	@Override
+	public LogFactory getLogFactory() {
+		return logFactory;
+	}
+
 }

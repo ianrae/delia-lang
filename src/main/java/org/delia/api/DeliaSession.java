@@ -1,5 +1,7 @@
 package org.delia.api;
 
+import java.time.ZoneId;
+
 import org.delia.assoc.DatIdMap;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
@@ -29,4 +31,5 @@ public interface DeliaSession {
 	DatIdMap getDatIdMap();
 	Runner getMostRecentRunner();
 	DeliaSession createChildSession();
+	ZoneId getDefaultTimezone();
 }

@@ -1,6 +1,6 @@
 package org.delia.rule;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.delia.type.DRelation;
@@ -13,7 +13,7 @@ public interface RuleOperand {
 	Integer asInt(DValue dval);
 	Long asLong(DValue dval);
 	Double asNumber(DValue dval);
-	Date asDate(DValue dval);
+	ZonedDateTime asDate(DValue dval);
 	DRelation asRelation(DValue dval);
 	
 	String getSubject();

@@ -1,13 +1,11 @@
 package org.delia.db.sql;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.core.TimeZoneService;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -36,27 +34,19 @@ public class SqlDateGenerator extends ServiceBase {
 	}
 
 	public String convertDateStringToSQLTimestamp(String value) {
-		Date dt = fmtSvc.parse(value);
-		return convertDateToSQLTimestamp(dt);
-	}
-	public String convertDateStringToSQLTimestamp2(String value) {
-		Date dt = fmtSvc.parse(value);
-		return fmtSvc.format(dt);
+		ZonedDateTime zdt = fmtSvc.parseDateTime(value);
+		return convertDateToSQLTimestamp(zdt);
 	}
 
 	/**
-	 * TODO: this probably needs to become db-specific
+	 * FUTURE: this probably needs to become db-specific
 	 * @param dt date
 	 * @return string representing date in sql format
 	 */
-	private String convertDateToSQLTimestamp(Date dt) {
+	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-		TimeZone tz = tzSvc.getDefaultTimeZone();
-		sdf.setTimeZone(tz);
-
-		String s = sdf.format(dt);
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		String s = zdt.format(sdf);
 		return String.format("'%s'", s);
 	}
 

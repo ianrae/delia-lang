@@ -26,15 +26,6 @@ public class DRuleHelper {
 		}
 		return null;
 	}
-//	public static TypePair findMatchingRelByType(DStructType dtype, DType targetType) {
-//		//TODO: later also use named relations
-//		for(TypePair pair: dtype.getAllFields()) {
-//			if (typesAreEqual(pair.type, targetType)) {
-//				return pair;
-//			}
-//		}
-//		return null;
-//	}
 	public static List<TypePair> xfindAllMatchingRelByType(DStructType dtype, DType targetType) {
 		List<TypePair> list = new ArrayList<>();
 		for(TypePair pair: dtype.getAllFields()) {
@@ -96,6 +87,29 @@ public class DRuleHelper {
 		}
 		return null;
 	}
+	//needed due to self-join
+	public static List<RelationInfo> findAllMatchingByName(RelationRuleBase rrTarget, DStructType farType) {
+		if (rrTarget.getRelationName() == null) {
+			return null;
+		}
+		String name = rrTarget.getRelationName();
+		List<RelationInfo> resultL = new ArrayList<>();
+		
+		for(DRule rule: farType.getRawRules()) {
+			if (rule instanceof RelationOneRule) {
+				RelationOneRule rr = (RelationOneRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					resultL.add(rr.relInfo);
+				}
+			} else if (rule instanceof RelationManyRule) {
+				RelationManyRule rr = (RelationManyRule) rule;
+				if (name.equals(rr.getRelationName())) {
+					resultL.add(rr.relInfo);
+				}
+			}
+		}
+		return resultL;
+	}
 
 	public static RelationOneRule findOneRule(String typeName, String fieldName, DTypeRegistry registry) {
 		DStructType dtype = (DStructType) registry.getType(typeName);
@@ -126,24 +140,7 @@ public class DRuleHelper {
 		return null;
 	}
 	
-//	public static boolean isOtherSideOne(DType otherSide, DStructType structType) {
-//		RelationInfo info = findOtherSideOne(otherSide, structType);
-//		return (info != null);
-//	}
-//	public static RelationInfo findOtherSideOne(DType otherSide, DStructType structType) {
-//		for(DRule rule: otherSide.getRawRules()) {
-//			if (rule instanceof RelationOneRule) {
-//				RelationOneRule rr = (RelationOneRule) rule;
-//				//TODO not correct should also check fieldName. may be multiple relations of same type.
-//				if (typesAreEqual(rr.relInfo.farType, structType)) {
-//					return rr.relInfo;
-//				}
-//			}
-//		}
-//		return null;
-//	}
-	//x is temporary marker of new safer fns
-	public static RelationInfo xfindOtherSideOne(RelationInfo relinfo) {
+	public static RelationInfo findOtherSideOne(RelationInfo relinfo) {
 		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
@@ -154,7 +151,7 @@ public class DRuleHelper {
 		}
 		return null;
 	}
-	public static RelationInfo xfindOtherSideMany(RelationInfo relinfo) {
+	public static RelationInfo findOtherSideMany(RelationInfo relinfo) {
 		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationManyRule) {
 				RelationManyRule rr = (RelationManyRule) rule;
@@ -166,24 +163,6 @@ public class DRuleHelper {
 		return null;
 	}
 
-//	public static RelationInfo findOtherSideMany(DType otherSide, DStructType structType) {
-//		for(DRule rule: otherSide.getRawRules()) {
-//			if (rule instanceof RelationManyRule) {
-//				RelationManyRule rr = (RelationManyRule) rule;
-//				if (typesAreEqual(rr.relInfo.farType, structType)) {
-//					return rr.relInfo;
-//				}
-//			}
-//		}
-//		return null;
-//	}
-//	public static RelationInfo findOtherSideOneOrMany(DType otherSide, DStructType structType) {
-//		RelationInfo farInfo = DRuleHelper.findOtherSideOne(otherSide, structType);
-//		if (farInfo == null) {
-//			farInfo = DRuleHelper.findOtherSideMany(otherSide, structType);
-//		}
-//		return farInfo;
-//	}
 	public static RelationInfo findRelinfoOneOrManyForField(DType structType, String fieldName) {
 		for(DRule rule: structType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {

@@ -31,6 +31,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R400_struct,
 		R500_relation,
 		R550_multi_relation,
+		R560_self_relation,
 		R600_rules,
 		R650_rule_fns,
 		R700_crud_insert,
@@ -70,11 +71,18 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
 	protected ZDBInterfaceFactory dbInterfaceToUse;
+	protected String diagnosticFilter = "";
 	
 	protected List<String> filesExecutedL = new ArrayList<>();
 	private BDDGroup currentGroup;
 	protected boolean enableAllFileCheck = true;
 	protected boolean disableAllSlowTests = DBTestHelper.disableAllSlowTests;
+	
+	//a test that is part of a group but will be tested separately
+	protected void ignoreTest(String filename) {
+		filesExecutedL.add(filename);
+	}
+	
 
 	/**
 	 * When we want to run all unit tests but not have to wait
@@ -104,6 +112,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR550File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R550_multi_relation, filename, numTests);
+	}
+	protected int runR560File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R560_self_relation, filename, numTests);
 	}
 	protected int runR600File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R600_rules, filename, numTests);
@@ -185,6 +196,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		
 		List<BDDTest> tests = parser.parse(lines);
 		BDDTestRunner runner = new BDDTestRunner(this);
+		runner.diagnosticFilter = diagnosticFilter;
 		if (testIndexToRun >= 0) {
 			runner.setTestToRun(testIndexToRun);
 		}

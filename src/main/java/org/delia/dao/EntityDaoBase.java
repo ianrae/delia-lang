@@ -49,7 +49,9 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 	
 	protected ResultValue doInsertOrUpdate(T entity, String src, InsertExtraInfo extraInfo) {
 		List<DValue> inputL = new ArrayList<>();
-		inputL.add(createDValue(entity));
+		if (entity != null) {
+			inputL.add(createDValue(entity));
+		}
 		DValueIterator iter = new DValueIterator(inputL);	
 		DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
 		
@@ -193,5 +195,24 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		String src = String.format("delete %s[%s]", typeName, pkval.asString());
 		ResultValue res = doInsertOrUpdate(entity, src, null);
 	}
+	protected void doDeleteAll() {
+		String src = String.format("delete %s[true]", typeName);
+		ResultValue res = doInsertOrUpdate(null, src, null);
+	}
 	
+	//--derived classes can override these if necessary--
+	public List<T> findAll() {
+		return doFindAll();
+	}
+	//not insert because may or may not return generated id
+	public int update(T entity) {
+		return doUpdate(entity);
+	}
+	public int upsert(T entity) {
+		return doUpsert(entity);
+	}
+	public void delete(T entity) {
+		doDelete(entity);
+	}
+
 }

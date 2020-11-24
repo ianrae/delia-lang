@@ -15,7 +15,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.TableExistenceServiceImpl;
 import org.delia.db.sql.fragment.DeleteFragmentParser;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.FragmentParserService;
@@ -98,7 +97,6 @@ public class DeleteFragementParserTests extends FragmentParserTestBase {
 	}
 	@After
 	public void shutdown() {
-		TableExistenceServiceImpl.hackYesFlag = false;
 	}
 
 	private String buildSrc() {
@@ -176,7 +174,7 @@ public class DeleteFragementParserTests extends FragmentParserTestBase {
 	}
 	private DeleteFragmentParser createParser(DeliaGenericDao dao) {
 		List<TableInfo> tblinfoL = new ArrayList<>();		
-		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
 		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		DeleteFragmentParser parser = new DeleteFragmentParser(factorySvc, fpSvc);
 		whereGen.tableFragmentMaker = parser;

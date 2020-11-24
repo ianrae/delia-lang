@@ -10,7 +10,6 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -67,10 +66,10 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		return errorConverter;
 	}
 
-	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		//nothing to do
-	}
+//	@Override
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		//nothing to do
+//	}
 
 	@Override
 	public ZDBExecutor createExecutor() {

@@ -138,8 +138,6 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	/**
 	 * dbNeedsMigration MUST have been called before this.
 	 * @param plan migration plan
-	 * @param datIdMap 
-	 * @return migration plan
 	 */
 	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
 		boolean b = performMigrations(plan.diffL, false);

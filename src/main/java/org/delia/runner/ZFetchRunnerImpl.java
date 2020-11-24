@@ -1,6 +1,7 @@
 package org.delia.runner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -59,27 +60,11 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 
 	private QueryExp buildQuery(DRelation drel) {
 		if (drel.isMultipleKey()) {
-			//TODO fix this. hack hack hack it is WRONG
 			DType relType = registry.getType(drel.getTypeName());
-//			String keyFieldName = DValueHelper.findUniqueField(relType);
-//			QueryInExp inExp = new QueryInExp(99, new IdentExp(keyFieldName), null);
-//			FilterOpFullExp fullExp = new FilterOpFullExp(99, inExp);
-//			for(DValue dval: drel.getMultipleKeys()) {
-//				//int only for now
-//				//TODO support string,long later
-//				Integer foreignKey = dval.asInt();
-//				IntegerExp exp = new IntegerExp(foreignKey);
-//				inExp.listExp.valueL.add(exp);
-//			}
-//			FilterExp filter = new FilterExp(99, fullExp); 
-//			QueryExp exp = new QueryExp(0, new IdentExp(drel.getTypeName()), filter, null);
 			QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 			QueryExp exp = builderSvc.createInQuery(drel.getTypeName(), drel.getMultipleKeys(), relType);
 			return exp;
 		} else {
-//			Integer foreignKey = drel.getForeignKey().asInt();
-//			//TODO string keys later
-//			FilterExp filter = new FilterExp(99, new IntegerExp(foreignKey));
 			QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 			QueryExp exp = builderSvc.createPrimaryKeyQuery(drel.getTypeName(), drel.getForeignKey());
 			return exp;
@@ -95,6 +80,12 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 
 	@Override
 	public boolean queryFKExists(DStructType owningType, String fieldName, DRelation drel) {
+		List<DValue> dvalList = queryFKs(owningType, fieldName, drel);
+		return !CollectionUtils.isEmpty(dvalList);
+	}
+
+	@Override
+	public List<DValue> queryFKs(DStructType owningType, String fieldName, DRelation drel) {
 		QueryExp queryExp = buildOwningTypeQuery(owningType, fieldName, drel);
 		//TODO resolve vars such as foo(id)
 		QuerySpec spec = new QuerySpec();
@@ -105,9 +96,9 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
 		
 		if (!qresp.ok) {
-			return false;
+			return Collections.emptyList();
 		} else {
-			return !CollectionUtils.isEmpty(qresp.dvalList);
+			return qresp.dvalList;
 		}
 	}
 

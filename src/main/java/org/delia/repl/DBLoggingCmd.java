@@ -8,10 +8,13 @@ public class DBLoggingCmd extends CmdBase {
 	public DBLoggingCmd() {
 		super("db log", null);
 	}
+	public DBLoggingCmd(DBLoggingCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new DBLoggingCmd();
+			Cmd cmd = new DBLoggingCmd(this);
 			cmd.cmd = name;
 			cmd.arg1 = parseArg1(src);
 			return cmd;

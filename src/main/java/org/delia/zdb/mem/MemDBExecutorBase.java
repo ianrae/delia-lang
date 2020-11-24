@@ -43,6 +43,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 	DateFormatService fmtSvc;
 	public boolean createTablesAsNeededFlag = true;
 	protected MemZDBInterfaceFactory dbInterface;
+	private PreSpecService preSpecSvc;
 
 	public MemDBExecutorBase(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc);
@@ -51,10 +52,28 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();
 		this.fmtSvc = factorySvc.getDateFormatService();
+		this.preSpecSvc = new PreSpecService(factorySvc, dbInterface);
 	}
 
-
 	protected QueryResponse doExecuteQuery(QuerySpec spec, QueryContext qtx) {
+		
+		//avoid infinite loop
+		int maxPreQueries = 10;
+		QuerySpec preQuerySpec = null;
+		QueryResponse qresp0 = null;
+		for(int i = 0; i < maxPreQueries; i++) {
+			preQuerySpec = preSpecSvc.getPreQuery(spec, preQuerySpec, qresp0);
+			if (preQuerySpec == null) {
+				break;
+			}
+			qresp0 = doSingleQuery(preQuerySpec, qtx);
+		}
+		
+		QueryResponse qresp = doSingleQuery(spec, qtx);
+		return qresp;
+	}
+
+	private QueryResponse doSingleQuery(QuerySpec spec, QueryContext qtx) {
 		QueryResponse qresp = new QueryResponse();
 		RowSelector selector = createSelector(spec); 
 		if (selector == null) {
@@ -152,7 +171,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			selector = new AllRowSelector();
 			break;
 		case OP:
-			selector = new OpRowSelector();
+			selector = new OpRowSelector(fmtSvc, factorySvc, spec.evaluator);
 			break;
 		case PRIMARY_KEY:
 		default:

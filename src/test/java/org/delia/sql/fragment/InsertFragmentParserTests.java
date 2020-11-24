@@ -14,12 +14,11 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBAccessContext;
-import org.delia.db.TableExistenceService;
-import org.delia.db.hls.AssocTblManager;
 import org.delia.db.hls.TestCreatorHelper;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertFragmentParser;
 import org.delia.db.sql.fragment.InsertStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -28,7 +27,6 @@ import org.delia.runner.RunnerImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZTableExistenceService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -122,7 +120,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33");
+		chkParams(selectFrag, "55", "33", "100");  //100 is part of 2nd sql statement
 	}
 	@Test
 	public void testOneToOneChild() {
@@ -160,7 +158,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33");
+		chkParams(selectFrag, "55", "33", "100"); //100 is part of 2nd sql statement
 	}
 	@Test
 	public void testOneToManyParentWithChild2() {
@@ -172,7 +170,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChk(selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33");
+		chkParams(selectFrag, "55", "33", "100", "101"); //100,101 is part of 2nd sql statement
 	}
 	@Test
 	public void testOneToManyChild() {
@@ -217,8 +215,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33", "100", "55");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33", "55", "100");
 		chkNumParams(2, 2);
 	}
 	@Test
@@ -233,9 +231,9 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Customer (id, wid) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "55", "33", "100", "55", "101", "55");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "55", "33", "55", "100", "55", "101");
 		chkNumParams(2, 2, 2);
 	}
 
@@ -250,8 +248,8 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "100", "5", "100", "55");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "100", "5", "55", "100");
 		chkNumParams(2, 2);
 	}
 
@@ -266,9 +264,9 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		InsertStatementFragment selectFrag = buildInsertFragment(insertStatementExp, dval); 
 
 		runAndChkLine(1, selectFrag, "INSERT INTO Address (id, z) VALUES(?, ?);");
-		chkLine(2, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?);");
-		chkLine(3, selectFrag, " INSERT INTO AddressCustomerDat1 (leftv, rightv) VALUES(?, ?)");
-		chkParams(selectFrag, "100", "5", "100", "55", "100", "56");
+		chkLine(2, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?);");
+		chkLine(3, selectFrag, " INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)");
+		chkParams(selectFrag, "100", "5", "55", "100", "56", "100");
 		chkNumParams(2, 2, 2);
 	}
 
@@ -326,18 +324,17 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 
 		InsertFragmentParser parser = createParser(dao, tblInfoL); 
 		this.queryBuilderSvc = factorySvc.getQueryBuilderService();
-		TestCreatorHelper.createTable(dao.getDbInterface(), "AddressCustomerDat1");
+		TestCreatorHelper.createTable(dao.getDbInterface(), "CustomerAddressDat1");
 
 		return parser;
 	}
 	private InsertFragmentParser createParser(DeliaGenericDao dao, List<TableInfo> tblinfoL) {
-		FragmentParserService fpSvc = createFragmentParserService(null, dao, tblinfoL);
+		WhereFragmentGenerator whereGen = new WhereFragmentGenerator(factorySvc, registry, runner, null);
+		FragmentParserService fpSvc = createFragmentParserService(whereGen, dao, tblinfoL);
 		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		ZDBExecutor zexec = dao.getDbInterface().createExecutor(); //don't worry about closing, is MME
-		TableExistenceService existSvc = new ZTableExistenceService(zexec);
-		AssocTblManager assocTblMgr = new AssocTblManager(existSvc, dao.getMostRecentSession().getDatIdMap());
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, assocTblMgr);
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, dao.getMostRecentSession().getDatIdMap());
 		return parser;
 	}
 

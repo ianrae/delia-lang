@@ -3,10 +3,8 @@ package org.delia.runner;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.base.DBHelper;
-import org.delia.db.DBAccessContext;
 import org.delia.db.sql.NewLegacyRunner;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,8 +39,6 @@ public class QueryFieldTests extends RunnerTestBase {
 	}
 	@Test
 	public void testFieldThenFuncFail() {
-		NewLegacyRunner runner = initData();
-		
 		//now query it
 //		LetStatementExp exp2 = chkQueryLet("let a = Actor[44].id.zzz()", "let a = Actor[44].id.zzz()");
 		String src = "let a = Actor[44].id.zzz()";
@@ -57,15 +53,6 @@ public class QueryFieldTests extends RunnerTestBase {
 	public void init() {
 		initRunner();
 		runner.begin("");
-		FetchRunner fetchRunner = createFetchRunner();
-//		qffRunner = new QueryFuncOrFieldRunner(factorySvc, runner.getRegistry(), fetchRunner, dbInterface.getCapabilities());
-	}
-	private FetchRunner createFetchRunner() {
-		DBAccessContext dbctx = runner.createDBAccessContext();
-		ZDBExecutor dbexecutor = dbInterface.createExecutor();
-		Runner run = runner.getDeliaRunner();
-		FetchRunner fetchRunner = new FetchRunnerImpl(factorySvc, dbexecutor, runner.getRegistry(), run);
-		return fetchRunner;
 	}
 	
 	private NewLegacyRunner initData() {

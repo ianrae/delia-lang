@@ -13,6 +13,7 @@ public class BDDTestRunner {
 	public int numSkippedTests;
 	private ZDBInterfaceFactory retainedDBinterface;
 	private DBInterfaceCreator creator;
+	public String diagnosticFilter = "";
 	
 	public BDDTestRunner(DBInterfaceCreator creator) {
 		this.creator = creator;
@@ -61,7 +62,7 @@ public class BDDTestRunner {
 		src += buildFrom(test.whenL);
 		
 //		FactoryServiceImpl.nextZDBToUse = retainedZDB;
-		BDDTesterEx tester = new BDDTesterEx(retainedDBinterface, creator, test, test.cleanTables);
+		BDDTesterEx tester = new BDDTesterEx(retainedDBinterface, creator, test, test.cleanTables, diagnosticFilter);
 		boolean pass = false;
 		
 		ThenValue thenVal = createThenValue(test); 

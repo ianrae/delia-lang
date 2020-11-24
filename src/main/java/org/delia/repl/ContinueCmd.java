@@ -6,10 +6,13 @@ public class ContinueCmd extends CmdBase {
 	public ContinueCmd() {
 		super("continue", "c");
 	}
+	public ContinueCmd(ContinueCmd obj) {
+		super(obj);
+	}
 	@Override
 	public Cmd isReplCmd(String src) {
 		if (isMatch(src)) {
-			Cmd cmd = new ContinueCmd();
+			Cmd cmd = new ContinueCmd(this);
 			cmd.cmd = name;
 			cmd.arg1 = parseArg1(src);
 			return cmd;

@@ -32,6 +32,6 @@ public class AliasedFragment implements SqlFragment {
 		if (name == null) {
 			return 0;
 		}
-		return name.contains("?") ? 1 : 0; //TODO: can it ever be more than one??
+		return name.contains("?") ? 1 : 0; 
 	}
 }

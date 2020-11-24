@@ -84,7 +84,6 @@ public class LetTests {
 		chkDollarDollarQuery("Actor[x = y]", "Actor[x = y]");
 		chkDollarDollarQuery("Actor[x == y]", "Actor[x == y]");
 		chkDollarDollarQuery("Actor[x != y]", "Actor[x != y]");
-		chkDollarDollarQuery("Actor[x <> y]", "Actor[x <> y]");
 		chkDollarDollarQuery("Actor[x > y]", "Actor[x > y]");
 		chkDollarDollarQuery("Actor[x < y]", "Actor[x < y]");
 		chkDollarDollarQuery("Actor[x >= y]", "Actor[x >= y]");

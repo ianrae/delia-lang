@@ -1,7 +1,7 @@
 package org.delia.queryresponse;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -34,13 +34,6 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 			return nexp.val;
 		}
 		
-//		protected void ensureFieldExists(QueryResponse qresp, String fnName, String fieldName) {
-//			if (CollectionUtils.isEmpty(qresp.dvalList)) {
-//				return;
-//			}
-//			DValue dval = qresp.dvalList.get(0);
-//			DValueHelper.throwIfFieldNotExist(fnName, fieldName, dval);
-//		}
 		protected void ensureFieldExists(List<DValue> dvalList, String fnName, String fieldName) {
 			if (CollectionUtils.isEmpty(dvalList)) {
 				return;
@@ -52,7 +45,7 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 		protected void setSingletonResult(QueryResponse qresp, DValue dval) {
 			qresp.dvalList = new ArrayList<>();
 			qresp.dvalList.add(dval);
-			//TODO: should we create a new qresp obj??
+			//should we create a new qresp obj??. current impl seems fine.
 		}
 		
 		protected DValue buildIntVal(int max) {
@@ -80,9 +73,9 @@ public abstract class ZQueryResponseFunctionBase implements ZQueryResponseFuncti
 			DValue dval = builder.buildString(s);
 			return dval;
 		}
-		protected DValue buildDateVal(Date dt, FactoryService factorySvc) {
+		protected DValue buildDateVal(ZonedDateTime zdt, FactoryService factorySvc) {
 			ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, registry);
-			DValue dval = builder.buildDate(dt);
+			DValue dval = builder.buildDate(zdt);
 			return dval;
 		}
 		

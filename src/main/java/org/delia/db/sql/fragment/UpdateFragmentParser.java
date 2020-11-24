@@ -80,9 +80,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		for(FieldFragment ff: selectFrag.fieldL) {
 			ff.alias = null;
 		}
-		//			public List<SqlFragment> earlyL = new ArrayList<>();
 		selectFrag.tblFrag.alias = null;
-		//			public JoinFragment joinFrag; //TODO later a list
 		for(SqlFragment ff: selectFrag.whereL) {
 			if (ff instanceof OpFragment) {
 				OpFragment opff = (OpFragment) ff;
@@ -132,7 +130,7 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 			DValue dvalToUse = inner;
 			if (inner.getType().isRelationShape()) {
 				DRelation drel = inner.asRelation();
-				dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+				dvalToUse  = drel.getForeignKey(); 
 			}
 
 			FieldFragment ff = FragmentHelper.buildFieldFrag(structType, updateFrag, pair);
@@ -214,14 +212,12 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 		}
 	}
 	private void chkIfCrudActionAllowed(String action, UpdateStatementFragment updateFrag, String fieldName, List<SqlFragment> existingWhereL, RelationInfo info) {
-		//only for update by primary id. TODO: later support more
-//		List<OpFragment> oplist = null;
+		//only for update by primary id. FUTURE: later support more
 		if (existingWhereL.isEmpty()) {
 			log.logDebug("m-to-n:scenario1");
 			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, action);
 			return;
 		} else if (WhereListHelper.isOnlyPrimaryKeyQuery(existingWhereL, info.farType)) {
-//			oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 		} else {
 			DeliaExceptionHelper.throwError("assoc-crud-not-allowed", "update %s field %s action '%s' not allowed", updateFrag.tblFrag.name, fieldName, action);
 		}
@@ -403,9 +399,9 @@ public class UpdateFragmentParser extends SelectFragmentParser {
 	}
 	protected void buildAssocTblUpdate(UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
-		DValue dvalToUse  = drel.getForeignKey(); //TODO; handle composite keys later
+		DValue dvalToUse  = drel.getForeignKey(); 
 
-		RelationInfo farInfo = info.otherSide; //DRuleHelper.findOtherSideMany(info.farType, structType);
+		RelationInfo farInfo = info.otherSide; 
 		TypePair pair2 = DValueHelper.findField(farInfo.nearType, farInfo.fieldName);
 		TypePair rightPair = new TypePair(assocFieldName, pair2.type);
 		FieldFragment ff = FragmentHelper.buildFieldFragForTable(assocUpdateFrag.tblFrag, assocUpdateFrag, rightPair);

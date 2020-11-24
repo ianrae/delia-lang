@@ -16,6 +16,5 @@ public class SqlExecuteContext extends DBAccessContext {
 	}
 	public SqlExecuteContext(DBAccessContext dbctx) {
 		super(dbctx.registry, dbctx.varEvaluator);
-		this.connObject = dbctx.connObject;
 	}
 }

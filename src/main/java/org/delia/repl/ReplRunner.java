@@ -22,6 +22,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.util.ResourceTextFileReader;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -31,11 +32,12 @@ public class ReplRunner  {
 	private Log log = new SimpleLog();
 
 	private Delia delia;
+	private boolean isExternalDelia = false;
 	private ZDBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 
 	private DeliaException mostRecentException;
-	private List<Cmd> allCmdsL = new ArrayList<>();
+	protected List<Cmd> allCmdsL = new ArrayList<>();
 	private String loadSrc;
 
 	private MigrationPlan currentMigrationPlan;
@@ -43,13 +45,25 @@ public class ReplRunner  {
 	private ConnectionInfo connectionInfo;
 
 	private String sessionName;
+
+	protected ReplOutputWriter outWriter;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
 
-	public ReplRunner(ConnectionInfo info) {
+	public ReplRunner(ConnectionInfo info, ReplOutputWriter outWriter) {
 		this.connectionInfo = info;
-		restart();
-
+		this.outWriter = outWriter;
+		addAllCmds();
+		restart(null);
+	}
+	public ReplRunner(DeliaSession externalDeliaSession, ReplOutputWriter outWriter) {
+		this.connectionInfo = null; //TODO: will this be a problem?
+		this.outWriter = outWriter;
+		addAllCmds();
+		restart(externalDeliaSession);
+	}
+	protected void addAllCmds() {
 		allCmdsL.add(new LoadCmd());
+		allCmdsL.add(new RunFromResourceCmd()); //must be before runcmd
 		allCmdsL.add(new RunCmd());
 		allCmdsL.add(new GenerateMigrationPlanCmd());
 		allCmdsL.add(new RunMigrationPlanCmd());
@@ -63,9 +77,17 @@ public class ReplRunner  {
 		allCmdsL.add(new DBLoggingCmd());
 	}
 
-	public void restart() {
-		this.delia = DeliaBuilder.withConnection(connectionInfo).build();
+	public void restart(DeliaSession externalDeliaSession) {
+		if (externalDeliaSession == null) {
+			this.delia = DeliaBuilder.withConnection(connectionInfo).build();
+		} else {
+			this.delia = externalDeliaSession.getDelia();
+			this.mostRecentSess = externalDeliaSession;
+			this.isExternalDelia = true;
+		}
+		
 		dbInterface = delia.getDBInterface();
+		//TODO: are these ok for external delia? or do we need to reset at the end?
 		dbInterface.getCapabilities().setRequiresSchemaMigration(true);
 		dbInterface.enableSQLLogging(false);
 //		if (dbInterface instanceof MemZDBInterfaceFactory) {
@@ -76,9 +98,12 @@ public class ReplRunner  {
 		for(Cmd cmdx: allCmdsL) {
 			CmdBase cmd = (CmdBase) cmdx;
 			cmd.setFactorySvc(delia.getFactoryService());
+			cmd.setOutputWriter(outWriter);
 		}
 		
-		mostRecentSess = null;
+		if (externalDeliaSession == null) {
+			mostRecentSess = null;
+		}
 		mostRecentException = null;
 		loadSrc = null;
 		currentMigrationPlan = null;
@@ -101,6 +126,15 @@ public class ReplRunner  {
 		String src = StringUtil.convertToSingleString(lines);
 
 		return this.continueDelia(src);
+	}
+	public ResultValue runFromResource(String resPath) {
+		log.log("reading: %s", resPath);
+		ResourceTextFileReader r = new ResourceTextFileReader();
+		String src = r.readAsSingleString(resPath);
+//		String src = StringUtil.convertToSingleString(lines);
+		this.sessionName = createSessionName(resPath);
+
+		return this.executeReplCmdOrDelia(src);
 	}
 
 	public ResultValue loadFromFile(String path) {

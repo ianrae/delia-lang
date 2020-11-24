@@ -1,5 +1,6 @@
 package org.delia.rule.rules;
 
+import java.util.List;
 import java.util.Map;
 
 import org.delia.error.DetailedError;
@@ -17,7 +18,6 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
-import org.delia.type.TypeReplaceSpec;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
@@ -32,12 +32,9 @@ public class RelationOneRule extends RelationRuleBase {
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
-//		if (ctx.isPlanModeFlg()) {
-//			return true;
-//		}
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (mustHaveFK()) {
+			if (isMandatoryFK()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' one -  a foreign key value must be specified.", key);
 				addDetailedError(ctx, msg, getSubject());
@@ -51,7 +48,6 @@ public class RelationOneRule extends RelationRuleBase {
 		}
 		
 		//first ensure foreign key points to existing record
-//		QueryResponse qrespFetch = ctx.getFetchRunner().load(drel);
 		boolean fkObjectExists = ctx.getFetchRunner().queryFKExists(drel);
 		boolean otherSideIsMany = false;
 		if (! fkObjectExists) {
@@ -63,7 +59,7 @@ public class RelationOneRule extends RelationRuleBase {
 			boolean bb = ctx.isPopulateFKsFlag();
 			if (!bb) {
 				if (relInfo.cardinality.equals(RelationCardinality.ONE_TO_ONE)) {
-					bb = chkRelationUniqueness(ctx, drel);
+					bb = chkRelationUniqueness(ctx, drel, dval);
 					if (! bb) {
 						return false;
 					}
@@ -81,7 +77,7 @@ public class RelationOneRule extends RelationRuleBase {
 		
 		//next ensure this is only foreign key of that value
 		if (!otherSideIsMany) {
-			boolean ok = this.chkRelationUniqueness(ctx, drel);
+			boolean ok = this.chkRelationUniqueness(ctx, drel, dval);
 			if (!ok) {
 				return false;
 			}
@@ -90,11 +86,20 @@ public class RelationOneRule extends RelationRuleBase {
 		return true;
 	}
 	
-	private boolean chkRelationUniqueness(DRuleContext ctx, DRelation drel) {
-		boolean exists = ctx.getFetchRunner().queryFKExists(owningType, oper1.getSubject(), drel);
-		if (!exists) {
+	private boolean chkRelationUniqueness(DRuleContext ctx, DRelation drel, DValue dvalBeingValidated) {
+		List<DValue> dvalL = ctx.getFetchRunner().queryFKs(owningType, oper1.getSubject(), drel);
+		if (dvalL.isEmpty()) {
 //		qresResult.err = qrespFetch.err;
 		} else {
+			if (dvalL.size() == 1) { //detect and ignore self-join
+				DValue tmp = dvalL.get(0);
+				DValue pk1 = DValueHelper.findPrimaryKeyValue(tmp);
+				DValue pk2 = DValueHelper.findPrimaryKeyValue(dvalBeingValidated);
+				if (pk1 != null && pk2 != null && pk1.asString().equals(pk2.asString())) {
+					return true; //ok
+				}
+			}
+			
 			String key = drel.getForeignKey().asString();
 			String msg = String.format("relation field '%s' one - foreign key '%s' already used -- type %s", getSubject(), key, owningType.getName());
 			addDetailedError(ctx, msg, getSubject());
@@ -108,11 +113,8 @@ public class RelationOneRule extends RelationRuleBase {
 		DetailedError err = ctx.addError(this, msg);
 		err.setFieldName(fieldName);
 	}
-	//TODO: should we save results in del.setFetchedItems ??
-	//TODO: the following mutates a DValue. is this ok for multi-threading?
+	//FUTURE: the following mutates a DValue. is this ok for multi-threading?
 	private boolean populateOtherSideOfRelation(DValue dval, DRuleContext ctx, QueryResponse qrespFetch, boolean otherSideIsMany) {
-		//TODO: should we save results in del.setFetchedItems ??
-		//TODO: the following mutates a DValue. is this ok for multi-threading?
 		DValue otherSide = qrespFetch.dvalList.get(0);
 		TypePair otherRelPair = findMatchingRel();
 		if (otherRelPair != null) { //one-side relations won't have otherRelPair
@@ -147,7 +149,7 @@ public class RelationOneRule extends RelationRuleBase {
 	private boolean isOtherSideMany(DValue otherSide, TypePair otherRelPair) {
 		return DRuleHelper.isOtherSideMany(otherSide.getType(), otherRelPair);
 	}
-	private boolean mustHaveFK() {
+	private boolean isMandatoryFK() {
 		String fieldName = oper1.getSubject();
 		boolean optional = owningType.fieldIsOptional(fieldName);
 		if (optional || isParent) {
@@ -165,9 +167,6 @@ public class RelationOneRule extends RelationRuleBase {
 		}
 		String otherSideFieldName = relInfo.otherSide.fieldName;
 		return DValueHelper.findField(relInfo.farType, otherSideFieldName);
-//		//TODO: later also use named relations
-//		DStructType dtype = (DStructType) otherSide.getType();
-//		return DRuleHelper.findMatchingRelByType(dtype, targetType);
 	}
 	public boolean isParent() {
 		return isParent;
@@ -213,17 +212,6 @@ public class RelationOneRule extends RelationRuleBase {
 		} else {
 			Map<String,DValue> map = dval.asMap();
 			map.put(relInfo.fieldName, builder.getDValue());
-		}
-	}
-	
-	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		if (spec.needsReplacement(this, owningType)) {
-			owningType = (DStructType) spec.newType;
-		}
-		
-		if (relInfo != null) {
-			relInfo.performTypeReplacement(spec);
 		}
 	}
 }

@@ -1,0 +1,40 @@
+# crud insert
+
+FEATURE: insert a parent fk (many to one)
+background:
+  type Customer struct {id int primaryKey, name string,
+      relation workers Address 'r1' many optional,
+  }  end
+  type Address struct {sid string primaryKey, city string,
+      relation manager Customer 'r1' one optional,
+  }  end
+  insert Customer {id: 55, name: 'art' }
+  insert Address  {sid: '100', city: 'kingston' }
+thenType: struct
+
+---
+title: add worker
+given:
+  insert Customer {id: 56, name: 'bob', workers: '100' }
+when:
+  let x = Address['100']
+then:
+value:a:Address {
+ vsid:'100'
+ vcity:'kingston'
+ vmanager:{56}
+}
+
+---
+title: add workers
+given:
+  insert Address  {sid: '101', city: 'ottawa' }
+  insert Customer {id: 56, name: 'bob', workers: ['100','101'] }
+when:
+  let x = Address['100']
+then:
+value:a:Address {
+ vsid:'100'
+ vcity:'kingston'
+ vmanager:{56}
+}

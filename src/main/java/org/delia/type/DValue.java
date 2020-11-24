@@ -1,5 +1,6 @@
 package org.delia.type;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
@@ -22,7 +23,8 @@ public interface DValue {
 	long asLong();
 	String asString();
 	boolean asBoolean();
-	Date asDate();
+	ZonedDateTime asDate();
+	Date asLegacyDate();
 	Map<String,DValue> asMap();
 	DStructHelper asStruct();
 	DRelation asRelation();

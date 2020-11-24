@@ -127,7 +127,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		logStatementGroup(stgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;
-		ZDBExecuteContext dbctxMain = null; //assume only one. TODO fix
+		ZDBExecuteContext dbctxMain = null; //can only be one statement that generates keys
 		try {
 			ZDBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
@@ -162,7 +162,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		List<LetSpan> spanL = new ArrayList<>();
 		QueryDetails details = new QueryDetails();
 		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator);
+		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
 
 		logSql(statement);
 		ZDBExecuteContext dbctx = createContext();

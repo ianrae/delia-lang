@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.delia.util.DeliaExceptionHelper;
 
-public class DStructType extends DType {
+public class DStructType extends DType implements DStructTypeInternal {
 	
 	private static final int MAX_INHERITANCE_DEPTH = 1000;
     private OrderedMap orderedMap;
@@ -15,6 +15,12 @@ public class DStructType extends DType {
 	
 	public DStructType(Shape shape, String name, DType baseType, OrderedMap orderedMap, PrimaryKey primaryKey) {
 		super(shape, name, baseType);
+		this.orderedMap = orderedMap;
+		this.primaryKey = primaryKey;
+	}
+	@Override
+	public void finishStructInitialization(DType baseType, OrderedMap orderedMap, PrimaryKey primaryKey) {
+		this.baseType = baseType;
 		this.orderedMap = orderedMap;
 		this.primaryKey = primaryKey;
 	}
@@ -140,18 +146,18 @@ public class DStructType extends DType {
 		return super.toString();
 	}
 
-	@Override
-	public void performTypeReplacement(TypeReplaceSpec spec) {
-		super.performTypeReplacement(spec);
-
-		orderedMap.performTypeReplacement(spec);
-		
-		for(TypePair pair: allFields) {
-			if (spec.needsReplacement(this, pair.type)) {
-				pair.type = spec.newType;
-			}
-		}
-	}
+//	@Override
+//	public void performTypeReplacement(TypeReplaceSpec spec) {
+//		super.performTypeReplacement(spec);
+//
+//		orderedMap.performTypeReplacement(spec);
+//		
+//		for(TypePair pair: allFields) {
+//			if (spec.needsReplacement(this, pair.type)) {
+//				pair.type = spec.newType;
+//			}
+//		}
+//	}
 
 	public PrimaryKey getPrimaryKey() {
 		return primaryKey;

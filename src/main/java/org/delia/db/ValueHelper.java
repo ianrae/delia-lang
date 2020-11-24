@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,8 +31,6 @@ import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class ValueHelper extends ServiceBase {
-
-
 	private DateFormatService fmtSvc;
 	private DValueConverterService dvalConverter;
 
@@ -81,11 +81,12 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
-			cal.setTime(dval.asDate());
-			Date dt = cal.getTime();
-			Timestamp ts = new Timestamp(dt.getTime());
+			cal.setTime(dval.asLegacyDate());
+			Date dt = dval.asLegacyDate();
+			Timestamp ts = new Timestamp(dt.getTime()); //TODO find way that doesn't lose nano seconds
 			stm.setTimestamp(index++, ts, cal);
 		}
 		break;
@@ -98,6 +99,8 @@ public class ValueHelper extends ServiceBase {
 		//			case RELATION:
 		//				//FIX
 		//				break;
+		default:
+			break;
 		}
 		return index;
 	}
@@ -174,13 +177,14 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			Date x = rs.getTimestamp(pair.name, cal);
 			if (rs.wasNull()) {
 				return null;
 			}
-			return dvalBuilder.buildDate(x, pair.type);
+			return dvalBuilder.buildLegacyDate(x, pair.type);
 			//				DValue tmp = dvalBuilder.buildDate(x, pair.type);;
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
@@ -237,13 +241,14 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			Date x = rs.getTimestamp(index, cal);
 			if (rs.wasNull()) {
 				return null;
 			}
-			return dvalBuilder.buildDate(x, pair.type);
+			return dvalBuilder.buildLegacyDate(x, pair.type);
 			//				DValue tmp = dvalBuilder.buildDate(x, pair.type);;
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
@@ -272,7 +277,7 @@ public class ValueHelper extends ServiceBase {
 	public DValue readIndexedField(DType type, int rsIndex, ResultSet rs, DBAccessContext dbctx) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 
-		boolean b = rs.next(); //assume rsIndex always 1. TODO fix if needed
+		boolean b = rs.next(); //assume we're reading 1st record
 		if (!b) {
 			return null;
 		}
@@ -305,13 +310,14 @@ public class ValueHelper extends ServiceBase {
 		case DATE:
 		{
 			TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-			TimeZone tz = tzSvc.getDefaultTimeZone();
+			ZoneId zoneId = tzSvc.getDefaultTimeZone();
+			TimeZone tz = TimeZone.getTimeZone(zoneId);
 			Calendar cal = Calendar.getInstance(tz);
 			Date x = rs.getTimestamp(rsIndex, cal);
 			if (rs.wasNull()) {
 				return null;
 			}
-			return dvalBuilder.buildDate(x, type);
+			return dvalBuilder.buildLegacyDate(x, type);
 		}
 		case BOOLEAN:
 		{
@@ -392,24 +398,17 @@ public class ValueHelper extends ServiceBase {
 			return dvalBuilder.buildString("");
 		}
 	}
-	private String convertDateStringToSQLTimestamp(String value) {
-		Date dt = fmtSvc.parse(value);
-		return convertDateToSQLTimestamp(dt);
-	}
 
 	/**
-	 * TODO: this probably needs to become db-specific
+	 * FUTURE: this probably needs to become db-specific
 	 * @param dt date
 	 * @return date as string in sql format
 	 */
-	private String convertDateToSQLTimestamp(Date dt) {
+	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		TimeZoneService tzSvc = factorySvc.getTimeZoneService();
-		TimeZone tz = tzSvc.getDefaultTimeZone();
-		sdf.setTimeZone(tz);
-
-		String s = sdf.format(dt);
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		String s = zdt.format(sdf);
+		
 		return String.format("'%s'", s);
 	}
 
