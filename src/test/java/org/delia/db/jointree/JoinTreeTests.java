@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.hls.HLSTestBase;
-import org.delia.db.hls.JTElement;
-import org.delia.db.hls.JoinTreeEngine;
+import org.delia.db.hls.join.JTElement;
+import org.delia.db.hls.join.JoinTreeEngine;
 import org.delia.queryresponse.LetSpan;
 import org.delia.queryresponse.LetSpanEngine;
 import org.junit.Before;

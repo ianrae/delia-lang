@@ -9,6 +9,7 @@ import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.hls.join.JoinTreeEngine;
 import org.delia.queryresponse.LetSpan;
 import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.type.DStructType;

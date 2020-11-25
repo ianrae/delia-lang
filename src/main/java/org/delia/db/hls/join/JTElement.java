@@ -1,4 +1,4 @@
-package org.delia.db.hls;
+package org.delia.db.hls.join;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,5 +27,9 @@ public class JTElement  {
 			return true;
 		}
 		return false;
+	}
+
+	public TypePair createPair() {
+		return new TypePair(fieldName, fieldType);
 	}
 }

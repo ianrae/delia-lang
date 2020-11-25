@@ -82,7 +82,8 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testDebugSQL() {
 		useCustomerManyToManySrc = true;
-
+		HLSSQLGeneratorImpl.useJoinTreeFlag = true;
+		
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv 
 		sqlchk("let x = Customer[true].addr", "SELECT d.id,d.y,c.leftv as cust FROM Address as d LEFT JOIN CustomerAddressDat1 as c ON d.id=c.rightv");
 	}

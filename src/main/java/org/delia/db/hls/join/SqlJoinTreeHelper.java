@@ -1,16 +1,16 @@
-package org.delia.db.hls;
+package org.delia.db.hls.join;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.delia.assoc.DatIdMap;
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.IdentExp;
-import org.delia.compiler.ast.QueryInExp;
 import org.delia.db.QueryDetails;
+import org.delia.db.hls.AliasInfo;
+import org.delia.db.hls.AliasManager;
+import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.hls.RenderedField;
+import org.delia.db.hls.SQLCreator;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
@@ -20,16 +20,17 @@ import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
-public class SqlJoinHelper {
+public class SqlJoinTreeHelper implements SqlJoinHelper {
 	private AliasManager aliasManager;
 	private DatIdMap datIdMap;
 
-	public SqlJoinHelper(AliasManager aliasManager, DatIdMap datIdMap, Map<String, String> asNameMap, MiniSelectFragmentParser miniSelectParser) {
+	public SqlJoinTreeHelper(AliasManager aliasManager, DatIdMap datIdMap, Map<String, String> asNameMap, MiniSelectFragmentParser miniSelectParser) {
 		this.aliasManager = aliasManager;
 		this.datIdMap = datIdMap;
 		//			this.miniSelectParser = miniSelectParser;
 	}
 
+	@Override
 	public QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 		List<TypePair> joinL = genJoinList(hlspan);
 		QueryDetails details = new QueryDetails();
@@ -187,28 +188,35 @@ public class SqlJoinHelper {
 		return null;
 	}
 
+	@Override
 	public boolean needJoin(HLSQuerySpan hlspan) {
 		return !genJoinList(hlspan).isEmpty();
 	}
 
 	private List<TypePair> genJoinList(HLSQuerySpan hlspan) {
-		List<TypePair> joinL = genFullJoinList(hlspan);
-		List<TypePair> join2L = genFKJoinList(hlspan);
-		joinL.addAll(join2L);
-		List<TypePair> join3L = genINJoinList(hlspan);
-		List<TypePair> finalL = Stream.concat(joinL.stream(), join3L.stream()).distinct().collect(Collectors.toList());
-		TypePair relFieldPair = genRelField(hlspan);
-		if (relFieldPair != null) {
-			finalL.add(relFieldPair);
+		List<TypePair> joinL = new ArrayList<>();
+		for(JTElement el: hlspan.joinTreeL) {
+			TypePair pair = el.createPair();
+			joinL.add(pair);
 		}
-		return finalL;
+		return joinL;
+//		List<TypePair> joinL = genFullJoinList(hlspan);
+//		List<TypePair> join2L = genFKJoinList(hlspan);
+//		joinL.addAll(join2L);
+//		List<TypePair> join3L = genINJoinList(hlspan);
+//		List<TypePair> finalL = Stream.concat(joinL.stream(), join3L.stream()).distinct().collect(Collectors.toList());
+//		TypePair relFieldPair = genRelField(hlspan);
+//		if (relFieldPair != null) {
+//			finalL.add(relFieldPair);
+//		}
+//		return finalL;
 	}
-	private TypePair genRelField(HLSQuerySpan hlspan) {
-		if (hlspan.rEl != null) {
-			return hlspan.rEl.rfieldPair;
-		}
-		return null;
-	}
+//	private TypePair genRelField(HLSQuerySpan hlspan) {
+//		if (hlspan.rEl != null) {
+//			return hlspan.rEl.rfieldPair;
+//		}
+//		return null;
+//	}
 
 	private List<TypePair> genFullJoinList(HLSQuerySpan hlspan) {
 		List<TypePair> joinL = new ArrayList<>();
@@ -252,28 +260,29 @@ public class SqlJoinHelper {
 		//TODO: later to fk(field)
 		return joinL;
 	}
-	private List<TypePair> genINJoinList(HLSQuerySpan hlspan) {
-		List<TypePair> joinL = new ArrayList<>();
-		if (hlspan.filEl ==  null) {
-			return joinL;
-		}
-		//look for in [followers]
-		QueryInExp inQueryExp = hlspan.filEl.getAsInQuery();
-		if (inQueryExp != null) {
-			for(Exp arg: inQueryExp.listExp.valueL) {
-				if (arg instanceof IdentExp) {
-					String fieldName = arg.strValue();
-					TypePair pair = DValueHelper.findField(hlspan.fromType, fieldName);
-					if (pair != null) {
-						joinL.add(pair);
-					}
-				}
-			}
-		}
-		return joinL;
-	}
+//	private List<TypePair> genINJoinList(HLSQuerySpan hlspan) {
+//		List<TypePair> joinL = new ArrayList<>();
+//		if (hlspan.filEl ==  null) {
+//			return joinL;
+//		}
+//		//look for in [followers]
+//		QueryInExp inQueryExp = hlspan.filEl.getAsInQuery();
+//		if (inQueryExp != null) {
+//			for(Exp arg: inQueryExp.listExp.valueL) {
+//				if (arg instanceof IdentExp) {
+//					String fieldName = arg.strValue();
+//					TypePair pair = DValueHelper.findField(hlspan.fromType, fieldName);
+//					if (pair != null) {
+//						joinL.add(pair);
+//					}
+//				}
+//			}
+//		}
+//		return joinL;
+//	}
 
 
+	@Override
 	public int addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 		List<TypePair> joinL = genFKJoinList(hlspan);
 
@@ -318,6 +327,7 @@ public class SqlJoinHelper {
 		addField(fieldL, null, fieldName, s).isAssocField = true;
 	}
 
+	@Override
 	public void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
 		List<TypePair> joinL = genFullJoinList(hlspan);
 
@@ -325,6 +335,7 @@ public class SqlJoinHelper {
 			addStructFieldsMM(hlspan, pair, fieldL);
 		}
 	}
+	@Override
 	public void addStructFieldsMM(HLSQuerySpan hlspan, TypePair joinPair, List<RenderedField> fieldL) {
 		DStructType joinType = (DStructType) joinPair.type;
 		String pk = joinType.getPrimaryKey().getFieldName();
@@ -353,6 +364,7 @@ public class SqlJoinHelper {
 			}
 		}
 	}
+	@Override
 	public void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
 		AliasInfo info = aliasManager.getMainTableAlias(fromType);
 
@@ -386,6 +398,7 @@ public class SqlJoinHelper {
 		return rf;
 	}
 
+	@Override
 	public List<TypePair> genTwoStatementJoinList(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2, SQLCreator sc) {
 		List<TypePair> joinL = new ArrayList<>();
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.db.QueryDetails;
+import org.delia.db.hls.join.JTElement;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;

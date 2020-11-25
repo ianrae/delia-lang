@@ -13,6 +13,9 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.join.SqlJoinHelper;
+import org.delia.db.hls.join.SqlJoinHelperImpl;
+import org.delia.db.hls.join.SqlJoinTreeHelper;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -26,6 +29,7 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
+	public static boolean useJoinTreeFlag = false;
 
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
@@ -37,7 +41,13 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
-		this.joinHelper = new SqlJoinHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
+		
+		if (useJoinTreeFlag) {
+			this.joinHelper = new SqlJoinTreeHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
+		} else {
+			this.joinHelper = new SqlJoinHelperImpl(aliasManager, datIdMap, asNameMap, miniSelectParser);
+			
+		}
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, miniSelectParser, varEvaluator, asNameMap, aliasManager, datIdMap);
 		this.aliasManager = aliasManager;
 		this.datIdMap = datIdMap;
