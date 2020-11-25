@@ -1,14 +1,5 @@
 package org.delia.db.jointree;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
-import org.delia.compiler.ast.QueryExp;
-import org.delia.db.hls.join.JTElement;
-import org.delia.db.hls.join.JoinTreeEngine;
-import org.delia.queryresponse.LetSpan;
-import org.delia.queryresponse.LetSpanEngine;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,14 +30,19 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class JoinTreeSQLTests extends JoinTreeTestBase {
+public class FilterJoinTreeTests extends JoinTreeTestBase {
 	
 	@Test
 	public void testPlainFilter() {
+		//1 and 2
 		chkJoinTree("let x = C1[cid < 111]"); 
 		chkJoinTree("let x = A1[id < 111]"); 
+		
+		//3 and 4
 		chkJoinTree("let x = CM[cid < 111]"); 
-		chkJoinTree("let x = AM1[cid < 111]"); 
+		chkJoinTree("let x = AM1[cid < 111]");
+		
+		//5 and 6
 		chkJoinTree("let x = CMM[cid < 111]"); 
 		chkJoinTree("let x = AMM[cid < 111]"); 
 	}
@@ -66,6 +62,52 @@ public class JoinTreeSQLTests extends JoinTreeTestBase {
 		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
 	}
 	
+//	@Test
+//	public void testDoubleRefFilter() {
+//		//1 and 2
+//		chkJoinTree("let x = C1[addr < 111 && something..]", "C1|addr|A1"); 
+//		chkJoinTree("let x = A1[cust < 111]");
+//		
+//		//3 and 4
+//		chkJoinTree("let x = CM[addr < 111]", "CM|addr|AM1"); 
+//		chkJoinTree("let x = AM1[cust < 111]");
+//		
+//		//5 and 6
+//		chkJoinTree("let x = CMM[addr < 111]", "CMM|addr|AMM"); 
+//		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
+//	}
+	
+//	@Test
+//	public void testInRefFilter() {
+//		//1 and 2
+//		chkJoinTree("let x = C1[addr in [111]]", "C1|addr|A1"); 
+//		chkJoinTree("let x = A1[cust < 111]");
+//		
+//		//3 and 4
+//		chkJoinTree("let x = CM[addr < 111]", "CM|addr|AM1"); 
+//		chkJoinTree("let x = AM1[cust < 111]");
+//		
+//		//5 and 6
+//		chkJoinTree("let x = CMM[addr < 111]", "CMM|addr|AMM"); 
+//		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
+//	}
+	
+	
+	@Test
+	public void testRefSubFieldFilter() {
+		//1 and 2
+		chkJoinTree("let x = C1[addr.y < 111]", "C1|addr|A1"); 
+		chkJoinTree("let x = A1[cust.x < 111]");
+		
+		//3 and 4
+		chkJoinTree("let x = CM[addr.y < 111]", "CM|addr|AM1"); 
+		chkJoinTree("let x = AM1[cust.x < 111]");
+		
+		//5 and 6
+		chkJoinTree("let x = CMM[addr.y < 111]", "CMM|addr|AMM"); 
+		chkJoinTree("let x = AMM[cust.x < 111]", "AMM|cust|CMM"); 
+	}
+	
 
 	@Test
 	public void testDebugSQL() {
@@ -81,20 +123,4 @@ public class JoinTreeSQLTests extends JoinTreeTestBase {
 		createDao();
 	}
 
-	protected void chkJoinTree(String src, String ...arExpected) {
-		QueryExp queryExp = compileQuery(src);
-		log.log(src);
-		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
-		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
-		
-		JoinTreeEngine jtEngine = new JoinTreeEngine(delia.getFactoryService(), session.getExecutionContext().registry);
-		List<JTElement> resultL = jtEngine.parse(queryExp, spanL);
-		int n = arExpected.length;
-		assertEquals(n, resultL.size());
-		
-		for(String expected: arExpected) {
-			String s = resultL.get(0).toString();
-			assertEquals(expected, s);
-		}
-	}
 }

@@ -3,11 +3,18 @@ package org.delia.db.jointree;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.LetStatementExp;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.hls.HLSTestBase;
+import org.delia.db.hls.join.JTElement;
+import org.delia.db.hls.join.JoinTreeEngine;
+import org.delia.queryresponse.LetSpan;
+import org.delia.queryresponse.LetSpanEngine;
 import org.delia.runner.ResultValue;
 
 /**
@@ -54,4 +61,20 @@ public class JoinTreeTestBase extends HLSTestBase {
 		return src;
 	}
 
+	protected void chkJoinTree(String src, String ...arExpected) {
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
+		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
+		
+		JoinTreeEngine jtEngine = new JoinTreeEngine(delia.getFactoryService(), session.getExecutionContext().registry);
+		List<JTElement> resultL = jtEngine.parse(queryExp, spanL);
+		int n = arExpected.length;
+		assertEquals(n, resultL.size());
+		
+		for(String expected: arExpected) {
+			String s = resultL.get(0).toString();
+			assertEquals(expected, s);
+		}
+	}
 }
