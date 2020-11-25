@@ -68,6 +68,16 @@ public class JoinTreeTests extends HLSTestBase {
 					QueryFuncExp qfe = span.qfeL.get(0);
 					if (qfe.funcName.equals("fks")) {
 						addFKs(span, resultL);
+					} else if (qfe.funcName.equals("fetch")) {
+						addFetch(span, qfe, resultL);
+					} else {
+						DStructType structType = (DStructType) registry.getType(queryExp.typeName);
+						String fieldName = qfe.funcName;
+						TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+						if (pair != null) {
+							addElement(structType, fieldName, (DStructType) pair.type, resultL);
+						}
+						
 					}
 				}
 			}
@@ -75,21 +85,32 @@ public class JoinTreeTests extends HLSTestBase {
 		}
 		
 		
+		private void addFetch(LetSpan span, QueryFuncExp qfe, List<JTElement> resultL) {
+			DStructType structType = (DStructType) span.dtype;
+			String fieldName = qfe.argL.get(0).strValue();
+			TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+			addElement(structType, fieldName, (DStructType) pair.type, resultL);
+			
+		}
+
 		private void addFKs(LetSpan span, List<JTElement> resultL) {
 			DStructType structType = (DStructType) span.dtype;
 			for(TypePair pair: structType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 					if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-						JTElement el = new JTElement();
-						el.dtype = (DStructType) span.dtype;
-						el.fieldName = pair.name;
-						el.fieldType = (DStructType) pair.type;
-						resultL.add(el);
+						addElement((DStructType) span.dtype, pair.name, (DStructType) pair.type, resultL);
 					}
 				}
 			}
-			
+		}
+		
+		private void addElement(DStructType dtype, String field, DStructType fieldType, List<JTElement> resultL) {
+			JTElement el = new JTElement();
+			el.dtype = dtype;
+			el.fieldName = field;
+			el.fieldType = fieldType;
+			resultL.add(el);
 		}
 	}	
 	
@@ -98,30 +119,26 @@ public class JoinTreeTests extends HLSTestBase {
 	@Test
 	public void test() {
 		useCustomer11Src = true;
-		parseIntoLetSpans("let x = Customer[55].fks()", 1, "Customer|addr|Address"); //, 					"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE a.cid = ?", "55");
+		chkJoinTree("let x = Customer[55].fks()", "Customer|addr|Address"); 
+		chkJoinTree("let x = Customer[55].x"); 
 		
+		chkJoinTree("let x = Customer[55].fetch('addr')", "Customer|addr|Address"); 
+		chkJoinTree("let x = Customer[55].addr", "Customer|addr|Address"); 
+		chkJoinTree("let x = Customer[55].addr.y", "Customer|addr|Address"); 
+		//FUTURE later support order by doing implicit fetch. orderBy(addr.city)
+
 		
-		
-//		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE a.cid = ?", "55");
-//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
-//		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
-//		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust ORDER BY a.cid");
-//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-//		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
 //		
 //		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE b.id < ?", "111");
 	}
 
 
-//	@Test
-//	public void testDebugSQL() {
-//		useCustomer11Src = true;
-//
-////		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust ORDER BY a.cid");
-////		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-////		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE b.id < ?", "111");
-//		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
-//	}
+	@Test
+	public void testDebugSQL() {
+		useCustomer11Src = true;
+		chkJoinTree("let x = Customer[55].addr", "Customer|addr|Address"); 
+
+	}
 
 	//---
 	
@@ -130,7 +147,7 @@ public class JoinTreeTests extends HLSTestBase {
 		createDao();
 	}
 
-	protected void parseIntoLetSpans(String src, int expectedSize, String expected1) {
+	protected void chkJoinTree(String src, String ...arExpected) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
@@ -138,11 +155,12 @@ public class JoinTreeTests extends HLSTestBase {
 		
 		JoinTreeEngine jtEngine = new JoinTreeEngine(delia.getFactoryService(), session.getExecutionContext().registry);
 		List<JTElement> resultL = jtEngine.parse(queryExp, spanL);
-		assertEquals(expectedSize, resultL.size());
+		int n = arExpected.length;
+		assertEquals(n, resultL.size());
 		
-		if (expected1 != null) {
+		for(String expected: arExpected) {
 			String s = resultL.get(0).toString();
-			assertEquals(expected1, s);
+			assertEquals(expected, s);
 		}
 		
 	}
