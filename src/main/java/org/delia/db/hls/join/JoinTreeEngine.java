@@ -83,7 +83,19 @@ public class JoinTreeEngine extends ServiceBase {
 			String fieldName = xne.strValue();
 			TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
 			if (pair != null) {
-				addElement(structType, fieldName, (DStructType) pair.type, resultL);
+				
+				JTElement el = buildElement(structType, fieldName, (DStructType) pair.type);
+				switch(el.relinfo.cardinality) {
+				case ONE_TO_ONE:
+				case ONE_TO_MANY:
+					if (el.relinfo.isParent) {
+						addElement(el, resultL);
+					}
+					break;
+				case MANY_TO_MANY:
+					addElement(el, resultL);
+					break;
+				}
 			}
 		}
 	}
@@ -107,13 +119,20 @@ public class JoinTreeEngine extends ServiceBase {
 		}
 	}
 	
-	private void addElement(DStructType dtype, String field, DStructType fieldType, List<JTElement> resultL) {
+	private JTElement buildElement(DStructType dtype, String field, DStructType fieldType) {
 		JTElement el = new JTElement();
 		el.dtype = dtype;
 		el.fieldName = field;
 		el.fieldType = fieldType;
 		el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
-		
+		return el;
+	}
+	
+	private void addElement(DStructType dtype, String field, DStructType fieldType, List<JTElement> resultL) {
+		JTElement el = buildElement(dtype, field, fieldType);
+		addElement(el, resultL);
+	}
+	private void addElement(JTElement el, List<JTElement> resultL) {
 		String target = el.toString();
 		Optional<JTElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
 		if (optExisting.isPresent()) {
@@ -122,4 +141,5 @@ public class JoinTreeEngine extends ServiceBase {
 		
 		resultL.add(el);
 	}
+	
 }

@@ -53,20 +53,24 @@ public class JoinTreeSQLTests extends JoinTreeTestBase {
 	
 	@Test
 	public void testRefFilter() {
-		chkJoinTree("let x = C1[adddr < 111]", "C1|addr|A1"); 
-		chkJoinTree("let x = A1[cust < 111]"); 
-		chkJoinTree("let x = CM[addr < 111]", "C1|addr|A1"); 
-		chkJoinTree("let x = AM1[cust < 111]"); 
-//		chkJoinTree("let x = CMM[addr < 111]"); 
-//		chkJoinTree("let x = AMM[cust < 111]"); 
-
+		//1 and 2
+		chkJoinTree("let x = C1[addr < 111]", "C1|addr|A1"); 
+		chkJoinTree("let x = A1[cust < 111]");
+		
+		//3 and 4
+		chkJoinTree("let x = CM[addr < 111]", "CM|addr|AM1"); 
+		chkJoinTree("let x = AM1[cust < 111]");
+		
+		//5 and 6
+		chkJoinTree("let x = CMM[addr < 111]", "CMM|addr|AMM"); 
+		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
 	}
 	
 
 	@Test
 	public void testDebugSQL() {
-		chkJoinTree("let x = C1[cid < 111]"); 
-		chkJoinTree("let x = C1[addr < 111]", "C1|addr|A1"); 
+//		chkJoinTree("let x = C1[addr < 111]", "C1|addr|A1"); 
+		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
 
 	}
 

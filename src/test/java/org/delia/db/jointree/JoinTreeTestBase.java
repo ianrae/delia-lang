@@ -49,7 +49,7 @@ public class JoinTreeTestBase extends HLSTestBase {
 		src += "\n type AM1 struct {id int unique, y int, relation cust CM one optional } end";
 		
 		src += " type CMM struct {cid int unique, x int, relation addr AMM many optional  } end";
-		src += "\n type AMM struct {id int unique, y int, relation cust CMM one optional } end";
+		src += "\n type AMM struct {id int unique, y int, relation cust CMM many optional } end";
 		
 		return src;
 	}
