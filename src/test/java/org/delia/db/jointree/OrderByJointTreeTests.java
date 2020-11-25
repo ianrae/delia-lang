@@ -30,36 +30,36 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class FieldJoinTreeTests extends JoinTreeTestBase {
+public class OrderByJointTreeTests extends JoinTreeTestBase {
 	
 	@Test
 	public void testPlainFilter() {
 		//1 and 2
-		chkJoinTree("let x = C1[55].addr", "C1|addr|A1"); 
-		chkJoinTree("let x = A1[100].cust", "A1|cust|C1"); 
+		chkJoinTree("let x = C1[55].orderBy('addr')", "C1|addr|A1"); 
+		chkJoinTree("let x = A1[100].orderBy('cust')", "A1|cust|C1"); 
 		
 		//3 and 4
-		chkJoinTree("let x = CM[55].addr", "CM|addr|AM1"); 
-		chkJoinTree("let x = AM1[100].cust", "AM1|cust|CM");
+		chkJoinTree("let x = CM[55].orderBy('addr')", "CM|addr|AM1"); 
+		chkJoinTree("let x = AM1[100].orderBy('cust')", "AM1|cust|CM");
 		
 		//5 and 6
-		chkJoinTree("let x = CMM[55].addr", "CMM|addr|AMM"); 
-		chkJoinTree("let x = AMM[100].cust", "AMM|cust|CMM"); 
+		chkJoinTree("let x = CMM[55].orderBy('addr')", "CMM|addr|AMM"); 
+		chkJoinTree("let x = AMM[100].orderBy('cust')", "AMM|cust|CMM"); 
 	}
 	
 	@Test
 	public void testRefFilter() {
 		//1 and 2
-		chkJoinTree("let x = C1[addr < 111].addr", "C1|addr|A1"); 
-		chkJoinTree("let x = A1[cust < 111].cust", "A1|cust|C1");
+		chkJoinTree("let x = C1[addr < 111].orderBy('addr')", "C1|addr|A1"); 
+		chkJoinTree("let x = A1[cust < 111].orderBy('cust')", "A1|cust|C1");
 		
 		//3 and 4
-		chkJoinTree("let x = CM[addr < 111].addr", "CM|addr|AM1"); 
-		chkJoinTree("let x = AM1[cust < 111].cust", "AM1|cust|CM");
+		chkJoinTree("let x = CM[addr < 111].orderBy('addr')", "CM|addr|AM1"); 
+		chkJoinTree("let x = AM1[cust < 111].orderBy('cust')", "AM1|cust|CM");
 		
 		//5 and 6
-		chkJoinTree("let x = CMM[addr < 111].addr", "CMM|addr|AMM"); 
-		chkJoinTree("let x = AMM[cust < 111].cust", "AMM|cust|CMM"); 
+		chkJoinTree("let x = CMM[addr < 111].orderBy('addr')", "CMM|addr|AMM"); 
+		chkJoinTree("let x = AMM[cust < 111].orderBy('cust')", "AMM|cust|CMM"); 
 	}
 	
 //	@Test
@@ -93,36 +93,26 @@ public class FieldJoinTreeTests extends JoinTreeTestBase {
 //	}
 	
 	
-	@Test
-	public void testRefSubFieldFilter() {
-		//1 and 2
-		chkJoinTree("let x = C1[addr.y < 111].addr", "C1|addr|A1"); 
-		chkJoinTree("let x = A1[cust.x < 111].cust", "A1|cust|C1");
-		//assume the rest work
-	}
-	
-	@Test
-	public void testSubField() {
-		//1 and 2
-		chkJoinTree("let x = C1[55].addr.y", "C1|addr|A1"); 
-		chkJoinTree("let x = A1[cust < 111].cust.x", "A1|cust|C1");
-		
-		//3 and 4
-		chkJoinTree("let x = CM[addr < 111].addr.y", "CM|addr|AM1"); 
-		chkJoinTree("let x = AM1[cust < 111].cust.x", "AM1|cust|CM");
-		
-		//5 and 6
-		chkJoinTree("let x = CMM[addr < 111].addr.y", "CMM|addr|AMM"); 
-		chkJoinTree("let x = AMM[cust < 111].cust.x", "AMM|cust|CMM"); 
-	}
+	//TODO: not yet supported
+//	@Test
+//	public void testSubField() {
+//		//1 and 2
+//		chkJoinTree("let x = C1[55].orderBy('addr.y')", "C1|addr|A1"); 
+//		chkJoinTree("let x = A1[cust < 111].orderBy('cust.x')", "A1|cust|C1");
+//		
+//		//3 and 4
+//		chkJoinTree("let x = CM[addr < 111].orderBy('addr.y')", "CM|addr|AM1"); 
+//		chkJoinTree("let x = AM1[cust < 111].orderBy('cust.x')", "AM1|cust|CM");
+//		
+//		//5 and 6
+//		chkJoinTree("let x = CMM[addr < 111].orderBy('addr.y')", "CMM|addr|AMM"); 
+//		chkJoinTree("let x = AMM[cust < 111].orderBy('cust.x')", "AMM|cust|CMM"); 
+//	}
 	
 	//TODO test C[true].addr.country double join
 
 	@Test
 	public void testDebugSQL() {
-		chkJoinTree("let x = C1[55].addr", "C1|addr|A1"); 
-		chkJoinTree("let x = C1[addr < 111].addr", "C1|addr|A1"); 
-//		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
 
 	}
 

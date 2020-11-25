@@ -42,6 +42,8 @@ public class JoinTreeEngine extends ServiceBase {
 					addFKs(span, resultL);
 				} else if (qfe.funcName.equals("fetch")) {
 					addFetch(span, qfe, resultL);
+				} else if (qfe.funcName.equals("orderBy")) {
+					addOrderBy(span, qfe, resultL);
 				} else {
 					String fieldName = qfe.funcName;
 					TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
@@ -117,6 +119,13 @@ public class JoinTreeEngine extends ServiceBase {
 				}
 			}
 		}
+	}
+	
+	private void addOrderBy(LetSpan span, QueryFuncExp qfe, List<JTElement> resultL) {
+		DStructType structType = (DStructType) span.dtype;
+		String fieldName = qfe.argL.get(0).strValue();
+		TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+		addElement(structType, fieldName, (DStructType) pair.type, resultL);
 	}
 	
 	private JTElement buildElement(DStructType dtype, String field, DStructType fieldType) {
