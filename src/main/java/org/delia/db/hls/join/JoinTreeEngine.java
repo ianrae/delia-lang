@@ -115,7 +115,9 @@ public class JoinTreeEngine extends ServiceBase {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					addElement((DStructType) span.dtype, pair.name, (DStructType) pair.type, resultL);
+					JTElement el = buildElement((DStructType) span.dtype, pair.name, (DStructType) pair.type);
+					el.usedForFK = true;
+					addElement(el, resultL);
 				}
 			}
 		}
@@ -145,6 +147,9 @@ public class JoinTreeEngine extends ServiceBase {
 		String target = el.toString();
 		Optional<JTElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
 		if (optExisting.isPresent()) {
+			if (el.usedForFK) {
+				optExisting.get().usedForFK = true; //propogate
+			}
 			return;
 		}
 		

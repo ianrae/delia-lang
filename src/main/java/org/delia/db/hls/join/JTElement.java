@@ -15,7 +15,8 @@ public class JTElement  {
 	public DStructType fieldType;
 	public List<JTElement> nextL = new ArrayList<>();
 	public RelationInfo relinfo;
-
+	public boolean usedForFK; //if true then fks(). but this join for other reasons too
+	
 	@Override
 	public String toString() {
 		StringJoiner joiner = new StringJoiner("|");

@@ -61,7 +61,7 @@ public class JoinTreeTestBase extends HLSTestBase {
 		return src;
 	}
 
-	protected void chkJoinTree(String src, String ...arExpected) {
+	protected List<JTElement> chkJoinTree(String src, String ...arExpected) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		LetSpanEngine letEngine = new LetSpanEngine(delia.getFactoryService(), session.getExecutionContext().registry);
@@ -76,5 +76,6 @@ public class JoinTreeTestBase extends HLSTestBase {
 			String s = resultL.get(0).toString();
 			assertEquals(expected, s);
 		}
+		return resultL;
 	}
 }

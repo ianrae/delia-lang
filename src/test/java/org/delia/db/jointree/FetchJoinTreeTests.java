@@ -1,5 +1,10 @@
 package org.delia.db.jointree;
 
+import static org.junit.Assert.*;
+
+import java.util.List;
+
+import org.delia.db.hls.join.JTElement;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +50,15 @@ public class FetchJoinTreeTests extends JoinTreeTestBase {
 		//5 and 6
 		chkJoinTree("let x = CMM[55].fetch('addr')", "CMM|addr|AMM"); 
 		chkJoinTree("let x = AMM[100].fetch('cust')", "AMM|cust|CMM"); 
+	}
+
+	@Test
+	public void testFKFlag() {
+		List<JTElement> list = chkJoinTree("let x = C1[55].fetch('addr')", "C1|addr|A1"); 
+		assertEquals(false, list.get(0).usedForFK);
+		
+		list = chkJoinTree("let x = C1[55].fks()", "C1|addr|A1"); 
+		assertEquals(true, list.get(0).usedForFK);
 	}
 	
 //	//TODO not yet supported

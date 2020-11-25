@@ -174,10 +174,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return sc.sql();
 	}
 
-	private String buildAlias(DStructType pairType, String fieldName) {
-//		return aliasAlloc.buildAlias(pairType, fieldName);
-		return aliasManager.getFieldAlias(pairType, fieldName).alias;
-	}
+//	private String buildAlias(DStructType pairType, String fieldName) {
+////		return aliasAlloc.buildAlias(pairType, fieldName);
+//		return aliasManager.getFieldAlias(pairType, fieldName).alias;
+//	}
 	private String buildMainAlias(DStructType fromType, String fieldName) {
 		AliasInfo info = aliasManager.getMainTableAlias(fromType);
 		return aliasManager.buildFieldAlias(info, fieldName);
