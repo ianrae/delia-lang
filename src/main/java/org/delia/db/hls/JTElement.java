@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.delia.type.DStructType;
+import org.delia.type.TypePair;
 
 public class JTElement  {
 	public DStructType dtype;
@@ -19,5 +20,12 @@ public class JTElement  {
 		joiner.add(fieldName);
 		joiner.add(fieldType.getName());
 		return joiner.toString();
+	}
+
+	public boolean matches(TypePair pair) {
+		if (pair.name.equals(fieldName) && pair.type == fieldType) {
+			return true;
+		}
+		return false;
 	}
 }

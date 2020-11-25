@@ -52,17 +52,18 @@ public class HLSEngine extends ServiceBase {
 //					spanL.add(0, span1); //insert as new first span
 //				}
 //			}
+			JoinTreeEngine jtEngine = new JoinTreeEngine(factorySvc, registry);
+			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
 			
 			int i = 0;
 			for(LetSpan span: spanL) {
 				HLSQuerySpan hlspan = generateSpan(i, span);
+				hlspan.joinTreeL = hlstatement.joinTreeL;
 				chkSpan(hlspan);
 				hlstatement.hlspanL.add(hlspan);
 				i++;
 			}
 			
-			JoinTreeEngine jtEngine = new JoinTreeEngine(factorySvc, registry);
-			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
 			
 			return hlstatement;
 		}

@@ -27,6 +27,7 @@ public class HLSQuerySpan implements HLSElement {
 	public QueryDetails details;
 	public String finalWhereSql;
 	public List<RenderedField> renderedFieldL = new ArrayList<>();
+	public List<JTElement> joinTreeL;
 	
 	@Override
 	public String toString() {

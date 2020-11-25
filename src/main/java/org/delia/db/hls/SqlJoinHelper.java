@@ -90,8 +90,12 @@ public class SqlJoinHelper {
 	}
 
 	private RelationInfo doFixupWithJoinTree(HLSQuerySpan hlspan, TypePair pair) {
-		for(String el: hlspan.j)
-		// TODO Auto-generated method stub
+		for(JTElement el: hlspan.joinTreeL) {
+			if (el.matches(pair)) {
+				RelationInfo relinfoA = DRuleHelper.findMatchingRuleInfo(el.dtype, pair);
+				return relinfoA;
+			}
+		}
 		return null;
 	}
 
