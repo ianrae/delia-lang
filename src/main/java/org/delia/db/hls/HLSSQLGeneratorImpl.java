@@ -334,10 +334,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		
 		boolean needJoin = joinHelper.needJoin(hlspan);
 		if (needJoin && fieldL.isEmpty()) {
+			joinHelper.addStructFields(hlspan.fromType, fieldL);
 			if (joinHelper.supportsAddAllJoins()) {
 				joinHelper.addAllJoins(hlspan, fieldL);
 			} else {
-				joinHelper.addStructFields(hlspan.fromType, fieldL);
 				addFKofJoins(hlspan, fieldL);
 				joinHelper.addFullofJoins(hlspan, fieldL);
 //				addRelFieldJoin(hlspan);

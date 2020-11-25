@@ -40,21 +40,15 @@ public class HLSEngine extends ServiceBase {
 			HLSQueryStatement hlstatement = new HLSQueryStatement();
 			hlstatement.queryExp = queryExp;
 			
+			JoinTreeEngine jtEngine = new JoinTreeEngine(factorySvc, registry);
+			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
+			
 			if (spanL.isEmpty()) {
 				HLSQuerySpan hsltat = generateSpan(0, null);
+				hsltat.joinTreeL = hlstatement.joinTreeL;
 				hlstatement.hlspanL.add(hsltat);
 				return hlstatement;
 			}
-			
-			//for some reason Customer[55].addr puts addr in span1.
-//			if (spanL.size() == 1) {
-//				LetSpan span1 = fixup(spanL.get(0));
-//				if (span1 != null) {
-//					spanL.add(0, span1); //insert as new first span
-//				}
-//			}
-			JoinTreeEngine jtEngine = new JoinTreeEngine(factorySvc, registry);
-			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
 			
 			int i = 0;
 			for(LetSpan span: spanL) {
@@ -64,7 +58,6 @@ public class HLSEngine extends ServiceBase {
 				hlstatement.hlspanL.add(hlspan);
 				i++;
 			}
-			
 			
 			return hlstatement;
 		}

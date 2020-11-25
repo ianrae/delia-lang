@@ -10,29 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * JoinTree extracts all potential JOINS from a query
- * Here are all the types of queries and their joins
- * 
- * C[name]    no join
- * C[addr == 111]  join if C is parent
- * A[cust == 111]  no join (A is child)
- * C[addr == 111 && profile==44]  2 joins
- *  
- * C[addr in(111)]  same as C[addr == 111]
- * C[addr.city == 'toronto'] ""  
- *  
- * C[55].firstName no join
- * C[55].addr   no join since returning Address and its child
- * A[100].cust   join since returning Customer and its parent
- * C[addr == 111].addr  no join. select from address where a.id=111
- * A[cust == 111].cust  no join
- * C[55].addr.city  same as just .addr
- * C[55].addr.country  double join!
- * C[55].fetch(addr) join since C is parent  
- * A[100].fetch(cust) no join since A is child  
- * -fetch
- * -fk
- * 
  * @author Ian Rae
  *
  */
@@ -41,7 +18,7 @@ public class SQLFetchTests extends JoinTreeTestBase {
 	@Test
 	public void testPlainFilter() {
 		//1 and 2
-		chkJoinTree("let x = C1[55].fetch('addr')", "C1|addr|A1"); 
+		sqlchkP("let x = C1[55].fetch('addr')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM C1 as a LEFT JOIN A1 as b ON a.cid=b.cust WHERE a.cid = ?", "55"); 
 		chkJoinTree("let x = A1[100].fetch('cust')", "A1|cust|C1"); 
 		
 		//3 and 4
@@ -111,9 +88,20 @@ public class SQLFetchTests extends JoinTreeTestBase {
 
 	@Test
 	public void testDebugSQL() {
-		sqlchkP("let x = C1[55].fetch('addr')", "C1|addr|A1", "55"); 
-//		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE a.cid = ?", "55");
-
+//		sqlchkP("let x = C1[55]", "SELECT * FROM C1 as a WHERE a.cid = ?", "55"); 
+//		sqlchkP("let x = C1[55].fetch('addr')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM C1 as a LEFT JOIN A1 as b ON a.cid=b.cust WHERE a.cid = ?", "55"); 
+//		sqlchkP("let x = A1[100].fetch('cust')", "SELECT a.id,a.y,a.cust,b.cid as cust,b.x FROM A1 as a LEFT JOIN C1 as b ON a.cust=b.cid WHERE a.id = ?", "100"); 
+		//TODO: 2 cust value in sql. is this a problem?
+		
+//		//3 and 4
+//		sqlchkP("let x = CM[55].fetch('addr')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM CM as a LEFT JOIN AM1 as b ON a.cid=b.cust WHERE a.cid = ?", "55"); 
+//		sqlchkP("let x = AM1[100].fetch('cust')", "SELECT a.id,a.y,a.cust,b.cid as cust,b.x FROM AM1 as a LEFT JOIN CM as b ON a.cust=b.cid WHERE a.id = ?", "100");
+		
+//		//5 and 6
+//		sqlchkP("let x = CMM[55].fetch('addr')", "SELECT a.cid,a.x,c.leftv as cust,b.id as addr,b.y FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE a.cid = ?", "55");
+		//TODO: should we have b.addr as c.rightv??
+		sqlchkP("let x = AMM[100].fetch('cust')", "SELECT a.id,a.y,c.rightv as addr,b.cid as cust,b.x FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE a.id = ?", "100"); 
+		//TODO: b.cid is wrong!
 	}
 
 	//---
