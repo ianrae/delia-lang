@@ -297,7 +297,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			case ONE_TO_MANY:
 				break;
 			case MANY_TO_MANY:
-				doManyToManyAddFKofJoins(hlspan, fieldL, pair, relinfoA);
+				doManyToManyAddFKofJoins(fieldL, pair, relinfoA);
 				numAdded++;
 				continue;
 			}
@@ -313,7 +313,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		}
 		return numAdded;
 	}
-	private void doManyToManyAddFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL, TypePair pair,
+	private void doManyToManyAddFKofJoins(List<RenderedField> fieldL, TypePair pair,
 			RelationInfo relinfoA) {
 		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
 		String fieldName = datIdMap.getAssocOtherField(relinfoA);
@@ -372,6 +372,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					doManyToManyAddFKofJoins(fieldL, pair, relinfo.otherSide);
 				} else if (!relinfo.isParent) {
 					//						addField(fieldL, fromType, pair, aliasAlloc.buildAlias(fromType, pair.name));
 					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name));
