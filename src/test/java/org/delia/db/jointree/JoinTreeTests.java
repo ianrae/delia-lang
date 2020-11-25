@@ -4,10 +4,16 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.FilterOpExp;
+import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
+import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.HLSTestBase;
@@ -38,7 +44,6 @@ public class JoinTreeTests extends HLSTestBase {
 		public DStructType fieldType;
 		public List<JTElement> nextL = new ArrayList<>();
 		
-		
 		@Override
 		public String toString() {
 			StringJoiner joiner = new StringJoiner("|");
@@ -63,6 +68,7 @@ public class JoinTreeTests extends HLSTestBase {
 		
 		public List<JTElement> parse(QueryExp queryExp, List<LetSpan> spanL) {
 			List<JTElement> resultL = new ArrayList<>();
+			DStructType structType = (DStructType) registry.getType(queryExp.typeName);
 			for(LetSpan span: spanL) {
 				if (!span.qfeL.isEmpty()) {
 					QueryFuncExp qfe = span.qfeL.get(0);
@@ -71,26 +77,56 @@ public class JoinTreeTests extends HLSTestBase {
 					} else if (qfe.funcName.equals("fetch")) {
 						addFetch(span, qfe, resultL);
 					} else {
-						DStructType structType = (DStructType) registry.getType(queryExp.typeName);
 						String fieldName = qfe.funcName;
 						TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
 						if (pair != null) {
 							addElement(structType, fieldName, (DStructType) pair.type, resultL);
 						}
-						
 					}
 				}
 			}
+			
+			if (queryExp.filter.cond instanceof FilterOpFullExp) {
+				FilterOpFullExp fofe = (FilterOpFullExp) queryExp.filter.cond;
+				if (fofe.opexp1 instanceof FilterOpExp) {
+					doFilterOpExp(fofe.opexp1, structType, resultL);
+				}
+				if (fofe.opexp2 instanceof FilterOpExp) {
+					doFilterOpExp(fofe.opexp1, structType, resultL);
+				}
+			}
+			
 			return resultL;
 		}
 		
 		
+		private void doFilterOpExp(Exp opexp1, DStructType structType, List<JTElement> resultL) {
+			FilterOpExp foe = (FilterOpExp) opexp1;
+			doXNAFMultiExp(foe.op1, structType, resultL);
+			doXNAFMultiExp(foe.op2, structType, resultL);
+		}
+
+		private void doXNAFMultiExp(Exp op, DStructType structType, List<JTElement> resultL) {
+			if (! (op instanceof XNAFMultiExp)) {
+				return;
+			}
+			XNAFMultiExp xx = (XNAFMultiExp) op;
+			if (!xx.qfeL.isEmpty() && xx.qfeL.get(0) instanceof XNAFNameExp) {
+				XNAFNameExp xne = (XNAFNameExp) xx.qfeL.get(0);
+				
+				String fieldName = xne.strValue();
+				TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+				if (pair != null) {
+					addElement(structType, fieldName, (DStructType) pair.type, resultL);
+				}
+			}
+		}
+
 		private void addFetch(LetSpan span, QueryFuncExp qfe, List<JTElement> resultL) {
 			DStructType structType = (DStructType) span.dtype;
 			String fieldName = qfe.argL.get(0).strValue();
 			TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
 			addElement(structType, fieldName, (DStructType) pair.type, resultL);
-			
 		}
 
 		private void addFKs(LetSpan span, List<JTElement> resultL) {
@@ -110,12 +146,18 @@ public class JoinTreeTests extends HLSTestBase {
 			el.dtype = dtype;
 			el.fieldName = field;
 			el.fieldType = fieldType;
+			
+			String target = el.toString();
+			Optional<JTElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
+			if (optExisting.isPresent()) {
+				return;
+			}
+			
 			resultL.add(el);
 		}
 	}	
 	
 	
-
 	@Test
 	public void test() {
 		useCustomer11Src = true;
@@ -127,16 +169,21 @@ public class JoinTreeTests extends HLSTestBase {
 		chkJoinTree("let x = Customer[55].addr.y", "Customer|addr|Address"); 
 		//FUTURE later support order by doing implicit fetch. orderBy(addr.city)
 
-		
+		//FUTUER test double join   .addr.country
 //		
-//		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE b.id < ?", "111");
+		chkJoinTree("let x = Customer[addr < 111]", "Customer|addr|Address"); 
 	}
 
+	@Test
+	public void testDouble() {
+		useCustomer11Src = true;
+		chkJoinTree("let x = Customer[addr < 111].fetch('addr')", "Customer|addr|Address"); 
+	}
 
 	@Test
 	public void testDebugSQL() {
 		useCustomer11Src = true;
-		chkJoinTree("let x = Customer[55].addr", "Customer|addr|Address"); 
+		chkJoinTree("let x = Customer[addr < 111]", "Customer|addr|Address"); 
 
 	}
 
