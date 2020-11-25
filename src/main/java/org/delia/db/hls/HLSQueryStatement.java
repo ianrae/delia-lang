@@ -13,6 +13,7 @@ public class HLSQueryStatement implements HLSElement {
 	public QueryExp queryExp;
 	public QuerySpec querySpec;
 	public QueryDetails details;
+	public List<JTElement> joinTreeL;
 	
 	public HLSQuerySpan getMainHLSSpan() {
 		return hlspanL.get(0);

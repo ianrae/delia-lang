@@ -38,6 +38,10 @@ public class SqlJoinHelper {
 		for(TypePair pair: joinL) {
 			boolean bHasFK = false;
 			RelationInfo relinfoA = DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
+			if (relinfoA == null) {
+				relinfoA = doFixupWithJoinTree(hlspan, pair);
+			}
+			
 			switch(relinfoA.cardinality) {
 			case ONE_TO_ONE:
 				bHasFK = relinfoA.isParent;
@@ -83,6 +87,12 @@ public class SqlJoinHelper {
 			sc.out(s);
 		}
 		return details;
+	}
+
+	private RelationInfo doFixupWithJoinTree(HLSQuerySpan hlspan, TypePair pair) {
+		for(String el: hlspan.j)
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private String buildMainAlias(HLSQuerySpan hlspan, String fieldName) {
@@ -183,10 +193,10 @@ public class SqlJoinHelper {
 		joinL.addAll(join2L);
 		List<TypePair> join3L = genINJoinList(hlspan);
 		List<TypePair> finalL = Stream.concat(joinL.stream(), join3L.stream()).distinct().collect(Collectors.toList());
-//		TypePair relFieldPair = genRelField(hlspan);
-//		if (relFieldPair != null) {
-//			finalL.add(relFieldPair);
-//		}
+		TypePair relFieldPair = genRelField(hlspan);
+		if (relFieldPair != null) {
+			finalL.add(relFieldPair);
+		}
 		return finalL;
 	}
 	private TypePair genRelField(HLSQuerySpan hlspan) {

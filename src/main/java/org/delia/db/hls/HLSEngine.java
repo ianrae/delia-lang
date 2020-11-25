@@ -60,6 +60,10 @@ public class HLSEngine extends ServiceBase {
 				hlstatement.hlspanL.add(hlspan);
 				i++;
 			}
+			
+			JoinTreeEngine jtEngine = new JoinTreeEngine(factorySvc, registry);
+			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
+			
 			return hlstatement;
 		}
 		
