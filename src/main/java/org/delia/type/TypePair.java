@@ -9,4 +9,9 @@ public class TypePair {
         this.name = name;
         this.type = type;
     }
+
+	@Override
+	public String toString() {
+		return String.format("%s.%s", type, name);
+	}
 }

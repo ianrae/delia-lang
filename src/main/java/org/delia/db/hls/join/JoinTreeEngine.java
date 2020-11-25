@@ -14,7 +14,6 @@ import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.queryresponse.LetSpan;
-import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -24,13 +23,13 @@ import org.delia.util.DRuleHelper;
 
 public class JoinTreeEngine extends ServiceBase {
 	private DTypeRegistry registry;
-	private ZQueryResponseFunctionFactory fnFactory;
+//	private ZQueryResponseFunctionFactory fnFactory;
 
 	public JoinTreeEngine(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		
-		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
+//		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
 	}
 	
 	public List<JTElement> parse(QueryExp queryExp, List<LetSpan> spanL) {
@@ -113,6 +112,7 @@ public class JoinTreeEngine extends ServiceBase {
 		el.dtype = dtype;
 		el.fieldName = field;
 		el.fieldType = fieldType;
+		el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
 		
 		String target = el.toString();
 		Optional<JTElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();

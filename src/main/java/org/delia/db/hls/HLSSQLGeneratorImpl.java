@@ -8,7 +8,6 @@ import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
-import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;

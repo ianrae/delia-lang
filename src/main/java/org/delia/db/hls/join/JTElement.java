@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 
 public class JTElement  {
 	public DStructType dtype;
 	public String fieldName;
 	public DStructType fieldType;
 	public List<JTElement> nextL = new ArrayList<>();
-	
+	public RelationInfo relinfo;
+
 	@Override
 	public String toString() {
 		StringJoiner joiner = new StringJoiner("|");
