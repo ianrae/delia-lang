@@ -12,6 +12,9 @@ import org.delia.type.TypePair;
 public interface SqlJoinHelper {
 	QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan);
 	boolean needJoin(HLSQuerySpan hlspan);
+	
+	boolean supportsAddAllJoins();
+	void addAllJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL);
 
 	int addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL);
 	void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL);

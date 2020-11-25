@@ -24,6 +24,7 @@ import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 public class SqlJoinHelperImpl implements SqlJoinHelper {
 	private AliasManager aliasManager;
@@ -427,4 +428,18 @@ public class SqlJoinHelperImpl implements SqlJoinHelper {
 		}
 		return joinL;
 	}
+
+	@Override
+	public boolean supportsAddAllJoins() {
+		return false;
+	}
+
+	private void throwNotAllowed() {
+		DeliaExceptionHelper.throwError("unsupported-in-interface", "This method not allowed to be called in this subclass");
+	}
+	@Override
+	public void addAllJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
+		throwNotAllowed();
+	}
+
 }

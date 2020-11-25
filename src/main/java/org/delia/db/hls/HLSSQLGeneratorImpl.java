@@ -203,9 +203,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			}
 		}
 	}
-	private void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
-		joinHelper.addFullofJoins(hlspan, fieldL);
-	}
+//	private void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
+//		joinHelper.addFullofJoins(hlspan, fieldL);
+//	}
 
 
 	protected void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -327,16 +327,21 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			}
 		}
 
-		if (forceAllFields) {
-			addStructFields(hlspan.fromType, fieldL);
-		}
+		//not needed i think
+//		if (forceAllFields) {
+//			addStructFields(hlspan.fromType, fieldL);
+//		}
 		
 		boolean needJoin = joinHelper.needJoin(hlspan);
 		if (needJoin && fieldL.isEmpty()) {
-			addStructFields(hlspan.fromType, fieldL);
-			addFKofJoins(hlspan, fieldL);
-			addFullofJoins(hlspan, fieldL);
-			addRelFieldJoin(hlspan);
+			if (joinHelper.supportsAddAllJoins()) {
+				joinHelper.addAllJoins(hlspan, fieldL);
+			} else {
+				joinHelper.addStructFields(hlspan.fromType, fieldL);
+				addFKofJoins(hlspan, fieldL);
+				joinHelper.addFullofJoins(hlspan, fieldL);
+//				addRelFieldJoin(hlspan);
+			}
 		} else if (isJustFieldName) {
 			addFKofJoins(hlspan, fieldL);
 		}
@@ -353,11 +358,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 		hlspan.renderedFieldL = fieldL;
 		sc.out(joiner.toString());
-	}
-
-	private void addRelFieldJoin(HLSQuerySpan hlspan) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	protected void doFirst(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -383,9 +383,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		fieldL.add(rf);
 	}
 
-	private void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
-		joinHelper.addStructFields(fromType, fieldL);
-	}
+//	private void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
+//		joinHelper.addStructFields(fromType, fieldL);
+//	}
 	@Override
 	public void setRegistry(DTypeRegistry registry) {
 		this.queryTypeDetector = new QueryTypeDetector(factorySvc, registry);
