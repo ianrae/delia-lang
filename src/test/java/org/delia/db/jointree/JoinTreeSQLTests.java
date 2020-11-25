@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.hls.HLSTestBase;
 import org.delia.db.hls.join.JTElement;
 import org.delia.db.hls.join.JoinTreeEngine;
 import org.delia.queryresponse.LetSpan;
@@ -40,34 +39,34 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class JoinTreeSQLTests extends HLSTestBase {
+public class JoinTreeSQLTests extends JoinTreeTestBase {
 	
 	@Test
-	public void test() {
-		useCustomer11Src = true;
-		chkJoinTree("let x = Customer[55].fks()", "Customer|addr|Address"); 
-		chkJoinTree("let x = Customer[55].x"); 
-		
-		chkJoinTree("let x = Customer[55].fetch('addr')", "Customer|addr|Address"); 
-		chkJoinTree("let x = Customer[55].addr", "Customer|addr|Address"); 
-		chkJoinTree("let x = Customer[55].addr.y", "Customer|addr|Address"); 
-		//FUTURE later support order by doing implicit fetch. orderBy(addr.city)
-
-		//FUTUER test double join   .addr.country
-//		
-		chkJoinTree("let x = Customer[addr < 111]", "Customer|addr|Address"); 
+	public void testPlainFilter() {
+		chkJoinTree("let x = C1[cid < 111]"); 
+		chkJoinTree("let x = A1[id < 111]"); 
+		chkJoinTree("let x = CM[cid < 111]"); 
+		chkJoinTree("let x = AM1[cid < 111]"); 
+		chkJoinTree("let x = CMM[cid < 111]"); 
+		chkJoinTree("let x = AMM[cid < 111]"); 
 	}
-
+	
 	@Test
-	public void testDouble() {
-		useCustomer11Src = true;
-		chkJoinTree("let x = Customer[addr < 111].fetch('addr')", "Customer|addr|Address"); 
+	public void testRefFilter() {
+		chkJoinTree("let x = C1[adddr < 111]", "C1|addr|A1"); 
+		chkJoinTree("let x = A1[cust < 111]"); 
+		chkJoinTree("let x = CM[addr < 111]", "C1|addr|A1"); 
+		chkJoinTree("let x = AM1[cust < 111]"); 
+//		chkJoinTree("let x = CMM[addr < 111]"); 
+//		chkJoinTree("let x = AMM[cust < 111]"); 
+
 	}
+	
 
 	@Test
 	public void testDebugSQL() {
-		useCustomer11Src = true;
-		chkJoinTree("let x = Customer[addr < 111]", "Customer|addr|Address"); 
+		chkJoinTree("let x = C1[cid < 111]"); 
+		chkJoinTree("let x = C1[addr < 111]", "C1|addr|A1"); 
 
 	}
 
@@ -93,7 +92,5 @@ public class JoinTreeSQLTests extends HLSTestBase {
 			String s = resultL.get(0).toString();
 			assertEquals(expected, s);
 		}
-		
 	}
-	
 }
