@@ -44,15 +44,17 @@ public class HLSEngine extends ServiceBase {
 			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
 			
 			if (spanL.isEmpty()) {
-				HLSQuerySpan hsltat = generateSpan(0, null);
-				hsltat.joinTreeL = hlstatement.joinTreeL;
-				hlstatement.hlspanL.add(hsltat);
+				HLSQuerySpan hlspan = generateSpan(0, null);
+				hlspan.mainStructType = this.mainStructType;
+				hlspan.joinTreeL = hlstatement.joinTreeL;
+				hlstatement.hlspanL.add(hlspan);
 				return hlstatement;
 			}
 			
 			int i = 0;
 			for(LetSpan span: spanL) {
 				HLSQuerySpan hlspan = generateSpan(i, span);
+				hlspan.mainStructType = this.mainStructType;
 				hlspan.joinTreeL = hlstatement.joinTreeL;
 				chkSpan(hlspan);
 				hlstatement.hlspanL.add(hlspan);

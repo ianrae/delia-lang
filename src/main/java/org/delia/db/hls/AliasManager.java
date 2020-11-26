@@ -170,7 +170,7 @@ public class AliasManager extends ServiceBase {
 		for(String x: map.keySet()) {
 			info = map.get(x);
 			if (info.fieldName != null) {
-				if (info.tblType == structType) {
+				if (info.structType == structType) {
 					return info; //TODO: won't work if multiple joins to same table.
 				}
 			}

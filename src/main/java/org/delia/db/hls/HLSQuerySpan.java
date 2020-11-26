@@ -13,6 +13,7 @@ import org.delia.type.DValue;
 
 public class HLSQuerySpan implements HLSElement {
 	public DStructType fromType;
+	public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
 	public DType resultType;
 	
 	public MTElement mtEl;
