@@ -10,31 +10,6 @@ import org.junit.Test;
  */
 public class SQLFieldTests extends JoinTreeTestBase {
 	
-	/**
-	 *    1 c[addr]   |  2 c[].addr
-	 *    -----------------------
-	 *    3 a[cust]   |  4 a[].cust
-	 */
-	@Test
-	public void testBigFour() {
-		//1
-		String arg = "111";
-		sqlchkP("let x = C1[addr < 111]", "SELECT a.cid,a.x FROM C1 as a LEFT JOIN A1 as b ON a.cid=b.cust WHERE b.id < ?", arg); 
-		
-		//2
-		arg = "55";
-		sqlchkP("let x = C1[55].addr", "SELECT a.id,a.y,a.cust FROM A1 as a LEFT JOIN C1 as b ON a.cust=b.cid WHERE b.cid = ?", arg); 
-
-		//3
-		arg = "111";
-		sqlchkP("let x = A1[cust < 111]", "SELECT * FROM A1 as a WHERE a.cust < ?", arg); 
-		
-		//4
-		arg = "111";
-		sqlchkP("let x = A1[111].cust", "SELECT a.cid,a.x FROM C1 as a LEFT JOIN A1 as c ON a.cid=c.cust WHERE c.id = ?", arg); 
-	}
-	
-	
 	@Test
 	public void testPlainFilter() {
 		//1 and 2

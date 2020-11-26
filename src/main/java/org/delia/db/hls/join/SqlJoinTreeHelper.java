@@ -170,7 +170,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 	private void doManyToManyAddFKofJoins(List<RenderedField> fieldL, TypePair pair,
 			RelationInfo relinfoA) {
 		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-		String fieldName = datIdMap.getAssocOtherField(relinfoA);
+		String fieldName = datIdMap.getAssocFieldFor(relinfoA);
 
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
 		String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
