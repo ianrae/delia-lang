@@ -196,9 +196,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
 					String asName = whereClauseHelper.asNameMap.get(fieldStr);
 					fieldStr = String.format("%s as %s", fieldStr, asName);
-//				fieldL.remove(n - 1);
 					rf.field = fieldStr;
-//				fieldL.add(fieldStr);
 				}
 			}
 		}

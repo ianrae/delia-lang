@@ -1,5 +1,6 @@
 package org.delia.db.hls.join;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,9 +41,6 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			TypePair pair = el.createPair();
 			boolean isParent = false;
 			RelationInfo relinfoA = el.relinfo; //DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
-//			if (relinfoA == null) {
-//				relinfoA = doFixupWithJoinTree(hlspan, pair);
-//			}
 			
 			switch(relinfoA.cardinality) {
 			case ONE_TO_ONE:
@@ -69,9 +67,9 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			String tbl1 = aliasManager.buildTblAlias(aliasInfo);
 			if (isParent) {
 				RelationInfo relinfoB = relinfoA.otherSide; //findOtherSide(pair, el.dtype);
-				PrimaryKey pk = relinfoB.nearType.getPrimaryKey();
+				PrimaryKey pk = relinfoA.nearType.getPrimaryKey();
 
-				String on1 = buildFieldAlias(relinfoB.nearType, pk.getKey().name); //a.id
+				String on1 = buildFieldAlias(el.dtype, pk.getKey().name); //a.id
 				String on2 = buildFieldAliasEx(el.dtype, pair.name, relinfoB.fieldName); //b.cust
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			} else {
@@ -324,13 +322,35 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 	}
 	@Override
 	public void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
-		throwNotAllowed();
-//		List<TypePair> joinL = genFullJoinList(hlspan);
-//
-//		for(TypePair pair: joinL) {
-//			addStructFieldsMM(hlspan, pair, fieldL);
-//		}
+		List<String> joinL = genFullJoinList(hlspan);
+
+		for(JTElement el: hlspan.joinTreeL) {
+			if (joinL.contains(el.fieldName)) {
+				TypePair pair = el.createPair();
+				addStructFieldsMM(hlspan, pair, fieldL);
+			}
+		}
 	}
+	private List<String> genFullJoinList(HLSQuerySpan hlspan) {
+		List<String> joinL = new ArrayList<>();
+
+		boolean needJoin = hlspan.subEl != null;
+		if (! needJoin) {
+			return joinL;
+		}
+
+		for (String fieldName: hlspan.subEl.fetchL) {
+			if (joinL.contains(fieldName)) {
+				continue;
+			}
+			joinL.add(fieldName);
+		}
+
+		//TODO: later support fk(field)
+		return joinL;
+	}
+	
+	
 	@Override
 	public void addStructFieldsMM(HLSQuerySpan hlspan, TypePair joinPair, List<RenderedField> fieldL) {
 		DStructType joinType = (DStructType) joinPair.type;
@@ -430,16 +450,17 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 
 	@Override
 	public boolean supportsAddAllJoins() {
-		return true;
+		return false; //TODO: supportsAddAllJoins not needed anymore. always false
 	}
 
 	@Override
 	public void addAllJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
-		List<JTElement> elL = hlspan.joinTreeL;
-
-		for(JTElement el: elL) {
-			TypePair pair = el.createPair();
-			addStructFieldsMM(hlspan, pair, fieldL);
-		}
+		throwNotAllowed();
+//		List<JTElement> elL = hlspan.joinTreeL;
+//
+//		for(JTElement el: elL) {
+//			TypePair pair = el.createPair();
+//			addStructFieldsMM(hlspan, pair, fieldL);
+//		}
 	}
 }

@@ -53,15 +53,14 @@ public class SQLFilterTests extends JoinTreeTestBase {
 	public void testRefFilter() {
 		//1 and 2
 		String arg = "111";
-		sqlchkP("let x = C1[addr < 111]", "SELECT * FROM C1 as a WHERE a.cid < ?", arg); 
-//		chkJoinTree("let x = C1[addr < 111]", "C1|addr|A1"); 
-//		chkJoinTree("let x = A1[cust < 111]");
-//		
-//		//3 and 4
-//		chkJoinTree("let x = CM[addr < 111]", "CM|addr|AM1"); 
-//		chkJoinTree("let x = AM1[cust < 111]");
-//		
-//		//5 and 6
+		sqlchkP("let x = C1[addr < 111]", "SELECT a.cid,a.x FROM C1 as a LEFT JOIN A1 as b ON a.cid=b.cust WHERE b.id < ?", arg); 
+		sqlchkP("let x = A1[cust < 111]", "SELECT * FROM A1 as a WHERE a.cust < ?", arg); 
+		
+		//3 and 4
+		sqlchkP("let x = CM[addr < 111]", "SELECT a.cid,a.x FROM CM as a LEFT JOIN AM1 as b ON a.cid=b.cust WHERE b.id < ?", arg); 
+		sqlchkP("let x = AM1[cust < 111]", "SELECT * FROM AM1 as a WHERE a.cust < ?", arg); 
+		
+//TODO		//5 and 6
 //		chkJoinTree("let x = CMM[addr < 111]", "CMM|addr|AMM"); 
 //		chkJoinTree("let x = AMM[cust < 111]", "AMM|cust|CMM"); 
 	}
