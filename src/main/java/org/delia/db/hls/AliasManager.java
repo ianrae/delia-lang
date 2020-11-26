@@ -160,6 +160,24 @@ public class AliasManager extends ServiceBase {
 		String key = String.format("%s", structType.getName());
 		return map.get(key);
 	}
+	public AliasInfo findAlias(DStructType structType) {
+		String key = String.format("%s", structType.getName());
+		AliasInfo info = map.get(key);
+		if (info != null) {
+			return info;
+		}
+		
+		for(String x: map.keySet()) {
+			info = map.get(x);
+			if (info.fieldName != null) {
+				if (info.tblType == structType) {
+					return info; //TODO: won't work if multiple joins to same table.
+				}
+			}
+		}
+		
+		return null; //oops!
+	}
 	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
 		return map.get(key);
@@ -193,6 +211,15 @@ public class AliasManager extends ServiceBase {
 	public String buildFieldAlias(AliasInfo info, String fieldName) {
 		String s = String.format("%s.%s", info.alias, fieldName);
 		return s;
+	}
+	public String buildTblAlias(AliasInfo info, boolean isBackards) {
+		if (isBackards) {
+			String otherTbl = info.structType.getName();
+			String s = String.format("%s as %s", otherTbl, info.alias);
+			return s;
+		} else {
+			return buildTblAlias(info);
+		}
 	}
 	
 }

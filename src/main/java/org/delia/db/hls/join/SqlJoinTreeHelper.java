@@ -69,11 +69,13 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			if (hlspan.fromType == el.dtype) {
 				leftJ = el.dtype;
 				rightJ = el.fieldType;
-				s = genJoinSQL(leftJ, rightJ, isParentL, isParentR, relinfoA);
+				AliasInfo aliasInfoR = findAlias(leftJ, relinfoA.fieldName);
+				s = genJoinSQL(leftJ, rightJ, isParentL, isParentR, relinfoA, relinfoA.otherSide, aliasInfoR, false);
 			} else {
 				leftJ = el.fieldType;
 				rightJ = el.dtype;
-				s = genJoinSQL(leftJ, rightJ, isParentR, isParentL, relinfoA.otherSide);
+				AliasInfo aliasInfoR = findAlias(rightJ, relinfoA.fieldName);
+				s = genJoinSQL(leftJ, rightJ, isParentR, isParentL, relinfoA.otherSide, relinfoA, aliasInfoR, true);
 			}
 			
 //			DStructType pairType = (DStructType) pair.type; //Address
@@ -99,25 +101,33 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		return details;
 	}
 
-	private String genJoinSQL(DStructType leftJ, DStructType rightJ, boolean isParentL, boolean isParentR, RelationInfo relinfo) {
-		AliasInfo aliasInfo = findAlias(leftJ, relinfo.fieldName);
-		String tbl1 = aliasManager.buildTblAlias(aliasInfo);
+	private String genJoinSQL(DStructType leftJ, DStructType rightJ, boolean isParentL, boolean isParentR, 
+			RelationInfo relinfoA, RelationInfo relinfoB, AliasInfo aliasInfoR, boolean isBackwards) {
+		String tbl1 = aliasManager.buildTblAlias(aliasInfoR, isBackwards);
 		
-		String on1 = genOn(leftJ, isParentL, relinfo.fieldName); 
-		String on2 = genOn(rightJ, isParentR, relinfo.fieldName);
+		String on1 = genOn(leftJ, isParentL, relinfoA.fieldName, isBackwards); 
+		String on2;
+		if (isParentR) {
+			on2 = genOn(rightJ, isParentR, relinfoB.fieldName, isBackwards);
+		} else {
+			on2 = aliasManager.buildFieldAlias(aliasInfoR, relinfoB.fieldName);
+		}
 		
 		String s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 		return s;
 	}
 	
-	private String genOn(DStructType dtype, boolean isParent, String fieldName) {
-		AliasInfo aliasInfo = findAlias(dtype, fieldName);
-		
+	private String genOn(DStructType dtype, boolean isParent, String fieldName, boolean isBackwards) {
 		String s;
 		if (isParent) {
 			PrimaryKey pk = dtype.getPrimaryKey();
+			AliasInfo aliasInfo = aliasManager.getMainTableAlias(dtype);
+			if (aliasInfo == null) {
+				aliasInfo = findAlias(dtype, fieldName);
+			}
 			s = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); 
 		} else {
+			AliasInfo aliasInfo = findAlias(dtype, fieldName);
 			s = aliasManager.buildFieldAlias(aliasInfo, fieldName); //a.addr
 		}
 		return s;

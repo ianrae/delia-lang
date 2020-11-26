@@ -85,6 +85,8 @@ public class SQLFilterTests extends JoinTreeTestBase {
 
 	@Test
 	public void testDebugSQL() {
+		String arg = "111";
+		sqlchkP("let x = C1[addr < 111]", "SELECT a.cid,a.x FROM C1 as a LEFT JOIN A1 as b ON a.cid=b.cust WHERE b.id < ?", arg); 
 
 	}
 
