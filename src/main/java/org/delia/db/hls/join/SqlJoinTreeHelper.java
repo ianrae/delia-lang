@@ -69,7 +69,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				RelationInfo relinfoB = relinfoA.otherSide; //findOtherSide(pair, el.dtype);
 				PrimaryKey pk = relinfoA.nearType.getPrimaryKey();
 
-				String on1 = buildFieldAlias(el.dtype, pk.getKey().name); //a.id
+				String on1 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); //a.id
 				String on2 = buildFieldAliasEx(el.dtype, pair.name, relinfoB.fieldName); //b.cust
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			} else {

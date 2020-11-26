@@ -144,7 +144,8 @@ public class AliasManager extends ServiceBase {
 		}
 		
 		for(JTElement el: hlspan.joinTreeL) {
-			createMainTableAlias(el.fieldType);
+//			createMainTableAlias(el.fieldType);
+			createFieldAlias(el.dtype, el.fieldName);
 		}
 	}
 	
