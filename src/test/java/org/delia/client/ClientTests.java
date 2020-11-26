@@ -12,6 +12,7 @@ import org.delia.api.DeliaOptions;
 import org.delia.api.DeliaSession;
 import org.delia.base.DBHelper;
 import org.delia.base.UnitTestLog;
+import org.delia.base.UnitTestLogFactory;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.schema.MigrationPlan;
@@ -42,7 +43,7 @@ public class ClientTests {
 			this.dbInterface = dbInterfaceParam;
 			Log log = new UnitTestLog(); //TODO fix later
 			ErrorTracker et = new SimpleErrorTracker(log);
-			this.factorySvc = new FactoryServiceImpl(log, et);
+			this.factorySvc = new FactoryServiceImpl(log, et, new UnitTestLogFactory());
 			delia = DeliaFactory.create(dbInterface, new UnitTestLog(), factorySvc);
 		}
 		
