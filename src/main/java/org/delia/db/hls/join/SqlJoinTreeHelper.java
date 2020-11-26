@@ -39,15 +39,18 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		//do the joins
 		for(JTElement el: hlspan.joinTreeL) {
 			TypePair pair = el.createPair();
-			boolean isParent = false;
-			RelationInfo relinfoA = el.relinfo; //DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
+			boolean isParentL = false;
+			boolean isParentR = false;
+			RelationInfo relinfoA = el.relinfo; 
 			
 			switch(relinfoA.cardinality) {
 			case ONE_TO_ONE:
-				isParent = relinfoA.isParent;
+				isParentL = relinfoA.isParent;
+				isParentR = !isParentL;
 				break;
 			case ONE_TO_MANY:
-				isParent = relinfoA.isParent;
+				isParentL = relinfoA.isParent;
+				isParentR = !isParentL;
 				details.mergeRows = true;
 				details.mergeOnFieldL.add(relinfoA.fieldName);
 				break;
@@ -58,31 +61,73 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
 				doManyToMany(sc, hlspan, pair, relinfoA, actualPair);
 				break;
-				//continue;
 			}
 			
+			DStructType leftJ;
+			DStructType rightJ;
 			String s;
-			DStructType pairType = (DStructType) pair.type; //Address
-			AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfoA.nearType, relinfoA.fieldName);
-			String tbl1 = aliasManager.buildTblAlias(aliasInfo);
-			if (isParent) {
-				RelationInfo relinfoB = relinfoA.otherSide; //findOtherSide(pair, el.dtype);
-				PrimaryKey pk = relinfoA.nearType.getPrimaryKey();
-
-				String on1 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); //a.id
-				String on2 = buildFieldAliasEx(el.dtype, pair.name, relinfoB.fieldName); //b.cust
-				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+			if (hlspan.fromType == el.dtype) {
+				leftJ = el.dtype;
+				rightJ = el.fieldType;
+				s = genJoinSQL(leftJ, rightJ, isParentL, isParentR, relinfoA);
 			} else {
-				PrimaryKey pk = pairType.getPrimaryKey();
-				String on1 = buildFieldAlias(relinfoA.nearType, relinfoA.fieldName); //a.addr
-//				String on2 = buildFieldAlias((DStructType) pair.type, pair.name, pk.getKey().name); //b.id
-				String on2 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); //b.id
-				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+				leftJ = el.fieldType;
+				rightJ = el.dtype;
+				s = genJoinSQL(leftJ, rightJ, isParentR, isParentL, relinfoA.otherSide);
 			}
+			
+//			DStructType pairType = (DStructType) pair.type; //Address
+//			AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfoA.nearType, relinfoA.fieldName);
+//			String tbl1 = aliasManager.buildTblAlias(aliasInfo);
+//			if (isParent) {
+//				RelationInfo relinfoB = relinfoA.otherSide; //findOtherSide(pair, el.dtype);
+//				PrimaryKey pk = relinfoA.nearType.getPrimaryKey();
+//
+//				String on1 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); //a.id
+//				String on2 = buildFieldAliasEx(el.dtype, pair.name, relinfoB.fieldName); //b.cust
+//				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+//			} else {
+//				PrimaryKey pk = pairType.getPrimaryKey();
+//				String on1 = buildFieldAlias(relinfoA.nearType, relinfoA.fieldName); //a.addr
+////				String on2 = buildFieldAlias((DStructType) pair.type, pair.name, pk.getKey().name); //b.id
+//				String on2 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); //b.id
+//				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+//			}
 
 			sc.out(s);
 		}
 		return details;
+	}
+
+	private String genJoinSQL(DStructType leftJ, DStructType rightJ, boolean isParentL, boolean isParentR, RelationInfo relinfo) {
+		AliasInfo aliasInfo = findAlias(leftJ, relinfo.fieldName);
+		String tbl1 = aliasManager.buildTblAlias(aliasInfo);
+		
+		String on1 = genOn(leftJ, isParentL, relinfo.fieldName); 
+		String on2 = genOn(rightJ, isParentR, relinfo.fieldName);
+		
+		String s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+		return s;
+	}
+	
+	private String genOn(DStructType dtype, boolean isParent, String fieldName) {
+		AliasInfo aliasInfo = findAlias(dtype, fieldName);
+		
+		String s;
+		if (isParent) {
+			PrimaryKey pk = dtype.getPrimaryKey();
+			s = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); 
+		} else {
+			s = aliasManager.buildFieldAlias(aliasInfo, fieldName); //a.addr
+		}
+		return s;
+	}
+	private AliasInfo findAlias(DStructType dtype, String fieldName) {
+		AliasInfo aliasInfo = aliasManager.getFieldAlias(dtype, fieldName);
+		if (aliasInfo == null) {
+			aliasInfo = aliasManager.getMainTableAlias(dtype);
+		}
+		return aliasInfo;
 	}
 
 	private String buildMainAlias(HLSQuerySpan hlspan, String fieldName) {
