@@ -38,7 +38,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		//do the joins
 		for(JTElement el: hlspan.joinTreeL) {
 			TypePair pair = el.createPair();
-			boolean bHasFK = false;
+			boolean isParent = false;
 			RelationInfo relinfoA = el.relinfo; //DRuleHelper.findMatchingRuleInfo(hlspan.fromType, pair);
 //			if (relinfoA == null) {
 //				relinfoA = doFixupWithJoinTree(hlspan, pair);
@@ -46,10 +46,10 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			
 			switch(relinfoA.cardinality) {
 			case ONE_TO_ONE:
-				bHasFK = relinfoA.isParent;
+				isParent = relinfoA.isParent;
 				break;
 			case ONE_TO_MANY:
-				bHasFK = relinfoA.isParent;
+				isParent = relinfoA.isParent;
 				details.mergeRows = true;
 				details.mergeOnFieldL.add(relinfoA.fieldName);
 				break;
@@ -59,30 +59,26 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				details.mergeOnFieldL.add(relinfoA.fieldName);
 				TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
 				doManyToMany(sc, hlspan, pair, relinfoA, actualPair);
-				continue;
+				break;
+				//continue;
 			}
-
+			
 			String s;
 			DStructType pairType = (DStructType) pair.type; //Address
-			//				AliasInstance aliasInst = aliasAlloc.findOrCreateAliasInstance(pairType, pair.name);
 			AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfoA.nearType, relinfoA.fieldName);
 			String tbl1 = aliasManager.buildTblAlias(aliasInfo);
-			if (bHasFK) {
-				RelationInfo relinfoB = findOtherSide(pair, hlspan.fromType);
-				PrimaryKey pk = hlspan.fromType.getPrimaryKey();
+			if (isParent) {
+				RelationInfo relinfoB = relinfoA.otherSide; //findOtherSide(pair, el.dtype);
+				PrimaryKey pk = relinfoB.nearType.getPrimaryKey();
 
-				//					String on1 = aliasAlloc.buildAlias(hlspan.fromType, pk.getKey()); //a.id
-				String on1 = buildMainAlias(hlspan, pk.getKey().name); //a.id
-				//					String on2 = aliasAlloc.buildAlias(aliasInst, relinfoB.fieldName); //b.cust
-				String on2 = buildFieldAlias(hlspan.fromType, pair.name, relinfoB.fieldName); //b.cust
+				String on1 = buildFieldAlias(relinfoB.nearType, pk.getKey().name); //a.id
+				String on2 = buildFieldAliasEx(el.dtype, pair.name, relinfoB.fieldName); //b.cust
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			} else {
 				PrimaryKey pk = pairType.getPrimaryKey();
-
-				//					String on1 = aliasAlloc.buildAlias(hlspan.fromType, relinfoA.fieldName); //a.addr
-				//					String on2 = aliasAlloc.buildAlias(aliasInst, pk.getKey().name); //b.id
-				String on1 = buildMainAlias(hlspan, relinfoA.fieldName); //a.addr
-				String on2 = buildFieldAlias(hlspan.fromType, pair.name, pk.getKey().name); //b.id
+				String on1 = buildFieldAlias(relinfoA.nearType, relinfoA.fieldName); //a.addr
+//				String on2 = buildFieldAlias((DStructType) pair.type, pair.name, pk.getKey().name); //b.id
+				String on2 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); //b.id
 				s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 			}
 
@@ -95,7 +91,11 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		AliasInfo info = aliasManager.getMainTableAlias(hlspan.mtEl.structType);
 		return aliasManager.buildFieldAlias(info, fieldName);
 	}
-	private String buildFieldAlias(DStructType structType, String fieldName, String fieldNameToBeAliased) {
+	private String buildFieldAlias(DStructType structType, String fieldName) {
+		AliasInfo info = aliasManager.getMainTableAlias(structType);
+		return aliasManager.buildFieldAlias(info, fieldName);
+	}
+	private String buildFieldAliasEx(DStructType structType, String fieldName, String fieldNameToBeAliased) {
 		AliasInfo info = aliasManager.getFieldAlias(structType, fieldName);
 		return aliasManager.buildFieldAlias(info, fieldNameToBeAliased);
 	}

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.hls.join.JTElement;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -140,6 +141,10 @@ public class AliasManager extends ServiceBase {
 					}
 				}
 			}
+		}
+		
+		for(JTElement el: hlspan.joinTreeL) {
+			createMainTableAlias(el.fieldType);
 		}
 	}
 	
