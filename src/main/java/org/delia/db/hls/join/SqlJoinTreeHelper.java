@@ -73,6 +73,9 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 
 	private String genJoinSQL(DStructType leftJ, DStructType rightJ, boolean isParentL, boolean isParentR, 
 			RelationInfo relinfoA, RelationInfo relinfoB, AliasInfo aliasInfoR, boolean isBackwards) {
+		if (relinfoA.isManyToMany()) {
+			return genJoinSQLManyToMany(leftJ, rightJ, isParentL, isParentR, relinfoA, relinfoB, aliasInfoR, isBackwards);
+		}
 		String tbl1 = aliasManager.buildTblAlias(aliasInfoR, isBackwards);
 		
 		String on1 = genOn(leftJ, isParentL, relinfoA.fieldName, isBackwards); 
@@ -83,6 +86,22 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			on2 = aliasManager.buildFieldAlias(aliasInfoR, relinfoB.fieldName);
 		}
 		
+		String s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
+		return s;
+	}
+	private String genJoinSQLManyToMany(DStructType leftJ, DStructType rightJ, boolean isParentL, boolean isParentR, 
+			RelationInfo relinfoA, RelationInfo relinfoB, AliasInfo aliasInfoR, boolean isBackwards) {
+		String tbl1 = aliasManager.buildTblAlias(aliasInfoR, isBackwards);
+		
+		AliasInfo aliasInfo = aliasInfoR;
+		PrimaryKey pk = rightJ.getPrimaryKey();
+		String on1 = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); 
+
+		String assocTable = datIdMap.getAssocTblName(relinfoA.getDatId()); 
+		aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTable);
+		String fff = datIdMap.getAssocOtherField(relinfoA);
+		String on2 = aliasManager.buildFieldAlias(aliasInfo, fff); 
+
 		String s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 		return s;
 	}

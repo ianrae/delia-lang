@@ -289,7 +289,8 @@ public class WhereFragmentGenerator extends ServiceBase {
 				}
 				
 				RelationManyRule manyRule = DRuleHelper.findManyRule(tbl.structType, possibleFieldName);
-				if (manyRule != null && manyRule.relInfo.isParent) {
+//				if (manyRule != null && manyRule.relInfo.isParent) {
+				if (manyRule != null) {
 					DStructType farType = manyRule.relInfo.farType;
 					
 					//hls needs this

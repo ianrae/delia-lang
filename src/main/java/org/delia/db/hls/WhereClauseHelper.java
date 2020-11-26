@@ -118,9 +118,9 @@ public class WhereClauseHelper extends ServiceBase {
 			return false;
 		} else if (relinfo.isManyToMany()) {
 			String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
-			boolean isLeft = datIdMap.isLeftType(assocTbl, relinfo);
+//			boolean isLeft = datIdMap.isLeftType(assocTbl, relinfo);
 			
-			af.name = DatIdMapHelper.getAssocTblField(isLeft);
+			af.name = datIdMap.getAssocOtherField(relinfo);
 			AliasInfo aliasInfo = aliasManager.getAssocAlias(ff.structType, pair.name, assocTbl);
 			af.alias = aliasInfo.alias; 
 			

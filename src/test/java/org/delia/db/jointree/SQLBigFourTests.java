@@ -67,7 +67,7 @@ public class SQLBigFourTests extends JoinTreeTestBase {
 	public void testBigFourMM() {
 		//1
 		String arg = "111";
-		sqlchkP("let x = CMM[addr < 111]", "SELECT a.cid,a.x FROM CMM as a LEFT JOIN AMM as b ON a.cid=b.cust WHERE b.id < ?", arg); 
+		sqlchkP("let x = CMM[addr < 111]", "SELECT a.cid,a.x,c.rightv as cust FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv LEFT JOIN AMM as b ON b.id=c.rightv WHERE c.rightv < ?", arg); 
 		
 //		//2
 //		arg = "55";
