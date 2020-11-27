@@ -123,7 +123,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			}
 			s = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); 
 		} else {
-			AliasInfo aliasInfo = findAlias(dtype, fieldName);
+			AliasInfo aliasInfo = (isBackwards) ? findAlias(dtype, fieldName) : aliasManager.getMainTableAlias(dtype);
 			s = aliasManager.buildFieldAlias(aliasInfo, fieldName); //a.addr
 		}
 		return s;
