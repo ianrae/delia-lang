@@ -2,8 +2,9 @@
 
 FEATURE: filter- in expression for twitter. self-join
 # Customer = Customer
-# Address = Address 
+# Address = Address
 background:
+ configure loadFKs = true
   type Customer struct {id int primaryKey, name string,
       relation followers Customer 'r1' many optional,
       relation followees Customer 'r1' many optional,
@@ -54,15 +55,15 @@ given:
 when:
 #left side of IN must be ident. TODO fix later and allow 55 in [followers]
   let u = 56
-  let x = Customer[u in [followers]].fks()
+  let x = Customer[u in [followers]].fks().orderBy('id')
 then:
 value:a:Customer {
- vid:56
- vname:'bob'
- vfollowers:{55}
-   vfollowees:null
-   vtweets:null
-  }
+vid:55
+vname:'art'
+vfollowers:null
+vfollowees:{[56,57]}
+  vtweets:{1}
+ }
   
 ---
 title: followers
@@ -81,18 +82,11 @@ vfollowees:{[56,57]}
   vtweets:{1}
  }
 value:a:Customer {
-vid:56
-vname:'bob'
- vfollowers:{55}
-   vfollowees:null
-   vtweets:null
-  }
-value:a:Customer {
- vid:57
- vname:'cam'
- vfollowers:{55}
-   vfollowees:null
-   vtweets:null
-  }
+vid:55
+vname:'art'
+vfollowers:null
+vfollowees:{[56,57]}
+  vtweets:{1}
+ }
 
   

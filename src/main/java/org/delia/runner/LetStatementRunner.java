@@ -22,7 +22,6 @@ import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
 import org.delia.queryresponse.LetSpanRunnerImpl;
-import org.delia.queryresponse.QueryFuncContext;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -158,8 +157,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	private QueryContext buildQueryContext(QuerySpec spec) {
-		QueryFuncContext ctx = new QueryFuncContext();
-
 		QueryContext qtx = new QueryContext();
 		qtx.letSpanEngine = letSpanEngine;
 		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
