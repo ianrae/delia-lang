@@ -19,15 +19,15 @@ public class SQLFetchTests extends JoinTreeTestBase {
 	public void testPlainFilter() {
 		//1 and 2
 		sqlchkP("let x = C1[55].fetch('addr')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM C1 as a LEFT JOIN A1 as b ON a.cid=b.cust WHERE a.cid = ?", "55"); 
-		chkJoinTree("let x = A1[100].fetch('cust')", "A1|cust|C1"); 
+		sqlchkP("let x = A1[100].fetch('cust')", "SELECT a.id,a.y,a.cust,b.cid as cust,b.x FROM A1 as a LEFT JOIN C1 as b ON b.cust=b.cid WHERE a.id = ?", "100"); 
 		
-		//3 and 4
-		chkJoinTree("let x = CM[55].fetch('addr')", "CM|addr|AM1"); 
-		chkJoinTree("let x = AM1[100].fetch('cust')", "AM1|cust|CM");
+//		//3 and 4
+		sqlchkP("let x = CM[55].fetch('addr')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM CM as a LEFT JOIN AM1 as b ON a.cid=b.cust WHERE a.cid = ?", "55"); 
+		sqlchkP("let x = AM1[100].fetch('cust')", "SELECT a.id,a.y,a.cust,b.cid as cust,b.x FROM AM1 as a LEFT JOIN CM as b ON b.cust=b.cid WHERE a.id = ?", "100");
 		
 		//5 and 6
-		chkJoinTree("let x = CMM[55].fetch('addr')", "CMM|addr|AMM"); 
-		chkJoinTree("let x = AMM[100].fetch('cust')", "AMM|cust|CMM"); 
+		sqlchkP("let x = CMM[55].fetch('addr')", "SELECT a.cid,a.x,c.rightv as cust,b.id as addr,b.y FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE a.cid = ?", "55"); 
+		sqlchkP("let x = AMM[100].fetch('cust')", "SELECT a.id,a.y,c.leftv as addr,b.cid as cust,b.x FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE a.id = ?", "100"); 
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class SQLFetchTests extends JoinTreeTestBase {
 //		//5 and 6
 //		sqlchkP("let x = CMM[55].fetch('addr')", "SELECT a.cid,a.x,c.leftv as cust,b.id as addr,b.y FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE a.cid = ?", "55");
 		//TODO: should we have b.addr as c.rightv??
-		sqlchkP("let x = AMM[100].fetch('cust')", "SELECT a.id,a.y,c.rightv as addr,b.cid as cust,b.x FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE a.id = ?", "100"); 
+		sqlchkP("let x = AMM[100].fetch('cust')", "SELECT a.id,a.y,c.leftv as addr,b.cid as cust,b.x FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE a.id = ?", "100"); 
 		//TODO: b.cid is wrong!
 	}
 

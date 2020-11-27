@@ -172,6 +172,8 @@ public class AliasManager extends ServiceBase {
 			if (info.fieldName != null) {
 				if (info.structType == structType) {
 					return info; //TODO: won't work if multiple joins to same table.
+				} else if (info.tblType == structType) {
+					return info; //TODO: won't work if multiple joins to same table.
 				}
 			}
 		}

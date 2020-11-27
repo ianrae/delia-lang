@@ -118,6 +118,9 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			if (aliasInfo == null) {
 				aliasInfo = findAlias(dtype, fieldName);
 			}
+			if (aliasInfo == null) {
+				aliasInfo = aliasManager.findAlias(dtype);
+			}
 			s = aliasManager.buildFieldAlias(aliasInfo, pk.getKey().name); 
 		} else {
 			AliasInfo aliasInfo = findAlias(dtype, fieldName);

@@ -115,11 +115,13 @@ public class WhereClauseHelper extends ServiceBase {
 						ff.fieldType = ff.structType.getPrimaryKey().getKeyType();
 						
 						RelationInfo relinfo = el.get().relinfo;
-						String assocTable = datIdMap.getAssocTblName(relinfo.getDatId()); 
-						ff.name = datIdMap.getAssocFieldFor(relinfo);
-						AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTable);
-						ff.alias = aliasInfo.alias;
-						return true;
+						if (relinfo.isManyToMany()) {
+							String assocTable = datIdMap.getAssocTblName(relinfo.getDatId()); 
+							ff.name = datIdMap.getAssocFieldFor(relinfo);
+							AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTable);
+							ff.alias = aliasInfo.alias;
+							return true;
+						}
 					}
 				}
 			}

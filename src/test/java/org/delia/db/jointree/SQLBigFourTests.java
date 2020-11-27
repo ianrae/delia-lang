@@ -67,20 +67,20 @@ public class SQLBigFourTests extends JoinTreeTestBase {
 	public void testBigFourMM() {
 		//1
 		String arg = "111";
-//		sqlchkP("let x = CMM[addr < 111]", "SELECT a.cid,a.x,c.rightv as cust FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE c.rightv < ?", arg); 
+		sqlchkP("let x = CMM[addr < 111]", "SELECT a.cid,a.x,c.rightv as cust FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE c.rightv < ?", arg); 
 //no		sqlchkP("let x = CMM[addr < 111]", "SELECT a.cid,a.x,c.rightv as cust FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv LEFT JOIN AMM as b ON b.id=c.rightv WHERE c.rightv < ?", arg); 
-		
+//TODO: remove unnecessary join of AMM		
 		//2
 		arg = "55";
 		sqlchkP("let x = CMM[55].addr", "SELECT a.id,a.y,c.leftv as addr FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE c.leftv = ?", arg); 
-//
-//		//3
-//		arg = "111";
-//		sqlchkP("let x = AM1[cust < 111]", "SELECT * FROM AM1 as a WHERE a.cust < ?", arg); 
-//		
-//		//4
-//		arg = "111";
-//		sqlchkP("let x = AM1[111].cust", "SELECT a.cid,a.x FROM CM as a LEFT JOIN AM1 as c ON a.cid=c.cust WHERE c.id = ?", arg); 
+
+		//3
+		arg = "111";
+		sqlchkP("let x = AM1[cust < 111]", "SELECT * FROM AM1 as a WHERE a.cust < ?", arg); 
+		
+		//4
+		arg = "111";
+		sqlchkP("let x = AMM[111].cust", "SELECT a.cid,a.x,c.rightv as cust FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE c.rightv = ?", arg); 
 	}
 
 	@Test
