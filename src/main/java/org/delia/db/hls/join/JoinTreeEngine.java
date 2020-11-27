@@ -106,8 +106,10 @@ public class JoinTreeEngine extends ServiceBase {
 		DStructType structType = (DStructType) span.dtype;
 		String fieldName = qfe.argL.get(0).strValue();
 		TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
-		JTElement el = addElement(structType, fieldName, (DStructType) pair.type, resultL);
-		el.usedForFetch = true;
+		if (pair != null) {
+			JTElement el = addElement(structType, fieldName, (DStructType) pair.type, resultL);
+			el.usedForFetch = true;
+		}
 	}
 
 	private void addFKs(LetSpan span, List<JTElement> resultL) {

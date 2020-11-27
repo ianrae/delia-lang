@@ -127,7 +127,9 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			} else {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(structType, pair.name);
 				if (manyRule != null) {
-					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
+					//MM have no parent so don't check isParent flag
+//					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
+					if (manyRule.relInfo != null) {
 						doomedL.add(pair.name);
 					}
 				}

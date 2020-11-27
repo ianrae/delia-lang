@@ -90,6 +90,8 @@ public class AllBDDTests extends BDDBase {
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
+		runR700File("t0-insert-parent.txt", 2);
+		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
 	@Test
@@ -318,13 +320,14 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
 //		runR1500File("t0-queryfn-orderby-2span.txt", 1);
-		runR1500File("t0-queryfn-orderby.txt", 4);
+//		runR1500File("t0-queryfn-orderby.txt", 4);
+		runR560File("t0-self-NN.txt", 4);
 
 	}
 	
