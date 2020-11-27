@@ -1,6 +1,8 @@
 package org.delia.db.hls;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
@@ -9,6 +11,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.join.JTElement;
 import org.delia.db.sql.fragment.AliasedFragment;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -19,6 +22,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 
@@ -72,7 +76,9 @@ public class WhereClauseHelper extends ServiceBase {
 		for(SqlFragment z: selectFrag.whereL) {
 			OpFragment op = (OpFragment) z;
 			if (op.left != null) {
-				if (!remapParentFieldIfNeeded(op.left, selectFrag)) {
+				if (handleMMBackwardsRef(op.left, selectFrag, hlspan)) {
+					
+				} else if (!remapParentFieldIfNeeded(op.left, selectFrag)) {
 					if (op.left.alias != null) {
 						op.left.alias = aliasInfo.alias;
 					}
@@ -98,6 +104,30 @@ public class WhereClauseHelper extends ServiceBase {
 		}
 	}
 	
+	private boolean handleMMBackwardsRef(AliasedFragment af, SelectStatementFragment selectFrag, HLSQuerySpan hlspan) {
+		if (af instanceof FieldFragment) {
+			FieldFragment ff = (FieldFragment) af;
+			String pk = ff.structType.getPrimaryKey().getFieldName();
+			if (ff.name.equals(pk)) {
+				if (hlspan.fromType != hlspan.mainStructType) {
+					Optional<JTElement> el = hlspan.joinTreeL.stream().filter(x -> x.fieldType == hlspan.fromType).findAny();
+					if (el.isPresent()) {
+						ff.fieldType = ff.structType.getPrimaryKey().getKeyType();
+						
+						RelationInfo relinfo = el.get().relinfo;
+						String assocTable = datIdMap.getAssocTblName(relinfo.getDatId()); 
+						ff.name = datIdMap.getAssocFieldFor(relinfo);
+						AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfo.nearType, relinfo.fieldName, assocTable);
+						ff.alias = aliasInfo.alias;
+						return true;
+					}
+				}
+			}
+			
+		} 
+		return false;
+	}
+
 	private boolean remapParentFieldIfNeeded(AliasedFragment af, SelectStatementFragment selectFrag) {
 		if (af instanceof FieldFragment) {
 			FieldFragment ff = (FieldFragment) af;

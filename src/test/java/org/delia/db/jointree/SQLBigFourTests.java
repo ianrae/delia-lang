@@ -72,7 +72,7 @@ public class SQLBigFourTests extends JoinTreeTestBase {
 		
 		//2
 		arg = "55";
-		sqlchkP("let x = CMM[55].addr", "SELECT a.id,a.y,c.leftv as addr FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE c.left = ?", arg); 
+		sqlchkP("let x = CMM[55].addr", "SELECT a.id,a.y,c.leftv as addr FROM AMM as a LEFT JOIN CMMAMMDat1 as c ON a.id=c.rightv WHERE c.leftv = ?", arg); 
 //
 //		//3
 //		arg = "111";
