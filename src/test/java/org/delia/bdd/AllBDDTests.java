@@ -323,8 +323,8 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-//		runR550File("t0-multirel-NtoN-1.txt", 1);
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+		runR1500File("t0-queryfn-orderby.txt", 4);
 
 	}
 	

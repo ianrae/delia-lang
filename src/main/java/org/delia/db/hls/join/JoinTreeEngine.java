@@ -46,7 +46,7 @@ public class JoinTreeEngine extends ServiceBase {
 					addOrderBy(span, qfe, resultL);
 				} else {
 					String fieldName = qfe.funcName;
-					TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+					TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
 					if (pair != null) {
 						addElement(structType, fieldName, (DStructType) pair.type, resultL);
 					}
@@ -54,7 +54,7 @@ public class JoinTreeEngine extends ServiceBase {
 			}
 		}
 		
-		if (queryExp.filter.cond instanceof FilterOpFullExp) {
+		if (queryExp.filter != null && queryExp.filter.cond instanceof FilterOpFullExp) {
 			FilterOpFullExp fofe = (FilterOpFullExp) queryExp.filter.cond;
 			if (fofe.opexp1 instanceof FilterOpExp) {
 				doFilterOpExp(fofe.opexp1, structType, resultL);
@@ -83,7 +83,7 @@ public class JoinTreeEngine extends ServiceBase {
 			XNAFNameExp xne = (XNAFNameExp) xx.qfeL.get(0);
 			
 			String fieldName = xne.strValue();
-			TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+			TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
 			if (pair != null) {
 				
 				JTElement el = buildElement(structType, fieldName, (DStructType) pair.type);
@@ -105,7 +105,7 @@ public class JoinTreeEngine extends ServiceBase {
 	private void addFetch(LetSpan span, QueryFuncExp qfe, List<JTElement> resultL) {
 		DStructType structType = (DStructType) span.dtype;
 		String fieldName = qfe.argL.get(0).strValue();
-		TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
+		TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
 		JTElement el = addElement(structType, fieldName, (DStructType) pair.type, resultL);
 		el.usedForFetch = true;
 	}
@@ -128,7 +128,10 @@ public class JoinTreeEngine extends ServiceBase {
 		DStructType structType = (DStructType) span.dtype;
 		String fieldName = qfe.argL.get(0).strValue();
 		TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
-		addElement(structType, fieldName, (DStructType) pair.type, resultL);
+		//ignore sort by scalar fields
+		if (pair != null && pair.type instanceof DStructType) {
+			addElement(structType, fieldName, (DStructType) pair.type, resultL);
+		}
 	}
 	
 	private JTElement buildElement(DStructType dtype, String field, DStructType fieldType) {

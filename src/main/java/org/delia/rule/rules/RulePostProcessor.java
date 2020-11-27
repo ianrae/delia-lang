@@ -589,7 +589,7 @@ public class RulePostProcessor extends ServiceBase {
 		if (! infos.isEmpty()) {
 			List<TypePair> pairs = new ArrayList<>();
 			for(RelationInfo info: infos) {
-				TypePair pair = DRuleHelper.findMatchingPair(info.nearType, info.fieldName);
+				TypePair pair = DRuleHelper.findMatchingStructPair(info.nearType, info.fieldName);
 				pairs.add(pair);
 			}
 			return pairs;
