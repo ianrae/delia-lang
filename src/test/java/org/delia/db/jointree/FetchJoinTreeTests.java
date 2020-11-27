@@ -56,6 +56,7 @@ public class FetchJoinTreeTests extends JoinTreeTestBase {
 	public void testFKFlag() {
 		List<JTElement> list = chkJoinTree("let x = C1[55].fetch('addr')", "C1|addr|A1"); 
 		assertEquals(false, list.get(0).usedForFK);
+		assertEquals(true, list.get(0).usedForFetch);
 		
 		list = chkJoinTree("let x = C1[55].fks()", "C1|addr|A1"); 
 		assertEquals(true, list.get(0).usedForFK);

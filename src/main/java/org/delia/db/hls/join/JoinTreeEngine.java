@@ -106,7 +106,8 @@ public class JoinTreeEngine extends ServiceBase {
 		DStructType structType = (DStructType) span.dtype;
 		String fieldName = qfe.argL.get(0).strValue();
 		TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
-		addElement(structType, fieldName, (DStructType) pair.type, resultL);
+		JTElement el = addElement(structType, fieldName, (DStructType) pair.type, resultL);
+		el.usedForFetch = true;
 	}
 
 	private void addFKs(LetSpan span, List<JTElement> resultL) {
@@ -139,9 +140,10 @@ public class JoinTreeEngine extends ServiceBase {
 		return el;
 	}
 	
-	private void addElement(DStructType dtype, String field, DStructType fieldType, List<JTElement> resultL) {
+	private JTElement addElement(DStructType dtype, String field, DStructType fieldType, List<JTElement> resultL) {
 		JTElement el = buildElement(dtype, field, fieldType);
 		addElement(el, resultL);
+		return el;
 	}
 	private void addElement(JTElement el, List<JTElement> resultL) {
 		String target = el.toString();
@@ -149,6 +151,9 @@ public class JoinTreeEngine extends ServiceBase {
 		if (optExisting.isPresent()) {
 			if (el.usedForFK) {
 				optExisting.get().usedForFK = true; //propogate
+			}
+			if (el.usedForFetch) {
+				optExisting.get().usedForFetch = true; //propogate
 			}
 			return;
 		}

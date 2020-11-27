@@ -49,7 +49,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
 				boolean tmpBackwards = hlspan.fromType != el.dtype;
 				doManyToMany(sc, hlspan, pair, relinfoA, actualPair, tmpBackwards);
-				if (!el.usedForFK) {
+				if (!el.usedForFetch) {
 					continue;
 				}
 				break;
@@ -170,6 +170,12 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 
 		int numAdded = 0;
 		for(JTElement el: elL) {
+			String target = String.format(" as %s", el.fieldName);
+			Optional<RenderedField> existing = fieldL.stream().filter(x -> x.field.contains(target)).findAny();
+			if (existing.isPresent()) {
+				continue;
+			}
+			
 			TypePair pair = el.createPair();
 			DStructType pairType = (DStructType) pair.type;
 			PrimaryKey pk = pairType.getPrimaryKey();
@@ -200,7 +206,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
 		String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-		s = String.format("%s as %s", s, relinfoA.fieldName);
+		s = String.format("%s as %s", s, pair.name);
 		addField(fieldL, null, fieldName, s).isAssocField = true;
 	}
 

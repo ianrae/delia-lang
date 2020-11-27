@@ -7,7 +7,6 @@ import java.util.StringJoiner;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 
 public class JTElement  {
 	public DStructType dtype;
@@ -16,6 +15,7 @@ public class JTElement  {
 	public List<JTElement> nextL = new ArrayList<>();
 	public RelationInfo relinfo;
 	public boolean usedForFK; //if true then fks(). but this join for other reasons too
+	public boolean usedForFetch; //if true then fettch. but this join for other reasons too
 	
 	@Override
 	public String toString() {
