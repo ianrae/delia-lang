@@ -33,7 +33,7 @@ import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.validation.ValidationRuleRunner;
+import org.delia.validation.ValidationRunner;
 
 public abstract class MemDBExecutorBase extends ServiceBase implements ZDBInternal {
 
@@ -152,7 +152,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 
 	protected void addAnyFKs(DValue dval) {
 		FetchRunner fetchRunner = doCreateFetchRunner();
-		ValidationRuleRunner ruleRunner = new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
+		ValidationRunner ruleRunner = factorySvc.createValidationRunner(dbInterface, fetchRunner);
 		ruleRunner.enableRelationModifier(true);
 		ruleRunner.setPopulateFKsFlag(true);
 		ruleRunner.validateRelationRules(dval);

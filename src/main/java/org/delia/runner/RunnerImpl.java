@@ -40,7 +40,8 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
-import org.delia.validation.ValidationRuleRunner;
+import org.delia.validation.ValidationRuleRunnerImpl;
+import org.delia.validation.ValidationRunner;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -217,8 +218,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				res.errors.add(e.getLastError());
 			}
 		}
-		private ValidationRuleRunner createValidationRunner() {
-			return new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
+		private ValidationRunner createValidationRunner() {
+			return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 		}
 		private void executeUserFuncDefStatement(UserFunctionDefStatementExp exp, ResultValue res) {
 			userFnMap.put(exp.funcName, exp);
@@ -259,7 +260,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				return;
 			} else {
 				//validate the fields of the partial DValue
-				ValidationRuleRunner ruleRunner = createValidationRunner();
+				ValidationRunner ruleRunner = createValidationRunner();
 				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
 					ruleRunner.propogateErrors(res);
 				}
@@ -314,7 +315,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				cres.assocCrudMap = null; //clear. not supported for upsert
 				
 				//validate the fields of the partial DValue
-				ValidationRuleRunner ruleRunner = createValidationRunner();
+				ValidationRunner ruleRunner = createValidationRunner();
 				ruleRunner.enableRelationModifier(true);
 				ruleRunner.enableInsertFlag(true);
 				ConfigureService configSvc = factorySvc.getConfigureService();

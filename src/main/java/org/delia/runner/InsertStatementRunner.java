@@ -20,7 +20,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
-import org.delia.validation.ValidationRuleRunner;
+import org.delia.validation.ValidationRunner;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -43,8 +43,8 @@ public class InsertStatementRunner extends ServiceBase {
 		this.varMap = varMap;
 	}
 
-	private ValidationRuleRunner createValidationRunner(FetchRunner fetchRunner) {
-		return new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
+	private ValidationRunner createValidationRunner(FetchRunner fetchRunner) {
+		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
 	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, ZDBExecutor dbexecutor, FetchRunner fetchRunner, 
@@ -64,7 +64,7 @@ public class InsertStatementRunner extends ServiceBase {
 			res.ok = false;
 			return;
 		} else {
-			ValidationRuleRunner ruleRunner = createValidationRunner(fetchRunner);
+			ValidationRunner ruleRunner = createValidationRunner(fetchRunner);
 			ruleRunner.enableRelationModifier(true);
 			ruleRunner.enableInsertFlag(true);
 			ConfigureService configSvc = factorySvc.getConfigureService();
