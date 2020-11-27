@@ -144,7 +144,6 @@ public class AliasManager extends ServiceBase {
 		}
 		
 		for(JTElement el: hlspan.joinTreeL) {
-//			createMainTableAlias(el.fieldType);
 			createFieldAlias(el.dtype, el.fieldName);
 		}
 	}
@@ -167,17 +166,25 @@ public class AliasManager extends ServiceBase {
 			return info;
 		}
 		
+		//look for structType match first
 		for(String x: map.keySet()) {
 			info = map.get(x);
 			if (info.fieldName != null) {
 				if (info.structType == structType) {
 					return info; //TODO: won't work if multiple joins to same table.
-				} else if (info.tblType == structType) {
+				}
+			}
+		}
+
+		//then tblType
+		for(String x: map.keySet()) {
+			info = map.get(x);
+			if (info.fieldName != null) {
+				if (info.tblType == structType) {
 					return info; //TODO: won't work if multiple joins to same table.
 				}
 			}
 		}
-		
 		return null; //oops!
 	}
 	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
