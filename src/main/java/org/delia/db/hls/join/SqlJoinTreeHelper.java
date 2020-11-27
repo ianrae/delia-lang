@@ -47,7 +47,11 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				details.isManyToMany = true;
 				details.mergeOnFieldL.add(relinfoA.fieldName);
 				TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
-				doManyToMany(sc, hlspan, pair, relinfoA, actualPair);
+				boolean tmpBackwards = hlspan.fromType != el.dtype;
+				doManyToMany(sc, hlspan, pair, relinfoA, actualPair, tmpBackwards);
+				if (!el.usedForFK) {
+					continue;
+				}
 				break;
 			}
 			
@@ -99,7 +103,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 
 		String assocTable = datIdMap.getAssocTblName(relinfoA.getDatId()); 
 		aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTable);
-		String fff = datIdMap.getAssocOtherField(relinfoA);
+		String fff = (isBackwards) ? datIdMap.getAssocFieldFor(relinfoA) : datIdMap.getAssocOtherField(relinfoA);
 		String on2 = aliasManager.buildFieldAlias(aliasInfo, fff); 
 
 		String s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
@@ -134,7 +138,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		return aliasManager.buildFieldAlias(info, fieldName);
 	}
 
-	private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA, TypePair actualPair) {
+	private void doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA, TypePair actualPair, boolean isBackwards) {
 		String s;
 		PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 		String assocTable = datIdMap.getAssocTblName(relinfoA.getDatId()); 
@@ -143,7 +147,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTable);
 			String tbl1 = aliasManager.buildTblAlias(aliasInfo);
 			String on1 = buildMainAlias(hlspan, mainPk.getFieldName()); //b.cust
-			String fff = datIdMap.getAssocFieldFor(relinfoA);
+			String fff = (isBackwards) ? datIdMap.getAssocOtherField(relinfoA) : datIdMap.getAssocFieldFor(relinfoA);
 			String on2 = aliasManager.buildFieldAlias(aliasInfo, fff); //a.id
 
 			s = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
