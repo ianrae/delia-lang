@@ -322,7 +322,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
@@ -332,7 +332,8 @@ public class AllBDDTests extends BDDBase {
 //		runR560File("t0-self-NN.txt", 4);
 		
 		DeliaFactory.useHLSMEM = true;
-		runR1300File("t0-let-query.txt", 7);
+//		runR1300File("t0-let-query.txt", 7);
+		runR1500File("t0-queryfn-orderby.txt", 4);
 
 	}
 	

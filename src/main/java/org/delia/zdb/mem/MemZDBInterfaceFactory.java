@@ -14,7 +14,7 @@ import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
-	private DBCapabilties capabilities;
+	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
 	
@@ -22,7 +22,6 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	public MemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(false, false, false, false);
-		this.capabilities.setRequiresTypeReplacementProcessing(true);
 	}
 	
 	public Map<String,MemDBTable> createSingleMemDB() {
