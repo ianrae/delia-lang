@@ -23,37 +23,38 @@ import org.delia.util.DRuleHelper;
 
 public class JoinTreeEngine extends ServiceBase {
 	private DTypeRegistry registry;
-//	private ZQueryResponseFunctionFactory fnFactory;
+	//	private ZQueryResponseFunctionFactory fnFactory;
 
 	public JoinTreeEngine(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
-		
-//		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
+
+		//		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
 	}
-	
+
 	public List<JTElement> parse(QueryExp queryExp, List<LetSpan> spanL) {
 		List<JTElement> resultL = new ArrayList<>();
 		DStructType structType = (DStructType) registry.getType(queryExp.typeName);
 		for(LetSpan span: spanL) {
 			if (!span.qfeL.isEmpty()) {
-				QueryFuncExp qfe = span.qfeL.get(0);
-				if (qfe.funcName.equals("fks")) {
-					addFKs(span, resultL);
-				} else if (qfe.funcName.equals("fetch")) {
-					addFetch(span, qfe, resultL);
-				} else if (qfe.funcName.equals("orderBy")) {
-					addOrderBy(span, qfe, resultL);
-				} else {
-					String fieldName = qfe.funcName;
-					TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
-					if (pair != null) {
-						addElement(structType, fieldName, (DStructType) pair.type, resultL);
+				for( QueryFuncExp qfe:span.qfeL) {
+					if (qfe.funcName.equals("fks")) {
+						addFKs(span, resultL);
+					} else if (qfe.funcName.equals("fetch")) {
+						addFetch(span, qfe, resultL);
+					} else if (qfe.funcName.equals("orderBy")) {
+						addOrderBy(span, qfe, resultL);
+					} else {
+						String fieldName = qfe.funcName;
+						TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
+						if (pair != null) {
+							addElement(structType, fieldName, (DStructType) pair.type, resultL);
+						}
 					}
 				}
 			}
 		}
-		
+
 		if (queryExp.filter != null && queryExp.filter.cond instanceof FilterOpFullExp) {
 			FilterOpFullExp fofe = (FilterOpFullExp) queryExp.filter.cond;
 			if (fofe.opexp1 instanceof FilterOpExp) {
@@ -63,11 +64,11 @@ public class JoinTreeEngine extends ServiceBase {
 				doFilterOpExp(fofe.opexp1, structType, resultL);
 			}
 		}
-		
+
 		return resultL;
 	}
-	
-	
+
+
 	private void doFilterOpExp(Exp opexp1, DStructType structType, List<JTElement> resultL) {
 		FilterOpExp foe = (FilterOpExp) opexp1;
 		doXNAFMultiExp(foe.op1, structType, resultL);
@@ -81,11 +82,11 @@ public class JoinTreeEngine extends ServiceBase {
 		XNAFMultiExp xx = (XNAFMultiExp) op;
 		if (!xx.qfeL.isEmpty() && xx.qfeL.get(0) instanceof XNAFNameExp) {
 			XNAFNameExp xne = (XNAFNameExp) xx.qfeL.get(0);
-			
+
 			String fieldName = xne.strValue();
 			TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
 			if (pair != null) {
-				
+
 				JTElement el = buildElement(structType, fieldName, (DStructType) pair.type);
 				switch(el.relinfo.cardinality) {
 				case ONE_TO_ONE:
@@ -125,7 +126,7 @@ public class JoinTreeEngine extends ServiceBase {
 			}
 		}
 	}
-	
+
 	private void addOrderBy(LetSpan span, QueryFuncExp qfe, List<JTElement> resultL) {
 		DStructType structType = (DStructType) span.dtype;
 		String fieldName = qfe.argL.get(0).strValue();
@@ -135,7 +136,7 @@ public class JoinTreeEngine extends ServiceBase {
 			addElement(structType, fieldName, (DStructType) pair.type, resultL);
 		}
 	}
-	
+
 	private JTElement buildElement(DStructType dtype, String field, DStructType fieldType) {
 		JTElement el = new JTElement();
 		el.dtype = dtype;
@@ -144,7 +145,7 @@ public class JoinTreeEngine extends ServiceBase {
 		el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
 		return el;
 	}
-	
+
 	private JTElement addElement(DStructType dtype, String field, DStructType fieldType, List<JTElement> resultL) {
 		JTElement el = buildElement(dtype, field, fieldType);
 		addElement(el, resultL);
@@ -162,8 +163,8 @@ public class JoinTreeEngine extends ServiceBase {
 			}
 			return;
 		}
-		
+
 		resultL.add(el);
 	}
-	
+
 }

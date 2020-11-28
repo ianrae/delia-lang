@@ -39,10 +39,10 @@ public class HLSSQLTests extends HLSTestBase {
 		useCustomerManyToManySrc = true;
 		flipAssocTbl = false;
 		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv WHERE a.cid = ?", "55");
-		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
-		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
-		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
-		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
+		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,c.rightv as addr,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
+		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,c.rightv as addr,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
+		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,c.rightv as addr,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv ORDER BY a.cid");
+		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
 		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv");
 	}
 
@@ -85,9 +85,9 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testDebugSQL() {
 		useCustomerManyToManySrc = true;
-//		HLSSQLGeneratorImpl.useJoinTreeFlag = true;
 		
-		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,c.rightv as addr FROM Address as a LEFT JOIN CustomerAddressDat1 as c ON a.id=c.leftv WHERE a.cid = ?", "55");
+//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,c.rightv as addr,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
+		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv");
 	}
 
 	@Before
