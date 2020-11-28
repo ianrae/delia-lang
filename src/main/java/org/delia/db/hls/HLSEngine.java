@@ -89,26 +89,6 @@ public class HLSEngine extends ServiceBase {
 			DValueHelper.throwIfFieldNotExist(prefix, pair.name, hlspan.fromType);
 		}
 
-//		public LetSpan fixup(LetSpan span) {
-//			HLSQuerySpan hlstat = new HLSQuerySpan();
-//			hlstat.fromType = determineFromType(0);
-//			hlstat.mtEl = new MTElement(hlstat.fromType);
-//			hlstat.resultType = determineResultType(0);
-//			hlstat.filEl = null;
-//			
-//			TypePair rfieldPair = findLastRField(0);
-//			if (rfieldPair != null) {
-//				LetSpan span1 = new LetSpan(mainStructType);
-//				QueryFuncExp rqfe = findRFieldQFE(span, mainStructType);
-////				span.qfeL.remove(rqfe);
-////				span1.qfeL.add(rqfe);
-//				span1.qresp = span.qresp;
-////				span.startsWithScopeChange = true;
-//				return span1;
-//			}
-//			return null;
-//		}		
-		
 		public HLSQuerySpan generateSpan(int i, LetSpan span) {
 			HLSQuerySpan hlstat = new HLSQuerySpan();
 			hlstat.fromType = determineFromType(i);

@@ -84,8 +84,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
 				
-				TypePair relPair = hlspan1.rEl.rfieldPair;
-				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan2.fromType, relPair);
+				TypePair relPair = hlspan1.rEl == null ? hlspan2.rEl.rfieldPair: hlspan1.rEl.rfieldPair;
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan1.fromType, relPair);
 				switch(relinfo.cardinality) {
 				case ONE_TO_ONE:
 				case ONE_TO_MANY:

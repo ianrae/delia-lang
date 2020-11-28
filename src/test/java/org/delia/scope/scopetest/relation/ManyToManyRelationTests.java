@@ -149,6 +149,7 @@ public class ManyToManyRelationTests extends NewRelationTestBase {
 			src = createTypeSrc("Customer", "");
 			src += createTypeSrc("Address", "relation cust Customer many optional");
 		}
+		log(src);
 		execTypeStatement(src);
 	}
 
