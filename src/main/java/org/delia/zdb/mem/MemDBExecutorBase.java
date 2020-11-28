@@ -95,8 +95,6 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			} else if (qtx.pruneParentRelationFlag) {
 				dvalList = removeParentSideRelations(dvalList);
 			}
-			//TODO: if query does NOT include fks or fetch then we should
-			//remove all parent side relations
 
 			qresp.dvalList = dvalList;
 			qresp.ok = true;

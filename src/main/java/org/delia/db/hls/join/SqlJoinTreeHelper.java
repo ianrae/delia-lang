@@ -202,7 +202,8 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 	private void doManyToManyAddFKofJoins(List<RenderedField> fieldL, TypePair pair,
 			RelationInfo relinfoA) {
 		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-		String fieldName = datIdMap.getAssocFieldFor(relinfoA);
+//		String fieldName = datIdMap.getAssocFieldFor(relinfoA);
+		String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
 
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
 		String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
@@ -276,7 +277,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					doManyToManyAddFKofJoins(fieldL, pair, relinfo.otherSide);
+					doManyToManyAddFKofJoins(fieldL, pair, relinfo);
 				} else if (!relinfo.isParent) {
 					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name));
 				}
