@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
 
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;

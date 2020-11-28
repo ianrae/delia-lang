@@ -9,6 +9,8 @@ import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.function.MemLimitFunction;
+import org.delia.zdb.mem.hls.function.MemOffsetFunction;
 import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 
 /**
@@ -36,16 +38,27 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			if (hlspan.oloEl != null) {
 				if (hlspan.oloEl.orderBy != null) {
 					MemOrderByFunction fn = new MemOrderByFunction(registry);
-					
-					QueryFuncContext ctx = new QueryFuncContext();
-					ctx.scope = new FuncScope(qresp);
-					ctx.offsetLimitDirtyFlag = hlspan.oloEl.limit != null;
-					
-					fn.process(hlspan, qresp, ctx);
+					runFn(hlspan, qresp, fn);
+				}
+				if (hlspan.oloEl.offset != null) {
+					MemOffsetFunction fn = new MemOffsetFunction(registry);
+					runFn(hlspan, qresp, fn);
+				}
+				if (hlspan.oloEl.limit != null) {
+					MemLimitFunction fn = new MemLimitFunction(registry);
+					runFn(hlspan, qresp, fn);
 				}
 			}
 		}
 		
 		return qresp;
+	}
+
+	private void runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn) {
+		QueryFuncContext ctx = new QueryFuncContext();
+		ctx.scope = new FuncScope(qresp);
+		ctx.offsetLimitDirtyFlag = hlspan.oloEl.limit != null;
+		
+		fn.process(hlspan, qresp, ctx);
 	}
 }
