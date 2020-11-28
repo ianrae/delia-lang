@@ -62,6 +62,8 @@ public class MemHLSTests extends HLSTestBase {
 		@Override
 		public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
 			log.log("ziggy!");
+			qtx.pruneParentRelationFlag = false;
+			qtx.loadFKs = false;
 			return this.doExecuteQuery(hls.querySpec, qtx);
 		}
 	}	
@@ -94,10 +96,11 @@ public class MemHLSTests extends HLSTestBase {
 	
 	@Before
 	public void init() {
-		createDaoHLSMEM();
+//		createDao();
 	}
 	
-	protected DeliaGenericDao createDaoHLSMEM() {
+	@Override
+	protected DeliaGenericDao createDao() {
 		DeliaBuilder builder = new DeliaBuilder();
 		FactoryService factorySvc = builder.createFactorySvcEx();
 		HLSMemZDBInterfaceFactory dbInterface = new HLSMemZDBInterfaceFactory(factorySvc);
@@ -105,6 +108,8 @@ public class MemHLSTests extends HLSTestBase {
 		MemZDBInterfaceFactory memDBinterface = (MemZDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;
+		
+		this.delia.getOptions().useHLS = true;
 		
 		if (flipAssocTbl) {
 			createTable(memDBinterface, "AddressCustomerDat1");

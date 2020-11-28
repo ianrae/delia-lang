@@ -146,19 +146,6 @@ public class DStructType extends DType implements DStructTypeInternal {
 		return super.toString();
 	}
 
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		super.performTypeReplacement(spec);
-//
-//		orderedMap.performTypeReplacement(spec);
-//		
-//		for(TypePair pair: allFields) {
-//			if (spec.needsReplacement(this, pair.type)) {
-//				pair.type = spec.newType;
-//			}
-//		}
-//	}
-
 	public PrimaryKey getPrimaryKey() {
 		return primaryKey;
 	}

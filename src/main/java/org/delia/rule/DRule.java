@@ -15,5 +15,4 @@ public interface DRule {
 	String getSubject(); //for error messages
 	void setPolarity(boolean polarity);
 	boolean executeGuard(DValue dval);
-//	void performTypeReplacement(TypeReplaceSpec spec);
 }

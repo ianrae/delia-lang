@@ -78,10 +78,5 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	public void enableSQLLogging(boolean b) {
 		actualInterface.enableSQLLogging(b);
 	}
-//
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		actualInterface.performTypeReplacement(spec);
-//	}
 
 }

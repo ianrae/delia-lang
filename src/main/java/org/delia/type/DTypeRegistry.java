@@ -133,11 +133,4 @@ public class DTypeRegistry {
 		return joiner.toString();
 	}
 
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		for(String typeName: this.getAll()) {
-//			DType currentType = getType(typeName);
-//			currentType.performTypeReplacement(spec);
-//		}
-//	}
-//    
 }

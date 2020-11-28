@@ -66,11 +66,6 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		return errorConverter;
 	}
 
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		//nothing to do
-//	}
-
 	@Override
 	public ZDBExecutor createExecutor() {
 		PostgresZDBConnection conn = (PostgresZDBConnection) openConnection();
