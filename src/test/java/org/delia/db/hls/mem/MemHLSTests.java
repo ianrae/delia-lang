@@ -5,14 +5,10 @@ import org.delia.assoc.CreateNewDatIdVisitor;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.QueryContext;
 import org.delia.db.hls.AliasManager;
-import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSTestBase;
-import org.delia.runner.QueryResponse;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,48 +34,6 @@ import org.junit.Test;
  */
 public class MemHLSTests extends HLSTestBase {
 	
-	public class HLSMemZDBExecutor extends MemZDBExecutor {
-
-		public HLSMemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
-			super(factorySvc, dbInterface);
-		}
-
-//		@Override
-//		public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-//			QueryResponse qresp = new QueryResponse();
-//
-//			try {
-//				qresp = doExecuteQuery(spec, qtx);
-//			} catch (InternalException e) {
-//				qresp.ok = false;
-//				qresp.err = e.getLastError();
-//			}
-//
-//			return qresp;
-//		}
-
-
-		@Override
-		public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-			log.log("ziggy!");
-			qtx.pruneParentRelationFlag = false;
-			qtx.loadFKs = false;
-			return this.doExecuteQuery(hls.querySpec, qtx);
-		}
-	}	
-	
-	public class HLSMemZDBInterfaceFactory extends MemZDBInterfaceFactory {
-		
-		public HLSMemZDBInterfaceFactory(FactoryService factorySvc) {
-			super(factorySvc);
-		}
-		
-		@Override
-		public ZDBExecutor createExecutor() {
-			return new HLSMemZDBExecutor(factorySvc, this);
-		}
-	}	
-
 	@Test
 	public void testOneSpanSubSQL() {
 		useCustomer11Src = true;
