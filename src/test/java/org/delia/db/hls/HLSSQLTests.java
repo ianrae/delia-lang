@@ -49,7 +49,7 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testOneRelationSQL() {
 		useCustomerManyToManySrc = true;
-		HLSSQLGeneratorImpl.useJoinTreeFlag = true;
+//		HLSSQLGeneratorImpl.useJoinTreeFlag = true;
 
 		//SELECT a.id,a.y FROM Address as a LEFT JOIN CustomerAddressDat1 as b ON a.id=b.rightv 
 //		sqlchk("let x = Customer[true].addr", "SELECT d.id,d.y,c.leftv as cust FROM Address as d LEFT JOIN CustomerAddressDat1 as c ON d.id=c.rightv");
@@ -85,7 +85,7 @@ public class HLSSQLTests extends HLSTestBase {
 	@Test
 	public void testDebugSQL() {
 		useCustomerManyToManySrc = true;
-		HLSSQLGeneratorImpl.useJoinTreeFlag = true;
+//		HLSSQLGeneratorImpl.useJoinTreeFlag = true;
 		
 		sqlchkP("let x = Customer[55].addr", "SELECT a.id,a.y,c.rightv as addr FROM Address as a LEFT JOIN CustomerAddressDat1 as c ON a.id=c.leftv WHERE a.cid = ?", "55");
 	}

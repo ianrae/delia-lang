@@ -86,7 +86,7 @@ public class SQLFetchTests extends JoinTreeTestBase {
 	@Before
 	public void init() {
 		createDao();
-		HLSSQLGeneratorImpl.useJoinTreeFlag = true;		
+//		HLSSQLGeneratorImpl.useJoinTreeFlag = true;		
 	}
 	private void sqlchkP(String src, String sqlExpected, String param1) {
 		doSqlchkP(src, sqlExpected, param1);
