@@ -156,7 +156,7 @@ public class HLSTestBase extends BDDBase {
 		return new DeliaGenericDao(delia);
 	}
 	
-	private void createTable(MemZDBInterfaceFactory db, String tableName) {
+	protected void createTable(MemZDBInterfaceFactory db, String tableName) {
 		TestCreatorHelper.createTable(db, tableName);
 	}
 

@@ -11,6 +11,7 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
 import org.delia.log.SimpleLog;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 /**
  * Main builder for creating your application's Delia object.
@@ -64,4 +65,27 @@ public class DeliaBuilder {
 			return delia;
 		}
 	}
+
+	/**
+	 * Ignores connection and builds with the given dbInterface
+	 * @param dbInterface
+	 * @return
+	 */
+	public Delia buildEx(ZDBInterfaceFactory dbInterface, FactoryService factorySvc) {
+		Delia delia = DeliaFactory.create(dbInterface, log, factorySvc);
+		return delia;
+	}
+	public FactoryService createFactorySvcEx() {
+		if (log == null) {
+			if (logFactory != null) {
+				log = logFactory.create("delia-logger"); //a single logger for Delia
+			} else {
+				log = new SimpleLog();
+			}
+		}
+		ErrorTracker et = new SimpleErrorTracker(log);
+		FactoryService factorySvc = new FactoryServiceImpl(log, et, logFactory);
+		return factorySvc;
+	}
+	
 }
