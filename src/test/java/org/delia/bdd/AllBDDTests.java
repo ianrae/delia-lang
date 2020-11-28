@@ -1,8 +1,10 @@
 package org.delia.bdd;
 
+import org.delia.api.DeliaFactory;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -328,6 +330,8 @@ public class AllBDDTests extends BDDBase {
 //		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
 //		runR560File("t0-self-NN.txt", 4);
+		
+		DeliaFactory.useHLSMEM = true;
 		runR1300File("t0-let-query.txt", 7);
 
 	}
@@ -348,7 +352,13 @@ public class AllBDDTests extends BDDBase {
 	
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		MemZDBInterfaceFactory db;
+		if (DeliaFactory.useHLSMEM) {
+			db = new HLSMemZDBInterfaceFactory(createFactorySvc());
+		} else {
+			db = new MemZDBInterfaceFactory(createFactorySvc());
+		}
+		
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);
 		}
