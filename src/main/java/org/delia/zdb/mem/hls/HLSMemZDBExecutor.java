@@ -11,6 +11,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.mem.hls.function.MemDistinctFunction;
+import org.delia.zdb.mem.hls.function.MemFieldFunction;
 import org.delia.zdb.mem.hls.function.MemLimitFunction;
 import org.delia.zdb.mem.hls.function.MemOffsetFunction;
 import org.delia.zdb.mem.hls.function.MemOrderByFunction;
@@ -36,6 +37,11 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		//do all spans after first
 		for(int i = 0; i < hls.hlspanL.size(); i++) {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
+			
+			if (hlspan.fEl != null) {
+				MemFieldFunction fn = new MemFieldFunction(registry, log, this.createFetchRunner());
+				runFn(hlspan, qresp, fn);
+			}
 			
 			if (hlspan.oloEl != null) {
 				if (hlspan.oloEl.orderBy != null) {
