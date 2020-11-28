@@ -4,9 +4,12 @@ import org.delia.core.FactoryService;
 import org.delia.db.QueryContext;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.queryresponse.FuncScope;
+import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 
 /**
  * Use HLS data to do MEM query
@@ -27,8 +30,20 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx);
 		
 		//do all spans after first
-		for(int i = 1; i < hls.hlspanL.size(); i++) {
+		for(int i = 0; i < hls.hlspanL.size(); i++) {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
+			
+			if (hlspan.oloEl != null) {
+				if (hlspan.oloEl.orderBy != null) {
+					MemOrderByFunction fn = new MemOrderByFunction(registry);
+					
+					QueryFuncContext ctx = new QueryFuncContext();
+					ctx.scope = new FuncScope(qresp);
+					ctx.offsetLimitDirtyFlag = hlspan.oloEl.limit != null;
+					
+					fn.process(hlspan, qresp, ctx);
+				}
+			}
 		}
 		
 		return qresp;
