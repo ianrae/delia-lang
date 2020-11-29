@@ -79,6 +79,9 @@ public class MemFieldFunction extends MemFunctionBase {
 			if (dval != null) {
 				DValue inner = dval.asStruct().getField(fieldName); 
 				if (inner != null) {
+					if (!inner.getType().isStructShape()) {
+						return null; //ian
+					}
 					nonNullDVal = dval;
 					break;
 				}
@@ -92,7 +95,6 @@ public class MemFieldFunction extends MemFunctionBase {
 			newRes.dvalList = newList;
 			ctx.scope.changeScope(newRes);  //new scope (empty)
 			
-			qresp.dvalList = newList;
 			return null;
 		}
 		

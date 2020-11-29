@@ -1,5 +1,10 @@
 package org.delia.zdb.mem.hls;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryContext;
 import org.delia.db.hls.GElement;
@@ -38,48 +43,68 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		for(int i = 0; i < hls.hlspanL.size(); i++) {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
 			
-			if (hlspan.fEl != null) {
-				MemFieldFunction fn = new MemFieldFunction(registry, log, this.createFetchRunner());
-				runFn(hlspan, qresp, fn);
-			}
-			
-			if (hlspan.oloEl != null) {
-				if (hlspan.oloEl.orderBy != null) {
-					MemOrderByFunction fn = new MemOrderByFunction(registry);
-					runFn(hlspan, qresp, fn);
-				}
-				if (hlspan.oloEl.offset != null) {
-					MemOffsetFunction fn = new MemOffsetFunction(registry);
-					runFn(hlspan, qresp, fn);
-				}
-				if (hlspan.oloEl.limit != null) {
-					MemLimitFunction fn = new MemLimitFunction(registry);
-					runFn(hlspan, qresp, fn);
-				}
-			}
-			
-			if (hlspan.gElList != null) {
-				for(GElement gel: hlspan.gElList) {
-					switch(gel.getFuncName()) {
-					case "distinct":
-						runFn(hlspan, qresp, new MemDistinctFunction(registry));
-						break;
-						default:
-							break;
-					}
-				}
-			}
+			List<String> actionL = buildActionsInOrder(hlspan, hls.queryExp);
+			runActions(actionL, hlspan, qresp);
 			
 		}
 		
 		return qresp;
 	}
 
-	private void runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn) {
+	private List<String> buildActionsInOrder(HLSQuerySpan hlspan, QueryExp queryExp) {
+		List<String> actionL = new ArrayList<>();
+		//TODO handle immediate scope change. i think that's a struct field
+		//then do order,limit,offset
+		addIf(actionL, (hlspan.oloEl.orderBy != null), "orderBy");
+		addIf(actionL, (hlspan.oloEl.limit != null), "linit");
+		addIf(actionL, (hlspan.oloEl.offset != null), "offset");
+		
+		//add rest in original order
+		for(QueryFuncExp qfe: queryExp.qfelist) {
+			if (!actionL.contains(qfe.funcName)) {
+				actionL.add(qfe.funcName);
+			}
+		}
+		
+		return actionL;
+	}
+
+	private void addIf(List<String> actionL, boolean b, String action) {
+		if (b) {
+			actionL.add(action);
+		}
+	}
+
+	private void runActions(List<String> actionL, HLSQuerySpan hlspan, QueryResponse qresp) {
+		MemFunction fn = null;
+		for(String action: actionL) {
+			switch(action) {
+			case "orderBy":
+				fn = new MemOrderByFunction(registry);
+				break;
+			case "offset":
+				fn = new MemOffsetFunction(registry);
+				break;
+			case "limit":
+				fn = new MemLimitFunction(registry);
+				break;
+			case "distinct":
+				fn = new MemDistinctFunction(registry);
+				break;
+			default:
+				fn = new MemFieldFunction(registry, log, this.createFetchRunner());
+				break;
+			}
+			
+			qresp = runFn(hlspan, qresp, fn);
+		}
+	}
+
+	private QueryResponse runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn) {
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
 		ctx.offsetLimitDirtyFlag = hlspan.oloEl.limit != null;
 		
-		fn.process(hlspan, qresp, ctx);
+		return fn.process(hlspan, qresp, ctx);
 	}
 }
