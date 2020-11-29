@@ -176,6 +176,7 @@ public class DeliaDaoTests extends DaoTestBase {
 		try {
 			dao.queryByFilter("bb", "zzz > 0");
 		} catch (Exception e) {
+//			e.printStackTrace();
 			log.log(e.getMessage());
 			failMsg = e.getMessage();
 		}

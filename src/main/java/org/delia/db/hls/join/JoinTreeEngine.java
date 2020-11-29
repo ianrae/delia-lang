@@ -35,6 +35,11 @@ public class JoinTreeEngine extends ServiceBase {
 	public List<JTElement> parse(QueryExp queryExp, List<LetSpan> spanL) {
 		List<JTElement> resultL = new ArrayList<>();
 		DStructType structType = (DStructType) registry.getType(queryExp.typeName);
+		if (structType == null) {
+			//unknown type. just return and the zdb executor will throw an exception
+			return resultL;
+		}
+		
 		for(LetSpan span: spanL) {
 			if (!span.qfeL.isEmpty()) {
 				for( QueryFuncExp qfe:span.qfeL) {
