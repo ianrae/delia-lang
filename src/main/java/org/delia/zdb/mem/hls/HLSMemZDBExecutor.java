@@ -11,7 +11,17 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.queryresponse.FuncScope;
 import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.function.ZCountFunction;
+import org.delia.queryresponse.function.ZDistinctFunction;
+import org.delia.queryresponse.function.ZExistsFunction;
+import org.delia.queryresponse.function.ZFKsFunction;
+import org.delia.queryresponse.function.ZFetchFunction;
 import org.delia.queryresponse.function.ZFirstFunction;
+import org.delia.queryresponse.function.ZLimitFunction;
+import org.delia.queryresponse.function.ZMaxFunction;
+import org.delia.queryresponse.function.ZMinFunction;
+import org.delia.queryresponse.function.ZOffsetFunction;
+import org.delia.queryresponse.function.ZOrderByFunction;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -23,6 +33,8 @@ import org.delia.zdb.mem.hls.function.MemFieldFunction;
 import org.delia.zdb.mem.hls.function.MemFirstFunction;
 import org.delia.zdb.mem.hls.function.MemFksFunction;
 import org.delia.zdb.mem.hls.function.MemLimitFunction;
+import org.delia.zdb.mem.hls.function.MemMaxFunction;
+import org.delia.zdb.mem.hls.function.MemMinFunction;
 import org.delia.zdb.mem.hls.function.MemOffsetFunction;
 import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 
@@ -87,31 +99,36 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		}
 		
 		for(GElement op: hlspan.gElList) {
-			switch(op.qfe.funcName) {
-			case "distinct":
-				actionL.add(new MemDistinctFunction(registry, op));
-				break;
-			case "count":
-				actionL.add(new MemCountFunction(registry, op));
-				break;
-			case "exists":
-				actionL.add(new MemExistsFunction(registry, op));
-				break;
-			case "first":
-				actionL.add(new MemFirstFunction(registry, op, true, false));
-				break;
-			case "last":
-				actionL.add(new MemFirstFunction(registry, op, false, false));
-				break;
-			case "ith":
-				actionL.add(new MemFirstFunction(registry, op, false, true));
-				break;
-			default:
-				break;
+			MemFunction fn = createGelMemFn(op);
+			if (fn != null) {
+				actionL.add(fn);
 			}
 		}
 		
 		return actionL;
+	}
+
+	private MemFunction createGelMemFn(GElement op) {
+		switch(op.qfe.funcName) {
+		case "min":
+			return new MemMinFunction(factorySvc, registry, op);
+		case "max":
+			return new MemMaxFunction(factorySvc, registry, op);
+		case "distinct":
+			return new MemDistinctFunction(registry, op);
+		case "count":
+			return new MemCountFunction(registry, op);
+		case "exists":
+			return new MemExistsFunction(registry, op);
+		case "first":
+			return new MemFirstFunction(registry, op, true, false);
+		case "last":
+			return new MemFirstFunction(registry, op, false, false);
+		case "ith":
+			return new MemFirstFunction(registry, op, false, true);
+		default:
+			return null;
+		}
 	}
 
 	private void addIf(List<MemFunction> actionL, boolean b, MemFunction fn) {

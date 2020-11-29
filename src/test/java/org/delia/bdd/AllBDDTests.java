@@ -344,10 +344,18 @@ public class AllBDDTests extends BDDBase {
 //		runR1500File("t0-queryfn-flatten.txt", 0);
 //		runR1500File("t0-queryfn-count.txt", 2);
 //		runR1500File("t0-queryfn-exist.txt", 2);
-		runR1500File("t0-queryfn-first.txt", 2);
-		runR1500File("t0-queryfn-last.txt", 2);
-		runR1500File("t0-queryfn-ith.txt", 4);
+//		runR1500File("t0-queryfn-first.txt", 2);
+//		runR1500File("t0-queryfn-last.txt", 2);
+//		runR1500File("t0-queryfn-ith.txt", 4);
 
+//		runR1500File("t0-queryfn-min-int.txt", 4);
+		runR1500File("t0-queryfn-max-date.txt", 4);
+
+		runR1500File("t0-queryfn-max.txt", 0);
+		runR1500File("t0-queryfn-max-int.txt", 4);
+		runR1500File("t0-queryfn-max-string.txt", 4);
+		runR1500File("t0-queryfn-limit.txt", 5);
+		runR1500File("t0-queryfn-offset.txt", 5);
 	}
 	
 	//---
