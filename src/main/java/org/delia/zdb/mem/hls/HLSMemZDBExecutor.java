@@ -2,11 +2,7 @@ package org.delia.zdb.mem.hls;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import org.delia.compiler.ast.QueryExp;
-import org.delia.compiler.ast.QueryFieldExp;
-import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryContext;
 import org.delia.db.hls.GElement;
@@ -46,14 +42,14 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		for(int i = 0; i < hls.hlspanL.size(); i++) {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
 			
-			List<MemFunction> actionL = buildActionsInOrder(hlspan, hls.queryExp);
+			List<MemFunction> actionL = buildActionsInOrder(hlspan);
 			runActions(actionL, hlspan, qresp);
 		}
 		
 		return qresp;
 	}
 
-	private List<MemFunction> buildActionsInOrder(HLSQuerySpan hlspan, QueryExp queryExp) {
+	private List<MemFunction> buildActionsInOrder(HLSQuerySpan hlspan) {
 		List<MemFunction> actionL = new ArrayList<>();
 		//TODO handle immediate scope change. i think that's a struct field
 		
@@ -64,42 +60,27 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			addIf(actionL, (hlspan.oloEl.offset != null), new MemOffsetFunction(registry));
 		}
 		
-		//add rest in original order
-		String fieldToSkip = null;
-		for(QueryFuncExp qfe: queryExp.qfelist) {
-			if (qfe instanceof QueryFieldExp) {
-				String fieldName = qfe.funcName;
-				if (fieldToSkip != null) {
-					fieldToSkip = null;
-					continue;
-				}
+		if (hlspan.rEl != null) {
+			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+		} else if (hlspan.fEl != null) {
+			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+		}
 				
-				if (hlspan.rEl != null) {
-					if (hlspan.rEl.rfieldPair.name.equals(fieldName)) {
-						actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-						if (hlspan.fEl != null && hlspan.fEl.fieldPair.equals(fieldName)) {
-							fieldToSkip = fieldName;
-						}
-					}
-				} else if (hlspan.fEl != null && hlspan.fEl.fieldPair.equals(fieldName)) {
-					actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-				}
-				
-			} else if (!actionL.contains(qfe.funcName)) {
-				String fnName = qfe.funcName;
-				Optional<GElement> opt = hlspan.gElList.stream().filter(x -> x.qfe.funcName.equals(fnName)).findAny();
-				if (! opt.isPresent()) {
-					continue;
-				}
-				switch(qfe.funcName) {
-				case "distinct":
-					actionL.add(new MemDistinctFunction(registry));
-					break;
-				case "fks":
-					actionL.add(new MemFksFunction(registry));
-				default:
-					break;
-				}
+		if (hlspan.subEl != null) {
+			if (hlspan.subEl.allFKs) {
+				actionL.add(new MemFksFunction(registry));
+//			} else if (fnName.equals("fetch")) {
+//				//TODO add 
+			}			
+		}
+		
+		for(GElement op: hlspan.gElList) {
+			switch(op.qfe.funcName) {
+			case "distinct":
+				actionL.add(new MemDistinctFunction(registry));
+				break;
+			default:
+				break;
 			}
 		}
 		

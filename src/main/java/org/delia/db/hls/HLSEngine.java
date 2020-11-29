@@ -2,6 +2,7 @@ package org.delia.db.hls;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryExp;
@@ -91,6 +92,7 @@ public class HLSEngine extends ServiceBase {
 
 		public HLSQuerySpan generateSpan(int i, LetSpan span) {
 			HLSQuerySpan hlstat = new HLSQuerySpan();
+			hlstat.optLetSpan = Optional.ofNullable(span);
 			hlstat.fromType = determineFromType(i);
 			hlstat.mtEl = new MTElement(hlstat.fromType);
 			hlstat.resultType = determineResultType(i);
