@@ -11,17 +11,6 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.queryresponse.FuncScope;
 import org.delia.queryresponse.QueryFuncContext;
-import org.delia.queryresponse.function.ZCountFunction;
-import org.delia.queryresponse.function.ZDistinctFunction;
-import org.delia.queryresponse.function.ZExistsFunction;
-import org.delia.queryresponse.function.ZFKsFunction;
-import org.delia.queryresponse.function.ZFetchFunction;
-import org.delia.queryresponse.function.ZFirstFunction;
-import org.delia.queryresponse.function.ZLimitFunction;
-import org.delia.queryresponse.function.ZMaxFunction;
-import org.delia.queryresponse.function.ZMinFunction;
-import org.delia.queryresponse.function.ZOffsetFunction;
-import org.delia.queryresponse.function.ZOrderByFunction;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -56,15 +45,16 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		qtx.loadFKs = findAnyFKs(hls);
 		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx); //do main filter
 		
+		pruneParentsIfNeeded(hls, qresp);
+		
 		//do all spans after first
 		for(int i = 0; i < hls.hlspanL.size(); i++) {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
 			
 			List<MemFunction> actionL = buildActionsInOrder(hlspan);
 			for(MemFunction fn: actionL) {
-				qresp = runFn(hlspan, qresp, fn);
+				qresp = runFn(hlspan, qresp, fn, i);
 			}
-
 		}
 		
 		return qresp;
@@ -140,11 +130,40 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		}
 	}
 
-	private QueryResponse runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn) {
+	private QueryResponse runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn, int i) {
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
 		ctx.offsetLimitDirtyFlag = hlspan.oloEl != null && hlspan.oloEl.limit != null;
 		
-		return fn.process(hlspan, qresp, ctx);
+		QueryResponse outputQresp = fn.process(hlspan, qresp, ctx);
+		if (i != 0 && ctx.scope.hasChanged()) {
+			pruneParentsAfterScopeChange(hlspan, qresp);
+		}
+		return outputQresp;
 	}
+	
+	private void pruneParentsIfNeeded(HLSQueryStatement hls, QueryResponse qresp) {
+		boolean needPrune = false;
+		if (hls.hlspanL.isEmpty()) {
+			needPrune = true;
+		} else {
+			needPrune = hls.hlspanL.get(0).subEl == null;
+		}
+		
+		if (needPrune) {
+			ParentPruner pruner = new ParentPruner(registry);
+			qresp.dvalList = pruner.removeParentSideRelations(qresp.dvalList);
+		}
+	}
+	private void pruneParentsAfterScopeChange(HLSQuerySpan hlspan, QueryResponse qresp) {
+		boolean needPrune = hlspan.subEl == null;
+		
+		if (needPrune) {
+			ParentPruner pruner = new ParentPruner(registry);
+			qresp.dvalList = pruner.removeParentSideRelations(qresp.dvalList);
+		}
+	}
+
+	
+	
 }
