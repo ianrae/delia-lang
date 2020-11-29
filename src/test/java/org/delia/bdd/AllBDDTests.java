@@ -322,7 +322,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
@@ -335,7 +335,14 @@ public class AllBDDTests extends BDDBase {
 //		runR1300File("t0-let-query.txt", 7);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
 //		runR1500File("t0-queryfn-limit.txt", 5);
-		runR1500File("t0-queryfn-distinct.txt", 3);
+//		runR1500File("t0-queryfn-distinct.txt", 3);
+		runR1500File("t0-queryfn-distinct-relation.txt", 2);
+//		runR1500File("t0-queryfn-flatten.txt", 0);
+//		runR1500File("t0-queryfn-count.txt", 2);
+//		runR1500File("t0-queryfn-exist.txt", 2);
+//		runR1500File("t0-queryfn-first.txt", 2);
+//		runR1500File("t0-queryfn-last.txt", 2);
+//		runR1500File("t0-queryfn-ith.txt", 4);
 
 	}
 	
