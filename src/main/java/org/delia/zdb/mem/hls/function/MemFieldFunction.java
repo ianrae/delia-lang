@@ -89,9 +89,6 @@ public class MemFieldFunction extends MemFunctionBase {
 			if (dval != null) {
 				DValue inner = dval.asStruct().getField(fieldName); 
 				if (inner != null) {
-					if (!inner.getType().isStructShape()) {
-						return null; //ian
-					}
 					nonNullDVal = dval;
 					break;
 				}
@@ -113,10 +110,10 @@ public class MemFieldFunction extends MemFunctionBase {
 	}
 	
 	private QueryResponse doImplicitFetchIfNeeded(DValue firstRel, HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		String fieldName = hlspan.fEl.getFieldName();
+		String fieldName = hlspan.rEl.rfieldPair.name;
 		
 		if (firstRel != null && firstRel.getType().isRelationShape()) {
-			MemFetchFunction fn = new MemFetchFunction(registry, fetchRunner);
+			MemFetchFunction fn = new MemFetchFunction(registry, fetchRunner, true);
 			qresp = fn.process(hlspan, qresp, ctx);
 			
 //			QueryFuncExp qfe = new QueryFuncExp(99, new IdentExp("fetch"), null, true);

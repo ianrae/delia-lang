@@ -15,15 +15,17 @@ import org.delia.zdb.mem.hls.MemFunctionBase;
 
 public class MemFetchFunction extends MemFunctionBase {
 	private FetchRunner fetchRunner;
+	private boolean doRFetch;
 
-	public MemFetchFunction(DTypeRegistry registry, FetchRunner fetchRunner) {
+	public MemFetchFunction(DTypeRegistry registry, FetchRunner fetchRunner, boolean doRFetch) {
 		super(registry);
 		this.fetchRunner = fetchRunner;
+		this.doRFetch = doRFetch;
 	}
 
 	@Override
 	public QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		String targetFieldName = hlspan.subEl.fetchL.get(0); //getStringArg(qfe, ctx);
+		String targetFieldName = (doRFetch) ? hlspan.rEl.rfieldPair.name : hlspan.subEl.fetchL.get(0); //getStringArg(qfe, ctx);
 		//TODO support multiple fetch('aaa','bbbb')
 
 		//find type of targetFieldName. Address

@@ -78,7 +78,7 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			if (hlspan.subEl.allFKs) {
 				actionL.add(new MemFksFunction(registry));
 			} else if (!hlspan.subEl.fetchL.isEmpty()) {
-				actionL.add(new MemFetchFunction(registry, createFetchRunner()));
+				actionL.add(new MemFetchFunction(registry, createFetchRunner(), false));
 			}			
 		}
 		
