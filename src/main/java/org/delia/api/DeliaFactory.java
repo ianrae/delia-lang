@@ -22,7 +22,7 @@ import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
  */
 public class DeliaFactory {
 	
-	public static boolean useHLSMEM = false;
+	public static boolean useHLSMEM = true;
 
 	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc) {
 		ConnectionString connectionString = new ConnectionString();

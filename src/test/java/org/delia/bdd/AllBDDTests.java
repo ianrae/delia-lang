@@ -201,7 +201,7 @@ public class AllBDDTests extends BDDBase {
 	@Test
 	public void testR1500a() {
 		enableAllFileCheck = false;
-		runR1500File("t0-queryfn-orderby-2span.txt", 2);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	@Test
@@ -322,11 +322,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+//		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
+//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---
@@ -335,7 +336,7 @@ public class AllBDDTests extends BDDBase {
 	@Before
 	public void init() {
 		BDDTesterEx.useHLS = true;
-		DeliaFactory.useHLSMEM = true;
+//		DeliaFactory.useHLSMEM = true;
 	}
 	@After
 	public void shutdown() {
