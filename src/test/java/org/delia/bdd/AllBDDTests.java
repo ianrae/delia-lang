@@ -343,10 +343,10 @@ public class AllBDDTests extends BDDBase {
 //		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 //		runR1500File("t0-queryfn-flatten.txt", 0);
 //		runR1500File("t0-queryfn-count.txt", 2);
-		runR1500File("t0-queryfn-exist.txt", 2);
-//		runR1500File("t0-queryfn-first.txt", 2);
-//		runR1500File("t0-queryfn-last.txt", 2);
-//		runR1500File("t0-queryfn-ith.txt", 4);
+//		runR1500File("t0-queryfn-exist.txt", 2);
+		runR1500File("t0-queryfn-first.txt", 2);
+		runR1500File("t0-queryfn-last.txt", 2);
+		runR1500File("t0-queryfn-ith.txt", 4);
 
 	}
 	

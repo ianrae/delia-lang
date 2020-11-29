@@ -11,6 +11,7 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.queryresponse.FuncScope;
 import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryresponse.function.ZFirstFunction;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -19,6 +20,7 @@ import org.delia.zdb.mem.hls.function.MemDistinctFunction;
 import org.delia.zdb.mem.hls.function.MemExistsFunction;
 import org.delia.zdb.mem.hls.function.MemFetchFunction;
 import org.delia.zdb.mem.hls.function.MemFieldFunction;
+import org.delia.zdb.mem.hls.function.MemFirstFunction;
 import org.delia.zdb.mem.hls.function.MemFksFunction;
 import org.delia.zdb.mem.hls.function.MemLimitFunction;
 import org.delia.zdb.mem.hls.function.MemOffsetFunction;
@@ -94,6 +96,15 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 				break;
 			case "exists":
 				actionL.add(new MemExistsFunction(registry));
+				break;
+			case "first":
+				actionL.add(new MemFirstFunction(registry, true, false));
+				break;
+			case "last":
+				actionL.add(new MemFirstFunction(registry, false, false));
+				break;
+			case "ith":
+				actionL.add(new MemFirstFunction(registry, false, true));
 				break;
 			default:
 				break;
