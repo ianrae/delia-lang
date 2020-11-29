@@ -29,7 +29,9 @@ public class ParentPruner {
 	public List<DValue> removeParentSideRelations(List<DValue> dvalList) {
 		List<DValue> list = new ArrayList<>();
 		for(DValue dval: dvalList) {
-			dval = removeParentSideRelationsOne(dval);
+			if (dval != null) {
+				dval = removeParentSideRelationsOne(dval);
+			}
 			list.add(dval);
 		}
 

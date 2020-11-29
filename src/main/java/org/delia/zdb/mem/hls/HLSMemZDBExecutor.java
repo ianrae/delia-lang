@@ -52,8 +52,10 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
 			
 			List<MemFunction> actionL = buildActionsInOrder(hlspan);
+			boolean isFirstFn = true;
 			for(MemFunction fn: actionL) {
-				qresp = runFn(hlspan, qresp, fn, i);
+				qresp = runFn(hlspan, qresp, fn, i, isFirstFn);
+				isFirstFn = false;
 			}
 		}
 		
@@ -130,33 +132,26 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		}
 	}
 
-	private QueryResponse runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn, int i) {
+	private QueryResponse runFn(HLSQuerySpan hlspan, QueryResponse qresp, MemFunction fn, int i, boolean isFirstFn) {
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
 		ctx.offsetLimitDirtyFlag = hlspan.oloEl != null && hlspan.oloEl.limit != null;
 		
 		QueryResponse outputQresp = fn.process(hlspan, qresp, ctx);
-		if (i != 0 && ctx.scope.hasChanged()) {
+		if (isFirstFn && (i == 0 || ctx.scope.hasChanged())) {
 			pruneParentsAfterScopeChange(hlspan, qresp);
 		}
 		return outputQresp;
 	}
 	
 	private void pruneParentsIfNeeded(HLSQueryStatement hls, QueryResponse qresp) {
-		boolean needPrune = false;
 		if (hls.hlspanL.isEmpty()) {
-			needPrune = true;
-		} else {
-			needPrune = hls.hlspanL.get(0).subEl == null;
-		}
-		
-		if (needPrune) {
 			ParentPruner pruner = new ParentPruner(registry);
 			qresp.dvalList = pruner.removeParentSideRelations(qresp.dvalList);
 		}
 	}
 	private void pruneParentsAfterScopeChange(HLSQuerySpan hlspan, QueryResponse qresp) {
-		boolean needPrune = hlspan.subEl == null;
+		boolean needPrune = hlspan.subEl == null && qresp.dvalList != null;
 		
 		if (needPrune) {
 			ParentPruner pruner = new ParentPruner(registry);
