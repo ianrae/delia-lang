@@ -2,6 +2,7 @@ package org.delia.zdb.mem.hls;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.delia.core.FactoryService;
 import org.delia.db.QueryContext;
@@ -14,6 +15,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.mem.hls.function.MemDistinctFunction;
+import org.delia.zdb.mem.hls.function.MemFetchFunction;
 import org.delia.zdb.mem.hls.function.MemFieldFunction;
 import org.delia.zdb.mem.hls.function.MemFksFunction;
 import org.delia.zdb.mem.hls.function.MemLimitFunction;
@@ -35,7 +37,7 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
 		log.log("ziggy!");
 		qtx.pruneParentRelationFlag = false;
-		qtx.loadFKs = false;
+		qtx.loadFKs = findAnyFKs(hls);
 		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx); //do main filter
 		
 		//do all spans after first
@@ -47,6 +49,12 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		}
 		
 		return qresp;
+	}
+
+	private boolean findAnyFKs(HLSQueryStatement hls) {
+		//TODO this finds any fks. TODO later need to distinguish among multiple
+		Optional<HLSQuerySpan> opt = hls.hlspanL.stream().filter(x -> (x.subEl != null && x.subEl.allFKs)).findAny();
+		return opt.isPresent();
 	}
 
 	private List<MemFunction> buildActionsInOrder(HLSQuerySpan hlspan) {
@@ -69,8 +77,8 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		if (hlspan.subEl != null) {
 			if (hlspan.subEl.allFKs) {
 				actionL.add(new MemFksFunction(registry));
-//			} else if (fnName.equals("fetch")) {
-//				//TODO add 
+			} else if (!hlspan.subEl.fetchL.isEmpty()) {
+				actionL.add(new MemFetchFunction(registry, createFetchRunner()));
 			}			
 		}
 		

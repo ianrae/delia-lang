@@ -28,20 +28,26 @@ public class MemFieldFunction extends MemFunctionBase {
 
 	@Override
 	public QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		String fieldName = hlspan.fEl.getFieldName();
-		log.logDebug("qff: " + fieldName);
-		
 		if (CollectionUtils.isEmpty(qresp.dvalList)) {
 			return qresp; //nothing to do
 		}
 		
 		//span may start with a relation field (eg .addr)
-		DValue firstRel = firstValueIsRelation(hlspan, qresp, ctx);
-		if (firstRel != null) {
-			qresp = doImplicitFetchIfNeeded(firstRel, hlspan, qresp, ctx);
-			return qresp;
+		if (hlspan.rEl != null) {
+			DValue firstRel = firstValueIsRelation(hlspan, qresp, ctx);
+			if (firstRel != null) {
+				qresp = doImplicitFetchIfNeeded(firstRel, hlspan, qresp, ctx);
+				if (hlspan.fEl == null) {
+					return qresp;
+				}
+			} else {
+				return null;
+			}
 		}
 
+		String fieldName = hlspan.fEl.getFieldName();
+		log.logDebug("qff: " + fieldName);
+		
 		List<DValue> newList = new ArrayList<>();
 		boolean checkFieldExists = true;
 		for(DValue dval: qresp.dvalList) {
@@ -67,7 +73,11 @@ public class MemFieldFunction extends MemFunctionBase {
 	}
 
 	private DValue firstValueIsRelation(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		String fieldName = hlspan.fEl.getFieldName();
+		if (hlspan.rEl == null) {
+			return null;
+		}
+		
+		String fieldName = hlspan.rEl.rfieldPair.name;
 //		if (!span.startsWithScopeChange) {
 //			return null;
 //		}

@@ -9,7 +9,7 @@ public class HLSMemZDBInterfaceFactory extends MemZDBInterfaceFactory {
 	
 	public HLSMemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
-		this.capabilities = new DBCapabilties(false, false, false, true);
+		this.capabilities = new DBCapabilties(false, false, true, true);
 	}
 	
 	@Override
