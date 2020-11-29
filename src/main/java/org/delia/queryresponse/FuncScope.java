@@ -6,7 +6,7 @@ import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
 
 public class FuncScope {
-	QueryResponse currentResp;
+	private QueryResponse currentResp;
 	
 	public FuncScope(QueryResponse result) {
 		this.currentResp = result;

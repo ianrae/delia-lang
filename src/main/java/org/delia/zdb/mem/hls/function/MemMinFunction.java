@@ -20,6 +20,7 @@ public class MemMinFunction extends GelMemFunctionBase {
 	
 	public MemMinFunction(FactoryService factorySvc, DTypeRegistry registry, GElement op) {
 		super(registry, op);
+		this.factorySvc = factorySvc;
 	}
 
 	@Override

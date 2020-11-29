@@ -322,40 +322,17 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 2;
+//		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
+		DeliaFactory.useHLSMEM = true;
 		
 //		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
 //		runR560File("t0-self-NN.txt", 4);
 		
-		DeliaFactory.useHLSMEM = true;
-//		runR1300File("t0-let-query.txt", 7);
-//		runR1500File("t0-queryfn-orderby.txt", 4);
-//		runR1500File("t0-queryfn-limit.txt", 5);
-//		runR1500File("t0-queryfn-distinct.txt", 3);
-		
-		
-//		runR1600File("t0-fetch.txt", 3);
-		
-//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
-//		runR1500File("t0-queryfn-flatten.txt", 0);
-//		runR1500File("t0-queryfn-count.txt", 2);
-//		runR1500File("t0-queryfn-exist.txt", 2);
-//		runR1500File("t0-queryfn-first.txt", 2);
-//		runR1500File("t0-queryfn-last.txt", 2);
-//		runR1500File("t0-queryfn-ith.txt", 4);
-
-//		runR1500File("t0-queryfn-min-int.txt", 4);
-		runR1500File("t0-queryfn-max-date.txt", 4);
-
-		runR1500File("t0-queryfn-max.txt", 0);
-		runR1500File("t0-queryfn-max-int.txt", 4);
-		runR1500File("t0-queryfn-max-string.txt", 4);
-		runR1500File("t0-queryfn-limit.txt", 5);
-		runR1500File("t0-queryfn-offset.txt", 5);
+		runR1700File("t0-let-field-multiple.txt", 5); 
 	}
 	
 	//---

@@ -61,7 +61,10 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
 			
 			List<MemFunction> actionL = buildActionsInOrder(hlspan);
-			runActions(actionL, hlspan, qresp);
+			for(MemFunction fn: actionL) {
+				qresp = runFn(hlspan, qresp, fn);
+			}
+
 		}
 		
 		return qresp;
@@ -134,12 +137,6 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 	private void addIf(List<MemFunction> actionL, boolean b, MemFunction fn) {
 		if (b) {
 			actionL.add(fn);
-		}
-	}
-
-	private void runActions(List<MemFunction> actionL, HLSQuerySpan hlspan, QueryResponse qresp) {
-		for(MemFunction fn: actionL) {
-			qresp = runFn(hlspan, qresp, fn);
 		}
 	}
 

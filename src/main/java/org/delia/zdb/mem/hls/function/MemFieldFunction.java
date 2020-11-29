@@ -41,7 +41,7 @@ public class MemFieldFunction extends MemFunctionBase {
 					return qresp;
 				}
 			} else {
-				return null;
+				return qresp;
 			}
 		}
 
@@ -102,6 +102,7 @@ public class MemFieldFunction extends MemFunctionBase {
 			newRes.dvalList = newList;
 			ctx.scope.changeScope(newRes);  //new scope (empty)
 			
+			qresp.dvalList = newList;
 			return null;
 		}
 		
