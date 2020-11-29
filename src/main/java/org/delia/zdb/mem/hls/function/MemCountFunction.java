@@ -3,15 +3,16 @@ package org.delia.zdb.mem.hls.function;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.db.hls.GElement;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
-public class MemCountFunction extends MemOffsetFunction {
-	public MemCountFunction(DTypeRegistry registry) {
-		super(registry);
+public class MemCountFunction extends GelMemFunctionBase {
+	public MemCountFunction(DTypeRegistry registry, GElement op) {
+		super(registry, op);
 	}
 
 	@Override

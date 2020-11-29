@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.db.hls.GElement;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
@@ -16,11 +17,10 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
-import org.delia.zdb.mem.hls.MemFunctionBase;
 
-public class MemDistinctFunction extends MemFunctionBase {
-	public MemDistinctFunction(DTypeRegistry registry) {
-		super(registry);
+public class MemDistinctFunction extends GelMemFunctionBase {
+	public MemDistinctFunction(DTypeRegistry registry, GElement op) {
+		super(registry, op);
 	}
 
 	@Override

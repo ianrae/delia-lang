@@ -4,8 +4,9 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.mem.hls.MemFunctionBase;
 
-public class MemFksFunction extends MemOffsetFunction {
+public class MemFksFunction extends MemFunctionBase {
 	public MemFksFunction(DTypeRegistry registry) {
 		super(registry);
 	}

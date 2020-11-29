@@ -12,28 +12,22 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
 
-public class MemFirstFunction extends MemOffsetFunction {
+public class MemFirstFunction extends GelMemFunctionBase {
 	private boolean firstFlag;
 	private boolean ithFlag;
 
-	public MemFirstFunction(DTypeRegistry registry, boolean firstFlag, boolean ithFlag) {
-		super(registry);
+	public MemFirstFunction(DTypeRegistry registry, GElement op, boolean firstFlag, boolean ithFlag) {
+		super(registry, op);
 		this.firstFlag = firstFlag;
 		this.ithFlag = ithFlag;
 	}
 	
-	private GElement findGEl(HLSQuerySpan hlspan) {
-		String target = ithFlag ? "ith" : (firstFlag ? "first" : "last");
-		Optional<GElement> opt = hlspan.gElList.stream().filter(x -> x.qfe.funcName.equals(target)).findAny();
-		return opt.isPresent() ? opt.get() : null;
-	}
-
 	@Override
 	public QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
 		List<DValue> dvalList = qresp.dvalList;
 		if (dvalList == null || dvalList.size() <= 1) {
 			if (ithFlag) {
-				GElement gel = findGEl(hlspan);
+				GElement gel = op;
 				if (gel.qfe.argL.isEmpty()) {
 					DeliaExceptionHelper.throwError("queryfn-bad-index", "bad index!! no index provided");				
 				}
@@ -45,7 +39,7 @@ public class MemFirstFunction extends MemOffsetFunction {
 		List<DValue> newlist = new ArrayList<>();
 		int n;
 		if (ithFlag) {
-			GElement gel = findGEl(hlspan);
+			GElement gel = op;
 			n = getIntArg(gel.qfe, ctx); 
 			if (n < 0 || n >= dvalList.size()) {
 				qresp.dvalList = newlist;

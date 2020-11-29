@@ -89,22 +89,22 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		for(GElement op: hlspan.gElList) {
 			switch(op.qfe.funcName) {
 			case "distinct":
-				actionL.add(new MemDistinctFunction(registry));
+				actionL.add(new MemDistinctFunction(registry, op));
 				break;
 			case "count":
-				actionL.add(new MemCountFunction(registry));
+				actionL.add(new MemCountFunction(registry, op));
 				break;
 			case "exists":
-				actionL.add(new MemExistsFunction(registry));
+				actionL.add(new MemExistsFunction(registry, op));
 				break;
 			case "first":
-				actionL.add(new MemFirstFunction(registry, true, false));
+				actionL.add(new MemFirstFunction(registry, op, true, false));
 				break;
 			case "last":
-				actionL.add(new MemFirstFunction(registry, false, false));
+				actionL.add(new MemFirstFunction(registry, op, false, false));
 				break;
 			case "ith":
-				actionL.add(new MemFirstFunction(registry, false, true));
+				actionL.add(new MemFirstFunction(registry, op, false, true));
 				break;
 			default:
 				break;
