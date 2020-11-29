@@ -14,7 +14,9 @@ import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.function.MemCountFunction;
 import org.delia.zdb.mem.hls.function.MemDistinctFunction;
+import org.delia.zdb.mem.hls.function.MemExistsFunction;
 import org.delia.zdb.mem.hls.function.MemFetchFunction;
 import org.delia.zdb.mem.hls.function.MemFieldFunction;
 import org.delia.zdb.mem.hls.function.MemFksFunction;
@@ -86,6 +88,12 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			switch(op.qfe.funcName) {
 			case "distinct":
 				actionL.add(new MemDistinctFunction(registry));
+				break;
+			case "count":
+				actionL.add(new MemCountFunction(registry));
+				break;
+			case "exists":
+				actionL.add(new MemExistsFunction(registry));
 				break;
 			default:
 				break;
