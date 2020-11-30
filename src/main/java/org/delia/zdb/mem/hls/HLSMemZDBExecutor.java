@@ -51,7 +51,8 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		for(int i = 0; i < hls.hlspanL.size(); i++) {
 			HLSQuerySpan hlspan = hls.hlspanL.get(i);
 			
-			List<MemFunction> actionL = buildActionsInOrder(hlspan);
+			boolean beginsWithScopeChange = (i == 0 ) && !(hlspan.fromType.getName().equals(hls.queryExp.typeName));
+			List<MemFunction> actionL = buildActionsInOrder(hlspan, hls, beginsWithScopeChange);
 			boolean isFirstFn = true;
 			for(MemFunction fn: actionL) {
 				qresp = runFn(hlspan, qresp, fn, i, isFirstFn);
@@ -68,9 +69,11 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		return opt.isPresent();
 	}
 
-	private List<MemFunction> buildActionsInOrder(HLSQuerySpan hlspan) {
+	private List<MemFunction> buildActionsInOrder(HLSQuerySpan hlspan, HLSQueryStatement hls, boolean beginsWithScopeChange) {
 		List<MemFunction> actionL = new ArrayList<>();
-		//TODO handle immediate scope change. i think that's a struct field
+		if (beginsWithScopeChange) {
+			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+		}
 		
 		//then do order,limit,offset
 		if (hlspan.oloEl != null) {
@@ -79,10 +82,12 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			addIf(actionL, (hlspan.oloEl.offset != null), new MemOffsetFunction(registry));
 		}
 		
-		if (hlspan.rEl != null) {
-			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-		} else if (hlspan.fEl != null) {
-			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+		if (! beginsWithScopeChange) {
+			if (hlspan.rEl != null) {
+				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+			} else if (hlspan.fEl != null) {
+				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+			}
 		}
 				
 		if (hlspan.subEl != null) {

@@ -328,6 +328,8 @@ public class AllBDDTests extends BDDBase {
 //		diagnosticFilter = "I"; //log insert statements
 		
 //		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
+		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 	}
 	
 	//---
