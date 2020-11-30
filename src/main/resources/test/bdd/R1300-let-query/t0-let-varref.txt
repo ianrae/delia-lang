@@ -55,7 +55,8 @@ given:
 when:
   let x = x0.wid
 then:
-value:a:int:5533
+value:a:int:1
+value:a:int:3
 
 ---
 title: let multiple fn

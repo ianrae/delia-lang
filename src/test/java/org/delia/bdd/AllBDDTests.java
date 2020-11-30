@@ -323,13 +323,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 2;
+//		testIndexToRun = 3;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-//		runR1300File("t0-let-varref.txt", 5);
-		runR1800File("t0-dollardollar.txt", 2);
+		runR1300File("t0-let-varref.txt", 5);
 	}
 	
 	//---
