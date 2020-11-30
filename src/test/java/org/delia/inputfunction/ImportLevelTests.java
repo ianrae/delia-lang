@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.app.NorthwindHelper;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -25,12 +22,10 @@ import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.OutputFieldHandle;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImportLevelTests  extends BDDBase {
+public class ImportLevelTests extends InputFunctionTestBase {
 
 	@Test
 	public void testLevel1() {
@@ -55,14 +50,8 @@ public class ImportLevelTests  extends BDDBase {
 	}
 	
 	// --
-	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-
-	//	private DeliaDao dao;
-	private DeliaSession session;
-//	private int numExpectedColumnsProcessed;
 	private List<LineObj> currentLineObjL;
-
-
+	
 	@Before
 	public void init() {
 	}
@@ -132,13 +121,6 @@ public class ImportLevelTests  extends BDDBase {
 		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
 		ImportSpecBuilder ispecBuilder = new ImportSpecBuilder();
 		ospec.ispec = ispecBuilder.buildSpecFor(progset, ospec.structType);
-	}
-
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
 	}
 
 	private LineObjIterator createIter(int n) {

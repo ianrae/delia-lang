@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -39,12 +38,10 @@ import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFunctionRunnerTests  extends BDDBase {
+public class InputFunctionRunnerTests extends InputFunctionTestBase {
 	
 	@Test
 	public void test2() {
@@ -170,9 +167,6 @@ public class InputFunctionRunnerTests  extends BDDBase {
 
 
 	// --
-//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
 	private DTypeRegistry registry;
 	private ErrorTracker localET;
 
@@ -195,11 +189,5 @@ public class InputFunctionRunnerTests  extends BDDBase {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
 		return new DeliaGenericDao(delia);
-	}
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
 	}
 }

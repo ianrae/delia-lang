@@ -31,7 +31,7 @@ import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFunctionServiceTests  extends BDDBase {
+public class InputFunctionServiceTests extends InputFunctionTestBase {
 
 	@Test
 	public void test1() {
@@ -169,9 +169,6 @@ public class InputFunctionServiceTests  extends BDDBase {
 	}
 
 	// --
-	//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
 
 	@Before
 	public void init() {
@@ -204,12 +201,6 @@ public class InputFunctionServiceTests  extends BDDBase {
 		return new DeliaGenericDao(delia);
 	}
 
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
-	
 	private LineObjIterator createIter(int n, boolean goodObj) {
 		List<LineObj> list = new ArrayList<>();
 		for(int i = 0; i < n; i++) {

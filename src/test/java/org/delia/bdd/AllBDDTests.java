@@ -348,11 +348,7 @@ public class AllBDDTests extends BDDBase {
 	@Override
 	public ZDBInterfaceFactory createForTest() {
 		MemZDBInterfaceFactory db;
-		if (DeliaFactory.useHLSMEM) {
-			db = new HLSMemZDBInterfaceFactory(createFactorySvc());
-		} else {
-			db = new MemZDBInterfaceFactory(createFactorySvc());
-		}
+		db = new HLSMemZDBInterfaceFactory(createFactorySvc());
 		
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);

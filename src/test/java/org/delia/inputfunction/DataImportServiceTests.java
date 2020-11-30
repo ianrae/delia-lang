@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -22,12 +20,10 @@ import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DataImportServiceTests  extends BDDBase {
+public class DataImportServiceTests extends InputFunctionTestBase {
 
 	@Test
 	public void test1() {
@@ -182,9 +178,6 @@ public class DataImportServiceTests  extends BDDBase {
 	
 	
 	// --
-	//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
 
 	@Before
 	public void init() {
@@ -252,15 +245,6 @@ public class DataImportServiceTests  extends BDDBase {
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
 		assertEquals(true, res.ok);
 		assertEquals(0, res.getAsDValueList().size());
-	}
-
-
-	
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
 	}
 
 	private LineObjIterator createIter(int n) {

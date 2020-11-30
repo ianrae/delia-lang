@@ -3,8 +3,6 @@ package org.delia.inputfunction;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -27,13 +25,10 @@ import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.TerminalParser;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFunctionParserTests  extends BDDBase {
+public class InputFunctionParserTests extends InputFunctionTestBase {
 	
 	@Test
 	public void test() {
@@ -221,19 +216,13 @@ public class InputFunctionParserTests  extends BDDBase {
 
 
 
-	// --
-//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
-	private DTypeRegistry registry;
-
+	//----------
 	@Before
 	public void init() {
 		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 		String src = buildSrc();
 		this.session = delia.beginSession(src);
-		this.registry = session.getExecutionContext().registry;
 	}
 	private String buildSrc() {
 		String src = " type Customer struct {id int unique, wid int, name string } end";
@@ -259,13 +248,4 @@ public class InputFunctionParserTests  extends BDDBase {
 		long bigId = Long.valueOf((long)max) + 10; //2147483647
 		return bigId;
 	}
-
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
-	
-	
 }

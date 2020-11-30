@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.app.NorthwindHelper;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -23,12 +21,10 @@ import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObjIterator;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DataImportGroupTests  extends BDDBase {
+public class DataImportGroupTests extends InputFunctionTestBase {
 	
 	public static class ImportGroupService extends ServiceBase {
 		
@@ -79,12 +75,6 @@ public class DataImportGroupTests  extends BDDBase {
 	
 	
 	// --
-	//	private DeliaDao dao;
-	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-	
-	private Delia delia;
-	private DeliaSession session;
-	private int numExpectedColumnsProcessed;
 	private int stopAfterErrorThreshold;
 
 	@Before
@@ -168,11 +158,5 @@ public class DataImportGroupTests  extends BDDBase {
 //			return src;
 //		}
 //	}
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
 
 }

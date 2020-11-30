@@ -11,6 +11,7 @@ import org.delia.api.DeliaFactory;
 import org.delia.api.DeliaOptions;
 import org.delia.api.DeliaSession;
 import org.delia.base.DBHelper;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.base.UnitTestLogFactory;
 import org.delia.core.FactoryService;
@@ -150,7 +151,7 @@ public class ClientTests {
 		addIdFlag = true;
 		Log log = new UnitTestLog();
 		FactoryService factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
-		dbInterface = new MemZDBInterfaceFactory(factorySvc);
+		dbInterface = DBTestHelper.createMEMDb(factorySvc);
 		client = new DeliaClient(dbInterface);
 		DBHelper.createTable(dbInterface, "Address"); //!! fake schema
 		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
