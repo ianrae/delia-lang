@@ -300,10 +300,15 @@ public class LetStatementRunner extends ServiceBase {
 				
 				//resolve varref to parseable query
 //				if (queryExp.)
-				if (qresp.emptyResults() && queryExp.qfelist.size() > 0) {
-					String msg = String.format("var '%s' is null. cannot be evaluationed", varRef.varRef);
-					DeliaError err = et.add("var-ref-is-null", msg);
-					throw new DeliaException(err);
+				if (qresp.emptyResults()) {
+					if (queryExp.qfelist.size() > 0) {
+						String msg = String.format("var '%s' is null. cannot be evaluationed", varRef.varRef);
+						DeliaError err = et.add("var-ref-is-null", msg);
+						throw new DeliaException(err);
+					}
+					
+					varRef.qresp = qresp.dvalList == null ? null : qresp;
+					return varRef;
 				} else {
 					DValue first = qresp.dvalList.get(0);
 					//if scalar then just return

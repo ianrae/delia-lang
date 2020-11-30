@@ -38,7 +38,7 @@ public class BDDTestBase {
 		assertEquals(true, runner.getRegistry().existsType("Zoo"));
 		
 		//migrate db
-		migrateDB(initter, "Actor", "Zoo");
+//		migrateDB(initter, "Actor", "Zoo");
 	}
 	
 	protected void addData() {
@@ -75,27 +75,27 @@ public class BDDTestBase {
 		log.log(msg);
 	}
 	
-	protected void migrateDB(DeliaInitializer initter, String typeName, String typeName2) {
-		SchemaMigrator migrator = initter.createSchemaMigrator();
-		boolean b = migrator.createSchemaTableIfNeeded();
-		assertEquals(true, b);
-		b = migrator.dbNeedsMigration();
-		assertEquals(true, b);
-
-		List<SchemaType> list = migrator.parseFingerprint(migrator.getDbFingerprint());
-		assertEquals(0, list.size());
-
-		List<SchemaType> list2 = migrator.parseFingerprint(migrator.getCurrentFingerprint());
-		assertEquals(2, list2.size());
-		assertEquals(typeName, list2.get(0).typeName);
-
-		List<SchemaType> diffL = migrator.calcDiff(list, list2);
-		assertEquals(2, diffL.size());
-		assertEquals(typeName, diffL.get(0).typeName);
-		log("migrate: +" + typeName + " +" + typeName2);
-
-		b = migrator.performMigrations(diffL, true);
-		assertEquals(true, b);
-		migrator.close();
-	}
+//	protected void migrateDB(DeliaInitializer initter, String typeName, String typeName2) {
+//		SchemaMigrator migrator = initter.createSchemaMigrator();
+//		boolean b = migrator.createSchemaTableIfNeeded();
+//		assertEquals(true, b);
+//		b = migrator.dbNeedsMigration();
+//		assertEquals(true, b);
+//
+//		List<SchemaType> list = migrator.parseFingerprint(migrator.getDbFingerprint());
+//		assertEquals(0, list.size());
+//
+//		List<SchemaType> list2 = migrator.parseFingerprint(migrator.getCurrentFingerprint());
+//		assertEquals(2, list2.size());
+//		assertEquals(typeName, list2.get(0).typeName);
+//
+//		List<SchemaType> diffL = migrator.calcDiff(list, list2);
+//		assertEquals(2, diffL.size());
+//		assertEquals(typeName, diffL.get(0).typeName);
+//		log("migrate: +" + typeName + " +" + typeName2);
+//
+//		b = migrator.performMigrations(diffL, true);
+//		assertEquals(true, b);
+//		migrator.close();
+//	}
 }
