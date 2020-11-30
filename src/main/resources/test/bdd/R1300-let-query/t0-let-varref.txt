@@ -1,0 +1,73 @@
+# let var ref tests
+
+FEATURE: let-query
+background:
+  type Flight struct {id int unique, wid int optional }  end
+thenType: struct
+
+---
+title: let single
+given:
+  insert Flight {id: 55, wid: 1 }
+  let x0 = Flight[55]
+when:
+  let x = x0
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+}
+---
+title: let multiple
+given:
+  insert Flight {id: 55, wid: 1 }
+  insert Flight {id: 56, wid: 3 }
+  let x0 = Flight[55]
+when:
+  let x = x0
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+}
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+
+
+---
+title: let single.field
+given:
+  insert Flight {id: 55, wid: 1 }
+  let x0 = Flight[55]
+when:
+  let x = x0.wid
+then:
+value:a:int:1
+
+---
+title: let multiple.field
+given:
+  insert Flight {id: 55, wid: 1 }
+  insert Flight {id: 56, wid: 3 }
+  let x0 = Flight[55]
+when:
+  let x = x0.wid
+then:
+value:a:int:5533
+
+---
+title: let multiple fn
+given:
+  insert Flight {id: 55, wid: 1 }
+  insert Flight {id: 56, wid: 3 }
+  let x0 = Flight[55]
+when:
+  let x = x0.first()
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+}
+

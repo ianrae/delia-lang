@@ -139,8 +139,11 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	private QueryResponse executeDBQuery(QueryExp queryExp) {
+		return executeDBQuery(queryExp, null);
+	}
+	private QueryResponse executeDBQuery(QueryExp queryExp, QueryResponse existingQResp) {
 		QuerySpec spec = resolveFilterVars(queryExp);
-		QueryContext qtx = buildQueryContext(spec);
+		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
 		boolean flag = mgr != null;
 		QueryResponse qresp;
@@ -154,8 +157,9 @@ public class LetStatementRunner extends ServiceBase {
 		return qresp;
 	}
 
-	private QueryContext buildQueryContext(QuerySpec spec) {
+	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp) {
 		QueryContext qtx = new QueryContext();
+		qtx.existingQResp = existingQResp;
 		qtx.letSpanEngine = letSpanEngine;
 		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
 		if (!qtx.loadFKs) {
@@ -305,7 +309,8 @@ public class LetStatementRunner extends ServiceBase {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
 				//extract fields or invoke fns (optional)
-				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp, spanRunner);
+//				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp, spanRunner);
+				QueryResponse qresp2 = executeDBQuery(queryExp, qresp);
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {
 					if (qresp2.dvalList == null) {

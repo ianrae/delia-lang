@@ -40,7 +40,7 @@ public class LetSpanEngine extends ServiceBase {
 		for(LetSpan span: spanL) {
 			span.qresp = qresp;
 			span.qfeL = adjustExecutionOrder(span);
-			qresp = runner.executeSpan(span);
+//			qresp = runner.executeSpan(span);
 		}
 		
 		return qresp;

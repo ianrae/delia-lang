@@ -140,6 +140,7 @@ public class AllBDDTests extends BDDBase {
 	@Test
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
+		runR1300File("t0-let-varref.txt", 7);
 	}
 	
 	@Test
@@ -322,14 +323,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
-//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
-		runR1550File("t0-queryfn-oneone-childa.txt", 7);
+		runR1300File("t0-let-varref.txt", 5);
 	}
 	
 	//---
