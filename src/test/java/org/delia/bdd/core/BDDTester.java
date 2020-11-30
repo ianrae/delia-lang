@@ -9,6 +9,7 @@ import org.delia.db.DBType;
 import org.delia.h2.DeliaInitializer;
 import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
+import org.delia.runner.LegacyRunner;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
@@ -20,13 +21,13 @@ public class BDDTester {
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper = new CompilerHelper(null);
 	protected DeliaInitializer initter;
-	protected Runner runner;
+	protected LegacyRunner runner;
 	protected BDDQueryHelper qhelper;
 	
 	public BDDTester() {
 		initter = new DeliaInitializer();
 		runner = initter.init(DBType.MEM, log);
-		qhelper = new BDDQueryHelper(initter, runner);
+		qhelper = new BDDQueryHelper(initter, runner.innerRunner);
 	}
 
 	public boolean chkString(String delia, String expected) {

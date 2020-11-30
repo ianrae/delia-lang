@@ -82,10 +82,10 @@ public class SchemaMigratorTests {
 		dbInterface = DBTestHelper.createMEMDb(factorySvc);
 		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 
-		Runner runner = helper.create(factorySvc, dbInterface);
+		LegacyRunner runner = helper.create(factorySvc, dbInterface);
 
-		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner, null);
-		return runner;
+		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner.innerRunner, null);
+		return runner.innerRunner;
 	}
 
 }

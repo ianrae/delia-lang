@@ -13,6 +13,7 @@ import org.delia.db.schema.SchemaType;
 import org.delia.h2.DeliaInitializer;
 import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
+import org.delia.runner.LegacyRunner;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
@@ -55,7 +56,7 @@ public class BDDTestBase {
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper = new CompilerHelper(null);
 	protected DeliaInitializer initter;
-	protected Runner runner;
+	protected LegacyRunner runner;
 	protected BDDQueryHelper qhelper;
 
 	public static final String TYPE0 = "Zoo"; //type with 0 values
@@ -64,7 +65,7 @@ public class BDDTestBase {
 	public void init() {
 		initter = new DeliaInitializer();
 		runner = initter.init(DBType.MEM, log);
-		qhelper = new BDDQueryHelper(initter, runner);
+		qhelper = new BDDQueryHelper(initter, runner.innerRunner);
 		
 		setupTypes();
 		addData();

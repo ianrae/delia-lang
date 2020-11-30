@@ -17,6 +17,7 @@ import org.delia.log.Log;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.LegacyRunner;
+import org.delia.runner.RunnerHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class DeliaInitializer {
@@ -38,10 +39,11 @@ public class DeliaInitializer {
 			return null;
 		}
 
-		this.runner = new LegacyRunner(factorySvc, dbInterface);
-		this.runner.legacyTypeMode = true;
-		b = runner.init(null);
-		assertEquals(true, b);
+		RunnerHelper helper = new RunnerHelper();
+		this.runner = helper.create(factorySvc, dbInterface);
+//		this.runner.legacyTypeMode = true;
+//		b = runner.init(null);
+//		assertEquals(true, b);
 //		dbInterface.setRegistry(runner.getRegistry());
 //		dbInterface.setVarEvaluator(runner);
 		return runner;

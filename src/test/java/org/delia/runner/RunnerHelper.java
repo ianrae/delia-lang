@@ -2,14 +2,13 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.api.Delia;
+import org.delia.api.DeliaImpl;
 import org.delia.base.FakeTypeCreator;
 import org.delia.base.UnitTestLog;
+import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.log.Log;
-import org.delia.runner.InternalCompileState;
-import org.delia.runner.QueryResponse;
-import org.delia.runner.ResultValue;
-import org.delia.runner.Runner;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -18,18 +17,25 @@ import org.delia.zdb.ZDBInterfaceFactory;
 
 
 public class RunnerHelper {
-	private LegacyRunner currentRunner;
+	private Runner currentRunner;
 	
 	public LegacyRunner create(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
-		LegacyRunner runner = new LegacyRunner(factorySvc, dbInterface);
-		runner.legacyTypeMode = true; //TODO: remove
-		boolean b = runner.init(null);
-		assertEquals(true, b);
+//		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		DeliaBuilder builder = new DeliaBuilder();
+		Delia delia = builder.buildEx(dbInterface, factorySvc);
+		
+		DeliaImpl impl = (DeliaImpl) delia;
+		currentRunner = impl.createRunner(null);
+		LegacyRunner runner = new LegacyRunner(currentRunner, factorySvc);
+		
+//		runner.legacyTypeMode = true; //TODO: remove
+//		boolean b = runner.init(null);
+//		assertEquals(true, b);
 //		dbInterface.init(factorySvc);
-		this.addFakeTypes(runner.getRegistry());
+		this.addFakeTypes(currentRunner.getRegistry());
 //		dbInterface.setRegistry(runner.getRegistry());
 //		dbInterface.setVarEvaluator(runner);
-		currentRunner = runner;
+		
 		return runner;
 	}
 	

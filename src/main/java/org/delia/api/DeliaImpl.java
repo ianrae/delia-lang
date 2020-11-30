@@ -91,7 +91,8 @@ public class DeliaImpl implements Delia {
 	}
 
 
-	protected Runner createRunner(DeliaSession dbsess) {
+	//only public for unit tests
+	public Runner createRunner(DeliaSession dbsess) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		Runner runner = new RunnerImpl(factorySvc, dbInterface);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
