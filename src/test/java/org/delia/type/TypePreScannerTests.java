@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.delia.api.Delia;
+import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
@@ -20,7 +21,6 @@ import org.delia.error.DeliaError;
 import org.delia.typebuilder.PreTypeRegistry;
 import org.delia.typebuilder.TypePreRunner;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -135,7 +135,7 @@ public class TypePreScannerTests extends BDDBase {
 
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

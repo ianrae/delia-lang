@@ -20,7 +20,6 @@ import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -125,7 +124,7 @@ public class PostgresImportTests  extends BDDBase {
 	
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 }
