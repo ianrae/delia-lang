@@ -3,6 +3,7 @@ package org.delia.runner;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
@@ -115,10 +116,7 @@ public class LetStatementRunner extends ServiceBase {
 			res.addIfNotNull(qresp.err);
 			res.shape = null;
 			res.val = qresp;
-
-//			if (qresp.ok) {
-//				runQueryFnsIfNeeded(queryExp, qresp, res);
-//			}
+			runValidation(queryExp, qresp, res);
 
 			assignVar(exp, res);
 			return res; //!!fill in rest
@@ -260,22 +258,15 @@ public class LetStatementRunner extends ServiceBase {
 //		//				return qresp2;
 //		//			}
 //	}
-//	private void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
-//		//extract fields or invoke fns (optional)
-//		QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
-//		res.ok = qresp2.ok;
-//		res.addIfNotNull(qresp2.err);
-//		res.shape = null;
-//		res.val = qresp2;
-//
-//		//validate (assume that we don't fully trust db storage - someone may have tampered with data)
-//		if (qresp2.ok && CollectionUtils.isNotEmpty(qresp2.dvalList)) {
-//			ValidationRunner ruleRunner = createValidationRunner();
-//			if (! ruleRunner.validateDVals(qresp.dvalList)) {
-//				ruleRunner.propogateErrors(res);
-//			}
-//		}                              
-//	}
+	private void runValidation(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
+		//validate (assume that we don't fully trust db storage - someone may have tampered with data)
+		if (qresp.ok && CollectionUtils.isNotEmpty(qresp.dvalList)) {
+			ValidationRunner ruleRunner = createValidationRunner();
+			if (! ruleRunner.validateDVals(qresp.dvalList)) {
+				ruleRunner.propogateErrors(res);
+			}
+		}                              
+	}
 
 	private void assignVar(LetStatementExp exp, ResultValue res) {
 		String varName = exp.varName;
