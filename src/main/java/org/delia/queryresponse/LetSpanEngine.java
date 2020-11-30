@@ -45,20 +45,20 @@ public class LetSpanEngine extends ServiceBase {
 //		
 //		return qresp;
 //	}
-	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
-		DType dtype = registry.getType(queryExp.typeName);
-		List<LetSpan> spanL = buildSpans(queryExp, dtype);
-		
-		//execute span
-		QueryResponse qresp = qrespInitial;
-		for(LetSpan span: spanL) {
-			span.qresp = qresp;
-			span.qfeL = adjustExecutionOrder(span);
-			qresp = runner.executeSpan(span);
-		}
-		
-		return qresp;
-	}
+//	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
+//		DType dtype = registry.getType(queryExp.typeName);
+//		List<LetSpan> spanL = buildSpans(queryExp, dtype);
+//		
+//		//execute span
+//		QueryResponse qresp = qrespInitial;
+//		for(LetSpan span: spanL) {
+//			span.qresp = qresp;
+//			span.qfeL = adjustExecutionOrder(span);
+//			qresp = runner.executeSpan(span);
+//		}
+//		
+//		return qresp;
+//	}
 	public List<LetSpan> buildAllSpans(QueryExp queryExp) {
 		DType dtype = registry.getType(queryExp.typeName);
 		if (dtype == null) {

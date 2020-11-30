@@ -20,7 +20,6 @@ import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
-import org.delia.queryresponse.LetSpanRunnerImpl;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -46,7 +45,6 @@ public class LetStatementRunner extends ServiceBase {
 	private RunnerImpl runner;
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
-	private LetSpanRunnerImpl spanRunner;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
@@ -72,7 +70,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	public ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-		this.spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
 		this.letSpanEngine = new LetSpanEngine(factorySvc, registry);
 		
 		if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
@@ -307,6 +304,7 @@ public class LetStatementRunner extends ServiceBase {
 		} else {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
+				
 				//extract fields or invoke fns (optional)
 				
 				//resolve varref to parseable query
@@ -317,6 +315,12 @@ public class LetStatementRunner extends ServiceBase {
 					throw new DeliaException(err);
 				} else {
 					DValue first = qresp.dvalList.get(0);
+					//if scalar then just return
+					if (first.getType().isScalarShape()) {
+						varRef.qresp = qresp;
+						return varRef;
+					}
+					
 					queryExp.typeName = first.getType().getName();
 					//TODO add code to handle var refs deeper in statement. ex: let x = y.orderBy(z)
 				}

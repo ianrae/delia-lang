@@ -23,7 +23,6 @@ import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.queryresponse.LetSpan;
 import org.delia.queryresponse.LetSpanEngine;
-import org.delia.queryresponse.LetSpanRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
@@ -109,20 +108,20 @@ public class HLSTestBase extends BDDBase {
 		return null;
 	}
 
-	public static class MyLetSpanRunner implements LetSpanRunner {
-
-		protected StringTrail trail = new StringTrail();
-
-		@Override
-		public QueryResponse executeSpan(LetSpan span) {
-			trail.add(span.dtype.getName());
-			for(QueryFuncExp qfe: span.qfeL) {
-				String s = qfe.strValue();
-				trail.add(s);
-			}
-			return span.qresp;
-		}
-	}
+//	public static class MyLetSpanRunner implements LetSpanRunner {
+//
+//		protected StringTrail trail = new StringTrail();
+//
+//		@Override
+//		public QueryResponse executeSpan(LetSpan span) {
+//			trail.add(span.dtype.getName());
+//			for(QueryFuncExp qfe: span.qfeL) {
+//				String s = qfe.strValue();
+//				trail.add(s);
+//			}
+//			return span.qresp;
+//		}
+//	}
 
 
 	//---
