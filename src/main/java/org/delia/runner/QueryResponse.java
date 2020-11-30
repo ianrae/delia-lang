@@ -15,7 +15,6 @@ public class QueryResponse {
 	public boolean ok;
 	public DeliaError err;
 	public List<DValue> dvalList; 
-	public boolean bindFetchFlag; //if true then auto-bind fetch results into dvallist dvals
 	
 	public boolean emptyResults() {
 		return dvalList == null || dvalList.isEmpty();

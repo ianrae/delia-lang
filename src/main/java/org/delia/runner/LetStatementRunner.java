@@ -102,9 +102,7 @@ public class LetStatementRunner extends ServiceBase {
 			if (varRef != null) {
 				res.ok = true;
 				res.shape = null;
-				varRef.qresp.bindFetchFlag = true;
 				runQueryFnsIfNeeded(queryExp, varRef.qresp, res);
-				varRef.qresp.bindFetchFlag = false; //reset
 
 				assignVar(exp, res);
 				return res;
@@ -307,9 +305,7 @@ public class LetStatementRunner extends ServiceBase {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
 				//extract fields or invoke fns (optional)
-				qresp.bindFetchFlag = true;
 				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp, spanRunner);
-				qresp.bindFetchFlag = false;
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {
 					if (qresp2.dvalList == null) {
