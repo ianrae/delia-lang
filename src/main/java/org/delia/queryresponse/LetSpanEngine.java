@@ -26,25 +26,25 @@ public class LetSpanEngine extends ServiceBase {
 		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
 	}
 	
-	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
-		if (qrespInitial.emptyResults()) {
-			return qrespInitial;
-		}
-		
-		DValue dval = qrespInitial.dvalList.get(0);
-		DType dtype = dval.getType();
-		List<LetSpan> spanL = buildSpans(queryExp, dtype);
-		
-		//execute span
-		QueryResponse qresp = qrespInitial;
-		for(LetSpan span: spanL) {
-			span.qresp = qresp;
-			span.qfeL = adjustExecutionOrder(span);
-//			qresp = runner.executeSpan(span);
-		}
-		
-		return qresp;
-	}
+//	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
+//		if (qrespInitial.emptyResults()) {
+//			return qrespInitial;
+//		}
+//		
+//		DValue dval = qrespInitial.dvalList.get(0);
+//		DType dtype = dval.getType();
+//		List<LetSpan> spanL = buildSpans(queryExp, dtype);
+//		
+//		//execute span
+//		QueryResponse qresp = qrespInitial;
+//		for(LetSpan span: spanL) {
+//			span.qresp = qresp;
+//			span.qfeL = adjustExecutionOrder(span);
+////			qresp = runner.executeSpan(span);
+//		}
+//		
+//		return qresp;
+//	}
 	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
 		DType dtype = registry.getType(queryExp.typeName);
 		List<LetSpan> spanL = buildSpans(queryExp, dtype);

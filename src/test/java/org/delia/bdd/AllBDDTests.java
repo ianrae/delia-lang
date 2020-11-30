@@ -140,7 +140,7 @@ public class AllBDDTests extends BDDBase {
 	@Test
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
-		runR1300File("t0-let-varref.txt", 7);
+		runR1300File("t0-let-varref.txt", 5);
 	}
 	
 	@Test
@@ -323,7 +323,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements

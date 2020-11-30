@@ -51,7 +51,7 @@ title: let multiple.field
 given:
   insert Flight {id: 55, wid: 1 }
   insert Flight {id: 56, wid: 3 }
-  let x0 = Flight[55]
+  let x0 = Flight[true]
 when:
   let x = x0.wid
 then:
