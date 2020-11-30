@@ -111,9 +111,7 @@ public class DeliaImpl implements Delia {
 		}
 		
 		HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
-		if (deliaOptions.useHLS) {
-			runner.setHLSManager(mgr);
-		}
+		runner.setHLSManager(mgr);
 		
 		return runner;
 	}

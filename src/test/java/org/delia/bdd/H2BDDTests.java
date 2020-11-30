@@ -337,13 +337,11 @@ public class H2BDDTests extends BDDBase {
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
-		BDDTesterEx.useHLS = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
-		BDDTesterEx.useHLS = false;
 	}
 
 	@Override

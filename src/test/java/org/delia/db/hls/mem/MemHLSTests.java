@@ -63,8 +63,6 @@ public class MemHLSTests extends HLSTestBase {
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;
 		
-		this.delia.getOptions().useHLS = true;
-		
 		if (flipAssocTbl) {
 			createTable(memDBinterface, "AddressCustomerDat1");
 		} else {

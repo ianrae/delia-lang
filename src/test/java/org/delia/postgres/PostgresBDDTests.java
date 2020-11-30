@@ -323,13 +323,11 @@ public class PostgresBDDTests extends BDDBase {
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
-		BDDTesterEx.useHLS = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
-		BDDTesterEx.useHLS = false;
 	}
 
 	@Override

@@ -337,14 +337,12 @@ public class AllBDDTests extends BDDBase {
 
 	@Before
 	public void init() {
-		BDDTesterEx.useHLS = true;
 //		DeliaFactory.useHLSMEM = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
-		BDDTesterEx.useHLS = false;
 	}
 	
 	@Override
