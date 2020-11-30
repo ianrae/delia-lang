@@ -140,6 +140,7 @@ public class H2BDDTests extends BDDBase {
 	@Test
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
+		runR1300File("t0-let-varref.txt", 5);
 	}
 	
 	@Test
@@ -316,17 +317,15 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 2;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 //		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-//		runR560File("t0-self-NN.txt", 4);
-//		runR700File("t0-insert-parent.txt", 2);
-//		runR1350File("t0-filter-in-twitter.txt", 4);
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR560File("t0-self-N1.txt", 4);
+		runR700File("t0-insert-parent.txt", 2);
 	}
 	
 	//---
