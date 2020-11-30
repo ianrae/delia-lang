@@ -12,5 +12,4 @@ public interface ZDBInterfaceFactory {
 	
 	boolean isSQLLoggingEnabled();
 	void enableSQLLogging(boolean b);
-//	void performTypeReplacement(TypeReplaceSpec spec);
 }

@@ -75,11 +75,6 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 		return errorConverter;
 	}
 
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		//nothing to do
-//	}
-
 	@Override
 	public ZDBExecutor createExecutor() {
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();

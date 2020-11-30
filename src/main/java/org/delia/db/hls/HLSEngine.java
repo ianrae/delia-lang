@@ -2,6 +2,7 @@ package org.delia.db.hls;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryExp;
@@ -9,6 +10,7 @@ import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.hls.join.JoinTreeEngine;
 import org.delia.queryresponse.LetSpan;
 import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
 import org.delia.type.DStructType;
@@ -39,27 +41,27 @@ public class HLSEngine extends ServiceBase {
 			HLSQueryStatement hlstatement = new HLSQueryStatement();
 			hlstatement.queryExp = queryExp;
 			
+			JoinTreeEngine jtEngine = new JoinTreeEngine(factorySvc, registry);
+			hlstatement.joinTreeL = jtEngine.parse(queryExp, spanL);
+			
 			if (spanL.isEmpty()) {
-				HLSQuerySpan hsltat = generateSpan(0, null);
-				hlstatement.hlspanL.add(hsltat);
+				HLSQuerySpan hlspan = generateSpan(0, null);
+				hlspan.mainStructType = this.mainStructType;
+				hlspan.joinTreeL = hlstatement.joinTreeL;
+				hlstatement.hlspanL.add(hlspan);
 				return hlstatement;
 			}
-			
-			//for some reason Customer[55].addr puts addr in span1.
-//			if (spanL.size() == 1) {
-//				LetSpan span1 = fixup(spanL.get(0));
-//				if (span1 != null) {
-//					spanL.add(0, span1); //insert as new first span
-//				}
-//			}
 			
 			int i = 0;
 			for(LetSpan span: spanL) {
 				HLSQuerySpan hlspan = generateSpan(i, span);
+				hlspan.mainStructType = this.mainStructType;
+				hlspan.joinTreeL = hlstatement.joinTreeL;
 				chkSpan(hlspan);
 				hlstatement.hlspanL.add(hlspan);
 				i++;
 			}
+			
 			return hlstatement;
 		}
 		
@@ -88,28 +90,9 @@ public class HLSEngine extends ServiceBase {
 			DValueHelper.throwIfFieldNotExist(prefix, pair.name, hlspan.fromType);
 		}
 
-//		public LetSpan fixup(LetSpan span) {
-//			HLSQuerySpan hlstat = new HLSQuerySpan();
-//			hlstat.fromType = determineFromType(0);
-//			hlstat.mtEl = new MTElement(hlstat.fromType);
-//			hlstat.resultType = determineResultType(0);
-//			hlstat.filEl = null;
-//			
-//			TypePair rfieldPair = findLastRField(0);
-//			if (rfieldPair != null) {
-//				LetSpan span1 = new LetSpan(mainStructType);
-//				QueryFuncExp rqfe = findRFieldQFE(span, mainStructType);
-////				span.qfeL.remove(rqfe);
-////				span1.qfeL.add(rqfe);
-//				span1.qresp = span.qresp;
-////				span.startsWithScopeChange = true;
-//				return span1;
-//			}
-//			return null;
-//		}		
-		
 		public HLSQuerySpan generateSpan(int i, LetSpan span) {
 			HLSQuerySpan hlstat = new HLSQuerySpan();
+			hlstat.optLetSpan = Optional.ofNullable(span);
 			hlstat.fromType = determineFromType(i);
 			hlstat.mtEl = new MTElement(hlstat.fromType);
 			hlstat.resultType = determineResultType(i);

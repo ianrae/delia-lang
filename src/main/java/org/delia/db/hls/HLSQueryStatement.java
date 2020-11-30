@@ -7,12 +7,14 @@ import java.util.StringJoiner;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.join.JTElement;
 
 public class HLSQueryStatement implements HLSElement {
 	public List<HLSQuerySpan> hlspanL = new ArrayList<>();
 	public QueryExp queryExp;
 	public QuerySpec querySpec;
 	public QueryDetails details;
+	public List<JTElement> joinTreeL;
 	
 	public HLSQuerySpan getMainHLSSpan() {
 		return hlspanL.get(0);

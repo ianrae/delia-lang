@@ -21,7 +21,7 @@ public class HLSSQL11OtherWayTests extends HLSTestBase {
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,a.addr,b.id as addr,b.y FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id ORDER BY a.cid");
-		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
+		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x FROM Customer as a");
 	}
 
@@ -55,15 +55,6 @@ public class HLSSQL11OtherWayTests extends HLSTestBase {
 	public void testDebugSQL() {
 		useCustomer11OtherWaySrc = true;
 
-		//		sqlchk("let x = Customer[55].fks()", "SELECT id,x,id FROM Customer LEFT JOIN Address ON id=id WHERE ID=55");
-//		sqlchk("let x = Customer[true].fetch('addr')", "SELECT id,x,id,y FROM Customer LEFT JOIN Address ON id=id");
-//		sqlchk("let x = Customer[true].fetch('addr').first()", "SELECT TOP 1 id,x,id,y FROM Customer LEFT JOIN Address ON id=id");
-//		sqlchk("let x = Customer[true].fetch('addr').orderBy('id')", "SELECT id,x,id,y FROM Customer LEFT JOIN Address ON id=id ORDER BY id");
-		//
-		//		//this one doesn't need to do fetch since just getting x
-//		sqlchk("let x = Customer[true].x.fetch('addr')", "SELECT x FROM Customer");
-		//		
-//		sqlchk("let x = Customer[true].x.fks()", "SELECT a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.addr=b.id");
 	}
 
 	//---

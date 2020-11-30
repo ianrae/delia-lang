@@ -93,7 +93,6 @@ public class H2BDDTests extends BDDBase {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
 		runR700File("t0-insert-parent.txt", 2);
-		runR700File("t0-insert-parent.txt", 2);
 		runR700File("t0-insert-parent2.txt", 1);
 	}
 	

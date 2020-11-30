@@ -158,7 +158,12 @@ public class HLSManager extends ServiceBase {
 
 		HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
 		HLSQueryStatement hls = hlsEngine.generateStatement(queryExp, spanL);
-		
+		//add sanity check
+		for (HLSQuerySpan tmp: hls.hlspanL) {
+			if (tmp.mainStructType == null) { //failed to find type. delia src error
+				return hls;
+			}
+		}
 		hls = runPipeline(hls, queryExp, datIdMap);
 
 		for(HLSQuerySpan hlspan: hls.hlspanL) {

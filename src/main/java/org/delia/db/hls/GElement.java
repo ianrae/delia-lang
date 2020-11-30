@@ -20,6 +20,10 @@ public class GElement implements HLSElement {
 		IntegerExp iexp = (IntegerExp) exp;
 		return iexp.val;
 	}
+	
+	public String getFuncName() {
+		return qfe.funcName;
+	}
 
 	@Override
 	public String toString() {

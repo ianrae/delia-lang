@@ -20,7 +20,7 @@ public class HLSSQL11Tests extends HLSTestBase {
 		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').first()", 	"SELECT TOP 1 a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
 		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust ORDER BY a.cid");
-		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
+		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
 		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
 		
 		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE b.id < ?", "111");
@@ -56,10 +56,7 @@ public class HLSSQL11Tests extends HLSTestBase {
 	public void testDebugSQL() {
 		useCustomer11Src = true;
 
-//		sqlchk("let x = Customer[true].fetch('addr').orderBy('cid')", "SELECT a.cid,a.x,b.id as addr,b.y,b.cust FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust ORDER BY a.cid");
-//		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a");
-//		sqlchkP("let x = Customer[addr < 111].fks()", 			"SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE b.id < ?", "111");
-		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
+		sqlchk("let x = Customer[true].x.fetch('addr')", 		"SELECT a.x FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust");
 	}
 
 	//---

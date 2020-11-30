@@ -70,10 +70,11 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			rr.relInfo.forceDatId(datId);
 			rr.relInfo.otherSide.forceDatId(datId);
 			String key = createKey(structType.getName(), rr.relInfo.fieldName);
-			log.log("DAT: %s -> datId: %d (table: %s)", key, datId, tblName);
+			String left = dval.asStruct().getField("leftName").asString();
+			String right = dval.asStruct().getField("rightName").asString();
+			log.log("DAT: %s -> datId: %d (table: %s) left:%s, right:%s", key, datId, tblName, left, right);
 			datIdCounter++;
-			datIdMap.putFull(key, datId, tblName, dval.asStruct().getField("leftName").asString(),
-					dval.asStruct().getField("rightName").asString());
+			datIdMap.putFull(key, datId, tblName, left, right);
 		}
 	}
 	

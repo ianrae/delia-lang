@@ -10,6 +10,6 @@ import org.delia.queryresponse.LetSpanEngine;
  */
 public class QueryContext { 
 	public boolean loadFKs;
-	public boolean pruneParentRelationFlag;
+	public boolean pruneParentRelationFlag; //MEM only
 	public LetSpanEngine letSpanEngine;
 }

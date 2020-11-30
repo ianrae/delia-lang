@@ -145,14 +145,5 @@ public class DType implements DTypeInternal {
 		return name;
 	}
 	
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		if (baseType != null && spec.needsReplacement(this, baseType)) {
-//			baseType = spec.newType;
-//		}
-//		
-//		for(DRule rule: this.rules) {
-//			rule.performTypeReplacement(spec);
-//		}
-//	}
 }
 

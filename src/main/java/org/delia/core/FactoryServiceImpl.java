@@ -8,8 +8,11 @@ import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
+import org.delia.runner.FetchRunner;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.validation.ValidationRuleRunnerImpl;
+import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -98,6 +101,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public LogFactory getLogFactory() {
 		return logFactory;
+	}
+	@Override
+	public ValidationRunner createValidationRunner(ZDBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
+		return new ValidationRuleRunnerImpl(this, dbInterface.getCapabilities(), fetchRunner);
 	}
 
 }

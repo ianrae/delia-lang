@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.hls.join.JTElement;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -141,6 +142,10 @@ public class AliasManager extends ServiceBase {
 				}
 			}
 		}
+		
+		for(JTElement el: hlspan.joinTreeL) {
+			createFieldAlias(el.dtype, el.fieldName);
+		}
 	}
 	
 	private boolean isFetched(HLSQuerySpan hlspan, String fieldName) {
@@ -153,6 +158,34 @@ public class AliasManager extends ServiceBase {
 	public AliasInfo getMainTableAlias(DStructType structType) {
 		String key = String.format("%s", structType.getName());
 		return map.get(key);
+	}
+	public AliasInfo findAlias(DStructType structType) {
+		String key = String.format("%s", structType.getName());
+		AliasInfo info = map.get(key);
+		if (info != null) {
+			return info;
+		}
+		
+		//look for structType match first
+		for(String x: map.keySet()) {
+			info = map.get(x);
+			if (info.fieldName != null) {
+				if (info.structType == structType) {
+					return info; //TODO: won't work if multiple joins to same table.
+				}
+			}
+		}
+
+		//then tblType
+		for(String x: map.keySet()) {
+			info = map.get(x);
+			if (info.fieldName != null) {
+				if (info.tblType == structType) {
+					return info; //TODO: won't work if multiple joins to same table.
+				}
+			}
+		}
+		return null; //oops!
 	}
 	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
@@ -187,6 +220,15 @@ public class AliasManager extends ServiceBase {
 	public String buildFieldAlias(AliasInfo info, String fieldName) {
 		String s = String.format("%s.%s", info.alias, fieldName);
 		return s;
+	}
+	public String buildTblAlias(AliasInfo info, boolean isBackards) {
+		if (isBackards) {
+			String otherTbl = info.structType.getName();
+			String s = String.format("%s as %s", otherTbl, info.alias);
+			return s;
+		} else {
+			return buildTblAlias(info);
+		}
 	}
 	
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
+import org.delia.base.UnitTestLogFactory;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
@@ -53,6 +54,7 @@ public class ZDBTests  extends BDDBase {
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
 		DValue newDatIdValue = dbexec.executeInsert(dval, ictx);
 		assertEquals(1, newDatIdValue.asInt());
+		dbexec.close();
 	}
 
 	@Test
@@ -102,7 +104,7 @@ public class ZDBTests  extends BDDBase {
 
 	private DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = DeliaBuilder.withConnection(info).log(new UnitTestLogFactory()).build();
 		return new DeliaGenericDao(delia);
 	}
 

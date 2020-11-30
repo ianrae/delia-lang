@@ -33,7 +33,7 @@ import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.validation.ValidationRuleRunner;
+import org.delia.validation.ValidationRunner;
 
 public abstract class MemDBExecutorBase extends ServiceBase implements ZDBInternal {
 
@@ -95,8 +95,6 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			} else if (qtx.pruneParentRelationFlag) {
 				dvalList = removeParentSideRelations(dvalList);
 			}
-			//TODO: if query does NOT include fks or fetch then we should
-			//remove all parent side relations
 
 			qresp.dvalList = dvalList;
 			qresp.ok = true;
@@ -127,7 +125,9 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			} else {
 				RelationManyRule manyRule = DRuleHelper.findManyRule(structType, pair.name);
 				if (manyRule != null) {
-					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
+					//MM have no parent so don't check isParent flag
+//					if (manyRule.relInfo != null && manyRule.relInfo.isParent) {
+					if (manyRule.relInfo != null) {
 						doomedL.add(pair.name);
 					}
 				}
@@ -150,7 +150,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 
 	protected void addAnyFKs(DValue dval) {
 		FetchRunner fetchRunner = doCreateFetchRunner();
-		ValidationRuleRunner ruleRunner = new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
+		ValidationRunner ruleRunner = factorySvc.createValidationRunner(dbInterface, fetchRunner);
 		ruleRunner.enableRelationModifier(true);
 		ruleRunner.setPopulateFKsFlag(true);
 		ruleRunner.validateRelationRules(dval);

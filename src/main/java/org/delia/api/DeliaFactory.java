@@ -11,6 +11,7 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
 /**
@@ -20,6 +21,8 @@ import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
  *
  */
 public class DeliaFactory {
+	
+	public static boolean useHLSMEM = true;
 
 	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc) {
 		ConnectionString connectionString = new ConnectionString();
@@ -34,7 +37,11 @@ public class DeliaFactory {
 		ZDBInterfaceFactory dbInterface = null;
 		switch(dbType) {
 		case MEM:
-			dbInterface = new MemZDBInterfaceFactory(factorySvc);
+			if (useHLSMEM) {
+				dbInterface = new HLSMemZDBInterfaceFactory(factorySvc);
+			} else {
+				dbInterface = new MemZDBInterfaceFactory(factorySvc);
+			}
 //			((MemZDBInterfaceFactory)dbInterface).createTablesAsNeededFlag = true;
 			break;
 		case H2:

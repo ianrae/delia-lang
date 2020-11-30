@@ -56,9 +56,4 @@ public abstract class DRuleBase implements DRule {
 		return b;
 	}
 	
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		//careful. any rule that holds a dtype MUST override this!!
-//	}
-//
 }

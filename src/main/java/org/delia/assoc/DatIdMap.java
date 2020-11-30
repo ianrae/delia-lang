@@ -9,9 +9,9 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class DatIdMap {
 	private static class DatInfo {
-		public String tableName;
-		public String left;
-		public String right;
+		public String tableName; //eg CustomerAddressDat1
+		public String left;  //eg. Customer.addr. Holds Customer pk values
+		public String right; //eg. Address.cust Holds Address pk values
 		
 		public DatInfo() {
 		}

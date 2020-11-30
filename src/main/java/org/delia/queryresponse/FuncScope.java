@@ -6,7 +6,8 @@ import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
 
 public class FuncScope {
-	QueryResponse currentResp;
+	private QueryResponse currentResp;
+	private boolean hasChanged;
 	
 	public FuncScope(QueryResponse result) {
 		this.currentResp = result;
@@ -18,5 +19,10 @@ public class FuncScope {
 
 	public void changeScope(QueryResponse qresResult) {
 		this.currentResp = qresResult;
+		this.hasChanged = true;
+	}
+
+	public boolean hasChanged() {
+		return hasChanged;
 	}
 }

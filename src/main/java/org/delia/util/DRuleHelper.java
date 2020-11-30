@@ -18,6 +18,14 @@ public class DRuleHelper {
 	
 	public static TypePair findMatchingPair(DStructType structType, String fieldName) {
 		for(TypePair pair: structType.getAllFields()) {
+			if (fieldName.equals(pair.name)) {
+				return pair;
+			}
+		}
+		return null;
+	}
+	public static TypePair findMatchingStructPair(DStructType structType, String fieldName) {
+		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				if (fieldName.equals(pair.name)) {
 					return pair;

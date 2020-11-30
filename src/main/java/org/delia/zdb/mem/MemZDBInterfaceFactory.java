@@ -14,7 +14,7 @@ import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
-	private DBCapabilties capabilities;
+	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
 	
@@ -22,7 +22,6 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	public MemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(false, false, false, false);
-		this.capabilities.setRequiresTypeReplacementProcessing(true);
 	}
 	
 	public Map<String,MemDBTable> createSingleMemDB() {
@@ -58,31 +57,6 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 		//not supported
 	}
 	
-//	@Override
-//	public void performTypeReplacement(TypeReplaceSpec spec) {
-//		//autocreate if needed
-//		createSingleMemDB();
-//		
-//		for (String typeName: tableMap.keySet()) {
-//			MemDBTable tbl = tableMap.get(typeName);
-//			for(DValue dval: tbl.rowL) {
-//				DType dtype = dval.getType();
-//
-//				//in addition the DValues stored here may be from a previous entire run
-//				//of Runner (and its registry).
-//				//so also check by name
-//				boolean shouldReplace = dtype.getName().equals(spec.newType.getName());
-//
-//				if (shouldReplace || spec.needsReplacement(this, dtype)) {
-//					DValueImpl impl = (DValueImpl) dval;
-//					impl.forceType(spec.newType);
-//				} else {
-//					dtype.performTypeReplacement(spec);
-//				}
-//			}
-//		}
-//	}
-
 	@Override
 	public ZDBExecutor createExecutor() {
 		return new MemZDBExecutor(factorySvc, this);

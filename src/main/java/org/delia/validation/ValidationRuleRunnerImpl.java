@@ -24,7 +24,7 @@ import org.delia.type.DValueInternal;
 import org.delia.type.TypePair;
 import org.delia.type.ValidationState;
 
-public class ValidationRuleRunner extends ServiceBase {
+public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationRunner {
 
 		private SimpleErrorTracker localET;
 		private boolean enableRelationModifierFlag;
@@ -34,7 +34,7 @@ public class ValidationRuleRunner extends ServiceBase {
 		private FetchRunner fetchRunner;
 		private DValueCompareService compareSvc;
 
-		public ValidationRuleRunner(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
+		public ValidationRuleRunnerImpl(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
 			super(factorySvc);
 			this.localET = new SimpleErrorTracker(log);
 			this.dbCapabilties = dbCapabilties;
@@ -42,6 +42,10 @@ public class ValidationRuleRunner extends ServiceBase {
 			this.compareSvc = factorySvc.getDValueCompareService();
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#validateFieldsOnly(org.delia.type.DValue)
+		 */
+		@Override
 		public boolean validateFieldsOnly(DValue dval) {
 			localET.clear();
 			List<DRule> ruleL = buildRuleList(dval);
@@ -66,6 +70,10 @@ public class ValidationRuleRunner extends ServiceBase {
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#validateDVal(org.delia.type.DValue)
+		 */
+		@Override
 		public boolean validateDVal(DValue dval) {
 			List<DRule> ruleL = buildRuleList(dval);
 			return doValidateDVal(dval, ruleL);
@@ -107,6 +115,10 @@ public class ValidationRuleRunner extends ServiceBase {
 			return (localET.errorCount() == errCount);
 		}
 		
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#validateRelationRules(org.delia.type.DValue)
+		 */
+		@Override
 		public void validateRelationRules(DValue dval) {
 			List<DRule> ruleL = buildRuleList(dval);
 			//we are only using validation to set parent fks
@@ -200,12 +212,20 @@ public class ValidationRuleRunner extends ServiceBase {
 			return b;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#propogateErrors(org.delia.runner.ResultValue)
+		 */
+		@Override
 		public void propogateErrors(ResultValue res) {
 			if (!localET.areNoErrors()) {
 				res.errors.addAll(localET.getErrors());
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#validateDVals(java.util.List)
+		 */
+		@Override
 		public boolean validateDVals(List<DValue> dvalList) {
 			for(DValue dval: dvalList) {
 				if (dval == null) {
@@ -216,6 +236,10 @@ public class ValidationRuleRunner extends ServiceBase {
 			return localET.errorCount() > 0;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#validateDependentRules(org.delia.type.DValue)
+		 */
+		@Override
 		public boolean validateDependentRules(DValue partialDVal) {
 			//validate the struct itself, but only rules that depend
 			//on fields in partialDVal
@@ -232,18 +256,34 @@ public class ValidationRuleRunner extends ServiceBase {
 			return localET.areNoErrors();
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#enableRelationModifier(boolean)
+		 */
+		@Override
 		public void enableRelationModifier(boolean b) {
 			this.enableRelationModifierFlag = b;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#isPopulateFKsFlag()
+		 */
+		@Override
 		public boolean isPopulateFKsFlag() {
 			return populateFKsFlag;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#setPopulateFKsFlag(boolean)
+		 */
+		@Override
 		public void setPopulateFKsFlag(boolean populateFKsFlag) {
 			this.populateFKsFlag = populateFKsFlag;
 		}
 
+		/* (non-Javadoc)
+		 * @see org.delia.validation.ValidationRunner#enableInsertFlag(boolean)
+		 */
+		@Override
 		public void enableInsertFlag(boolean b) {
 			this.insertFlag = b;
 		}

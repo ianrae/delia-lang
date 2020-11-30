@@ -54,7 +54,7 @@ public class HLSTests extends HLSTestBase {
 	@Test
 	public void testOneRelation() {
 		useCustomerManyToManySrc = true;
-		chk("let x = Customer[true].addr", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,()}");
+		chk("let x = Customer[true].addr", "{Address->Address,MT:Address,[true],R:addr,()}");
 		
 		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true}");
 		chk("let x = Customer[true].fetch('addr')", "{Customer->Customer,MT:Customer,[true],(),SUB:false,addr}");
@@ -67,11 +67,11 @@ public class HLSTests extends HLSTestBase {
 		
 		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
 		
-		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
+		chk("let x = Customer[true].addr.fks()", "{Address->Address,MT:Address,[true],R:addr,(),SUB:true}");
 		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
 		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
 		
-		chk("let x = Customer[true].addr.orderBy('id')", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),OLO:id,null,null}");
+		chk("let x = Customer[true].addr.orderBy('id')", "{Address->Address,MT:Address,[true],R:addr,(),OLO:id,null,null}");
 		chk("let x = Customer[true].orderBy('cid').addr", "{Customer->Customer,MT:Customer,[true],(),OLO:cid,null,null},{Address->Address,MT:Address,R:addr,()}");
 		chk("let x = Customer[true].orderBy('cid').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:cid,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
 	}
@@ -79,16 +79,9 @@ public class HLSTests extends HLSTestBase {
 	
 	@Test
 	public void testDebug() {
-//		chk("let x = Flight[55].first()", "{Flight->Flight,MT:Flight,[55],(first)}");
 		
 		useCustomerManyToManySrc = true;
-//		chk("let x = Customer[true].fks()", "{Customer->Customer,MT:Customer,[true],(fks),SUB:true}");
-//		chk("let x = Customer[true].x.fks()", "{Customer->int,MT:Customer,[true],F:x,(),SUB:true}");
-		chk("let x = Customer[true].addr.fks()", "{Customer->Customer,MT:Customer,[true],()},{Address->Address,MT:Address,R:addr,(),SUB:true}");
-//		chk("let x = Customer[true].fks().addr", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,()}");
-//		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
-		
-		chk("let x = Customer[true].orderBy('cid').addr.orderBy('y')", "{Customer->Customer,MT:Customer,[true],(),OLO:cid,null,null},{Address->Address,MT:Address,R:addr,(),OLO:y,null,null}");
+		chk("let x = Customer[true].fks().addr.fks()", "{Customer->Customer,MT:Customer,[true],(),SUB:true},{Address->Address,MT:Address,R:addr,(),SUB:true}");
 	}
 	
 

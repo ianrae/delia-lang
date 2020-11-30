@@ -12,4 +12,10 @@ public class AliasInfo {
 	public String getAlias() {
 		return alias;
 	}
+
+	@Override
+	public String toString() {
+		String s = String.format("%s=%s.%s", alias, structType.getName(), fieldName);
+		return s;
+	}
 }

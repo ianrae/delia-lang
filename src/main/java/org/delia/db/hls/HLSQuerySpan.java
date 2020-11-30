@@ -2,16 +2,21 @@ package org.delia.db.hls;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.delia.db.QueryDetails;
+import org.delia.db.hls.join.JTElement;
+import org.delia.queryresponse.LetSpan;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 
 public class HLSQuerySpan implements HLSElement {
+	public Optional<LetSpan> optLetSpan;
 	public DStructType fromType;
+	public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
 	public DType resultType;
 	
 	public MTElement mtEl;
@@ -27,6 +32,7 @@ public class HLSQuerySpan implements HLSElement {
 	public QueryDetails details;
 	public String finalWhereSql;
 	public List<RenderedField> renderedFieldL = new ArrayList<>();
+	public List<JTElement> joinTreeL;
 	
 	@Override
 	public String toString() {

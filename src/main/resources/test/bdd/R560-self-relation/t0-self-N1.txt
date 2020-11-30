@@ -52,7 +52,7 @@ then:
 value:a:Customer {
  vid:55
  vname:'art'
- vmanager:{56}
+ vmanager:null
  vworkers:null
 }
 value:a:Customer {

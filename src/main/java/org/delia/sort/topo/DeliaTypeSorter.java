@@ -90,7 +90,7 @@ public class DeliaTypeSorter {
 	}
 	
 	private TypePair findMatchingPair(DStructType structType, String fieldName) {
-		return DRuleHelper.findMatchingPair(structType, fieldName);
+		return DRuleHelper.findMatchingStructPair(structType, fieldName);
 	}
 
 //	protected RelationOneRule findOneRule(String typeName, DTypeRegistry registry) {

@@ -22,6 +22,6 @@ then:
 value:a:Address {
  vsid:'100'
  vcity:'kingston'
- vmanager:{56}
+ vmanager:null
 }
 

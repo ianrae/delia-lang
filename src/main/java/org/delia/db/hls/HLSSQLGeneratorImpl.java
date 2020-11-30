@@ -8,11 +8,12 @@ import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
-import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.join.SqlJoinHelper;
+import org.delia.db.hls.join.SqlJoinTreeHelper;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
@@ -26,6 +27,7 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator {
+//	public static boolean useJoinTreeFlag = true;
 
 	private QueryTypeDetector queryTypeDetector;
 	private QueryExp queryExp;
@@ -37,7 +39,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 
 	public HLSSQLGeneratorImpl(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
-		this.joinHelper = new SqlJoinHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
+		
+		this.joinHelper = new SqlJoinTreeHelper(aliasManager, datIdMap, asNameMap, miniSelectParser);
 		this.whereClauseHelper = new WhereClauseHelper(factorySvc, miniSelectParser, varEvaluator, asNameMap, aliasManager, datIdMap);
 		this.aliasManager = aliasManager;
 		this.datIdMap = datIdMap;
@@ -81,8 +84,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				genWhere(sc, hlspan2);
 				String s2 = sc.sql();
 				
-				TypePair relPair = hlspan1.rEl.rfieldPair;
-				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan2.fromType, relPair);
+				TypePair relPair = hlspan1.rEl == null ? hlspan2.rEl.rfieldPair: hlspan1.rEl.rfieldPair;
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(hlspan1.fromType, relPair);
 				switch(relinfo.cardinality) {
 				case ONE_TO_ONE:
 				case ONE_TO_MANY:
@@ -165,10 +168,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return sc.sql();
 	}
 
-	private String buildAlias(DStructType pairType, String fieldName) {
-//		return aliasAlloc.buildAlias(pairType, fieldName);
-		return aliasManager.getFieldAlias(pairType, fieldName).alias;
-	}
+//	private String buildAlias(DStructType pairType, String fieldName) {
+////		return aliasAlloc.buildAlias(pairType, fieldName);
+//		return aliasManager.getFieldAlias(pairType, fieldName).alias;
+//	}
 	private String buildMainAlias(DStructType fromType, String fieldName) {
 		AliasInfo info = aliasManager.getMainTableAlias(fromType);
 		return aliasManager.buildFieldAlias(info, fieldName);
@@ -187,16 +190,14 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				if (whereClauseHelper.asNameMap.containsKey(fieldStr)) {
 					String asName = whereClauseHelper.asNameMap.get(fieldStr);
 					fieldStr = String.format("%s as %s", fieldStr, asName);
-//				fieldL.remove(n - 1);
 					rf.field = fieldStr;
-//				fieldL.add(fieldStr);
 				}
 			}
 		}
 	}
-	private void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
-		joinHelper.addFullofJoins(hlspan, fieldL);
-	}
+//	private void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL) {
+//		joinHelper.addFullofJoins(hlspan, fieldL);
+//	}
 
 
 	protected void genOLO(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -318,16 +319,21 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 			}
 		}
 
-		if (forceAllFields) {
-			addStructFields(hlspan.fromType, fieldL);
-		}
+		//not needed i think
+//		if (forceAllFields) {
+//			addStructFields(hlspan.fromType, fieldL);
+//		}
 		
 		boolean needJoin = joinHelper.needJoin(hlspan);
 		if (needJoin && fieldL.isEmpty()) {
-			addStructFields(hlspan.fromType, fieldL);
-			addFKofJoins(hlspan, fieldL);
-			addFullofJoins(hlspan, fieldL);
-			addRelFieldJoin(hlspan);
+			joinHelper.addStructFields(hlspan.fromType, fieldL);
+			if (joinHelper.supportsAddAllJoins()) {
+				joinHelper.addAllJoins(hlspan, fieldL);
+			} else {
+				addFKofJoins(hlspan, fieldL);
+				joinHelper.addFullofJoins(hlspan, fieldL);
+//				addRelFieldJoin(hlspan);
+			}
 		} else if (isJustFieldName) {
 			addFKofJoins(hlspan, fieldL);
 		}
@@ -344,11 +350,6 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		}
 		hlspan.renderedFieldL = fieldL;
 		sc.out(joiner.toString());
-	}
-
-	private void addRelFieldJoin(HLSQuerySpan hlspan) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	protected void doFirst(SQLCreator sc, HLSQuerySpan hlspan) {
@@ -374,9 +375,9 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		fieldL.add(rf);
 	}
 
-	private void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
-		joinHelper.addStructFields(fromType, fieldL);
-	}
+//	private void addStructFields(DStructType fromType, List<RenderedField> fieldL) {
+//		joinHelper.addStructFields(fromType, fieldL);
+//	}
 	@Override
 	public void setRegistry(DTypeRegistry registry) {
 		this.queryTypeDetector = new QueryTypeDetector(factorySvc, registry);

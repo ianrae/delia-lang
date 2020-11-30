@@ -183,62 +183,6 @@ public class DeliaImpl implements Delia {
 			//something went wrong
 			throw new DeliaException(allErrors);
 		}
-		
-//		//2nd pass - for future decls
-//		allErrors.clear();
-//		List<Exp> newExtL = typeRunner.getNeedReexecuteL(); //only re-exec the failed types
-//		DTypeRegistry registry = typeRunner.getRegistry();
-//		List<DType> oldTypeL = new ArrayList<>();
-//		for(Exp exp: newExtL) {
-//			TypeStatementExp texp = (TypeStatementExp) exp;
-//			DType dtype = registry.getType(texp.typeName);
-//			oldTypeL.add(dtype);
-//		}
-		
-		//Type Replacement - because of the after-you-after-you problem with relations, 
-		//newExtL will contain types that could fully be built because of forward declarations
-		//Our solution is to run the typerunner again on just the broken types, and then
-		//use a visitor pattern to get all parts of the registry, types, rules, etc to update
-		//themselves with the new (correct) version of the type.
-		
-		//prepare the type replacer
-//		List<TypeReplaceSpec> replacerL = new ArrayList<>();
-//		for(DType oldtype: oldTypeL) {
-//			TypeReplaceSpec spec = new TypeReplaceSpec();
-//			spec.oldType = oldtype;
-//			replacerL.add(spec);
-//		}
-//		
-//		typeRunner.executeStatements(newExtL, allErrors, false);
-//		
-//		//now update all types
-//		for(TypeReplaceSpec spec: replacerL) {
-//			spec.newType = registry.getType(spec.oldType.getName());
-//			registry.performTypeReplacement(spec);
-//			log.log("type-replacement '%s' %d", spec.newType.getName(), spec.counter);
-//			
-//			if (dbInterface.getCapabilities().isRequiresTypeReplacementProcessing()) {
-//				dbInterface.performTypeReplacement(spec);
-//			}
-//			
-//		}
-		
-//		//and check that we did all replacement
-//		for(String typeName: typeRunner.getRegistry().getAll()) {
-//			DType dtype = registry.getType(typeName);
-//			if (dtype.invalidFlag) {
-//				log.logError("ERROR1: type %s invalid", dtype.getName());
-//			}
-//		}
-//		
-//		typeRunner.executeRulePostProcessor(allErrors);
-//		
-//		if (allErrors.isEmpty()) {
-//			return;
-//		} else {
-//			//something else went wrong
-//			throw new DeliaException(allErrors);
-//		}
 	}
 
 	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {

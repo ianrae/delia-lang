@@ -22,12 +22,11 @@ import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
 import org.delia.queryresponse.LetSpanRunnerImpl;
-import org.delia.queryresponse.QueryFuncContext;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.validation.ValidationRuleRunner;
+import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -63,8 +62,8 @@ public class LetStatementRunner extends ServiceBase {
 		this.datIdMap = datIdMap;
 	}
 
-	private ValidationRuleRunner createValidationRunner() {
-		return new ValidationRuleRunner(factorySvc, dbInterface.getCapabilities(), fetchRunner);
+	private ValidationRunner createValidationRunner() {
+		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
 	private void addError(ResultValue res, String id, String msg) {
@@ -103,9 +102,7 @@ public class LetStatementRunner extends ServiceBase {
 			if (varRef != null) {
 				res.ok = true;
 				res.shape = null;
-				varRef.qresp.bindFetchFlag = true;
 				runQueryFnsIfNeeded(queryExp, varRef.qresp, res);
-				varRef.qresp.bindFetchFlag = false; //reset
 
 				assignVar(exp, res);
 				return res;
@@ -158,8 +155,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	private QueryContext buildQueryContext(QuerySpec spec) {
-		QueryFuncContext ctx = new QueryFuncContext();
-
 		QueryContext qtx = new QueryContext();
 		qtx.letSpanEngine = letSpanEngine;
 		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
@@ -275,7 +270,7 @@ public class LetStatementRunner extends ServiceBase {
 
 		//validate (assume that we don't fully trust db storage - someone may have tampered with data)
 		if (qresp2.ok && CollectionUtils.isNotEmpty(qresp2.dvalList)) {
-			ValidationRuleRunner ruleRunner = createValidationRunner();
+			ValidationRunner ruleRunner = createValidationRunner();
 			if (! ruleRunner.validateDVals(qresp.dvalList)) {
 				ruleRunner.propogateErrors(res);
 			}
@@ -310,9 +305,7 @@ public class LetStatementRunner extends ServiceBase {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
 				//extract fields or invoke fns (optional)
-				qresp.bindFetchFlag = true;
 				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp, spanRunner);
-				qresp.bindFetchFlag = false;
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {
 					if (qresp2.dvalList == null) {
@@ -353,7 +346,7 @@ public class LetStatementRunner extends ServiceBase {
 			res.errors.addAll(list);
 		}
 		if (dval != null) {
-			ValidationRuleRunner ruleRunner = createValidationRunner();
+			ValidationRunner ruleRunner = createValidationRunner();
 			if (! ruleRunner.validateDVal(dval)) {
 				ruleRunner.propogateErrors(res);
 			}
