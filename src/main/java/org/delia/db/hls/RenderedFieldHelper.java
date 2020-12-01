@@ -37,13 +37,13 @@ public class RenderedFieldHelper {
 	}
 	
 	public static String getAssocFieldName(RenderedField rff) {
-		if (rff.structType != null) {
-			return rff.field;
-		} else {
-			//alias
+//		if (rff.structType != null) {
+//			return rff.pair.name;
+//		} else {
+//			//alias
 			String fieldName = StringUtils.substringAfter(rff.field, " as ");
 			return fieldName;
-		}
+//		}
 	}
 
 }

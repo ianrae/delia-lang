@@ -18,6 +18,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.StructValueBuilder;
 
@@ -107,7 +108,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			//do remaining column runs
 			for(int i = 1; i < columnRunL.size(); i++) {
 				ColumnRun columnRun = columnRunL.get(i);
-				DValue subDVal = readStructDValueX(mainRun, rsw, dbctx);
+				DValue subDVal = readStructDValueX(columnRun, rsw, dbctx);
 				if (subDVal != null) {
 					addAsSubOjbectX(dval, subDVal, columnRun);
 				}
@@ -133,7 +134,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			} else {
 				copyToRunList(run, iEnd, rfList);
 				
-				run = new ColumnRun(i, dtype);
+				run = new ColumnRun(i, tmp);
 				resultL.add(run);
 				currentType = tmp;
 			}
@@ -174,14 +175,19 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 					throw new DBException(err);
 				}
 				
+				RenderedField copyrff = new RenderedField(rff);
+				copyrff.pair.name = fld;
+				copyrff.pair.type = ddd;
+				
 				//FK only goes in child so it may not be here.
 				//However if .fks() was used then it is
 				String strValue = rsw.getString(rff.columnIndex);
 				if (strValue == null) {
 					structBuilder.addField(rff.pair.name, null);
 				} else {
-					DValue inner = createRelation(dtype, rff.pair, strValue, dbctx, rff);
-					structBuilder.addField(rff.pair.name, inner);
+					TypePair fieldPair = new TypePair(fld, ddd);
+					DValue inner = createRelation(dtype, fieldPair, strValue, dbctx, copyrff);
+					structBuilder.addField(fieldPair.name, inner);
 				}
 			} else {
 				DValue inner = rsw.readFieldByColumnIndex(rff.pair, rff.columnIndex, dbctx);
