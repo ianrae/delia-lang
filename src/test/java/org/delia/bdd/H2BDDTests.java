@@ -321,11 +321,12 @@ public class H2BDDTests extends BDDBase {
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
-//		ResultSetToDValConverter.logResultSetDetails = true;
+		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
 //		runR560File("t0-self-N1.txt", 4);
-		runR700File("t0-insert-parent.txt", 2);
+//		runR700File("t0-insert-parent.txt", 2);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---

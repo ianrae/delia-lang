@@ -23,7 +23,7 @@ public class ResultSetWrapper {
 	public boolean next() throws SQLException {
 		boolean b = rs.next();
 		if (logResultSetDetails) {
-			log.log("RSW: row %b", b);
+			log.log("RSW: --- row %b ---", b);
 		}
 		return b;
 	}
@@ -31,7 +31,7 @@ public class ResultSetWrapper {
 	public String getString(String columnLabel) throws SQLException {
 		String s = rs.getString(columnLabel);
 		if (logResultSetDetails) {
-			log.log("RSW: str %s", s);
+			log.log("bRSW: str %s", s);
 		}
 		if (rs.wasNull()) {
 			return null;
@@ -41,7 +41,7 @@ public class ResultSetWrapper {
 	public String getString(int columnIndex) throws SQLException {
 		String s = rs.getString(columnIndex);
 		if (logResultSetDetails) {
-			log.log("RSW: row %s", s);
+			log.log("cRSW: row %s", s);
 		}
 		if (rs.wasNull()) {
 			return null;
@@ -56,7 +56,7 @@ public class ResultSetWrapper {
 	public DValue readField(TypePair pair, DBAccessContext dbctx) throws SQLException {
 		DValue dval = valueHelper.readField(pair, rs, dbctx);
 		if (logResultSetDetails) {
-			log.log("RSW: field %s", dval == null ? "null" : dval.asString());
+			log.log("dRSW: field %s", dval == null ? "null" : dval.asString());
 		}
 		
 		return dval;
@@ -65,7 +65,7 @@ public class ResultSetWrapper {
 	public DValue readFieldByColumnIndex(TypePair pair, int index, DBAccessContext dbctx) throws SQLException {
 		DValue dval = valueHelper.readFieldByColumnIndex(pair, rs, index, dbctx);
 		if (logResultSetDetails) {
-			log.log("RSW: field %s", dval == null ? "null" : dval.asString());
+			log.log("eRSW: field %s", dval == null ? "null" : dval.asString());
 		}
 		return dval;
 	}
