@@ -41,7 +41,15 @@ public class StructChecker extends ValueCheckerBase {
 		List<String> genL = generateFromMultiDVal(list);
 		List<String> thenL = generateFromThen(thenVal);
 
-		return compareStringLists(genL, thenL, log);
+		boolean pass = compareStringLists(genL, thenL, log);
+		if (! pass) {
+			log.log("DVAL values ==>");
+			for(String ss: genL) {
+				log.log(ss);
+			}
+			log.log("DVAL values end");
+		}
+		return pass;
 	}
 	
 	private boolean compareStringLists(List<String> genL, List<String> thenL, Log log) {

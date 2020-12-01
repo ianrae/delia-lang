@@ -186,7 +186,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return list;
 	}
 	//TODO: fix. very inefficient when many fks
-	private boolean alreadyExist(DValue inner1, DValue foreignKey) {
+	protected boolean alreadyExist(DValue inner1, DValue foreignKey) {
 		Object obj2 = foreignKey.getObject();
 		DRelation drel = inner1.asRelation();
 		for(DValue keyval: drel.getMultipleKeys()) {
