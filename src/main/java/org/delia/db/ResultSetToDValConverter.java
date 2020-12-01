@@ -253,7 +253,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return list;
 	}
 	
-	protected void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
+	private void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
 		//rff is something like b.id as addr
 		String targetAlias = getAlias(rff.field);
 		
@@ -340,7 +340,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return dval;
 	}
 
-	private DValue createRelation(DStructType structType, TypePair targetPair, String strValue, DBAccessContext dbctx, RenderedField rf) throws SQLException {
+	protected DValue createRelation(DStructType structType, TypePair targetPair, String strValue, DBAccessContext dbctx, RenderedField rf) throws SQLException {
 		//get as string and let builder convert
 		String s = strValue;
 		

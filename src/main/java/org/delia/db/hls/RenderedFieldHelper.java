@@ -3,8 +3,10 @@ package org.delia.db.hls;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.db.sql.StrCreator;
 import org.delia.log.Log;
+import org.delia.type.DStructType;
 
 public class RenderedFieldHelper {
 
@@ -32,6 +34,16 @@ public class RenderedFieldHelper {
 		}
 		scx.o(joiner.toString());
 		log.log(scx.toString());
+	}
+	
+	public static String getAssocFieldName(RenderedField rff) {
+		if (rff.structType != null) {
+			return rff.field;
+		} else {
+			//alias
+			String fieldName = StringUtils.substringAfter(rff.field, " as ");
+			return fieldName;
+		}
 	}
 
 }
