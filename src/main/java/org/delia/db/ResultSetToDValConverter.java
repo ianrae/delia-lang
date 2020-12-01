@@ -45,7 +45,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		public int numColumnsRead;
 	}
 	
-	private ValueHelper valueHelper;
+	protected ValueHelper valueHelper;
 	private DValueConverterService dvalConverter;
 
 	public ResultSetToDValConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
@@ -253,7 +253,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return list;
 	}
 	
-	private void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
+	protected void addAsSubOjbect(DValue dval, DValue subDVal, RenderedField rff, List<RenderedField> rfList) {
 		//rff is something like b.id as addr
 		String targetAlias = getAlias(rff.field);
 		
@@ -273,7 +273,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return StringUtils.substringBefore(field, ".");
 	}
 
-	private DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
+	protected DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
 		DStructType dtype = rfTarget.structType;
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 		PrimaryKey pk = dtype.getPrimaryKey();

@@ -14,6 +14,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.QueryDetails;
+import org.delia.db.ResultSetConverter;
 import org.delia.db.ResultSetToDValConverter;
 import org.delia.db.ValueHelper;
 import org.delia.db.hls.HLSQueryStatement;
@@ -47,14 +48,16 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 	protected DBType dbType;
 	protected DBErrorConverter errorConverter;
 	protected ZTableCreator tableCreator;
-	protected ResultSetToDValConverter resultSetConverter;
+//	protected ResultSetToDValConverter resultSetConverter;
+	protected ResultSetConverter resultSetConverter;
 	protected Random random = new Random();
 
 	public ZDBExecutorBase(FactoryService factorySvc, Log sqlLog, DBErrorConverter errorConverter) {
 		super(factorySvc);
 		this.sqlLog = sqlLog;
 		this.errorConverter = errorConverter;
-		this.resultSetConverter = new ResultSetToDValConverter(factorySvc, new ValueHelper(factorySvc));
+//		this.resultSetConverter = new ResultSetToDValConverter(factorySvc, new ValueHelper(factorySvc));
+		this.resultSetConverter = new ResultSetConverter(factorySvc, new ValueHelper(factorySvc));
 		resultSetConverter.init(factorySvc);
 	}
 
