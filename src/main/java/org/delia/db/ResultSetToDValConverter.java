@@ -198,7 +198,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return false;
 	}
 	
-	private DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
+	protected DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
 		TypePair pair = DValueHelper.findField(structType, mergeOnField);
 		RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);

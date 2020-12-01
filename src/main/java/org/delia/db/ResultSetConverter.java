@@ -12,6 +12,7 @@ import org.delia.db.hls.RenderedFieldHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.error.DeliaError;
+import org.delia.relation.RelationInfo;
 import org.delia.runner.ValueException;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -19,6 +20,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.StructValueBuilder;
 
@@ -60,13 +62,13 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		List<DValue> list = null;
 		try {
 			list = newBuildDValueList(rsw, dtype, dbctx, hls);
-			if (details.mergeRows) {
-				if (details.isManyToMany) {
-					list = mergeRowsOneToMany(list, dtype, details, dbctx);
-				} else {
-					list = mergeRowsOneToMany(list, dtype, details, dbctx);
-				}
-			}
+//			if (details.mergeRows) {
+//				if (details.isManyToMany) {
+//					list = mergeRowsOneToMany(list, dtype, details, dbctx);
+//				} else {
+//					list = mergeRowsOneToMany(list, dtype, details, dbctx);
+//				}
+//			}
 		} catch (ValueException e) {
 			ValueException ve = (ValueException)e;
 			throw new DBException(ve.errL);
@@ -110,7 +112,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				ColumnRun columnRun = columnRunL.get(i);
 				DValue subDVal = readStructDValueX(columnRun, rsw, dbctx);
 				if (subDVal != null) {
-					addAsSubOjbectX(dval, subDVal, columnRun);
+					addAsSubOjbectX(dval, subDVal, columnRun, dbctx);
 				}
 			}
 		}
@@ -206,14 +208,33 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		DValue dval = structBuilder.getDValue();
 		return dval;
 	}
-	protected void addAsSubOjbectX(DValue dval, DValue subDVal, ColumnRun columnRun) {
+	protected void addAsSubOjbectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
 		//rff is something like b.id as addr
 		RenderedField rff = columnRun.runList.get(0);
 		String fieldName = RenderedFieldHelper.getAssocFieldName(rff);
 		
+		//setting dval's relation (fieldName) to have subDVal
 		DValue inner = dval.asStruct().getField(fieldName);
 		DRelation drel = inner.asRelation();
 		DRelationHelper.addToFetchedItems(drel, subDVal);
+		
+		TypePair tp = new TypePair(fieldName, null); //type part not needed;
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
+		if (relinfo.isManyToMany()) {
+			//do the inverse. setting subDVal's relation to have dval
+			String otherField = relinfo.otherSide.fieldName;
+			DValue inner2 = subDVal.asStruct().getField(otherField);
+			if (inner2 == null) {
+				inner2 = this.createEmptyRelation(dbctx, (DStructType) subDVal.getType(), otherField);
+				subDVal.asMap().put(otherField, inner2);
+			}
+			drel = inner2.asRelation();
+			
+			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+			this.log.log("xx %s", pkval.asString());
+			drel.addKey(pkval);
+			DRelationHelper.addToFetchedItems(drel, dval);
+		}
 	}
 
 	
