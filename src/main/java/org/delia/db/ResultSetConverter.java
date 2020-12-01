@@ -83,7 +83,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			throw new DBException(err);
 		}
 		
-		chkObjects(list, "addr");
+		chkObjects(list, "addr", "cust");
 		return list;
 	}
 	
@@ -373,16 +373,24 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			}
 			log.log("%s: %d", dval.getType().getName(), dval.getPersistenceId());
 
-			DValue inner = dval.asStruct().getField(relField);
-			DRelation rel = inner.asRelation();
-			for(DValue xx: rel.getFetchedItems()) {
-				impl = (DValueImpl) xx;
-				if (impl.getPersistenceId() == null) {
-					impl.setPersistenceId(id++);
-				}
-				log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
+			id = chkSubOjb(dval, relField, id, backField);
+		}
+	}
+	private int chkSubOjb(DValue dval, String relField, int id, String backField) {
+		DValue inner = dval.asStruct().getField(relField);
+		DRelation rel = inner.asRelation();
+		for(DValue xx: rel.getFetchedItems()) {
+			DValueImpl impl = (DValueImpl) xx;
+			if (impl.getPersistenceId() == null) {
+				impl.setPersistenceId(id++);
+			}
+			log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
+			
+			if (backField != null) {
+				id = chkSubOjb(xx, backField, id, null);
 			}
 		}
+		return id;
 	}
 	
 	
