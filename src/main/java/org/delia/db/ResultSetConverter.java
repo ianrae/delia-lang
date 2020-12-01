@@ -20,6 +20,7 @@ import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.DValueImpl;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
@@ -81,6 +82,8 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
 			throw new DBException(err);
 		}
+		
+		chkObjects(list, "addr");
 		return list;
 	}
 	
@@ -255,6 +258,8 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		PrimaryKey pkType = dtype.getPrimaryKey();
 		String pkField = pkType.getFieldName();
 		
+		Map<Object,DValue> subMap = new HashMap<>(); //pk,dval
+		
 		for(DValue dval: rawList) {
 			DValue pkval = dval.asStruct().getField(pkField); 
 			Object key = pkval.getObject();
@@ -271,16 +276,16 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 							mergeToVal.asMap().put(mergeOnField, inner1);
 						}
 						DRelation drel2 = inner2.asRelation();
+						addToSubMap(drel2, subMap);
+						
 						for(DValue fkval: drel2.getMultipleKeys()) {
 							if (! alreadyExist(inner1, fkval)) {
 								inner1.asRelation().addKey(fkval);
-								DRelationHelper.addToFetchedItemsFromRelation(inner1, drel2);
-								
-								//TODO: add config flag for this. it's good for tests but slows perf
-								DRelationHelper.sortFKs(inner1.asRelation());
+								addToFetchedItemsFromRelationX(inner1, drel2, subMap);
 							}
-							
 						}
+						//TODO: add config flag for this. it's good for tests but slows perf
+						DRelationHelper.sortFKs(inner1.asRelation());
 					}
 				}
 			}
@@ -305,6 +310,33 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		return list;
 	}
 
+	private void addToSubMap(DRelation drel2, Map<Object, DValue> subMap) {
+		for(DValue dd: drel2.getFetchedItems()) {
+			DValue pkval = DValueHelper.findPrimaryKeyValue(dd);
+			Object key = pkval.getObject();
+			if (! subMap.containsKey(key)) {
+				subMap.put(key, dd);
+			}
+		}
+	}
+	public void addToFetchedItemsFromRelationX(DValue inner1, DRelation drel2, Map<Object, DValue> subMap) {
+		if (! drel2.haveFetched()) {
+			return;
+		}
+		
+		for(DValue dval: drel2.getFetchedItems()) {
+			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+			Object key = pkval.getObject();
+			DValue subObj = subMap.get(key);
+			if (subObj == null) {
+				System.out.println("ssssssssssssss");
+			}
+			DRelation drel1 = inner1.asRelation();
+			DRelationHelper.addToFetchedItems(drel1, subObj);
+		}
+	}
+	
+	
 	protected void fillInParentSideRelation(DValue dval, String relField, DBAccessContext dbctx) {
 		String fieldName = relField;
 		
@@ -330,4 +362,28 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			}
 		}
 	}
+	
+	
+	protected void chkObjects(List<DValue> list, String relField, String backField) {
+		int id = 100;
+		for(DValue dval: list) {
+			DValueImpl impl = (DValueImpl) dval;
+			if (impl.getPersistenceId() == null) {
+				impl.setPersistenceId(id++);
+			}
+			log.log("%s: %d", dval.getType().getName(), dval.getPersistenceId());
+
+			DValue inner = dval.asStruct().getField(relField);
+			DRelation rel = inner.asRelation();
+			for(DValue xx: rel.getFetchedItems()) {
+				impl = (DValueImpl) xx;
+				if (impl.getPersistenceId() == null) {
+					impl.setPersistenceId(id++);
+				}
+				log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
+			}
+		}
+	}
+	
+	
 }
