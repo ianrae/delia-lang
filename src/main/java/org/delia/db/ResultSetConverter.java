@@ -48,6 +48,57 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		}
 	}
 	
+	static class ObjectPool {
+		private Map<String,DValue> map = new HashMap<>(); //Customer.55 is key
+		
+		public void add(DValue dval) {
+			String key = makeKey(dval);
+			if (map.containsKey(key)) {
+				//harvest the fks
+				DStructType dtype = (DStructType) dval.getType();
+				for(TypePair pair: dtype.getAllFields()) {
+					if (pair.type.isStructShape()) {
+						DValue inner = dval.asStruct().getField(pair.name);
+						if (inner != null) {
+							DRelation drel = inner.asRelation();
+							addForeignKeys(key, pair, drel);
+						}
+					}
+				}
+			} else {
+				map.put(key, dval);
+			}
+		}
+
+		private void addForeignKeys(String key, TypePair pair, DRelation drelSrc) {
+			DValue current = map.get(key);
+			DValue inner = current.asStruct().getField(pair.name);
+			DRelation drelTarget = inner.asRelation();
+			drelTarget.getMultipleKeys().addAll(drelSrc.getMultipleKeys());
+		}
+
+		private String makeKey(DValue dval) {
+			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+			return makeKey(dval.getType(), pkval);
+		}
+		private String makeKey(DType dtype, DValue pkval) {
+			String key = String.format("%s.%s", dtype.getName(), pkval.asString());
+			return key;
+		}
+
+		public boolean contains(DValue dval) {
+			String key = makeKey(dval);
+			DValue current = map.get(key);
+			return current == dval;
+		}
+
+		//should always be a match
+		public DValue findMatch(DType dtype, DValue pkval) {
+			String key = makeKey(dtype, pkval);
+			return map.get(key);
+		}
+	}
+	
 	public ResultSetConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
 		super(dbType, factorySvc, connFactory, sqlhelperFactory);
 	}
@@ -67,11 +118,12 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		
 		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
 		List<DValue> list = null;
+		ObjectPool pool = new ObjectPool();
 		try {
-			list = newBuildDValueList(rsw, dtype, dbctx, hls);
+			list = doBuildDValueList(rsw, dtype, dbctx, hls, pool);
 			if (details.mergeRows) {
 				if (details.isManyToMany) {
-					list = mergeRowsManyToMany(list, dtype, details, dbctx);
+					list = mergeRowsManyToMany(list, dtype, details, dbctx, pool);
 				} else {
 					list = mergeRowsOneToMany(list, dtype, details, dbctx);
 				}
@@ -90,7 +142,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	}
 	
 	
-	private List<DValue> newBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls) throws Exception {
+	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLSQueryStatement hls, ObjectPool pool) throws Exception {
 		List<DValue> list = new ArrayList<>();
 
 		List<RenderedField> rfList = null;
@@ -115,6 +167,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			ColumnRun mainRun = columnRunL.get(0);
 			DValue dval = readStructDValueX(mainRun, rsw, dbctx);
 			list.add(dval);
+			pool.add(dval);
 			
 			//do remaining column runs
 			for(int i = 1; i < columnRunL.size(); i++) {
@@ -122,6 +175,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				DValue subDVal = readStructDValueX(columnRun, rsw, dbctx);
 				if (subDVal != null) {
 					addAsSubOjbectX(dval, subDVal, columnRun, dbctx);
+					pool.add(subDVal);
 				}
 			}
 		}
@@ -231,25 +285,25 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		//setting dval's relation (fieldName) to have subDVal
 		DValue inner = dval.asStruct().getField(fieldName);
 		DRelation drel = inner.asRelation();
-		DRelationHelper.addToFetchedItems(drel, subDVal);
+//		DRelationHelper.addToFetchedItems(drel, subDVal);
 		
-//		TypePair tp = new TypePair(fieldName, null); //type part not needed;
-//		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
-//		if (relinfo.isManyToMany()) {
-//			//do the inverse. setting subDVal's relation to have dval
-//			String otherField = relinfo.otherSide.fieldName;
-//			DValue inner2 = subDVal.asStruct().getField(otherField);
-//			if (inner2 == null) {
-//				inner2 = this.createEmptyRelation(dbctx, (DStructType) subDVal.getType(), otherField);
-//				subDVal.asMap().put(otherField, inner2);
-//			}
-//			drel = inner2.asRelation();
-//			
-//			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
-//			this.log.log("xx %s", pkval.asString());
-//			drel.addKey(pkval);
+		TypePair tp = new TypePair(fieldName, null); //type part not needed;
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
+		if (relinfo.isManyToMany()) {
+			//do the inverse. setting subDVal's relation to have dval
+			String otherField = relinfo.otherSide.fieldName;
+			DValue inner2 = subDVal.asStruct().getField(otherField);
+			if (inner2 == null) {
+				inner2 = this.createEmptyRelation(dbctx, (DStructType) subDVal.getType(), otherField);
+				subDVal.asMap().put(otherField, inner2);
+			}
+			drel = inner2.asRelation();
+			
+			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+			this.log.log("xx %s", pkval.asString());
+			drel.addKey(pkval);
 //			DRelationHelper.addToFetchedItems(drel, dval);
-//		}
+		}
 	}
 
 	/**
@@ -261,61 +315,38 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	 * @param dbctx 
 	 * @return merged rows
 	 */
-	private List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx) {
-		Map<Object,DValue> pkMap = new HashMap<>(); //pk,dval
-		PrimaryKey pkType = dtype.getPrimaryKey();
-		String pkField = pkType.getFieldName();
-		
-		Map<Object,DValue> subMap = new HashMap<>(); //pk,dval
-		
+	private List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx, ObjectPool pool) {
+		//build output list. keep same order
+		List<DValue> resultList = new ArrayList<>();
 		for(DValue dval: rawList) {
-			DValue pkval = dval.asStruct().getField(pkField); 
-			Object key = pkval.getObject();
-			if (! pkMap.containsKey(key)) {
-				pkMap.put(key, dval);
-			} else {
-				DValue mergeToVal = pkMap.get(key);
-				for(String mergeOnField: details.mergeOnFieldL) {
-					DValue inner1 = mergeToVal.asStruct().getField(mergeOnField);
-					DValue inner2 = dval.asStruct().getField(mergeOnField);
-					if (inner2 != null) {
-						if (inner1 == null) {
-							inner1 = this.createEmptyRelation(dbctx, dtype, mergeOnField);
-							mergeToVal.asMap().put(mergeOnField, inner1);
-						}
-						DRelation drel2 = inner2.asRelation();
-						addToSubMap(drel2, subMap);
-						
-						for(DValue fkval: drel2.getMultipleKeys()) {
-							if (! alreadyExist(inner1, fkval)) {
-								inner1.asRelation().addKey(fkval);
-								addToFetchedItemsFromRelationX(inner1, drel2, subMap);
+			if (! pool.contains(dval)) {
+				continue;
+			}
+			resultList.add(dval);
+			
+			for(TypePair pair: dtype.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					DValue inner = dval.asStruct().getField(pair.name);
+					if (inner != null) {
+						DRelation drel = inner.asRelation();
+						for(DValue pkval: drel.getMultipleKeys()) {
+							DValue foreignVal = pool.findMatch(pair.type, pkval);
+							if (foreignVal == null) {
+								this.log.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 							}
+							DRelationHelper.addToFetchedItems(drel, foreignVal);
 						}
-						//TODO: add config flag for this. it's good for tests but slows perf
-						DRelationHelper.sortFKs(inner1.asRelation());
 					}
 				}
 			}
 		}
 		
-		//build output list. keep same order
-		List<DValue> list = new ArrayList<>();
-		for(DValue dval: rawList) {
-			DValue pkval = dval.asStruct().getField(pkField); 
-			Object key = pkval.getObject();
-			if (pkMap.containsKey(key)) {
-				list.add(dval);
-				pkMap.remove(key);
-			}
-		}
-		
-		for(DValue dval: list) {
-			for(String relField: details.mergeOnFieldL) {
-				fillInParentSideRelation(dval, relField, dbctx);
-			}
-		}		
-		return list;
+//		for(DValue dval: resultList) {
+//			for(String relField: details.mergeOnFieldL) {
+//				fillInParentSideRelation(dval, relField, dbctx);
+//			}
+//		}		
+		return resultList;
 	}
 
 	private void addToSubMap(DRelation drel2, Map<Object, DValue> subMap) {
@@ -387,6 +418,9 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	private int chkSubOjb(DValue dval, String relField, int id, String backField) {
 		DValue inner = dval.asStruct().getField(relField);
 		DRelation rel = inner.asRelation();
+		if (!rel.haveFetched()) {
+			return -1;
+		}
 		for(DValue xx: rel.getFetchedItems()) {
 			DValueImpl impl = (DValueImpl) xx;
 			if (impl.getPersistenceId() == null) {

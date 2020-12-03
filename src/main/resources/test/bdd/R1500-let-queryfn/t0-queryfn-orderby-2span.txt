@@ -28,7 +28,7 @@ value:a:Customer {
    {
    vid:101
    vy:21
-   vcust:{[55,56,57]}
+   vcust:{[57,56,55]}
   }
 }
 }
@@ -39,12 +39,12 @@ value:a:Customer {
    {
    vid:101
    vy:21
-   vcust:{[55,56,57]}
+   vcust:{[57,56,55]}
   }
    {
    vid:102
    vy:22
-   vcust:{[55,56]}
+   vcust:{[56,55]}
   }
 }
 }
@@ -60,12 +60,12 @@ value:a:Customer {
    {
    vid:101
    vy:21
-   vcust:{[55,56,57]}
+   vcust:{[57,56,55]}
   }
    {
    vid:102
    vy:22
-   vcust:{[55,56]}
+   vcust:{[56,55]}
   }
 }
 }
