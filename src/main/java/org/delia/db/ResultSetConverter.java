@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSQueryStatement;
@@ -122,11 +123,8 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		try {
 			list = doBuildDValueList(rsw, dtype, dbctx, hls, pool);
 			if (details.mergeRows) {
-				if (details.isManyToMany) {
-					list = mergeRowsManyToMany(list, dtype, details, dbctx, pool);
-				} else {
-					list = mergeRowsOneToMany(list, dtype, details, dbctx);
-				}
+//				if (details.isManyToMany) {
+				list = mergeRows(list, dtype, details, dbctx, pool);
 			}
 		} catch (ValueException e) {
 			ValueException ve = (ValueException)e;
@@ -285,7 +283,6 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		//setting dval's relation (fieldName) to have subDVal
 		DValue inner = dval.asStruct().getField(fieldName);
 		DRelation drel = inner.asRelation();
-//		DRelationHelper.addToFetchedItems(drel, subDVal);
 		
 		TypePair tp = new TypePair(fieldName, null); //type part not needed;
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
@@ -302,7 +299,6 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
 			this.log.log("xx %s", pkval.asString());
 			drel.addKey(pkval);
-//			DRelationHelper.addToFetchedItems(drel, dval);
 		}
 	}
 
@@ -315,7 +311,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	 * @param dbctx 
 	 * @return merged rows
 	 */
-	private List<DValue> mergeRowsManyToMany(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx, ObjectPool pool) {
+	private List<DValue> mergeRows(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx, ObjectPool pool) {
 		//build output list. keep same order
 		List<DValue> resultList = new ArrayList<>();
 		for(DValue dval: rawList) {
@@ -332,7 +328,8 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 						for(DValue pkval: drel.getMultipleKeys()) {
 							DValue foreignVal = pool.findMatch(pair.type, pkval);
 							if (foreignVal == null) {
-								this.log.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+								String msg = String.format("no match for fk '%s' in type %s",  pkval.asString(), pair.type.getName());
+								throw new RuntimeException(msg);
 							}
 							DRelationHelper.addToFetchedItems(drel, foreignVal);
 						}
@@ -341,67 +338,9 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			}
 		}
 		
-//		for(DValue dval: resultList) {
-//			for(String relField: details.mergeOnFieldL) {
-//				fillInParentSideRelation(dval, relField, dbctx);
-//			}
-//		}		
 		return resultList;
 	}
 
-	private void addToSubMap(DRelation drel2, Map<Object, DValue> subMap) {
-		for(DValue dd: drel2.getFetchedItems()) {
-			DValue pkval = DValueHelper.findPrimaryKeyValue(dd);
-			Object key = pkval.getObject();
-			if (! subMap.containsKey(key)) {
-				subMap.put(key, dd);
-			}
-		}
-	}
-	public void addToFetchedItemsFromRelationX(DValue inner1, DRelation drel2, Map<Object, DValue> subMap) {
-		if (! drel2.haveFetched()) {
-			return;
-		}
-		
-		for(DValue dval: drel2.getFetchedItems()) {
-			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
-			Object key = pkval.getObject();
-			DValue subObj = subMap.get(key);
-			if (subObj == null) {
-				System.out.println("ssssssssssssss");
-			}
-			DRelation drel1 = inner1.asRelation();
-			DRelationHelper.addToFetchedItems(drel1, subObj);
-		}
-	}
-	
-	
-	protected void fillInParentSideRelation(DValue dval, String relField, DBAccessContext dbctx) {
-		String fieldName = relField;
-		
-		TypePair tp = DValueHelper.findField(dval.getType(), relField);
-		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
-		if (relinfo.isManyToMany()) {
-			DValue inner = dval.asStruct().getField(fieldName);
-			DRelation drel = inner.asRelation();
-
-			String otherField = relinfo.otherSide.fieldName;
-			for(DValue subval: drel.getFetchedItems()) {
-				DValue inner2 = subval.asStruct().getField(otherField);
-				if (inner2 == null) {
-					inner2 = this.createEmptyRelation(dbctx, (DStructType) subval.getType(), otherField);
-					subval.asMap().put(otherField, inner2);
-				}
-				drel = inner2.asRelation();
-				
-				DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
-				this.log.log("xx %s", pkval.asString());
-				drel.addKey(pkval);
-				DRelationHelper.addToFetchedItems(drel, dval);
-			}
-		}
-	}
-	
 	
 	protected void chkObjects(List<DValue> list, String relField, String backField) {
 		int id = 100;
