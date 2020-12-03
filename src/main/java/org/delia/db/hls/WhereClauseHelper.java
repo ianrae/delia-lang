@@ -152,7 +152,9 @@ public class WhereClauseHelper extends ServiceBase {
 			String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 //			boolean isLeft = datIdMap.isLeftType(assocTbl, relinfo);
 			
-			af.name = datIdMap.getAssocOtherField(relinfo);
+//			af.name = datIdMap.getAssocOtherField(relinfo); //this is the original version
+			boolean flipped = datIdMap.isFlipped(relinfo);
+			af.name = flipped ?  datIdMap.getAssocFieldFor(relinfo) : datIdMap.getAssocOtherField(relinfo);
 			AliasInfo aliasInfo = aliasManager.getAssocAlias(ff.structType, pair.name, assocTbl);
 			af.alias = aliasInfo.alias; 
 			

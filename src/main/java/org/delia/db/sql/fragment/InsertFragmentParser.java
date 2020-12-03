@@ -198,32 +198,32 @@ public class InsertFragmentParser extends SelectFragmentParser {
 		//		if (assocTblName.startsWith(structType.getName())) {
 		boolean flipped = datIdMap.isFlipped(info);
 		if (!flipped) {
-			genAssocTblInsertRows(assocInsertFrag, true, mainDVal, info.nearType, info.farType, xdval, info);
+			genAssocTblInsertRows(assocInsertFrag, flipped, mainDVal, info.nearType, info.farType, xdval, info);
 		} else {
-			genAssocTblInsertRows(assocInsertFrag, false, mainDVal, info.farType, info.nearType, xdval, info);
+			genAssocTblInsertRows(assocInsertFrag, flipped, mainDVal, info.farType, info.nearType, xdval, info);
 		}
 		return true;
 	}
 
-	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean notFlipped, 
+	private void genAssocTblInsertRows(InsertStatementFragment assocInsertFrag, boolean flipped, 
 			DValue mainDVal, DStructType nearType, DStructType farType, DValue xdval, RelationInfo info) {
 //		String assocTbl = datIdMap.getAssocTblName(info.getDatId());
 //		String field1 = DatIdMapHelper.getAssocLeftField(nearType, assocTbl);
 		TypePair keyPair1 = DValueHelper.findPrimaryKeyFieldPair(nearType);
 		TypePair keyPair2 = DValueHelper.findPrimaryKeyFieldPair(farType);
 		
-		if (notFlipped) {
-			String field1 = datIdMap.getAssocFieldFor(info);
-			String field2 = datIdMap.getAssocOtherField(info);
-			DValue pk = mainDVal.asStruct().getField(keyPair1.name);
-			genxrow(assocInsertFrag, field1, keyPair2, pk);
-			genxrow(assocInsertFrag, field2, keyPair1, xdval);
-		} else {
+		if (flipped) {
 			String field2 = datIdMap.getAssocFieldFor(info);
 			String field1 = datIdMap.getAssocOtherField(info);
 			DValue pk = mainDVal.asStruct().getField(keyPair2.name);
 			genxrow(assocInsertFrag, field1, keyPair1, xdval);
 			genxrow(assocInsertFrag, field2, keyPair2, pk);
+		} else {
+			String field1 = datIdMap.getAssocFieldFor(info);
+			String field2 = datIdMap.getAssocOtherField(info);
+			DValue pk = mainDVal.asStruct().getField(keyPair1.name);
+			genxrow(assocInsertFrag, field1, keyPair2, pk);
+			genxrow(assocInsertFrag, field2, keyPair1, xdval);
 		}
 	}
 
