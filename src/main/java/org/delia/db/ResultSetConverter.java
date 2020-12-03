@@ -291,6 +291,8 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		if (! b) {
 			JTElement el = columnRun.getJTElementIfExist();
 			boolean needAllColumns = el == null ? true : !el.usedForFK;
+			//if we're doing .fks() then are only getting pk, not all the columns
+			//TODO: only ignore missing field errors. other types of validation errors should still be thrown!
 			if (needAllColumns) {
 				throw new ValueException(structBuilder.getValidationErrors()); 
 			}
