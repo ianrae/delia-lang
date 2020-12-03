@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
@@ -164,6 +165,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		genWhere(sc, hlspan);
 
 		genOLO(sc, hlspan);
+		
+		fixupFieldGroups(hlspan);
 
 		return sc.sql();
 	}
@@ -367,6 +370,20 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		rf.structType = structType;
 		fieldL.add(rf);
 	}
+	private void fixupFieldGroups(HLSQuerySpan hlspan) {
+		//in the case of Customer[true].addr, the addr field won't have a field group, so set one
+		for(RenderedField rff: hlspan.renderedFieldL) {
+			if (rff.structType != null && rff.fieldGroup == null) {
+				Optional<RenderedField> optRF = hlspan.renderedFieldL.stream().filter(x -> x.structType == rff.structType && x.fieldGroup != null).findAny();
+				if (optRF.isPresent()) {
+					rff.fieldGroup = optRF.get().fieldGroup;
+				} else {
+					DeliaExceptionHelper.throwError("empty-rff-error", ""); //should never happen
+				}
+			}
+		}
+	}
+
 
 
 	private void addField(List<RenderedField> fieldL, String s) {

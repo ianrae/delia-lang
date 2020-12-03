@@ -329,7 +329,7 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-		runR1300File("t0-let-varref.txt", 5);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---

@@ -186,7 +186,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			case ONE_TO_MANY:
 				break;
 			case MANY_TO_MANY:
-				doManyToManyAddFKofJoins(fieldL, pair, relinfoA);
+				doManyToManyAddFKofJoins(fieldL, pair, relinfoA, el);
 				numAdded++;
 				continue;
 			}
@@ -194,13 +194,13 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			AliasInfo aliasInfo = aliasManager.getFieldAlias(relinfoA.nearType, relinfoA.fieldName);
 			String s = aliasManager.buildFieldAlias(aliasInfo, pk.getFieldName());
 			s = String.format("%s as %s", s, relinfoA.fieldName);
-			addField(fieldL, pairType, pk.getKey(), s); 
+			addField(fieldL, pairType, pk.getKey(), s).fieldGroup = new FieldGroup(false, el);
 			numAdded++;
 		}
 		return numAdded;
 	}
 	private void doManyToManyAddFKofJoins(List<RenderedField> fieldL, TypePair pair,
-			RelationInfo relinfoA) {
+			RelationInfo relinfoA, JTElement el) {
 		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
 //		String fieldName = datIdMap.getAssocFieldFor(relinfoA);
 		String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
@@ -208,7 +208,9 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
 		String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
 		s = String.format("%s as %s", s, pair.name);
-		addField(fieldL, null, fieldName, s).isAssocField = true;
+		RenderedField rff = addField(fieldL, null, fieldName, s);
+		rff.isAssocField = true;
+		rff.fieldGroup = new FieldGroup((el == null), el);
 	}
 
 	private void throwNotAllowed() {
@@ -221,7 +223,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		for(JTElement el: hlspan.joinTreeL) {
 			if (joinL.contains(el.fieldName)) {
 				TypePair pair = el.createPair();
-				addStructFieldsMM(hlspan, pair, fieldL);
+				addStructFieldsMM(hlspan, pair, fieldL, el);
 			}
 		}
 	}
@@ -246,26 +248,28 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 	
 	
 	@Override
-	public void addStructFieldsMM(HLSQuerySpan hlspan, TypePair joinPair, List<RenderedField> fieldL) {
+	public void addStructFieldsMM(HLSQuerySpan hlspan, TypePair joinPair, List<RenderedField> fieldL, JTElement el) {
 		DStructType joinType = (DStructType) joinPair.type;
 		String pk = joinType.getPrimaryKey().getFieldName();
+		
+		FieldGroup fieldGroup = new FieldGroup((el == null), el);
 
 		AliasInfo aliasInfo = aliasManager.getFieldAlias(hlspan.fromType, joinPair.name);
 		for(TypePair pair: joinType.getAllFields()) {
 			if (pair.name.equals(pk)) {
 				String s = aliasManager.buildFieldAlias(aliasInfo, pair.name);
 				s = String.format("%s as %s", s, joinPair.name);
-				addField(fieldL, joinType, pair, s);
+				addField(fieldL, joinType, pair, s).fieldGroup = fieldGroup;
 			} else if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(joinType, pair);
 				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 				} else if (!relinfo.isParent) {
 					String s = aliasManager.buildFieldAlias(aliasInfo, pair.name);
-					addField(fieldL, joinType, pair, s);
+					addField(fieldL, joinType, pair, s).fieldGroup = fieldGroup;
 				}
 			} else {
 				String s = aliasManager.buildFieldAlias(aliasInfo, pair.name);
-				addField(fieldL, joinType, pair, s);
+				addField(fieldL, joinType, pair, s).fieldGroup = fieldGroup;
 			}
 		}
 	}
@@ -277,22 +281,23 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					doManyToManyAddFKofJoins(fieldL, pair, relinfo);
+					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null);
 				} else if (!relinfo.isParent) {
-					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name));
+					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name)).fieldGroup = new FieldGroup(true, null);
 				}
 			} else {
-				addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name));
+				addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name)).fieldGroup = new FieldGroup(true, null);
 			}
 		}
 	}
 
-	private void addField(List<RenderedField> fieldL, DStructType fromType, TypePair pair, String s) {
+	private RenderedField addField(List<RenderedField> fieldL, DStructType fromType, TypePair pair, String s) {
 		RenderedField rf = new RenderedField();
 		rf.pair = pair;
 		rf.field = s;
 		rf.structType = fromType;
 		fieldL.add(rf);
+		return rf;
 	}
 	private RenderedField addField(List<RenderedField> fieldL, DStructType fromType, String fieldName, String s) {
 		RenderedField rf = new RenderedField();
