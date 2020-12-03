@@ -43,11 +43,11 @@ public class StructChecker extends ValueCheckerBase {
 
 		boolean pass = compareStringLists(genL, thenL, log);
 		if (! pass) {
-			log.log("DVAL values ==>");
+			log.log("**** DVAL values ==>");
 			for(String ss: genL) {
 				log.log(ss);
 			}
-			log.log("DVAL values end");
+			log.log("***** DVAL values end");
 		}
 		return pass;
 	}

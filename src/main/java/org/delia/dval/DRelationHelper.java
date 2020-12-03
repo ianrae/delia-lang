@@ -19,6 +19,12 @@ public class DRelationHelper {
 	}
 	
 	public static void addToFetchedItems(DRelation drel, DValue subObj) {
+		if (drel.haveFetched()) {
+			if (drel.getFetchedItems().contains(subObj)) {
+				return; //already in list
+			}
+		}
+		
 		List<DValue> fetchedL = drel.haveFetched() ? drel.getFetchedItems() : new ArrayList<>();
 		fetchedL.add(subObj);
 		drel.setFetchedItems(fetchedL);

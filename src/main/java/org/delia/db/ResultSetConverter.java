@@ -319,28 +319,34 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				continue;
 			}
 			resultList.add(dval);
-			
-			for(TypePair pair: dtype.getAllFields()) {
-				if (pair.type.isStructShape()) {
-					DValue inner = dval.asStruct().getField(pair.name);
-					if (inner != null) {
-						DRelation drel = inner.asRelation();
-						for(DValue pkval: drel.getMultipleKeys()) {
-							DValue foreignVal = pool.findMatch(pair.type, pkval);
-							if (foreignVal == null) {
-								String msg = String.format("no match for fk '%s' in type %s",  pkval.asString(), pair.type.getName());
-								throw new RuntimeException(msg);
-							}
-							DRelationHelper.addToFetchedItems(drel, foreignVal);
-						}
-					}
-				}
-			}
+			fillInFetchedItems(dval, pool, true);
 		}
 		
 		return resultList;
 	}
 
+	private void fillInFetchedItems(DValue dval, ObjectPool pool, boolean doInner) {
+		DStructType dtype = (DStructType) dval.getType();
+		for(TypePair pair: dtype.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				if (inner != null) {
+					DRelation drel = inner.asRelation();
+					for(DValue pkval: drel.getMultipleKeys()) {
+						DValue foreignVal = pool.findMatch(pair.type, pkval);
+						if (foreignVal == null) {
+							String msg = String.format("no match for fk '%s' in type %s",  pkval.asString(), pair.type.getName());
+							throw new RuntimeException(msg);
+						}
+						DRelationHelper.addToFetchedItems(drel, foreignVal);
+						if (doInner) {
+							fillInFetchedItems(foreignVal, pool, false); //** recursion **
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	protected void chkObjects(List<DValue> list, String relField, String backField) {
 		int id = 100;
