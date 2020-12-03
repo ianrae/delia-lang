@@ -115,6 +115,11 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLSQueryStatement hls) {
 		if (hls == null) { //TODO: or if is select *
 			return super.buildDValueList(rs, dtype, details, dbctx, hls);
+		} else if (!hls.hlspanL.isEmpty() && !hls.hlspanL.get(0).renderedFieldL.isEmpty()) {
+			boolean isStarQuery = hls.hlspanL.get(0).renderedFieldL.get(0).field.equals("*");
+			if (isStarQuery) {
+				return super.buildDValueList(rs, dtype, details, dbctx, hls);
+			}
 		}
 		
 		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
@@ -122,10 +127,10 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		ObjectPool pool = new ObjectPool();
 		try {
 			list = doBuildDValueList(rsw, dtype, dbctx, hls, pool);
-			if (details.mergeRows) {
+//			if (details.mergeRows) {
 //				if (details.isManyToMany) {
 				list = mergeRows(list, dtype, details, dbctx, pool);
-			}
+//			}
 		} catch (ValueException e) {
 			ValueException ve = (ValueException)e;
 			throw new DBException(ve.errL);
@@ -281,27 +286,30 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		String fieldName = RenderedFieldHelper.getAssocFieldName(rff);
 		
 		//setting dval's relation (fieldName) to have subDVal
-		DValue inner = dval.asStruct().getField(fieldName);
-		DRelation drel = inner.asRelation();
+		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
 		
 		TypePair tp = new TypePair(fieldName, null); //type part not needed;
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
-		if (relinfo.isManyToMany()) {
+//		if (relinfo.isManyToMany()) {
 			//do the inverse. setting subDVal's relation to have dval
 			String otherField = relinfo.otherSide.fieldName;
-			DValue inner2 = subDVal.asStruct().getField(otherField);
-			if (inner2 == null) {
-				inner2 = this.createEmptyRelation(dbctx, (DStructType) subDVal.getType(), otherField);
-				subDVal.asMap().put(otherField, inner2);
-			}
-			drel = inner2.asRelation();
+			drel = getOrCreateRelation(subDVal, otherField, dval, dbctx);
+//		}
+	}
+
+	private DRelation getOrCreateRelation(DValue subDVal, String otherField, DValue parentDVal, DBAccessContext dbctx) {
+		DValue inner2 = subDVal.asStruct().getField(otherField);
+		if (inner2 == null) {
+			inner2 = this.createEmptyRelation(dbctx, (DStructType) subDVal.getType(), otherField);
+			subDVal.asMap().put(otherField, inner2);
+			DRelation drel = inner2.asRelation();
 			
-			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+			DValue pkval = DValueHelper.findPrimaryKeyValue(parentDVal);
 			this.log.log("xx %s", pkval.asString());
 			drel.addKey(pkval);
 		}
+		return inner2.asRelation();
 	}
-
 	/**
 	 * On a Many-to-many relation our query returns multiple rows in order to get all
 	 * the 'many' ids.
@@ -334,13 +342,11 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 					DRelation drel = inner.asRelation();
 					for(DValue pkval: drel.getMultipleKeys()) {
 						DValue foreignVal = pool.findMatch(pair.type, pkval);
-						if (foreignVal == null) {
-							String msg = String.format("no match for fk '%s' in type %s",  pkval.asString(), pair.type.getName());
-							throw new RuntimeException(msg);
-						}
-						DRelationHelper.addToFetchedItems(drel, foreignVal);
-						if (doInner) {
-							fillInFetchedItems(foreignVal, pool, false); //** recursion **
+						if (foreignVal != null) { //can be null if only doing fks()
+							DRelationHelper.addToFetchedItems(drel, foreignVal);
+							if (doInner) {
+								fillInFetchedItems(foreignVal, pool, false); //** recursion **
+							}
 						}
 					}
 				}
@@ -357,11 +363,14 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			}
 			log.log("%s: %d", dval.getType().getName(), dval.getPersistenceId());
 
-			id = chkSubOjb(dval, relField, id, backField);
+			id = chkSubObj(dval, relField, id, backField);
 		}
 	}
-	private int chkSubOjb(DValue dval, String relField, int id, String backField) {
+	private int chkSubObj(DValue dval, String relField, int id, String backField) {
 		DValue inner = dval.asStruct().getField(relField);
+		if (inner == null) {
+			return -1;
+		}
 		DRelation rel = inner.asRelation();
 		if (!rel.haveFetched()) {
 			return -1;
@@ -374,7 +383,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
 			
 			if (backField != null) {
-				id = chkSubOjb(xx, backField, id, null);
+				id = chkSubObj(xx, backField, id, null);
 			}
 		}
 		return id;
