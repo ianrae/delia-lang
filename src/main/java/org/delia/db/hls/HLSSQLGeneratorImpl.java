@@ -13,6 +13,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.join.FieldGroup;
 import org.delia.db.hls.join.SqlJoinHelper;
 import org.delia.db.hls.join.SqlJoinTreeHelper;
 import org.delia.db.sql.QueryType;
@@ -378,7 +379,12 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 				if (optRF.isPresent()) {
 					rff.fieldGroup = optRF.get().fieldGroup;
 				} else {
-					DeliaExceptionHelper.throwError("empty-rff-error", ""); //should never happen
+					if (rff.structType == hlspan.fromType) {
+						rff.fieldGroup = new FieldGroup(true, null);
+					} else {
+						DeliaExceptionHelper.throwError("empty-rff-error", ""); //should never happen
+					}
+					
 				}
 			}
 		}
