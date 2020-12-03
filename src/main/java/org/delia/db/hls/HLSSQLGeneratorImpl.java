@@ -375,16 +375,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		//in the case of Customer[true].addr, the addr field won't have a field group, so set one
 		for(RenderedField rff: hlspan.renderedFieldL) {
 			if (rff.structType != null && rff.fieldGroup == null) {
-				Optional<RenderedField> optRF = hlspan.renderedFieldL.stream().filter(x -> x.structType == rff.structType && x.fieldGroup != null).findAny();
-				if (optRF.isPresent()) {
-					rff.fieldGroup = optRF.get().fieldGroup;
+				if (rff.structType == hlspan.fromType) {
+					rff.fieldGroup = new FieldGroup(true, null);
 				} else {
-					if (rff.structType == hlspan.fromType) {
-						rff.fieldGroup = new FieldGroup(true, null);
-					} else {
-						DeliaExceptionHelper.throwError("empty-rff-error", ""); //should never happen
-					}
-					
+					DeliaExceptionHelper.throwError("empty-rff-error", ""); //should never happen
 				}
 			}
 		}

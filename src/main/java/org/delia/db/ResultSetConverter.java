@@ -11,6 +11,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.RenderedField;
 import org.delia.db.hls.RenderedFieldHelper;
+import org.delia.db.hls.join.FieldGroup;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.error.DeliaError;
@@ -39,6 +40,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		public DStructType dtype;
 		public List<RenderedField> runList = new ArrayList<>();
 		public int iStart;
+		public FieldGroup fieldGroup;
 
 		public ColumnRun(int i, DStructType dtype) {
 			this.iStart = i;
@@ -54,12 +56,12 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	}
 
 	public void init(FactoryService factorySvc) {
-		super.init(factorySvc);;
+		super.init(factorySvc);
 	}
 
 	@Override
 	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLSQueryStatement hls) {
-		if (hls == null) {
+		if (hls == null) { //TODO: or if is select *
 			return super.buildDValueList(rs, dtype, details, dbctx, hls);
 		}
 		
@@ -83,7 +85,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			throw new DBException(err);
 		}
 		
-		chkObjects(list, "addr", "cust");
+		chkObjects(list, "addr", "cust"); //TODO remove
 		return list;
 	}
 	
@@ -130,22 +132,28 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	private List<ColumnRun> buildColumnRuns(DStructType dtype, List<RenderedField> rfList) {
 		List<ColumnRun> resultL = new ArrayList<>();
 		ColumnRun run = new ColumnRun(0, dtype);
+		run.fieldGroup = new FieldGroup(true, null); //main group
 		resultL.add(run);
 		
 		DStructType currentType = dtype;
+		String currentKey = run.fieldGroup.getUniqueKey();
 		int iEnd = 0;
 		for(int i = 0; i < rfList.size(); i++) {
 			RenderedField rff = rfList.get(i);
 			
 			DStructType tmp = getFieldStructType(rff, currentType);
-			if (tmp == currentType) {
+			String tmpKey = rff.fieldGroup.getUniqueKey();
+			if (tmpKey.equals(currentKey)) {
 				iEnd = i;
 			} else {
 				copyToRunList(run, iEnd, rfList);
 				
 				run = new ColumnRun(i, tmp);
+				run.fieldGroup = rff.fieldGroup;
 				resultL.add(run);
 				currentType = tmp;
+				currentKey = tmpKey;
+				iEnd = i;
 			}
 		}
 		copyToRunList(run, iEnd, rfList);
