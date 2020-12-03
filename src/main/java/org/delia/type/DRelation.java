@@ -33,6 +33,16 @@ public class DRelation {
 	public List<DValue> getMultipleKeys() {
 		return foreignKeyL;
 	}
+	public DValue findMatchingKey(DValue keyval) {
+		String s2 = keyval.asString();
+		for(DValue dval: foreignKeyL) {
+			String s1 = dval.asString();
+			if (s1 != null && s1.equals(s2)) {
+				return dval;
+			}
+		}
+		return null;
+	}
 	
 	public DValue getForeignKey() {
 		if (foreignKeyL.size() != 1) {

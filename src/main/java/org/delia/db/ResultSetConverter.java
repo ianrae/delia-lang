@@ -48,6 +48,13 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			this.iStart = i;
 			this.dtype = dtype;
 		}
+		
+		public JTElement getJTElementIfExist() {
+			if (fieldGroup != null) {
+				return fieldGroup.el;
+			}
+			return null;
+		}
 	}
 	
 	static class ObjectPool {
@@ -75,8 +82,17 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		private void addForeignKeys(String key, TypePair pair, DRelation drelSrc) {
 			DValue current = map.get(key);
 			DValue inner = current.asStruct().getField(pair.name);
-			DRelation drelTarget = inner.asRelation();
-			drelTarget.getMultipleKeys().addAll(drelSrc.getMultipleKeys());
+			
+			//when doing fks() and are multiple relations then we load each one at a time, and one might be missing
+			if (inner != null) {
+				DRelation drelTarget = inner.asRelation();
+				
+				for(DValue srcval: drelSrc.getMultipleKeys()) {
+					if (drelTarget.findMatchingKey(srcval) == null) { //avoid duplicates
+						drelTarget.addKey(srcval);
+					}
+				}
+			}
 		}
 
 		private String makeKey(DValue dval) {
@@ -255,7 +271,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				//However if .fks() was used then it is
 				String strValue = rsw.getString(rff.columnIndex);
 				if (strValue == null) {
-					structBuilder.addField(rff.pair.name, null);
+					structBuilder.addField(fld, null);
 				} else {
 					TypePair fieldPair = new TypePair(fld, ddd);
 					DValue inner = createRelation(dtype, fieldPair, strValue, dbctx, copyrff);
@@ -273,7 +289,11 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		
 		boolean b = structBuilder.finish();
 		if (! b) {
-			throw new ValueException(structBuilder.getValidationErrors()); 
+			JTElement el = columnRun.getJTElementIfExist();
+			boolean needAllColumns = el == null ? true : !el.usedForFK;
+			if (needAllColumns) {
+				throw new ValueException(structBuilder.getValidationErrors()); 
+			}
 		}
 		DValue dval = structBuilder.getDValue();
 		return dval;
