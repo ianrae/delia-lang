@@ -13,6 +13,7 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.RenderedField;
 import org.delia.db.hls.RenderedFieldHelper;
 import org.delia.db.hls.join.FieldGroup;
+import org.delia.db.hls.join.JTElement;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.error.DeliaError;
@@ -127,10 +128,6 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		ObjectPool pool = new ObjectPool();
 		try {
 			list = doBuildDValueList(rsw, dtype, dbctx, hls, pool);
-//			if (details.mergeRows) {
-//				if (details.isManyToMany) {
-				list = mergeRows(list, dtype, details, dbctx, pool);
-//			}
 		} catch (ValueException e) {
 			ValueException ve = (ValueException)e;
 			throw new DBException(ve.errL);
@@ -170,19 +167,20 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			ColumnRun mainRun = columnRunL.get(0);
 			DValue dval = readStructDValueX(mainRun, rsw, dbctx);
 			list.add(dval);
-			pool.add(dval);
 			
 			//do remaining column runs
 			for(int i = 1; i < columnRunL.size(); i++) {
 				ColumnRun columnRun = columnRunL.get(i);
 				DValue subDVal = readStructDValueX(columnRun, rsw, dbctx);
 				if (subDVal != null) {
-					addAsSubOjbectX(dval, subDVal, columnRun, dbctx);
+					addAsSubObjectX(dval, subDVal, columnRun, dbctx);
 					pool.add(subDVal);
 				}
 			}
+			pool.add(dval);
 		}
 
+		list = mergeRows(list, pool, columnRunL);
 		return list;
 	}
 	
@@ -280,7 +278,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		DValue dval = structBuilder.getDValue();
 		return dval;
 	}
-	protected void addAsSubOjbectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
+	protected void addAsSubObjectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
 		//rff is something like b.id as addr
 		RenderedField rff = columnRun.runList.get(0);
 		String fieldName = RenderedFieldHelper.getAssocFieldName(rff);
@@ -314,12 +312,14 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 	 * On a Many-to-many relation our query returns multiple rows in order to get all
 	 * the 'many' ids.
 	 * @param rawList list of dvalues to merge
+	 * @param columnRunL 
+	 * @param dtype 
 	 * @param dtype of values
 	 * @param details query details
 	 * @param dbctx 
 	 * @return merged rows
 	 */
-	private List<DValue> mergeRows(List<DValue> rawList, DStructType dtype, QueryDetails details, DBAccessContext dbctx, ObjectPool pool) {
+	private List<DValue> mergeRows(List<DValue> rawList, ObjectPool pool, List<ColumnRun> columnRunL) {
 		//build output list. keep same order
 		List<DValue> resultList = new ArrayList<>();
 		for(DValue dval: rawList) {
@@ -327,25 +327,29 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				continue;
 			}
 			resultList.add(dval);
-			fillInFetchedItems(dval, pool, true);
+			fillInFetchedItems(dval, pool, true, columnRunL);
 		}
 		
 		return resultList;
 	}
 
-	private void fillInFetchedItems(DValue dval, ObjectPool pool, boolean doInner) {
+	private void fillInFetchedItems(DValue dval, ObjectPool pool, boolean doInner, List<ColumnRun> columnRunL) {
 		DStructType dtype = (DStructType) dval.getType();
 		for(TypePair pair: dtype.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				DValue inner = dval.asStruct().getField(pair.name);
 				if (inner != null) {
 					DRelation drel = inner.asRelation();
+					if (!isAFetchedColumn(dtype, pair, columnRunL)) {
+						continue;
+					}
+					
 					for(DValue pkval: drel.getMultipleKeys()) {
 						DValue foreignVal = pool.findMatch(pair.type, pkval);
 						if (foreignVal != null) { //can be null if only doing fks()
 							DRelationHelper.addToFetchedItems(drel, foreignVal);
 							if (doInner) {
-								fillInFetchedItems(foreignVal, pool, false); //** recursion **
+								fillInFetchedItems(foreignVal, pool, false, columnRunL); //** recursion **
 							}
 						}
 					}
@@ -354,6 +358,17 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		}
 	}
 	
+	private boolean isAFetchedColumn(DStructType dtype, TypePair pair, List<ColumnRun> columnRunL) {
+		for(ColumnRun run: columnRunL) {
+			if (run.fieldGroup != null && run.fieldGroup.el != null) {
+				JTElement el = run.fieldGroup.el;
+				if (el.dtype == dtype && el.fieldName.equals(pair.name)) {
+					return el.usedForFetch;
+				}
+			}
+		}
+		return false;
+	}
 	protected void chkObjects(List<DValue> list, String relField, String backField) {
 		int id = 100;
 		for(DValue dval: list) {
