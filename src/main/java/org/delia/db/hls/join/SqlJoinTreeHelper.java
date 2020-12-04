@@ -51,9 +51,6 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
 				boolean tmpBackwards = hlspan.fromType != el.dtype;
 				JoinFrag joinFrag = doManyToMany(sc, hlspan, pair, relinfoA, actualPair, tmpBackwards, manytoManyJoinL);
-				if (joinFrag == null) {
-					continue;
-				}
 				details.joinFragL.add(joinFrag);
 				if (!el.usedForFetch) {
 					continue;
@@ -180,13 +177,6 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		JoinFrag joinFrag = new JoinFrag();
 		joinFrag.tblName = aliasInfo.tblName;
 		
-//		//no need to join same assoc table twice
-//		for(JoinFrag js: manytoManyJoinL) {
-//			if (js.tblName.equals(joinFrag.tblName)) {
-//				return null;
-//			}
-//		}
-		
 		String on1 = buildMainAlias(hlspan, mainPk.getFieldName(), joinFrag); //b.cust
 		String fff = (isBackwards) ? datIdMap.getAssocOtherField(relinfoA) : datIdMap.getAssocFieldFor(relinfoA);
 		String on2 = this.buildFieldAliasWithJoinFrag(aliasInfo, fff, joinFrag, false); //a.id
@@ -224,7 +214,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			case ONE_TO_MANY:
 				break;
 			case MANY_TO_MANY:
-				doManyToManyAddFKofJoins(fieldL, pair, relinfoA, el, null, hlspan);
+				doManyToManyAddFKofJoins(fieldL, pair, relinfoA, el, hlspan);
 				numAdded++;
 				continue;
 			}
@@ -238,53 +228,17 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		return numAdded;
 	}
 	private void doManyToManyAddFKofJoins(List<RenderedField> fieldL, TypePair pair,
-			RelationInfo relinfoA, JTElement el, List<AliasInfo> manyToManyAliasL, HLSQuerySpan hlspan) {
+			RelationInfo relinfoA, JTElement el, HLSQuerySpan hlspan) {
 		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
 //		String fieldName = datIdMap.getAssocFieldFor(relinfoA);
 		String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
 
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-//		//first check we haven't already used a different alias for same table
-//		if (manyToManyAliasL != null) {
-//			for(AliasInfo ai: manyToManyAliasL) {
-//				if (ai.tblName != null && ai.tblName.equals(assocTbl)) {
-//					aliasInfo = ai;
-//					System.out.println("fixup MM alias!!!...............");
-//					break;
-//				}
-//			}
-//		}
-		
-		//now avoid including a selfjoin field to self
-		boolean skip = false;
-		if (hlspan != null) {
-			for(JoinFrag joinFrag: hlspan.details.joinFragL) {
-				if (joinFrag.tblName.equals(assocTbl)) {
-//					//2nd alias fixup
-//					if (joinFrag.field1.equals(fieldName) || joinFrag.field2.equals(fieldName)) {
-//						aliasInfo = aliasManager.getAssocAlias(relinfoA.farType, relinfoA.otherSide.fieldName, assocTbl);
-//					}
-
-					if (joinFrag.alias1.equals(aliasInfo.alias) && joinFrag.field1.equals(fieldName)) {
-						skip = true; //(manyToManyAliasL != null);
-					} else if (joinFrag.alias2.equals(aliasInfo.alias) && joinFrag.field2.equals(fieldName)) {
-						skip = true; //(manyToManyAliasL != null);
-					}
-				}
-			}
-		}
-		
-		if (!skip) {
-			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-			s = String.format("%s as %s", s, pair.name);
-			RenderedField rff = addField(fieldL, null, fieldName, s);
-			rff.isAssocField = true;
-			rff.fieldGroup = new FieldGroup((el == null), el);
-		}
-
-		if (manyToManyAliasL != null) {
-			manyToManyAliasL.add(aliasInfo);
-		}
+		String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
+		s = String.format("%s as %s", s, pair.name);
+		RenderedField rff = addField(fieldL, null, fieldName, s);
+		rff.isAssocField = true;
+		rff.fieldGroup = new FieldGroup((el == null), el);
 	}
 
 
@@ -353,13 +307,11 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		DStructType fromType = hlspan.fromType;
 		AliasInfo info = aliasManager.getMainTableAlias(fromType);
 		
-		List<AliasInfo> manyToManyAliasL = new ArrayList<>();
-
 		for(TypePair pair: fromType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, manyToManyAliasL, hlspan);
+					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hlspan);
 				} else if (!relinfo.isParent) {
 					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name)).fieldGroup = new FieldGroup(true, null);
 				}

@@ -306,7 +306,7 @@ public class PostgresBDDTests extends BDDBase {
 	@Test
 	public void testDebug() {
 		testIndexToRun = 1;
-		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
