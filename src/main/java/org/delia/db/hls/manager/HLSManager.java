@@ -80,16 +80,19 @@ public class HLSManager extends ServiceBase {
 		}
 	}
 	
-	public HLSQueryStatement buildStatementOnly(QuerySpec spec) {
-		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry); 
-		List<LetSpan> spanL = letEngine.buildAllSpans(spec.queryExp);
-
-		HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
-		HLSQueryStatement hls = hlsEngine.generateStatement(spec.queryExp, spanL);
-		hls.querySpec = spec;
-		
-		return hls;
-	}
+//	public HLSQueryStatement buildStatementOnly(QuerySpec spec, DatIdMap datIdMap) {
+////		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry); 
+////		List<LetSpan> spanL = letEngine.buildAllSpans(spec.queryExp);
+////
+////		HLSEngine hlsEngine = new HLSEngine(factorySvc, registry);
+////		HLSQueryStatement hls = hlsEngine.generateStatement(spec.queryExp, spanL);
+////		hls.querySpec = spec;
+//		
+//		initMiniParser(datIdMap);
+//		HLSQueryStatement hls = buildHLS(spec.queryExp, datIdMap);
+//		hls.querySpec = spec;
+//		return hls;
+//	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
 		initMiniParser(zexec.getDatIdMap());
@@ -201,5 +204,9 @@ public class HLSManager extends ServiceBase {
 
 	public void setGenerateSQLforMemFlag(boolean generateSQLforMemFlag) {
 		this.generateSQLforMemFlag = generateSQLforMemFlag;
+	}
+
+	public DTypeRegistry getRegistry() {
+		return registry;
 	}
 }
