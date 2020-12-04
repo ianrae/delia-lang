@@ -36,14 +36,14 @@ public class PostgresBDDTests extends BDDBase {
 	public void testR400() {
 		runR400File("t0-struct-key.txt", 9);
 		runR400File("t0-field-unique.txt", 6);
-		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
+		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-field-primarykey.txt", 6);
-		runR400File("t0-field-serial.txt",7);
+		runR400File("t0-field-serial.txt", 7);
 	}
 	@Test
-	public void testR500() { 
+	public void testR500() {
 		runR500File("t0-relation-one-to-one.txt", 9);
 		runR500File("t0-relation-one-to-one-oneway.txt", 8);
 		runR500File("t0-relation-one-to-many.txt", 9);
@@ -59,7 +59,10 @@ public class PostgresBDDTests extends BDDBase {
 	}
 	@Test
 	public void testR560() {
-		runR560File("t0-self-11.txt", 1);
+		runR560File("t0-self-11.txt", 3);
+		runR560File("t0-self-11a.txt", 3);
+		runR560File("t0-self-N1.txt", 4);
+		runR560File("t0-self-NN.txt", 4);
 	}
 	@Test
 	public void testR600() {
@@ -90,6 +93,8 @@ public class PostgresBDDTests extends BDDBase {
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
+		runR700File("t0-insert-parent.txt", 2);
+		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
 	@Test
@@ -136,6 +141,7 @@ public class PostgresBDDTests extends BDDBase {
 	@Test
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
+		runR1300File("t0-let-varref.txt", 5);
 	}
 	
 	@Test
@@ -152,6 +158,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR1350File("t0-filter-like.txt", 6);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);
+		runR1350File("t0-filter-in-twitter.txt", 4);
 	}
 	
 	@Test
@@ -161,8 +168,8 @@ public class PostgresBDDTests extends BDDBase {
 	
 	@Test
 	public void testR1500() {
+		ignoreTest("t0-queryfn-orderby-2span.txt");
 		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 		runR1500File("t0-queryfn-distinct.txt", 3);
 		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 		runR1500File("t0-queryfn-flatten.txt", 0);
@@ -193,7 +200,12 @@ public class PostgresBDDTests extends BDDBase {
 		runR1500File("t0-queryfn-limit.txt", 5);
 		runR1500File("t0-queryfn-offset.txt", 5);
 	}
-	
+	@Test
+	public void testR1500a() {
+		enableAllFileCheck = false;
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+	}
+
 	@Test
 	public void testR1550() {
 		runR1550File("t0-queryfn-oneone-parent.txt", 6);
@@ -245,7 +257,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2100File("t0-migration3.txt", 2);
 		runR2100File("t0-migration3a.txt", 2);
 		runR2100File("t0-migration3b.txt", 2);
-		runR2100File("t0-migration3c.txt", 2);
+		runR2100File("t0-migration3c.txt", 2); //!!
 		runR2100File("t0-migration4.txt", 2);
 		runR2100File("t0-migration10.txt", 2);
 		runR2100File("t0-migration10a.txt", 2);
@@ -294,6 +306,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2150File("t0-migrate-many-to-many8.txt", 3);
 		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
+	
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
@@ -305,15 +318,13 @@ public class PostgresBDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
-//		runR550File("t0-multirel-Nto1-1.txt", 1);
-//		runR2100File("t0-migration10.txt", 2);
-		runR560File("t0-self-N1.txt", 4);
+		runR500File("t0-relation-one-to-one.txt", 9);
 	}
 	
 	//---
