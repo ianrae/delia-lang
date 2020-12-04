@@ -87,7 +87,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		}
 		String tbl1 = aliasManager.buildTblAlias(aliasInfoR, isBackwards);
 		JoinFrag joinFrag = new JoinFrag();
-		joinFrag.tblName = tbl1;
+		joinFrag.tblName = isBackwards ? aliasInfoR.structType.getName() : aliasInfoR.tblName;
 		
 		String on1 = genOn(leftJ, isParentL, relinfoA.fieldName, isBackwards, joinFrag, true); 
 		String on2;
@@ -104,7 +104,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			RelationInfo relinfoA, RelationInfo relinfoB, AliasInfo aliasInfoR, boolean isBackwards) {
 		String tbl1 = aliasManager.buildTblAlias(aliasInfoR, isBackwards);
 		JoinFrag joinFrag = new JoinFrag();
-		joinFrag.tblName = tbl1;
+		joinFrag.tblName = isBackwards ? aliasInfoR.structType.getName() : aliasInfoR.tblName;
 		
 		AliasInfo aliasInfo = aliasInfoR;
 		PrimaryKey pk = rightJ.getPrimaryKey();
@@ -173,7 +173,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTable);
 		String tbl1 = aliasManager.buildTblAlias(aliasInfo);
 		JoinFrag joinFrag = new JoinFrag();
-		joinFrag.tblName = tbl1;
+		joinFrag.tblName = aliasInfo.tblName;
 		
 		String on1 = buildMainAlias(hlspan, mainPk.getFieldName(), joinFrag); //b.cust
 		String fff = (isBackwards) ? datIdMap.getAssocOtherField(relinfoA) : datIdMap.getAssocFieldFor(relinfoA);
@@ -211,7 +211,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			case ONE_TO_MANY:
 				break;
 			case MANY_TO_MANY:
-				doManyToManyAddFKofJoins(fieldL, pair, relinfoA, el, null);
+				doManyToManyAddFKofJoins(fieldL, pair, relinfoA, el, null, hlspan);
 				numAdded++;
 				continue;
 			}
@@ -225,7 +225,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		return numAdded;
 	}
 	private void doManyToManyAddFKofJoins(List<RenderedField> fieldL, TypePair pair,
-			RelationInfo relinfoA, JTElement el, List<AliasInfo> manyToManyAliasL) {
+			RelationInfo relinfoA, JTElement el, List<AliasInfo> manyToManyAliasL, HLSQuerySpan hlspan) {
 		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
 //		String fieldName = datIdMap.getAssocFieldFor(relinfoA);
 		String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
@@ -242,17 +242,33 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			}
 		}
 		
+		//now avoid including a selfjoin field to self
+		boolean skip = false;
+		if (hlspan != null) {
+			for(JoinFrag joinFrag: hlspan.details.joinFragL) {
+				if (joinFrag.tblName.equals(assocTbl)) {
+					if (joinFrag.alias1.equals(aliasInfo.alias) && joinFrag.field1.equals(fieldName)) {
+						skip = true;
+					} else if (joinFrag.alias2.equals(aliasInfo.alias) && joinFrag.field2.equals(fieldName)) {
+						skip = true;
+					}
+				}
+			}
+		}
 		
-		String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-		s = String.format("%s as %s", s, pair.name);
-		RenderedField rff = addField(fieldL, null, fieldName, s);
-		rff.isAssocField = true;
-		rff.fieldGroup = new FieldGroup((el == null), el);
+		if (!skip) {
+			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
+			s = String.format("%s as %s", s, pair.name);
+			RenderedField rff = addField(fieldL, null, fieldName, s);
+			rff.isAssocField = true;
+			rff.fieldGroup = new FieldGroup((el == null), el);
+		}
 
 		if (manyToManyAliasL != null) {
 			manyToManyAliasL.add(aliasInfo);
 		}
 	}
+
 
 	private void throwNotAllowed() {
 		DeliaExceptionHelper.throwError("unsupported-in-interface", "This method not allowed to be called in this subclass");
@@ -325,11 +341,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					if (shouldSkipInSelfJoin(hlspan, fromType, pair, relinfo)) {
-						
-					} else {
-						doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, manyToManyAliasL);
-					}
+					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, manyToManyAliasL, hlspan);
 				} else if (!relinfo.isParent) {
 					addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name)).fieldGroup = new FieldGroup(true, null);
 				}
@@ -337,15 +349,6 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				addField(fieldL, fromType, pair, aliasManager.buildFieldAlias(info, pair.name)).fieldGroup = new FieldGroup(true, null);
 			}
 		}
-	}
-
-	private boolean shouldSkipInSelfJoin(HLSQuerySpan hlspan, DStructType fromType, TypePair pair, RelationInfo relinfoA) {
-		String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-		for(JoinFrag joinFrag: hlspan.details.joinFragL) {
-			System.out.println(assocTbl);
-		}
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	private RenderedField addField(List<RenderedField> fieldL, DStructType fromType, TypePair pair, String s) {
