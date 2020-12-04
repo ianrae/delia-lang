@@ -91,6 +91,8 @@ public class SQLBigFourTests extends JoinTreeTestBase {
 	public void testSelfJoinMM() {
 		String arg = "111";
 		sqlchkP("let x = CMMSelf[addr < 111]", "SELECT a.cid,a.x,c.rightv as addr FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv WHERE c.rightv < ?", arg); 
+
+		sqlchkP("let x = CMMSelf[true].fks()", "SELECT a.cid,a.x,c.rightv as addr FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv", null); 
 	}
 	
 

@@ -23,6 +23,8 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 	@Override
 	public QueryDetails genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 		QueryDetails details = new QueryDetails();
+		
+		List<JoinFrag> manytoManyJoinL = new ArrayList<>();
 
 		//do the joins
 		for(JTElement el: hlspan.joinTreeL) {
@@ -48,7 +50,10 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 				details.mergeOnFieldL.add(relinfoA.fieldName);
 				TypePair actualPair = new TypePair(relinfoA.fieldName, relinfoA.nearType);
 				boolean tmpBackwards = hlspan.fromType != el.dtype;
-				JoinFrag joinFrag = doManyToMany(sc, hlspan, pair, relinfoA, actualPair, tmpBackwards);
+				JoinFrag joinFrag = doManyToMany(sc, hlspan, pair, relinfoA, actualPair, tmpBackwards, manytoManyJoinL);
+				if (joinFrag == null) {
+					continue;
+				}
 				details.joinFragL.add(joinFrag);
 				if (!el.usedForFetch) {
 					continue;
@@ -165,7 +170,7 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		return aliasManager.buildFieldAlias(info, fieldName);
 	}
 
-	private JoinFrag doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA, TypePair actualPair, boolean isBackwards) {
+	private JoinFrag doManyToMany(SQLCreator sc, HLSQuerySpan hlspan, TypePair pair, RelationInfo relinfoA, TypePair actualPair, boolean isBackwards, List<JoinFrag> manytoManyJoinL) {
 		String s;
 		PrimaryKey mainPk = hlspan.fromType.getPrimaryKey(); //Customer
 		String assocTable = datIdMap.getAssocTblName(relinfoA.getDatId()); 
@@ -175,12 +180,20 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		JoinFrag joinFrag = new JoinFrag();
 		joinFrag.tblName = aliasInfo.tblName;
 		
+		//no need to join same assoc table twice
+		for(JoinFrag js: manytoManyJoinL) {
+			if (js.tblName.equals(joinFrag.tblName)) {
+				return null;
+			}
+		}
+		
 		String on1 = buildMainAlias(hlspan, mainPk.getFieldName(), joinFrag); //b.cust
 		String fff = (isBackwards) ? datIdMap.getAssocOtherField(relinfoA) : datIdMap.getAssocFieldFor(relinfoA);
 		String on2 = this.buildFieldAliasWithJoinFrag(aliasInfo, fff, joinFrag, false); //a.id
 
 		joinFrag.sql = String.format("LEFT JOIN %s ON %s=%s", tbl1, on1, on2);
 		sc.out(joinFrag.sql);
+		manytoManyJoinL.add(joinFrag);
 		return joinFrag;
 	}
 
@@ -247,6 +260,11 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		if (hlspan != null) {
 			for(JoinFrag joinFrag: hlspan.details.joinFragL) {
 				if (joinFrag.tblName.equals(assocTbl)) {
+					//2nd alias fixup
+					if (joinFrag.field1.equals(fieldName) || joinFrag.field2.equals(fieldName)) {
+						aliasInfo = aliasManager.getAssocAlias(relinfoA.farType, relinfoA.otherSide.fieldName, assocTbl);
+					}
+
 					if (joinFrag.alias1.equals(aliasInfo.alias) && joinFrag.field1.equals(fieldName)) {
 						skip = true;
 					} else if (joinFrag.alias2.equals(aliasInfo.alias) && joinFrag.field2.equals(fieldName)) {
