@@ -180,12 +180,12 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		JoinFrag joinFrag = new JoinFrag();
 		joinFrag.tblName = aliasInfo.tblName;
 		
-		//no need to join same assoc table twice
-		for(JoinFrag js: manytoManyJoinL) {
-			if (js.tblName.equals(joinFrag.tblName)) {
-				return null;
-			}
-		}
+//		//no need to join same assoc table twice
+//		for(JoinFrag js: manytoManyJoinL) {
+//			if (js.tblName.equals(joinFrag.tblName)) {
+//				return null;
+//			}
+//		}
 		
 		String on1 = buildMainAlias(hlspan, mainPk.getFieldName(), joinFrag); //b.cust
 		String fff = (isBackwards) ? datIdMap.getAssocOtherField(relinfoA) : datIdMap.getAssocFieldFor(relinfoA);
@@ -244,26 +244,26 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 		String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
 
 		AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-		//first check we haven't already used a different alias for same table
-		if (manyToManyAliasL != null) {
-			for(AliasInfo ai: manyToManyAliasL) {
-				if (ai.tblName != null && ai.tblName.equals(assocTbl)) {
-					aliasInfo = ai;
-					System.out.println("fixup MM alias!!!...............");
-					break;
-				}
-			}
-		}
+//		//first check we haven't already used a different alias for same table
+//		if (manyToManyAliasL != null) {
+//			for(AliasInfo ai: manyToManyAliasL) {
+//				if (ai.tblName != null && ai.tblName.equals(assocTbl)) {
+//					aliasInfo = ai;
+//					System.out.println("fixup MM alias!!!...............");
+//					break;
+//				}
+//			}
+//		}
 		
 		//now avoid including a selfjoin field to self
 		boolean skip = false;
 		if (hlspan != null) {
 			for(JoinFrag joinFrag: hlspan.details.joinFragL) {
 				if (joinFrag.tblName.equals(assocTbl)) {
-					//2nd alias fixup
-					if (joinFrag.field1.equals(fieldName) || joinFrag.field2.equals(fieldName)) {
-						aliasInfo = aliasManager.getAssocAlias(relinfoA.farType, relinfoA.otherSide.fieldName, assocTbl);
-					}
+//					//2nd alias fixup
+//					if (joinFrag.field1.equals(fieldName) || joinFrag.field2.equals(fieldName)) {
+//						aliasInfo = aliasManager.getAssocAlias(relinfoA.farType, relinfoA.otherSide.fieldName, assocTbl);
+//					}
 
 					if (joinFrag.alias1.equals(aliasInfo.alias) && joinFrag.field1.equals(fieldName)) {
 						skip = (manyToManyAliasL != null);
