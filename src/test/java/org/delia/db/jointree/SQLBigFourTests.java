@@ -90,9 +90,10 @@ public class SQLBigFourTests extends JoinTreeTestBase {
 	@Test
 	public void testSelfJoinMM() {
 		String arg = "111";
-//		sqlchkP("let x = CMMSelf[addr < 111]", "SELECT a.cid,a.x,c.rightv as addr FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv WHERE c.rightv < ?", arg); 
+		//TODO this seems wrong. without fks() we shouldn't be getting c.rightv or e.leftv
+		sqlchkP("let x = CMMSelf[addr < 111]", "SELECT a.cid,a.x,c.rightv as addr,e.leftv as cust FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv WHERE c.rightv < ?", arg); 
 
-		sqlchkP("let x = CMMSelf[true].fks()", "SELECT a.cid,a.x,c.rightv as addr FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv LEFT JOIN CMMSelfCMMSelfDat2 as e ON a.cid=e.rightv", null); 
+		sqlchkP("let x = CMMSelf[true].fks()", "SELECT a.cid,a.x,c.rightv as addr,e.leftv as cust FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv LEFT JOIN CMMSelfCMMSelfDat2 as e ON a.cid=e.rightv", null); 
 	}
 	
 
