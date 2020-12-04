@@ -153,7 +153,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			throw new DBException(err);
 		}
 		
-		chkObjects(list, "addr", "cust"); //TODO remove
+//		chkObjects(list, "addr", "cust"); //TODO remove
 		return list;
 	}
 	
@@ -367,6 +367,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			}
 			resultList.add(dval);
 			fillInFetchedItems(dval, pool, true, columnRunL);
+			sortFKsIfNeeded(dval);
 		}
 		
 		return resultList;
@@ -392,6 +393,18 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+	private void sortFKsIfNeeded(DValue dval) {
+		DStructType dtype = (DStructType) dval.getType();
+		for(TypePair pair: dtype.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				if (inner != null) {
+					DRelation drel = inner.asRelation();
+					DRelationHelper.sortFKs(drel); //this is not needed, but simplifies unit tests
 				}
 			}
 		}

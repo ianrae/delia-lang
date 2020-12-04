@@ -53,7 +53,7 @@ public class PostgresBDDTests extends BDDBase {
 	@Test
 	public void testR550() {
 		runR550File("t0-multirel-1to1-1.txt", 1);
-		runR550File("t0-multirel-Nto1-1.txt", 1);
+		runR550File("t0-multirel-Nto1-1.txt", 1); 
 		runR550File("t0-multirel-Nto1-2.txt", 1);
 		runR550File("t0-multirel-NtoN-1.txt", 1);
 	}
@@ -325,7 +325,9 @@ public class PostgresBDDTests extends BDDBase {
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
 //		runR500File("t0-relation-one-to-one.txt", 9);
-		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR500File("t0-relation-many-to-many.txt", 11);
+		runR550File("t0-multirel-Nto1-1.txt", 1);
+		log.log("sfd");
 	}
 	
 	//---
