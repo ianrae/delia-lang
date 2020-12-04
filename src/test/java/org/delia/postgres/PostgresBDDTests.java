@@ -305,14 +305,15 @@ public class PostgresBDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 0;
-//		BDDTester2.disableSQLLoggingDuringSchemaMigration = false;
+		testIndexToRun = 1;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 		
 //		runR550File("t0-multirel-Nto1-1.txt", 1);
 //		runR2100File("t0-migration10.txt", 2);
+		runR560File("t0-self-N1.txt", 4);
 	}
 	
 	//---

@@ -1,6 +1,5 @@
 package org.delia.bdd;
 
-import org.delia.assoc.CreateNewDatIdVisitor;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
@@ -318,15 +317,17 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 3;
-//		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+		testIndexToRun = 1;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
 //		runR550File("t0-multirel-NtoN-1.txt", 1);
-		runR1350File("t0-filter-in-twitter.txt", 4);
+//		runR1350File("t0-filter-in-twitter.txt", 4);
+		runR560File("t0-self-N1.txt", 4);
+//		runR500File("t0-relation-one-to-many.txt", 9);
 	}
 	
 	//---

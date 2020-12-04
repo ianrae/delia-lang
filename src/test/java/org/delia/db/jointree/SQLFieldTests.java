@@ -85,6 +85,7 @@ public class SQLFieldTests extends JoinTreeTestBase {
 
 	@Test
 	public void testDebugSQL() {
+		sqlchkP("let x = AMM[cust < 111].cust", "SELECT a.cid,a.x,c.rightv as addr FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE c.leftv < ?", "111"); 
 
 	}
 

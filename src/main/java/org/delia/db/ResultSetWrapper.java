@@ -67,8 +67,8 @@ public class ResultSetWrapper {
 		if (logResultSetDetails) {
 			log.log("eRSW: field %s", dval == null ? "null" : dval.asString());
 		}
+		
 		return dval;
 	}
-	
 	
 }
