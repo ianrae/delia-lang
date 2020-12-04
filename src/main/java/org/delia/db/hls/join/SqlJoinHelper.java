@@ -19,7 +19,7 @@ public interface SqlJoinHelper {
 	int addFKofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL);
 	void addFullofJoins(HLSQuerySpan hlspan, List<RenderedField> fieldL);
 	void addStructFieldsMM(HLSQuerySpan hlspan, TypePair joinPair, List<RenderedField> fieldL, JTElement el);
-	void addStructFields(DStructType fromType, List<RenderedField> fieldL);
+	void addStructFields(HLSQuerySpan hlspan, List<RenderedField> fieldL);
 
 	List<TypePair> genTwoStatementJoinList(HLSQuerySpan hlspan1, HLSQuerySpan hlspan2, SQLCreator sc);
 }

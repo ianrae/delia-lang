@@ -155,6 +155,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 //		}
 		this.whereClauseHelper.genWhere(hlspan); //need this to genereate "as " in fields
 		
+		doPreJoin(hlspan); //MUST do this before generate fields
+		
 		SQLCreator sc = new SQLCreator();
 		//SELECT .. from .. ..join.. ..where.. ..order..
 		sc.out("SELECT");
@@ -181,6 +183,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return aliasManager.buildFieldAlias(info, fieldName);
 	}
 
+	private void doPreJoin(HLSQuerySpan hlspan) {
+		SQLCreator sc = new SQLCreator();
+		hlspan.details = joinHelper.genJoin(sc, hlspan);
+	}
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 		hlspan.details = joinHelper.genJoin(sc, hlspan);
 	}
@@ -330,7 +336,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		
 		boolean needJoin = joinHelper.needJoin(hlspan);
 		if (needJoin && fieldL.isEmpty()) {
-			joinHelper.addStructFields(hlspan.fromType, fieldL);
+			joinHelper.addStructFields(hlspan, fieldL);
 			if (joinHelper.supportsAddAllJoins()) {
 				joinHelper.addAllJoins(hlspan, fieldL);
 			} else {
