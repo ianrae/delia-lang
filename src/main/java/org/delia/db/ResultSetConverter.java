@@ -287,7 +287,8 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				//handle relation. inner is the pkval
 				if (inner != null && rff.pair.type.isStructShape()) {
 					DValue pkval = inner;
-					inner = this.createEmptyRelation(dbctx, (DStructType) rff.pair.type, rff.pair.name);
+//					inner = this.createEmptyRelation(dbctx, (DStructType) rff.pair.type, rff.pair.name);
+					inner = this.createEmptyRelation(dbctx, (DStructType) rff.structType, rff.pair.name);
 					DRelation drel = inner.asRelation();
 					drel.addKey(pkval);
 				}

@@ -58,6 +58,9 @@ public class JoinTreeTestBase extends HLSTestBase {
 		src += " type CMM struct {cid int unique, x int, relation addr AMM many optional  } end";
 		src += "\n type AMM struct {id int unique, y int, relation cust CMM many optional } end";
 		
+		src += " type CMMSelf struct {cid int unique, x int, relation addr CMMSelf 'r1' many optional ";
+		src += "\n  relation cust CMMSelf 'r1' many optional } end";
+		
 		return src;
 	}
 
