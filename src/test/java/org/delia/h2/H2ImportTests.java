@@ -131,7 +131,7 @@ public class H2ImportTests  extends BDDBase {
 	
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 }

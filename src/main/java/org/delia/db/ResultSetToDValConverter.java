@@ -45,7 +45,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		public int numColumnsRead;
 	}
 	
-	private ValueHelper valueHelper;
+	protected ValueHelper valueHelper;
 	private DValueConverterService dvalConverter;
 
 	public ResultSetToDValConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
@@ -186,7 +186,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return list;
 	}
 	//TODO: fix. very inefficient when many fks
-	private boolean alreadyExist(DValue inner1, DValue foreignKey) {
+	protected boolean alreadyExist(DValue inner1, DValue foreignKey) {
 		Object obj2 = foreignKey.getObject();
 		DRelation drel = inner1.asRelation();
 		for(DValue keyval: drel.getMultipleKeys()) {
@@ -198,7 +198,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return false;
 	}
 	
-	private DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
+	protected DValue createEmptyRelation(DBAccessContext dbctx, DStructType structType, String mergeOnField) {
 		DType relType = dbctx.registry.getType(BuiltInTypes.RELATION_SHAPE);
 		TypePair pair = DValueHelper.findField(structType, mergeOnField);
 		RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, dbctx.registry);
@@ -273,7 +273,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return StringUtils.substringBefore(field, ".");
 	}
 
-	private DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
+	protected DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, RenderedField rfTarget, List<RenderedField> rfList) throws SQLException {
 		DStructType dtype = rfTarget.structType;
 		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
 		PrimaryKey pk = dtype.getPrimaryKey();
@@ -340,7 +340,7 @@ public class ResultSetToDValConverter extends ServiceBase {
 		return dval;
 	}
 
-	private DValue createRelation(DStructType structType, TypePair targetPair, String strValue, DBAccessContext dbctx, RenderedField rf) throws SQLException {
+	protected DValue createRelation(DStructType structType, TypePair targetPair, String strValue, DBAccessContext dbctx, RenderedField rf) throws SQLException {
 		//get as string and let builder convert
 		String s = strValue;
 		

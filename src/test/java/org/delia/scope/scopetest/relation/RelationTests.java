@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.delia.api.Delia;
 import org.delia.api.DeliaFactory;
 import org.delia.api.DeliaSession;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -16,7 +17,6 @@ import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -232,7 +232,7 @@ public class RelationTests { //extends IntegerTestBase {
 		addIdFlag = true;
 		Log log = new UnitTestLog();
 		FactoryService factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
-		dbInterface = new MemZDBInterfaceFactory(factorySvc);
+		dbInterface = DBTestHelper.createMEMDb(factorySvc);
 		delia = DeliaFactory.create(dbInterface, log, factorySvc);
 //		DBHelper.createTable(dbInterface, "Address"); //!! fake schema
 //		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema

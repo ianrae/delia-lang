@@ -21,7 +21,6 @@ import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
-import org.delia.queryresponse.LetSpanRunnerImpl;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -47,7 +46,6 @@ public class LetStatementRunner extends ServiceBase {
 	private RunnerImpl runner;
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
-	private LetSpanRunnerImpl spanRunner;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
@@ -73,7 +71,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	public ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-		this.spanRunner = new LetSpanRunnerImpl(factorySvc, registry, fetchRunner);
 		this.letSpanEngine = new LetSpanEngine(factorySvc, registry);
 		
 		if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
@@ -98,11 +95,11 @@ public class LetStatementRunner extends ServiceBase {
 
 		if (exp.isType(LetStatementExp.QUERY_RESPONSE_TYPE)) {
 			QueryExp queryExp = (QueryExp) exp.value;
-			VarRef varRef = resolveVarReference(queryExp);
+			VarRef varRef = resolveScalarVarReference(queryExp);
 			if (varRef != null) {
 				res.ok = true;
 				res.shape = null;
-				runQueryFnsIfNeeded(queryExp, varRef.qresp, res);
+//				runQueryFnsIfNeeded(queryExp, varRef.qresp, res);
 
 				assignVar(exp, res);
 				return res;
@@ -119,10 +116,7 @@ public class LetStatementRunner extends ServiceBase {
 			res.addIfNotNull(qresp.err);
 			res.shape = null;
 			res.val = qresp;
-
-			if (qresp.ok) {
-				runQueryFnsIfNeeded(queryExp, qresp, res);
-			}
+			runValidation(queryExp, qresp, res);
 
 			assignVar(exp, res);
 			return res; //!!fill in rest
@@ -139,8 +133,11 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	private QueryResponse executeDBQuery(QueryExp queryExp) {
+		return executeDBQuery(queryExp, null);
+	}
+	private QueryResponse executeDBQuery(QueryExp queryExp, QueryResponse existingQResp) {
 		QuerySpec spec = resolveFilterVars(queryExp);
-		QueryContext qtx = buildQueryContext(spec);
+		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
 		boolean flag = mgr != null;
 		QueryResponse qresp;
@@ -154,8 +151,9 @@ public class LetStatementRunner extends ServiceBase {
 		return qresp;
 	}
 
-	private QueryContext buildQueryContext(QuerySpec spec) {
+	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp) {
 		QueryContext qtx = new QueryContext();
+		qtx.existingQResp = existingQResp;
 		qtx.letSpanEngine = letSpanEngine;
 		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
 		if (!qtx.loadFKs) {
@@ -247,29 +245,22 @@ public class LetStatementRunner extends ServiceBase {
 		return dval;
 	}
 
-	private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
-		if (dbInterface.getCapabilities().supportsOffsetAndLimit()) {
-			return qresp; //don't need span engine. db does it.
-		}
-		//			boolean flag = true;
-		//			if (flag) {
-		QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp, spanRunner);
-		return qresp2;
-		//			} else {
-		//				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
-		//				return qresp2;
-		//			}
-	}
-	private void runQueryFnsIfNeeded(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
-		//extract fields or invoke fns (optional)
-		QueryResponse qresp2 = runLetSpanEngine(queryExp, qresp);
-		res.ok = qresp2.ok;
-		res.addIfNotNull(qresp2.err);
-		res.shape = null;
-		res.val = qresp2;
-
+//	private QueryResponse runLetSpanEngine(QueryExp queryExp, QueryResponse qresp) {
+//		if (dbInterface.getCapabilities().supportsOffsetAndLimit()) {
+//			return qresp; //don't need span engine. db does it.
+//		}
+//		//			boolean flag = true;
+//		//			if (flag) {
+//		QueryResponse qresp2 = letSpanEngine.process(queryExp, qresp, spanRunner);
+//		return qresp2;
+//		//			} else {
+//		//				QueryResponse qresp2 = this.qffRunner.process(queryExp, qresp);
+//		//				return qresp2;
+//		//			}
+//	}
+	private void runValidation(QueryExp queryExp, QueryResponse qresp, ResultValue res) {
 		//validate (assume that we don't fully trust db storage - someone may have tampered with data)
-		if (qresp2.ok && CollectionUtils.isNotEmpty(qresp2.dvalList)) {
+		if (qresp.ok && CollectionUtils.isNotEmpty(qresp.dvalList)) {
 			ValidationRunner ruleRunner = createValidationRunner();
 			if (! ruleRunner.validateDVals(qresp.dvalList)) {
 				ruleRunner.propogateErrors(res);
@@ -304,8 +295,34 @@ public class LetStatementRunner extends ServiceBase {
 		} else {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
+				
 				//extract fields or invoke fns (optional)
-				QueryResponse qresp2 = this.letSpanEngine.processVarRef(queryExp, qresp, spanRunner);
+				
+				//resolve varref to parseable query
+//				if (queryExp.)
+				if (qresp.emptyResults()) {
+					if (queryExp.qfelist.size() > 0) {
+						String msg = String.format("var '%s' is null. cannot be evaluationed", varRef.varRef);
+						DeliaError err = et.add("var-ref-is-null", msg);
+						throw new DeliaException(err);
+					}
+					
+					varRef.qresp = qresp.dvalList == null ? null : qresp;
+					return varRef;
+				} else {
+					DValue first = qresp.dvalList.get(0);
+					//if scalar then just return
+					if (first.getType().isScalarShape()) {
+						varRef.qresp = qresp;
+						return varRef;
+					}
+					
+					queryExp.typeName = first.getType().getName();
+					//TODO add code to handle var refs deeper in statement. ex: let x = y.orderBy(z)
+				}
+				
+				
+				QueryResponse qresp2 = executeDBQuery(queryExp, qresp);
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {
 					if (qresp2.dvalList == null) {
@@ -323,19 +340,19 @@ public class LetStatementRunner extends ServiceBase {
 		}
 		return null;
 	}
-	private VarRef resolveVarReference(QueryExp queryExp) {
-		ResultValue res = runner.varMap.get(queryExp.typeName);
-		if (res == null) {
-			return null;
-		}
-
-		VarRef varRef = new VarRef();
-		varRef.varRef = queryExp.typeName;
-
-		QueryResponse qresp = (QueryResponse) res.val;
-		varRef.qresp = qresp;
-		return varRef;
-	}
+//	private VarRef resolveVarReference(QueryExp queryExp) {
+//		ResultValue res = runner.varMap.get(queryExp.typeName);
+//		if (res == null) {
+//			return null;
+//		}
+//
+//		VarRef varRef = new VarRef();
+//		varRef.varRef = queryExp.typeName;
+//
+//		QueryResponse qresp = (QueryResponse) res.val;
+//		varRef.qresp = qresp;
+//		return varRef;
+//	}
 
 	private DValue toObject(Exp valueExp, LetStatementExp exp, ResultValue res) {
 		int numErr = et.errorCount();

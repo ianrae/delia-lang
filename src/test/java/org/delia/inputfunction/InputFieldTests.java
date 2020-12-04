@@ -4,12 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -25,12 +22,10 @@ import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class InputFieldTests  extends BDDBase {
+public class InputFieldTests extends InputFunctionTestBase {
 
 	@Test
 	public void testColumnNameWithSpaces() {
@@ -116,21 +111,12 @@ public class InputFieldTests  extends BDDBase {
 	
 	
 	// --
-	//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
 
 	@Before
 	public void init() {
 		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
-//	private void createDelia(String tlang) {
-//		String src = buildSrc(tlang);
-//		this.delia.getLog().setLevel(LogLevel.DEBUG);
-//		delia.getLog().log(src);
-//		this.session = delia.beginSession(src);
-//	}
 	private String buildSrc(String columnName) {
 		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } end");
 		src += String.format(" input function foo(Customer c) { %s -> c.id, WID -> c.wid, NAME -> c.name using {  }}", columnName);
@@ -161,15 +147,6 @@ public class InputFieldTests  extends BDDBase {
 		assertEquals(1, result.numRowsInserted);
 		return result;
 	}
-	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
-		DataImportService importSvc = new DataImportService(session, 0);
-
-		InputFunctionResult result = importSvc.executeImport("foo", lineObjIter, ImportLevel.ONE);
-		assertEquals(0, result.errors.size());
-		assertEquals(1, result.numRowsProcessed);
-		assertEquals(0, result.numRowsInserted);
-		return result;
-	}
 	private void chkCustomer(Integer id, String expected) {
 		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
@@ -179,12 +156,6 @@ public class InputFieldTests  extends BDDBase {
 		long n  = dao.count("Customer");
 		assertEquals(1L, n);
 	}
-	private void chkNoCustomer(Integer id) {
-		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
-		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
-		assertEquals(true, res.ok);
-		assertEquals(0, res.getAsDValueList().size());
-	}
 	private DValue getCustomerExtra(Integer id) {
 		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
 		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
@@ -193,14 +164,6 @@ public class InputFieldTests  extends BDDBase {
 		return dval.asStruct().getField("extra");
 	}
 
-
-	
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
 
 	private LineObjIterator createIter(int n) {
 		return createIter(n, "bob");

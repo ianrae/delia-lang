@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.app.NorthwindHelper;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -22,14 +20,11 @@ import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
-import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ImportToolTests  extends BDDBase {
+public class ImportToolTests extends InputFunctionTestBase {
 	
 	@Test
 	public void testTool1Category() {
@@ -224,10 +219,6 @@ public class ImportToolTests  extends BDDBase {
 	}
 
 	// --
-	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-
-	private DeliaSession session;
-
 
 	@Before
 	public void init() {
@@ -237,26 +228,6 @@ public class ImportToolTests  extends BDDBase {
 		delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
-	}
-	private String createCustomerSrc(int which) {
-
-		String rule = which == 2 ? "name.len() > 4" : "";
-		String src = "";
-		if (which == 3) {
-			src = String.format(" type Customer struct {id long primaryKey, wid int unique, name string } %s end", rule);
-		} else 
-		{
-			src = String.format(" type Customer struct {id long primaryKey, wid int, name string } %s end", rule);
-		}
-
-		if (which == 1) {
-			src += " input function foo(Customer c) { ID -> c.id, NAME -> c.name}";
-		} else {
-			src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, ";
-			src += " NAME -> c.name using { if missing return null} }";
-		}
-
-		return src;
 	}
 	private String createCategorySrc(boolean inOrder) {
 		if (inOrder) {
@@ -282,19 +253,4 @@ public class ImportToolTests  extends BDDBase {
 		return src;
 	}
 	
-	
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
-
-	private LineObj createLineObj(int id, String nameStr) {
-		String[] ar = { "", "33", "bob" };
-		ar[0] = String.format("%d", id);
-		ar[2] = nameStr;
-
-		LineObj lineObj = new LineObj(ar, 1);
-		return lineObj;
-	}
 }

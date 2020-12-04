@@ -20,6 +20,7 @@ public class ValueException extends RuntimeException {
 	}
 	public ValueException(List<DetailedError> detailedErrL) {
 		super(detailedErrL.get(0).getMsg());
+		errL = new ArrayList<>();
 		for(DeliaError err: detailedErrL) {
 			errL.add(err);
 		}

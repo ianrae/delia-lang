@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.delia.base.DBHelper;
+import org.delia.base.DBTestHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
@@ -13,7 +14,7 @@ import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.Test;
 
 /**
@@ -70,7 +71,7 @@ public class SchemaMigratorTests {
 
 	// --
 	//private Runner runner;
-	private MemZDBInterfaceFactory dbInterface;
+	private ZDBInterfaceFactory dbInterface;
 	private SchemaMigrator migrator;
 	private RunnerHelper helper = new RunnerHelper();
 
@@ -78,13 +79,13 @@ public class SchemaMigratorTests {
 		Log log = new SimpleLog();
 		ErrorTracker et = new SimpleErrorTracker(log);
 		FactoryService factorySvc = new FactoryServiceImpl(log, et);
-		dbInterface = new MemZDBInterfaceFactory(factorySvc);
+		dbInterface = DBTestHelper.createMEMDb(factorySvc);
 		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 
-		Runner runner = helper.create(factorySvc, dbInterface);
+		LegacyRunner runner = helper.create(factorySvc, dbInterface);
 
-		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner, null);
-		return runner;
+		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner.innerRunner, null);
+		return runner.innerRunner;
 	}
 
 }

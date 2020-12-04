@@ -6,6 +6,7 @@ import org.delia.api.Delia;
 import org.delia.api.DeliaFactory;
 import org.delia.assoc.DatIdMap;
 import org.delia.base.DBHelper;
+import org.delia.base.DBTestHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;
@@ -16,8 +17,8 @@ import org.delia.log.Log;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.LegacyRunner;
+import org.delia.runner.RunnerHelper;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class DeliaInitializer {
 	private ZDBInterfaceFactory dbInterface;
@@ -38,10 +39,11 @@ public class DeliaInitializer {
 			return null;
 		}
 
-		this.runner = new LegacyRunner(factorySvc, dbInterface);
-		this.runner.legacyTypeMode = true;
-		b = runner.init(null);
-		assertEquals(true, b);
+		RunnerHelper helper = new RunnerHelper();
+		this.runner = helper.create(factorySvc, dbInterface);
+//		this.runner.legacyTypeMode = true;
+//		b = runner.init(null);
+//		assertEquals(true, b);
 //		dbInterface.setRegistry(runner.getRegistry());
 //		dbInterface.setVarEvaluator(runner);
 		return runner;
@@ -51,7 +53,7 @@ public class DeliaInitializer {
 		switch(dbType) {
 		case MEM:
 		{
-			dbInterface = new MemZDBInterfaceFactory(factorySvc);
+			dbInterface = DBTestHelper.createMEMDb(factorySvc);
 			DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
 //			dbInterface.init(factorySvc);
 		}

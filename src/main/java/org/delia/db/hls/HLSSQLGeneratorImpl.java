@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.join.FieldGroup;
 import org.delia.db.hls.join.SqlJoinHelper;
 import org.delia.db.hls.join.SqlJoinTreeHelper;
 import org.delia.db.sql.QueryType;
@@ -153,6 +155,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 //		}
 		this.whereClauseHelper.genWhere(hlspan); //need this to genereate "as " in fields
 		
+		doPreJoin(hlspan); //MUST do this before generate fields
+		
 		SQLCreator sc = new SQLCreator();
 		//SELECT .. from .. ..join.. ..where.. ..order..
 		sc.out("SELECT");
@@ -164,6 +168,8 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		genWhere(sc, hlspan);
 
 		genOLO(sc, hlspan);
+		
+		fixupFieldGroups(hlspan);
 
 		return sc.sql();
 	}
@@ -177,6 +183,10 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		return aliasManager.buildFieldAlias(info, fieldName);
 	}
 
+	private void doPreJoin(HLSQuerySpan hlspan) {
+		SQLCreator sc = new SQLCreator();
+		hlspan.details = joinHelper.genJoin(sc, hlspan);
+	}
 	private void genJoin(SQLCreator sc, HLSQuerySpan hlspan) {
 		hlspan.details = joinHelper.genJoin(sc, hlspan);
 	}
@@ -326,7 +336,7 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		
 		boolean needJoin = joinHelper.needJoin(hlspan);
 		if (needJoin && fieldL.isEmpty()) {
-			joinHelper.addStructFields(hlspan.fromType, fieldL);
+			joinHelper.addStructFields(hlspan, fieldL);
 			if (joinHelper.supportsAddAllJoins()) {
 				joinHelper.addAllJoins(hlspan, fieldL);
 			} else {
@@ -367,6 +377,19 @@ public class HLSSQLGeneratorImpl extends ServiceBase implements HLSSQLGenerator 
 		rf.structType = structType;
 		fieldL.add(rf);
 	}
+	private void fixupFieldGroups(HLSQuerySpan hlspan) {
+		//in the case of Customer[true].addr, the addr field won't have a field group, so set one
+		for(RenderedField rff: hlspan.renderedFieldL) {
+			if (rff.structType != null && rff.fieldGroup == null) {
+				if (rff.structType == hlspan.fromType) {
+					rff.fieldGroup = new FieldGroup(true, null);
+				} else {
+					DeliaExceptionHelper.throwError("empty-rff-error", ""); //should never happen
+				}
+			}
+		}
+	}
+
 
 
 	private void addField(List<RenderedField> fieldL, String s) {

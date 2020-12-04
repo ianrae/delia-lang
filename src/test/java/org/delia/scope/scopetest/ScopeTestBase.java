@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.delia.base.DBHelper;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.InstrumentedZDBInterface;
 import org.delia.compiler.ast.TypeStatementExp;
@@ -42,7 +43,7 @@ public class ScopeTestBase {
 	protected FactoryService factorySvc = new FactoryServiceImpl(log, et);
 
 	protected NewLegacyRunner initRunner()  {
-		ZDBInterfaceFactory mockInterface = new MemZDBInterfaceFactory(factorySvc);
+		ZDBInterfaceFactory mockInterface = DBTestHelper.createMEMDb(factorySvc);
 		dbInterface = new InstrumentedZDBInterface(DBType.MEM);
 		dbInterface.init(mockInterface);
 //		DBHelper.createTable(dbInterface, "Flight"); //!! fake schema

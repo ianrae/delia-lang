@@ -54,17 +54,23 @@ given:
   insert Address {id: 1, text: 'tweet1', sender: 55 }
 when:
 #left side of IN must be ident. TODO fix later and allow 55 in [followers]
-  let u = 56
+  let u = 55
   let x = Customer[u in [followers]].fks().orderBy('id')
 then:
 value:a:Customer {
-vid:55
-vname:'art'
-vfollowers:null
-vfollowees:{[56,57]}
-  vtweets:{1}
- }
-  
+vid:56
+vname:'bob'
+vfollowers:{55}
+vfollowees:null
+vtweets:null
+}
+value:a:Customer {
+  vid:57
+  vname:'cam'
+  vfollowers:{55}
+  vfollowees:null
+  vtweets:null
+}
 ---
 title: followers
 given:

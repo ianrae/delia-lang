@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.delia.api.Delia;
 import org.delia.api.DeliaFactory;
 import org.delia.api.DeliaSession;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.error.DeliaError;
@@ -14,7 +15,6 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class DeliaClientTestBase { 
 	
@@ -30,7 +30,7 @@ public class DeliaClientTestBase {
 	public void init() {
 		addIdFlag = true;
 		factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
-		dbInterface = new MemZDBInterfaceFactory(factorySvc);
+		dbInterface = DBTestHelper.createMEMDb(factorySvc);
 		delia = DeliaFactory.create(dbInterface, log, factorySvc);
 //		DBHelper.createTable(dbInterface, "Address"); //!! fake schema
 //		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLogFactory;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
@@ -28,7 +29,7 @@ import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.H2ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBExecutor;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,7 +37,7 @@ public class ZDBTests  extends BDDBase {
 
 	@Test
 	public void testMEM() {
-		MemZDBInterfaceFactory dbFactory = new MemZDBInterfaceFactory(factorySvc);
+		HLSMemZDBInterfaceFactory dbFactory = new HLSMemZDBInterfaceFactory(factorySvc);
 		MemZDBExecutor dbexec = new MemZDBExecutor(factorySvc, dbFactory);
 		dbexec.init1(registry);
 
@@ -110,7 +111,7 @@ public class ZDBTests  extends BDDBase {
 
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

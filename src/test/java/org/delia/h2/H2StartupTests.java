@@ -14,6 +14,6 @@ public class H2StartupTests extends StartupTestBase {
 
 		DeliaInitializer initter = new DeliaInitializer();
 		LegacyRunner runner = initter.init(DBType.H2);
-		basicTest(initter, runner);
+		basicTest(initter, runner.innerRunner);
 	}
 }

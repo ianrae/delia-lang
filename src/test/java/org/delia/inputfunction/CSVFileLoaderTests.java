@@ -1,35 +1,24 @@
 package org.delia.inputfunction;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.app.NorthwindHelper;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.CSVFileLoader;
-import org.delia.dataimport.DataImportService;
-import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBType;
 import org.delia.log.LogLevel;
-import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
-import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CSVFileLoaderTests  extends BDDBase {
+public class CSVFileLoaderTests extends InputFunctionTestBase {
 
 	@Test
 	public void test1() {
@@ -48,12 +37,6 @@ public class CSVFileLoaderTests  extends BDDBase {
 	}
 	
 	// --
-	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-	
-	//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
-	private int numExpectedColumnsProcessed;
 
 	@Before
 	public void init() {
@@ -98,49 +81,6 @@ public class CSVFileLoaderTests  extends BDDBase {
 	private InputFunctionResult buildAndRun(boolean inOrder, LineObjIterator lineObjIter, int expectedNumRows) {
 		createDelia(inOrder);
 		return buildAndRun(lineObjIter, expectedNumRows);
-	}
-	private InputFunctionResult buildAndRun(LineObjIterator lineObjIter, int expectedNumRows) {
-		DataImportService importSvc = new DataImportService(session, 0);
-
-		InputFunctionResult result = importSvc.executeImport("foo", lineObjIter, ImportLevel.ONE);
-		assertEquals(0, result.errors.size());
-		assertEquals(expectedNumRows, result.numRowsProcessed);
-		assertEquals(expectedNumRows, result.numRowsInserted);
-		assertEquals(numExpectedColumnsProcessed, result.numColumnsProcessedPerRow);
-		return result;
-	}
-	private InputFunctionResult buildAndRunFail(LineObjIterator lineObjIter) {
-		DataImportService importSvc = new DataImportService(session, 0);
-
-		InputFunctionResult result = importSvc.executeImport("foo", lineObjIter, ImportLevel.ONE);
-		assertEquals(0, result.errors.size());
-		assertEquals(1, result.numRowsProcessed);
-		assertEquals(0, result.numRowsInserted);
-		return result;
-	}
-	private void chkCustomer(Integer id, String expected) {
-		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
-		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
-		assertEquals(true, res.ok);
-		DValue dval = res.getAsDValue();
-		assertEquals(expected, dval.asStruct().getField("name").asString());
-		long n  = dao.count("Customer");
-		assertEquals(1L, n);
-	}
-	private void chkNoCustomer(Integer id) {
-		DeliaGenericDao dao = new DeliaGenericDao(delia, session);
-		ResultValue res = dao.queryByPrimaryKey("Customer", id.toString());
-		assertEquals(true, res.ok);
-		assertEquals(0, res.getAsDValueList().size());
-	}
-
-
-	
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
 	}
 
 	private LineObjIterator createIter(int n) {

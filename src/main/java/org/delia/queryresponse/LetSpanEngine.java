@@ -9,10 +9,8 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.queryresponse.function.ZQueryResponseFunctionFactory;
-import org.delia.runner.QueryResponse;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
 
 public class LetSpanEngine extends ServiceBase {
@@ -23,42 +21,42 @@ public class LetSpanEngine extends ServiceBase {
 		super(factorySvc);
 		this.registry = registry;
 		
-		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null); //fetchRunner not needed here
+		this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc);
 	}
 	
-	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
-		if (qrespInitial.emptyResults()) {
-			return qrespInitial;
-		}
-		
-		DValue dval = qrespInitial.dvalList.get(0);
-		DType dtype = dval.getType();
-		List<LetSpan> spanL = buildSpans(queryExp, dtype);
-		
-		//execute span
-		QueryResponse qresp = qrespInitial;
-		for(LetSpan span: spanL) {
-			span.qresp = qresp;
-			span.qfeL = adjustExecutionOrder(span);
-			qresp = runner.executeSpan(span);
-		}
-		
-		return qresp;
-	}
-	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
-		DType dtype = registry.getType(queryExp.typeName);
-		List<LetSpan> spanL = buildSpans(queryExp, dtype);
-		
-		//execute span
-		QueryResponse qresp = qrespInitial;
-		for(LetSpan span: spanL) {
-			span.qresp = qresp;
-			span.qfeL = adjustExecutionOrder(span);
-			qresp = runner.executeSpan(span);
-		}
-		
-		return qresp;
-	}
+//	public QueryResponse processVarRef(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
+//		if (qrespInitial.emptyResults()) {
+//			return qrespInitial;
+//		}
+//		
+//		DValue dval = qrespInitial.dvalList.get(0);
+//		DType dtype = dval.getType();
+//		List<LetSpan> spanL = buildSpans(queryExp, dtype);
+//		
+//		//execute span
+//		QueryResponse qresp = qrespInitial;
+//		for(LetSpan span: spanL) {
+//			span.qresp = qresp;
+//			span.qfeL = adjustExecutionOrder(span);
+////			qresp = runner.executeSpan(span);
+//		}
+//		
+//		return qresp;
+//	}
+//	public QueryResponse process(QueryExp queryExp, QueryResponse qrespInitial, LetSpanRunner runner) {
+//		DType dtype = registry.getType(queryExp.typeName);
+//		List<LetSpan> spanL = buildSpans(queryExp, dtype);
+//		
+//		//execute span
+//		QueryResponse qresp = qrespInitial;
+//		for(LetSpan span: spanL) {
+//			span.qresp = qresp;
+//			span.qfeL = adjustExecutionOrder(span);
+//			qresp = runner.executeSpan(span);
+//		}
+//		
+//		return qresp;
+//	}
 	public List<LetSpan> buildAllSpans(QueryExp queryExp) {
 		DType dtype = registry.getType(queryExp.typeName);
 		if (dtype == null) {

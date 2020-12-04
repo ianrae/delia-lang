@@ -81,6 +81,21 @@ public class SQLBigFourTests extends JoinTreeTestBase {
 		arg = "111";
 		sqlchkP("let x = AMM[111].cust", "SELECT a.cid,a.x,c.rightv as addr FROM CMM as a LEFT JOIN CMMAMMDat1 as c ON a.cid=c.leftv WHERE c.rightv = ?", arg); 
 	}
+	
+	/**
+	 * Need to ensure don't pull in c.leftv when joining on c.leftv.
+	 * -self-join. we pull in parent value c.rightv from assoc table
+	 * -we should not be pulling in 'child' value c.leftv because its same as a.id so you end up with Customer 55 having 55 as a worker
+	 */
+	@Test
+	public void testSelfJoinMM() {
+		String arg = "111";
+		//TODO this seems wrong. without fks() we shouldn't be getting c.rightv or e.leftv
+		sqlchkP("let x = CMMSelf[addr < 111]", "SELECT a.cid,a.x,c.rightv as addr,e.leftv as cust FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv WHERE c.rightv < ?", arg); 
+
+		sqlchkP("let x = CMMSelf[true].fks()", "SELECT a.cid,a.x,c.rightv as addr,e.leftv as cust FROM CMMSelf as a LEFT JOIN CMMSelfCMMSelfDat2 as c ON a.cid=c.leftv LEFT JOIN CMMSelfCMMSelfDat2 as e ON a.cid=e.rightv", null); 
+	}
+	
 
 	@Test
 	public void testDebugSQL() {

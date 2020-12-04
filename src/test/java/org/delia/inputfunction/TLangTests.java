@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -35,12 +33,10 @@ import org.delia.tlang.statement.VariableStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TLangTests  extends BDDBase {
+public class TLangTests extends InputFunctionTestBase {
 	public static class AddXStatement extends TLangStatementBase {
 		public AddXStatement() {
 			super("addX");
@@ -176,9 +172,6 @@ public class TLangTests  extends BDDBase {
 	}
 
 	// --
-	//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
 	private DTypeRegistry registry;
 	private ScalarValueBuilder builder;
 	
@@ -261,13 +254,4 @@ public class TLangTests  extends BDDBase {
 		delia.getLog().log(tlangRunner.getTrail());
 		assertEquals(expected, tlangRunner.getTrail());
 	}
-
-
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
-
-
 }

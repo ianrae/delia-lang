@@ -212,6 +212,11 @@ public class ValueHelper extends ServiceBase {
 	
 	public DValue readFieldByColumnIndex(TypePair pair, ResultSet rs, int index, DBAccessContext dbctx) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
+		
+		if (pair.type.isStructShape()) {
+			pair = DValueHelper.findPrimaryKeyFieldPair(pair.type);
+			//read the primary key value
+		}
 
 		switch(pair.type.getShape()) {
 		case INTEGER:

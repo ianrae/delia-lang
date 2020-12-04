@@ -56,6 +56,9 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 	}
 
 	protected QueryResponse doExecuteQuery(QuerySpec spec, QueryContext qtx) {
+		if (qtx.existingQResp != null) {
+			return qtx.existingQResp;
+		}
 		
 		//avoid infinite loop
 		int maxPreQueries = 10;

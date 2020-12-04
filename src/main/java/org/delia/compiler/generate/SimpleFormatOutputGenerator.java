@@ -49,7 +49,7 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
 
 	@Override
 	public void structMemberValue(String fieldName, DValue dval, GeneratorContext genctx, int index) {
-		String value = DValToString(dval);
+		String value = DValToString(dval, genctx);
 		String s;
 		if (includeVPrefix) {
 			s = String.format(" v%s:%s", fieldName, value);
@@ -66,7 +66,7 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
 				write("null", genctx);
 			} else {
 				String typeName = getTypeName(dval.getType());
-				String value = DValToString(dval);
+				String value = DValToString(dval, genctx);
 				String s = String.format("value:%s:%s:%s", varName, typeName, value);
 				write(s, genctx);
 			}
@@ -97,7 +97,7 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
 		}
 		return space;
 	}
-    private String DValToString(DValue dval) {
+    private String DValToString(DValue dval, GeneratorContext genctx) {
         if (dval == null) {
             return "null";
         } else if (dval.getType().isShape(Shape.RELATION)) {
@@ -106,7 +106,8 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
         		return buildMultipleRef(rel);
         	}
         	String keyStr = rel.getForeignKey().asString();
-        	String suffix = rel.haveFetched() ? ":" : "}";
+        	boolean b = genctx.expandSubOjectsFlag ? rel.haveFetched() : false;
+        	String suffix = b ? ":" : "}";
         	return String.format("{%s%s", keyStr, suffix);
         } else if (dval.getType().isShape(Shape.STRING)) {
         	String s = dval.asString();

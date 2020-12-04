@@ -9,6 +9,7 @@ import java.util.List;
 import org.delia.api.Delia;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.api.MigrationAction;
+import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
@@ -37,7 +38,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -250,7 +250,7 @@ public class FragmentParserTests extends BDDBase {
 
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 	

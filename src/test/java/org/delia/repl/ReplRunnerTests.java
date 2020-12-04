@@ -3,6 +3,7 @@ package org.delia.repl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
@@ -11,7 +12,6 @@ import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -202,7 +202,7 @@ public class ReplRunnerTests extends BDDBase {
 
 	@Override
 	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
+		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

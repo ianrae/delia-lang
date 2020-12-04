@@ -22,7 +22,7 @@ then:
 value:a:Address {
  vsid:'100'
  vcity:'kingston'
- vmanager:null
+ vmanager:{56}
 }
 
 ---
@@ -36,5 +36,5 @@ then:
 value:a:Address {
  vsid:'100'
  vcity:'kingston'
- vmanager:null
+ vmanager:{56}
 }

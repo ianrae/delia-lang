@@ -91,7 +91,8 @@ public class DeliaImpl implements Delia {
 	}
 
 
-	protected Runner createRunner(DeliaSession dbsess) {
+	//only public for unit tests
+	public Runner createRunner(DeliaSession dbsess) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		Runner runner = new RunnerImpl(factorySvc, dbInterface);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
@@ -111,9 +112,7 @@ public class DeliaImpl implements Delia {
 		}
 		
 		HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
-		if (deliaOptions.useHLS) {
-			runner.setHLSManager(mgr);
-		}
+		runner.setHLSManager(mgr);
 		
 		return runner;
 	}

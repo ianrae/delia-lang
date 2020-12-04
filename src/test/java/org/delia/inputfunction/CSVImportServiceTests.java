@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
-import org.delia.app.NorthwindHelper;
-import org.delia.bdd.MemBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -20,7 +18,7 @@ import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CSVImportServiceTests  extends MemBDDBase {
+public class CSVImportServiceTests extends InputFunctionTestBase {
 	
 	@Test
 	public void testLevel1Category() {
@@ -140,7 +138,6 @@ public class CSVImportServiceTests  extends MemBDDBase {
 	}
 
 	// --
-	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 	public final String IMPORT_DIR = "src/main/resources/test/import/";
 
 	@Before

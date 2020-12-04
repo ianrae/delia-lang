@@ -38,6 +38,7 @@ public class AllBDDTests extends BDDBase {
 		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
+		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-field-primarykey.txt", 6);
 		runR400File("t0-field-serial.txt", 7);
 	}
@@ -140,6 +141,7 @@ public class AllBDDTests extends BDDBase {
 	@Test
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
+		runR1300File("t0-let-varref.txt", 5);
 	}
 	
 	@Test
@@ -322,14 +324,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 3;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
-//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
-		runR1550File("t0-queryfn-oneone-childa.txt", 7);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---
@@ -337,24 +337,18 @@ public class AllBDDTests extends BDDBase {
 
 	@Before
 	public void init() {
-		BDDTesterEx.useHLS = true;
 //		DeliaFactory.useHLSMEM = true;
 	}
 	@After
 	public void shutdown() {
 		chkAllFiles();
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
-		BDDTesterEx.useHLS = false;
 	}
 	
 	@Override
 	public ZDBInterfaceFactory createForTest() {
 		MemZDBInterfaceFactory db;
-		if (DeliaFactory.useHLSMEM) {
-			db = new HLSMemZDBInterfaceFactory(createFactorySvc());
-		} else {
-			db = new MemZDBInterfaceFactory(createFactorySvc());
-		}
+		db = new HLSMemZDBInterfaceFactory(createFactorySvc());
 		
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);

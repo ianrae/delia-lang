@@ -167,7 +167,7 @@ public class DeliaGeneratePhase extends ServiceBase {
 			if (! genctx.expandSubOjectsFlag) {
 				return;
 			}
-			genctx.expandSubOjectsFlag = false;
+			genctx.expandSubOjectsFlag = false; //protect against infinite recursion
 			genctx.indentLevel = 1;
 			DRelation drel = inner.asRelation();
 			if (!drel.haveFetched()) {

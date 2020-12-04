@@ -13,6 +13,7 @@ import org.delia.db.schema.SchemaType;
 import org.delia.h2.DeliaInitializer;
 import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
+import org.delia.runner.LegacyRunner;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
@@ -37,7 +38,7 @@ public class BDDTestBase {
 		assertEquals(true, runner.getRegistry().existsType("Zoo"));
 		
 		//migrate db
-		migrateDB(initter, "Actor", "Zoo");
+//		migrateDB(initter, "Actor", "Zoo");
 	}
 	
 	protected void addData() {
@@ -55,7 +56,7 @@ public class BDDTestBase {
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper = new CompilerHelper(null);
 	protected DeliaInitializer initter;
-	protected Runner runner;
+	protected LegacyRunner runner;
 	protected BDDQueryHelper qhelper;
 
 	public static final String TYPE0 = "Zoo"; //type with 0 values
@@ -64,7 +65,7 @@ public class BDDTestBase {
 	public void init() {
 		initter = new DeliaInitializer();
 		runner = initter.init(DBType.MEM, log);
-		qhelper = new BDDQueryHelper(initter, runner);
+		qhelper = new BDDQueryHelper(initter, runner.innerRunner);
 		
 		setupTypes();
 		addData();
@@ -74,27 +75,27 @@ public class BDDTestBase {
 		log.log(msg);
 	}
 	
-	protected void migrateDB(DeliaInitializer initter, String typeName, String typeName2) {
-		SchemaMigrator migrator = initter.createSchemaMigrator();
-		boolean b = migrator.createSchemaTableIfNeeded();
-		assertEquals(true, b);
-		b = migrator.dbNeedsMigration();
-		assertEquals(true, b);
-
-		List<SchemaType> list = migrator.parseFingerprint(migrator.getDbFingerprint());
-		assertEquals(0, list.size());
-
-		List<SchemaType> list2 = migrator.parseFingerprint(migrator.getCurrentFingerprint());
-		assertEquals(2, list2.size());
-		assertEquals(typeName, list2.get(0).typeName);
-
-		List<SchemaType> diffL = migrator.calcDiff(list, list2);
-		assertEquals(2, diffL.size());
-		assertEquals(typeName, diffL.get(0).typeName);
-		log("migrate: +" + typeName + " +" + typeName2);
-
-		b = migrator.performMigrations(diffL, true);
-		assertEquals(true, b);
-		migrator.close();
-	}
+//	protected void migrateDB(DeliaInitializer initter, String typeName, String typeName2) {
+//		SchemaMigrator migrator = initter.createSchemaMigrator();
+//		boolean b = migrator.createSchemaTableIfNeeded();
+//		assertEquals(true, b);
+//		b = migrator.dbNeedsMigration();
+//		assertEquals(true, b);
+//
+//		List<SchemaType> list = migrator.parseFingerprint(migrator.getDbFingerprint());
+//		assertEquals(0, list.size());
+//
+//		List<SchemaType> list2 = migrator.parseFingerprint(migrator.getCurrentFingerprint());
+//		assertEquals(2, list2.size());
+//		assertEquals(typeName, list2.get(0).typeName);
+//
+//		List<SchemaType> diffL = migrator.calcDiff(list, list2);
+//		assertEquals(2, diffL.size());
+//		assertEquals(typeName, diffL.get(0).typeName);
+//		log("migrate: +" + typeName + " +" + typeName2);
+//
+//		b = migrator.performMigrations(diffL, true);
+//		assertEquals(true, b);
+//		migrator.close();
+//	}
 }

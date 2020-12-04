@@ -38,7 +38,7 @@ public class QueryCountTests extends ScopeTestBase {
 		
 		queryOneInt("Flight[66].count()", 0);
 		
-		runLetInt("a1.count()", 1);
+		runLetInt("a1.count()", 2);
 	}
 	
 	@Test

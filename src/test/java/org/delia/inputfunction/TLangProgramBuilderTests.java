@@ -3,8 +3,6 @@ package org.delia.inputfunction;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -27,12 +25,10 @@ import org.delia.tlang.statement.ToUpperStatement;
 import org.delia.tlang.statement.ValueStatement;
 import org.delia.tlang.statement.VariableStatement;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TLangProgramBuilderTests  extends BDDBase {
+public class TLangProgramBuilderTests extends InputFunctionTestBase {
 	
 	@Test
 	public void test1() {
@@ -83,9 +79,6 @@ public class TLangProgramBuilderTests  extends BDDBase {
 
 
 	// --
-//	private DeliaDao dao;
-	private Delia delia;
-	private DeliaSession session;
 	private DTypeRegistry registry;
 	private TLangProgram recentProgram;
 
@@ -123,11 +116,6 @@ public class TLangProgramBuilderTests  extends BDDBase {
 	}
 
 
-	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
-		return db;
-	}
 	private <T extends TLangStatement> T buildTLang(String tlang, int expectedSize, Class<T> clazz) {
 		InputFunctionDefStatementExp infnExp = doTLang(tlang);
 		TLangProgramBuilder programBuilder = new TLangProgramBuilder(delia.getFactoryService(), registry);

@@ -30,7 +30,7 @@ public class HLSEngine extends ServiceBase {
 		public HLSEngine(FactoryService factorySvc, DTypeRegistry registry) {
 			super(factorySvc);
 			this.registry = registry;
-			this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc, null);
+			this.fnFactory = new ZQueryResponseFunctionFactory(factorySvc);
 		}
 		
 		public HLSQueryStatement generateStatement(QueryExp queryExp, List<LetSpan> spanL) {
