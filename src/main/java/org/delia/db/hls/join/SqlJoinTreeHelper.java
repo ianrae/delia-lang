@@ -266,9 +266,9 @@ public class SqlJoinTreeHelper implements SqlJoinHelper {
 					}
 
 					if (joinFrag.alias1.equals(aliasInfo.alias) && joinFrag.field1.equals(fieldName)) {
-						skip = true;
+						skip = (manyToManyAliasL != null);
 					} else if (joinFrag.alias2.equals(aliasInfo.alias) && joinFrag.field2.equals(fieldName)) {
-						skip = true;
+						skip = (manyToManyAliasL != null);
 					}
 				}
 			}

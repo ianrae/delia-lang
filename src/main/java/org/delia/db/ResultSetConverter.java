@@ -189,8 +189,9 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 				ColumnRun columnRun = columnRunL.get(i);
 				DValue subDVal = readStructDValueX(columnRun, rsw, dbctx);
 				if (subDVal != null) {
-					addAsSubObjectX(dval, subDVal, columnRun, dbctx);
-					pool.add(subDVal);
+					if (addAsSubObjectX(dval, subDVal, columnRun, dbctx) != null) {
+						pool.add(subDVal);
+					}
 				}
 			}
 			pool.add(dval);
@@ -309,7 +310,11 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 		DValue dval = structBuilder.getDValue();
 		return dval;
 	}
-	protected void addAsSubObjectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
+	protected DRelation addAsSubObjectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
+		if (DValueHelper.findPrimaryKeyValue(subDVal) == null) {
+			return null;
+		}
+		
 		//rff is something like b.id as addr
 		RenderedField rff = columnRun.runList.get(0);
 		String fieldName = RenderedFieldHelper.getAssocFieldName(rff);
@@ -322,7 +327,7 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 //		if (relinfo.isManyToMany()) {
 			//do the inverse. setting subDVal's relation to have dval
 			String otherField = relinfo.otherSide.fieldName;
-			drel = getOrCreateRelation(subDVal, otherField, dval, dbctx);
+			return getOrCreateRelation(subDVal, otherField, dval, dbctx);
 //		}
 	}
 
@@ -334,6 +339,9 @@ public class ResultSetConverter extends ResultSetToDValConverter {
 			DRelation drel = inner2.asRelation();
 			
 			DValue pkval = DValueHelper.findPrimaryKeyValue(parentDVal);
+			if (pkval == null) {
+				return null; //happens in self.join c.leftv as workers
+			}
 			this.log.log("xx %s", pkval.asString());
 			drel.addKey(pkval);
 		}

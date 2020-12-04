@@ -1,5 +1,10 @@
 package org.delia.db.hls;
 
+/**
+ * Track info about joins.
+ * @author irae
+ *
+ */
 public class JoinFrag {
 	public String tblName;
 	public String alias1;
