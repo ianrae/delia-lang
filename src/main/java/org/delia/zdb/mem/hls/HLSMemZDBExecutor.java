@@ -75,11 +75,11 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
 		}
 		
-		//then do order,limit,offset
+		//then do orderBy,offset,limit
 		if (hlspan.oloEl != null) {
 			addIf(actionL, (hlspan.oloEl.orderBy != null), new MemOrderByFunction(registry));
-			addIf(actionL, (hlspan.oloEl.limit != null), new MemLimitFunction(registry));
 			addIf(actionL, (hlspan.oloEl.offset != null), new MemOffsetFunction(registry));
+			addIf(actionL, (hlspan.oloEl.limit != null), new MemLimitFunction(registry));
 		}
 		
 		if (! beginsWithScopeChange) {
