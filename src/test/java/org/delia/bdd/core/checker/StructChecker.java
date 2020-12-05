@@ -42,13 +42,13 @@ public class StructChecker extends ValueCheckerBase {
 		List<String> thenL = generateFromThen(thenVal);
 
 		boolean pass = compareStringLists(genL, thenL, log);
-		if (! pass) {
-			log.log("**** DVAL values ==>");
-			for(String ss: genL) {
-				log.log(ss);
-			}
-			log.log("***** DVAL values end");
-		}
+//		if (! pass) {
+//			log.log("**** DVAL values ==>");
+//			for(String ss: genL) {
+//				log.log(ss);
+//			}
+//			log.log("***** DVAL values end");
+//		}
 		return pass;
 	}
 	

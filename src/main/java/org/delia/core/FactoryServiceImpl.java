@@ -3,6 +3,7 @@ package org.delia.core;
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
@@ -105,6 +106,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public ValidationRunner createValidationRunner(ZDBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
 		return new ValidationRuleRunnerImpl(this, dbInterface.getCapabilities(), fetchRunner);
+	}
+	@Override
+	public HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
+		return new HLSSimpleQueryService(this, dbInterface, registry);
 	}
 
 }
