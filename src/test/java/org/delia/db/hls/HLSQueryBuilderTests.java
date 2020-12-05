@@ -29,7 +29,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 	public void testAllRows() {
 		try(ZDBExecutor dbexecutor = createExecutor()) {
 			QueryExp queryExp = svc.getQueryBuilderSvc().createAllRowsQuery("Customer");
-			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
+			HLSManagerResult hlsResult = svc.execQueryEx(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -40,7 +40,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 	public void testCount() {
 		try(ZDBExecutor dbexecutor = createExecutor()) {
 			QueryExp queryExp = svc.getQueryBuilderSvc().createCountQuery("Customer");
-			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
+			HLSManagerResult hlsResult = svc.execQueryEx(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT COUNT(*) FROM Customer as a");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -58,7 +58,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
 			QueryExp queryExp = svc.getQueryBuilderSvc().createInQuery("Customer", list, relType);
-			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
+			HLSManagerResult hlsResult = svc.execQueryEx(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SxxELECT COUNT(*) FROM Customer as a");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -73,7 +73,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
 			QueryExp queryExp = svc.getQueryBuilderSvc().createPrimaryKeyQuery("Customer", dval);
-			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
+			HLSManagerResult hlsResult = svc.execQueryEx(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a WHERE a.cid = ?");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -87,7 +87,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
 			QueryExp queryExp = svc.getQueryBuilderSvc().createEqQuery("Customer", "x", dval);
-			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
+			HLSManagerResult hlsResult = svc.execQueryEx(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a WHERE a.x = ?");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);

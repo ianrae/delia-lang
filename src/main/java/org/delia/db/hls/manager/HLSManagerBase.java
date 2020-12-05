@@ -113,6 +113,7 @@ public class HLSManagerBase extends ServiceBase {
 	}
 
 	public HLSQueryStatement buildHLS(QueryExp queryExp, DatIdMap datIdMap) {
+		//Warning. sometimes datIdMap can be null (when we are be called by HLSSimpleQueryService)
 		LetSpanEngine letEngine = new LetSpanEngine(factorySvc, registry); 
 		List<LetSpan> spanL = letEngine.buildAllSpans(queryExp);
 
