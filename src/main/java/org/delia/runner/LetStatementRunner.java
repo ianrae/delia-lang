@@ -25,6 +25,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
@@ -146,7 +147,8 @@ public class LetStatementRunner extends ServiceBase {
 			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 			qresp = result.qresp;
 		} else {
-			qresp = zexec.rawQuery(spec, qtx);
+			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
+			qresp = null; //zexec.rawQuery(spec, qtx);
 		}
 		return qresp;
 	}

@@ -11,6 +11,7 @@ import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.queryresponse.LetSpanEngine;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -32,8 +33,8 @@ public class HLSSimpleQueryService {
 		hlsManager.setGenerateSQLforMemFlag(true); //TODO:is this only for unit test?
 	}
 
-	public HLSManagerResult execQueryEx(QueryExp queryExp, ZDBExecutor zexec) {
-		QuerySpec querySpec = innerSvc.buildSpec(queryExp, new DoNothingVarEvaluator());
+	public HLSManagerResult execQueryEx(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+		QuerySpec querySpec = innerSvc.buildSpec(queryExp, varEvaluator);
 		
 		QueryContext qtx = new QueryContext();
 		qtx.letSpanEngine = new LetSpanEngine(factorySvc, hlsManager.getRegistry()); 
