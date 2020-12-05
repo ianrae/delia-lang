@@ -14,6 +14,7 @@ import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
+import org.delia.db.hls.manager.HLSManagerBase;
 import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.queryresponse.LetSpanEngine;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -35,10 +36,10 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 	
 	public static class HLSQueryService { // implements QueryBuilderService {
 		private QueryBuilderService innerSvc;
-		private HLSManager hlsManager;
+		private HLSManagerBase hlsManager;
 		private FactoryService factorySvc;
 		
-		public HLSQueryService(FactoryService factorySvc, QueryBuilderService innerSvc, HLSManager hlsManager) {
+		public HLSQueryService(FactoryService factorySvc, QueryBuilderService innerSvc, HLSManagerBase hlsManager) {
 			this.factorySvc = factorySvc;
 			this.innerSvc = innerSvc;
 			this.hlsManager = hlsManager;
@@ -144,7 +145,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 	
 	
 	//---
-	private HLSManager hlsManager;
+	private HLSManagerBase hlsManager;
 	private HLSQueryService svc;
 	private DTypeRegistry registry;
 	
@@ -156,7 +157,7 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 
 		registry = session.getExecutionContext().registry;
 		QueryBuilderService impl = new QueryBuilderServiceImpl(delia.getFactoryService());
-		hlsManager = new HLSManager(delia, registry, session, new DoNothingVarEvaluator());
+		hlsManager = new HLSManagerBase(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator());
 		svc = new HLSQueryService(delia.getFactoryService(), impl, hlsManager);
 		hlsManager.setGenerateSQLforMemFlag(true);
 	}
