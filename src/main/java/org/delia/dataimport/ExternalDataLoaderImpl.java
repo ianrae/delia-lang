@@ -6,7 +6,6 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBHelper;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.hls.manager.HLSManagerResult;

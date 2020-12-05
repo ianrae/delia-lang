@@ -88,7 +88,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		this.zinsert = new PostgresZInsert(factorySvc, registry);
 		this.zquery = new PostgresZQuery(factorySvc, registry);
 		this.zupdate = new PostgresZUpdate(factorySvc, registry);
-		this.zupsert = new PostgresZUpsert(factorySvc, registry);
+		this.zupsert = new PostgresZUpsert(factorySvc, registry, dbInterface);
 		this.zdelete = new PostgresZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}

@@ -89,7 +89,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		this.zinsert = new ZInsert(factorySvc, registry);
 		this.zquery = new ZQuery(factorySvc, registry);
 		this.zupdate = new ZUpdate(factorySvc, registry);
-		this.zupsert = new ZUpsert(factorySvc, registry);
+		this.zupsert = new ZUpsert(factorySvc, registry, dbInterface);
 		this.zdelete = new ZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}

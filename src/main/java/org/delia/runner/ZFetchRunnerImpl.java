@@ -109,12 +109,11 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp queryExp = builderSvc.createEqQuery(typeName, fieldName, keyVal);
 		
-		QuerySpec spec = new QuerySpec();
-		spec.queryExp = queryExp;
-		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
-		spec.evaluator.init(spec.queryExp);
-		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
+//		QuerySpec spec = new QuerySpec();
+//		spec.queryExp = queryExp;
+//		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+//		spec.evaluator.init(spec.queryExp);
+		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator).qresp;
 		return qresp;
 	}
 
