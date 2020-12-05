@@ -3,7 +3,6 @@ package org.delia.db.hls;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -55,7 +54,7 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		QueryDetails details = new QueryDetails();
 		
-		this.hlspanForAliasCreator = hlspan; //TODO: is this thread-safe??
+		this.hlspanForAliasCreator = hlspan; //TODO: is this thread-safe?? (i think so: only one thread will use this object at a time)
 		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
 		
 		//now do adjustment
@@ -79,14 +78,13 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 			}
 		}
 		
-		String whereSql = miniSelectParser.renderSelect(selectFrag);
+		String whereSql = miniSelectParser.renderSelectWherePartOnly(selectFrag);
 		
 		hlspan.finalWhereSql = "";
 		if (!selectFrag.whereL.isEmpty()) {
 			SqlStatement statement = selectFrag.statement;
 			hlspan.paramL = statement.paramL;
-			whereSql = StringUtils.substringAfter(whereSql, "WHERE ").trim();
-			hlspan.finalWhereSql = String.format("WHERE %s", whereSql);
+			hlspan.finalWhereSql = whereSql; 
 		}
 	}
 	

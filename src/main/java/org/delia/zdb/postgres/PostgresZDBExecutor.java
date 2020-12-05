@@ -52,7 +52,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	private PostgresZDBInterfaceFactory dbInterface;
 	private PostgresZDBConnection conn;
 	private PostgresZInsert zinsert;
-	private PostgresZQuery zquery;
+//	private PostgresZQuery zquery;
 	private PostgresZUpdate zupdate;
 	private PostgresZUpsert zupsert;
 	private PostgresZDelete zdelete;
@@ -86,7 +86,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	public void init1(DTypeRegistry registry) {
 		super.init1(registry);
 		this.zinsert = new PostgresZInsert(factorySvc, registry);
-		this.zquery = new PostgresZQuery(factorySvc, registry);
+//		this.zquery = new PostgresZQuery(factorySvc, registry);
 		this.zupdate = new PostgresZUpdate(factorySvc, registry);
 		this.zupsert = new PostgresZUpsert(factorySvc, registry, dbInterface);
 		this.zdelete = new PostgresZDelete(factorySvc, registry);

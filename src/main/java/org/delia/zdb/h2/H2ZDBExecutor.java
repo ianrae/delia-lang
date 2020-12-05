@@ -14,7 +14,6 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
-import org.delia.db.SpanHelper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.hls.HLSQuerySpan;
@@ -22,11 +21,9 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.prepared.RawStatementGenerator;
-import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
-import org.delia.queryresponse.LetSpan;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -42,7 +39,6 @@ import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZDelete;
 import org.delia.zdb.ZInsert;
-import org.delia.zdb.ZQuery;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.ZUpdate;
 import org.delia.zdb.ZUpsert;
@@ -53,7 +49,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	private H2ZDBInterfaceFactory dbInterface;
 	private H2ZDBConnection conn;
 	private ZInsert zinsert;
-	private ZQuery zquery;
+//	private ZQuery zquery;
 	private ZUpdate zupdate;
 	private ZUpsert zupsert;
 	private ZDelete zdelete;
@@ -87,7 +83,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	public void init1(DTypeRegistry registry) {
 		super.init1(registry);
 		this.zinsert = new ZInsert(factorySvc, registry);
-		this.zquery = new ZQuery(factorySvc, registry);
+//		this.zquery = new ZQuery(factorySvc, registry);
 		this.zupdate = new ZUpdate(factorySvc, registry);
 		this.zupsert = new ZUpsert(factorySvc, registry, dbInterface);
 		this.zdelete = new ZDelete(factorySvc, registry);
@@ -157,36 +153,36 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 //	@Override
-	private QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-		failIfNotInit1(); 
-		List<LetSpan> spanL = new ArrayList<>();
-		QueryDetails details = new QueryDetails();
-		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
-
-		logSql(statement);
-		ZDBExecuteContext dbctx = createContext();
-		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-
-		QueryResponse qresp = new QueryResponse();
-		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
-		SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-		DType selectResultType = sfhelper.getSelectResultType(spec);
-		if (selectResultType.isScalarShape()) {
-			ResultTypeInfo rti = new ResultTypeInfo();
-			rti.logicalType = selectResultType;
-			rti.physicalType = selectResultType;
-			qresp.dvalList = buildScalarResult(rs, rti, details);
-			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-			qresp.ok = true;
-		} else {
-			String typeName = spec.queryExp.getTypeName();
-			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, null);
-			qresp.ok = true;
-		}
-		return qresp;
-	}
+//	private QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+//		failIfNotInit1(); 
+//		List<LetSpan> spanL = new ArrayList<>();
+//		QueryDetails details = new QueryDetails();
+//		ZTableCreator partialTableCreator = createPartialTableCreator();
+//		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
+//
+//		logSql(statement);
+//		ZDBExecuteContext dbctx = createContext();
+//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+//
+//		QueryResponse qresp = new QueryResponse();
+//		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
+//		SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
+//		DType selectResultType = sfhelper.getSelectResultType(spec);
+//		if (selectResultType.isScalarShape()) {
+//			ResultTypeInfo rti = new ResultTypeInfo();
+//			rti.logicalType = selectResultType;
+//			rti.physicalType = selectResultType;
+//			qresp.dvalList = buildScalarResult(rs, rti, details);
+//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+//			qresp.ok = true;
+//		} else {
+//			String typeName = spec.queryExp.getTypeName();
+//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+//			qresp.dvalList = buildDValueList(rs, dtype, details, null);
+//			qresp.ok = true;
+//		}
+//		return qresp;
+//	}
 
 	@Override
 	public boolean rawTableDetect(String tableName) {

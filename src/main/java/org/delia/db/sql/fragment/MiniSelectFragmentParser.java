@@ -3,6 +3,7 @@ package org.delia.db.sql.fragment;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 
@@ -39,5 +40,12 @@ public class MiniSelectFragmentParser extends MiniFragmentParserBase {
 	public String renderSelect(SelectStatementFragment selectFrag) {
 		selectFrag.statement.sql = selectFrag.render();
 		return selectFrag.statement.sql;
+	}
+
+	public String renderSelectWherePartOnly(SelectStatementFragment selectFrag) {
+		StrCreator sc = new StrCreator();
+		sc.o("WHERE");
+		selectFrag.renderWhereL(sc);
+		return sc.toString();
 	}
 }

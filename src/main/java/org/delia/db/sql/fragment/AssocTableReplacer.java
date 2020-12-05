@@ -12,7 +12,6 @@ import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 //single use!!!
