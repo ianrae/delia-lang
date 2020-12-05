@@ -322,12 +322,15 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+//		testIndexToRun = 0;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-		runR700File("t0-insert-parent2.txt", 1);
+//		runR700File("t0-insert-parent2.txt", 1);
+//		runR560File("t0-self-N1.txt", 4);
+//		runR1600File("t0-fetch-fks.txt", 4);
+		runR700File("t0-insert-parent.txt", 2);
 	}
 	
 	//---

@@ -338,7 +338,6 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
 			spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 			spec.evaluator.init(spec.queryExp);
-			QueryContext qtx = new QueryContext();
 			QueryResponse qresp = querySvc.execQuery(spec.queryExp, this);
 			if (qresp.ok && !qresp.emptyResults()) {
 				DetailedError err = new DetailedError("duplicate-unique-value", String.format("%s. row with unique field '%s' = '%s' already exists", structType.getName(), uniqueField, inner.asString()));

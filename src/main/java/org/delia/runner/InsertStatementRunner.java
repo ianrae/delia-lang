@@ -9,6 +9,7 @@ import org.delia.core.DiagnosticService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
+import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.error.DeliaError;
@@ -68,8 +69,14 @@ public class InsertStatementRunner extends ServiceBase {
 			ruleRunner.enableRelationModifier(true);
 			ruleRunner.enableInsertFlag(true);
 			ConfigureService configSvc = factorySvc.getConfigureService();
-
-			ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
+			
+			//hack. not sure why i needed to add this for MEM
+			//when inserting values we need to add relation to other side
+			boolean flag = configSvc.isPopulateFKsFlag();
+//			if (DBType.MEM.equals(dbInterface.getDBType())) {
+//				flag = true;
+//			}
+			ruleRunner.setPopulateFKsFlag(flag);
 			if (! ruleRunner.validateDVal(cres.dval)) {
 				ruleRunner.propogateErrors(res);
 			}
