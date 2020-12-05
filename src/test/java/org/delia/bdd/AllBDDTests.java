@@ -330,7 +330,8 @@ public class AllBDDTests extends BDDBase {
 //		runR700File("t0-insert-parent2.txt", 1);
 //		runR560File("t0-self-N1.txt", 4);
 //		runR1600File("t0-fetch-fks.txt", 4);
-		runR700File("t0-insert-parent.txt", 2);
+//		runR700File("t0-insert-parent.txt", 2);
+		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---

@@ -37,7 +37,6 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private String dbFingerprint;
 	private ZDBExecutor zexec;
 	private MigrationRunner migrationRunner;
-	private VarEvaluator varEvaluator;
 	private MigrationOptimizer optimizer;
 
 	public SchemaMigrator(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
@@ -45,12 +44,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
-		this.varEvaluator = varEvaluator;
 		
 		//init zdb (but datIdMap will be null in early phase of startup)
 		zexec.init1(registry);
 		if (datIdMap != null) {
 			zexec.init2(datIdMap, varEvaluator);
+		} else if (! DBType.MEM.equals(dbInterface.getDBType())){
+			//hack. need some sort of DatIdMap for H2 and PG
+			zexec.init2(new DatIdMap(), varEvaluator);
 		}
 
 		InternalTypeCreator fakeCreator = new InternalTypeCreator();
