@@ -13,7 +13,6 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerBase;
 import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.queryresponse.LetSpanEngine;
@@ -39,37 +38,37 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		private HLSManagerBase hlsManager;
 		private FactoryService factorySvc;
 		
-		public HLSQueryService(FactoryService factorySvc, QueryBuilderService innerSvc, HLSManagerBase hlsManager) {
+		public HLSQueryService(FactoryService factorySvc, HLSManagerBase hlsManager) {
 			this.factorySvc = factorySvc;
-			this.innerSvc = innerSvc;
+			this.innerSvc = new QueryBuilderServiceImpl(factorySvc);
 			this.hlsManager = hlsManager;
 		}
 
-		public HLSManagerResult execEqQuery(String typeName, String fieldName, DValue targetValue, ZDBExecutor zexec) {
-			QueryExp queryExp = innerSvc.createEqQuery(typeName, fieldName, targetValue);
-			return execQuery(queryExp, zexec);
-		}
-
-		public HLSManagerResult execPrimaryKeyQuery(String typeName, DValue keyValue, ZDBExecutor zexec) {
-			QueryExp queryExp = innerSvc.createPrimaryKeyQuery(typeName, keyValue);
-			return execQuery(queryExp, zexec);
-		}
-
-		public HLSManagerResult execInQuery(String typeName, List<DValue> list, DType relType, ZDBExecutor zexec) {
-			QueryExp queryExp = innerSvc.createInQuery(typeName, list, relType);
-			return execQuery(queryExp, zexec);
-		}
-
-		public HLSManagerResult execCountQuery(String typeName, ZDBExecutor zexec) {
-			QueryExp queryExp = innerSvc.createCountQuery(typeName);
-			return execQuery(queryExp, zexec);
-		}
-
-		public HLSManagerResult execAllRowsQuery(String typeName, ZDBExecutor zexec) {
-			QueryExp queryExp = innerSvc.createAllRowsQuery(typeName);
-			return execQuery(queryExp, zexec);
-		}
-		private HLSManagerResult execQuery(QueryExp queryExp, ZDBExecutor zexec) {
+//		public HLSManagerResult execEqQuery(String typeName, String fieldName, DValue targetValue, ZDBExecutor zexec) {
+//			QueryExp queryExp = innerSvc.createEqQuery(typeName, fieldName, targetValue);
+//			return execQuery(queryExp, zexec);
+//		}
+//
+//		public HLSManagerResult execPrimaryKeyQuery(String typeName, DValue keyValue, ZDBExecutor zexec) {
+//			QueryExp queryExp = innerSvc.createPrimaryKeyQuery(typeName, keyValue);
+//			return execQuery(queryExp, zexec);
+//		}
+//
+//		public HLSManagerResult execInQuery(String typeName, List<DValue> list, DType relType, ZDBExecutor zexec) {
+//			QueryExp queryExp = innerSvc.createInQuery(typeName, list, relType);
+//			return execQuery(queryExp, zexec);
+//		}
+//
+//		public HLSManagerResult execCountQuery(String typeName, ZDBExecutor zexec) {
+//			QueryExp queryExp = innerSvc.createCountQuery(typeName);
+//			return execQuery(queryExp, zexec);
+//		}
+//
+//		public HLSManagerResult execAllRowsQuery(String typeName, ZDBExecutor zexec) {
+//			QueryExp queryExp = innerSvc.createAllRowsQuery(typeName);
+//			return execQuery(queryExp, zexec);
+//		}
+		public HLSManagerResult execQuery(QueryExp queryExp, ZDBExecutor zexec) {
 			QuerySpec querySpec = innerSvc.buildSpec(queryExp, new DoNothingVarEvaluator());
 			
 			QueryContext qtx = new QueryContext();
@@ -77,12 +76,17 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 			HLSManagerResult result = hlsManager.execute(querySpec, qtx, zexec);
 			return result;
 		}
+
+		public QueryBuilderService getQueryBuilderSvc() {
+			return innerSvc;
+		}
 	}
 
 	@Test
 	public void testAllRows() {
 		try(ZDBExecutor dbexecutor = createExecutor()) {
-			HLSManagerResult hlsResult = svc.execAllRowsQuery("Customer", dbexecutor);
+			QueryExp queryExp = svc.getQueryBuilderSvc().createAllRowsQuery("Customer");
+			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -92,7 +96,8 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 	@Test
 	public void testCount() {
 		try(ZDBExecutor dbexecutor = createExecutor()) {
-			HLSManagerResult hlsResult = svc.execCountQuery("Customer", dbexecutor);
+			QueryExp queryExp = svc.getQueryBuilderSvc().createCountQuery("Customer");
+			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT COUNT(*) FROM Customer as a");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -109,7 +114,8 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		DType relType = registry.getType("Address");
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
-			HLSManagerResult hlsResult = svc.execInQuery("Customer", list, relType, dbexecutor);
+			QueryExp queryExp = svc.getQueryBuilderSvc().createInQuery("Customer", list, relType);
+			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SxxELECT COUNT(*) FROM Customer as a");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -123,7 +129,8 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		DValue dval = builder.buildInt(55);
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
-			HLSManagerResult hlsResult = svc.execPrimaryKeyQuery("Customer", dval, dbexecutor);
+			QueryExp queryExp = svc.getQueryBuilderSvc().createPrimaryKeyQuery("Customer", dval);
+			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a WHERE a.cid = ?");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -136,7 +143,8 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		DValue dval = builder.buildInt(55);
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
-			HLSManagerResult hlsResult = svc.execEqQuery("Customer", "x", dval, dbexecutor);
+			QueryExp queryExp = svc.getQueryBuilderSvc().createEqQuery("Customer", "x", dval);
+			HLSManagerResult hlsResult = svc.execQuery(queryExp, dbexecutor);
 			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a WHERE a.x = ?");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
@@ -156,9 +164,8 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		compileQueryToLetStatement("");
 
 		registry = session.getExecutionContext().registry;
-		QueryBuilderService impl = new QueryBuilderServiceImpl(delia.getFactoryService());
 		hlsManager = new HLSManagerBase(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator());
-		svc = new HLSQueryService(delia.getFactoryService(), impl, hlsManager);
+		svc = new HLSQueryService(delia.getFactoryService(), hlsManager);
 		hlsManager.setGenerateSQLforMemFlag(true);
 	}
 	
