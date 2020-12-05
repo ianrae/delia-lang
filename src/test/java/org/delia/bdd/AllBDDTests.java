@@ -1,6 +1,5 @@
 package org.delia.bdd;
 
-import org.delia.api.DeliaFactory;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -328,7 +327,7 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
 	//---

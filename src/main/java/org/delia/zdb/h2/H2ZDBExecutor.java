@@ -156,8 +156,8 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		super.convertAndRethrow(e, this);
 	}
 
-	@Override
-	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+//	@Override
+	private QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
 		failIfNotInit1(); 
 		List<LetSpan> spanL = new ArrayList<>();
 		QueryDetails details = new QueryDetails();

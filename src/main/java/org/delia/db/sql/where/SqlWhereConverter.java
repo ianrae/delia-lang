@@ -196,7 +196,8 @@ public class SqlWhereConverter extends ServiceBase {
 		return null;
 	}
 	private DType getFromOpByFieldName(String typeName, String fieldName, TypeDetails details) {
-		DStructType structType = (DStructType) registry.getType(typeName);
+//		DStructType structType = (DStructType) registry.getType(typeName);
+		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
 
 		RelationInfo relinfo = DRuleHelper.findRelinfoOneOrManyForField(structType, fieldName);
 		if (relinfo != null) {

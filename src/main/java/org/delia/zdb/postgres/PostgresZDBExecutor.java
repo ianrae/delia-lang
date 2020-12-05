@@ -164,37 +164,37 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		super.convertAndRethrow(e, this);
 	}
 
-	@Override
-	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-		failIfNotInit1(); 
-		List<LetSpan> spanL = new ArrayList<>();
-		QueryDetails details = new QueryDetails();
-		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
-
-		logSql(statement);
-		ZDBExecuteContext dbctx = createContext();
-		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-
-		QueryResponse qresp = new QueryResponse();
-		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
-		SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-		DType selectResultType = sfhelper.getSelectResultType(spec);
-		if (selectResultType.isScalarShape()) {
-			ResultTypeInfo rti = new ResultTypeInfo();
-			rti.logicalType = selectResultType;
-			rti.physicalType = selectResultType;
-			qresp.dvalList = buildScalarResult(rs, rti, details);
-			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-			qresp.ok = true;
-		} else {
-			String typeName = spec.queryExp.getTypeName();
-			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, null);
-			qresp.ok = true;
-		}
-		return qresp;
-	}
+//	@Override
+//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+//		failIfNotInit1(); 
+//		List<LetSpan> spanL = new ArrayList<>();
+//		QueryDetails details = new QueryDetails();
+//		ZTableCreator partialTableCreator = createPartialTableCreator();
+//		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
+//
+//		logSql(statement);
+//		ZDBExecuteContext dbctx = createContext();
+//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+//
+//		QueryResponse qresp = new QueryResponse();
+//		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
+//		SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
+//		DType selectResultType = sfhelper.getSelectResultType(spec);
+//		if (selectResultType.isScalarShape()) {
+//			ResultTypeInfo rti = new ResultTypeInfo();
+//			rti.logicalType = selectResultType;
+//			rti.physicalType = selectResultType;
+//			qresp.dvalList = buildScalarResult(rs, rti, details);
+//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+//			qresp.ok = true;
+//		} else {
+//			String typeName = spec.queryExp.getTypeName();
+//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+//			qresp.dvalList = buildDValueList(rs, dtype, details, null);
+//			qresp.ok = true;
+//		}
+//		return qresp;
+//	}
 
 	@Override
 	public boolean rawTableDetect(String tableName) {

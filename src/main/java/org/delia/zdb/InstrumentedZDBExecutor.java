@@ -61,10 +61,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.rawInsert(dval, ctx);
 	}
 
-	@Override
-	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-		return zexec.rawQuery(spec, qtx);
-	}
+//	@Override
+//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+//		return zexec.rawQuery(spec, qtx);
+//	}
 
 	@Override
 	public boolean rawTableDetect(String tableName) {
