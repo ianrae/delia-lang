@@ -14,20 +14,24 @@ import org.delia.type.DTypeRegistry;
 		private QueryTypeDetector queryDetectorSvc;
 		private DTypeRegistry registry;
 		protected WhereFragmentGenerator whereGen;
+		private AliasCreator aliasCreator;
 		
-		public MiniFragmentParserBase(FactoryService factorySvc, DTypeRegistry registry, WhereFragmentGenerator whereGen) {
+		public MiniFragmentParserBase(FactoryService factorySvc, DTypeRegistry registry, WhereFragmentGenerator whereGen, AliasCreator aliasCreator) {
 			super(factorySvc);
 			
 			this.registry = registry;
 			this.queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
 			this.whereGen = whereGen;
+			this.aliasCreator = aliasCreator;
 		}		
-		public void createAlias(AliasedFragment frag) {
-			char ch = (char) ('a' + nextAliasIndex++);
-			frag.alias = String.format("%c", ch);
+		public void createAlias(TableFragment frag) {
+			if (aliasCreator != null) {
+				aliasCreator.fillInAlias(frag);
+			} else {
+				char ch = (char) ('a' + nextAliasIndex++);
+				frag.alias = String.format("%c", ch);
+			}
 		}
-
-		
 
 		@Override
 		public TableFragment createTable(DStructType structType, StatementFragmentBase selectFrag) {
@@ -38,8 +42,8 @@ import org.delia.type.DTypeRegistry;
 			
 			tblFrag = new TableFragment();
 			tblFrag.structType = structType;
-			createAlias(tblFrag);
 			tblFrag.name = structType.getName();
+			createAlias(tblFrag);
 			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 			return tblFrag;
 		}
@@ -52,8 +56,8 @@ import org.delia.type.DTypeRegistry;
 			
 			tblFrag = new TableFragment();
 			tblFrag.structType = null;
-			createAlias(tblFrag);
 			tblFrag.name = tableName;
+			createAlias(tblFrag);
 			selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 			return tblFrag;
 		}
@@ -94,5 +98,8 @@ import org.delia.type.DTypeRegistry;
 		public String renderSelect(SelectStatementFragment selectFrag) {
 			selectFrag.statement.sql = selectFrag.render();
 			return selectFrag.statement.sql;
+		}
+		public void setAliasCreator(AliasCreator aliasCreator) {
+			this.aliasCreator = aliasCreator;
 		}
 	}

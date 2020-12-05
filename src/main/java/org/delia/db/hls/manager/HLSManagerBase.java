@@ -55,7 +55,7 @@ public class HLSManagerBase extends ServiceBase {
 	
 	private void initMiniParser(DatIdMap datIdMap) {
 		WhereFragmentGenerator whereGen = createWhereGen(datIdMap);
-		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen);
+		this.miniSelectParser = new MiniSelectFragmentParser(factorySvc, registry, whereGen, null);
 		whereGen.tableFragmentMaker = miniSelectParser;
 	}
 	

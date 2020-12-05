@@ -12,21 +12,25 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.join.JTElement;
+import org.delia.db.sql.fragment.AliasCreator;
 import org.delia.db.sql.fragment.AliasedFragment;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.OpFragment;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.SqlFragment;
+import org.delia.db.sql.fragment.StatementFragmentBase;
+import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.DStructType;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 
-public class WhereClauseHelper extends ServiceBase {
+public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 
 	private MiniSelectFragmentParser miniSelectParser;
 	private VarEvaluator varEvaluator;
@@ -34,11 +38,13 @@ public class WhereClauseHelper extends ServiceBase {
 	private AliasManager aliasManager;
 //	private String realAlias;
 	private DatIdMap datIdMap;
+	private HLSQuerySpan hlspanForAliasCreator;
 	
 	public WhereClauseHelper(FactoryService factorySvc, MiniSelectFragmentParser miniSelectParser, VarEvaluator varEvaluator, 
 				Map<String, String> asNameMap, AliasManager aliasManager, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.miniSelectParser = miniSelectParser;
+		this.miniSelectParser.setAliasCreator(this);
 		this.varEvaluator = varEvaluator;
 		this.asNameMap = asNameMap;
 		this.aliasManager = aliasManager;
@@ -53,23 +59,10 @@ public class WhereClauseHelper extends ServiceBase {
 		spec.queryExp = hlspan.filEl.queryExp;
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		QueryDetails details = new QueryDetails();
-		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
 		
-		//so selectFrag.whereL has the filter expression
-		//if it contains any parent relation fields (Customer.addr)
-		//we need to change them to other side's pk.
-		//Also need to merge fragment parsers' table aliases with ours.
-//		Map<String,String> aliasAdjustmentMap = new HashMap<>();
-//		for(String x: selectFrag.aliasMap.keySet()) {
-//			TableFragment tblfrag = selectFrag.aliasMap.get(x);
-//			if (tblfrag.structType != null) {
-//				String alias = this.aliasAlloc.findOrCreateFor(tblfrag.structType);
-//				aliasAdjustmentMap.put(tblfrag.alias,  alias);
-//			} else {
-//				String alias = this.aliasAlloc.buildTblAliasAssoc(tblfrag.name);
-//				aliasAdjustmentMap.put(tblfrag.alias,  alias);
-//			}
-//		}
+		this.hlspanForAliasCreator = hlspan; //TODO: is this thread-safe??
+//		SelectStatementFragment selectFrag = initSelectFrag(spec, details, hlspan);
+		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
 		
 		//now do adjustment
 		AliasInfo aliasInfo = aliasManager.findAlias(hlspan.mainStructType);
@@ -103,6 +96,20 @@ public class WhereClauseHelper extends ServiceBase {
 			hlspan.finalWhereSql = String.format("WHERE %s", whereSql);
 		}
 	}
+	
+	private SelectStatementFragment initSelectFrag(QuerySpec spec, QueryDetails details, HLSQuerySpan hlspan) {
+		SelectStatementFragment selectFrag = new SelectStatementFragment();
+		
+		TableFragment tblFrag = new TableFragment();
+		tblFrag.structType = hlspan.mainStructType;
+		AliasInfo info = aliasManager.getMainTableAlias(hlspan.mainStructType);
+		tblFrag.alias = info.alias;// createAlias(tblFrag);
+		tblFrag.name = hlspan.mainStructType.getName();
+		selectFrag.aliasMap.put(tblFrag.name, tblFrag);
+		selectFrag.tblFrag = tblFrag;
+		return selectFrag;
+	}
+	
 	
 	private boolean handleMMBackwardsRef(AliasedFragment af, SelectStatementFragment selectFrag, HLSQuerySpan hlspan) {
 		if (af instanceof FieldFragment) {
@@ -175,5 +182,18 @@ public class WhereClauseHelper extends ServiceBase {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public void fillInAlias(TableFragment tblFrag) {
+		HLSQuerySpan hlspan = hlspanForAliasCreator;
+		
+		if (tblFrag.structType == null) {
+//			AliasInfo info = aliasManager.getAssocAlias(hlspan.mainStructType, fieldName, tblFrag.name);
+//			tblFrag.alias = info.alias;
+		} else {
+			AliasInfo info = aliasManager.getMainTableAlias(hlspan.mainStructType);
+			tblFrag.alias = info.alias;
+		}
 	}
 }

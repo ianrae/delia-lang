@@ -16,8 +16,8 @@ import org.delia.type.DTypeRegistry;
  */
 public class MiniSelectFragmentParser extends MiniFragmentParserBase {
 
-	public MiniSelectFragmentParser(FactoryService factorySvc, DTypeRegistry registry, WhereFragmentGenerator whereGen) {
-		super(factorySvc, registry, whereGen);
+	public MiniSelectFragmentParser(FactoryService factorySvc, DTypeRegistry registry, WhereFragmentGenerator whereGen, AliasCreator aliasCreator) {
+		super(factorySvc, registry, whereGen, aliasCreator);
 	}
 
 	public SelectStatementFragment parseSelect(QuerySpec spec, QueryDetails details) {
