@@ -2,11 +2,9 @@ package org.delia.db.hls;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
-import org.delia.assoc.DatIdMapHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
@@ -19,14 +17,11 @@ import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.fragment.OpFragment;
 import org.delia.db.sql.fragment.SelectStatementFragment;
 import org.delia.db.sql.fragment.SqlFragment;
-import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.VarEvaluator;
-import org.delia.type.DStructType;
-import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 
@@ -61,27 +56,25 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 		QueryDetails details = new QueryDetails();
 		
 		this.hlspanForAliasCreator = hlspan; //TODO: is this thread-safe??
-//		SelectStatementFragment selectFrag = initSelectFrag(spec, details, hlspan);
 		SelectStatementFragment selectFrag = miniSelectParser.parseSelect(spec, details);
 		
 		//now do adjustment
-		AliasInfo aliasInfo = aliasManager.findAlias(hlspan.mainStructType);
 		for(SqlFragment z: selectFrag.whereL) {
 			OpFragment op = (OpFragment) z;
 			if (op.left != null) {
 				if (handleMMBackwardsRef(op.left, selectFrag, hlspan)) {
 					
 				} else if (!remapParentFieldIfNeeded(op.left, selectFrag)) {
-					if (op.left.alias != null) {
-						op.left.alias = aliasInfo.alias;
-					}
+//					if (op.left.alias != null) {
+//						op.left.alias = aliasInfo.alias;
+//					}
 				}
 			}
 			if (op.right != null) {
 				if (!remapParentFieldIfNeeded(op.right, selectFrag)) {
-					if (op.right.alias != null) {
-						op.right.alias = aliasInfo.alias;
-					}
+//					if (op.right.alias != null) {
+//						op.right.alias = aliasInfo.alias;
+//					}
 				}
 			}
 		}
@@ -96,20 +89,6 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 			hlspan.finalWhereSql = String.format("WHERE %s", whereSql);
 		}
 	}
-	
-	private SelectStatementFragment initSelectFrag(QuerySpec spec, QueryDetails details, HLSQuerySpan hlspan) {
-		SelectStatementFragment selectFrag = new SelectStatementFragment();
-		
-		TableFragment tblFrag = new TableFragment();
-		tblFrag.structType = hlspan.mainStructType;
-		AliasInfo info = aliasManager.getMainTableAlias(hlspan.mainStructType);
-		tblFrag.alias = info.alias;// createAlias(tblFrag);
-		tblFrag.name = hlspan.mainStructType.getName();
-		selectFrag.aliasMap.put(tblFrag.name, tblFrag);
-		selectFrag.tblFrag = tblFrag;
-		return selectFrag;
-	}
-	
 	
 	private boolean handleMMBackwardsRef(AliasedFragment af, SelectStatementFragment selectFrag, HLSQuerySpan hlspan) {
 		if (af instanceof FieldFragment) {
@@ -157,7 +136,6 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 			return false;
 		} else if (relinfo.isManyToMany()) {
 			String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
-//			boolean isLeft = datIdMap.isLeftType(assocTbl, relinfo);
 			
 			af.name = datIdMap.getAssocOtherField(relinfo); //this is the original version
 //			boolean flipped = datIdMap.isFlipped(relinfo);
@@ -165,8 +143,6 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 			AliasInfo aliasInfo = aliasManager.getAssocAlias(ff.structType, pair.name, assocTbl);
 			af.alias = aliasInfo.alias; 
 			
-//			String key = String.format("%s.%s", af.alias, af.name);
-//			asNameMap.put(key, relinfo.fieldName);
 			return true;
 
 		} else if (relinfo.isParent) {
@@ -189,10 +165,15 @@ public class WhereClauseHelper extends ServiceBase implements AliasCreator {
 		HLSQuerySpan hlspan = hlspanForAliasCreator;
 		
 		if (tblFrag.structType == null) {
+			throw new RuntimeException("fillInAlias does not support assoc alias. fix!!!");
+			//TODO: somehow we need the fieldName here
 //			AliasInfo info = aliasManager.getAssocAlias(hlspan.mainStructType, fieldName, tblFrag.name);
 //			tblFrag.alias = info.alias;
 		} else {
 			AliasInfo info = aliasManager.getMainTableAlias(hlspan.mainStructType);
+			if (info == null) {
+				info = aliasManager.findAlias(hlspan.mainStructType);
+			}
 			tblFrag.alias = info.alias;
 		}
 	}

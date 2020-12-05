@@ -55,12 +55,12 @@ public class HLSQueryBuilderTests extends HLSTestBase {
 		list.add(builder.buildInt(55));
 		list.add(builder.buildInt(57));
 		
-		DType relType = registry.getType("Address");
+		DType relType = registry.getType("Customer");
 		
 		try(ZDBExecutor dbexecutor = createExecutor()) {
 			QueryExp queryExp = svc.getQueryBuilderSvc().createInQuery("Customer", list, relType);
 			HLSManagerResult hlsResult = svc.execQueryEx(queryExp, dbexecutor,  new DoNothingVarEvaluator());
-			this.chkSqlGen(hlsResult, "SxxELECT COUNT(*) FROM Customer as a");
+			this.chkSqlGen(hlsResult, "SELECT * FROM Customer as a WHERE a.cid IN (?,?)");
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 			throw e;

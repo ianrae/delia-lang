@@ -86,9 +86,7 @@ public class HLSSQLTests extends HLSTestBase {
 	public void testDebugSQL() {
 		useCustomerManyToManySrc = true;
 		
-//		sqlchk("let x = Customer[true].fetch('addr')", 			"SELECT a.cid,a.x,c.rightv as addr,b.id as addr,b.y FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv LEFT JOIN Address as b ON b.id=c.rightv");
-//		sqlchk("let x = Customer[true].x.fks()", 				"SELECT a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv");
-		sqlchkP("let x = Customer[55].fks()", 					"SELECT a.cid,a.x,c.rightv as addr FROM Customer as a LEFT JOIN CustomerAddressDat1 as c ON a.cid=c.leftv WHERE a.cid = ?", "55");
+		sqlchk("let x = Customer[true].addr", "SELECT a.id,a.y,c.leftv as cust FROM Address as a LEFT JOIN CustomerAddressDat1 as c ON a.id=c.rightv");
 	}
 
 	@Before
