@@ -68,8 +68,8 @@ public class UpsertFragmentParser extends UpdateFragmentParser {
 		if (inner == null) {
 			if (spec.queryExp.filter.cond instanceof BooleanExp) {
 				DeliaExceptionHelper.throwError("upsert-filter-error", "[true] not supported");
-			} else if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
-				DeliaExceptionHelper.throwError("upsert-filter-error", "only primary key filters are supported");
+//			} else if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
+//				DeliaExceptionHelper.throwError("upsert-filter-error", "only primary key filters are supported");
 			}
 			
 			FilterEvaluator evaluator = spec.evaluator;

@@ -40,7 +40,7 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		log.log("ziggy!");
+		log.logDebug("ziggy!");
 		qtx.pruneParentRelationFlag = false;
 		qtx.loadFKs = findAnyFKs(hls);
 		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx); //do main filter

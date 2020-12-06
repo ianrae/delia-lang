@@ -132,9 +132,9 @@ public class HLSManagerBase extends ServiceBase {
 		}
 		for(HLSQuerySpan hlspan: hls.hlspanL) {
 			String hlstr = hlspan.toString();
-			log.log(hlstr);
+			log.logDebug(hlstr);
 		}
-		log.log("alias: %s", aliasManager.dumpToString());
+		log.logDebug("alias: %s", aliasManager.dumpToString());
 		return hls;
 	}
 
