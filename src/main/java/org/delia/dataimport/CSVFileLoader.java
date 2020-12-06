@@ -40,9 +40,18 @@ public class CSVFileLoader implements LineObjIterator {
 		} catch (Exception e) {
 			DeliaExceptionHelper.throwError("csv-file-open-failed", "Failed to open path '%s'", path);
 		}
-
 	}
-
+	@Override
+	public void close() {
+		if (csvreader != null) {
+			try {
+				csvreader.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 	public char getDelim() {
 		return delim == null ? ',' : delim.charAt(0);
 	}

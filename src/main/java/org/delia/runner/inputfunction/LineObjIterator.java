@@ -6,4 +6,5 @@ public interface LineObjIterator extends Iterator<LineObj> {
 
 	int getNumHdrRows();
 	String getFileName();
+	void close();
 }

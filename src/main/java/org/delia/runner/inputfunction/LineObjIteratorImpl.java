@@ -31,4 +31,8 @@ public class LineObjIteratorImpl implements LineObjIterator {
 	public String getFileName() {
 		return "in-memory";
 	}
+
+	@Override
+	public void close() {
+	}
 }

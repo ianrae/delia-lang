@@ -84,6 +84,7 @@ public class DataImportService extends ServiceBase {
 		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		result.filename = lineObjIter.getFileName();
+		lineObjIter.close();
 		return result;
 	}
 

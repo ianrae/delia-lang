@@ -63,7 +63,7 @@ public class ImportTool extends ServiceBase {
 				}
 			}
 			sc.o("}");
-			
+			loader.close();
 			return sc.toString();
 		}
 		
@@ -91,7 +91,7 @@ public class ImportTool extends ServiceBase {
 			}
 			
 			sc.o("} end");
-			
+			loader.close();
 			return sc.toString();
 		}
 
