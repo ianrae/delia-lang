@@ -16,7 +16,6 @@ import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
-import sun.rmi.runtime.Log;
 
 public class CSVImportService  {
 	

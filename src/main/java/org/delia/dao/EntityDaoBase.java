@@ -118,7 +118,8 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
     	boolean b = builder.finish();
     	if (!b) {
     		DetailedError err = builder.getValidationErrors().get(builder.getValidationErrors().size() - 1);
-    		DeliaExceptionHelper.throwError("badsomething", err.toString());
+    		String msg = String.format("field %s: %s", err.getFieldName(), err.toString());
+    		DeliaExceptionHelper.throwError("dao-error", msg);
     	}
     	DValue finalVal = builder.getDValue();
     	return finalVal;

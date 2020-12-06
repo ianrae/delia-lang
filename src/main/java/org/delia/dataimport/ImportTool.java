@@ -17,11 +17,11 @@ import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringUtil;
 
-public class ImportToool extends ServiceBase {
+public class ImportTool extends ServiceBase {
 
 		private DeliaSession session;
 
-		public ImportToool(DeliaSession session) {
+		public ImportTool(DeliaSession session) {
 			super(session.getDelia().getFactoryService());
 			this.session = session;
 		}

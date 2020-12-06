@@ -14,7 +14,7 @@ import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupBuilder;
 import org.delia.dataimport.ImportLevel;
-import org.delia.dataimport.ImportToool;
+import org.delia.dataimport.ImportTool;
 import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
@@ -33,7 +33,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 		String src = createCategorySrc(false);
 		buildSrc(delia, src);
 		
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 		String path = BASE_DIR + "categories.csv";
 		String s = tool.generateInputFunctionSourceCode("Category", path);
 		log.log("here:");
@@ -58,7 +58,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 		String src = createCategorySrc(false);
 		buildSrc(delia, src);
 		
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 		String path = BASE_DIR + "products.csv";
 		String s = tool.generateDeliaStructSourceCode("Product", path, false);
 		log.log("here:");
@@ -70,7 +70,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	public void testTool1Product() {
 		Delia delia = initDelia(); 
 		
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 		String path = BASE_DIR + "products.csv";
 		String s = tool.generateInputFunctionSourceCode("Product", path);
 		log.log("here:");
@@ -101,7 +101,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	public void testLevel2() {
 		Delia delia = initDelia(); 
 		
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 		String path = BASE_DIR + "products.csv";
 		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
 		log.log("here:");
@@ -136,7 +136,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	public void testLevel3() {
 		Delia delia = initDelia(); 
 		
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 		String path = BASE_DIR + "products.csv";
 		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
 		log.log("here:");
@@ -187,7 +187,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	public void testLevel4() {
 		Delia delia = initDelia(); 
 		
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 		String path = BASE_DIR + "products.csv";
 		String prodSrc = tool.generateInputFunctionSourceCode("Product", path);
 		log.log("here:");
