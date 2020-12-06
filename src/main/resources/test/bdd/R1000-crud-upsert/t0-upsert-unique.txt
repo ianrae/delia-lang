@@ -30,12 +30,12 @@ value:a:Customer {
 title: upsert using unique field - insert
 when:
   upsert Customer[name=='c3'] {wid: 333, name: 'c3'}
-  let x = Customer[1]
+  let x = Customer[3]
 then:
 value:a:Customer {
- vid:1
+ vid:3
  vwid:333
- vname:'c1'
+ vname:'c3'
 }
 ---
 title: upsert using other field
@@ -44,7 +44,7 @@ when:
   let x = Customer[1]
 then:
 value:a:Customer {
- vid:55
- vwid:333
- vaddr:{[100,101]}
+ vid:1
+ vwid:33
+ vname:'c1a'
 }

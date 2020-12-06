@@ -323,7 +323,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+		testIndexToRun = 3;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
@@ -333,7 +333,7 @@ public class AllBDDTests extends BDDBase {
 //		runR1600File("t0-fetch-fks.txt", 4);
 //		runR700File("t0-insert-parent.txt", 2);
 //		runR1500File("t0-queryfn-orderby-2span.txt", 1);
-		runR1000File("t0-upsert-unique.txt", 3);
+		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
 	//---
