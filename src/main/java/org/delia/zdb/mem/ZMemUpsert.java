@@ -17,6 +17,7 @@ import org.delia.db.memdb.RowSelector;
 import org.delia.dval.DValueExConverter;
 import org.delia.error.DeliaError;
 import org.delia.runner.FilterEvaluator;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -48,8 +49,6 @@ public class ZMemUpsert extends ServiceBase {
 		}
 		if (spec.queryExp.filter.cond instanceof BooleanExp) {
 			DeliaExceptionHelper.throwError("upsert-filter-error", "[true] not supported");
-		} else if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
-			DeliaExceptionHelper.throwError("upsert-filter-error", "only primary key filters are supported");
 		}
 
 		if (CollectionUtils.isEmpty(dvalList)) {
@@ -97,7 +96,9 @@ public class ZMemUpsert extends ServiceBase {
 	private void addPrimaryKey(QuerySpec spec, DValue dvalFull, RowSelector selector) {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dvalFull.getType());
 		if (dvalFull.asStruct().getField(keyPair.name) != null) {
-			return; //already has primary key
+			if (!DValueHelper.typeHasSerialPrimaryKey(dvalFull.getType())) {
+				return; //already has primary key
+			}
 		}
 
 		FilterEvaluator evaluator = spec.evaluator;

@@ -16,15 +16,26 @@ then:
 ERROR: upsert-filter-error
 
 ---
-title: upsert using unique field
+title: upsert using unique field - update
 when:
   upsert Customer[name=='c1'] {wid: 333, name: 'c1'}
   let x = Customer[1]
 then:
 value:a:Customer {
- vid:55
+ vid:1
  vwid:333
- vaddr:{[100,101]}
+ vname:'c1'
+}
+---
+title: upsert using unique field - insert
+when:
+  upsert Customer[name=='c3'] {wid: 333, name: 'c3'}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:333
+ vname:'c1'
 }
 ---
 title: upsert using other field

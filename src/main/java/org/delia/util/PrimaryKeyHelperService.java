@@ -3,8 +3,11 @@ package org.delia.util;
 import java.util.Map;
 
 import org.delia.compiler.ast.BooleanExp;
+import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.FilterOpFullExp;
-import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
@@ -27,7 +30,13 @@ public class PrimaryKeyHelperService extends ServiceBase {
 	public boolean addPrimaryKeyIfMissing(QuerySpec spec, DValue partialVal) {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(partialVal.getType());
 		DStructType dtype = (DStructType) partialVal.getType();
-		if (dtype.fieldIsSerial(keyPair.name)) {
+		if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
+			String filterField = extractFieldName(spec);
+			if (filterField != null) {
+				//TODO: what to check here??
+				return false;
+			}
+		} else if (dtype.fieldIsSerial(keyPair.name)) {
 			DeliaExceptionHelper.throwError("upsert-filter-error", "cannot upsert using a serial primary key filter.");
 		}
 		
@@ -51,6 +60,34 @@ public class PrimaryKeyHelperService extends ServiceBase {
 		} else {
 			return false;
 		}
+	}
+		
+	private String extractFieldName(QuerySpec spec) {
+		if (spec.queryExp.filter.cond instanceof FilterOpFullExp) {
+			FilterOpFullExp fullexp = (FilterOpFullExp) spec.queryExp.filter.cond;
+			if (fullexp.opexp1 instanceof FilterOpExp) {
+				FilterOpExp foexp = (FilterOpExp) fullexp.opexp1;
+				String fieldName = extractFieldNameFromFilterOp(foexp.op1);
+				if (fieldName != null) {
+					return fieldName;
+				}
+				return extractFieldNameFromFilterOp(foexp.op2);
+			}
+		}
+		return null;
+	}
+
+	private String extractFieldNameFromFilterOp(Exp op1) {
+		if (op1 instanceof XNAFMultiExp) {
+			XNAFMultiExp xx = (XNAFMultiExp) op1;
+			if (!xx.qfeL.isEmpty() && xx.qfeL.get(0) instanceof XNAFNameExp) {
+				XNAFNameExp xne = (XNAFNameExp) xx.qfeL.get(0);
+				if (xne.argL.isEmpty()) {
+					return xne.funcName;
+				}
+			}
+		}
+		return null;
 	}
 
 	public void removePrimayKey(DValue dval) {
