@@ -98,7 +98,7 @@ public class ZMemUpsert extends ServiceBase {
 		if (dvalFull.asStruct().getField(keyPair.name) != null) {
 			return; //already has primary key
 		} else if (DValueHelper.typeHasSerialPrimaryKey(dvalFull.getType())) {
-				return; //don't add serial key
+			return; //don't add serial key
 		}
 
 		FilterEvaluator evaluator = spec.evaluator;

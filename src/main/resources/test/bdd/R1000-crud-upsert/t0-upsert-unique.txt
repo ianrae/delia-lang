@@ -46,5 +46,5 @@ then:
 value:a:Customer {
  vid:1
  vwid:33
- vname:'c1a'
+ vname:'c1'
 }
