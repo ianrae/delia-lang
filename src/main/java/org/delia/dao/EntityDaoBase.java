@@ -8,24 +8,18 @@ import org.delia.api.DeliaSession;
 import org.delia.codegen.DeliaEntity;
 import org.delia.codegen.DeliaImmutable;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
 import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DetailedError;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.runner.RunnerImpl;
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DRelation;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
-import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.valuebuilder.RelationValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
@@ -130,21 +124,11 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
     	return finalVal;
     }
 	private DValue createEmptyRelation(DStructType structType, String fieldName, DValue relValue) {
-		DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
-		TypePair pair = DValueHelper.findField(structType, fieldName);
-		RelationValueBuilder builder = new RelationValueBuilder(relType, pair.type, registry);
-		builder.buildEmptyRelation();
-		boolean b = builder.finish();
-		if (!b) {
-			DeliaExceptionHelper.throwError("relation-create-failed-entitydao", "Type '%s': Failed to create empty relation", pair.type);
-			return null;
-		} else {
-			DValue pkval = DValueHelper.findPrimaryKeyValue(relValue);
-			DValue newVal = builder.getDValue();
-			DRelation drel = newVal.asRelation();
-			drel.addKey(pkval);
-			return newVal;
+		DValue newVal = DRelationHelper.createEmptyRelation(structType, fieldName, registry);
+		if (newVal != null) {
+			DRelationHelper.addFK(newVal, relValue);
 		}
+		return newVal;
 	}
 	
     protected DValue getPrimaryKeyValue(DeliaImmutable immut) {
