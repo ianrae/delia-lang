@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.delia.type.DRelation;
+import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 public class DRelationHelper {
 
@@ -46,6 +49,11 @@ public class DRelationHelper {
 		
 		FKSorter sorter = new FKSorter(true);
 		Collections.sort(fks, sorter);
+	}
+
+	public static boolean isRelation(DStructType structType, String fieldName) {
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		return pair != null && pair.type.isStructShape();
 	}
 	
 }
