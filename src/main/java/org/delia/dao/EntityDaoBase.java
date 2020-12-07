@@ -132,9 +132,19 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		return newVal;
 	}
 	
-    protected DValue getPrimaryKeyValue(DeliaImmutable immut) {
-		PrimaryKey pk = structType.getPrimaryKey();
-		DValue pkval = immut.internalDValue().asStruct().getField(pk.getFieldName());
+    protected DValue getPrimaryKeyValue(DeliaImmutable obj) {
+    	PrimaryKey pk = structType.getPrimaryKey();
+    	if (obj instanceof DeliaEntity) {
+    		String fieldName = pk.getKey().name;
+    		DeliaEntity entity = (DeliaEntity) obj;
+    		if (entity.internalSetValueMap().containsKey(fieldName)) {
+    			Object val = entity.internalSetValueMap().get(fieldName);
+				DValue dval = dvalConverter.buildFromObject(val, pk.getKey().type.getShape(), scalarBuilder);
+				return dval;
+    		}
+    	}
+    	
+		DValue pkval = obj.internalDValue().asStruct().getField(pk.getFieldName());
 		return pkval;
 
     }
