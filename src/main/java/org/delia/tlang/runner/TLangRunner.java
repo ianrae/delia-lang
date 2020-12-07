@@ -10,5 +10,5 @@ public interface TLangRunner {
 	TLangResult execute(TLangProgram program, DValue initialValue);
 	TLangResult executeOne(TLangStatement statement, DValue initialValue);
 	String getTrail();
-	void setInputMap(Map<String, Object> inputData, int lineNum);
+	void setInputMap(Map<String, Object> inputData);
 }

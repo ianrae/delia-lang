@@ -13,7 +13,6 @@ public class TLangContext {
 	public boolean failFlag;
 	public boolean stopFlag;
 	public boolean stopAfterNextFlag;
-	public int lineNum; //1-based
 	
 	public String getInputColumnAsString(String inputColumn) {
 		Object obj = inputDataMap.get(inputColumn);

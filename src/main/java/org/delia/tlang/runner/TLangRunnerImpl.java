@@ -54,7 +54,6 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				ctx.builder = scalarBuilder;
 				ctx.varEvaluator = varEvaluator;
 				ctx.inputDataMap = inputDataMap;
-				ctx.lineNum = lineNum;
 
 				res.ok = true;
 				trail.add(statement.getName());
@@ -117,7 +116,6 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 		TLangContext ctx = new TLangContext();
 		ctx.builder = scalarBuilder;
 		ctx.varEvaluator = varEvaluator;
-		ctx.lineNum = lineNum;
 
 		res.ok = true;
 		statement.execute(dval, res, ctx);
@@ -141,8 +139,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 
 
 	@Override
-	public void setInputMap(Map<String, Object> inputData, int lineNum) {
+	public void setInputMap(Map<String, Object> inputData) {
 		this.inputDataMap = inputData;
-		this.lineNum = lineNum + 1; //convert to 1-based
 	}
 }
