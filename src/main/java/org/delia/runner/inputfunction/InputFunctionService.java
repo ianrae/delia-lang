@@ -201,6 +201,9 @@ public class InputFunctionService extends ServiceBase {
 					//TODO: queue up a bunch of dvals and then do a batch insert
 					executeInsert(dval, request, fnResult, lineNum, errL);
 					addErrors(errL, fnResult.errors, lineNum);
+					if (request.importedValueListener != null) {
+						request.importedValueListener.valueImported(dval, errL);
+					}
 				}
 				
 				if (viaLineInfo.hasRows()) {
