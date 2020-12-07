@@ -10,9 +10,16 @@ import org.delia.type.DTypeRegistry;
 import org.delia.util.TextFileWriter;
 
 public class EntitySourceCodeGenerator extends ServiceBase {
+	
+	public static class Options {
+		public boolean addJsonIgnoreToRelations = false;
+	}
+
+	private Options options;
 
 	public EntitySourceCodeGenerator(FactoryService factorySvc) {
 		super(factorySvc);
+		this.options = new Options();
 	}
 	
 	public boolean createSourceFiles(DTypeRegistry registry, String packageName, String targetDir) {
@@ -33,6 +40,7 @@ public class EntitySourceCodeGenerator extends ServiceBase {
 
 	private void doGetterInteface(DStructType structType, DTypeRegistry registry, String packageName, String targetDir) {
 		GetterInterfaceCodeGen gen = new GetterInterfaceCodeGen(registry, packageName);
+		gen.addJsonIgnoreToRelations = options.addJsonIgnoreToRelations;
 		String java = gen.generate(structType);
 		
 		String filename = String.format("%s.java", structType.getName());
@@ -68,5 +76,9 @@ public class EntitySourceCodeGenerator extends ServiceBase {
 		this.log.log("writing %s", path);
 		TextFileWriter w = new TextFileWriter();
 		w.writeFile(path, Collections.singletonList(java));
+	}
+
+	public Options getOptions() {
+		return options;
 	}
 }
