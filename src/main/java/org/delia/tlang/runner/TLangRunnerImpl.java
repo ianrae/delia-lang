@@ -20,6 +20,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 	private StringTrail trail = new StringTrail();
 	private VarEvaluator varEvaluator;
 	private Map<String, Object> inputDataMap;
+	private int lineNum;
 
 	public TLangRunnerImpl(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -53,7 +54,8 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				ctx.builder = scalarBuilder;
 				ctx.varEvaluator = varEvaluator;
 				ctx.inputDataMap = inputDataMap;
-				
+				ctx.lineNum = lineNum;
+
 				res.ok = true;
 				trail.add(statement.getName());
 				statement.execute(dval, res, ctx);
@@ -115,6 +117,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 		TLangContext ctx = new TLangContext();
 		ctx.builder = scalarBuilder;
 		ctx.varEvaluator = varEvaluator;
+		ctx.lineNum = lineNum;
 
 		res.ok = true;
 		statement.execute(dval, res, ctx);
@@ -138,7 +141,8 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 
 
 	@Override
-	public void setInputMap(Map<String, Object> inputData) {
+	public void setInputMap(Map<String, Object> inputData, int lineNum) {
 		this.inputDataMap = inputData;
+		this.lineNum = lineNum + 1; //convert to 1-based
 	}
 }

@@ -65,7 +65,7 @@ public class InputFunctionRunner extends ServiceBase {
 		Map<String,Object> inputData = createInputMap(hdr, lineObj);
 		viaLineInfo.inputData = inputData;
 		//it can produce multiple if input function has multiple args (Customer c, Address a)
-		List<ProcessedInputData> processedDataL = runTLang(inputData);
+		List<ProcessedInputData> processedDataL = runTLang(inputData, lineObj);
 		if (haltNowFlag) {
 			return dvalL;
 		}
@@ -223,20 +223,20 @@ public class InputFunctionRunner extends ServiceBase {
 		return inner;
 	}
 
-	private List<ProcessedInputData> runTLang(Map<String, Object> inputData) {
+	private List<ProcessedInputData> runTLang(Map<String, Object> inputData, LineObj lineObj) {
 		List<ProcessedInputData> list = new ArrayList<>();
 		
 		int index = 0;
 		for(ProgramSet.OutputSpec ospec: progset.outputSpecs) {
 			String alias = ospec.alias;
-			ProcessedInputData data = runTLangForType(alias, ospec.structType, inputData);
+			ProcessedInputData data = runTLangForType(alias, ospec.structType, inputData, lineObj);
 			data.structType = ospec.structType;
 			list.add(data);
 			index++;
 		}
 		return list;
 	}
-	private ProcessedInputData runTLangForType(String alias, DStructType structType, Map<String, Object> inputData) {
+	private ProcessedInputData runTLangForType(String alias, DStructType structType, Map<String, Object> inputData, LineObj lineObj) {
 		ProcessedInputData data = new ProcessedInputData();
 		
 		for(String inputField: inputData.keySet()) {
@@ -267,7 +267,7 @@ public class InputFunctionRunner extends ServiceBase {
 				tlangRunner.setVarEvaluator(varEvaluator);
 				DValue initialValue = value == null ? null : scalarBuilder.buildString(value);
 				varEvaluator.setValueVar(initialValue);
-				tlangRunner.setInputMap(inputData);
+				tlangRunner.setInputMap(inputData, lineObj.lineNum);
 				
 				TLangResult res = tlangRunner.execute(spec.prog, initialValue);
 				if (!res.ok) {
