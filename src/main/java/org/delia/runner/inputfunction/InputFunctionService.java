@@ -275,6 +275,7 @@ public class InputFunctionService extends ServiceBase {
 				}
 				
 				ProgramSpec spec = saveFieldMap.get(columnName);
+				if (spec.syntheticFieldName != null) {
 					request.progset.fieldMap.put(columnName, saveFieldMap.get(columnName));
 				}
 			}
