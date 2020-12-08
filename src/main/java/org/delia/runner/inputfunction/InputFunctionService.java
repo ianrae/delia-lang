@@ -268,7 +268,21 @@ public class InputFunctionService extends ServiceBase {
 		log.log("found %d columns", request.progset.fieldMap.size());
 		int numMissed = saveFieldMap.size() - request.progset.fieldMap.size();
 		if (numMissed != 0) {
-			log.log("%d columns missed. Perhaps input function has incorrect input column name?", numMissed);
+			//might be synthetic columns. add them back
+			for(String columnName: saveFieldMap.keySet()) {
+				if (request.progset.fieldMap.containsKey(columnName)) {
+					continue;
+				}
+				
+				ProgramSpec spec = saveFieldMap.get(columnName);
+					request.progset.fieldMap.put(columnName, saveFieldMap.get(columnName));
+				}
+			}
+			
+			numMissed = saveFieldMap.size() - request.progset.fieldMap.size();
+			if (numMissed != 0) {
+				log.log("%d columns missed. Perhaps input function has incorrect input column name?", numMissed);
+			}
 		}
 		
 		return hdr;
