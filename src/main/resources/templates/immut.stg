@@ -8,8 +8,8 @@ import org.delia.type.DRelation;
 
 t2(cname,iname) ::= <<
 public class <cname> implements <iname> {
-  private DValue dval;
-  private DStructHelper helper;
+  protected DValue dval;
+  protected DStructHelper helper;
 
   public <cname>(DValue dval) {
     this.dval = dval;
@@ -18,6 +18,15 @@ public class <cname> implements <iname> {
   @Override
   public DValue internalDValue() {
     return dval;
+  }
+
+>>
+
+t2base(cname,base,iname) ::= <<
+public class <cname> extends <base>Immut implements <iname> {
+
+  public <cname>(DValue dval) {
+    super(dval);
   }
 
 >>

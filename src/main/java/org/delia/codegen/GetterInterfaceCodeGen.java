@@ -27,7 +27,8 @@ public class GetterInterfaceCodeGen extends CodeGenBase {
 		sc.nl();
 		sc.nl();
 
-		sc.o("public interface %s extends DeliaImmutable {", typeName);
+		String baseType = (structType.getBaseType() == null) ? "DeliaImmutable" : structType.getBaseType().getName();
+		sc.o("public interface %s extends %s {", typeName, baseType);
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
