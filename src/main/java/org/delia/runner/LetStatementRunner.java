@@ -149,7 +149,8 @@ public class LetStatementRunner extends ServiceBase {
 		} else {
 			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
 //			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
-			qresp = querySvc.execQuery(queryExp, zexec); 
+			HLSManagerResult mgrRes = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
+			qresp = mgrRes.qresp;
 		}
 		return qresp;
 	}
