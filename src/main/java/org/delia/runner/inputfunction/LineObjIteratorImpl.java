@@ -35,4 +35,9 @@ public class LineObjIteratorImpl implements LineObjIterator {
 	@Override
 	public void close() {
 	}
+
+	@Override
+	public LineObj readHdrRow() {
+		return null;
+	}
 }

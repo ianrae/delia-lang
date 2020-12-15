@@ -231,14 +231,7 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 	private HdrInfo readHeader(InputFunctionRequest request, LineObjIterator lineObjIter) {
-		LineObj hdrLineObj = null; //TODO support more than one later
-		int numToIgnore = lineObjIter.getNumHdrRows();
-		while (numToIgnore-- > 0) {
-			if (!lineObjIter.hasNext()) {
-				return null; //empty file
-			}
-			hdrLineObj = lineObjIter.next();
-		}
+		LineObj hdrLineObj = lineObjIter.readHdrRow(); //TODO support more than one later
 		
 		if (hdrLineObj == null) {
 			return createHdrFrom(request.progset);

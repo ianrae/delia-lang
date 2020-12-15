@@ -115,4 +115,16 @@ public class CSVFileLoader implements LineObjIterator {
 	public String getFileName() {
 		return FilenameUtils.getName(path);
 	}
+
+	@Override
+	public LineObj readHdrRow() {
+		if (numHdrRows <= 0) {
+			return null;
+		}
+		
+		if (! hasNext()) {
+			return null;
+		}
+		return next();
+	}
 }

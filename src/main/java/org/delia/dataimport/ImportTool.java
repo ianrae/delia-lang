@@ -114,15 +114,8 @@ public class ImportTool extends ServiceBase {
 		}
 
 		private List<String> readHeaderColumns(CSVFileLoader loader) {
-			LineObj hdrLineObj = null; //TODO support more than one later
-			int numToIgnore = loader.getNumHdrRows();
-			while (numToIgnore-- > 0) {
-				if (!loader.hasNext()) {
-					return null; //empty file
-				}
-				hdrLineObj = loader.next();
-			}
-			
+			LineObj hdrLineObj = loader.readHdrRow(); //TODO support more than one later
+			//for now assume is always hdr. fix later!!
 			List<String> columns = new ArrayList<>();
 			for(String col: hdrLineObj.elements) {
 				columns.add(col.trim());
