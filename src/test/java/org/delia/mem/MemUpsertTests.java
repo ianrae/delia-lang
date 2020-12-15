@@ -40,10 +40,10 @@ public class MemUpsertTests extends TopoTestBase {
 		assertEquals(44, dval.asStruct().getField("wid").asInt());
 	}
 	
-	@Test(expected=DeliaException.class)
+	@Test 
 	public void testOtherUniqueFilter() {
 		createCustomer();
-		//alternative way. put primary key in fields and then can use any filter
+		//alternative way that we support. put primary key in fields and then can use any filter
 		//that matches 0 or 1 records
 		ResultValue res = execStatement("upsert Customer[wid==19] {id:55, wid:44}");
 		assertEquals(true, res.ok);
