@@ -31,7 +31,7 @@ public class CSVImportService  {
 		public boolean useInsertStatement;
 		public LogLevel logLevel;
 		public ImportedValueListener importedValueListener;
-		public InputFileLoader inputFileLoader = new CSVFileLoader();
+		public InputFileLoaderFactory inputFileLoaderFactory = new CSVInputFileLoaderFactory();
 	}
 
 	private DeliaSession session;
@@ -69,7 +69,7 @@ public class CSVImportService  {
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
-		InputFileLoader loader = options.inputFileLoader;
+		InputFileLoader loader = options.inputFileLoaderFactory.create();
 		loader.init(csvPath);
 		this.observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
@@ -92,7 +92,7 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			InputFileLoader loader = options.inputFileLoader;
+			InputFileLoader loader = options.inputFileLoaderFactory.create();
 			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
@@ -123,7 +123,7 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			InputFileLoader loader = options.inputFileLoader;
+			InputFileLoader loader = options.inputFileLoaderFactory.create();
 			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
@@ -143,7 +143,7 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			InputFileLoader loader = options.inputFileLoader;
+			InputFileLoader loader = options.inputFileLoaderFactory.create();
 			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
