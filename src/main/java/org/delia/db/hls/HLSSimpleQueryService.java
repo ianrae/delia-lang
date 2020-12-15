@@ -37,6 +37,7 @@ public class HLSSimpleQueryService {
 		QuerySpec querySpec = innerSvc.buildSpec(queryExp, varEvaluator);
 		
 		QueryContext qtx = new QueryContext();
+		hlsManager.setVarEvaluator(varEvaluator);
 		qtx.letSpanEngine = new LetSpanEngine(factorySvc, hlsManager.getRegistry()); 
 		HLSManagerResult result = hlsManager.execute(querySpec, qtx, zexec);
 		return result;

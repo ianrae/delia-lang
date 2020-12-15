@@ -156,4 +156,8 @@ public class HLSManagerBase extends ServiceBase {
 	public DTypeRegistry getRegistry() {
 		return registry;
 	}
+
+	public void setVarEvaluator(VarEvaluator varEvaluator) {
+		this.varEvaluator = varEvaluator;
+	}
 }
