@@ -44,7 +44,8 @@ public class ImportToolTests extends InputFunctionTestBase {
 		assertEquals(true, res.ok);
 		
 		DataImportService importSvc = new DataImportService(session, 10);
-		CSVFileLoader loader = new CSVFileLoader(path);
+		CSVFileLoader loader = new CSVFileLoader();
+		loader.init(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
 		InputFunctionResult result = importSvc.executeImport("category", loader, ImportLevel.ONE);
@@ -81,7 +82,8 @@ public class ImportToolTests extends InputFunctionTestBase {
 		assertEquals(true, res.ok);
 		
 		DataImportService importSvc = new DataImportService(session, 10);
-		CSVFileLoader loader = new CSVFileLoader(path);
+		CSVFileLoader loader = new CSVFileLoader();
+		loader.init(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
 		InputFunctionResult result = importSvc.executeImport("product", loader, ImportLevel.ONE);
@@ -119,11 +121,17 @@ public class ImportToolTests extends InputFunctionTestBase {
 		assertEquals(true, res.ok);
 		
 		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
-		groupBuilder.addImport("category", new CSVFileLoader(path2));
-		groupBuilder.addImport("product", new CSVFileLoader(path));
+		CSVFileLoader loader1 = new CSVFileLoader();
+		loader1.init(path2);
+		CSVFileLoader loader2 = new CSVFileLoader();
+		loader2.init(path);
+		
+		groupBuilder.addImport("category", loader1);
+		groupBuilder.addImport("product", loader2);
 		
 		DataImportService importSvc = new DataImportService(session, 10);
-		CSVFileLoader loader = new CSVFileLoader(path);
+		CSVFileLoader loader = new CSVFileLoader();
+		loader.init(path);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
 		List<InputFunctionResult> resultL = importSvc.executeImportGroup(groupBuilder.getGroupL(), ImportLevel.TWO);
@@ -154,8 +162,12 @@ public class ImportToolTests extends InputFunctionTestBase {
 		assertEquals(true, res.ok);
 		
 		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
-		groupBuilder.addImport("category", new CSVFileLoader(path2));
-		groupBuilder.addImport("product", new CSVFileLoader(path));
+		CSVFileLoader loader1 = new CSVFileLoader();
+		loader1.init(path2);
+		CSVFileLoader loader2 = new CSVFileLoader();
+		loader2.init(path);
+		groupBuilder.addImport("category", loader1);
+		groupBuilder.addImport("product", loader2);
 		
 		DataImportService importSvc = new DataImportService(session, 10);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();
@@ -205,8 +217,12 @@ public class ImportToolTests extends InputFunctionTestBase {
 		assertEquals(true, res.ok);
 		
 		ImportGroupBuilder groupBuilder = new ImportGroupBuilder(delia.getFactoryService());
-		groupBuilder.addImport("category", new CSVFileLoader(path2));
-		groupBuilder.addImport("product", new CSVFileLoader(path));
+		CSVFileLoader loader1 = new CSVFileLoader();
+		loader1.init(path2);
+		CSVFileLoader loader2 = new CSVFileLoader();
+		loader2.init(path);
+		groupBuilder.addImport("category", loader1);
+		groupBuilder.addImport("product", loader2);
 		
 		DataImportService importSvc = new DataImportService(session, 10);
 		SimpleImportMetricObserver observer = new SimpleImportMetricObserver();

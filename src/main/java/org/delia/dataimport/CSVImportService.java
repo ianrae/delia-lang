@@ -31,6 +31,7 @@ public class CSVImportService  {
 		public boolean useInsertStatement;
 		public LogLevel logLevel;
 		public ImportedValueListener importedValueListener;
+		public InputFileLoader inputFileLoader = new CSVFileLoader();
 	}
 
 	private DeliaSession session;
@@ -68,7 +69,8 @@ public class CSVImportService  {
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
-		CSVFileLoader loader = new CSVFileLoader(csvPath);
+		InputFileLoader loader = options.inputFileLoader;
+		loader.init(csvPath);
 		this.observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
 		InputFunctionResult result = importSvc.executeImport(inputFunctionName, loader, ImportLevel.ONE);
@@ -90,7 +92,8 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+			InputFileLoader loader = options.inputFileLoader;
+			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
 			pair.iter = loader;
@@ -120,7 +123,8 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+			InputFileLoader loader = options.inputFileLoader;
+			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
 			pair.iter = loader;
@@ -139,7 +143,8 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+			InputFileLoader loader = options.inputFileLoader;
+			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
 			pair.iter = loader;

@@ -9,13 +9,12 @@ import java.io.InputStreamReader;
 
 import org.apache.commons.io.FilenameUtils;
 import org.delia.runner.inputfunction.LineObj;
-import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.util.DeliaExceptionHelper;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 
-public class CSVFileLoader implements LineObjIterator {
+public class CSVFileLoader implements InputFileLoader {
 	private String path;
 	private CSVReader csvreader;
 	private int lineNum;
@@ -24,11 +23,13 @@ public class CSVFileLoader implements LineObjIterator {
 	private String[] pendingNextLine;
 	private int numHdrRows = 1;
 
-	public CSVFileLoader(String path) {
+	@Override
+	public void init(String path) {
 		this.path = path;
 		open(path);
 	}
 	
+	@Override
 	public void open(String path) {
 		File f = new File(path);
 		try {
@@ -52,6 +53,7 @@ public class CSVFileLoader implements LineObjIterator {
 			}
 		}
 	}
+	@Override
 	public char getDelim() {
 		return delim == null ? ',' : delim.charAt(0);
 	}

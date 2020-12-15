@@ -23,7 +23,8 @@ public class CSVFileLoaderTests extends InputFunctionTestBase {
 	@Test
 	public void test1() {
 		String path = BASE_DIR + "categories.csv";
-		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		CSVFileLoader fileLoader = new CSVFileLoader();
+		fileLoader.init(path);
 		numExpectedColumnsProcessed = 4;
 		buildAndRun(true, fileLoader, 8);
 	}
@@ -31,7 +32,8 @@ public class CSVFileLoaderTests extends InputFunctionTestBase {
 	@Test
 	public void testOutOfOrder() {
 		String path = BASE_DIR + "categories.csv";
-		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		CSVFileLoader fileLoader = new CSVFileLoader();
+		fileLoader.init(path);
 		numExpectedColumnsProcessed = 4;
 		buildAndRun(false, fileLoader, 8);
 	}

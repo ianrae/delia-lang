@@ -28,7 +28,8 @@ public class ImportTool extends ServiceBase {
 		
 		public String generateInputFunctionSourceCode(String typeName, String path) {
 			DStructType structType = (DStructType) getType(typeName); 
-			CSVFileLoader loader = new CSVFileLoader(path);
+			CSVFileLoader loader = new CSVFileLoader();
+			loader.init(path);
 			
 			StrCreator sc = new StrCreator();
 			String fnName = StringUtil.lowify(typeName);
@@ -68,7 +69,8 @@ public class ImportTool extends ServiceBase {
 		}
 		
 		public String generateDeliaStructSourceCode(String typeName, String path, boolean addLineFeed) {
-			CSVFileLoader loader = new CSVFileLoader(path);
+			CSVFileLoader loader = new CSVFileLoader();
+			loader.init(path);
 			
 			StrCreator sc = new StrCreator();
 			String lf = addLineFeed ? "\n" : "";
