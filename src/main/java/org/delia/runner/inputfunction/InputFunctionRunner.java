@@ -216,6 +216,7 @@ public class InputFunctionRunner extends ServiceBase {
 					ImportSpec ispec = findImportSpec(data.structType);
 					metricsObserver.onInvalid1Error(ispec, pair.name);
 				}
+				err.setArg1(pair.name);
 				errL.add(err);
 				return null;
 			} else {

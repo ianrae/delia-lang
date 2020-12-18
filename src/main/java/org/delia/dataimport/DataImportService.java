@@ -164,6 +164,8 @@ public class DataImportService extends ServiceBase {
 				if (err instanceof DetailedError) {
 					DetailedError derr = (DetailedError) err;
 					fieldName = derr.getFieldName();
+				} else {
+					fieldName = err.getArg1();
 				}
 				String msg = err.toString();
 				log.log("  line %d: %s - %s", err.getLineNum(), fieldName, msg);
