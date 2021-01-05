@@ -7,17 +7,7 @@ import java.util.List;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.QueryContext;
-import org.delia.db.QuerySpec;
-import org.delia.db.hls.manager.HLSManager;
-import org.delia.db.hls.manager.HLSManagerResult;
-import org.delia.runner.DoNothingVarEvaluator;
-import org.delia.runner.QueryResponse;
-import org.delia.runner.VarEvaluator;
-import org.delia.type.DValue;
-import org.delia.zdb.ZDBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -139,7 +129,7 @@ public class NewHLSTests extends HLSTestBase {
 	
 	
 	@Test
-	public void test1() {
+	public void testBool() {
 		chkbuilderBool("let x = Flight[true]", true);
 		chkbuilderBool("let x = Flight[false]", false);
 	}	
