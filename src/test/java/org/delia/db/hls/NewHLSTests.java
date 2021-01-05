@@ -7,7 +7,10 @@ import java.util.List;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.IntegerExp;
+import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.StringExp;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +41,9 @@ import org.junit.Test;
  *        -only join pk if parent (in 1:1 or 1:N)
  *  -use newHLS for filters in update/upsert/delete statements
  *    
+ * TODO: add delia inject attack prevention tests!
+ * 
+ * 
  * @author Ian Rae
  *
  */
@@ -54,6 +60,36 @@ public class NewHLSTests extends HLSTestBase {
 		}
 		public boolean asBoolean() {
 			return flag;
+		}
+	}
+	public static class IntFilterCond implements FilterCond {
+		private int n;
+		 
+		public IntFilterCond(int n) {
+			this.n = n;
+		}
+		public int asInt() {
+			return n;
+		}
+	}
+	public static class LongFilterCond implements FilterCond {
+		private long n;
+		 
+		public LongFilterCond(long n) {
+			this.n = n;
+		}
+		public long asLong() {
+			return n;
+		}
+	}
+	public static class StringFilterCond implements FilterCond {
+		private String str;
+		 
+		public StringFilterCond(String str) {
+			this.str = str;
+		}
+		public String asString() {
+			return str;
 		}
 	}
 	public static enum ValType {
@@ -119,9 +155,19 @@ public class NewHLSTests extends HLSTestBase {
 	public static class FilterCondBuilder {
 		
 		public FilterCond build(QueryExp queryExp) {
-			if (queryExp.filter.cond instanceof BooleanExp) {
+			Exp cond = queryExp.filter.cond;
+			if (cond instanceof BooleanExp) {
 				BooleanExp exp = (BooleanExp) queryExp.filter.cond;
 				return new BooleanFilterCond(exp.val.booleanValue());
+			} else if (cond instanceof IntegerExp) {
+				IntegerExp exp = (IntegerExp) queryExp.filter.cond;
+				return new IntFilterCond(exp.val.intValue());
+			} else if (cond instanceof LongExp) {
+				LongExp exp = (LongExp) queryExp.filter.cond;
+				return new LongFilterCond(exp.val.longValue());
+			} else if (cond instanceof StringExp) {
+				StringExp exp = (StringExp) queryExp.filter.cond;
+				return new StringFilterCond(exp.val);
 			}
 			return null;
 		}
@@ -133,10 +179,24 @@ public class NewHLSTests extends HLSTestBase {
 		chkbuilderBool("let x = Flight[true]", true);
 		chkbuilderBool("let x = Flight[false]", false);
 	}	
+	@Test
+	public void testPKInt() {
+		chkbuilderInt("let x = Flight[15]", 15);
+	}	
+	@Test
+	public void testPKLong() {
+		pkType = "long";
+		chkbuilderLong("let x = Flight[15]", 15L);
+	}	
+	@Test
+	public void testPKString() {
+		pkType = "string";
+		chkbuilderString("let x = Flight['abc']", "abc");
+	}	
 	
 	
 	//-------------------------
-	private boolean generateSQLforMemFlag = true;
+	private String pkType = "int";
 	
 	@Before
 	public void init() {
@@ -144,11 +204,46 @@ public class NewHLSTests extends HLSTestBase {
 	}
 
 	private void chkbuilderBool(String src, boolean expected) {
+		FilterCond cond = buildCond(src);
+		BooleanFilterCond bfc = (BooleanFilterCond) cond;
+		assertEquals(expected, bfc.asBoolean());
+	}
+	private void chkbuilderInt(String src, int expected) {
+		FilterCond cond = buildCond(src);
+		IntFilterCond bfc = (IntFilterCond) cond;
+		assertEquals(expected, bfc.asInt());
+	}
+	private void chkbuilderLong(String src, long expected) {
+		FilterCond cond = buildCond(src);
+		LongFilterCond bfc = (LongFilterCond) cond;
+		assertEquals(expected, bfc.asLong());
+	}
+	private void chkbuilderString(String src, String expected) {
+		FilterCond cond = buildCond(src);
+		StringFilterCond bfc = (StringFilterCond) cond;
+		assertEquals(expected, bfc.asString());
+	}
+	private FilterCond buildCond(String src) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		FilterCondBuilder builder = new FilterCondBuilder();
 		FilterCond cond = builder.build(queryExp);
-		BooleanFilterCond bfc = (BooleanFilterCond) cond;
-		assertEquals(expected, bfc.asBoolean());
+		return cond;
 	}
+
+	@Override
+	protected String buildSrc() {
+		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int } end", pkType);
+		
+		if (pkType.equals("string")) {
+			src += "\n insert Flight {field1: 'ab', field2: 10}";
+			src += "\n insert Flight {field1: 'cd', field2: 20}";
+			
+		} else {
+			src += "\n insert Flight {field1: 1, field2: 10}";
+			src += "\n insert Flight {field1: 2, field2: 20}";
+		}
+		return src;
+	}
+	
 }
