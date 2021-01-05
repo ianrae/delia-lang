@@ -204,9 +204,18 @@ public class NewHLSTests extends HLSTestBase {
 						OpFilterCond opfiltercond = new OpFilterCond();
 						opfiltercond.isNot = exp.negFlag;
 						opfiltercond.op = new FilterOp(foexp.op);
-						//TODO handle reverse order
 						opfiltercond.val1 = new FilterVal(ValType.SYMBOL, el);
 						opfiltercond.val2 = new FilterVal(createValType(foexp.op2), foexp.op2);
+						return opfiltercond;
+					} else if (foexp.op2 instanceof XNAFMultiExp) {
+						XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op2;
+						XNAFSingleExp el = xnaf.qfeL.get(0);
+						
+						OpFilterCond opfiltercond = new OpFilterCond();
+						opfiltercond.isNot = exp.negFlag;
+						opfiltercond.op = new FilterOp(foexp.op);
+						opfiltercond.val1 = new FilterVal(createValType(foexp.op1), foexp.op1);
+						opfiltercond.val2 = new FilterVal(ValType.SYMBOL, el);
 						return opfiltercond;
 					}
 				}
@@ -255,6 +264,7 @@ public class NewHLSTests extends HLSTestBase {
 	@Test
 	public void testOp1() {
 		chkbuilderOpSymbolInt("let x = Flight[field1 < 15]", "field1", "<", 15);
+		chkbuilderOpIntSymbol("let x = Flight[15 < field1]", 15, "<", "field1");
 	}	
 
 	//-------------------------
@@ -295,9 +305,25 @@ public class NewHLSTests extends HLSTestBase {
 	private void chkbuilderOpSymbolInt(String src, String val1, String op, int val2) {
 		FilterCond cond = buildCond(src);
 		OpFilterCond ofc = (OpFilterCond) cond;
-		assertEquals(val1, ofc.val1.asSymbol());
+		chkSymbol(val1, ofc.val1);
 		assertEquals(op, ofc.op.toString());
-		assertEquals(val2, ofc.val2.asInt());
+		chkInt(val2, ofc.val2);
+	}
+	private void chkbuilderOpIntSymbol(String src, int val1, String op, String val2) {
+		FilterCond cond = buildCond(src);
+		OpFilterCond ofc = (OpFilterCond) cond;
+		chkInt(val1, ofc.val1);
+		assertEquals(op, ofc.op.toString());
+		chkSymbol(val2, ofc.val2);
+	}
+
+	private void chkSymbol(String val1, FilterVal fval) {
+		assertEquals(ValType.SYMBOL, fval.valType);
+		assertEquals(val1, fval.asSymbol());
+	}
+	private void chkInt(int val1, FilterVal fval) {
+		assertEquals(ValType.INT, fval.valType);
+		assertEquals(val1, fval.asInt());
 	}
 
 
