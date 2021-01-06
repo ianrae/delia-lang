@@ -59,6 +59,15 @@ import org.junit.Test;
  *    
  * TODO: add delia inject attack prevention tests!
  * 
+ * steps
+ *  -build filtercond
+ *  -build hld
+ *  -fill in fieldVal.structField on all SYMBOLS that are fieldnames (they can be a let var or a fieldname. fieldname takes precedence)
+ *   -actually resolve varnames to scalar values here.
+ *  -build joinL and then aliases
+ *  -build fieldL. affected by joins, fetch,fks,count(*), ....
+ * -now we have a high level version of the query in hld.
+ * -generate sql  
  * 
  * @author Ian Rae
  *
@@ -67,65 +76,6 @@ public class NewHLSTests extends HLSTestBase {
 
 	public interface FilterCond {
 
-	}
-	public static class BooleanFilterCond implements FilterCond {
-		private boolean flag;
-
-		public BooleanFilterCond(boolean flag) {
-			this.flag = flag;
-		}
-		public boolean asBoolean() {
-			return flag;
-		}
-		@Override
-		public String toString() {
-			String s = String.format("%b", flag);
-			return s;
-		}
-	}
-	public static class IntFilterCond implements FilterCond {
-		private int n;
-
-		public IntFilterCond(int n) {
-			this.n = n;
-		}
-		public int asInt() {
-			return n;
-		}
-		@Override
-		public String toString() {
-			String s = String.format("%d", n);
-			return s;
-		}
-	}
-	public static class LongFilterCond implements FilterCond {
-		private long n;
-
-		public LongFilterCond(long n) {
-			this.n = n;
-		}
-		public long asLong() {
-			return n;
-		}
-		@Override
-		public String toString() {
-			String s = String.format("%d", n);
-			return s;
-		}
-	}
-	public static class StringFilterCond implements FilterCond {
-		private String str;
-
-		public StringFilterCond(String str) {
-			this.str = str;
-		}
-		public String asString() {
-			return str;
-		}
-		@Override
-		public String toString() {
-			return str;
-		}
 	}
 	public static enum ValType {
 		BOOLEAN,
@@ -155,6 +105,9 @@ public class NewHLSTests extends HLSTestBase {
 		public ValType valType;
 		public Exp exp;
 		public FilterFunc filterFn; //normally null
+		
+		//resolved later
+		public StructField structField; //only set if SYMBOL
 		
 		public FilterVal(ValType valType, Exp exp) {
 			this.valType = valType;
@@ -186,7 +139,7 @@ public class NewHLSTests extends HLSTestBase {
 			return nafexp.funcName;
 		}
 		public FilterFunc asFunc() {
-			return null; //TODO!
+			return filterFn; 
 		}
 		
 		boolean isSymbol() {
@@ -216,6 +169,51 @@ public class NewHLSTests extends HLSTestBase {
 			return op;
 		}
 	}
+	
+	//for [true], [16], [x], [myfunc(13)]
+	public static class SingleFilterCond implements FilterCond {
+		public FilterVal val1;
+
+		@Override
+		public String toString() {
+			return val1.toString();
+		}
+	}
+	public static class BooleanFilterCond extends SingleFilterCond {
+		public BooleanFilterCond(BooleanExp exp) {
+			this.val1 = new FilterVal(ValType.BOOLEAN, exp);
+		}
+		public boolean asBoolean() {
+			return val1.asBoolean();
+		}
+	}
+	public static class IntFilterCond extends SingleFilterCond  {
+		public IntFilterCond(IntegerExp exp) {
+			this.val1 = new FilterVal(ValType.INT, exp);
+		}
+		public int asInt() {
+			return val1.asInt();
+		}
+	}
+	public static class LongFilterCond extends SingleFilterCond {
+		public LongFilterCond(LongExp exp) {
+			this.val1 = new FilterVal(ValType.LONG, exp);
+		}
+		public long asLong() {
+			return val1.asLong();
+		}
+	}
+	public static class StringFilterCond extends SingleFilterCond {
+		public StringFilterCond(StringExp exp) {
+			this.val1 = new FilterVal(ValType.STRING, exp);
+		}
+		public String asString() {
+			return val1.asString();
+		}
+	}
+	
+	
+	
 	public static class OpFilterCond implements FilterCond {
 		//[not] val op val
 		public boolean isNot;
@@ -250,16 +248,16 @@ public class NewHLSTests extends HLSTestBase {
 			Exp cond = queryExp.filter.cond;
 			if (cond instanceof BooleanExp) {
 				BooleanExp exp = (BooleanExp) queryExp.filter.cond;
-				return new BooleanFilterCond(exp.val.booleanValue());
+				return new BooleanFilterCond(exp);
 			} else if (cond instanceof IntegerExp) {
 				IntegerExp exp = (IntegerExp) queryExp.filter.cond;
-				return new IntFilterCond(exp.val.intValue());
+				return new IntFilterCond(exp);
 			} else if (cond instanceof LongExp) {
 				LongExp exp = (LongExp) queryExp.filter.cond;
-				return new LongFilterCond(exp.val.longValue());
+				return new LongFilterCond(exp);
 			} else if (cond instanceof StringExp) {
 				StringExp exp = (StringExp) queryExp.filter.cond;
-				return new StringFilterCond(exp.val);
+				return new StringFilterCond(exp);
 			} else if (cond instanceof FilterOpFullExp) {
 				FilterOpFullExp exp = (FilterOpFullExp) queryExp.filter.cond;
 				if (exp.opexp1 instanceof FilterOpExp) {
@@ -614,6 +612,16 @@ public class NewHLSTests extends HLSTestBase {
 		pkType = "string";
 		chkbuilderString("let x = Flight['abc']", "abc");
 	}	
+//	@Test TODO  FIX
+//	public void testPKSymbol() {
+////		chkbuilderInt("let y = 1\n let x = Flight[y]", 15);
+//		 //need better source to test this
+//	}	
+//	@Test TODO  FIX
+//	public void testPKFn() {
+////		chkbuilderInt("let x = Flight[myfn(13)]", 15);
+//		//need better source to test this
+//	}	
 
 	@Test
 	public void testOp1() {
