@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
@@ -18,6 +19,8 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
+import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -68,6 +71,11 @@ public class NewHLSTests extends HLSTestBase {
 		public boolean asBoolean() {
 			return flag;
 		}
+		@Override
+		public String toString() {
+			String s = String.format("%b", flag);
+			return s;
+		}
 	}
 	public static class IntFilterCond implements FilterCond {
 		private int n;
@@ -77,6 +85,11 @@ public class NewHLSTests extends HLSTestBase {
 		}
 		public int asInt() {
 			return n;
+		}
+		@Override
+		public String toString() {
+			String s = String.format("%d", n);
+			return s;
 		}
 	}
 	public static class LongFilterCond implements FilterCond {
@@ -88,6 +101,11 @@ public class NewHLSTests extends HLSTestBase {
 		public long asLong() {
 			return n;
 		}
+		@Override
+		public String toString() {
+			String s = String.format("%d", n);
+			return s;
+		}
 	}
 	public static class StringFilterCond implements FilterCond {
 		private String str;
@@ -96,6 +114,10 @@ public class NewHLSTests extends HLSTestBase {
 			this.str = str;
 		}
 		public String asString() {
+			return str;
+		}
+		@Override
+		public String toString() {
 			return str;
 		}
 	}
@@ -111,6 +133,16 @@ public class NewHLSTests extends HLSTestBase {
 	public static class FilterFunc {
 		public String fnName;
 		public List<FilterVal> argL = new ArrayList<>();
+		
+		@Override
+		public String toString() {
+			StringJoiner joiner = new StringJoiner(",");
+			for(FilterVal fval: argL) {
+				joiner.add(fval.toString());
+			}
+			String s = String.format("%s(%s)", fnName, joiner.toString());
+			return s;
+		}
 	}
 	public static class FilterVal {
 		//name,int,boolean,string,fn
@@ -150,6 +182,14 @@ public class NewHLSTests extends HLSTestBase {
 		public FilterFunc asFunc() {
 			return null; //TODO!
 		}
+		
+		@Override
+		public String toString() {
+			String fn = filterFn == null ? "" : ":" + filterFn.toString();
+			String s = String.format("%s:%s%s", valType.name(), exp.strValue(), fn);
+			return s;
+		}
+		
 	}
 	public static class FilterOp {
 		public String op; //==,!=,<,>,<=,>=
@@ -169,20 +209,27 @@ public class NewHLSTests extends HLSTestBase {
 		public FilterVal val1;
 		public FilterOp op;
 		public FilterVal val2;
+		
+		@Override
+		public String toString() {
+			String fn = isNot ? "!" : "";
+			String s = String.format("%s%s %s %s", fn, val1.toString(), op.toString(), val2.toString());
+			return s;
+		}
 	}
-	public static class LikeFilterCond implements FilterCond {
-		//[not] val like val
-		public boolean isNot;
-		public FilterVal val1;
-		public List<FilterVal> inList;
-	}
-	public static class AndOrFilterCond implements FilterCond {
-		//[not] cond and/or cond
-		public boolean isNot;
-		public FilterCond val1;
-		public boolean isAnd; //if false then is OR
-		public FilterCond val2;
-	}
+//	public static class LikeFilterCond implements FilterCond {
+//		//[not] val like val
+//		public boolean isNot;
+//		public FilterVal val1;
+//		public List<FilterVal> inList;
+//	}
+//	public static class AndOrFilterCond implements FilterCond {
+//		//[not] cond and/or cond
+//		public boolean isNot;
+//		public FilterCond val1;
+//		public boolean isAnd; //if false then is OR
+//		public FilterCond val2;
+//	}
 
 	public static class FilterCondBuilder {
 
@@ -242,7 +289,6 @@ public class NewHLSTests extends HLSTestBase {
 			}
 		}
 
-
 		private ValType createValType(Exp op2) {
 			if (op2 instanceof BooleanExp) {
 				return ValType.BOOLEAN;
@@ -260,6 +306,107 @@ public class NewHLSTests extends HLSTestBase {
 		}
 	}
 
+//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
+//	 *   filter:
+//	 *     true or pkval [15]
+//	 *     [not] val op val
+//	 *     [not] val like str
+//	 *     val in [sdfsdf]
+//	 *     cond AND/OR cond
+//	 *     date fns
+//	 * throughChain    .addr.country             0 or more. contiguous chain
+//	 * field           .name                     0 or 1. query one field, not an object
+//	 * listFn          orderBy/distinct/limit/offset/first,last,ith      sort,paging. optional    
+//	 * fetch           fks,fetch('aaa'),...          load 0 or more sub-objects.
+//	 * calcFn          exists,count,min,max,average,sum,...   query produces a calculated result. 
+	
+	public static class StructField  {
+		public DStructType dtype;
+		public String fieldName;
+		public DStructType fieldType;
+
+		@Override
+		public String toString() {
+			String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());
+			return s;
+		}
+	}
+	public static class FetchSpec {
+		public StructField structField;
+		public boolean isFK; //if true then fks, else fetch
+
+		@Override
+		public String toString() {
+			String s = String.format("%s:%b", structField.toString(), isFK);
+			return s;
+		}
+	}
+	public static class QueryFnSpec {
+		public StructField structField; //who the func is being applied to. fieldName & fieldType can be null
+		public FilterFunc filterFn;
+
+		@Override
+		public String toString() {
+			String s = String.format("%s %", structField.toString(), filterFn.toString());
+			return s;
+		}
+	}
+	public static class HLDQuery {
+		public DStructType fromType;
+		public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
+		public DType resultType; //might be string if .firstName
+		public FilterCond filter;
+		public List<StructField> throughChain = new ArrayList<>();
+		public StructField finalField; //eg Customer.addr
+		public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
+		public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
+
+		@Override
+		public String toString() {
+			String s = String.format("%s:%s[]:%s", resultType.getName(), fromType.getName(), mainStructType.getName());
+			s += String.format(" [%s]", filter.toString());
+			
+			if (throughChain.isEmpty()) {
+				s += " TC[]";
+			} else {
+				StringJoiner joiner = new StringJoiner(",");
+				for(StructField sf: throughChain) {
+					joiner.add(sf.toString());
+				}
+				s += String.format(" TC[%s]", joiner.toString());
+			}
+			
+			if (finalField == null) {
+				s += " FF()";
+			} else {
+				s += String.format(" FF(%s)", finalField.toString());
+			}
+			
+			if (fetchL.isEmpty()) {
+				s += " Fetch[]";
+			} else {
+				StringJoiner joiner = new StringJoiner(",");
+				for(FetchSpec sf: fetchL) {
+					joiner.add(sf.toString());
+				}
+				s += String.format(" Fetch[%s]", joiner.toString());
+			}
+			
+			if (funcL.isEmpty()) {
+				s += " fn[]";
+			} else {
+				StringJoiner joiner = new StringJoiner(",");
+				for(QueryFnSpec sf: funcL) {
+					joiner.add(sf.toString());
+				}
+				s += String.format(" fn[%s]", joiner.toString());
+			}
+			return s;
+		}
+		
+		
+	}
+	
 
 	@Test
 	public void testBool() {
@@ -293,8 +440,6 @@ public class NewHLSTests extends HLSTestBase {
 		chkbuilderOpFnInt("let x = Flight[orderDate.day() == 31]", "orderDate", "day", "==", 31);
 		chkbuilderOpIntFn("let x = Flight[31 == orderDate.day()]", 31, "==", "orderDate", "day");
 	}	
-
-	
 
 
 	//-------------------------
