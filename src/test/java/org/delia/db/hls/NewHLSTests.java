@@ -3,6 +3,7 @@ package org.delia.db.hls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.compiler.ast.BooleanExp;
@@ -15,6 +16,7 @@ import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,12 +110,13 @@ public class NewHLSTests extends HLSTestBase {
 	}
 	public static class FilterFunc {
 		public String fnName;
-		public List<FilterVal> argL;
+		public List<FilterVal> argL = new ArrayList<>();
 	}
 	public static class FilterVal {
 		//name,int,boolean,string,fn
 		public ValType valType;
 		public Exp exp;
+		public FilterFunc filterFn; //normally null
 		
 		public FilterVal(ValType valType, Exp exp) {
 			this.valType = valType;
@@ -121,27 +124,31 @@ public class NewHLSTests extends HLSTestBase {
 		}
 		
 		public boolean asBoolean() {
-			return false;
+			BooleanExp bexp = (BooleanExp) exp;
+			return bexp.val.booleanValue();
 		}
 		public int asInt() {
 			IntegerExp exp1 = (IntegerExp) exp;
 			return exp1.val.intValue();
 		}
 		public long asLong() {
-			return 0L; //
+			LongExp exp1 = (LongExp) exp;
+			return exp1.val.longValue();
 		}
 		public double asNumber() {
-			return 0.0;
+			NumberExp exp1 = (NumberExp) exp;
+			return exp1.val.doubleValue();
 		}
 		public String asString() {
-			return "";
+//			StringExp exp1 = (StringExp) exp;
+			return exp.strValue();
 		}
 		public String asSymbol() {
 			XNAFSingleExp nafexp = (XNAFSingleExp) exp;
 			return nafexp.funcName;
 		}
 		public FilterFunc asFunc() {
-			return null;
+			return null; //TODO!
 		}
 	}
 	public static class FilterOp {
@@ -199,29 +206,42 @@ public class NewHLSTests extends HLSTestBase {
 					FilterOpExp foexp = (FilterOpExp) exp.opexp1;
 					if (foexp.op1 instanceof XNAFMultiExp) {
 						XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op1;
-						XNAFSingleExp el = xnaf.qfeL.get(0);
-						
 						OpFilterCond opfiltercond = new OpFilterCond();
 						opfiltercond.isNot = exp.negFlag;
 						opfiltercond.op = new FilterOp(foexp.op);
-						opfiltercond.val1 = new FilterVal(ValType.SYMBOL, el);
+						opfiltercond.val1 = buildValOrFunc(exp, foexp, xnaf); 
 						opfiltercond.val2 = new FilterVal(createValType(foexp.op2), foexp.op2);
 						return opfiltercond;
 					} else if (foexp.op2 instanceof XNAFMultiExp) {
 						XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op2;
-						XNAFSingleExp el = xnaf.qfeL.get(0);
 						
 						OpFilterCond opfiltercond = new OpFilterCond();
 						opfiltercond.isNot = exp.negFlag;
 						opfiltercond.op = new FilterOp(foexp.op);
 						opfiltercond.val1 = new FilterVal(createValType(foexp.op1), foexp.op1);
-						opfiltercond.val2 = new FilterVal(ValType.SYMBOL, el);
+						opfiltercond.val2 = buildValOrFunc(exp, foexp, xnaf); 
 						return opfiltercond;
 					}
 				}
 			}
 			return null;
 		}
+
+
+		private FilterVal buildValOrFunc(FilterOpFullExp exp, FilterOpExp foexp, XNAFMultiExp xnaf) {
+			if (xnaf.qfeL.size() == 1) {
+				XNAFSingleExp el = xnaf.qfeL.get(0);
+				return new FilterVal(ValType.SYMBOL, el);
+			} else {
+				XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
+				XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
+				FilterVal fval = new FilterVal(ValType.FUNCTION, el);
+				fval.filterFn = new FilterFunc();
+				fval.filterFn.fnName = el2.funcName; //TODO: handle args later
+				return fval;
+			}
+		}
+
 
 		private ValType createValType(Exp op2) {
 			if (op2 instanceof BooleanExp) {
@@ -267,8 +287,19 @@ public class NewHLSTests extends HLSTestBase {
 		chkbuilderOpIntSymbol("let x = Flight[15 < field1]", 15, "<", "field1");
 	}	
 
+	@Test
+	public void testDateFn() {
+		addOrderDate = true;
+		chkbuilderOpFnInt("let x = Flight[orderDate.day() == 31]", "orderDate", "day", "==", 31);
+		chkbuilderOpIntFn("let x = Flight[31 == orderDate.day()]", 31, "==", "orderDate", "day");
+	}	
+
+	
+
+
 	//-------------------------
 	private String pkType = "int";
+	private boolean addOrderDate = false;
 
 	@Before
 	public void init() {
@@ -316,7 +347,28 @@ public class NewHLSTests extends HLSTestBase {
 		assertEquals(op, ofc.op.toString());
 		chkSymbol(val2, ofc.val2);
 	}
+	private void chkbuilderOpFnInt(String src, String fieldName, String val1, String op, int val2) {
+		FilterCond cond = buildCond(src);
+		OpFilterCond ofc = (OpFilterCond) cond;
+		chkFn(fieldName, val1, ofc.val1, 0);
+		assertEquals(op, ofc.op.toString());
+		chkInt(val2, ofc.val2);
+	}
+	private void chkbuilderOpIntFn(String src, int val1, String op, String fieldName, String val2) {
+		FilterCond cond = buildCond(src);
+		OpFilterCond ofc = (OpFilterCond) cond;
+		chkInt(val1, ofc.val1);
+		assertEquals(op, ofc.op.toString());
+		chkFn(fieldName, val2, ofc.val2, 0);
+	}
 
+	private void chkFn(String fieldName, String fnName, FilterVal fval, int n) {
+		assertEquals(ValType.FUNCTION, fval.valType);
+		FilterFunc func = fval.filterFn;
+		assertEquals(n, func.argL.size());
+		assertEquals(fieldName, fval.asString());
+		assertEquals(fnName, func.fnName);
+	}
 	private void chkSymbol(String val1, FilterVal fval) {
 		assertEquals(ValType.SYMBOL, fval.valType);
 		assertEquals(val1, fval.asSymbol());
@@ -329,15 +381,17 @@ public class NewHLSTests extends HLSTestBase {
 
 	@Override
 	protected String buildSrc() {
-		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int } end", pkType);
+		String s = addOrderDate ? ", orderDate date" : "";
+		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int %s } end", pkType, s);
 
+		s = addOrderDate ? ", orderDate: '2019'" : "";
 		if (pkType.equals("string")) {
-			src += "\n insert Flight {field1: 'ab', field2: 10}";
-			src += "\n insert Flight {field1: 'cd', field2: 20}";
+			src += String.format("\n insert Flight {field1: 'ab', field2: 10 %s}", s);
+			src += String.format("\n insert Flight {field1: 'cd', field2: 20 %s}", s);
 
 		} else {
-			src += "\n insert Flight {field1: 1, field2: 10}";
-			src += "\n insert Flight {field1: 2, field2: 20}";
+			src += String.format("\n insert Flight {field1: 1, field2: 10 %s}", s);
+			src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
 		}
 		return src;
 	}
