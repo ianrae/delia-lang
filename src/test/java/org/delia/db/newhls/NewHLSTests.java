@@ -20,6 +20,8 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
+import org.delia.core.FactoryService;
+import org.delia.db.hls.AliasInfo;
 import org.delia.db.hls.HLSTestBase;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
@@ -114,7 +116,7 @@ public class NewHLSTests extends HLSTestBase {
 	public static class FilterFunc {
 		public String fnName;
 		public List<FilterVal> argL = new ArrayList<>();
-		
+
 		@Override
 		public String toString() {
 			StringJoiner joiner = new StringJoiner(",");
@@ -130,15 +132,15 @@ public class NewHLSTests extends HLSTestBase {
 		public ValType valType;
 		public Exp exp;
 		public FilterFunc filterFn; //normally null
-		
+
 		//resolved later
 		public StructField structField; //only set if SYMBOL
-		
+
 		public FilterVal(ValType valType, Exp exp) {
 			this.valType = valType;
 			this.exp = exp;
 		}
-		
+
 		public boolean asBoolean() {
 			BooleanExp bexp = (BooleanExp) exp;
 			return bexp.val.booleanValue();
@@ -156,7 +158,7 @@ public class NewHLSTests extends HLSTestBase {
 			return exp1.val.doubleValue();
 		}
 		public String asString() {
-//			StringExp exp1 = (StringExp) exp;
+			//			StringExp exp1 = (StringExp) exp;
 			return exp.strValue();
 		}
 		public String asSymbol() {
@@ -166,25 +168,25 @@ public class NewHLSTests extends HLSTestBase {
 		public FilterFunc asFunc() {
 			return filterFn; 
 		}
-		
+
 		boolean isSymbol() {
 			return valType.equals(ValType.SYMBOL);
 		}
 		boolean isFn() {
 			return valType.equals(ValType.FUNCTION);
 		}
-		
+
 		@Override
 		public String toString() {
 			String fn = filterFn == null ? "" : ":" + filterFn.toString();
 			String s = String.format("%s:%s%s", valType.name(), exp.strValue(), fn);
 			return s;
 		}
-		
+
 	}
 	public static class FilterOp {
 		public String op; //==,!=,<,>,<=,>=
-		
+
 		public FilterOp(String op) {
 			this.op = op;
 		}
@@ -194,7 +196,7 @@ public class NewHLSTests extends HLSTestBase {
 			return op;
 		}
 	}
-	
+
 	//for [true], [16], [x], [myfunc(13)]
 	public static class SingleFilterCond implements FilterCond {
 		public FilterVal val1;
@@ -236,16 +238,16 @@ public class NewHLSTests extends HLSTestBase {
 			return val1.asString();
 		}
 	}
-	
-	
-	
+
+
+
 	public static class OpFilterCond implements FilterCond {
 		//[not] val op val
 		public boolean isNot;
 		public FilterVal val1;
 		public FilterOp op;
 		public FilterVal val2;
-		
+
 		@Override
 		public String toString() {
 			String fn = isNot ? "!" : "";
@@ -253,19 +255,19 @@ public class NewHLSTests extends HLSTestBase {
 			return s;
 		}
 	}
-//	public static class LikeFilterCond implements FilterCond {
-//		//[not] val like val
-//		public boolean isNot;
-//		public FilterVal val1;
-//		public List<FilterVal> inList;
-//	}
-//	public static class AndOrFilterCond implements FilterCond {
-//		//[not] cond and/or cond
-//		public boolean isNot;
-//		public FilterCond val1;
-//		public boolean isAnd; //if false then is OR
-//		public FilterCond val2;
-//	}
+	//	public static class LikeFilterCond implements FilterCond {
+	//		//[not] val like val
+	//		public boolean isNot;
+	//		public FilterVal val1;
+	//		public List<FilterVal> inList;
+	//	}
+	//	public static class AndOrFilterCond implements FilterCond {
+	//		//[not] cond and/or cond
+	//		public boolean isNot;
+	//		public FilterCond val1;
+	//		public boolean isAnd; //if false then is OR
+	//		public FilterCond val2;
+	//	}
 
 	public static class FilterCondBuilder {
 
@@ -297,7 +299,7 @@ public class NewHLSTests extends HLSTestBase {
 						return opfiltercond;
 					} else if (foexp.op2 instanceof XNAFMultiExp) {
 						XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op2;
-						
+
 						OpFilterCond opfiltercond = new OpFilterCond();
 						opfiltercond.isNot = exp.negFlag;
 						opfiltercond.op = new FilterOp(foexp.op);
@@ -342,20 +344,20 @@ public class NewHLSTests extends HLSTestBase {
 		}
 	}
 
-//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
-//	 *   filter:
-//	 *     true or pkval [15]
-//	 *     [not] val op val
-//	 *     [not] val like str
-//	 *     val in [sdfsdf]
-//	 *     cond AND/OR cond
-//	 *     date fns
-//	 * throughChain    .addr.country             0 or more. contiguous chain
-//	 * field           .name                     0 or 1. query one field, not an object
-//	 * listFn          orderBy/distinct/limit/offset/first,last,ith      sort,paging. optional    
-//	 * fetch           fks,fetch('aaa'),...          load 0 or more sub-objects.
-//	 * calcFn          exists,count,min,max,average,sum,...   query produces a calculated result. 
-	
+	//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
+	//	 *   filter:
+	//	 *     true or pkval [15]
+	//	 *     [not] val op val
+	//	 *     [not] val like str
+	//	 *     val in [sdfsdf]
+	//	 *     cond AND/OR cond
+	//	 *     date fns
+	//	 * throughChain    .addr.country             0 or more. contiguous chain
+	//	 * field           .name                     0 or 1. query one field, not an object
+	//	 * listFn          orderBy/distinct/limit/offset/first,last,ith      sort,paging. optional    
+	//	 * fetch           fks,fetch('aaa'),...          load 0 or more sub-objects.
+	//	 * calcFn          exists,count,min,max,average,sum,...   query produces a calculated result. 
+
 	public static class StructField  {
 		public DStructType dtype;
 		public String fieldName;
@@ -393,14 +395,14 @@ public class NewHLSTests extends HLSTestBase {
 			return s;
 		}
 	}
-	
+
 	public static class JoinElement  {
 		public StructField structField;
-//		public List<JTElement> nextL = new ArrayList<>();
+		//		public List<JTElement> nextL = new ArrayList<>();
 		public RelationInfo relinfo;
 		public boolean usedForFK; //if true then fks(). but this join for other reasons too
 		public boolean usedForFetch; //if true then fettch. but this join for other reasons too
-		
+
 		@Override
 		public String toString() {
 			StringJoiner joiner = new StringJoiner("|");
@@ -434,12 +436,12 @@ public class NewHLSTests extends HLSTestBase {
 
 		//added after
 		public List<JoinElement> joinL = new ArrayList<>();
-		
+
 		@Override
 		public String toString() {
 			String s = String.format("%s:%s[]:%s", resultType.getName(), fromType.getName(), mainStructType.getName());
 			s += String.format(" [%s]", filter.toString());
-			
+
 			if (throughChain.isEmpty()) {
 				s += " TC[]";
 			} else {
@@ -449,13 +451,13 @@ public class NewHLSTests extends HLSTestBase {
 				}
 				s += String.format(" TC[%s]", joiner.toString());
 			}
-			
+
 			if (finalField == null) {
 				s += " fld()";
 			} else {
 				s += String.format(" fld(%s)", finalField.toString());
 			}
-			
+
 			if (fetchL.isEmpty()) {
 				s += " fetch[]";
 			} else {
@@ -465,7 +467,7 @@ public class NewHLSTests extends HLSTestBase {
 				}
 				s += String.format(" fetch[%s]", joiner.toString());
 			}
-			
+
 			if (funcL.isEmpty()) {
 				s += " fn[]";
 			} else {
@@ -475,7 +477,7 @@ public class NewHLSTests extends HLSTestBase {
 				}
 				s += String.format(" fn[%s]", joiner.toString());
 			}
-			
+
 			if (fieldL.isEmpty()) {
 				s += " {}";
 			} else {
@@ -488,7 +490,7 @@ public class NewHLSTests extends HLSTestBase {
 			return s;
 		}
 	}
-	
+
 	public static class HLDQueryBuilder {
 		private DTypeRegistry registry;
 
@@ -501,13 +503,13 @@ public class NewHLSTests extends HLSTestBase {
 			hld.fromType = (DStructType) registry.getType(queryExp.typeName);
 			hld.mainStructType = hld.fromType; //TODO fix
 			hld.resultType = hld.fromType; //TODO fix
-			
+
 			FilterCondBuilder builder = new FilterCondBuilder();
 			hld.filter = builder.build(queryExp);
-//			public List<StructField> throughChain = new ArrayList<>();
-//			public StructField finalField; //eg Customer.addr
-//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
-//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
+			//			public List<StructField> throughChain = new ArrayList<>();
+			//			public StructField finalField; //eg Customer.addr
+			//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
+			//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 
 			return hld;
 		}
@@ -522,16 +524,16 @@ public class NewHLSTests extends HLSTestBase {
 					addFetch(spec, hld.joinL);
 				}
 			}
-			
+
 			for(QueryFnSpec fnspec: hld.funcL) {
 				//if parent does .orderBy('addr') then we need a join.
 				if (fnspec.filterFn.fnName.equals("orderBy")) {
 					addOrderBy(fnspec, hld.joinL);
 				}
 			}
-			
+
 			//TODO: add throughChain
-			
+
 			if (hld.filter instanceof OpFilterCond) {
 				OpFilterCond ofc = (OpFilterCond) hld.filter;
 				addImplicitJoin(hld.fromType, ofc.val1, hld.joinL);
@@ -539,7 +541,7 @@ public class NewHLSTests extends HLSTestBase {
 			}
 			//TODO: do like and IN filters too, and AndOr
 		}
-		
+
 		private void addImplicitJoin(DStructType fromType, FilterVal fval, List<JoinElement> resultL) {
 			if (fval.isSymbol()) {
 				String fieldName = fval.asSymbol();
@@ -576,12 +578,12 @@ public class NewHLSTests extends HLSTestBase {
 			TypePair pair = DRuleHelper.findMatchingPair(structType, fieldName);
 			//ignore sort by scalar fields
 			if (pair != null && pair.type instanceof DStructType) {
-//				addElement(structType, fieldName, (DStructType) pair.type, resultL);
+				//				addElement(structType, fieldName, (DStructType) pair.type, resultL);
 				JoinElement el = buildElement(structType, fieldName, (DStructType) pair.type);
 				addElement(el, resultL);
 			}
 		}
-		
+
 		private void addFKs(FetchSpec spec, List<JoinElement> resultL) {
 			DStructType structType = spec.structField.dtype;
 			for(TypePair pair: structType.getAllFields()) {
@@ -627,32 +629,53 @@ public class NewHLSTests extends HLSTestBase {
 			resultL.add(el);
 		}
 	}
-	
+
 	public static class HLDField {
 		public DStructType structType;
 		public String fieldName;
 		public DType fieldType;
-//		public boolean isAssocField;
-		public String groupName;
-		
+		//		public boolean isAssocField;
+//		public String groupName; just use alias??
+		public String alias;
+		public String asStr;
+
 		@Override
 		public String toString() {
 			String fldType = BuiltInTypes.convertDTypeNameToDeliaName(fieldType.getName());
-			String s = String.format("%s.%s(%s)", structType.getName(), fieldName, fldType);
+			String s = String.format("%s.%s(%s,%s)", structType.getName(), fieldName, fldType, alias);
 			return s;
 		}
 	}
-	
+
 	public static class HLDFieldBuilder {
+		private HLDAliasManager aliasMgr;
+
+		public HLDFieldBuilder(HLDAliasManager aliasMgr) {
+			this.aliasMgr = aliasMgr;
+		}
+
 		public void generateJoinTree(HLDQuery hld) {
 			//TODO much more code needed here!
 			addStructFields(hld, hld.fieldL);
-			
+
+			assignAliases(hld);
 		}
-		
+
+		private void assignAliases(HLDQuery hld) {
+			
+			AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
+			for(HLDField rf: hld.fieldL) {
+				if (rf.structType == hld.fromType) {
+					rf.alias = info.alias;
+				} else {
+					//TODO!!
+				}
+			}
+		}
+
 		private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
 			DStructType fromType = hld.fromType;
-			
+
 			for(TypePair pair: fromType.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
@@ -672,25 +695,25 @@ public class NewHLSTests extends HLSTestBase {
 			rf.structType = fromType;
 			rf.fieldName = pair.name;
 			rf.fieldType = pair.type;
-			rf.groupName = "__MAINGROUP__";
+//			rf.groupName = "__MAINGROUP__";
 			fieldL.add(rf);
 			return rf;
 		}
 		private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
-//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
-//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
-//
-//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-//			s = String.format("%s as %s", s, pair.name);
-//			RenderedField rff = addField(fieldL, null, fieldName, s);
-//			rff.isAssocField = true;
-//			rff.fieldGroup = new FieldGroup((el == null), el);
+			//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
+			////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
+			//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
+			//
+			//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
+			//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
+			//			s = String.format("%s as %s", s, pair.name);
+			//			RenderedField rff = addField(fieldL, null, fieldName, s);
+			//			rff.isAssocField = true;
+			//			rff.fieldGroup = new FieldGroup((el == null), el);
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testBool() {
 		chkbuilderBool("let x = Flight[true]", true);
@@ -710,16 +733,16 @@ public class NewHLSTests extends HLSTestBase {
 		pkType = "string";
 		chkbuilderString("let x = Flight['abc']", "abc");
 	}	
-//	@Test TODO  FIX
-//	public void testPKSymbol() {
-////		chkbuilderInt("let y = 1\n let x = Flight[y]", 15);
-//		 //need better source to test this
-//	}	
-//	@Test TODO  FIX
-//	public void testPKFn() {
-////		chkbuilderInt("let x = Flight[myfn(13)]", 15);
-//		//need better source to test this
-//	}	
+	//	@Test TODO  FIX
+	//	public void testPKSymbol() {
+	////		chkbuilderInt("let y = 1\n let x = Flight[y]", 15);
+	//		 //need better source to test this
+	//	}	
+	//	@Test TODO  FIX
+	//	public void testPKFn() {
+	////		chkbuilderInt("let x = Flight[myfn(13)]", 15);
+	//		//need better source to test this
+	//	}	
 
 	@Test
 	public void testOp1() {
@@ -740,36 +763,37 @@ public class NewHLSTests extends HLSTestBase {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
-		
+
 		HLDQuery hld = hldBuilder.build(queryExp);
 		log.log(hld.toString());
-//		assertEquals()
-		
+		//		assertEquals()
+
 		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
 		joinBuilder.generateJoinTree(hld);
 		assertEquals(0, hld.joinL.size());
 	}	
-	
+
 	@Test
 	public void testHLDField() {
 		String src = "let x = Flight[15]";
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
-		
+
 		HLDQuery hld = hldBuilder.build(queryExp);
 		log.log(hld.toString());
-//		assertEquals()
-		
+		//		assertEquals()
+
 		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
 		joinBuilder.generateJoinTree(hld);
 		assertEquals(0, hld.joinL.size());
-		
-		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
+
+		HLDAliasManager aliasMgr = new HLDAliasManager(delia.getFactoryService());
+		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
 		fieldBuilder.generateJoinTree(hld);
 		log.log(hld.toString());
 	}	
-	
+
 
 	//-------------------------
 	private String pkType = "int";
