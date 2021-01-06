@@ -8,20 +8,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import org.delia.compiler.ast.BooleanExp;
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.FilterOpExp;
-import org.delia.compiler.ast.FilterOpFullExp;
-import org.delia.compiler.ast.IntegerExp;
-import org.delia.compiler.ast.LongExp;
-import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.compiler.ast.StringExp;
-import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
-import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.hls.AliasInfo;
 import org.delia.db.hls.HLSTestBase;
+import org.delia.db.newhls.cond.BooleanFilterCond;
+import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.newhls.cond.FilterCondBuilder;
+import org.delia.db.newhls.cond.FilterFunc;
+import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.IntFilterCond;
+import org.delia.db.newhls.cond.LongFilterCond;
+import org.delia.db.newhls.cond.OpFilterCond;
+import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.StrCreator;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
@@ -102,267 +101,7 @@ import org.junit.Test;
  */
 public class NewHLSTests extends HLSTestBase {
 
-	public interface FilterCond {
-
-	}
-	public static enum ValType {
-		BOOLEAN,
-		INT,
-		LONG,
-		NUMBER,
-		STRING,
-		SYMBOL,
-		FUNCTION
-	}
-	public static class FilterFunc {
-		public String fnName;
-		public List<FilterVal> argL = new ArrayList<>();
-
-		@Override
-		public String toString() {
-			StringJoiner joiner = new StringJoiner(",");
-			for(FilterVal fval: argL) {
-				joiner.add(fval.toString());
-			}
-			String s = String.format("%s(%s)", fnName, joiner.toString());
-			return s;
-		}
-	}
-	public static class FilterVal {
-		//name,int,boolean,string,fn
-		public ValType valType;
-		public Exp exp;
-		public FilterFunc filterFn; //normally null
-
-		//resolved later
-		public StructFieldMini structField; //only set if SYMBOL or if SingleFilterCond
-		public String alias;
-
-		public FilterVal(ValType valType, Exp exp) {
-			this.valType = valType;
-			this.exp = exp;
-		}
-
-		public boolean asBoolean() {
-			BooleanExp bexp = (BooleanExp) exp;
-			return bexp.val.booleanValue();
-		}
-		public int asInt() {
-			IntegerExp exp1 = (IntegerExp) exp;
-			return exp1.val.intValue();
-		}
-		public long asLong() {
-			LongExp exp1 = (LongExp) exp;
-			return exp1.val.longValue();
-		}
-		public double asNumber() {
-			NumberExp exp1 = (NumberExp) exp;
-			return exp1.val.doubleValue();
-		}
-		public String asString() {
-			//			StringExp exp1 = (StringExp) exp;
-			return exp.strValue();
-		}
-		public String asSymbol() {
-			XNAFSingleExp nafexp = (XNAFSingleExp) exp;
-			return nafexp.funcName;
-		}
-		public FilterFunc asFunc() {
-			return filterFn; 
-		}
-
-		boolean isSymbol() {
-			return valType.equals(ValType.SYMBOL);
-		}
-		boolean isFn() {
-			return valType.equals(ValType.FUNCTION);
-		}
-
-		@Override
-		public String toString() {
-			String fn = filterFn == null ? "" : ":" + filterFn.toString();
-			String s = String.format("%s:%s%s", valType.name(), exp.strValue(), fn);
-			return s;
-		}
-
-	}
-	public static class FilterOp {
-		public String op; //==,!=,<,>,<=,>=
-
-		public FilterOp(String op) {
-			this.op = op;
-		}
-
-		@Override
-		public String toString() {
-			return op;
-		}
-	}
-
-	//for [true], [16], [x], [myfunc(13)]
-	public static abstract class SingleFilterCond implements FilterCond {
-		public FilterVal val1;
-
-		@Override
-		public String toString() {
-			return val1.toString();
-		}
-
-		public abstract String renderSql();
-	}
-	public static class BooleanFilterCond extends SingleFilterCond {
-		public BooleanFilterCond(BooleanExp exp) {
-			this.val1 = new FilterVal(ValType.BOOLEAN, exp);
-		}
-		public boolean asBoolean() {
-			return val1.asBoolean();
-		}
-		@Override
-		public String renderSql() {
-			return String.format("%b", val1.asBoolean());
-		}
-	}
-	public static class IntFilterCond extends SingleFilterCond  {
-		public IntFilterCond(IntegerExp exp) {
-			this.val1 = new FilterVal(ValType.INT, exp);
-		}
-		public int asInt() {
-			return val1.asInt();
-		}
-		@Override
-		public String renderSql() {
-			return String.format("%d", val1.asInt());
-		}
-	}
-	public static class LongFilterCond extends SingleFilterCond {
-		public LongFilterCond(LongExp exp) {
-			this.val1 = new FilterVal(ValType.LONG, exp);
-		}
-		public long asLong() {
-			return val1.asLong();
-		}
-		@Override
-		public String renderSql() {
-			return String.format("%d", val1.asLong());
-		}
-	}
-	public static class StringFilterCond extends SingleFilterCond {
-		public StringFilterCond(StringExp exp) {
-			this.val1 = new FilterVal(ValType.STRING, exp);
-		}
-		public String asString() {
-			return val1.asString();
-		}
-		@Override
-		public String renderSql() {
-			return String.format("'%s'", val1.asString()); //TODO: escape ' chars1
-		}
-	}
-
-
-
-	public static class OpFilterCond implements FilterCond {
-		//[not] val op val
-		public boolean isNot;
-		public FilterVal val1;
-		public FilterOp op;
-		public FilterVal val2;
-
-		@Override
-		public String toString() {
-			String fn = isNot ? "!" : "";
-			String s = String.format("%s%s %s %s", fn, val1.toString(), op.toString(), val2.toString());
-			return s;
-		}
-	}
-	//	public static class LikeFilterCond implements FilterCond {
-	//		//[not] val like val
-	//		public boolean isNot;
-	//		public FilterVal val1;
-	//		public List<FilterVal> inList;
-	//	}
-	//	public static class AndOrFilterCond implements FilterCond {
-	//		//[not] cond and/or cond
-	//		public boolean isNot;
-	//		public FilterCond val1;
-	//		public boolean isAnd; //if false then is OR
-	//		public FilterCond val2;
-	//	}
-
-	public static class FilterCondBuilder {
-
-		public FilterCond build(QueryExp queryExp) {
-			Exp cond = queryExp.filter.cond;
-			if (cond instanceof BooleanExp) {
-				BooleanExp exp = (BooleanExp) queryExp.filter.cond;
-				return new BooleanFilterCond(exp);
-			} else if (cond instanceof IntegerExp) {
-				IntegerExp exp = (IntegerExp) queryExp.filter.cond;
-				return new IntFilterCond(exp);
-			} else if (cond instanceof LongExp) {
-				LongExp exp = (LongExp) queryExp.filter.cond;
-				return new LongFilterCond(exp);
-			} else if (cond instanceof StringExp) {
-				StringExp exp = (StringExp) queryExp.filter.cond;
-				return new StringFilterCond(exp);
-			} else if (cond instanceof FilterOpFullExp) {
-				FilterOpFullExp exp = (FilterOpFullExp) queryExp.filter.cond;
-				if (exp.opexp1 instanceof FilterOpExp) {
-					FilterOpExp foexp = (FilterOpExp) exp.opexp1;
-					if (foexp.op1 instanceof XNAFMultiExp) {
-						XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op1;
-						OpFilterCond opfiltercond = new OpFilterCond();
-						opfiltercond.isNot = exp.negFlag;
-						opfiltercond.op = new FilterOp(foexp.op);
-						opfiltercond.val1 = buildValOrFunc(exp, foexp, xnaf); 
-						opfiltercond.val2 = new FilterVal(createValType(foexp.op2), foexp.op2);
-						return opfiltercond;
-					} else if (foexp.op2 instanceof XNAFMultiExp) {
-						XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op2;
-
-						OpFilterCond opfiltercond = new OpFilterCond();
-						opfiltercond.isNot = exp.negFlag;
-						opfiltercond.op = new FilterOp(foexp.op);
-						opfiltercond.val1 = new FilterVal(createValType(foexp.op1), foexp.op1);
-						opfiltercond.val2 = buildValOrFunc(exp, foexp, xnaf); 
-						return opfiltercond;
-					}
-				}
-			}
-			return null;
-		}
-
-
-		private FilterVal buildValOrFunc(FilterOpFullExp exp, FilterOpExp foexp, XNAFMultiExp xnaf) {
-			if (xnaf.qfeL.size() == 1) {
-				XNAFSingleExp el = xnaf.qfeL.get(0);
-				return new FilterVal(ValType.SYMBOL, el);
-			} else {
-				XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
-				XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
-				FilterVal fval = new FilterVal(ValType.FUNCTION, el);
-				fval.filterFn = new FilterFunc();
-				fval.filterFn.fnName = el2.funcName; //TODO: handle args later
-				return fval;
-			}
-		}
-
-		private ValType createValType(Exp op2) {
-			if (op2 instanceof BooleanExp) {
-				return ValType.BOOLEAN;
-			} else if (op2 instanceof IntegerExp) {
-				return ValType.INT;
-			} else if (op2 instanceof LongExp) {
-				return ValType.LONG;
-			} else if (op2 instanceof NumberExp) {
-				return ValType.NUMBER;
-			} else if (op2 instanceof StringExp) {
-				return ValType.STRING;
-			} else {
-				return null; //TODO: error
-			}
-		}
-	}
+	
 
 	//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
 	//	 *   filter:
@@ -378,42 +117,8 @@ public class NewHLSTests extends HLSTestBase {
 	//	 * fetch           fks,fetch('aaa'),...          load 0 or more sub-objects.
 	//	 * calcFn          exists,count,min,max,average,sum,...   query produces a calculated result. 
 
-	public static class StructField  {
-		public DStructType dtype;
-		public String fieldName;
-		public DStructType fieldType;
-
-		public StructField(DStructType dtype, String field, DStructType fieldType) {
-			this.dtype = dtype;
-			this.fieldName = field;
-			this.fieldType = fieldType;
-		}
-
-		@Override
-		public String toString() {
-			String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());
-			return s;
-		}
-	}
-	public static class StructFieldMini  {
-		public DStructType dtype;
-		public String fieldName;
-		public DType fieldType;
-
-		public StructFieldMini(DStructType dtype, String field, DType fieldType) {
-			this.dtype = dtype;
-			this.fieldName = field;
-			this.fieldType = fieldType;
-		}
-
-		@Override
-		public String toString() {
-			String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());
-			return s;
-		}
-	}
 	public static class FetchSpec {
-		public StructField structField;
+		public RelationField structField;
 		public boolean isFK; //if true then fks, else fetch
 
 		@Override
@@ -423,7 +128,7 @@ public class NewHLSTests extends HLSTestBase {
 		}
 	}
 	public static class QueryFnSpec {
-		public StructField structField; //who the func is being applied to. fieldName & fieldType can be null
+		public RelationField structField; //who the func is being applied to. fieldName & fieldType can be null
 		public FilterFunc filterFn;
 
 		@Override
@@ -434,7 +139,7 @@ public class NewHLSTests extends HLSTestBase {
 	}
 
 	public static class JoinElement  {
-		public StructField structField;
+		public RelationField structField;
 		//		public List<JTElement> nextL = new ArrayList<>();
 		public RelationInfo relinfo;
 		public boolean usedForFK; //if true then fks(). but this join for other reasons too
@@ -466,7 +171,7 @@ public class NewHLSTests extends HLSTestBase {
 		public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
 		public DType resultType; //might be string if .firstName
 		public FilterCond filter;
-		public List<StructField> throughChain = new ArrayList<>();
+		public List<RelationField> throughChain = new ArrayList<>();
 		public StructField finalField; //eg Customer.addr
 		public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 		public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
@@ -484,7 +189,7 @@ public class NewHLSTests extends HLSTestBase {
 				s += " TC[]";
 			} else {
 				StringJoiner joiner = new StringJoiner(",");
-				for(StructField sf: throughChain) {
+				for(RelationField sf: throughChain) {
 					joiner.add(sf.toString());
 				}
 				s += String.format(" TC[%s]", joiner.toString());
@@ -647,7 +352,7 @@ public class NewHLSTests extends HLSTestBase {
 		}
 		private JoinElement buildElement(DStructType dtype, String field, DStructType fieldType) {
 			JoinElement el = new JoinElement();
-			el.structField = new StructField(dtype, field, fieldType);
+			el.structField = new RelationField(dtype, field, fieldType);
 			el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
 			return el;
 		}
@@ -725,14 +430,14 @@ public class NewHLSTests extends HLSTestBase {
 			if (val1.isSymbol()) {
 				String fieldName = val1.exp.strValue();
 				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
-				val1.structField = new StructFieldMini(hld.fromType, fieldName, fieldType);
+				val1.structField = new StructField(hld.fromType, fieldName, fieldType);
 				val1.alias = hld.fromAlias;
 			}
 		}
 		private void doFilterPKVal(FilterVal val1, HLDQuery hld) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
 			String fieldName = pkpair.name;
-			val1.structField = new StructFieldMini(hld.fromType, fieldName, pkpair.type);
+			val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
 			val1.alias = hld.fromAlias;
 		}
 
