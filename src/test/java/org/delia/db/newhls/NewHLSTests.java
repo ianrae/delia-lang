@@ -20,9 +20,9 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
-import org.delia.core.FactoryService;
 import org.delia.db.hls.AliasInfo;
 import org.delia.db.hls.HLSTestBase;
+import org.delia.db.sql.StrCreator;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.BuiltInTypes;
@@ -31,6 +31,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -198,13 +199,15 @@ public class NewHLSTests extends HLSTestBase {
 	}
 
 	//for [true], [16], [x], [myfunc(13)]
-	public static class SingleFilterCond implements FilterCond {
+	public static abstract class SingleFilterCond implements FilterCond {
 		public FilterVal val1;
 
 		@Override
 		public String toString() {
 			return val1.toString();
 		}
+
+		public abstract String renderSql();
 	}
 	public static class BooleanFilterCond extends SingleFilterCond {
 		public BooleanFilterCond(BooleanExp exp) {
@@ -212,6 +215,10 @@ public class NewHLSTests extends HLSTestBase {
 		}
 		public boolean asBoolean() {
 			return val1.asBoolean();
+		}
+		@Override
+		public String renderSql() {
+			return String.format("%b", val1.asBoolean());
 		}
 	}
 	public static class IntFilterCond extends SingleFilterCond  {
@@ -221,6 +228,10 @@ public class NewHLSTests extends HLSTestBase {
 		public int asInt() {
 			return val1.asInt();
 		}
+		@Override
+		public String renderSql() {
+			return String.format("%d", val1.asInt());
+		}
 	}
 	public static class LongFilterCond extends SingleFilterCond {
 		public LongFilterCond(LongExp exp) {
@@ -229,6 +240,10 @@ public class NewHLSTests extends HLSTestBase {
 		public long asLong() {
 			return val1.asLong();
 		}
+		@Override
+		public String renderSql() {
+			return String.format("%d", val1.asLong());
+		}
 	}
 	public static class StringFilterCond extends SingleFilterCond {
 		public StringFilterCond(StringExp exp) {
@@ -236,6 +251,10 @@ public class NewHLSTests extends HLSTestBase {
 		}
 		public String asString() {
 			return val1.asString();
+		}
+		@Override
+		public String renderSql() {
+			return String.format("'%s'", val1.asString()); //TODO: escape ' chars1
 		}
 	}
 
@@ -711,7 +730,39 @@ public class NewHLSTests extends HLSTestBase {
 			//			rff.isAssocField = true;
 			//			rff.fieldGroup = new FieldGroup((el == null), el);
 		}
+	}
+	
+	public static class HLDSQLGenerator {
+		
+		public String generateSQL(HLDQuery hld) {
+			StrCreator sc = new StrCreator();
+			sc.o("SELECT ");
+			
+			StringJoiner joiner = new StringJoiner(",");
+			for(HLDField rf: hld.fieldL) {
+				if (rf.asStr != null) {
+					joiner.add(String.format("%s.%s as %s", rf.alias, rf.fieldName, rf.asStr));
+				} else {
+					joiner.add(String.format("%s.%s", rf.alias, rf.fieldName));
+				}
+			}
+			sc.o(joiner.toString());
+			
+			sc.o(" FROM %s", hld.fromType.getName());
+			
+			generateWhere(sc, hld);
+			return sc.toString();
+		}
 
+		private void generateWhere(StrCreator sc, HLDQuery hld) {
+			FilterCond filter = hld.filter;
+			if (filter instanceof SingleFilterCond) {
+				SingleFilterCond sfc = (SingleFilterCond) filter;
+				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
+				String s = String.format("%s=%s", pkpair.name, sfc.renderSql());
+				sc.o(" WHERE %s", s);
+			}
+		}
 	}
 
 	@Test
@@ -792,6 +843,11 @@ public class NewHLSTests extends HLSTestBase {
 		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
 		fieldBuilder.generateJoinTree(hld);
 		log.log(hld.toString());
+		
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator();
+		String sql = sqlgen.generateSQL(hld);
+		log.log(sql);
+		assertEquals("SELECT a.field1,a.field2 FROM Flight WHERE field1=15", sql);
 	}	
 
 
