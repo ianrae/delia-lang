@@ -27,8 +27,9 @@ public class HLDAliasManager extends ServiceBase {
 	}
 	
 	private String createAlias() {
-		char ch = (char) ('a' + nextAliasIndex++);
-		String alias = String.format("%c", ch);
+//		char ch = (char) ('a' + nextAliasIndex++);
+//		String alias = String.format("%c", ch);
+		String alias = String.format("t%d", nextAliasIndex++);
 		return alias;
 	}
 	
