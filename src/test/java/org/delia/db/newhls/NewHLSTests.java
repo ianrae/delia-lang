@@ -135,7 +135,8 @@ public class NewHLSTests extends HLSTestBase {
 		public FilterFunc filterFn; //normally null
 
 		//resolved later
-		public StructField structField; //only set if SYMBOL
+		public StructFieldMini structField; //only set if SYMBOL
+		public String alias;
 
 		public FilterVal(ValType valType, Exp exp) {
 			this.valType = valType;
@@ -394,6 +395,23 @@ public class NewHLSTests extends HLSTestBase {
 			return s;
 		}
 	}
+	public static class StructFieldMini  {
+		public DStructType dtype;
+		public String fieldName;
+		public DType fieldType;
+
+		public StructFieldMini(DStructType dtype, String field, DType fieldType) {
+			this.dtype = dtype;
+			this.fieldName = field;
+			this.fieldType = fieldType;
+		}
+
+		@Override
+		public String toString() {
+			String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());
+			return s;
+		}
+	}
 	public static class FetchSpec {
 		public StructField structField;
 		public boolean isFK; //if true then fks, else fetch
@@ -444,6 +462,7 @@ public class NewHLSTests extends HLSTestBase {
 	}	
 	public static class HLDQuery {
 		public DStructType fromType;
+		public String fromAlias;
 		public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
 		public DType resultType; //might be string if .firstName
 		public FilterCond filter;
@@ -683,12 +702,32 @@ public class NewHLSTests extends HLSTestBase {
 		private void assignAliases(HLDQuery hld) {
 			
 			AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
+			hld.fromAlias = info.alias;
 			for(HLDField rf: hld.fieldL) {
 				if (rf.structType == hld.fromType) {
 					rf.alias = info.alias;
 				} else {
 					//TODO!!
 				}
+			}
+			
+			//now populate SYMBOL FilterdVal
+			if (hld.filter instanceof SingleFilterCond) {
+				SingleFilterCond sfc = (SingleFilterCond) hld.filter;
+				doFilterVal(sfc.val1, hld);
+			} else if (hld.filter instanceof OpFilterCond) {
+				OpFilterCond ofc = (OpFilterCond) hld.filter;
+				doFilterVal(ofc.val1, hld);
+				doFilterVal(ofc.val2, hld);
+			}
+		}
+
+		private void doFilterVal(FilterVal val1, HLDQuery hld) {
+			if (val1.isSymbol()) {
+				String fieldName = val1.exp.strValue();
+				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
+				val1.structField = new StructFieldMini(hld.fromType, fieldName, fieldType);
+				val1.alias = hld.fromAlias;
 			}
 		}
 
@@ -732,6 +771,12 @@ public class NewHLSTests extends HLSTestBase {
 		}
 	}
 	
+	public static class HLDException extends RuntimeException {
+		HLDException(String s) {
+			super(s);
+		}
+	}
+	
 	public static class HLDSQLGenerator {
 		
 		public String generateSQL(HLDQuery hld) {
@@ -748,7 +793,7 @@ public class NewHLSTests extends HLSTestBase {
 			}
 			sc.o(joiner.toString());
 			
-			sc.o(" FROM %s", hld.fromType.getName());
+			sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
 			
 			generateWhere(sc, hld);
 			return sc.toString();
@@ -756,11 +801,34 @@ public class NewHLSTests extends HLSTestBase {
 
 		private void generateWhere(StrCreator sc, HLDQuery hld) {
 			FilterCond filter = hld.filter;
+			String fragment = null;
 			if (filter instanceof SingleFilterCond) {
 				SingleFilterCond sfc = (SingleFilterCond) filter;
 				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
-				String s = String.format("%s=%s", pkpair.name, sfc.renderSql());
-				sc.o(" WHERE %s", s);
+				fragment = String.format("%s=%s", pkpair.name, sfc.renderSql());
+			} else if (filter instanceof OpFilterCond) {
+				OpFilterCond ofc = (OpFilterCond) filter;
+				String s1 = renderVal(ofc.val1);
+				String s2 = renderVal(ofc.val2);
+				fragment = String.format("%s %s %s", s1, ofc.op.op, s2);
+			}
+			sc.o(" WHERE %s", fragment);
+		}
+
+		private String renderVal(FilterVal val1) {
+			switch(val1.valType) {
+			case BOOLEAN:
+			case INT:
+			case LONG:
+			case NUMBER:
+			case STRING:
+				return val1.exp.strValue();
+			case SYMBOL:
+				return String.format("%s.%s", val1.alias, val1.structField.fieldName);
+				
+			case FUNCTION:
+			default:
+				throw new HLDException("renderVal not impl1");
 			}
 		}
 	}
@@ -847,9 +915,34 @@ public class NewHLSTests extends HLSTestBase {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator();
 		String sql = sqlgen.generateSQL(hld);
 		log.log(sql);
-		assertEquals("SELECT a.field1,a.field2 FROM Flight WHERE field1=15", sql);
+		assertEquals("SELECT a.field1,a.field2 FROM Flight as a WHERE field1=15", sql);
 	}	
 
+	@Test
+	public void testHLDField2() {
+		String src = "let x = Flight[field1 < 15]";
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
+
+		HLDQuery hld = hldBuilder.build(queryExp);
+		log.log(hld.toString());
+		//		assertEquals()
+
+		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
+		joinBuilder.generateJoinTree(hld);
+		assertEquals(0, hld.joinL.size());
+
+		HLDAliasManager aliasMgr = new HLDAliasManager(delia.getFactoryService());
+		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
+		fieldBuilder.generateJoinTree(hld);
+		log.log(hld.toString());
+		
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator();
+		String sql = sqlgen.generateSQL(hld);
+		log.log(sql);
+		assertEquals("SELECT a.field1,a.field2 FROM Flight as a WHERE a.field1 < 15", sql);
+	}	
 
 	//-------------------------
 	private String pkType = "int";
