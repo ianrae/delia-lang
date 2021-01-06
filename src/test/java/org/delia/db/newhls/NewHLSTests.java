@@ -1,4 +1,4 @@
-package org.delia.db.hls;
+package org.delia.db.newhls;
 
 
 import static org.junit.Assert.assertEquals;
@@ -20,8 +20,10 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
+import org.delia.db.hls.HLSTestBase;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -66,8 +68,31 @@ import org.junit.Test;
  *   -actually resolve varnames to scalar values here.
  *  -build joinL and then aliases
  *  -build fieldL. affected by joins, fetch,fks,count(*), ....
+ *    field should have structField.
+ *    fields grouped in columnRuns (use a string groupName)
+ *	public boolean isAssocField; and probably the alias name b.custId as addr
+ *     -we don't want to build or construct anything during query execution. 
+ *     all should be in field so that we can cache it.
+ *  -should handle scalar results (count() or .firstName)
+ *  -should handle select * query (lookup fields by name in rs)    
  * -now we have a high level version of the query in hld.
- * -generate sql  
+ * -generate sql. types of sql  
+ *   -select *
+ *   -count
+ *   -regular
+ * Development plan
+ * -do Customer[true] in MEM and sql (don't actually wire up h2)
+ * -do [45]
+ * -do [id > 10] //leave in and like for later
+ *  -do not, and do bool,int,long,number,date,enum
+ * -do order/limit stuff
+ * -do .firstName scalar result
+ * -do simple join, 1:1, 1:N, M:N
+ * -do fetch join, then implicit joins
+ * -do through join, and self-join
+ * -do first,last,ith,count,...
+ * 
+ * -idea is a new set of unit tests that fully test MEM and sql generation
  * 
  * @author Ian Rae
  *
@@ -405,6 +430,7 @@ public class NewHLSTests extends HLSTestBase {
 		public StructField finalField; //eg Customer.addr
 		public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 		public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
+		public List<HLDField> fieldL = new ArrayList<>(); 
 
 		//added after
 		public List<JoinElement> joinL = new ArrayList<>();
@@ -448,6 +474,16 @@ public class NewHLSTests extends HLSTestBase {
 					joiner.add(sf.toString());
 				}
 				s += String.format(" fn[%s]", joiner.toString());
+			}
+			
+			if (fieldL.isEmpty()) {
+				s += " {}";
+			} else {
+				StringJoiner joiner = new StringJoiner(",");
+				for(HLDField rf: fieldL) {
+					joiner.add(rf.toString());
+				}
+				s += String.format(" {%s}", joiner.toString());
 			}
 			return s;
 		}
@@ -592,6 +628,68 @@ public class NewHLSTests extends HLSTestBase {
 		}
 	}
 	
+	public static class HLDField {
+		public DStructType structType;
+		public String fieldName;
+		public DType fieldType;
+//		public boolean isAssocField;
+		public String groupName;
+		
+		@Override
+		public String toString() {
+			String fldType = BuiltInTypes.convertDTypeNameToDeliaName(fieldType.getName());
+			String s = String.format("%s.%s(%s)", structType.getName(), fieldName, fldType);
+			return s;
+		}
+	}
+	
+	public static class HLDFieldBuilder {
+		public void generateJoinTree(HLDQuery hld) {
+			//TODO much more code needed here!
+			addStructFields(hld, hld.fieldL);
+			
+		}
+		
+		private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
+			DStructType fromType = hld.fromType;
+			
+			for(TypePair pair: fromType.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
+					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+						doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+					} else if (!relinfo.isParent) {
+						addField(fieldL, fromType, pair);
+					}
+				} else {
+					addField(fieldL, fromType, pair);
+				}
+			}
+		}
+
+		private HLDField addField(List<HLDField> fieldL, DStructType fromType, TypePair pair) {
+			HLDField rf = new HLDField();
+			rf.structType = fromType;
+			rf.fieldName = pair.name;
+			rf.fieldType = pair.type;
+			rf.groupName = "__MAINGROUP__";
+			fieldL.add(rf);
+			return rf;
+		}
+		private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
+//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
+////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
+//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
+//
+//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
+//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
+//			s = String.format("%s as %s", s, pair.name);
+//			RenderedField rff = addField(fieldL, null, fieldName, s);
+//			rff.isAssocField = true;
+//			rff.fieldGroup = new FieldGroup((el == null), el);
+		}
+		
+	}
 	
 	@Test
 	public void testBool() {
@@ -651,6 +749,27 @@ public class NewHLSTests extends HLSTestBase {
 		joinBuilder.generateJoinTree(hld);
 		assertEquals(0, hld.joinL.size());
 	}	
+	
+	@Test
+	public void testHLDField() {
+		String src = "let x = Flight[15]";
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
+		
+		HLDQuery hld = hldBuilder.build(queryExp);
+		log.log(hld.toString());
+//		assertEquals()
+		
+		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
+		joinBuilder.generateJoinTree(hld);
+		assertEquals(0, hld.joinL.size());
+		
+		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
+		fieldBuilder.generateJoinTree(hld);
+		log.log(hld.toString());
+	}	
+	
 
 	//-------------------------
 	private String pkType = "int";
