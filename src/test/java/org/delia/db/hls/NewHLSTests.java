@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.delia.compiler.ast.BooleanExp;
@@ -19,8 +20,13 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
+import org.delia.relation.RelationCardinality;
+import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
+import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -325,6 +331,12 @@ public class NewHLSTests extends HLSTestBase {
 		public String fieldName;
 		public DStructType fieldType;
 
+		public StructField(DStructType dtype, String field, DStructType fieldType) {
+			this.dtype = dtype;
+			this.fieldName = field;
+			this.fieldType = fieldType;
+		}
+
 		@Override
 		public String toString() {
 			String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());
@@ -351,6 +363,34 @@ public class NewHLSTests extends HLSTestBase {
 			return s;
 		}
 	}
+	
+	public static class JoinElement  {
+		public StructField structField;
+//		public List<JTElement> nextL = new ArrayList<>();
+		public RelationInfo relinfo;
+		public boolean usedForFK; //if true then fks(). but this join for other reasons too
+		public boolean usedForFetch; //if true then fettch. but this join for other reasons too
+		
+		@Override
+		public String toString() {
+			StringJoiner joiner = new StringJoiner("|");
+			joiner.add(structField.dtype.getName());
+			joiner.add(structField.fieldName);
+			joiner.add(structField.fieldType.getName());
+			return joiner.toString();
+		}
+
+		public boolean matches(TypePair pair) {
+			if (pair.name.equals(structField.fieldName) && pair.type == structField.fieldType) {
+				return true;
+			}
+			return false;
+		}
+
+		public TypePair createPair() {
+			return new TypePair(structField.fieldName, structField.fieldType);
+		}
+	}	
 	public static class HLDQuery {
 		public DStructType fromType;
 		public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
@@ -361,6 +401,9 @@ public class NewHLSTests extends HLSTestBase {
 		public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 		public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 
+		//added after
+		public List<JoinElement> joinL = new ArrayList<>();
+		
 		@Override
 		public String toString() {
 			String s = String.format("%s:%s[]:%s", resultType.getName(), fromType.getName(), mainStructType.getName());
@@ -377,19 +420,19 @@ public class NewHLSTests extends HLSTestBase {
 			}
 			
 			if (finalField == null) {
-				s += " FF()";
+				s += " fld()";
 			} else {
-				s += String.format(" FF(%s)", finalField.toString());
+				s += String.format(" fld(%s)", finalField.toString());
 			}
 			
 			if (fetchL.isEmpty()) {
-				s += " Fetch[]";
+				s += " fetch[]";
 			} else {
 				StringJoiner joiner = new StringJoiner(",");
 				for(FetchSpec sf: fetchL) {
 					joiner.add(sf.toString());
 				}
-				s += String.format(" Fetch[%s]", joiner.toString());
+				s += String.format(" fetch[%s]", joiner.toString());
 			}
 			
 			if (funcL.isEmpty()) {
@@ -403,11 +446,88 @@ public class NewHLSTests extends HLSTestBase {
 			}
 			return s;
 		}
+	}
+	
+	public static class HLDQueryBuilder {
+		private DTypeRegistry registry;
+
+		public HLDQueryBuilder(DTypeRegistry registry) {
+			this.registry = registry;
+		}
+
+		public HLDQuery build(QueryExp queryExp) {
+			HLDQuery hld = new HLDQuery();
+			hld.fromType = (DStructType) registry.getType(queryExp.typeName);
+			hld.mainStructType = hld.fromType; //TODO fix
+			hld.resultType = hld.fromType; //TODO fix
+			
+			FilterCondBuilder builder = new FilterCondBuilder();
+			hld.filter = builder.build(queryExp);
+//			public List<StructField> throughChain = new ArrayList<>();
+//			public StructField finalField; //eg Customer.addr
+//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
+//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
+
+			return hld;
+		}
 		
+		public void generateJoinTree(HLDQuery hld) {
+			for(FetchSpec spec: hld.fetchL) {
+				if (spec.isFK) {
+					addFKs(spec, hld.joinL);
+				} else {
+					addFetch(spec, hld.joinL);
+				}
+			}
+		}
+		
+		private void addFKs(FetchSpec spec, List<JoinElement> resultL) {
+			DStructType structType = spec.structField.dtype;
+			for(TypePair pair: structType.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+					if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+						JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
+						el.usedForFK = true;
+						addElement(el, resultL);
+					}
+				}
+			}
+		}
+		private void addFetch(FetchSpec spec, List<JoinElement> resultL) {
+			DStructType structType = spec.structField.dtype;
+			String fieldName = spec.structField.fieldName;
+			TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
+			if (pair != null) {
+				JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
+				el.usedForFK = false;
+				addElement(el, resultL);
+			}
+		}
+		private JoinElement buildElement(DStructType dtype, String field, DStructType fieldType) {
+			JoinElement el = new JoinElement();
+			el.structField = new StructField(dtype, field, fieldType);
+			el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
+			return el;
+		}
+		private void addElement(JoinElement el, List<JoinElement> resultL) {
+			String target = el.toString();
+			Optional<JoinElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
+			if (optExisting.isPresent()) {
+				if (el.usedForFK) {
+					optExisting.get().usedForFK = true; //propogate
+				}
+				if (el.usedForFetch) {
+					optExisting.get().usedForFetch = true; //propogate
+				}
+				return;
+			}
+
+			resultL.add(el);
+		}
 		
 	}
 	
-
 	@Test
 	public void testBool() {
 		chkbuilderBool("let x = Flight[true]", true);
@@ -441,6 +561,17 @@ public class NewHLSTests extends HLSTestBase {
 		chkbuilderOpIntFn("let x = Flight[31 == orderDate.day()]", 31, "==", "orderDate", "day");
 	}	
 
+	@Test
+	public void testHLD() {
+		String src = "let x = Flight[15]";
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
+		
+		HLDQuery hld = hldBuilder.build(queryExp);
+		log.log(hld.toString());
+//		assertEquals()
+	}	
 
 	//-------------------------
 	private String pkType = "int";
