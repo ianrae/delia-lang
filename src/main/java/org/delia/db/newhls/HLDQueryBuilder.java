@@ -35,19 +35,14 @@ public class HLDQueryBuilder {
 
 		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType);
 		hld.filter = builder.build(queryExp);
-		buildThroughChain(queryExp, hld);//			public List<StructField> throughChain = new ArrayList<>();
-		buildFinalField(queryExp, hld); //			public StructField finalField; //eg Customer.addr
+		buildFinalFieldAndThroughChain(queryExp, hld); //			public StructField finalField; //eg Customer.addr
 		//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 		//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 		buildFns(queryExp, hld);
 		return hld;
 	}
 
-	private void buildThroughChain(QueryExp queryExp, HLDQuery hld) {
-		// TODO Auto-generated method stub
-		
-	}
-	private void buildFinalField(QueryExp queryExp, HLDQuery hld) {
+	private void buildFinalFieldAndThroughChain(QueryExp queryExp, HLDQuery hld) {
 		DStructType currentScope = hld.fromType;
 		for(QueryFuncExp qfnexp: queryExp.qfelist) {
 			if (qfnexp instanceof QueryFieldExp) {
@@ -55,6 +50,11 @@ public class HLDQueryBuilder {
 				DType type = DValueHelper.findFieldType(currentScope, qfe.funcName);
 				StructField sf = new StructField(currentScope, qfe.funcName, type);
 				hld.finalField = sf;
+				if (type.isStructShape()) {
+					RelationField rf = new RelationField(currentScope, qfnexp.funcName, (DStructType) type);
+					hld.throughChain.add(rf);
+					currentScope = (DStructType) type;
+				}
 			}
 		}
 	}

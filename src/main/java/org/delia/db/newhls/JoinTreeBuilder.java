@@ -31,6 +31,10 @@ public class JoinTreeBuilder {
 			}
 		}
 		
+		for(RelationField rf: hld.throughChain) {
+			addThroughChain(rf, hld);
+		}
+		
 		if (hld.finalField != null) {
 			addFinalFieldFetchIfNeeded(hld);
 		}
@@ -42,14 +46,16 @@ public class JoinTreeBuilder {
 			}
 		}
 
-		//TODO: add throughChain
-
 		if (hld.filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) hld.filter;
 			addImplicitJoin(hld.fromType, ofc.val1, hld.joinL);
 			addImplicitJoin(hld.fromType, ofc.val2, hld.joinL);
 		}
 		//TODO: do like and IN filters too, and AndOr
+	}
+
+	private void addThroughChain(RelationField rf, HLDQuery hld) {
+		addFieldJoinIfNeeded(rf.dtype, rf.fieldName, hld.joinL);
 	}
 
 	private void addFinalFieldFetchIfNeeded(HLDQuery hld) {
