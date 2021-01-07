@@ -4,7 +4,6 @@ package org.delia.db.newhls;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.hls.HLSTestBase;
 import org.delia.db.newhls.cond.BooleanFilterCond;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
@@ -15,7 +14,6 @@ import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -84,7 +82,7 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class NewHLSTests extends HLSTestBase {
+public class NewHLSTests extends NewHLSTestBase {
 	
 	
 
@@ -164,13 +162,7 @@ public class NewHLSTests extends HLSTestBase {
 	@Test
 	public void testHLDField() {
 		String src = "let x = Flight[15]";
-		QueryExp queryExp = compileQuery(src);
-		log.log(src);
-		
-		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
-		HLDQuery hld = mgr.fullBuildQuery(queryExp);
-		log.log(hld.toString());
-		assertEquals(0, hld.joinL.size());
+		HLDQuery hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -183,12 +175,7 @@ public class NewHLSTests extends HLSTestBase {
 	@Test
 	public void testHLDField2() {
 		String src = "let x = Flight[field1 < 15]";
-		QueryExp queryExp = compileQuery(src);
-		log.log(src);
-		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
-		HLDQuery hld = mgr.fullBuildQuery(queryExp);
-		log.log(hld.toString());
-		assertEquals(0, hld.joinL.size());
+		HLDQuery hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -201,12 +188,7 @@ public class NewHLSTests extends HLSTestBase {
 	@Test
 	public void testHLDFieldNot() {
 		String src = "let x = Flight[!(field1 < 15)]";
-		QueryExp queryExp = compileQuery(src);
-		log.log(src);
-		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
-		HLDQuery hld = mgr.fullBuildQuery(queryExp);
-		log.log(hld.toString());
-		assertEquals(0, hld.joinL.size());
+		HLDQuery hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -219,12 +201,7 @@ public class NewHLSTests extends HLSTestBase {
 	@Test
 	public void testHLDFieldCount() {
 		String src = "let x = Flight[field1 < 15].count()";
-		QueryExp queryExp = compileQuery(src);
-		log.log(src);
-		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
-		HLDQuery hld = mgr.fullBuildQuery(queryExp);
-		log.log(hld.toString());
-		assertEquals(0, hld.joinL.size());
+		HLDQuery hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -332,16 +309,6 @@ public class NewHLSTests extends HLSTestBase {
 			src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
 		}
 		return src;
-	}
-	private void chkStm(SqlStatement stm, String expected, String... args) {
-		log.log(stm.sql);
-		assertEquals(expected, stm.sql);
-		assertEquals(args.length, stm.paramL.size());
-		for(int i = 0; i < args.length; i++) {
-			String arg = args[i];
-			DValue dval = stm.paramL.get(i);
-			assertEquals(arg, dval.asString());
-		}
 	}
 
 }

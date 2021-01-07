@@ -3,7 +3,6 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.compiler.ast.QueryExp;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -147,7 +146,6 @@ public class HLDBasicTests extends NewHLSTestBase {
 	private String pkType = "int";
 	private boolean addOrderDate = false;
 	private boolean srcSimpleTypes;
-	private HLDManager mgr;
 
 	@Before
 	public void init() {
@@ -190,39 +188,6 @@ public class HLDBasicTests extends NewHLSTestBase {
 		src += String.format("\n insert Flight {id: 1, bfield: false, nfield: -1, lfield: 1, dfield:55.4, strfield: 'abc', dtfield: '2020'}");
 		src += String.format("\n insert Flight {id: 2, bfield: true, nfield: 2, lfield: 1, dfield:55.4, strfield: 'd', dtfield: '2020'}");
 		return src;
-	}
-
-	private void chkStm(SqlStatement stm, String expected, String... args) {
-		log.log(stm.sql);
-		assertEquals(expected, stm.sql);
-		assertEquals(args.length, stm.paramL.size());
-		for(int i = 0; i < args.length; i++) {
-			String arg = args[i];
-			DValue dval = stm.paramL.get(i);
-			assertEquals(arg, dval.asString());
-		}
-	}
-	private void chkRawSql(HLDQuery hld, String expected) {
-		String sql = mgr.generateRawSql(hld);
-		log.log(sql);
-		assertEquals(expected, sql);
-	}
-	private void chkFullSql(HLDQuery hld, String expected, String...args) {
-		SqlStatement stm = mgr.generateSql(hld);
-		chkStm(stm, expected, args);
-	}
-
-
-
-	private HLDQuery buildFromSrc(String src, int expectedJoins) {
-		QueryExp queryExp = compileQuery(src);
-		log.log(src);
-		
-		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
-		HLDQuery hld = mgr.fullBuildQuery(queryExp);
-		log.log(hld.toString());
-		assertEquals(expectedJoins, hld.joinL.size());
-		return hld;
 	}
 
 

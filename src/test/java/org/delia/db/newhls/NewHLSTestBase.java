@@ -16,7 +16,9 @@ import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.ResultValue;
+import org.delia.type.DValue;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
@@ -28,6 +30,42 @@ import org.junit.After;
  *
  */
 public class NewHLSTestBase extends BDDBase {
+	
+	protected HLDManager mgr;
+
+
+	protected HLDQuery buildFromSrc(String src, int expectedJoins) {
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		
+		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
+		HLDQuery hld = mgr.fullBuildQuery(queryExp);
+		log.log(hld.toString());
+		assertEquals(expectedJoins, hld.joinL.size());
+		return hld;
+	}
+	protected void chkRawSql(HLDQuery hld, String expected) {
+		String sql = mgr.generateRawSql(hld);
+		log.log(sql);
+		assertEquals(expected, sql);
+	}
+	protected void chkFullSql(HLDQuery hld, String expected, String...args) {
+		SqlStatement stm = mgr.generateSql(hld);
+		chkStm(stm, expected, args);
+	}
+	protected void chkStm(SqlStatement stm, String expected, String... args) {
+		log.log(stm.sql);
+		assertEquals(expected, stm.sql);
+		assertEquals(args.length, stm.paramL.size());
+		for(int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			DValue dval = stm.paramL.get(i);
+			assertEquals(arg, dval.asString());
+		}
+	}
+
+
+	
 	
 	protected QueryExp compileQuery(String src) {
 		LetStatementExp letStatement = compileQueryToLetStatement(src);
