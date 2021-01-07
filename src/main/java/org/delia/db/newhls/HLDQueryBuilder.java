@@ -4,8 +4,12 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
+import org.delia.relation.RelationCardinality;
+import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 
 /**
  * Creates HLDQuery from a QueryExp
@@ -45,8 +49,7 @@ public class HLDQueryBuilder {
 		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
 			if (fnexp.funcName.equals("fks")) {
-				FetchSpec spec = new FetchSpec(currentScope);
-				hld.fetchL.add(spec);
+				addFKS(currentScope, hld);
 			} else if (fnexp.funcName.equals("fetch")) {
 //TODO				FetchSpec spec = new FetchSpec(currentScope);
 //				hld.fetchL.add(spec);
@@ -57,6 +60,21 @@ public class HLDQueryBuilder {
 				spec.filterFn.fnName = fnexp.funcName;
 				//TODO: handle args later
 				hld.funcL.add(spec);
+			}
+		}
+	}
+
+	private void addFKS(DStructType currentScope, HLDQuery hld) {
+		for(TypePair pair: currentScope.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(currentScope, pair);
+				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					//TODO: doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+				} else if (relinfo.isParent) {
+					FetchSpec spec = new FetchSpec(currentScope, pair.name);
+					spec.isFK = true;
+					hld.fetchL.add(spec);
+				}
 			}
 		}
 	}

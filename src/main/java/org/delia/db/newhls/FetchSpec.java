@@ -9,7 +9,7 @@ import org.delia.type.DStructType;
  */
 public class FetchSpec {
 	public DStructType structType;
-	public String fieldName; //null if isFK
+	public String fieldName; 
 	public boolean isFK; //if true then fks, else fetch
 	
 	public FetchSpec(DStructType structType, String fieldName) {
@@ -17,19 +17,11 @@ public class FetchSpec {
 		this.fieldName = fieldName;
 		this.isFK = false;
 	}
-	public FetchSpec(DStructType structType) {
-		this.structType = structType;
-		this.fieldName = null;
-		this.isFK = true;
-	}
 
 	@Override
 	public String toString() {
-		if (isFK) {
-			return String.format("%s:fks", structType.toString());
-		} else {
-			String s = String.format("%s.%s", structType.toString(), fieldName);
-			return s;
-		}
+		String str = isFK ? ":fks" : "";
+		String s = String.format("%s.%s%s", structType.toString(), fieldName, str);
+		return s;
 	}
 }

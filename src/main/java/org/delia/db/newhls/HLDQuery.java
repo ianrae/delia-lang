@@ -47,7 +47,7 @@ public class HLDQuery {
 		if (finalField == null) {
 			s += " fld()";
 		} else {
-			s += String.format(" fld(%s)", finalField.toString());
+			s += String.format(" ffld(%s)", finalField.toString());
 		}
 
 		if (fetchL.isEmpty()) {
