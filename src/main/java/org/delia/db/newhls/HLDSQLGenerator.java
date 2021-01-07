@@ -12,6 +12,8 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 /**
  * Generate SQL statement from an HLDQuery
@@ -47,10 +49,36 @@ public class HLDSQLGenerator {
 		sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
 		
 		SqlStatement stm = new SqlStatement();
+		generateJoins(sc, hld, stm, paramGen);
 		generateWhere(sc, hld, stm, paramGen);
 		stm.sql = sc.toString();
 		return stm;
 	}
+
+	private void generateJoins(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
+		for(JoinElement el: hld.joinL) {
+			if (el.relinfo.isManyToMany()) {
+				//TODO
+			} else if (el.relinfo.isParent) {
+				//need to reverse, since parent doesn't have child id
+				//JOIN Address as t1 ON t0.id=t1.cust
+				String tbl = el.relationField.fieldType.getName();
+				sc.o(" JOIN %s as %s", tbl, el.aliasName);
+				
+				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.dtype);
+				String parentName = el.relinfo.otherSide.fieldName; //TODO. can otherSide ever be null??
+				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
+			} else {
+				//JOIN Address as t1 ON t0.addr=t1.id
+				String tbl = el.relationField.fieldType.getName();
+				sc.o(" JOIN %s as %s", tbl, el.aliasName);
+				
+				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
+				sc.o(" ON %s.%s=%s.%s", el.srcAlias, el.relationField.fieldName, el.aliasName, pkpair.name);  
+			}
+		}
+	}
+
 
 	private StringJoiner generateFields(HLDQuery hld) {
 		StringJoiner joiner = new StringJoiner(",");

@@ -82,7 +82,7 @@ public class HLDRelationTests extends NewHLSTestBase {
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
 //		chkRawSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15");
-		chkFullSql(hld, "SELECT a.cid,a.x,b.id as addr FROM Customer as a LEFT JOIN Address as b ON a.cid=b.cust WHERE a.cid = ?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 JOIN Address as t1 ON t0.addr=t1.id WHERE t0.cid=?", "55");
 	}	
 
 	

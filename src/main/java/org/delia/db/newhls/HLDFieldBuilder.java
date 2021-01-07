@@ -103,6 +103,10 @@ public class HLDFieldBuilder {
 					if (el.aliasName == null) {
 						AliasInfo info2 = aliasMgr.createMainTableAlias(el.relationField.fieldType);
 						el.aliasName = info2.alias;
+						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
+						el.srcAlias = info2.alias;
+						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
+						//need to determine which instance of Customer this is!!
 					}
 					rf.alias = el.aliasName;
 				}
