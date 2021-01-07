@@ -81,15 +81,24 @@ public class HLDBasicTests extends NewHLSTestBase {
 		String src = "let x = Flight[15]";
 		HLDQuery hld = buildFromSrc(src, 0); 
 		chkRawSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15");
-		chkFullSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=?");
+		chkFullSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=?", "15");
 	}	
 
+	@Test
+	public void testSimpleTypes() {
+		srcSimpleTypes = true;
+		String src = "let x = Flight[15]";
+		HLDQuery hld = buildFromSrc(src, 0); 
+		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.id=15");
+		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.id=?", "15");
+	}	
 	
 
 
 	//-------------------------
 	private String pkType = "int";
 	private boolean addOrderDate = false;
+	private boolean srcSimpleTypes;
 	private HLDManager mgr;
 
 	@Before
@@ -99,6 +108,9 @@ public class HLDBasicTests extends NewHLSTestBase {
 
 	@Override
 	protected String buildSrc() {
+		if (srcSimpleTypes) {
+			return buildSimpleSrc();
+		}
 		String s = addOrderDate ? ", orderDate date" : "";
 		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int %s } end", pkType, s);
 
@@ -113,6 +125,25 @@ public class HLDBasicTests extends NewHLSTestBase {
 		}
 		return src;
 	}
+	private String buildSimpleSrc() {
+//		xINTEGER,
+//		xLONG,
+//		xNUMBER,
+//		xBOOLEAN,
+//		xSTRING,
+//		DATE,
+//		STRUCT,
+//		RELATION;
+		
+		
+		String src = String.format("type Flight struct {id int primaryKey, bfield boolean, nfield int,");
+		src += String.format("\n lfield long, dfield number, strfield string, dtfield date} end");
+
+		src += String.format("\n insert Flight {id: 1, bfield: false, nfield: -1, lfield: 1, dfield:55.4, strfield: 'abc', dtfield: '2020'}");
+		src += String.format("\n insert Flight {id: 2, bfield: true, nfield: 2, lfield: 1, dfield:55.4, strfield: 'd', dtfield: '2020'}");
+		return src;
+	}
+
 	private void chkStm(SqlStatement stm, String expected, String... args) {
 		log.log(stm.sql);
 		assertEquals(expected, stm.sql);
@@ -128,9 +159,9 @@ public class HLDBasicTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals(expected, sql);
 	}
-	private void chkFullSql(HLDQuery hld, String expected) {
+	private void chkFullSql(HLDQuery hld, String expected, String...args) {
 		SqlStatement stm = mgr.generateSql(hld);
-		chkStm(stm, expected, "15");
+		chkStm(stm, expected, args);
 	}
 
 
