@@ -11,13 +11,13 @@ public class RelationField  {
 	public DStructType dtype;
 	public String fieldName;
 	public DStructType fieldType;
-
+	
 	public RelationField(DStructType dtype, String field, DStructType fieldType) {
 		this.dtype = dtype;
 		this.fieldName = field;
 		this.fieldType = fieldType;
 	}
-
+	
 	@Override
 	public String toString() {
 		String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());

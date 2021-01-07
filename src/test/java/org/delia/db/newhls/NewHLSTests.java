@@ -84,8 +84,6 @@ import org.junit.Test;
  */
 public class NewHLSTests extends NewHLSTestBase {
 	
-	
-
 	//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
 	//	 *   filter:
 	//	 *     true or pkval [15]

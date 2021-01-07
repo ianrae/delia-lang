@@ -1,7 +1,5 @@
 package org.delia.db.newhls;
 
-import java.util.List;
-
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
@@ -29,7 +27,7 @@ public class HLDQueryBuilder {
 
 		FilterCondBuilder builder = new FilterCondBuilder();
 		hld.filter = builder.build(queryExp);
-		//			public List<StructField> throughChain = new ArrayList<>();
+		buildThroughChain(queryExp, hld);//			public List<StructField> throughChain = new ArrayList<>();
 		//			public StructField finalField; //eg Customer.addr
 		//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 		//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
@@ -37,14 +35,31 @@ public class HLDQueryBuilder {
 		return hld;
 	}
 
+	private void buildThroughChain(QueryExp queryExp, HLDQuery hld) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void buildFns(QueryExp queryExp, HLDQuery hld) {
+		DStructType currentScope = hld.fromType; //TODO implement scope changes when see .addr
+		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
-			QueryFnSpec spec = new QueryFnSpec();
-			spec.structField = null;// new StructField(hld.fromType, null, null); //?? correct?
-			spec.filterFn = new FilterFunc();
-			spec.filterFn.fnName = fnexp.funcName;
-			//TODO: handle args later
-			hld.funcL.add(spec);
+			if (fnexp.funcName.equals("fks")) {
+				FetchSpec spec = new FetchSpec(currentScope);
+				hld.fetchL.add(spec);
+			} else if (fnexp.funcName.equals("fetch")) {
+//TODO				FetchSpec spec = new FetchSpec(currentScope);
+//				hld.fetchL.add(spec);
+			} else {
+				QueryFnSpec spec = new QueryFnSpec();
+				spec.structField = null;// new StructField(hld.fromType, null, null); //?? correct?
+				spec.filterFn = new FilterFunc();
+				spec.filterFn.fnName = fnexp.funcName;
+				//TODO: handle args later
+				hld.funcL.add(spec);
+			}
 		}
 	}
+	
+	
 }

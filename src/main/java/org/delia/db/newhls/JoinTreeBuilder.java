@@ -88,7 +88,7 @@ public class JoinTreeBuilder {
 	}
 
 	private void addFKs(FetchSpec spec, List<JoinElement> resultL) {
-		DStructType structType = spec.structField.dtype;
+		DStructType structType = spec.structType;
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
@@ -101,8 +101,8 @@ public class JoinTreeBuilder {
 		}
 	}
 	private void addFetch(FetchSpec spec, List<JoinElement> resultL) {
-		DStructType structType = spec.structField.dtype;
-		String fieldName = spec.structField.fieldName;
+		DStructType structType = spec.structType;
+		String fieldName = spec.fieldName;
 		TypePair pair = DRuleHelper.findMatchingStructPair(structType, fieldName);
 		if (pair != null) {
 			JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
@@ -112,7 +112,7 @@ public class JoinTreeBuilder {
 	}
 	private JoinElement buildElement(DStructType dtype, String field, DStructType fieldType) {
 		JoinElement el = new JoinElement();
-		el.structField = new RelationField(dtype, field, fieldType);
+		el.relationField = new RelationField(dtype, field, fieldType);
 		el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
 		return el;
 	}
