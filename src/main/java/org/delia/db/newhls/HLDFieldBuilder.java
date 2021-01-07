@@ -32,7 +32,11 @@ public class HLDFieldBuilder {
 
 	public void generateFieldsAndAliases(HLDQuery hld) {
 		//TODO much more code needed here!
-		addStructFields(hld, hld.fieldL);
+		if (hld.finalField == null) {
+			addStructFields(hld, hld.fieldL);
+		} else {
+			addFinalField(hld);
+		}
 
 		for(FetchSpec spec: hld.fetchL) {
 			addFetchField(spec, hld);
@@ -41,6 +45,12 @@ public class HLDFieldBuilder {
 		assignAliases(hld);
 	}
 	
+	private void addFinalField(HLDQuery hld) {
+		DStructType fromType = hld.finalField.dtype;
+		TypePair pair = DValueHelper.findField(fromType, hld.finalField.fieldName);
+		addField(hld.fieldL, fromType, pair);
+	}
+
 	private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
 		DStructType fromType = hld.fromType;
 

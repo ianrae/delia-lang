@@ -9,6 +9,7 @@ import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
@@ -63,6 +64,10 @@ public class HLDQueryBuilder {
 		DStructType currentScope = hld.fromType; //TODO implement scope changes when see .addr
 		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
+			if (fnexp instanceof QueryFieldExp) {
+				continue;
+			}
+			
 			if (fnexp.funcName.equals("fks")) {
 				addFKS(currentScope, hld);
 			} else if (fnexp.funcName.equals("fetch")) {

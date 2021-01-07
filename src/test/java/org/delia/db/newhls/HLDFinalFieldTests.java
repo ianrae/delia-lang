@@ -76,7 +76,7 @@ public class HLDFinalFieldTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].x";
 		
 		HLDQuery hld = buildFromSrc(src, 0); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.x FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 //	@Test
 //	public void testFKS11Child() {
