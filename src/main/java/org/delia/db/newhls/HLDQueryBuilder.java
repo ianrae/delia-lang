@@ -55,13 +55,22 @@ public class HLDQueryBuilder {
 				addFetch(fnexp, currentScope, hld);
 			} else {
 				QueryFnSpec spec = new QueryFnSpec();
-				spec.structField = null;// new StructField(hld.fromType, null, null); //?? correct?
+				spec.structField = new StructFieldOpt(currentScope, null, null); //?? correct?
 				spec.filterFn = new FilterFunc();
 				spec.filterFn.fnName = fnexp.funcName;
-				//TODO: handle args later
+				addArgs(spec, fnexp);
 				hld.funcL.add(spec);
 			}
 		}
+	}
+
+	private void addArgs(QueryFnSpec spec, QueryFuncExp fnexp) {
+		if (spec.isFn("orderBy")) {
+			String fieldName = fnexp.argL.get(0).strValue();
+			spec.structField.fieldName = fieldName;
+		}
+		// TODO add more later
+		
 	}
 
 	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld) {

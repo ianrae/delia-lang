@@ -121,7 +121,7 @@ public class HLDRelationTests extends NewHLSTestBase {
 		String src = "let x = Address[100].fks()";
 		
 		HLDQuery hld = buildFromSrc(src, 0); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust FROM Address as t0 WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust1,t0.cust2 FROM Address as t0 WHERE t0.id=?", "100");
 	}	
 	
 	@Test
@@ -144,11 +144,21 @@ public class HLDRelationTests extends NewHLSTestBase {
 	@Test
 	public void testFetch11Child2Addr() {
 		use11TwoAddr = true;
-		String src = "let x = Address[100].fetch('cust')";
+		String src = "let x = Address[100].fetch('cust1')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust,t1.cid,t1.x FROM Address as t0 JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust1,t0.cust2,t1.cid,t1.x FROM Address as t0 JOIN Customer as t1 ON t0.cust1=t1.cid WHERE t0.id=?", "100");
 	}	
+
+	//implicit fetch
+	@Test
+	public void testImplicit11Parent() {
+		useCustomer11Src = true;
+		String src = "let x = Customer[55].orderBy('addr')";
+		
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+	}
 
 	//-------------------------
 	private boolean use11TwoAddr;
