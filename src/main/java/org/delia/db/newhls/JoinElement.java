@@ -12,12 +12,13 @@ import org.delia.type.TypePair;
  */
 public class JoinElement  {
 	public RelationField relationField;
-	//		public List<JTElement> nextL = new ArrayList<>();
 	public RelationInfo relinfo;
-	public boolean usedForFK; //if true then fks(). but this join for other reasons too
-	public boolean usedForFetch; //if true then fetch. but this join for other reasons too
-	public FetchSpec fetchSpec;
+	public FetchSpec fetchSpec; //if not null then this join is from a fetch
 	public String aliasName;
+	
+	public boolean usedForFK() {
+		return fetchSpec != null && fetchSpec.isFK;
+	}
 	
 	public String makeKey() {
 		StringJoiner joiner = new StringJoiner("|");
@@ -35,7 +36,7 @@ public class JoinElement  {
 		joiner.add(relationField.dtype.getName());
 		joiner.add(relationField.fieldName);
 		joiner.add(relationField.fieldType.getName());
-		if (usedForFK) {
+		if (usedForFK()) {
 			joiner.add("FK");
 		}
 		return joiner.toString();
