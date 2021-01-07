@@ -22,13 +22,23 @@ public class HLDQuery {
 	public DType resultType; //might be string if .firstName
 	public FilterCond filter;
 	public List<RelationField> throughChain = new ArrayList<>();
-	public StructField finalField; //eg Customer.addr
+	public FinalField finalField; //eg Customer.addr
 	public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 	public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 	public List<HLDField> fieldL = new ArrayList<>(); 
 
 	//added after
 	public List<JoinElement> joinL = new ArrayList<>();
+	
+	public JoinElement findMatch(DStructType dtype, String fieldName, HLDQuery hld) {
+		for(JoinElement el: hld.joinL) {
+			if (fieldName.equals(el.relationField.fieldName) && el.relationField.dtype == dtype) {
+				return el;
+			}
+		}
+		return null;
+	}
+	
 
 	@Override
 	public String toString() {

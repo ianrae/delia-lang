@@ -59,10 +59,12 @@ public class JoinTreeBuilder {
 	}
 
 	private void addFinalFieldFetchIfNeeded(HLDQuery hld) {
-		if (! hld.finalField.fieldType.isStructShape()) {
+		StructField sf = hld.finalField.structField;
+		if (! sf.fieldType.isStructShape()) {
 			return;
 		}
-		addFieldJoinIfNeeded(hld.finalField.dtype, hld.finalField.fieldName, hld.joinL);
+		
+		addFieldJoinIfNeeded(sf.dtype, sf.fieldName, hld.joinL);
 	}
 
 	private void addImplicitJoin(DStructType fromType, FilterVal fval, List<JoinElement> resultL) {

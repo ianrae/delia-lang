@@ -44,15 +44,19 @@ public class HLDQueryBuilder {
 
 	private void buildFinalFieldAndThroughChain(QueryExp queryExp, HLDQuery hld) {
 		DStructType currentScope = hld.fromType;
+		RelationField currentRF = null;
 		for(QueryFuncExp qfnexp: queryExp.qfelist) {
 			if (qfnexp instanceof QueryFieldExp) {
 				QueryFieldExp qfe = (QueryFieldExp) qfnexp;
 				DType type = DValueHelper.findFieldType(currentScope, qfe.funcName);
-				StructField sf = new StructField(currentScope, qfe.funcName, type);
-				hld.finalField = sf;
+				FinalField ff = new FinalField();
+				ff.structField = new StructField(currentScope, qfe.funcName, type);
+				ff.rf = currentRF;
+				hld.finalField = ff;
 				if (type.isStructShape()) {
 					RelationField rf = new RelationField(currentScope, qfnexp.funcName, (DStructType) type);
 					hld.throughChain.add(rf);
+					currentRF = rf;
 					currentScope = (DStructType) type;
 				}
 			}

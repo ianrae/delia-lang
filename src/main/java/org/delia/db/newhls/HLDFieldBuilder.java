@@ -2,6 +2,7 @@ package org.delia.db.newhls;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.delia.db.hls.AliasInfo;
 import org.delia.db.newhls.cond.FilterVal;
@@ -46,14 +47,23 @@ public class HLDFieldBuilder {
 	}
 	
 	private void addFinalField(HLDQuery hld) {
-		DStructType fromType = hld.finalField.dtype;
-		TypePair pair = DValueHelper.findField(fromType, hld.finalField.fieldName);
+		JoinElement throughChainEl = findThroughChainEl(hld.finalField, hld);
+		StructField sf = hld.finalField.structField;
+		DStructType fromType = sf.dtype;
+		TypePair pair = DValueHelper.findField(fromType, sf.fieldName);
 		if (!pair.type.isStructShape()) {
-			addField(hld.fieldL, fromType, pair);
+			addField(hld.fieldL, fromType, pair).source = throughChainEl;
 			return;
 		}
 		
-		JoinElement el = this.findMatch(fromType, hld.finalField.fieldName, hld);
+		if (hld.finalField.rf != null) { //has throughchain?
+			RelationField rf = hld.finalField.rf;
+			TypePair pairx = new TypePair(rf.fieldName, rf.fieldType);
+			addField(hld.fieldL, rf.dtype, pairx).source = throughChainEl;
+			return;
+		}
+		
+		JoinElement el = hld.findMatch(fromType, sf.fieldName, hld);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 		if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 			//doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
@@ -63,6 +73,15 @@ public class HLDFieldBuilder {
 		} else {
 			addField(hld.fieldL, fromType, pair).source = el;
 		}
+	}
+
+	private JoinElement findThroughChainEl(FinalField finalField, HLDQuery hld) {
+		if (hld.finalField.rf != null) { //has throughchain?
+			RelationField rf = hld.finalField.rf;
+			JoinElement el = hld.findMatch(rf.dtype, rf.fieldName, hld);
+			return el;
+		}
+		return null;
 	}
 
 	private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
@@ -167,6 +186,11 @@ public class HLDFieldBuilder {
 				el.aliasName = info2.alias;
 				info2 = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
 				el.srcAlias = info2.alias;
+				
+				List<HLDField> fields = hld.fieldL.stream().filter(x -> x.source == el).collect(Collectors.toList());
+				for(HLDField fld: fields) {
+					fld.alias = info2.alias;
+				}
 			}
 		}
 		
@@ -191,15 +215,6 @@ public class HLDFieldBuilder {
 		}
 		return null;
 	}
-	private JoinElement findMatch(DStructType dtype, String fieldName, HLDQuery hld) {
-		for(JoinElement el: hld.joinL) {
-			if (fieldName.equals(el.relationField.fieldName) && 
-					dtype == dtype) {
-				return el;
-			}
-		}
-		return null;
-	}
 
 	private void doFilterVal(FilterVal val1, HLDQuery hld) {
 		if (val1.isSymbol()) {
@@ -214,7 +229,7 @@ public class HLDFieldBuilder {
 			val1.structField = new StructField(chain.fromType, fieldName, fieldType);
 			AliasInfo info = aliasMgr.createFieldAlias(chain.fromType, fieldName);
 			val1.alias = info.alias;
-			JoinElement el = findMatch(chain.fromType, fieldName, hld);
+			JoinElement el = hld.findMatch(chain.fromType, fieldName, hld);
 			if (el.aliasName == null) {
 				el.aliasName = info.alias;
 				info = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
