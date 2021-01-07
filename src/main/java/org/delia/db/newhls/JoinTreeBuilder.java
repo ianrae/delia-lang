@@ -95,6 +95,7 @@ public class JoinTreeBuilder {
 				if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
 					el.usedForFK = true;
+					el.fetchSpec = spec;
 					addElement(el, resultL);
 				}
 			}
@@ -107,6 +108,7 @@ public class JoinTreeBuilder {
 		if (pair != null) {
 			JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
 			el.usedForFK = false;
+			el.fetchSpec = spec;
 			addElement(el, resultL);
 		}
 	}

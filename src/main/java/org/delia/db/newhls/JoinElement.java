@@ -15,8 +15,10 @@ public class JoinElement  {
 	//		public List<JTElement> nextL = new ArrayList<>();
 	public RelationInfo relinfo;
 	public boolean usedForFK; //if true then fks(). but this join for other reasons too
-	public boolean usedForFetch; //if true then fettch. but this join for other reasons too
-
+	public boolean usedForFetch; //if true then fetch. but this join for other reasons too
+	public FetchSpec fetchSpec;
+	public String aliasName;
+	
 	public String makeKey() {
 		StringJoiner joiner = new StringJoiner("|");
 		joiner.add(relationField.dtype.getName());
@@ -33,6 +35,9 @@ public class JoinElement  {
 		joiner.add(relationField.dtype.getName());
 		joiner.add(relationField.fieldName);
 		joiner.add(relationField.fieldType.getName());
+		if (usedForFK) {
+			joiner.add("FK");
+		}
 		return joiner.toString();
 	}
 

@@ -29,7 +29,7 @@ public class HLDManager {
 
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc);
 		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
-		fieldBuilder.generateJoinTree(hld);
+		fieldBuilder.generateFieldsAndAliases(hld);
 		return hld;
 	}
 	

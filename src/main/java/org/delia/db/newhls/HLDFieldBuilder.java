@@ -1,6 +1,7 @@
 package org.delia.db.newhls;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.delia.db.hls.AliasInfo;
 import org.delia.db.newhls.cond.FilterVal;
@@ -28,7 +29,7 @@ public class HLDFieldBuilder {
 		this.aliasMgr = aliasMgr;
 	}
 
-	public void generateJoinTree(HLDQuery hld) {
+	public void generateFieldsAndAliases(HLDQuery hld) {
 		//TODO much more code needed here!
 		addStructFields(hld, hld.fieldL);
 
@@ -38,6 +39,57 @@ public class HLDFieldBuilder {
 
 		assignAliases(hld);
 	}
+	
+	private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
+		DStructType fromType = hld.fromType;
+
+		for(TypePair pair: fromType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
+				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+				} else if (!relinfo.isParent) {
+					addField(fieldL, fromType, pair);
+				}
+			} else {
+				addField(fieldL, fromType, pair);
+			}
+		}
+	}
+
+	private HLDField addField(List<HLDField> fieldL, DStructType fromType, TypePair pair) {
+		HLDField rf = new HLDField();
+		rf.structType = fromType;
+		rf.fieldName = pair.name;
+		rf.fieldType = pair.type;
+		//			rf.groupName = "__MAINGROUP__";
+		fieldL.add(rf);
+		return rf;
+	}
+	private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
+		//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
+		////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
+		//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
+		//
+		//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
+		//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
+		//			s = String.format("%s as %s", s, pair.name);
+		//			RenderedField rff = addField(fieldL, null, fieldName, s);
+		//			rff.isAssocField = true;
+		//			rff.fieldGroup = new FieldGroup((el == null), el);
+	}
+
+	private void addFetchField(FetchSpec spec, HLDQuery hld) {
+		if (spec.isFK) {
+			DStructType reftype = (DStructType) DValueHelper.findFieldType(spec.structType, spec.fieldName);
+			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(reftype);
+			Optional<JoinElement> optJoin = hld.joinL.stream().filter(x -> x.fetchSpec == spec).findAny(); //should only be one
+			
+			addField(hld.fieldL, reftype, pkpair).source = optJoin.get();
+		} else {
+			//TODO
+		}
+	}
 
 	private void assignAliases(HLDQuery hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
@@ -46,6 +98,14 @@ public class HLDFieldBuilder {
 			if (rf.structType == hld.fromType) {
 				rf.alias = info.alias;
 			} else {
+				if (rf.source instanceof JoinElement) {
+					JoinElement el = (JoinElement) rf.source;
+					if (el.aliasName == null) {
+						AliasInfo info2 = aliasMgr.createMainTableAlias(el.relationField.fieldType);
+						el.aliasName = info2.alias;
+					}
+					rf.alias = el.aliasName;
+				}
 				//TODO!!
 			}
 		}
@@ -75,56 +135,5 @@ public class HLDFieldBuilder {
 		val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
 		val1.alias = hld.fromAlias;
 	}
-
-	private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
-		DStructType fromType = hld.fromType;
-
-		for(TypePair pair: fromType.getAllFields()) {
-			if (pair.type.isStructShape()) {
-				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
-				} else if (!relinfo.isParent) {
-					addField(fieldL, fromType, pair);
-				}
-			} else {
-				addField(fieldL, fromType, pair);
-			}
-		}
-	}
-
-
-	private HLDField addField(List<HLDField> fieldL, DStructType fromType, TypePair pair) {
-		HLDField rf = new HLDField();
-		rf.structType = fromType;
-		rf.fieldName = pair.name;
-		rf.fieldType = pair.type;
-		//			rf.groupName = "__MAINGROUP__";
-		fieldL.add(rf);
-		return rf;
-	}
-	private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
-		//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-		////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
-		//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
-		//
-		//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-		//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-		//			s = String.format("%s as %s", s, pair.name);
-		//			RenderedField rff = addField(fieldL, null, fieldName, s);
-		//			rff.isAssocField = true;
-		//			rff.fieldGroup = new FieldGroup((el == null), el);
-	}
-
-	private void addFetchField(FetchSpec spec, HLDQuery hld) {
-		if (spec.isFK) {
-			DStructType reftype = (DStructType) DValueHelper.findFieldType(spec.structType, spec.fieldName);
-			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(reftype);
-			addField(hld.fieldL, reftype, pkpair);
-		} else {
-			//TODO
-		}
-	}
-		
 
 }

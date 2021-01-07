@@ -17,6 +17,8 @@ import org.delia.type.DType;
 //		public String groupName; just use alias??
 		public String alias;
 		public String asStr;
+		
+		public Object source; //null means main struct, else is joinelement
 
 		@Override
 		public String toString() {

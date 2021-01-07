@@ -59,6 +59,15 @@ public class HLDQuery {
 			}
 			s += String.format(" fetch[%s]", joiner.toString());
 		}
+		if (joinL.isEmpty()) {
+			s += " join[]";
+		} else {
+			StringJoiner joiner = new StringJoiner(",");
+			for(JoinElement el: joinL) {
+				joiner.add(el.toString());
+			}
+			s += String.format(" join[%s]", joiner.toString());
+		}
 
 		if (funcL.isEmpty()) {
 			s += " fn[]";
