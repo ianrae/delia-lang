@@ -79,12 +79,20 @@ public class HLDFinalFieldTests extends NewHLSTestBase {
 		chkFullSql(hld, "SELECT t0.x FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
-	public void testRelationFieldParent() {
+	public void testRelParent() {
 		useCustomer11Src = true;
 		String src = "let x = Customer[55].addr";
 		
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+	}
+	@Test
+	public void testRelChild() {
+		useCustomer11Src = true;
+		String src = "let x = Address[100].cust";
+		
 		HLDQuery hld = buildFromSrc(src, 0); 
-		chkFullSql(hld, "SELECT t0.x FROM Customer as t0 WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cust FROM Address as t0 WHERE t0.id=?", "100");
 	}
 //	@Test
 //	public void testFKS11Child() {
