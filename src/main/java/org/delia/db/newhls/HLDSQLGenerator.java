@@ -11,6 +11,7 @@ import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DTypeRegistry;
@@ -143,7 +144,7 @@ public class HLDSQLGenerator {
 		}
 	}
 	private String renderVal(FilterVal val1, SqlParamGenerator paramGen, SqlStatement stm) {
-		boolean notParam = val1.isFn() || val1.isSymbol();
+		boolean notParam = val1.isFn() || val1.isSymbol() || val1.isSymbolChain();
 		if (paramGen == null || notParam) {
 			return doRenderVal(val1);
 		} else {
@@ -164,12 +165,12 @@ public class HLDSQLGenerator {
 			return String.format("'%s'", val1.exp.strValue());
 		case SYMBOL:
 			return String.format("%s.%s", val1.alias, val1.structField.fieldName);
-			
-		case FUNCTION:
+		case SYMBOLCHAIN:
 		{
-			FilterFunc fn = val1.asFunc();
-			return String.format("%s.%s", val1.alias, fn.fnName);
+			SymbolChain chain = val1.asSymbolChain();
+			return String.format("%s.%s", val1.alias, chain.list.get(0)); //TODO: later support list > 1
 		}
+		case FUNCTION:
 		default:
 			throw new HLDException("renderVal not impl1");
 		}

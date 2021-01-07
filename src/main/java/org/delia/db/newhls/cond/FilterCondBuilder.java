@@ -82,6 +82,7 @@ public class FilterCondBuilder {
 			if (pair != null) {
 				FilterVal fval = new FilterVal(ValType.SYMBOLCHAIN, el); //has .addr
 				fval.symchain = new SymbolChain(fromType); //has .y
+				fval.symchain.list.add(el2.strValue());
 				return fval;
 			} else {
 				FilterVal fval = new FilterVal(ValType.FUNCTION, el);

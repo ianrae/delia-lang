@@ -7,6 +7,7 @@ import org.delia.db.hls.AliasInfo;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -182,13 +183,14 @@ public class HLDFieldBuilder {
 			DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
 			val1.structField = new StructField(hld.fromType, fieldName, fieldType);
 			val1.alias = hld.fromAlias;
-		} else if (val1.isFn()) {
+		} else if (val1.isSymbolChain()) {
 			String fieldName = val1.exp.strValue();
-			DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
-			val1.structField = new StructField(hld.fromType, fieldName, fieldType);
-			AliasInfo info = aliasMgr.createFieldAlias(hld.fromType, fieldName);
+			SymbolChain chain = val1.asSymbolChain();
+			DType fieldType = DValueHelper.findFieldType(chain.fromType, fieldName);
+			val1.structField = new StructField(chain.fromType, fieldName, fieldType);
+			AliasInfo info = aliasMgr.createFieldAlias(chain.fromType, fieldName);
 			val1.alias = info.alias;
-			JoinElement el = findMatch(hld.fromType, fieldName, hld);
+			JoinElement el = findMatch(chain.fromType, fieldName, hld);
 			if (el.aliasName == null) {
 				el.aliasName = info.alias;
 				info = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
