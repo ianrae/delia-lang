@@ -71,9 +71,17 @@ import org.junit.Test;
  */
 public class HLDFinalFieldTests extends NewHLSTestBase {
 	@Test
-	public void test1() {
+	public void testScalar() {
 		useCustomer11Src = true;
 		String src = "let x = Customer[55].x";
+		
+		HLDQuery hld = buildFromSrc(src, 0); 
+		chkFullSql(hld, "SELECT t0.x FROM Customer as t0 WHERE t0.cid=?", "55");
+	}
+	@Test
+	public void testRelationFieldParent() {
+		useCustomer11Src = true;
+		String src = "let x = Customer[55].addr";
 		
 		HLDQuery hld = buildFromSrc(src, 0); 
 		chkFullSql(hld, "SELECT t0.x FROM Customer as t0 WHERE t0.cid=?", "55");

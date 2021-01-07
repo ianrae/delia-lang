@@ -3,6 +3,7 @@ package org.delia.db.newhls;
 import java.util.List;
 import java.util.Optional;
 
+import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
@@ -29,10 +30,14 @@ public class JoinTreeBuilder {
 				addFetch(spec, hld.joinL);
 			}
 		}
+		
+		if (hld.finalField != null) {
+			addFinalFieldFetchIfNeeded(hld);
+		}
 
 		for(QueryFnSpec fnspec: hld.funcL) {
-			//if parent does .orderBy('addr') then we need a join.
 			if (fnspec.filterFn.fnName.equals("orderBy")) {
+				//if parent does .orderBy('addr') then we need a join.
 				addOrderBy(fnspec, hld.joinL);
 			}
 		}
@@ -45,6 +50,13 @@ public class JoinTreeBuilder {
 			addImplicitJoin(hld.fromType, ofc.val2, hld.joinL);
 		}
 		//TODO: do like and IN filters too, and AndOr
+	}
+
+	private void addFinalFieldFetchIfNeeded(HLDQuery hld) {
+		if (! hld.finalField.fieldType.isStructShape()) {
+			return;
+		}
+		addFieldJoinIfNeeded(hld.finalField.dtype, hld.finalField.fieldName, hld.joinL);
 	}
 
 	private void addImplicitJoin(DStructType fromType, FilterVal fval, List<JoinElement> resultL) {

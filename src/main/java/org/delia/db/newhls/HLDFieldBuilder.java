@@ -48,7 +48,15 @@ public class HLDFieldBuilder {
 	private void addFinalField(HLDQuery hld) {
 		DStructType fromType = hld.finalField.dtype;
 		TypePair pair = DValueHelper.findField(fromType, hld.finalField.fieldName);
-		addField(hld.fieldL, fromType, pair);
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
+		if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+			//doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+		} else if (relinfo.isParent) {
+			TypePair other = new TypePair(relinfo.otherSide.fieldName, relinfo.nearType);
+			addField(hld.fieldL, relinfo.otherSide.nearType, other);
+		} else {
+			addField(hld.fieldL, fromType, pair);
+		}
 	}
 
 	private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
