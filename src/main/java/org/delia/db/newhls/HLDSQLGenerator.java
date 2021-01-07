@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
@@ -165,6 +166,10 @@ public class HLDSQLGenerator {
 			return String.format("%s.%s", val1.alias, val1.structField.fieldName);
 			
 		case FUNCTION:
+		{
+			FilterFunc fn = val1.asFunc();
+			return String.format("%s.%s", val1.alias, fn.fnName);
+		}
 		default:
 			throw new HLDException("renderVal not impl1");
 		}

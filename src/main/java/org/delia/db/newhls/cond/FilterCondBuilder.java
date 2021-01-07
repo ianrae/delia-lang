@@ -65,6 +65,7 @@ public class FilterCondBuilder {
 		} else {
 			XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
 			XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
+			//Note. addr.y is a field but will become a FUNCTION here
 			FilterVal fval = new FilterVal(ValType.FUNCTION, el);
 			fval.filterFn = new FilterFunc();
 			fval.filterFn.fnName = el2.funcName; //TODO: handle args later

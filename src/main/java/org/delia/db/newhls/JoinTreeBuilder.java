@@ -11,6 +11,7 @@ import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 
 /**
  * Detects all the explicit and implicit joins needed by a query.
@@ -50,9 +51,17 @@ public class JoinTreeBuilder {
 			String fieldName = fval.asSymbol();
 			addFieldJoinIfNeeded(fromType, fieldName, resultL);
 		} else if (fval.isFn()) {
-			FilterFunc filterFn = fval.asFunc();
-			for(FilterVal inner: filterFn.argL) {
-				addImplicitJoin(fromType, inner, resultL); //*** recursion ***
+			String fieldName = fval.asString();
+			//two possibilities: it's addr.y, or its a fn
+			TypePair pair = DValueHelper.findField(fromType, fieldName);
+			if (pair != null) {
+				addFieldJoinIfNeeded(fromType, fieldName, resultL);
+			} else {
+				//do args
+				FilterFunc filterFn = fval.asFunc();
+				for(FilterVal inner: filterFn.argL) {
+					addImplicitJoin(fromType, inner, resultL); //*** recursion ***
+				}
 			}
 		}
 	}

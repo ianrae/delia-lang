@@ -46,8 +46,7 @@ public class FilterVal {
 		return exp1.val.doubleValue();
 	}
 	public String asString() {
-		//			StringExp exp1 = (StringExp) exp;
-		return exp.strValue();
+		return exp.strValue(); //return any valtype as strings
 	}
 	public String asSymbol() {
 		XNAFSingleExp nafexp = (XNAFSingleExp) exp;

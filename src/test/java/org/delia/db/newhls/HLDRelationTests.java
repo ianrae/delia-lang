@@ -152,14 +152,23 @@ public class HLDRelationTests extends NewHLSTestBase {
 
 	//implicit fetch
 	@Test
-	public void testImplicit11Parent() {
+	public void testImplicitOrderBy() {
 		useCustomer11Src = true;
 		String src = "let x = Customer[55].orderBy('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
 		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=? ORDER BY t1.addr", "55");
 	}
-
+	@Test
+	public void testImplicitFilter() {
+		useCustomer11Src = true;
+		String src = "let x = Customer[addr.y == 55]";
+		
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=? ORDER BY t1.addr", "55");
+	}
+	//TODO then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
+	
 	//-------------------------
 	private boolean use11TwoAddr;
 	

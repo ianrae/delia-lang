@@ -166,6 +166,15 @@ public class HLDFieldBuilder {
 		}
 		return null;
 	}
+	private JoinElement findMatch(DStructType dtype, String fieldName, HLDQuery hld) {
+		for(JoinElement el: hld.joinL) {
+			if (fieldName.equals(el.relationField.fieldName) && 
+					dtype == dtype) {
+				return el;
+			}
+		}
+		return null;
+	}
 
 	private void doFilterVal(FilterVal val1, HLDQuery hld) {
 		if (val1.isSymbol()) {
@@ -173,6 +182,18 @@ public class HLDFieldBuilder {
 			DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
 			val1.structField = new StructField(hld.fromType, fieldName, fieldType);
 			val1.alias = hld.fromAlias;
+		} else if (val1.isFn()) {
+			String fieldName = val1.exp.strValue();
+			DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
+			val1.structField = new StructField(hld.fromType, fieldName, fieldType);
+			AliasInfo info = aliasMgr.createFieldAlias(hld.fromType, fieldName);
+			val1.alias = info.alias;
+			JoinElement el = findMatch(hld.fromType, fieldName, hld);
+			if (el.aliasName == null) {
+				el.aliasName = info.alias;
+				info = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
+				el.srcAlias = info.alias;
+			}
 		}
 	}
 	private void doFilterPKVal(FilterVal val1, HLDQuery hld) {
