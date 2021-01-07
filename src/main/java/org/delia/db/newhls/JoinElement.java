@@ -39,7 +39,8 @@ public class JoinElement  {
 		if (usedForFK()) {
 			joiner.add("FK");
 		}
-		return joiner.toString();
+		String s = String.format("%s/%s", joiner.toString(), aliasName);
+		return s;
 	}
 
 	public boolean matches(TypePair pair) {

@@ -80,14 +80,25 @@ public class HLDFieldBuilder {
 	}
 
 	private void addFetchField(FetchSpec spec, HLDQuery hld) {
+		DStructType reftype = (DStructType) DValueHelper.findFieldType(spec.structType, spec.fieldName);
+		Optional<JoinElement> optJoin = hld.joinL.stream().filter(x -> x.fetchSpec == spec).findAny(); //should only be one
 		if (spec.isFK) {
-			DStructType reftype = (DStructType) DValueHelper.findFieldType(spec.structType, spec.fieldName);
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(reftype);
-			Optional<JoinElement> optJoin = hld.joinL.stream().filter(x -> x.fetchSpec == spec).findAny(); //should only be one
 			
 			addField(hld.fieldL, reftype, pkpair).source = optJoin.get();
 		} else {
-			//TODO
+			for(TypePair pair: reftype.getAllFields()) {
+				if (pair.type.isStructShape()) {
+					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(reftype, pair);
+					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+						//TODO doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+					} else if (!relinfo.isParent) {
+						addField(hld.fieldL, reftype, pair).source = optJoin.get();
+					}
+				} else {
+					addField(hld.fieldL, reftype, pair).source = optJoin.get();
+				}
+			}
 		}
 	}
 

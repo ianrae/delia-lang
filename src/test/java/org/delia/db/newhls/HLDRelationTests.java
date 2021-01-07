@@ -1,10 +1,6 @@
 package org.delia.db.newhls;
 
 
-import static org.junit.Assert.assertEquals;
-
-import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -76,16 +72,41 @@ import org.junit.Test;
 public class HLDRelationTests extends NewHLSTestBase {
 	
 	@Test
-	public void testHLDField() {
+	public void testFKS11Parent() {
 		useCustomer11Src = true;
 		String src = "let x = Customer[55].fks()";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-//		chkRawSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15");
 		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 JOIN Address as t1 ON t0.addr=t1.id WHERE t0.cid=?", "55");
 	}	
 
+	@Test
+	public void testFKS11Child() {
+		useCustomer11Src = true;
+		String src = "let x = Address[100].fks()";
+		
+		HLDQuery hld = buildFromSrc(src, 0); 
+		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust FROM Address as t0 WHERE t0.id=?", "100");
+	}	
 	
+	@Test
+	public void testFetch11Parent() {
+		useCustomer11Src = true;
+		String src = "let x = Customer[55].fetch('addr')";
+		
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+	}	
+	@Test
+	public void testFetch11Child() {
+		useCustomer11Src = true;
+		String src = "let x = Address[100].fetch('cust')";
+		
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust,t1.cid,t1.x FROM Address as t0 JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
+	}	
+	
+	//TODO Customer.addr1 and .addr2 and try fetching one or both
 
 
 	//-------------------------

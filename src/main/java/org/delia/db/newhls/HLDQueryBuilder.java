@@ -51,8 +51,7 @@ public class HLDQueryBuilder {
 			if (fnexp.funcName.equals("fks")) {
 				addFKS(currentScope, hld);
 			} else if (fnexp.funcName.equals("fetch")) {
-//TODO				FetchSpec spec = new FetchSpec(currentScope);
-//				hld.fetchL.add(spec);
+				addFetch(fnexp, currentScope, hld);
 			} else {
 				QueryFnSpec spec = new QueryFnSpec();
 				spec.structField = null;// new StructField(hld.fromType, null, null); //?? correct?
@@ -62,6 +61,13 @@ public class HLDQueryBuilder {
 				hld.funcL.add(spec);
 			}
 		}
+	}
+
+	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld) {
+		String fieldToFetch = fnexp.argL.get(0).strValue();
+		FetchSpec spec = new FetchSpec(currentScope, fieldToFetch);
+		spec.isFK = false;
+		hld.fetchL.add(spec);
 	}
 
 	private void addFKS(DStructType currentScope, HLDQuery hld) {
