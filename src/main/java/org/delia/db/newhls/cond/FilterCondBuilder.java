@@ -79,7 +79,8 @@ public class FilterCondBuilder {
 			XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
 			//Note. addr.y is a field but will become a FUNCTION here
 			TypePair pair = DValueHelper.findField(fromType, el.strValue());
-			if (pair != null) {
+			TypePair pair2 = (pair == null) ? null : DValueHelper.findField(pair.type, el2.strValue());
+			if (pair != null && pair2 != null) {
 				FilterVal fval = new FilterVal(ValType.SYMBOLCHAIN, el); //has .addr
 				fval.symchain = new SymbolChain(fromType); //has .y
 				fval.symchain.list.add(el2.strValue());
