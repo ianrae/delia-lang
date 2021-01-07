@@ -1,5 +1,6 @@
 package org.delia.db.newhls;
 
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.delia.core.FactoryService;
@@ -40,14 +41,7 @@ public class HLDSQLGenerator {
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");
 		
-		StringJoiner joiner = new StringJoiner(",");
-		for(HLDField rf: hld.fieldL) {
-			if (rf.asStr != null) {
-				joiner.add(String.format("%s.%s as %s", rf.alias, rf.fieldName, rf.asStr));
-			} else {
-				joiner.add(String.format("%s.%s", rf.alias, rf.fieldName));
-			}
-		}
+		StringJoiner joiner = generateFields(hld);
 		sc.o(joiner.toString());
 		
 		sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
@@ -57,6 +51,25 @@ public class HLDSQLGenerator {
 		stm.sql = sc.toString();
 		return stm;
 	}
+
+	private StringJoiner generateFields(HLDQuery hld) {
+		StringJoiner joiner = new StringJoiner(",");
+		Optional<QueryFnSpec> optCountFn = hld.funcL.stream().filter(x -> x.filterFn.fnName.equals("count")).findAny();
+		if (optCountFn.isPresent()) {
+			joiner.add("count(*)");
+			return joiner;
+		}
+		
+		for(HLDField rf: hld.fieldL) {
+			if (rf.asStr != null) {
+				joiner.add(String.format("%s.%s as %s", rf.alias, rf.fieldName, rf.asStr));
+			} else {
+				joiner.add(String.format("%s.%s", rf.alias, rf.fieldName));
+			}
+		}
+		return joiner;
+	}
+
 
 	private void generateWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		FilterCond filter = hld.filter;

@@ -8,12 +8,12 @@ import org.delia.db.newhls.cond.FilterFunc;
  *
  */
 public class QueryFnSpec {
-	public RelationField structField; //who the func is being applied to. fieldName & fieldType can be null
+	public StructField structField; //who the func is being applied to. fieldName & fieldType can be null
 	public FilterFunc filterFn;
 
 	@Override
 	public String toString() {
-		String s = String.format("%s %", structField.toString(), filterFn.toString());
+		String s = String.format("%s %s", structField == null ? "" : structField.toString(), filterFn.toString());
 		return s;
 	}
 }
