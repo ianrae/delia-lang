@@ -14,6 +14,8 @@ import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.type.DStructType;
+import org.delia.type.DTypeRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -242,7 +244,9 @@ public class NewHLSTests extends NewHLSTestBase {
 	private FilterCond buildCond(String src) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
-		FilterCondBuilder builder = new FilterCondBuilder();
+		DTypeRegistry registry = session.getExecutionContext().registry;
+		DStructType dtype = (DStructType) registry.getType("Flight");
+		FilterCondBuilder builder = new FilterCondBuilder(registry, dtype);
 		FilterCond cond = builder.build(queryExp);
 		return cond;
 	}

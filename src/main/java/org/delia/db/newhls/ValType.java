@@ -12,5 +12,6 @@ public enum ValType {
 	NUMBER,
 	STRING,
 	SYMBOL,
+	SYMBOLCHAIN,
 	FUNCTION
 }

@@ -13,9 +13,21 @@ import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.newhls.ValType;
+import org.delia.type.DStructType;
+import org.delia.type.DTypeRegistry;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 public class FilterCondBuilder {
 
+	private DTypeRegistry registry;
+	private DStructType fromType;
+
+	public FilterCondBuilder(DTypeRegistry registry, DStructType fromType) {
+		this.registry = registry;
+		this.fromType = fromType;
+	}
+	
 	public FilterCond build(QueryExp queryExp) {
 		Exp cond = queryExp.filter.cond;
 		if (cond instanceof BooleanExp) {
@@ -66,10 +78,17 @@ public class FilterCondBuilder {
 			XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
 			XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
 			//Note. addr.y is a field but will become a FUNCTION here
-			FilterVal fval = new FilterVal(ValType.FUNCTION, el);
-			fval.filterFn = new FilterFunc();
-			fval.filterFn.fnName = el2.funcName; //TODO: handle args later
-			return fval;
+			TypePair pair = DValueHelper.findField(fromType, el.strValue());
+			if (pair != null) {
+				FilterVal fval = new FilterVal(ValType.SYMBOLCHAIN, el); //has .addr
+				fval.symchain = new SymbolChain(fromType); //has .y
+				return fval;
+			} else {
+				FilterVal fval = new FilterVal(ValType.FUNCTION, el);
+				fval.filterFn = new FilterFunc();
+				fval.filterFn.fnName = el2.funcName; //TODO: handle args later
+				return fval;
+			}
 		}
 	}
 

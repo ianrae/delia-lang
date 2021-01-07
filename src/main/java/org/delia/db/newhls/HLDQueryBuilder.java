@@ -30,7 +30,7 @@ public class HLDQueryBuilder {
 		hld.mainStructType = hld.fromType; //TODO fix
 		hld.resultType = hld.fromType; //TODO fix
 
-		FilterCondBuilder builder = new FilterCondBuilder();
+		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType);
 		hld.filter = builder.build(queryExp);
 		buildThroughChain(queryExp, hld);//			public List<StructField> throughChain = new ArrayList<>();
 		//			public StructField finalField; //eg Customer.addr

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
+import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -50,18 +51,15 @@ public class JoinTreeBuilder {
 		if (fval.isSymbol()) {
 			String fieldName = fval.asSymbol();
 			addFieldJoinIfNeeded(fromType, fieldName, resultL);
-		} else if (fval.isFn()) {
+		} else if (fval.isSymbolChain()) {
 			String fieldName = fval.asString();
-			//two possibilities: it's addr.y, or its a fn
-			TypePair pair = DValueHelper.findField(fromType, fieldName);
-			if (pair != null) {
-				addFieldJoinIfNeeded(fromType, fieldName, resultL);
-			} else {
-				//do args
-				FilterFunc filterFn = fval.asFunc();
-				for(FilterVal inner: filterFn.argL) {
-					addImplicitJoin(fromType, inner, resultL); //*** recursion ***
-				}
+			SymbolChain chain = fval.asSymbolChain();
+			addFieldJoinIfNeeded(chain.fromType, fieldName, resultL);
+		} else if (fval.isFn()) {
+			//do args
+			FilterFunc filterFn = fval.asFunc();
+			for(FilterVal inner: filterFn.argL) {
+				addImplicitJoin(fromType, inner, resultL); //*** recursion ***
 			}
 		}
 	}

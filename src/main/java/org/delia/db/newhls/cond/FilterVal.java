@@ -19,7 +19,8 @@ public class FilterVal {
 	public ValType valType;
 	public Exp exp;
 	public FilterFunc filterFn; //normally null
-
+	public SymbolChain symchain; //normally null
+	
 	//resolved later
 	public StructField structField; //only set if SYMBOL or if SingleFilterCond
 	public String alias;
@@ -52,12 +53,18 @@ public class FilterVal {
 		XNAFSingleExp nafexp = (XNAFSingleExp) exp;
 		return nafexp.funcName;
 	}
+	public SymbolChain asSymbolChain() {
+		return symchain;
+	}
 	public FilterFunc asFunc() {
 		return filterFn; 
 	}
 
 	public boolean isSymbol() {
 		return valType.equals(ValType.SYMBOL);
+	}
+	public boolean isSymbolChain() {
+		return valType.equals(ValType.SYMBOLCHAIN);
 	}
 	public boolean isFn() {
 		return valType.equals(ValType.FUNCTION);
