@@ -86,7 +86,8 @@ public class HLDSQLGenerator {
 		}
 	}
 	private String renderVal(FilterVal val1, SqlParamGenerator paramGen, SqlStatement stm) {
-		if (paramGen == null) {
+		boolean notParam = val1.isFn() || val1.isSymbol();
+		if (paramGen == null || notParam) {
 			return doRenderVal(val1);
 		} else {
 			DValue dval = paramGen.convert(val1);

@@ -17,6 +17,7 @@ import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -211,6 +212,9 @@ public class NewHLSTests extends HLSTestBase {
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15", sql);
+
+		SqlStatement stm = mgr.generateSql(hld);
+		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=?", "15");
 	}	
 
 	@Test
@@ -226,6 +230,9 @@ public class NewHLSTests extends HLSTestBase {
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < 15", sql);
+
+		SqlStatement stm = mgr.generateSql(hld);
+		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < ?", "15");
 	}	
 
 	//-------------------------
@@ -325,6 +332,16 @@ public class NewHLSTests extends HLSTestBase {
 			src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
 		}
 		return src;
+	}
+	private void chkStm(SqlStatement stm, String expected, String... args) {
+		log.log(stm.sql);
+		assertEquals(expected, stm.sql);
+		assertEquals(args.length, stm.paramL.size());
+		for(int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			DValue dval = stm.paramL.get(i);
+			assertEquals(arg, dval.asString());
+		}
 	}
 
 }
