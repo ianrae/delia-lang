@@ -15,6 +15,7 @@ import org.delia.db.newhls.cond.IntFilterCond;
 import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DTypeRegistry;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,9 +86,8 @@ import org.junit.Test;
  *
  */
 public class NewHLSTests extends HLSTestBase {
-
+	
 	public static class HLDManager {
-		
 		private DTypeRegistry registry;
 		private FactoryService factorySvc;
 
@@ -110,10 +110,17 @@ public class NewHLSTests extends HLSTestBase {
 			return hld;
 		}
 		
-		public String generateSql(HLDQuery hld) {
-			HLDSQLGenerator sqlgen = new HLDSQLGenerator();
-			String sql = sqlgen.generateSQL(hld);
+		public String generateRawSql(HLDQuery hld) {
+			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
+			String sql = sqlgen.generateRawSql(hld);
 			return sql;
+		}
+		
+		SqlStatement generateSql(HLDQuery hld) {
+			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
+			SqlStatement sql = sqlgen.generateSqlStatement(hld);
+			return sql;
+			
 		}
 	}
 
@@ -201,7 +208,7 @@ public class NewHLSTests extends HLSTestBase {
 		log.log(hld.toString());
 		assertEquals(0, hld.joinL.size());
 
-		String sql = mgr.generateSql(hld);
+		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15", sql);
 	}	
@@ -216,7 +223,7 @@ public class NewHLSTests extends HLSTestBase {
 		log.log(hld.toString());
 		assertEquals(0, hld.joinL.size());
 
-		String sql = mgr.generateSql(hld);
+		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < 15", sql);
 	}	
