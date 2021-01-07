@@ -4,7 +4,6 @@ package org.delia.db.newhls;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.ast.QueryExp;
-import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSTestBase;
 import org.delia.db.newhls.cond.BooleanFilterCond;
 import org.delia.db.newhls.cond.FilterCond;
@@ -16,7 +15,6 @@ import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,41 +86,7 @@ import org.junit.Test;
  */
 public class NewHLSTests extends HLSTestBase {
 	
-	public static class HLDManager {
-		private DTypeRegistry registry;
-		private FactoryService factorySvc;
-
-		public HLDManager(DTypeRegistry registry, FactoryService factorySvc) {
-			this.registry = registry;
-			this.factorySvc = factorySvc;
-		}
-		
-		public HLDQuery fullBuildQuery(QueryExp queryExp) {
-			HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
-
-			HLDQuery hld = hldBuilder.build(queryExp);
-
-			JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
-			joinBuilder.generateJoinTree(hld);
-
-			HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc);
-			HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
-			fieldBuilder.generateJoinTree(hld);
-			return hld;
-		}
-		
-		public String generateRawSql(HLDQuery hld) {
-			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
-			String sql = sqlgen.generateRawSql(hld);
-			return sql;
-		}
-		
-		SqlStatement generateSql(HLDQuery hld) {
-			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
-			SqlStatement sql = sqlgen.generateSqlStatement(hld);
-			return sql;
-		}
-	}
+	
 
 	//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
 	//	 *   filter:
