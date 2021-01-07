@@ -1,5 +1,6 @@
 package org.delia.db.newhls;
 
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 
@@ -21,7 +22,8 @@ public class StructField  {
 
 	@Override
 	public String toString() {
-		String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fieldType.getName());
+		String fldType = BuiltInTypes.convertDTypeNameToDeliaName(fieldType.getName());
+		String s = String.format("%s.%s:%s", dtype.getName(), fieldName, fldType);
 		return s;
 	}
 }

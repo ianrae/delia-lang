@@ -167,7 +167,15 @@ public class HLDRelationTests extends NewHLSTestBase {
 		HLDQuery hld = buildFromSrc(src, 1); 
 		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y == ?", "55");
 	}
-	//TODO then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
+	//then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
+	@Test
+	public void testImplicitFilter2() {
+		useCustomer11Src = true;
+		String src = "let x = Customer[addr.y == 55].orderBy('addr')";
+		
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y == ? ORDER BY t1.addr", "55");
+	}
 	
 	//-------------------------
 	private boolean use11TwoAddr;

@@ -2,6 +2,7 @@ package org.delia.db.newhls;
 
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
@@ -11,6 +12,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 
 /**
  * Creates HLDQuery from a QueryExp
@@ -33,7 +35,7 @@ public class HLDQueryBuilder {
 		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType);
 		hld.filter = builder.build(queryExp);
 		buildThroughChain(queryExp, hld);//			public List<StructField> throughChain = new ArrayList<>();
-		//			public StructField finalField; //eg Customer.addr
+		buildFinalField(queryExp, hld); //			public StructField finalField; //eg Customer.addr
 		//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 		//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 		buildFns(queryExp, hld);
@@ -44,6 +46,18 @@ public class HLDQueryBuilder {
 		// TODO Auto-generated method stub
 		
 	}
+	private void buildFinalField(QueryExp queryExp, HLDQuery hld) {
+		DStructType currentScope = hld.fromType;
+		for(QueryFuncExp qfnexp: queryExp.qfelist) {
+			if (qfnexp instanceof QueryFieldExp) {
+				QueryFieldExp qfe = (QueryFieldExp) qfnexp;
+				DType type = DValueHelper.findFieldType(currentScope, qfe.funcName);
+				StructField sf = new StructField(currentScope, qfe.funcName, type);
+				hld.finalField = sf;
+			}
+		}
+	}
+
 
 	private void buildFns(QueryExp queryExp, HLDQuery hld) {
 		DStructType currentScope = hld.fromType; //TODO implement scope changes when see .addr
