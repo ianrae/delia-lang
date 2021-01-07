@@ -59,22 +59,20 @@ public class HLDSQLGenerator {
 		for(JoinElement el: hld.joinL) {
 			if (el.relinfo.isManyToMany()) {
 				//TODO
-			} else if (el.relinfo.isParent) {
-				//need to reverse, since parent doesn't have child id
+			} else {
 				//JOIN Address as t1 ON t0.id=t1.cust
 				String tbl = el.relationField.fieldType.getName();
 				sc.o(" JOIN %s as %s", tbl, el.aliasName);
 				
-				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.dtype);
-				String parentName = el.relinfo.otherSide.fieldName; //TODO. can otherSide ever be null??
-				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
-			} else {
-				//JOIN Address as t1 ON t0.addr=t1.id
-				String tbl = el.relationField.fieldType.getName();
-				sc.o(" JOIN %s as %s", tbl, el.aliasName);
-				
-				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
-				sc.o(" ON %s.%s=%s.%s", el.srcAlias, el.relationField.fieldName, el.aliasName, pkpair.name);  
+				if (el.relinfo.isParent) {
+					//need to reverse, since parent doesn't have child id
+					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.dtype);
+					String parentName = el.relinfo.otherSide.fieldName; //TODO. can otherSide ever be null??
+					sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
+				} else {
+					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
+					sc.o(" ON %s.%s=%s.%s", el.srcAlias, el.relationField.fieldName, el.aliasName, pkpair.name);  
+				}
 			}
 		}
 	}
