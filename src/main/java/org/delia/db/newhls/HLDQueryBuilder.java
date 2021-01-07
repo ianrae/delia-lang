@@ -1,5 +1,6 @@
 package org.delia.db.newhls;
 
+import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
@@ -64,10 +65,12 @@ public class HLDQueryBuilder {
 	}
 
 	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld) {
-		String fieldToFetch = fnexp.argL.get(0).strValue();
-		FetchSpec spec = new FetchSpec(currentScope, fieldToFetch);
-		spec.isFK = false;
-		hld.fetchL.add(spec);
+		for(Exp exp: fnexp.argL) {
+			String fieldToFetch = exp.strValue();
+			FetchSpec spec = new FetchSpec(currentScope, fieldToFetch);
+			spec.isFK = false;
+			hld.fetchL.add(spec);
+		}
 	}
 
 	private void addFKS(DStructType currentScope, HLDQuery hld) {

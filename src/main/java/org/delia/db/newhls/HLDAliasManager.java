@@ -77,23 +77,26 @@ public class HLDAliasManager extends ServiceBase {
 		map.put(key, info);
 		return info;
 	}
-//	public void createFieldAlias(DStructType structType, String fieldName) {
-//		AliasInfo info = getFieldAlias(structType, fieldName);
-//		if (info != null) {
-//			return;
-//		}
-//		info = new AliasInfo();
-//		info.alias = createAlias();
-//		info.structType = structType;
-//		info.fieldName = fieldName;
-//		
-//		TypePair pair = DValueHelper.findField(structType, fieldName);
-//		info.tblType = (DStructType) pair.type;
-//		info.tblName = info.tblType.getName();
-//		
-//		String key = String.format("%s.%s", structType.getName(), fieldName);
-//		map.put(key, info);
-//	}
+	
+	//note. Customer.addr is an alias for Address (not Customer)
+	public AliasInfo createFieldAlias(DStructType structType, String fieldName) {
+		AliasInfo info = getFieldAlias(structType, fieldName);
+		if (info != null) {
+			return null;
+		}
+		info = new AliasInfo();
+		info.alias = createAlias();
+		info.structType = structType;
+		info.fieldName = fieldName;
+		
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		info.tblType = (DStructType) pair.type;
+		info.tblName = info.tblType.getName();
+		
+		String key = String.format("%s.%s", structType.getName(), fieldName);
+		map.put(key, info);
+		return info;
+	}
 	public void createAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		AliasInfo info = getAssocAlias(structType, fieldName, assocTbl);
 		if (info != null) {
@@ -185,10 +188,10 @@ public class HLDAliasManager extends ServiceBase {
 //		}
 //		return null; //oops!
 //	}
-//	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
-//		String key = String.format("%s.%s", structType.getName(), fieldName);
-//		return map.get(key);
-//	}
+	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
+		String key = String.format("%s.%s", structType.getName(), fieldName);
+		return map.get(key);
+	}
 	private AliasInfo getAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
 		AliasInfo info = assocMap.get(key);

@@ -112,7 +112,7 @@ public class HLDFieldBuilder {
 				if (rf.source instanceof JoinElement) {
 					JoinElement el = (JoinElement) rf.source;
 					if (el.aliasName == null) {
-						AliasInfo info2 = aliasMgr.createMainTableAlias(el.relationField.fieldType);
+						AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
 						el.aliasName = info2.alias;
 						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
 						el.srcAlias = info2.alias;

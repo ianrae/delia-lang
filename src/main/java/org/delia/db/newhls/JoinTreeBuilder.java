@@ -90,7 +90,7 @@ public class JoinTreeBuilder {
 	private void addFKs(FetchSpec spec, List<JoinElement> resultL) {
 		DStructType structType = spec.structType;
 		for(TypePair pair: structType.getAllFields()) {
-			if (pair.type.isStructShape()) {
+			if (pair.type.isStructShape() && pair.name.equals(spec.fieldName)) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
 					JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
