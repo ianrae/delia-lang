@@ -3,11 +3,8 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
-import java.util.StringJoiner;
-
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.hls.AliasInfo;
+import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSTestBase;
 import org.delia.db.newhls.cond.BooleanFilterCond;
 import org.delia.db.newhls.cond.FilterCond;
@@ -17,16 +14,8 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.IntFilterCond;
 import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
-import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
-import org.delia.db.sql.StrCreator;
-import org.delia.relation.RelationCardinality;
-import org.delia.relation.RelationInfo;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
-import org.delia.util.DValueHelper;
+import org.delia.type.DTypeRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,7 +86,36 @@ import org.junit.Test;
  */
 public class NewHLSTests extends HLSTestBase {
 
-	
+	public static class HLDManager {
+		
+		private DTypeRegistry registry;
+		private FactoryService factorySvc;
+
+		public HLDManager(DTypeRegistry registry, FactoryService factorySvc) {
+			this.registry = registry;
+			this.factorySvc = factorySvc;
+		}
+		
+		public HLDQuery fullBuildQuery(QueryExp queryExp) {
+			HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
+
+			HLDQuery hld = hldBuilder.build(queryExp);
+
+			JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
+			joinBuilder.generateJoinTree(hld);
+
+			HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc);
+			HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
+			fieldBuilder.generateJoinTree(hld);
+			return hld;
+		}
+		
+		public String generateSql(HLDQuery hld) {
+			HLDSQLGenerator sqlgen = new HLDSQLGenerator();
+			String sql = sqlgen.generateSQL(hld);
+			return sql;
+		}
+	}
 
 	//	 * type and filter  Customer[id > 10]        initial type and WHERE filter
 	//	 *   filter:
@@ -112,161 +130,6 @@ public class NewHLSTests extends HLSTestBase {
 	//	 * listFn          orderBy/distinct/limit/offset/first,last,ith      sort,paging. optional    
 	//	 * fetch           fks,fetch('aaa'),...          load 0 or more sub-objects.
 	//	 * calcFn          exists,count,min,max,average,sum,...   query produces a calculated result. 
-
-	public static class HLDFieldBuilder {
-		private HLDAliasManager aliasMgr;
-
-		public HLDFieldBuilder(HLDAliasManager aliasMgr) {
-			this.aliasMgr = aliasMgr;
-		}
-
-		public void generateJoinTree(HLDQuery hld) {
-			//TODO much more code needed here!
-			addStructFields(hld, hld.fieldL);
-
-			assignAliases(hld);
-		}
-
-		private void assignAliases(HLDQuery hld) {
-			AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
-			hld.fromAlias = info.alias;
-			for(HLDField rf: hld.fieldL) {
-				if (rf.structType == hld.fromType) {
-					rf.alias = info.alias;
-				} else {
-					//TODO!!
-				}
-			}
-			
-			//now populate SYMBOL FilterdVal
-			if (hld.filter instanceof SingleFilterCond) {
-				SingleFilterCond sfc = (SingleFilterCond) hld.filter;
-				doFilterPKVal(sfc.val1, hld);
-			} else if (hld.filter instanceof OpFilterCond) {
-				OpFilterCond ofc = (OpFilterCond) hld.filter;
-				doFilterVal(ofc.val1, hld);
-				doFilterVal(ofc.val2, hld);
-			}
-		}
-
-		private void doFilterVal(FilterVal val1, HLDQuery hld) {
-			if (val1.isSymbol()) {
-				String fieldName = val1.exp.strValue();
-				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
-				val1.structField = new StructField(hld.fromType, fieldName, fieldType);
-				val1.alias = hld.fromAlias;
-			}
-		}
-		private void doFilterPKVal(FilterVal val1, HLDQuery hld) {
-			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
-			String fieldName = pkpair.name;
-			val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
-			val1.alias = hld.fromAlias;
-		}
-
-		private void addStructFields(HLDQuery hld, List<HLDField> fieldL) {
-			DStructType fromType = hld.fromType;
-
-			for(TypePair pair: fromType.getAllFields()) {
-				if (pair.type.isStructShape()) {
-					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-						doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
-					} else if (!relinfo.isParent) {
-						addField(fieldL, fromType, pair);
-					}
-				} else {
-					addField(fieldL, fromType, pair);
-				}
-			}
-		}
-
-		private HLDField addField(List<HLDField> fieldL, DStructType fromType, TypePair pair) {
-			HLDField rf = new HLDField();
-			rf.structType = fromType;
-			rf.fieldName = pair.name;
-			rf.fieldType = pair.type;
-//			rf.groupName = "__MAINGROUP__";
-			fieldL.add(rf);
-			return rf;
-		}
-		private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
-			//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-			////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
-			//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
-			//
-			//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-			//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-			//			s = String.format("%s as %s", s, pair.name);
-			//			RenderedField rff = addField(fieldL, null, fieldName, s);
-			//			rff.isAssocField = true;
-			//			rff.fieldGroup = new FieldGroup((el == null), el);
-		}
-	}
-	
-	public static class HLDException extends RuntimeException {
-		HLDException(String s) {
-			super(s);
-		}
-	}
-	
-	public static class HLDSQLGenerator {
-		
-		public String generateSQL(HLDQuery hld) {
-			StrCreator sc = new StrCreator();
-			sc.o("SELECT ");
-			
-			StringJoiner joiner = new StringJoiner(",");
-			for(HLDField rf: hld.fieldL) {
-				if (rf.asStr != null) {
-					joiner.add(String.format("%s.%s as %s", rf.alias, rf.fieldName, rf.asStr));
-				} else {
-					joiner.add(String.format("%s.%s", rf.alias, rf.fieldName));
-				}
-			}
-			sc.o(joiner.toString());
-			
-			sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
-			
-			generateWhere(sc, hld);
-			return sc.toString();
-		}
-
-		private void generateWhere(StrCreator sc, HLDQuery hld) {
-			FilterCond filter = hld.filter;
-			String fragment = null;
-			if (filter instanceof SingleFilterCond) {
-				SingleFilterCond sfc = (SingleFilterCond) filter;
-				String alias = sfc.val1.alias;
-				String fieldName = sfc.val1.structField.fieldName;
-				fragment = String.format("%s.%s=%s", alias, fieldName, sfc.renderSql());
-			} else if (filter instanceof OpFilterCond) {
-				OpFilterCond ofc = (OpFilterCond) filter;
-				String s1 = renderVal(ofc.val1);
-				String s2 = renderVal(ofc.val2);
-				fragment = String.format("%s %s %s", s1, ofc.op.op, s2);
-			}
-			sc.o(" WHERE %s", fragment);
-		}
-
-		private String renderVal(FilterVal val1) {
-			switch(val1.valType) {
-			case BOOLEAN:
-			case INT:
-			case LONG:
-			case NUMBER:
-				return val1.exp.strValue();
-			case STRING:
-				return String.format("'%s'", val1.exp.strValue());
-			case SYMBOL:
-				return String.format("%s.%s", val1.alias, val1.structField.fieldName);
-				
-			case FUNCTION:
-			default:
-				throw new HLDException("renderVal not impl1");
-			}
-		}
-	}
 
 	@Test
 	public void testBool() {
@@ -332,23 +195,13 @@ public class NewHLSTests extends HLSTestBase {
 		String src = "let x = Flight[15]";
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
-		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
-
-		HLDQuery hld = hldBuilder.build(queryExp);
+		
+		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
+		HLDQuery hld = mgr.fullBuildQuery(queryExp);
 		log.log(hld.toString());
-		//		assertEquals()
-
-		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
-		joinBuilder.generateJoinTree(hld);
 		assertEquals(0, hld.joinL.size());
 
-		HLDAliasManager aliasMgr = new HLDAliasManager(delia.getFactoryService());
-		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
-		fieldBuilder.generateJoinTree(hld);
-		log.log(hld.toString());
-		
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator();
-		String sql = sqlgen.generateSQL(hld);
+		String sql = mgr.generateSql(hld);
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15", sql);
 	}	
@@ -358,23 +211,12 @@ public class NewHLSTests extends HLSTestBase {
 		String src = "let x = Flight[field1 < 15]";
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
-		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
-
-		HLDQuery hld = hldBuilder.build(queryExp);
+		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
+		HLDQuery hld = mgr.fullBuildQuery(queryExp);
 		log.log(hld.toString());
-		//		assertEquals()
-
-		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
-		joinBuilder.generateJoinTree(hld);
 		assertEquals(0, hld.joinL.size());
 
-		HLDAliasManager aliasMgr = new HLDAliasManager(delia.getFactoryService());
-		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
-		fieldBuilder.generateJoinTree(hld);
-		log.log(hld.toString());
-		
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator();
-		String sql = sqlgen.generateSQL(hld);
+		String sql = mgr.generateSql(hld);
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < 15", sql);
 	}	
