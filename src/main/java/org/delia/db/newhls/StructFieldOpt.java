@@ -13,6 +13,8 @@ public class StructFieldOpt  {
 	public String fieldName; //can be null
 	public DType fieldType; //can be null
 
+	public String alias; //added later
+	
 	public StructFieldOpt(DStructType dtype, String field, DType fieldType) {
 		this.dtype = dtype;
 		this.fieldName = field;

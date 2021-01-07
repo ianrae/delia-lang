@@ -157,7 +157,7 @@ public class HLDRelationTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].orderBy('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=? ORDER BY t1.addr", "55");
 	}
 
 	//-------------------------

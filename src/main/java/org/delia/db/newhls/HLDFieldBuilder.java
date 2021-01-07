@@ -134,6 +134,37 @@ public class HLDFieldBuilder {
 			doFilterVal(ofc.val1, hld);
 			doFilterVal(ofc.val2, hld);
 		}
+		
+		//now do any other implicit joins
+		for(JoinElement el: hld.joinL) {
+			if (el.aliasName == null) {
+				AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
+				el.aliasName = info2.alias;
+				info2 = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
+				el.srcAlias = info2.alias;
+			}
+		}
+		
+		//and propogate alias to query fns
+		for(QueryFnSpec fnspec: hld.funcL) {
+			JoinElement el = findMatch(fnspec, hld);
+			if (el != null) {
+				fnspec.structField.alias = el.aliasName;
+			}
+		}
+	}
+
+	private JoinElement findMatch(QueryFnSpec fnspec, HLDQuery hld) {
+		if (fnspec.structField.fieldName == null) {
+			return null;
+		}
+		for(JoinElement el: hld.joinL) {
+			if (fnspec.structField.fieldName.equals(el.relationField.fieldName) && 
+					fnspec.structField.dtype == el.relationField.dtype) {
+				return el;
+			}
+		}
+		return null;
 	}
 
 	private void doFilterVal(FilterVal val1, HLDQuery hld) {

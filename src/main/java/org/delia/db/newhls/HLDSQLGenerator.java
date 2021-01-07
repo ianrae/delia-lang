@@ -1,7 +1,9 @@
 package org.delia.db.newhls;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
@@ -51,9 +53,23 @@ public class HLDSQLGenerator {
 		SqlStatement stm = new SqlStatement();
 		generateJoins(sc, hld, stm, paramGen);
 		generateWhere(sc, hld, stm, paramGen);
+		generateOrderBy(sc, hld);
 		stm.sql = sc.toString();
 		return stm;
 	}
+
+	private void generateOrderBy(StrCreator sc, HLDQuery hld) {
+		List<QueryFnSpec> list = hld.funcL.stream().filter(x -> x.isFn("orderBy")).collect(Collectors.toList());
+		if (list.isEmpty()) {
+			return;
+		}
+		
+		sc.o(" ORDER BY");
+		for(QueryFnSpec fnspec: list) {
+			sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
+		}
+	}
+
 
 	private void generateJoins(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		for(JoinElement el: hld.joinL) {

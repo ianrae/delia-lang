@@ -16,6 +16,7 @@ public class JoinElement  {
 	public FetchSpec fetchSpec; //if not null then this join is from a fetch
 	public String aliasName;
 	public String srcAlias; //needed for JOIN ON. alias of table we're joining froms
+	
 	public boolean usedForFK() {
 		return fetchSpec != null && fetchSpec.isFK;
 	}
