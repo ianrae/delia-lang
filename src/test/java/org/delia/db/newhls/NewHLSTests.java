@@ -121,7 +121,6 @@ public class NewHLSTests extends HLSTestBase {
 			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
 			SqlStatement sql = sqlgen.generateSqlStatement(hld);
 			return sql;
-			
 		}
 	}
 
@@ -235,6 +234,24 @@ public class NewHLSTests extends HLSTestBase {
 		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < ?", "15");
 	}	
 
+	@Test
+	public void testHLDFieldNot() {
+		String src = "let x = Flight[!(field1 < 15)]";
+		QueryExp queryExp = compileQuery(src);
+		log.log(src);
+		HLDManager mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService());
+		HLDQuery hld = mgr.fullBuildQuery(queryExp);
+		log.log(hld.toString());
+		assertEquals(0, hld.joinL.size());
+
+		String sql = mgr.generateRawSql(hld);
+		log.log(sql);
+		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < 15", sql);
+
+		SqlStatement stm = mgr.generateSql(hld);
+		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < ?", "15");
+	}	
+	
 	//-------------------------
 	private String pkType = "int";
 	private boolean addOrderDate = false;

@@ -71,7 +71,8 @@ public class HLDSQLGenerator {
 			OpFilterCond ofc = (OpFilterCond) filter;
 			String s1 = renderVal(ofc.val1, paramGen, stm);
 			String s2 = renderVal(ofc.val2, paramGen, stm);
-			fragment = String.format("%s %s %s", s1, ofc.op.op, s2);
+			String not = ofc.isNot ? "NOT " : "";
+			fragment = String.format("%s%s %s %s", not, s1, ofc.op.op, s2);
 		}
 		sc.o(" WHERE %s", fragment);
 	}
