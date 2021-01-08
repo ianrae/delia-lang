@@ -68,7 +68,15 @@ public class HLDSQLGenerator {
 		
 		sc.o(" ORDER BY");
 		for(QueryFnSpec fnspec: list) {
-			sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
+			JoinElement el = hld.findJoinByAlias(fnspec.structField.alias, hld);
+			if (el != null && el.relinfo.isParent) {
+				//need to reverse, since parent doesn't have child id
+				TypePair pkpair = el.getOtherSidePK();
+				String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
+				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
+			} else {
+				sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
+			}
 		}
 	}
 
@@ -84,8 +92,8 @@ public class HLDSQLGenerator {
 				
 				if (el.relinfo.isParent) {
 					//need to reverse, since parent doesn't have child id
-					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.dtype);
-					String parentName = el.relinfo.otherSide.fieldName; //TODO. can otherSide ever be null??
+					TypePair pkpair = el.getOtherSidePK();
+					String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
 					sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
 				} else {
 					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);

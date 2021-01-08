@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import org.delia.relation.RelationInfo;
 import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 /**
  * A join needed by the query. Can be an explicit join (eg. fetch), or implicit join (eg [addr.city=='toronto')
@@ -53,5 +54,15 @@ public class JoinElement  {
 
 	public TypePair createPair() {
 		return new TypePair(relationField.fieldName, relationField.fieldType);
+	}
+	
+	public TypePair getOtherSidePK() {
+		//need to reverse, since parent doesn't have child id
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(relationField.dtype);
+		return pkpair;
+	}
+	public String getOtherSideField() {
+		String parentName = relinfo.otherSide.fieldName; //TODO. can otherSide ever be null??
+		return parentName;
 	}
 }

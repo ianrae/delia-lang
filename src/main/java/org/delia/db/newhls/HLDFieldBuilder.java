@@ -198,7 +198,15 @@ public class HLDFieldBuilder {
 		for(QueryFnSpec fnspec: hld.funcL) {
 			JoinElement el = findMatch(fnspec, hld);
 			if (el != null) {
-				fnspec.structField.alias = el.aliasName;
+				if (el.relinfo.isParent) {
+					fnspec.structField.alias = el.aliasName;
+				} else if (el.relationField.dtype == hld.fromType) {
+					fnspec.structField.alias = hld.fromAlias;
+				} else {
+					fnspec.structField.alias = el.aliasName;
+				}
+			} else {
+				fnspec.structField.alias = hld.fromAlias;
 			}
 		}
 	}

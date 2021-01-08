@@ -2,6 +2,7 @@ package org.delia.db.newhls;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.delia.db.newhls.cond.FilterCond;
@@ -38,7 +39,10 @@ public class HLDQuery {
 		}
 		return null;
 	}
-	
+	public JoinElement findJoinByAlias(String alias, HLDQuery hld) {
+		Optional<JoinElement> optEl = hld.joinL.stream().filter(x -> x.aliasName.equals(alias)).findAny();
+		return optEl.orElse(null);
+	}
 
 	@Override
 	public String toString() {

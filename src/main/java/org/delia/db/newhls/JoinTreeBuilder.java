@@ -110,7 +110,9 @@ public class JoinTreeBuilder {
 		if (pair != null && pair.type instanceof DStructType) {
 			//				addElement(structType, fieldName, (DStructType) pair.type, resultL);
 			JoinElement el = buildElement(structType, fieldName, (DStructType) pair.type);
-			addElement(el, resultL);
+			if (el.relinfo.isParent) {
+				addElement(el, resultL);
+			}
 		}
 	}
 
