@@ -71,9 +71,8 @@ public class HLDSQLGenerator {
 			JoinElement el = hld.findJoinByAlias(fnspec.structField.alias, hld);
 			if (el != null && el.relinfo.isParent) {
 				//need to reverse, since parent doesn't have child id
-				TypePair pkpair = el.getOtherSidePK();
 				String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
-				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
+				sc.o(" %s.%s", el.aliasName, parentName);  
 			} else {
 				sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
 			}

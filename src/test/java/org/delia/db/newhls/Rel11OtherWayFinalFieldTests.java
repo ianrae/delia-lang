@@ -7,10 +7,10 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class Rel11FinalFieldTests extends NewHLSTestBase {
+public class Rel11OtherWayFinalFieldTests extends NewHLSTestBase {
 	@Test
 	public void testScalar() {
-		useCustomer11Src = true;
+		useCustomer11OtherWaySrc = true;
 		String src = "let x = Customer[55].x";
 		
 		HLDQuery hld = buildFromSrc(src, 0); 
@@ -18,25 +18,25 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 	}
 	@Test
 	public void testRelParent() {
-		useCustomer11Src = true;
+		useCustomer11OtherWaySrc = true;
 		String src = "let x = Customer[55].addr";
 		
-		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		HLDQuery hld = buildFromSrc(src, 0); 
+		chkFullSql(hld, "SELECT t0.addr FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void testRelChild() {
-		useCustomer11Src = true;
+		useCustomer11OtherWaySrc = true;
 		String src = "let x = Address[100].cust";
 		
-		HLDQuery hld = buildFromSrc(src, 0); 
-		chkFullSql(hld, "SELECT t0.cust FROM Address as t0 WHERE t0.id=?", "100");
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t1.addr FROM Address as t0 JOIN Customer as t1 ON t0.id=t1.addr WHERE t0.id=?", "100");
 	}
 	
 	//-- through chain
 	@Test
 	public void testTCScalar() {
-		useCustomer11Src = true;
+		useCustomer11OtherWaySrc = true;
 		String src = "let x = Customer[55].addr.y";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -44,7 +44,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 	}
 //	@Test
 //	public void testTCRelParent() {
-//		useCustomer11Src = true;
+//		useCustomer11OtherWaySrc = true;
 //		String src = "let x = Customer[55].addr";
 //		
 //		HLDQuery hld = buildFromSrc(src, 1); 
@@ -52,7 +52,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 //	}
 //	@Test
 //	public void testTCRelChild() {
-//		useCustomer11Src = true;
+//		useCustomer11OtherWaySrc = true;
 //		String src = "let x = Address[100].cust";
 //		
 //		HLDQuery hld = buildFromSrc(src, 0); 
