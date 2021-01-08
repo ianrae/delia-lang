@@ -22,6 +22,9 @@ public class JoinElement  {
 	public boolean usedForFK() {
 		return fetchSpec != null && fetchSpec.isFK;
 	}
+	public boolean usedForFetch() {
+		return fetchSpec != null && !fetchSpec.isFK;
+	}
 	
 	public String makeKey() {
 		StringJoiner joiner = new StringJoiner("|");

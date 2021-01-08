@@ -37,11 +37,8 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		//all wrong
-		// t1.rightv as addr
-		// t2.id,t2.y,t1.leftv
-		// and 2nd join
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		// t1.rightv as addr -- is 'as addr' needed?
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv,t2.id,t2.y,t1.leftv FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t0.addr=t2.id WHERE t0.cid=?", "55");
 	}	
 	@Test
 	public void testFetch11Child() {
@@ -49,7 +46,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Address[100].fetch('cust')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust,t1.cid,t1.x FROM Address as t0 JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t1.leftv,t2.cid,t2.x,t1.rightv FROM Address as t0 JOIN CustomerAddressDat1 as t1 ON t0.id=t1.rightv JOIN Customer as t2 ON t0.cust=t2.cid WHERE t0.id=?", "100");
 	}	
 	
 	//TODO Customer.addr1 and .addr2 and try fetching one or both
@@ -60,24 +57,24 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fks()";
 		
 		HLDQuery hld = buildFromSrc(src, 2); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t2.id FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust1 JOIN Address as t2 ON t0.cid=t2.cust2 WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv,t2.rightv FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN CustomerAddressDat2 as t2 ON t0.cid=t2.leftv WHERE t0.cid=?", "55");
 	}	
 	@Test
 	public void testFKS11Child2Addr() {
 		use11TwoAddr = true;
 		String src = "let x = Address[100].fks()";
 		
-		HLDQuery hld = buildFromSrc(src, 0); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust1,t0.cust2 FROM Address as t0 WHERE t0.id=?", "100");
+		HLDQuery hld = buildFromSrc(src, 2); 
+		chkFullSql(hld, "SELECT t0.id,t0.y,t1.leftv,t2.leftv FROM Address as t0 JOIN CustomerAddressDat1 as t1 ON t0.id=t1.rightv JOIN CustomerAddressDat2 as t2 ON t0.id=t2.rightv WHERE t0.id=?", "100");
 	}	
 	
 	@Test
 	public void testFetch11Parent2Addr() {
 		use11TwoAddr = true;
 		String src = "let x = Customer[55].fetch('addr1')";
-		
+		//here
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust1,t1.cust2 FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust1 WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv,t2.id,t2.y,t1.leftv FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t0.addr1=t2.id WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void testFetch11Parent2AddrB() {
@@ -85,7 +82,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr1', 'addr2')";
 		
 		HLDQuery hld = buildFromSrc(src, 2); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust1,t1.cust2,t2.id,t2.y,t2.cust1,t2.cust2 FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust1 JOIN Address as t2 ON t0.cid=t2.cust2 WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv,t3.rightv,t2.id,t2.y,t1.leftv,t1.leftv,t4.id,t4.y,t3.leftv,t3.leftv FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t0.addr1=t2.id JOIN CustomerAddressDat2 as t3 ON t0.cid=t3.leftv JOIN Address as t4 ON t0.addr2=t4.id WHERE t0.cid=?", "55");
 	}
 	
 	@Test
@@ -94,7 +91,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Address[100].fetch('cust1')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust1,t0.cust2,t1.cid,t1.x FROM Address as t0 JOIN Customer as t1 ON t0.cust1=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t1.leftv,t2.cid,t2.x,t1.rightv FROM Address as t0 JOIN CustomerAddressDat1 as t1 ON t0.id=t1.rightv JOIN Customer as t2 ON t0.cust1=t2.cid WHERE t0.id=?", "100");
 	}	
 
 	//implicit fetch

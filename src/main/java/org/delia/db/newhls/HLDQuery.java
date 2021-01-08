@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.delia.db.newhls.cond.FilterCond;
+import org.delia.relation.RelationInfo;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -31,6 +32,16 @@ public class HLDQuery {
 	//added after
 	public List<JoinElement> joinL = new ArrayList<>();
 	
+	public JoinElement findMatch(RelationInfo relinfo, HLDQuery hld) {
+		return findMatch(relinfo.nearType, relinfo.fieldName, hld);
+	}
+	public JoinElement findMatchBothSided(RelationInfo relinfo, HLDQuery hld) {
+		JoinElement el = findMatch(relinfo.nearType, relinfo.fieldName, hld);
+		if (el == null) {
+			el = findMatch(relinfo.otherSide.nearType, relinfo.otherSide.fieldName, hld);
+		}
+		return el;
+	}
 	public JoinElement findMatch(DStructType dtype, String fieldName, HLDQuery hld) {
 		for(JoinElement el: hld.joinL) {
 			if (fieldName.equals(el.relationField.fieldName) && el.relationField.dtype == dtype) {

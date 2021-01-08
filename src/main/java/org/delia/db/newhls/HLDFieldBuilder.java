@@ -75,8 +75,14 @@ public class HLDFieldBuilder {
 		for(TypePair pair: fromType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-				if (!relinfo.isParent || relinfo.isManyToMany()) {
-					JoinElement el = hld.findMatch(relinfo.nearType, relinfo.fieldName, hld);
+				//only load fk fields if fks or fetch
+				JoinElement el = hld.findMatch(relinfo, hld);
+				if (relinfo.notContainsFK()) {
+					boolean fetchingThisField = el == null ? false : el.usedForFetch();
+					if (fetchingThisField) {
+						addField(fieldL, fromType, pair).source = el;
+					}
+				} else {
 					addField(fieldL, fromType, pair).source = el;
 				}
 			} else {
@@ -108,9 +114,12 @@ public class HLDFieldBuilder {
 			for(TypePair pair: reftype.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(reftype, pair);
-					if (relinfo.isManyToMany()) {
+					
+					//only get fk fields if is a join for it
+					JoinElement el = hld.findMatchBothSided(relinfo, hld);
+					if (relinfo.notContainsFK() && el != null) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();
-					} else if (!relinfo.isParent) {
+					} else if (!relinfo.isParent && !relinfo.isManyToMany()) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();
 					}
 				} else {
