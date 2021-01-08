@@ -41,7 +41,16 @@ public class HLDAliasBuilder {
 						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
 						//need to determine which instance of Customer this is!!
 					}
-					rf.alias = el.aliasName;
+					
+					//need 2nd alias if M:M and a fetch
+					if (el.relinfo.isManyToMany() && el.fetchSpec != null && !el.fetchSpec.isFK) {
+						AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
+						el.aliasNameAdditional = infoAdd.alias;
+						rf.alias = el.aliasNameAdditional;
+					} else {
+						rf.alias = el.aliasName;
+					}
+
 				}
 				//TODO!!
 			}
@@ -70,13 +79,6 @@ public class HLDAliasBuilder {
 					fld.alias = info2.alias;
 				}
 			}
-			
-			//need 2nd alias if M:M and a fetch
-			if (el.relinfo.isManyToMany() && el.fetchSpec != null && !el.fetchSpec.isFK) {
-				AliasInfo infoAdd = aliasMgr.createFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
-				el.aliasNameAdditional = infoAdd.alias;
-			}
-
 		}
 		
 		//and propogate alias to query fns

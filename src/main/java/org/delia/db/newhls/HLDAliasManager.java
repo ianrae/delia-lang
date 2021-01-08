@@ -100,10 +100,10 @@ public class HLDAliasManager extends ServiceBase {
 		map.put(key, info);
 		return info;
 	}
-	public AliasInfo createFieldAliasAdditional(DStructType structType, String fieldName) {
+	public AliasInfo createOrGetFieldAliasAdditional(DStructType structType, String fieldName) {
 		AliasInfo info = getFieldAliasAdditional(structType, fieldName);
 		if (info != null) {
-			return null;
+			return info;
 		}
 		info = new AliasInfo();
 		info.alias = createAlias();

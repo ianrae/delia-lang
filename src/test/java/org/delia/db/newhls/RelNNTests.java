@@ -37,6 +37,10 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
+		//all wrong
+		// t1.rightv as addr
+		// t2.id,t2.y,t1.leftv
+		// and 2nd join
 		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
 	}	
 	@Test
