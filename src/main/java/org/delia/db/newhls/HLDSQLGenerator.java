@@ -14,6 +14,7 @@ import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -82,10 +83,16 @@ public class HLDSQLGenerator {
 		sc.o(" ORDER BY");
 		for(QueryFnSpec fnspec: list) {
 			JoinElement el = hld.findJoinByAlias(fnspec.structField.alias, hld);
-			if (el != null && el.relinfo.isParent) {
-				//need to reverse, since parent doesn't have child id
-				String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
-				sc.o(" %s.%s", el.aliasName, parentName);  
+			if (el != null && el.relinfo.notContainsFK()) {
+				if (el.relinfo.isManyToMany()) {
+					//passing null here ok because we know its M:M
+					NamePair npair = doMapFieldIfNeeded(el.aliasName, null, fnspec.structField.dtype, el);
+					sc.o(" %s.%s", npair.alias, npair.name);  
+				} else {
+					//need to reverse, since parent doesn't have child id
+					String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
+					sc.o(" %s.%s", el.aliasName, parentName);  
+				}
 			} else {
 				sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
 			}
@@ -153,17 +160,21 @@ public class HLDSQLGenerator {
 	private NamePair mapFieldIfNeeded(HLDField rf) {
 		if (rf.fieldType.isStructShape() && rf.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) rf.source;
-			if (el.relinfo.isManyToMany()) {
-				String field;
-				if (el.relinfo.nearType == rf.structType) {
-					field = datIdMap.getAssocOtherField(el.relinfo);
-				} else {
-					field = datIdMap.getAssocFieldFor(el.relinfo);
-				}
-				return new NamePair(el.aliasName, field);
-			}
+			return doMapFieldIfNeeded(rf.alias, rf.fieldName, rf.structType, el);
 		}
 		return new NamePair(rf.alias, rf.fieldName);
+	}
+	private NamePair doMapFieldIfNeeded(String alias, String fieldName, DStructType structType, JoinElement el) {
+		if (el.relinfo.isManyToMany()) {
+			String field;
+			if (el.relinfo.nearType == structType) {
+				field = datIdMap.getAssocOtherField(el.relinfo);
+			} else {
+				field = datIdMap.getAssocFieldFor(el.relinfo);
+			}
+			return new NamePair(el.aliasName, field);
+		}
+		return new NamePair(alias, fieldName);
 	}
 
 

@@ -85,7 +85,7 @@ public class HLDAliasBuilder {
 		for(QueryFnSpec fnspec: hld.funcL) {
 			JoinElement el = findMatch(fnspec, hld);
 			if (el != null) {
-				if (el.relinfo.isParent) {
+				if (el.relinfo.notContainsFK()) {
 					fnspec.structField.alias = el.aliasName;
 				} else if (el.relationField.dtype == hld.fromType) {
 					fnspec.structField.alias = hld.fromAlias;

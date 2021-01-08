@@ -101,7 +101,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].orderBy('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=? ORDER BY t1.cust", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv WHERE t0.cid=? ORDER BY t1.rightv", "55");
 	}
 	@Test
 	public void testImplicitFilter() {
