@@ -53,7 +53,7 @@ public class JoinTreeBuilder {
 	}
 
 	private void addThroughChain(RelationField rf, HLDQuery hld) {
-		addFieldJoinIfNeeded(rf.dtype, rf.fieldName, hld.joinL);
+		addFieldJoinIfNeeded(rf.dtype, rf.fieldName, hld.joinL, true);
 	}
 
 	private void addFinalFieldFetchIfNeeded(HLDQuery hld) {

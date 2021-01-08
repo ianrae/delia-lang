@@ -1,5 +1,8 @@
 package org.delia.db.newhls;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryFieldExp;
@@ -45,6 +48,8 @@ public class HLDQueryBuilder {
 	private void buildFinalFieldAndThroughChain(QueryExp queryExp, HLDQuery hld) {
 		DStructType currentScope = hld.fromType;
 		RelationField currentRF = null;
+		List<RelationField> pendingL = new ArrayList<>();
+		
 		for(QueryFuncExp qfnexp: queryExp.qfelist) {
 			if (qfnexp instanceof QueryFieldExp) {
 				QueryFieldExp qfe = (QueryFieldExp) qfnexp;
@@ -55,12 +60,19 @@ public class HLDQueryBuilder {
 				hld.finalField = ff;
 				if (type.isStructShape()) {
 					RelationField rf = new RelationField(currentScope, qfnexp.funcName, (DStructType) type);
-					hld.throughChain.add(rf);
 					currentRF = rf;
+					pendingL.add(rf);
 					currentScope = (DStructType) type;
+				} else {
+					//only add to throughchain if we ref a field in it. eg. addr.y
+					for(RelationField rf: pendingL) {
+						hld.throughChain.add(rf);
+					}
+					pendingL.clear();
 				}
 			}
 		}
+		
 	}
 
 
