@@ -109,9 +109,8 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55]";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y == ?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t0.addr=t2.id WHERE t2.y == ?", "55");
 	}
-	//then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
 	@Test
 	public void testImplicitFilter2() {
 		useCustomerManyToManySrc = true;

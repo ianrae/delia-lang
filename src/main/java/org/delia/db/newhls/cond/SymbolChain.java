@@ -3,6 +3,7 @@ package org.delia.db.newhls.cond;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.db.newhls.JoinElement;
 import org.delia.type.DStructType;
 
 public class SymbolChain {
@@ -13,4 +14,5 @@ public class SymbolChain {
 	}
 
 	public List<String> list = new ArrayList<>();
+	public JoinElement el; //can be null. if implicit join
 }

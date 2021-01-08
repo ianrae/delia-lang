@@ -112,7 +112,7 @@ public class HLDSQLGenerator {
 				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relinfo.nearType);
 				
 				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, field1);  
-				if (el.fetchSpec != null && !el.fetchSpec.isFK) {
+				if (el.aliasNameAdditional != null) {
 					doSimpleJoin(sc, el, el.aliasNameAdditional);
 				}
 			} else {
@@ -231,7 +231,11 @@ public class HLDSQLGenerator {
 		case SYMBOLCHAIN:
 		{
 			SymbolChain chain = val1.asSymbolChain();
-			return String.format("%s.%s", val1.alias, chain.list.get(0)); //TODO: later support list > 1
+			if (chain.el != null && chain.el.aliasNameAdditional != null) {
+				return String.format("%s.%s", chain.el.aliasNameAdditional, chain.list.get(0)); //TODO: later support list > 1
+			} else {
+				return String.format("%s.%s", val1.alias, chain.list.get(0)); //TODO: later support list > 1
+			}
 		}
 		case FUNCTION:
 		default:

@@ -71,7 +71,7 @@ public class JoinTreeBuilder {
 		} else if (fval.isSymbolChain()) {
 			String fieldName = fval.asString();
 			SymbolChain chain = fval.asSymbolChain();
-			addFieldJoinIfNeeded(chain.fromType, fieldName, resultL, true);
+			chain.el = addFieldJoinIfNeeded(chain.fromType, fieldName, resultL, true);
 		} else if (fval.isFn()) {
 			//do args
 			FilterFunc filterFn = fval.asFunc();
@@ -84,18 +84,19 @@ public class JoinTreeBuilder {
 	private void addFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL) {
 		addFieldJoinIfNeeded(fromType, fieldName, resultL, false);
 	}
-	private void addFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL, boolean forceAdd) {
+	private JoinElement addFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL, boolean forceAdd) {
 		TypePair pair = DRuleHelper.findMatchingStructPair(fromType, fieldName);
 		if (pair != null) {
 			JoinElement el = buildElement(fromType, fieldName, (DStructType) pair.type);
 			if (forceAdd) {
-				addElement(el, resultL);
+				return addElement(el, resultL);
 			} else {
 				if (el.relinfo.notContainsFK()) {
-					addElement(el, resultL);
+					return addElement(el, resultL);
 				}
 			}
 		}
+		return null;
 	}
 
 	private void addOrderBy(QueryFnSpec fnspec, List<JoinElement> resultL) {
@@ -141,7 +142,7 @@ public class JoinTreeBuilder {
 		el.relinfo = DRuleHelper.findMatchingRuleInfo(dtype, el.createPair());
 		return el;
 	}
-	private void addElement(JoinElement el, List<JoinElement> resultL) {
+	private JoinElement addElement(JoinElement el, List<JoinElement> resultL) {
 		String target = el.toString();
 		Optional<JoinElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
 		if (optExisting.isPresent()) {
@@ -151,9 +152,10 @@ public class JoinTreeBuilder {
 //			if (el.usedForFetch) {
 //				optExisting.get().usedForFetch = true; //propogate
 //			}
-			return;
+			return optExisting.get();
 		}
 
 		resultL.add(el);
+		return el;
 	}
 }

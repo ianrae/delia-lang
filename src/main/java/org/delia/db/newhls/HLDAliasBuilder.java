@@ -43,7 +43,7 @@ public class HLDAliasBuilder {
 					}
 					
 					//need 2nd alias if M:M and a fetch
-					if (el.relinfo.isManyToMany() && el.fetchSpec != null && !el.fetchSpec.isFK) {
+					if (el.relinfo.isManyToMany() && el.usedForFetch()) {
 						AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
 						el.aliasNameAdditional = infoAdd.alias;
 						rf.alias = el.aliasNameAdditional;
@@ -129,6 +129,11 @@ public class HLDAliasBuilder {
 				el.aliasName = info.alias;
 				info = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
 				el.srcAlias = info.alias;
+				
+				if (el.relinfo.isManyToMany()) {
+					AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
+					el.aliasNameAdditional = infoAdd.alias;
+				}						
 			}
 		}
 	}
