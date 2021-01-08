@@ -38,9 +38,7 @@ public class HLDQueryBuilder {
 
 		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType);
 		hld.filter = builder.build(queryExp);
-		buildFinalFieldAndThroughChain(queryExp, hld); //			public StructField finalField; //eg Customer.addr
-		//			public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
-		//			public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
+		buildFinalFieldAndThroughChain(queryExp, hld); 
 		buildFns(queryExp, hld);
 		return hld;
 	}
@@ -121,9 +119,7 @@ public class HLDQueryBuilder {
 		for(TypePair pair: currentScope.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(currentScope, pair);
-				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
-					//TODO: doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
-				} else if (relinfo.isParent) {
+				if (relinfo.notContainsFK()) {
 					FetchSpec spec = new FetchSpec(currentScope, pair.name);
 					spec.isFK = true;
 					hld.fetchL.add(spec);

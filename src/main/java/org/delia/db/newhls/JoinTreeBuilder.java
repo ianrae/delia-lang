@@ -7,7 +7,6 @@ import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
-import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
@@ -91,19 +90,10 @@ public class JoinTreeBuilder {
 			JoinElement el = buildElement(fromType, fieldName, (DStructType) pair.type);
 			if (forceAdd) {
 				addElement(el, resultL);
-				return;
-			}
-			
-			switch(el.relinfo.cardinality) {
-			case ONE_TO_ONE:
-			case ONE_TO_MANY:
-				if (el.relinfo.isParent) {
+			} else {
+				if (el.relinfo.notContainsFK()) {
 					addElement(el, resultL);
 				}
-				break;
-			case MANY_TO_MANY:
-				addElement(el, resultL);
-				break;
 			}
 		}
 	}
@@ -116,7 +106,7 @@ public class JoinTreeBuilder {
 		if (pair != null && pair.type instanceof DStructType) {
 			//				addElement(structType, fieldName, (DStructType) pair.type, resultL);
 			JoinElement el = buildElement(structType, fieldName, (DStructType) pair.type);
-			if (el.relinfo.isParent) {
+			if (el.relinfo.notContainsFK()) {
 				addElement(el, resultL);
 			}
 		}
@@ -127,7 +117,7 @@ public class JoinTreeBuilder {
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape() && pair.name.equals(spec.fieldName)) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.isParent || RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+				if (relinfo.notContainsFK()) {
 					JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
 					el.fetchSpec = spec;
 					addElement(el, resultL);

@@ -329,7 +329,8 @@ public class AllBDDTests extends BDDBase {
 //		diagnosticFilter = "I"; //log insert statements
 		
 //		runR1000File("t0-upsert-unique.txt", 4);
-		runR1000File("t0-upsert.txt", 4);
+//		runR1000File("t0-upsert.txt", 4);
+		runR900File("t0-update-mm-all.txt", 4);
 	}
 	
 	//---

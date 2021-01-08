@@ -77,7 +77,7 @@ public class NewHLSTestBase extends BDDBase {
 	protected LetStatementExp compileQueryToLetStatement(String src) {
 		String initialSrc;
 		if  (useCustomerManyToManySrc) {
-			initialSrc = buildCustomerSrc();
+			initialSrc = buildCustomerNNSrc();
 		} else if (useCustomer11Src) {
 			initialSrc = buildCustomer11Src();
 		} else if (useCustomer11OtherWaySrc) {
@@ -153,7 +153,7 @@ public class NewHLSTestBase extends BDDBase {
 		src += "\n insert Flight {field1: 2, field2: 20}";
 		return src;
 	}
-	protected String buildCustomerSrc() {
+	protected String buildCustomerNNSrc() {
 		String src = " type Customer struct {cid int unique, x int, relation addr Address many optional  } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  many optional } end";
 		

@@ -9,7 +9,6 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
-import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -65,7 +64,7 @@ public class HLDFieldBuilder {
 		
 		JoinElement el = hld.findMatch(fromType, sf.fieldName, hld);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-		if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+		if (relinfo.isManyToMany()) {
 			//doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
 		} else if (relinfo.isParent) {
 			TypePair other = new TypePair(relinfo.otherSide.fieldName, relinfo.nearType);
@@ -90,7 +89,7 @@ public class HLDFieldBuilder {
 		for(TypePair pair: fromType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-				if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+				if (relinfo.isManyToMany()) {
 					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
 				} else if (!relinfo.isParent) {
 					addField(fieldL, fromType, pair);
@@ -110,18 +109,6 @@ public class HLDFieldBuilder {
 		fieldL.add(rf);
 		return rf;
 	}
-	private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
-		//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-		////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
-		//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
-		//
-		//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-		//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-		//			s = String.format("%s as %s", s, pair.name);
-		//			RenderedField rff = addField(fieldL, null, fieldName, s);
-		//			rff.isAssocField = true;
-		//			rff.fieldGroup = new FieldGroup((el == null), el);
-	}
 
 	private void addFetchField(FetchSpec spec, HLDQuery hld) {
 		DStructType reftype = (DStructType) DValueHelper.findFieldType(spec.structType, spec.fieldName);
@@ -134,7 +121,7 @@ public class HLDFieldBuilder {
 			for(TypePair pair: reftype.getAllFields()) {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(reftype, pair);
-					if (RelationCardinality.MANY_TO_MANY.equals(relinfo.cardinality)) {
+					if (relinfo.isManyToMany()) {
 						//TODO doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
 					} else if (!relinfo.isParent) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();
@@ -252,4 +239,16 @@ public class HLDFieldBuilder {
 		val1.alias = hld.fromAlias;
 	}
 
+	private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
+		//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
+		////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
+		//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
+		//
+		//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
+		//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
+		//			s = String.format("%s as %s", s, pair.name);
+		//			RenderedField rff = addField(fieldL, null, fieldName, s);
+		//			rff.isAssocField = true;
+		//			rff.fieldGroup = new FieldGroup((el == null), el);
+	}
 }
