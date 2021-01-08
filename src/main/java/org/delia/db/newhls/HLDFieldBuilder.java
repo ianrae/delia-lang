@@ -17,7 +17,7 @@ import org.delia.util.DValueHelper;
  *
  */
 public class HLDFieldBuilder {
-
+	
 	public void generateFields(HLDQuery hld) {
 		//TODO much more code needed here!
 		if (hld.finalField == null) {
@@ -75,9 +75,7 @@ public class HLDFieldBuilder {
 		for(TypePair pair: fromType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
-				if (relinfo.isManyToMany()) {
-					doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
-				} else if (!relinfo.isParent) {
+				if (!relinfo.isParent || relinfo.isManyToMany()) {
 					addField(fieldL, fromType, pair);
 				}
 			} else {
@@ -101,8 +99,10 @@ public class HLDFieldBuilder {
 		Optional<JoinElement> optJoin = hld.joinL.stream().filter(x -> x.fetchSpec == spec).findAny(); //should only be one
 		if (spec.isFK) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(reftype);
-			
-			addField(hld.fieldL, reftype, pkpair).source = optJoin.get();
+			RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(spec.structType, new TypePair(spec.fieldName, null));
+			if (!relinfo.isManyToMany()) {
+				addField(hld.fieldL, reftype, pkpair).source = optJoin.get();
+			}
 		} else {
 			for(TypePair pair: reftype.getAllFields()) {
 				if (pair.type.isStructShape()) {
@@ -119,16 +119,4 @@ public class HLDFieldBuilder {
 		}
 	}
 
-	private void doManyToManyAddFKofJoins(List<HLDField> fieldL, TypePair pair, RelationInfo relinfoA, JoinElement el, HLDQuery hld) {
-		//			String assocTbl = datIdMap.getAssocTblName(relinfoA.getDatId()); 
-		////			String fieldName = datIdMap.getAssocFieldFor(relinfoA);
-		//			String fieldName = datIdMap.getAssocFieldFor(relinfoA.otherSide);
-		//
-		//			AliasInfo aliasInfo = aliasManager.getAssocAlias(relinfoA.nearType, relinfoA.fieldName, assocTbl);
-		//			String s = aliasManager.buildFieldAlias(aliasInfo, fieldName);
-		//			s = String.format("%s as %s", s, pair.name);
-		//			RenderedField rff = addField(fieldL, null, fieldName, s);
-		//			rff.isAssocField = true;
-		//			rff.fieldGroup = new FieldGroup((el == null), el);
-	}
 }

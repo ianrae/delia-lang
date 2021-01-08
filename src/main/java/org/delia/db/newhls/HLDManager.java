@@ -40,13 +40,13 @@ public class HLDManager {
 	}
 	
 	public String generateRawSql(HLDQuery hld) {
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		String sql = sqlgen.generateRawSql(hld);
 		return sql;
 	}
 	
 	SqlStatement generateSql(HLDQuery hld) {
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc);
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hld);
 		return sql;
 	}

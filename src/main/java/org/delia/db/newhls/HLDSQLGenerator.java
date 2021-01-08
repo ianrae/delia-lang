@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterFunc;
@@ -27,10 +28,12 @@ import org.delia.util.DValueHelper;
 public class HLDSQLGenerator {
 	private DTypeRegistry registry;
 	private FactoryService factorySvc;
+	private DatIdMap datIdMap;
 
-	public HLDSQLGenerator(DTypeRegistry registry, FactoryService factorySvc) {
+	public HLDSQLGenerator(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
+		this.datIdMap = datIdMap;
 	}
 
 	
@@ -83,7 +86,14 @@ public class HLDSQLGenerator {
 	private void generateJoins(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		for(JoinElement el: hld.joinL) {
 			if (el.relinfo.isManyToMany()) {
-				//TODO
+				//select t0.cid,t0.x,t1.leftv,t1.rightv from Customers as t0 join cat on t1 as t0.cid=cat.leftv where t0.cid=?
+				String tbl = datIdMap.getAssocTblName(el.relinfo.getDatId());
+				sc.o(" JOIN %s as %s", tbl, el.aliasName);
+				
+				String field1 = datIdMap.getAssocFieldFor(el.relinfo);
+				String field2 = datIdMap.getAssocOtherField(el.relinfo);
+				
+				sc.o(" ON %s.%s=%s.%s", el.srcAlias, field1, el.aliasName, field2);  
 			} else {
 				//JOIN Address as t1 ON t0.id=t1.cust
 				String tbl = el.relationField.fieldType.getName();
