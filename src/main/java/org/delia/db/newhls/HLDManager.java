@@ -1,5 +1,6 @@
 package org.delia.db.newhls;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -13,10 +14,12 @@ import org.delia.type.DTypeRegistry;
 public class HLDManager {
 	private DTypeRegistry registry;
 	private FactoryService factorySvc;
+	private DatIdMap datIdMap;
 
-	public HLDManager(DTypeRegistry registry, FactoryService factorySvc) {
+	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
+		this.datIdMap = datIdMap;
 	}
 	
 	public HLDQuery fullBuildQuery(QueryExp queryExp) {
@@ -27,9 +30,12 @@ public class HLDManager {
 		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
 		joinBuilder.generateJoinTree(hld);
 
-		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc);
-		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder(aliasMgr);
-		fieldBuilder.generateFieldsAndAliases(hld);
+		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
+		fieldBuilder.generateFields(hld);
+		
+		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		aliasBuilder.assignAliases(hld);
 		return hld;
 	}
 	

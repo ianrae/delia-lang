@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hls.AliasInfo;
@@ -21,9 +22,11 @@ public class HLDAliasManager extends ServiceBase {
 	private Map<String,AliasInfo> map = new HashMap<>(); //key is type or type.field
 	private Map<String,AliasInfo> assocMap = new HashMap<>(); //key is type.field
 	protected int nextAliasIndex = 0;
+	private DatIdMap datIdMap;
 	
-	public HLDAliasManager(FactoryService factorySvc) {
+	public HLDAliasManager(FactoryService factorySvc, DatIdMap datIdMap) {
 		super(factorySvc);
+		this.datIdMap = datIdMap;
 	}
 	
 	private String createAlias() {
