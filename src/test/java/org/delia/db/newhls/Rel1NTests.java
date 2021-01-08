@@ -8,11 +8,11 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class Rel11Tests extends NewHLSTestBase {
+public class Rel1NTests extends NewHLSTestBase {
 	//one addr
 	@Test
 	public void testFKS11Parent() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[55].fks()";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -20,7 +20,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	}
 	@Test
 	public void testFKS11Child() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Address[100].fks()";
 		
 		HLDQuery hld = buildFromSrc(src, 0); 
@@ -29,7 +29,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	
 	@Test
 	public void testFetch11Parent() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -37,7 +37,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	}	
 	@Test
 	public void testFetch11Child() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Address[100].fetch('cust')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -92,7 +92,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	//implicit fetch
 	@Test
 	public void testImplicitOrderBy() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[55].orderBy('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -100,7 +100,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	}
 	@Test
 	public void testImplicitFilter() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[addr.y == 55]";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -109,7 +109,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	//then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
 	@Test
 	public void testImplicitFilter2() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[addr.y == 55].orderBy('addr')";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
@@ -122,7 +122,7 @@ public class Rel11Tests extends NewHLSTestBase {
 	@Override
 	protected String buildSrc() {
 		if (use11TwoAddr) {
-			String src = " type Customer struct {cid int unique, x int, relation addr1 Address 'a1' one optional parent, relation addr2 Address 'a2' one optional parent } end";
+			String src = " type Customer struct {cid int unique, x int, relation addr1 Address 'a1' many optional, relation addr2 Address 'a2' many optional } end";
 			src += "\n type Address struct {id int unique, y int, relation cust1 Customer 'a1' one optional, relation cust2 Customer 'a2' one optional } end";
 			return src;
 		} else {
