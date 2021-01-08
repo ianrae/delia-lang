@@ -238,7 +238,7 @@ public class HLDFieldBuilder {
 			AliasInfo info = aliasMgr.createFieldAlias(chain.fromType, fieldName);
 			val1.alias = info.alias;
 			JoinElement el = hld.findMatch(chain.fromType, fieldName, hld);
-			if (el.aliasName == null) {
+			if (el != null && el.aliasName == null) {
 				el.aliasName = info.alias;
 				info = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
 				el.srcAlias = info.alias;

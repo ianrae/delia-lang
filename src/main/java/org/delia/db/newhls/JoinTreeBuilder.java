@@ -3,7 +3,6 @@ package org.delia.db.newhls;
 import java.util.List;
 import java.util.Optional;
 
-import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
@@ -13,7 +12,6 @@ import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
-import org.delia.util.DValueHelper;
 
 /**
  * Detects all the explicit and implicit joins needed by a query.
@@ -74,7 +72,7 @@ public class JoinTreeBuilder {
 		} else if (fval.isSymbolChain()) {
 			String fieldName = fval.asString();
 			SymbolChain chain = fval.asSymbolChain();
-			addFieldJoinIfNeeded(chain.fromType, fieldName, resultL);
+			addFieldJoinIfNeeded(chain.fromType, fieldName, resultL, true);
 		} else if (fval.isFn()) {
 			//do args
 			FilterFunc filterFn = fval.asFunc();
@@ -85,9 +83,17 @@ public class JoinTreeBuilder {
 	}
 
 	private void addFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL) {
+		addFieldJoinIfNeeded(fromType, fieldName, resultL, false);
+	}
+	private void addFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL, boolean forceAdd) {
 		TypePair pair = DRuleHelper.findMatchingStructPair(fromType, fieldName);
 		if (pair != null) {
 			JoinElement el = buildElement(fromType, fieldName, (DStructType) pair.type);
+			if (forceAdd) {
+				addElement(el, resultL);
+				return;
+			}
+			
 			switch(el.relinfo.cardinality) {
 			case ONE_TO_ONE:
 			case ONE_TO_MANY:
