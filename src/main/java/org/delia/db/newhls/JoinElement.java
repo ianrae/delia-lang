@@ -17,6 +17,7 @@ public class JoinElement  {
 	public FetchSpec fetchSpec; //if not null then this join is from a fetch
 	public String aliasName;
 	public String srcAlias; //needed for JOIN ON. alias of table we're joining froms
+	public String aliasNameAdditional; //M:M we sometimes need to join assoctbl and fk table
 	
 	public boolean usedForFK() {
 		return fetchSpec != null && fetchSpec.isFK;
@@ -41,7 +42,8 @@ public class JoinElement  {
 		if (usedForFK()) {
 			joiner.add("FK");
 		}
-		String s = String.format("%s/%s", joiner.toString(), aliasName);
+		String addStr = aliasNameAdditional == null ? "" : "/" + aliasNameAdditional;
+		String s = String.format("%s/%s%s", joiner.toString(), aliasName, addStr);
 		return s;
 	}
 

@@ -51,7 +51,7 @@ public class HLDFieldBuilder {
 		JoinElement el = hld.findMatch(fromType, sf.fieldName, hld);
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 		if (relinfo.isManyToMany()) {
-			//doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+			addField(hld.fieldL, fromType, pair).source = el;
 		} else if (relinfo.isParent) {
 			TypePair other = new TypePair(relinfo.otherSide.fieldName, relinfo.nearType);
 			addField(hld.fieldL, relinfo.otherSide.nearType, other).source = el;
@@ -109,7 +109,7 @@ public class HLDFieldBuilder {
 				if (pair.type.isStructShape()) {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(reftype, pair);
 					if (relinfo.isManyToMany()) {
-						//TODO doManyToManyAddFKofJoins(fieldL, pair, relinfo, null, hld);
+						addField(hld.fieldL, reftype, pair).source = optJoin.get();
 					} else if (!relinfo.isParent) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();
 					}

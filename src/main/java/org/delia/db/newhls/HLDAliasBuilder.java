@@ -70,6 +70,13 @@ public class HLDAliasBuilder {
 					fld.alias = info2.alias;
 				}
 			}
+			
+			//need 2nd alias if M:M and a fetch
+			if (el.relinfo.isManyToMany() && el.fetchSpec != null && !el.fetchSpec.isFK) {
+				AliasInfo infoAdd = aliasMgr.createFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
+				el.aliasNameAdditional = infoAdd.alias;
+			}
+
 		}
 		
 		//and propogate alias to query fns

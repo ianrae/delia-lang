@@ -105,21 +105,27 @@ public class HLDSQLGenerator {
 				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relinfo.nearType);
 				
 				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, field1);  
-			} else {
-				//JOIN Address as t1 ON t0.id=t1.cust
-				String tbl = el.relationField.fieldType.getName();
-				sc.o(" JOIN %s as %s", tbl, el.aliasName);
-				
-				if (el.relinfo.isParent) {
-					//need to reverse, since parent doesn't have child id
-					TypePair pkpair = el.getOtherSidePK();
-					String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
-					sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, parentName);  
-				} else {
-					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
-					sc.o(" ON %s.%s=%s.%s", el.srcAlias, el.relationField.fieldName, el.aliasName, pkpair.name);  
+				if (el.fetchSpec != null && !el.fetchSpec.isFK) {
+					doSimpleJoin(sc, el, el.aliasNameAdditional);
 				}
+			} else {
+				doSimpleJoin(sc, el, el.aliasName);
 			}
+		}
+	}
+	private void doSimpleJoin(StrCreator sc, JoinElement el, String alias) {
+		//JOIN Address as t1 ON t0.id=t1.cust
+		String tbl = el.relationField.fieldType.getName();
+		sc.o(" JOIN %s as %s", tbl, alias);
+		
+		if (el.relinfo.isParent) {
+			//need to reverse, since parent doesn't have child id
+			TypePair pkpair = el.getOtherSidePK();
+			String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
+			sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, alias, parentName);  
+		} else {
+			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
+			sc.o(" ON %s.%s=%s.%s", el.srcAlias, el.relationField.fieldName, alias, pkpair.name);  
 		}
 	}
 
@@ -145,12 +151,16 @@ public class HLDSQLGenerator {
 
 
 	private NamePair mapFieldIfNeeded(HLDField rf) {
-		if (rf.source instanceof JoinElement) {
+		if (rf.fieldType.isStructShape() && rf.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) rf.source;
 			if (el.relinfo.isManyToMany()) {
-				String field1 = datIdMap.getAssocFieldFor(el.relinfo);
-				String field2 = datIdMap.getAssocOtherField(el.relinfo);
-				return new NamePair(el.aliasName, field2);
+				String field;
+				if (el.relinfo.nearType == rf.structType) {
+					field = datIdMap.getAssocOtherField(el.relinfo);
+				} else {
+					field = datIdMap.getAssocFieldFor(el.relinfo);
+				}
+				return new NamePair(el.aliasName, field);
 			}
 		}
 		return new NamePair(rf.alias, rf.fieldName);

@@ -100,6 +100,35 @@ public class HLDAliasManager extends ServiceBase {
 		map.put(key, info);
 		return info;
 	}
+	public AliasInfo createFieldAliasAdditional(DStructType structType, String fieldName) {
+		AliasInfo info = getFieldAliasAdditional(structType, fieldName);
+		if (info != null) {
+			return null;
+		}
+		info = new AliasInfo();
+		info.alias = createAlias();
+		info.structType = structType;
+		info.fieldName = fieldName;
+		
+		TypePair pair = DValueHelper.findField(structType, fieldName);
+		info.tblType = (DStructType) pair.type;
+		info.tblName = info.tblType.getName();
+		
+		String key = String.format("ADD_%s.%s", structType.getName(), fieldName);
+		map.put(key, info);
+		return info;
+	}
+	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
+		String key = String.format("%s.%s", structType.getName(), fieldName);
+		return map.get(key);
+	}
+	public AliasInfo getFieldAliasAdditional(DStructType structType, String fieldName) {
+		String key = String.format("ADD_%s.%s", structType.getName(), fieldName);
+		return map.get(key);
+	}
+	
+	
+	
 	public void createAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		AliasInfo info = getAssocAlias(structType, fieldName, assocTbl);
 		if (info != null) {
@@ -191,10 +220,6 @@ public class HLDAliasManager extends ServiceBase {
 //		}
 //		return null; //oops!
 //	}
-	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
-		String key = String.format("%s.%s", structType.getName(), fieldName);
-		return map.get(key);
-	}
 	private AliasInfo getAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
 		AliasInfo info = assocMap.get(key);
@@ -234,5 +259,5 @@ public class HLDAliasManager extends ServiceBase {
 //			return buildTblAlias(info);
 //		}
 //	}
-	
+
 }
