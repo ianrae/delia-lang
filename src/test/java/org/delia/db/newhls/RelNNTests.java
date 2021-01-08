@@ -20,15 +20,15 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fks()";
 		
 		HLDQuery hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void testFKS11Child() {
 		useCustomerManyToManySrc = true;
 		String src = "let x = Address[100].fks()";
 		
-		HLDQuery hld = buildFromSrc(src, 0); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust FROM Address as t0 WHERE t0.id=?", "100");
+		HLDQuery hld = buildFromSrc(src, 1); 
+		chkFullSql(hld, "SELECT t0.id,t0.y,t1.leftv FROM Address as t0 JOIN CustomerAddressDat1 as t1 ON t0.id=t1.rightv WHERE t0.id=?", "100");
 	}	
 	
 	@Test

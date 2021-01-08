@@ -76,7 +76,8 @@ public class HLDFieldBuilder {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				if (!relinfo.isParent || relinfo.isManyToMany()) {
-					addField(fieldL, fromType, pair);
+					JoinElement el = hld.findMatch(relinfo.nearType, relinfo.fieldName, hld);
+					addField(fieldL, fromType, pair).source = el;
 				}
 			} else {
 				addField(fieldL, fromType, pair);

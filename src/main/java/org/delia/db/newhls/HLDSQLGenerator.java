@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
-import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
@@ -26,6 +25,17 @@ import org.delia.util.DValueHelper;
  *
  */
 public class HLDSQLGenerator {
+	private static class NamePair {
+		public String alias;
+		public String name;
+		
+		public NamePair(String alias, String name) {
+			this.alias = alias;
+			this.name = name;
+		}
+	}
+	
+	
 	private DTypeRegistry registry;
 	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
@@ -92,8 +102,9 @@ public class HLDSQLGenerator {
 				
 				String field1 = datIdMap.getAssocFieldFor(el.relinfo);
 				String field2 = datIdMap.getAssocOtherField(el.relinfo);
+				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relinfo.nearType);
 				
-				sc.o(" ON %s.%s=%s.%s", el.srcAlias, field1, el.aliasName, field2);  
+				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, field1);  
 			} else {
 				//JOIN Address as t1 ON t0.id=t1.cust
 				String tbl = el.relationField.fieldType.getName();
@@ -122,13 +133,27 @@ public class HLDSQLGenerator {
 		}
 		
 		for(HLDField rf: hld.fieldL) {
+			NamePair npair = mapFieldIfNeeded(rf);
 			if (rf.asStr != null) {
-				joiner.add(String.format("%s.%s as %s", rf.alias, rf.fieldName, rf.asStr));
+				joiner.add(String.format("%s.%s as %s", npair.alias, npair.name, rf.asStr));
 			} else {
-				joiner.add(String.format("%s.%s", rf.alias, rf.fieldName));
+				joiner.add(String.format("%s.%s", npair.alias, npair.name));
 			}
 		}
 		return joiner;
+	}
+
+
+	private NamePair mapFieldIfNeeded(HLDField rf) {
+		if (rf.source instanceof JoinElement) {
+			JoinElement el = (JoinElement) rf.source;
+			if (el.relinfo.isManyToMany()) {
+				String field1 = datIdMap.getAssocFieldFor(el.relinfo);
+				String field2 = datIdMap.getAssocOtherField(el.relinfo);
+				return new NamePair(el.aliasName, field2);
+			}
+		}
+		return new NamePair(rf.alias, rf.fieldName);
 	}
 
 
