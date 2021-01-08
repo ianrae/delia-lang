@@ -69,7 +69,7 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class HLDFinalFieldTests extends NewHLSTestBase {
+public class Rel11FinalFieldTests extends NewHLSTestBase {
 	@Test
 	public void testScalar() {
 		useCustomer11Src = true;
