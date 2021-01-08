@@ -131,8 +131,9 @@ public class HLDSQLGenerator {
 			String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
 			sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, alias, parentName);  
 		} else {
+			NamePair npair = doMapFieldIfNeeded(el.srcAlias, el.relationField.fieldName, el.relationField.dtype, el);
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
-			sc.o(" ON %s.%s=%s.%s", el.srcAlias, el.relationField.fieldName, alias, pkpair.name);  
+			sc.o(" ON %s.%s=%s.%s", npair.alias, npair.name, alias, pkpair.name);  
 		}
 	}
 

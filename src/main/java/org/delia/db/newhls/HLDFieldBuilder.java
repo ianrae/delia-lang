@@ -107,7 +107,9 @@ public class HLDFieldBuilder {
 		if (spec.isFK) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(reftype);
 			RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(spec.structType, new TypePair(spec.fieldName, null));
-			if (!relinfo.isManyToMany()) {
+			//only get fk fields if is a join for it
+			JoinElement el = optJoin.orElse(null);
+			if (!relinfo.isManyToMany() || (el != null && el.usedForFK())) {
 				addField(hld.fieldL, reftype, pkpair).source = optJoin.get();
 			}
 		} else {
@@ -116,7 +118,7 @@ public class HLDFieldBuilder {
 					RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(reftype, pair);
 					
 					//only get fk fields if is a join for it
-					JoinElement el = hld.findMatchBothSided(relinfo, hld);
+					JoinElement el = optJoin.orElse(null);
 					if (relinfo.notContainsFK() && el != null) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();
 					} else if (!relinfo.isParent && !relinfo.isManyToMany()) {
