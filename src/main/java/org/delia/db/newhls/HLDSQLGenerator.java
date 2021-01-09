@@ -26,25 +26,16 @@ import org.delia.util.DValueHelper;
  *
  */
 public class HLDSQLGenerator {
-	private static class NamePair {
-		public String alias;
-		public String name;
-		
-		public NamePair(String alias, String name) {
-			this.alias = alias;
-			this.name = name;
-		}
-	}
-	
-	
 	private DTypeRegistry registry;
 	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
+	private SqlColumnBuilder columnBuilder;
 
 	public HLDSQLGenerator(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
+		this.columnBuilder = new SqlColumnBuilder(datIdMap);
 	}
 
 	
@@ -86,8 +77,8 @@ public class HLDSQLGenerator {
 			if (el != null && el.relinfo.notContainsFK()) {
 				if (el.relinfo.isManyToMany()) {
 					//passing null here ok because we know its M:M
-					NamePair npair = doMapFieldIfNeeded(el.aliasName, null, fnspec.structField.dtype, el);
-					sc.o(" %s.%s", npair.alias, npair.name);  
+					SqlColumn npair = doMapFieldIfNeeded(el.aliasName, null, fnspec.structField.dtype, el);
+					sc.o(" %s", npair.toString());  
 				} else {
 					//need to reverse, since parent doesn't have child id
 					String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
@@ -131,9 +122,9 @@ public class HLDSQLGenerator {
 			String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
 			sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, alias, parentName);  
 		} else {
-			NamePair npair = doMapFieldIfNeeded(el.srcAlias, el.relationField.fieldName, el.relationField.dtype, el);
+			SqlColumn npair = doMapFieldIfNeeded(el.srcAlias, el.relationField.fieldName, el.relationField.dtype, el);
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relationField.fieldType);
-			sc.o(" ON %s.%s=%s.%s", npair.alias, npair.name, alias, pkpair.name);  
+			sc.o(" ON %s=%s.%s", npair.toString(), alias, pkpair.name);  
 		}
 	}
 
@@ -147,43 +138,26 @@ public class HLDSQLGenerator {
 		}
 		
 		for(HLDField rf: hld.fieldL) {
-			NamePair npair = mapFieldIfNeeded(rf);
+			SqlColumn npair = mapFieldIfNeeded(rf);
 			if (rf.asStr != null) {
-				joiner.add(String.format("%s.%s as %s", npair.alias, npair.name, rf.asStr));
+				joiner.add(String.format("%s as %s", npair.toString(), rf.asStr));
 			} else {
-				joiner.add(String.format("%s.%s", npair.alias, npair.name));
+				joiner.add(String.format("%s", npair.toString()));
 			}
 		}
 		return joiner;
 	}
 
 
-	private NamePair mapFieldIfNeeded(HLDField rf) {
+	private SqlColumn mapFieldIfNeeded(HLDField rf) {
 		if (rf.fieldType.isStructShape() && rf.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) rf.source;
 			return doMapFieldIfNeeded(rf.alias, rf.fieldName, rf.structType, el);
 		}
-		return new NamePair(rf.alias, rf.fieldName);
+		return new SqlColumn(rf.alias, rf.fieldName);
 	}
-	private NamePair doMapFieldIfNeeded(String alias, String fieldName, DStructType structType, JoinElement el) {
-		if (el.relinfo.isManyToMany()) {
-			String field;
-			if (el.relinfo.nearType == structType) {
-				field = datIdMap.getAssocOtherField(el.relinfo);
-			} else {
-				field = datIdMap.getAssocFieldFor(el.relinfo);
-			}
-			return new NamePair(el.aliasName, field);
-		} else if (el.relinfo.isParent) {
-			if (el.relinfo.fieldName.equals(fieldName)) {
-				TypePair pkpair = el.getOtherSidePK();
-				return new NamePair(el.aliasName, pkpair.name);
-			} else {
-				return new NamePair(alias, fieldName);
-			}
-		} else {
-			return new NamePair(alias, fieldName);
-		}
+	private SqlColumn doMapFieldIfNeeded(String alias, String fieldName, DStructType structType, JoinElement el) {
+		return columnBuilder.adjust(alias, structType, fieldName, el);
 	}
 
 
