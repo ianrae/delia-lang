@@ -12,6 +12,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.TableExistenceService;
+import org.delia.db.newhls.HLDWhereGenImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.AliasedFragment;
@@ -464,6 +465,10 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
 		
+//		HLDWhereGenImpl hldwheregen = new HLDWhereGenImpl();
+//		List<SqlFragment> fragL = hldwheregen.createWere(spec, structType, selectFrag.statement);
+//		selectFrag.whereL.addAll(fragL);
+
 		if (whereGen == null) {
 			whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator(), datIdMap);
 		}

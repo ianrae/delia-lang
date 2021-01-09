@@ -49,6 +49,13 @@ public class HLDSQLGenerator {
 		SqlStatement stm = doGenerateSql(hld, null);
 		return stm.sql;
 	}
+	public String generateSqlWhere(HLDQuery hld, SqlStatement stm) {
+		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
+		StrCreator sc = new StrCreator();
+		
+		generateWhere(sc, hld, stm, paramGen);
+		return sc.toString();
+	}
 	
 	private SqlStatement doGenerateSql(HLDQuery hld, SqlParamGenerator paramGen) {
 		StrCreator sc = new StrCreator();

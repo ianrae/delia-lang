@@ -83,6 +83,10 @@ public class HLDManager {
 		SqlStatement sql = sqlgen.generateSqlStatement(hld);
 		return sql;
 	}
+	public HLDSQLGenerator createSQLGenerator() {
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		return sqlgen;
+	}
 	public SqlStatement generateSql(HLDDelete hlddel) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hlddel);
