@@ -42,7 +42,7 @@ public class HLDInsertSQLGenerator {
 //				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
 //		ZTableExistenceService existSvc = new ZTableExistenceService();
 //		fpSvc.setExistSvc(existSvc);
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, null, datIdMap, registry);
+		HLDInsertFragmentParser parser = new HLDInsertFragmentParser(factorySvc, datIdMap, registry);
 		parser.existSvc = new ZTableExistenceService();
 		parser.tblinfoL = buildTblList(dval); //new ArrayList<>();
 		

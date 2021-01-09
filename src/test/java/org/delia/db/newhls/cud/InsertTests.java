@@ -95,12 +95,12 @@ public class InsertTests extends NewHLSTestBase {
 	public void testMN2a() {
 		useCustomerManyToManySrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
+		String src = addSrc(src0, "insert Address {id: 100, y: 45, cust:55}");
 		
 		HLDInsert hldins = buildFromSrcInsert(src, 1); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
-		chkInsertSql(stmgrp, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Address (id, y) VALUES(?, ?)", "100", "45");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");
 	}
 	
 	
