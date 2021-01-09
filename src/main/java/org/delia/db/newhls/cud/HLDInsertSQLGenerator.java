@@ -32,7 +32,6 @@ public class HLDInsertSQLGenerator {
 
 	
 	public SqlStatementGroup generate(DValue dval) {
-		
 //		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 //		WhereFragmentGenerator whereGen = createWhereFragmentGenerator(dbctx.varEvaluator, zexec.getDatIdMap());
 //		FragmentParserService fpSvc = new FragmentParserService(factorySvc, registry, 
@@ -51,6 +50,20 @@ public class HLDInsertSQLGenerator {
 		return stgroup;
 	}
 
+	public SqlStatementGroup generateUpdate(DValue dval) {
+		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
+		HLDInsertFragmentParser parser = new HLDInsertFragmentParser(factorySvc, datIdMap, registry, whereGen, aliasMgr);
+		parser.existSvc = new ZTableExistenceService();
+		parser.tblinfoL = buildTblList(dval); 
+		
+		String typeName = dval.getType().getName();
+		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
+		SqlStatementGroup stgroup = parser.renderInsertGroup(selectFrag);
+		
+		return stgroup;
+	}
+	
+
 
 	private List<TableInfo> buildTblList(DValue dval) {
 		List<TableInfo> tblinfoL = new ArrayList<>();
@@ -67,5 +80,4 @@ public class HLDInsertSQLGenerator {
 		}
 		return tblinfoL;
 	}
-	
 }

@@ -70,6 +70,7 @@ public class HLDManager {
 	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
+		hld.hld = fullBuildQuery(updateExp.queryExp);
 		return hld;
 	}
 	
@@ -99,6 +100,14 @@ public class HLDManager {
 		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
 		
 		SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.cres.dval);
+		return stmgrp;
+	}
+
+	public SqlStatementGroup generateSql(HLDUpdate hldupdate) {
+		HLDWhereGen whereGen = new HLDWhereGenImpl(this);
+		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
+		
+		SqlStatementGroup stmgrp = insertSqlGen.generateUpdate(hldupdate.cres.dval);
 		return stmgrp;
 	}
 }

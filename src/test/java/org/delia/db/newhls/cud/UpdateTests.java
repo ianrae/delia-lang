@@ -170,7 +170,7 @@ public class UpdateTests extends NewHLSTestBase {
 	}
 
 	protected SqlStatementGroup genUpdateSql(HLDUpdate hldupdate, int numStatements) {
-		SqlStatementGroup stmgrp = null; //mgr.generateSql(hldupdate);
+		SqlStatementGroup stmgrp = mgr.generateSql(hldupdate);
 		assertEquals(numStatements, stmgrp.statementL.size());
 		return stmgrp;
 	}

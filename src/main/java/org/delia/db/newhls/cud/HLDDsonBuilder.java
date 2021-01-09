@@ -34,11 +34,11 @@ public class HLDDsonBuilder {
 		
 		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
-		hldins.cres = buildValue(dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		return hldins;
 	}
 
-	private ConversionResult buildValue(DStructType dtype, DsonExp dsonExp, DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {
+	private ConversionResult buildValue(boolean doFull, DStructType dtype, DsonExp dsonExp, DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {
 		ConversionResult cres = new ConversionResult();
 		cres.localET = new SimpleErrorTracker(log);
 		if (insertPrebuiltValueIterator != null) {
@@ -52,7 +52,11 @@ public class HLDDsonBuilder {
 		//			}
 
 		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, varEvaluator, sprigSvc);
-		cres.dval = converter.convertOne(dtype.getName(), dsonExp, cres);
+		if (doFull) {
+			cres.dval = converter.convertOne(dtype.getName(), dsonExp, cres);
+		} else {
+			cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
+		}
 		return cres;
 	}
 
@@ -61,7 +65,7 @@ public class HLDDsonBuilder {
 		
 		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
-		hldins.cres = buildValue(dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		hldins.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		return hldins;
 	}
 	
