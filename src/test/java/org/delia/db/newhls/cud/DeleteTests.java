@@ -50,7 +50,7 @@ public class DeleteTests extends NewHLSTestBase {
 		QueryExp queryExp = deleteExp.queryExp;
 		log.log(src);
 		
-		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap());
+		mgr = createManager(); 
 		HLDDelete hlddel = mgr.fullBuildDelete(queryExp);
 		log.log(hlddel.toString());
 		assertEquals(expectedJoins, hlddel.hld.joinL.size());

@@ -18,6 +18,8 @@ import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.ResultValue;
+import org.delia.sprig.SprigService;
+import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -38,12 +40,18 @@ public class NewHLSTestBase extends BDDBase {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
-		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap());
+		mgr = createManager();
 		HLDQuery hld = mgr.fullBuildQuery(queryExp);
 		log.log(hld.toString());
 		assertEquals(expectedJoins, hld.joinL.size());
 		return hld;
 	}
+
+	protected HLDManager createManager() {
+		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
+		return new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap(), sprigSvc);
+	}
+	
 	protected void chkRawSql(HLDQuery hld, String expected) {
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);

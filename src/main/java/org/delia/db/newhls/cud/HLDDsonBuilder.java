@@ -19,16 +19,22 @@ public class HLDDsonBuilder {
 	private DTypeRegistry registry;
 	private Log log;
 	private FactoryService factorySvc;
+	private SprigService sprigSvc;
 
-	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log) {
+	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc) {
 		this.registry = registry;
 		this.log = log;
 		this.factorySvc = factorySvc;
+		this.sprigSvc = sprigSvc;
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		// TODO Auto-generated method stub
-		return null;
+		HLDInsert hldins = new HLDInsert();
+		
+		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
+		DValueIterator insertPrebuiltValueIterator = null; //TODO
+		hldins.cres = buildValue(dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		return hldins;
 	}
 
 	private ConversionResult buildValue(DStructType dtype, DsonExp dsonExp, DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {

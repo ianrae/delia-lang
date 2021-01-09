@@ -50,7 +50,7 @@ public class InsertTests extends NewHLSTestBase {
 		InsertStatementExp insertExp = compileToInsertStatement(src);
 		log.log(src);
 		
-		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap());
+		mgr = createManager(); 
 		HLDInsert hldins = mgr.fullBuildInsert(insertExp);
 		log.log(hldins.toString());
 //		assertEquals(expectedJoins, hldins.hld.joinL.size());

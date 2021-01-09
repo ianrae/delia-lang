@@ -9,6 +9,8 @@ import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.log.Log;
+import org.delia.sprig.SprigService;
+import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DTypeRegistry;
 
 /**
@@ -21,12 +23,14 @@ public class HLDManager {
 	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
 	private Log log;
+	private SprigService sprigSvc;
 
-	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap) {
+	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
 		this.log = log;
+		this.sprigSvc = sprigSvc;
 	}
 	
 	public HLDQuery fullBuildQuery(QueryExp queryExp) {
@@ -51,7 +55,7 @@ public class HLDManager {
 		return hlddel;
 	}
 	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 
