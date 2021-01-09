@@ -3,6 +3,7 @@ package org.delia.db.newhls;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DTypeRegistry;
 
@@ -38,6 +39,11 @@ public class HLDManager {
 		aliasBuilder.assignAliases(hld);
 		return hld;
 	}
+	public HLDDelete fullBuildDelete(QueryExp queryExp) {
+		HLDQuery hld = fullBuildQuery(queryExp);
+		HLDDelete hlddel = new  HLDDelete(hld);
+		return hlddel;
+	}
 	
 	public String generateRawSql(HLDQuery hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
@@ -45,9 +51,15 @@ public class HLDManager {
 		return sql;
 	}
 	
-	SqlStatement generateSql(HLDQuery hld) {
+	public SqlStatement generateSql(HLDQuery hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hld);
 		return sql;
 	}
+	public SqlStatement generateSql(HLDDelete hlddel) {
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		SqlStatement sql = sqlgen.generateSqlStatement(hlddel);
+		return sql;
+	}
+	
 }
