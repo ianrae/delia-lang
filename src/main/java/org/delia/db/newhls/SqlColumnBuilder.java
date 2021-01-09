@@ -22,9 +22,17 @@ public class SqlColumnBuilder {
 		if (el.relinfo.isManyToMany()) {
 			String field;
 			if (el.relinfo.nearType == structType) {
-				field = datIdMap.getAssocOtherField(el.relinfo);
+				if (el.relinfo.fieldName.equals(fieldName)) {
+					field = datIdMap.getAssocOtherField(el.relinfo);
+				} else {
+					field = datIdMap.getAssocFieldFor(el.relinfo);
+				}
 			} else {
-				field = datIdMap.getAssocFieldFor(el.relinfo);
+				if (el.relinfo.fieldName.equals(fieldName)) {
+					field = datIdMap.getAssocOtherField(el.relinfo);
+				} else {
+					field = datIdMap.getAssocFieldFor(el.relinfo);
+				}
 			}
 			return new SqlColumn(el.aliasName, field);
 		} else if (el.relinfo.isParent) {

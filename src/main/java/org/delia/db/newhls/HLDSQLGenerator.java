@@ -99,7 +99,7 @@ public class HLDSQLGenerator {
 				sc.o(" JOIN %s as %s", tbl, el.aliasName);
 				
 				String field1 = datIdMap.getAssocFieldFor(el.relinfo);
-				String field2 = datIdMap.getAssocOtherField(el.relinfo);
+//				String field2 = datIdMap.getAssocOtherField(el.relinfo);
 				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(el.relinfo.nearType);
 				
 				sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, el.aliasName, field1);  
@@ -151,6 +151,7 @@ public class HLDSQLGenerator {
 
 	private SqlColumn mapFieldIfNeeded(HLDField rf) {
 		if (rf.fieldType.isStructShape() && rf.source instanceof JoinElement) {
+//		if (rf.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) rf.source;
 			return doMapFieldIfNeeded(rf.alias, rf.fieldName, rf.structType, el);
 		}
