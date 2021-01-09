@@ -11,25 +11,16 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.db.SpanHelper;
 import org.delia.db.TableExistenceService;
-import org.delia.db.sql.QueryType;
-import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.AliasedFragment;
-import org.delia.db.sql.fragment.FKHelper;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
-import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.InsertStatementFragment;
-import org.delia.db.sql.fragment.JoinFragment;
 import org.delia.db.sql.fragment.OpFragment;
-import org.delia.db.sql.fragment.SelectFragmentParser;
 import org.delia.db.sql.fragment.SqlFragment;
 import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
-import org.delia.db.sql.fragment.WhereFragmentGenerator;
-import org.delia.db.sql.prepared.SelectFuncHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -47,9 +38,10 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
-//single use!!!
 /**
- * Copy of InsertFragmentParser but seperated from SelectFragmentParser
+ * Copy of InsertFragmentParser but seperated from SelectFragmentParser.
+ * 
+ * single use!!!
  * @author ian
  *
  */
@@ -375,7 +367,7 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 							DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
 							RelationInfo info = ruleMany.relInfo;
 							RelationInfo otherSide = ruleMany.relInfo.otherSide;
-							PrimaryKey pk = info.nearType.getPrimaryKey();
+							//PrimaryKey pk = info.nearType.getPrimaryKey();
 
 							for(DValue fkval: inner.asRelation().getMultipleKeys()) {
 								addFkUpdateStatement(insertFrag, info, otherSide, pkval, fkval);
@@ -451,15 +443,14 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	}
 	
 	private int nextAliasIndex = 0;
-	private QueryTypeDetector queryDetectorSvc;
-	private WhereFragmentGenerator whereGen;
-	private SelectFuncHelper selectFnHelper;
+//	private QueryTypeDetector queryDetectorSvc;
+//	private WhereFragmentGenerator whereGen;
+//	private SelectFuncHelper selectFnHelper;
 	public TableExistenceService existSvc; //public as a hack
-	private FKHelper fkHelper;
-	private JoinFragment savedJoinedFrag;
+//	private FKHelper fkHelper;
+//	private JoinFragment savedJoinedFrag;
 	public List<TableInfo> tblinfoL; //public as a hack
-	private SpanHelper spanHelper;
-	
+//	private SpanHelper spanHelper;
 	
 	
 	public void createAlias(AliasedFragment frag) {
@@ -468,23 +459,23 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	}
 	
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
-		
-		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
-		switch(queryType) {
-		case ALL_ROWS:
-		{
-		}
-			break;
-		case OP:
-			whereGen.addWhereClauseOp(spec, structType, selectFrag);
-			break;
-		case PRIMARY_KEY:
-		default:
-		{
-			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
-		}
-			break;
-		}
+		DeliaExceptionHelper.throwError("initWhere-not-impl", "");
+//		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
+//		switch(queryType) {
+//		case ALL_ROWS:
+//		{
+//		}
+//			break;
+//		case OP:
+//			whereGen.addWhereClauseOp(spec, structType, selectFrag);
+//			break;
+//		case PRIMARY_KEY:
+//		default:
+//		{
+//			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
+//		}
+//			break;
+//		}
 	}
 	
 	private TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName) {

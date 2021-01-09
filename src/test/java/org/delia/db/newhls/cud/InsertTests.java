@@ -103,6 +103,31 @@ public class InsertTests extends NewHLSTestBase {
 		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");
 	}
 	
+	@Test
+	public void testMNInsertParent() {
+		//adapted from t0-insert-parent.txt: add workers
+		useCustomerManyToManySrc = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "insert Address {id: 100, y: 45}");
+		src = addSrc(src, "insert Address {id: '101', y:46 }");
+		src = addSrc(src, "insert Customer {cid: 56, x:66, addr: ['100','101'] }");
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 3); 
+		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
+		dumpGrp(stmgrp);
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "100");
+		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "101");
+	}
+	
+	
+	private void dumpGrp(SqlStatementGroup stmgrp) {
+		log.log("grp: %s", stmgrp.statementL.size());
+		for(SqlStatement stm: stmgrp.statementL) {
+			log.log(stm.sql);
+		}
+	}
+	
 	
 	//-------------------------
 	protected HLDInsert buildFromSrcInsert(String src, int statementIndex) {

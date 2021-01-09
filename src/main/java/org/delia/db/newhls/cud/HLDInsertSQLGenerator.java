@@ -46,7 +46,6 @@ public class HLDInsertSQLGenerator {
 		parser.existSvc = new ZTableExistenceService();
 		parser.tblinfoL = buildTblList(dval); //new ArrayList<>();
 		
-		
 		String typeName = dval.getType().getName();
 		InsertStatementFragment selectFrag = parser.parseInsert(typeName, dval);
 		SqlStatementGroup stgroup = parser.renderInsertGroup(selectFrag);

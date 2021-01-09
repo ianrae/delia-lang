@@ -332,7 +332,9 @@ public class H2BDDTests extends BDDBase {
 //		runR1600File("t0-fetch.txt", 3);
 //		runR560File("t0-self-NN.txt", 4);
 //		runR560File("t0-self-N1.txt", 4);
-		runR900File("t0-update-mm-all.txt", 4);
+//		runR900File("t0-update-mm-all.txt", 4);
+		runR700File("t0-insert-parent.txt", 2);
+		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
 	//---
