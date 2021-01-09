@@ -39,15 +39,17 @@ import org.delia.util.DValueHelper;
 		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc) {
 			super(factorySvc);
 			
-			this.registry = fpSvc.registry;
-			this.queryDetectorSvc = fpSvc.createQueryTypeDetector();
-			this.tblinfoL = fpSvc.tblinfoL;
-			this.whereGen = fpSvc.whereGen; 
-			this.selectFnHelper = fpSvc.createSelectFuncHelper(); 
-			this.existSvc = fpSvc.createTableExistenceService(); 
-			
-			this.fkHelper = fpSvc.createFKHelper(); 
-			this.spanHelper = fpSvc.spanHelper;
+			this.registry = fpSvc == null ? null : fpSvc.registry; //hack hack hack
+			if (fpSvc != null) {
+				this.queryDetectorSvc = fpSvc.createQueryTypeDetector();
+				this.tblinfoL = fpSvc.tblinfoL;
+				this.whereGen = fpSvc.whereGen; 
+				this.selectFnHelper = fpSvc.createSelectFuncHelper(); 
+				this.existSvc = fpSvc.createTableExistenceService(); 
+				
+				this.fkHelper = fpSvc.createFKHelper(); 
+				this.spanHelper = fpSvc.spanHelper;
+			}
 		}
 		
 		public void createAlias(AliasedFragment frag) {

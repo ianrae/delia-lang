@@ -1,16 +1,12 @@
 package org.delia.db.newhls.cud;
 
 
-import static org.junit.Assert.assertEquals;
-
 import org.delia.api.DeliaSessionImpl;
-import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.compiler.ast.QueryExp;
-import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.junit.Test;
 
 /**
@@ -23,10 +19,10 @@ public class InsertTests extends NewHLSTestBase {
 	@Test
 	public void test1() {
 		useCustomer11Src = true;
-		String src = "delete Customer[55]";
+		String src = "insert Customer {cid: 1, x: 45}";
 		
 		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
+		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
 	}
 //	@Test
 //	public void test2() {
@@ -67,8 +63,15 @@ public class InsertTests extends NewHLSTestBase {
 		return null;
 	}
 	
-	protected void chkInsertSql(HLDInsert hldins, String expected, String...args) {
-		SqlStatement stm = null; //mgr.generateSql(hldins);
+	protected void chkInsertSql(HLDInsert hldins, int numStatements, String expected, String...args) {
+		SqlStatementGroup stmgrp = mgr.generateSql(hldins);
+		SqlStatement stm = stmgrp.statementL.get(0);
 		chkStm(stm, expected, args);
+		assertEquals(numStatements, stmgrp.statementL.size());
+	}
+
+	private void assertEquals(int numStatements, int size) {
+		// TODO Auto-generated method stub
+		
 	}
 }

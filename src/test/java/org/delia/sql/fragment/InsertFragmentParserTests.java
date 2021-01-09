@@ -334,7 +334,7 @@ public class InsertFragmentParserTests extends FragmentParserTestBase {
 		
 		DBAccessContext dbctx = new DBAccessContext(runner);
 		ZDBExecutor zexec = dao.getDbInterface().createExecutor(); //don't worry about closing, is MME
-		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, dao.getMostRecentSession().getDatIdMap());
+		InsertFragmentParser parser = new InsertFragmentParser(factorySvc, fpSvc, dao.getMostRecentSession().getDatIdMap(), null);
 		return parser;
 	}
 

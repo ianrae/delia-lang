@@ -19,6 +19,7 @@ import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
@@ -32,8 +33,12 @@ public class InsertFragmentParser extends SelectFragmentParser {
 	private boolean useAliases = false;
 	private DatIdMap datIdMap;
 
-	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, DatIdMap datIdMap) {
+	public InsertFragmentParser(FactoryService factorySvc, FragmentParserService fpSvc, DatIdMap datIdMap, DTypeRegistry registry) {
 		super(factorySvc, fpSvc);
+		//hack. if fsSvc is null then use registry
+		if (fpSvc == null) {
+			this.registry = registry;
+		}
 		this.datIdMap = datIdMap;
 	}
 

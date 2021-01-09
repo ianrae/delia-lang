@@ -8,6 +8,7 @@ import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
@@ -85,5 +86,12 @@ public class HLDManager {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hlddel);
 		return sql;
+	}
+
+	public SqlStatementGroup generateSql(HLDInsert hldins) {
+		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap);
+		
+		SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.cres.dval);
+		return stmgrp;
 	}
 }
