@@ -27,51 +27,51 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
 	@Test
 	public void test2() {
 		useCustomer11Src = true;
-		String src = "insert Address {id: 1, y: 45}";
+		String src = "update Address[100] { y: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
 	}
 	@Test
 	public void test2a() {
 		useCustomer11Src = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
+		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 1); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.cust = ?, t0.y = ? WHERE t0.id=?", "55", "45", "1");
 	}
 	
 	// --- 1:N ---
 	@Test
 	public void test1N() {
 		useCustomer1NSrc = true;
-		String src = "insert Customer {cid: 1, x: 45}";
+		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
 	@Test
 	public void test1N2() {
 		useCustomer1NSrc = true;
-		String src = "insert Address {id: 1, y: 45}";
+		String src = "update Address[100] {y: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
 	}
 	@Test
 	public void test1N2a() {
 		useCustomer1NSrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
+		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 1); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.cust = ?, t0.y = ? WHERE t0.id=?", "55", "45", "100");
 	}
 	@Test
 	public void test1NInsertParent() {
@@ -80,10 +80,10 @@ public class UpdateTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "insert Address {id: 100, y: 45}");
 		src = addSrc(src, "insert Address {id: '101', y:46 }");
-		src = addSrc(src, "insert Customer {cid: 56, x:66, addr: ['100','101'] }");
+		src = addSrc(src, "update Customer[56] {x:66, addr: ['100','101'] }");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 3); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
 		chkUpdateSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
