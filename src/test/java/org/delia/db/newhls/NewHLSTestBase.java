@@ -75,6 +75,11 @@ public class NewHLSTestBase extends BDDBase {
 	}
 	
 	protected LetStatementExp compileQueryToLetStatement(String src) {
+		DeliaSessionImpl sessimpl = doCompileStatement(src);
+		LetStatementExp letStatement = findLet(sessimpl);
+		return letStatement;
+	}
+	protected DeliaSessionImpl doCompileStatement(String src) {
 		String initialSrc;
 		if  (useCustomerManyToManySrc) {
 			initialSrc = buildCustomerNNSrc();
@@ -100,8 +105,7 @@ public class NewHLSTestBase extends BDDBase {
 		ResultValue res = delia.continueExecution(src, session);
 		
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
-		LetStatementExp letStatement = findLet(sessimpl);
-		return letStatement;
+		return sessimpl;
 	}
 
 	protected LetStatementExp findLet(DeliaSession session) {
