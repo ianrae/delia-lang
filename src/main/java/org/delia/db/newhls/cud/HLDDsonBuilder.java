@@ -2,6 +2,7 @@ package org.delia.db.newhls.cud;
 
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.InsertStatementExp;
+import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -53,6 +54,15 @@ public class HLDDsonBuilder {
 		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, varEvaluator, sprigSvc);
 		cres.dval = converter.convertOne(dtype.getName(), dsonExp, cres);
 		return cres;
+	}
+
+	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
+		HLDUpdate hldins = new HLDUpdate(null);//fill in later
+		
+		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
+		DValueIterator insertPrebuiltValueIterator = null; //TODO
+		hldins.cres = buildValue(dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		return hldins;
 	}
 	
 	

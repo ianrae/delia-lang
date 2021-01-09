@@ -27,7 +27,6 @@ public class HLDWhereGenImpl implements HLDWhereGen {
 		String sqlwhere = gen.generateSqlWhere(hld, statement);
 		int n2 = statement.paramL.size();
 		
-		
 		HLDWhereFragment frag = new HLDWhereFragment(sqlwhere, n2 - n1);
 		List<SqlFragment> list = new ArrayList<>();
 		list.add(frag);

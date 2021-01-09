@@ -3,11 +3,13 @@ package org.delia.db.newhls;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
+import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -62,19 +64,14 @@ public class HLDManager {
 	}
 	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
-
-
-//		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
-//		fieldBuilder.generateFields(hld);
-//		
-//		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-//		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
-//		aliasBuilder.assignAliases(hld);
 		return hld;
 	}
-	
+	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
+		return hld;
+	}
 	
 	public String generateRawSql(HLDQuery hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
