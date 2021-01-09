@@ -20,11 +20,13 @@ public class HLDInsertSQLGenerator {
 	private DTypeRegistry registry;
 	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
+	private HLDWhereGen whereGen;
 
-	public HLDInsertSQLGenerator(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap) {
+	public HLDInsertSQLGenerator(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, HLDWhereGen whereGen) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
+		this.whereGen = whereGen;
 	}
 
 	
@@ -36,7 +38,7 @@ public class HLDInsertSQLGenerator {
 //				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
 //		ZTableExistenceService existSvc = new ZTableExistenceService();
 //		fpSvc.setExistSvc(existSvc);
-		HLDInsertFragmentParser parser = new HLDInsertFragmentParser(factorySvc, datIdMap, registry);
+		HLDInsertFragmentParser parser = new HLDInsertFragmentParser(factorySvc, datIdMap, registry, whereGen);
 		parser.existSvc = new ZTableExistenceService();
 		parser.tblinfoL = buildTblList(dval); 
 		

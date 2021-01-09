@@ -51,10 +51,8 @@ public class HLDSQLGenerator {
 	}
 	public String generateSqlWhere(HLDQuery hld, SqlStatement stm) {
 		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
-		StrCreator sc = new StrCreator();
-		
-		generateWhere(sc, hld, stm, paramGen);
-		return sc.toString();
+		String sql = generateWhereClause(hld, stm, paramGen);
+		return " " + sql;
 	}
 	
 	private SqlStatement doGenerateSql(HLDQuery hld, SqlParamGenerator paramGen) {
@@ -181,6 +179,10 @@ public class HLDSQLGenerator {
 
 
 	private void generateWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
+		String fragment = generateWhereClause(hld, stm, paramGen);
+		sc.o(" WHERE %s", fragment);
+	}
+	private String generateWhereClause(HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		FilterCond filter = hld.filter;
 		String fragment = null;
 		if (filter instanceof SingleFilterCond) {
@@ -196,7 +198,7 @@ public class HLDSQLGenerator {
 			String not = ofc.isNot ? "NOT " : "";
 			fragment = String.format("%s%s %s %s", not, s1, ofc.op.op, s2);
 		}
-		sc.o(" WHERE %s", fragment);
+		return fragment;
 	}
 
 	private String renderValParam(SingleFilterCond sfc, SqlParamGenerator paramGen, SqlStatement stm) {

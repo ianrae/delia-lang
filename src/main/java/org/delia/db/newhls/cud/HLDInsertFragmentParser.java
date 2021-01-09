@@ -54,11 +54,13 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	private boolean useAliases = false;
 	private DatIdMap datIdMap;
 	protected DTypeRegistry registry;
+	private HLDWhereGen hldWhereGen;
 
-	public HLDInsertFragmentParser(FactoryService factorySvc, DatIdMap datIdMap, DTypeRegistry registry) {
+	public HLDInsertFragmentParser(FactoryService factorySvc, DatIdMap datIdMap, DTypeRegistry registry, HLDWhereGen hdlWhereGen) {
 		super(factorySvc);
 		this.registry = registry;
 		this.datIdMap = datIdMap;
+		this.hldWhereGen = hdlWhereGen;
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {
@@ -465,30 +467,29 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
 		
-//		HLDWhereGenImpl hldwheregen = new HLDWhereGenImpl();
-//		List<SqlFragment> fragL = hldwheregen.createWere(spec, structType, selectFrag.statement);
-//		selectFrag.whereL.addAll(fragL);
-
-		if (whereGen == null) {
-			whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator(), datIdMap);
-		}
+		List<SqlFragment> fragL = hldWhereGen.createWhere(spec, structType, selectFrag.statement);
+		selectFrag.whereL.addAll(fragL);
 		
-		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
-		switch(queryType) {
-		case ALL_ROWS:
-		{
-		}
-			break;
-		case OP:
-			whereGen.addWhereClauseOp(spec, structType, selectFrag);
-			break;
-		case PRIMARY_KEY:
-		default:
-		{
-			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
-		}
-			break;
-		}
+//		if (whereGen == null) {
+//			whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator(), datIdMap);
+//		}
+//		
+//		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
+//		switch(queryType) {
+//		case ALL_ROWS:
+//		{
+//		}
+//			break;
+//		case OP:
+//			whereGen.addWhereClauseOp(spec, structType, selectFrag);
+//			break;
+//		case PRIMARY_KEY:
+//		default:
+//		{
+//			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
+//		}
+//			break;
+//		}
 	}
 	
 	private TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName) {
