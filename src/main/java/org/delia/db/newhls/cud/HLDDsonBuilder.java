@@ -61,12 +61,12 @@ public class HLDDsonBuilder {
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
-		HLDUpdate hldins = new HLDUpdate(null);//fill in later
+		HLDUpdate hldupdate = new HLDUpdate(null);//fill in later
 		
 		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
-		hldins.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
-		return hldins;
+		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		return hldupdate;
 	}
 	
 	

@@ -5,6 +5,7 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
@@ -14,6 +15,7 @@ import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DTypeRegistry;
@@ -71,6 +73,9 @@ public class HLDManager {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
 		hld.hld = fullBuildQuery(updateExp.queryExp);
+		hld.querySpec = new QuerySpec();
+		hld.querySpec.evaluator = null; //TOOD fix
+		hld.querySpec.queryExp = updateExp.queryExp;
 		return hld;
 	}
 	
@@ -105,9 +110,9 @@ public class HLDManager {
 
 	public SqlStatementGroup generateSql(HLDUpdate hldupdate) {
 		HLDWhereGen whereGen = new HLDWhereGenImpl(this);
-		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
+		HLDInsertSQLGenerator updateSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
 		
-		SqlStatementGroup stmgrp = insertSqlGen.generateUpdate(hldupdate.cres.dval);
+		SqlStatementGroup stmgrp = updateSqlGen.generateUpdate(hldupdate);
 		return stmgrp;
 	}
 }
