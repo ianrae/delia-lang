@@ -85,9 +85,9 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsert hldins = buildFromSrcInsert(src, 3); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
 		dumpGrp(stmgrp);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
-		chkInsertSql(stmgrp, 1, "UPDATE Address SET cust = ? WHERE id=?", "56", "100");
-		chkInsertSql(stmgrp, 2, "UPDATE Address SET cust = ? WHERE id=?", "56", "101");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
+		chkInsertSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
+		chkInsertSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
 	}
 	
 	// --- M:N ---
