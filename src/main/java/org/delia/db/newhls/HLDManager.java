@@ -37,6 +37,10 @@ public class HLDManager {
 	}
 	
 	public HLDQuery fullBuildQuery(QueryExp queryExp) {
+		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
+		return fullBuildQuery(queryExp, aliasMgr);
+	}
+	public HLDQuery fullBuildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
 		HLDQuery hld = hldBuilder.build(queryExp);
@@ -47,7 +51,6 @@ public class HLDManager {
 		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
 		fieldBuilder.generateFields(hld);
 		
-		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(hld);
 		return hld;

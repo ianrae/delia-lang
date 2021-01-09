@@ -12,6 +12,8 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.TableExistenceService;
+import org.delia.db.hls.AliasInfo;
+import org.delia.db.newhls.HLDAliasManager;
 import org.delia.db.newhls.HLDWhereGenImpl;
 import org.delia.db.sql.QueryType;
 import org.delia.db.sql.QueryTypeDetector;
@@ -466,9 +468,19 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
-		
-		List<SqlFragment> fragL = hldWhereGen.createWhere(spec, structType, selectFrag.statement);
+		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
+		//copyAliases(selectFrag, aliasMgr);
+		for(String tbl: selectFrag.aliasMap.keySet()) {
+			DStructType dtype = (DStructType) registry.getType(tbl);
+			aliasMgr.createMainTableAlias(dtype);
+		}
+		AliasInfo info = aliasMgr.createMainTableAlias(structType); //doing get here, not create
+		selectFrag.tblFrag.alias = info.alias;
+
+		List<SqlFragment> fragL = hldWhereGen.createWhere(spec, structType, selectFrag.statement, aliasMgr);
 		selectFrag.whereL.addAll(fragL);
+		useAliases = true;
+		
 		
 //		if (whereGen == null) {
 //			whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator(), datIdMap);
