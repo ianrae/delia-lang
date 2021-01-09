@@ -38,7 +38,7 @@ public class NewHLSTestBase extends BDDBase {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
-		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap());
+		mgr = new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap());
 		HLDQuery hld = mgr.fullBuildQuery(queryExp);
 		log.log(hld.toString());
 		assertEquals(expectedJoins, hld.joinL.size());
