@@ -8,7 +8,7 @@ import org.delia.relation.RelationInfo;
 import org.delia.util.DeliaExceptionHelper;
 
 public class DatIdMap {
-	private static class DatInfo {
+	public static class DatInfo {
 		public String tableName; //eg CustomerAddressDat1
 		public String left;  //eg. Customer.addr. Holds Customer pk values
 		public String right; //eg. Address.cust Holds Address pk values
@@ -59,6 +59,10 @@ public class DatIdMap {
 	public String getAssocTblName(int datId) {
 		DatInfo info = tblNameMap.get(datId);
 		return info == null ? null : info.tableName;
+	}
+	public DatInfo getAssocTblInfo(int datId) {
+		DatInfo info = tblNameMap.get(datId);
+		return info;
 	}
 
 	//AddressCustomerDat1, so "Address" is left type

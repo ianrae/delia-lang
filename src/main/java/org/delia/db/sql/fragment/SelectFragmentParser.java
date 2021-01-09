@@ -22,6 +22,12 @@ public class SelectFragmentParser extends FragmentParserBase {
 		super(factorySvc, fpSvc);
 	}
 
+	/**
+	 * not used, but keep for unit tests because SelectFragmentParser is base for InsertStatementParsers,etc.
+	 * @param spec
+	 * @param details
+	 * @return
+	 */
 	public SelectStatementFragment parseSelect(QuerySpec spec, QueryDetails details) {
 		SelectStatementFragment selectFrag = new SelectStatementFragment();
 

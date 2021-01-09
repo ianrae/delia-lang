@@ -30,24 +30,26 @@ import org.delia.util.DValueHelper;
 		protected DTypeRegistry registry;
 		protected WhereFragmentGenerator whereGen;
 		protected SelectFuncHelper selectFnHelper;
-		protected TableExistenceService existSvc;
+		public TableExistenceService existSvc; //public as a hack
 		protected FKHelper fkHelper;
 		protected JoinFragment savedJoinedFrag;
-		protected List<TableInfo> tblinfoL;
+		public List<TableInfo> tblinfoL; //public as a hack
 		protected SpanHelper spanHelper;
 		
 		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc) {
 			super(factorySvc);
 			
-			this.registry = fpSvc.registry;
-			this.queryDetectorSvc = fpSvc.createQueryTypeDetector();
-			this.tblinfoL = fpSvc.tblinfoL;
-			this.whereGen = fpSvc.whereGen; 
-			this.selectFnHelper = fpSvc.createSelectFuncHelper(); 
-			this.existSvc = fpSvc.createTableExistenceService(); 
-			
-			this.fkHelper = fpSvc.createFKHelper(); 
-			this.spanHelper = fpSvc.spanHelper;
+			this.registry = fpSvc == null ? null : fpSvc.registry; //hack hack hack
+			if (fpSvc != null) {
+				this.queryDetectorSvc = fpSvc.createQueryTypeDetector();
+				this.tblinfoL = fpSvc.tblinfoL;
+				this.whereGen = fpSvc.whereGen; 
+				this.selectFnHelper = fpSvc.createSelectFuncHelper(); 
+				this.existSvc = fpSvc.createTableExistenceService(); 
+				
+				this.fkHelper = fpSvc.createFKHelper(); 
+				this.spanHelper = fpSvc.spanHelper;
+			}
 		}
 		
 		public void createAlias(AliasedFragment frag) {

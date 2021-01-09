@@ -25,5 +25,16 @@ public class RelationInfo {
 	public void forceDatId(Integer datId) {
 		this.datId = datId;
 	}
+	
+	/**
+	 * Used to determine if a join is needed (generally if this fn returns true then yes)
+	 * @return true if the near side of this relation does NOT hold the fk
+	 */
+	public boolean notContainsFK() {
+		if (isManyToMany() || isParent) {
+			return true;
+		}
+		return false;
+	}
 
 }

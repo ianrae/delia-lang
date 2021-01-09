@@ -14,8 +14,8 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBHelper;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.sort.topo.DeliaTypeSorter;
@@ -37,7 +37,6 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private String dbFingerprint;
 	private ZDBExecutor zexec;
 	private MigrationRunner migrationRunner;
-	private VarEvaluator varEvaluator;
 	private MigrationOptimizer optimizer;
 
 	public SchemaMigrator(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
@@ -45,12 +44,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
-		this.varEvaluator = varEvaluator;
 		
 		//init zdb (but datIdMap will be null in early phase of startup)
 		zexec.init1(registry);
 		if (datIdMap != null) {
 			zexec.init2(datIdMap, varEvaluator);
+		} else if (! DBType.MEM.equals(dbInterface.getDBType())){
+			//hack. need some sort of DatIdMap for H2 and PG
+			zexec.init2(new DatIdMap(), varEvaluator);
 		}
 
 		InternalTypeCreator fakeCreator = new InternalTypeCreator();
@@ -151,9 +152,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		FilterExp filter = null; //query all
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
-		QueryContext qtx = new QueryContext();
-//		QueryResponse qresp = rawExecutor.executeQuery(spec, qtx);
-		QueryResponse qresp = zexec.rawQuery(spec, qtx);
+		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(zexec.getDbInterface(), registry);
+		QueryResponse qresp = querySvc.execQuery(spec.queryExp, zexec);
 		//TODO: should specify orderby id!!
 		
 		
@@ -385,9 +385,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 				if (doLowRiskChecks && ! f1.flagStr.contains("O") && ! isMemDB()) { //mandatory field?
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(st.typeName);
-					QuerySpec spec = queryBuilder.buildSpec(exp, varEvaluator);
-//					QueryResponse qresp = rawExecutor.executeQuery(spec, new QueryContext());
-					QueryResponse qresp = zexec.rawQuery(spec, new QueryContext());
+					HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(zexec.getDbInterface(), registry);
+					QueryResponse qresp = querySvc.execQuery(exp, zexec);
 					DValue dval = qresp.getOne();
 					long numRecords = dval.asLong();
 					if (numRecords > 0) {

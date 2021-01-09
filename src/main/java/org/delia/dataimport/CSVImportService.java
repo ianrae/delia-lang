@@ -12,12 +12,17 @@ import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
+import org.delia.runner.inputfunction.ImportedValueListener;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
-import sun.rmi.runtime.Log;
 
+/**
+ * Single use class
+ * @author ian
+ *
+ */
 public class CSVImportService  {
 	
 	public static class Options {
@@ -25,30 +30,30 @@ public class CSVImportService  {
 		public boolean logDetails = false;
 		public boolean useInsertStatement;
 		public LogLevel logLevel;
+		public ImportedValueListener importedValueListener;
+		public InputFileLoaderFactory inputFileLoaderFactory = new CSVInputFileLoaderFactory();
 	}
 
 	private DeliaSession session;
 	private SimpleImportMetricObserver observer;
 	private DataImportService importSvc;
-
+	private Options options;
+	
 	public CSVImportService() {
+		this.options = new Options();
 	}
 
 	public InputFunctionResult dryRunLevel1(String csvPath, String deliaSrc, String typeName, String inputFunctionName) {
-		Options options = new Options();
 		return dryRunLevel1(csvPath, deliaSrc, typeName, inputFunctionName, options);
 	}
 	public List<InputFunctionResult> dryRunLevel2(List<ImportGroupSpec> groupList, String deliaSrc) {
-		Options options = new Options();
 		return this.dryRunLevel2(groupList, deliaSrc, options);
 	}
 	public List<InputFunctionResult> dryRunLevel3(List<ImportGroupSpec> groupList, String deliaSrc,
 			ExternalDataLoader externalLoader) {
-		Options options = new Options();
 		return this.dryRunLevel3(groupList, deliaSrc, externalLoader, options);
 	}
 	public List<InputFunctionResult> importIntoDatabase(List<ImportGroupSpec> groupList, String deliaSrc, Delia delia) {
-		Options options = new Options();
 		return this.importIntoDatabase(groupList, deliaSrc, delia, options);
 	}
 
@@ -64,7 +69,8 @@ public class CSVImportService  {
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
-		CSVFileLoader loader = new CSVFileLoader(csvPath);
+		InputFileLoader loader = options.inputFileLoaderFactory.create();
+		loader.init(csvPath);
 		this.observer = new SimpleImportMetricObserver();
 		importSvc.setMetricsObserver(observer);
 		InputFunctionResult result = importSvc.executeImport(inputFunctionName, loader, ImportLevel.ONE);
@@ -74,6 +80,7 @@ public class CSVImportService  {
 	private DataImportService createDataImportService(Options options) {
 		importSvc = new DataImportService(session, options.numRowsToImport, 10, options.logDetails);
 		importSvc.setUseInsertStatement(options.useInsertStatement);
+		importSvc.setImportedValueListener(options.importedValueListener);
 		return importSvc;
 	}
 
@@ -85,7 +92,8 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+			InputFileLoader loader = options.inputFileLoaderFactory.create();
+			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
 			pair.iter = loader;
@@ -115,7 +123,8 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+			InputFileLoader loader = options.inputFileLoaderFactory.create();
+			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
 			pair.iter = loader;
@@ -134,7 +143,8 @@ public class CSVImportService  {
 		importSvc = createDataImportService(options); 
 		List<GroupPair> groupL = new ArrayList<>();
 		for(ImportGroupSpec spec: groupList) {
-			CSVFileLoader loader = new CSVFileLoader(spec.csvPath);
+			InputFileLoader loader = options.inputFileLoaderFactory.create();
+			loader.init(spec.csvPath);
 			GroupPair pair = new GroupPair();
 			pair.inputFnName = spec.inputFnName;
 			pair.iter = loader;
@@ -148,5 +158,9 @@ public class CSVImportService  {
 
 	public DeliaSession getSession() {
 		return session;
+	}
+
+	public Options getOptions() {
+		return options;
 	}
 }

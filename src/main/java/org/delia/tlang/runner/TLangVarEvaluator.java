@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.delia.runner.ExecutionState;
+import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DValue;
@@ -39,5 +40,15 @@ public class TLangVarEvaluator implements VarEvaluator {
 
 	public void setValueVar(DValue initialValue) {
 		this.valueVar = initialValue;
+	}
+	
+	public void setLineNum(DValue nval) {
+		QueryResponse qresp = new QueryResponse();
+		qresp.ok = true;
+		qresp.dvalList = Collections.singletonList(nval);
+		ResultValue res = new ResultValue();
+		res.ok = true;
+		res.val = qresp;
+		execState.varMap.put("LINENUM", res);
 	}
 }

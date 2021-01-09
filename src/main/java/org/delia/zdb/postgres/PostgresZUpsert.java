@@ -11,12 +11,13 @@ import org.delia.db.sql.fragment.UpsertFragmentParser;
 import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.ZUpsert;
 
 public class PostgresZUpsert extends ZUpsert {
 
-	public PostgresZUpsert(FactoryService factorySvc, DTypeRegistry registry) {
-		super(factorySvc, registry);
+	public PostgresZUpsert(FactoryService factorySvc, DTypeRegistry registry, ZDBInterfaceFactory dbInterface) {
+		super(factorySvc, registry, dbInterface);
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.runner.inputfunction.GroupPair;
-import org.delia.runner.inputfunction.LineObjIterator;
 
 public class ImportGroupBuilder extends ServiceBase {
 	private List<GroupPair> groupL = new ArrayList<>();
@@ -15,7 +14,7 @@ public class ImportGroupBuilder extends ServiceBase {
 		super(factorySvc);
 	}
 	
-	public void addImport(String inputFunctionName, LineObjIterator iter) {
+	public void addImport(String inputFunctionName, InputFileLoader iter) {
 		GroupPair pair = new GroupPair();
 		pair.inputFnName = inputFunctionName;
 		pair.iter = iter;

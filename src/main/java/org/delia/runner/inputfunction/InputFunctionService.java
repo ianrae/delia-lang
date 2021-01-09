@@ -201,6 +201,9 @@ public class InputFunctionService extends ServiceBase {
 					//TODO: queue up a bunch of dvals and then do a batch insert
 					executeInsert(dval, request, fnResult, lineNum, errL);
 					addErrors(errL, fnResult.errors, lineNum);
+					if (request.importedValueListener != null) {
+						request.importedValueListener.valueImported(dval, errL);
+					}
 				}
 				
 				if (viaLineInfo.hasRows()) {
@@ -228,14 +231,7 @@ public class InputFunctionService extends ServiceBase {
 	}
 
 	private HdrInfo readHeader(InputFunctionRequest request, LineObjIterator lineObjIter) {
-		LineObj hdrLineObj = null; //TODO support more than one later
-		int numToIgnore = lineObjIter.getNumHdrRows();
-		while (numToIgnore-- > 0) {
-			if (!lineObjIter.hasNext()) {
-				return null; //empty file
-			}
-			hdrLineObj = lineObjIter.next();
-		}
+		LineObj hdrLineObj = lineObjIter.readHdrRow(); //TODO support more than one later
 		
 		if (hdrLineObj == null) {
 			return createHdrFrom(request.progset);
@@ -265,7 +261,22 @@ public class InputFunctionService extends ServiceBase {
 		log.log("found %d columns", request.progset.fieldMap.size());
 		int numMissed = saveFieldMap.size() - request.progset.fieldMap.size();
 		if (numMissed != 0) {
-			log.log("%d columns missed. Perhaps input function has incorrect input column name?", numMissed);
+			//might be synthetic columns. add them back
+			for(String columnName: saveFieldMap.keySet()) {
+				if (request.progset.fieldMap.containsKey(columnName)) {
+					continue;
+				}
+				
+				ProgramSpec spec = saveFieldMap.get(columnName);
+				if (spec.syntheticFieldName != null) {
+					request.progset.fieldMap.put(columnName, saveFieldMap.get(columnName));
+				}
+			}
+			
+			numMissed = saveFieldMap.size() - request.progset.fieldMap.size();
+			if (numMissed != 0) {
+				log.log("%d columns missed. Perhaps input function has incorrect input column name?", numMissed);
+			}
 		}
 		
 		return hdr;

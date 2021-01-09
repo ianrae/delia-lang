@@ -11,6 +11,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -25,24 +26,25 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 	private DTypeRegistry registry;
 	private VarEvaluator varEvaluator;
 	private ZDBExecutor dbexecutor;
+	private HLSSimpleQueryService querySvc;
 
 	public ZFetchRunnerImpl(FactoryService factorySvc, ZDBExecutor dbexecutor, DTypeRegistry registry, VarEvaluator eval) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
 		this.varEvaluator = eval;
+		this.querySvc = new HLSSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), registry);
 	}
 	
 	@Override
 	public QueryResponse load(DRelation drel) {
 		QueryExp queryExp = buildQuery(drel);
 		//TODO resolve vars such as foo(id)
-		QuerySpec spec = new QuerySpec();
-		spec.queryExp = queryExp;
-		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
-		spec.evaluator.init(spec.queryExp);
-		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
+//		QuerySpec spec = new QuerySpec();
+//		spec.queryExp = queryExp;
+//		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+//		spec.evaluator.init(spec.queryExp);
+		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator).qresp;
 		return qresp;
 	}
 
@@ -93,7 +95,8 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.evaluator.init(spec.queryExp);
 		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
+//		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
+		QueryResponse qresp = querySvc.execQuery(queryExp, dbexecutor);
 		
 		if (!qresp.ok) {
 			return Collections.emptyList();
@@ -106,12 +109,11 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp queryExp = builderSvc.createEqQuery(typeName, fieldName, keyVal);
 		
-		QuerySpec spec = new QuerySpec();
-		spec.queryExp = queryExp;
-		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
-		spec.evaluator.init(spec.queryExp);
-		QueryContext qtx = new QueryContext();
-		QueryResponse qresp = dbexecutor.rawQuery(spec, qtx);
+//		QuerySpec spec = new QuerySpec();
+//		spec.queryExp = queryExp;
+//		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+//		spec.evaluator.init(spec.queryExp);
+		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator).qresp;
 		return qresp;
 	}
 

@@ -159,6 +159,23 @@ public class TLangTests extends InputFunctionTestBase {
 		assertEquals("abcd", dval.asString());
 		chkTrail(tlangRunner, "var");
 	}
+	@Test
+	public void test5VarLineNum() {
+		TLangRunner tlangRunner = createTLangRunner();
+		TLangProgram prog = createProgramLineNum();
+
+		DValue initialValue = builder.buildString("something");
+
+		TLangVarEvaluator varEvaluator = new TLangVarEvaluator(session.getExecutionContext());
+		varEvaluator.setLineNum(builder.buildInt(5));
+		tlangRunner.setVarEvaluator(varEvaluator);
+		TLangResult res = tlangRunner.execute(prog, initialValue);
+
+		assertEquals(true, res.ok);
+		DValue dval = (DValue) res.val;
+		assertEquals(5, dval.asInt());
+		chkTrail(tlangRunner, "var");
+	}
 
 	private void buildVar(String varName, String str) {
 		DValue varvalue = builder.buildString(str);
@@ -242,8 +259,12 @@ public class TLangTests extends InputFunctionTestBase {
 	
 	private TLangProgram createProgram5(boolean bb) {
 		TLangProgram prog = new TLangProgram();
-		
 		prog.statements.add(new VariableStatement("z"));
+		return prog;
+	}
+	private TLangProgram createProgramLineNum() {
+		TLangProgram prog = new TLangProgram();
+		prog.statements.add(new VariableStatement("LINENUM"));
 		return prog;
 	}
 

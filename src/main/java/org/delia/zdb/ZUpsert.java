@@ -12,6 +12,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.h2.H2SqlHelperFactory;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.FragmentParserService;
 import org.delia.db.sql.fragment.UpsertFragmentParser;
@@ -23,16 +24,19 @@ import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 
 public class ZUpsert extends ServiceBase {
 	
 	protected DTypeRegistry registry;
 	protected H2SqlHelperFactory sqlHelperFactory;
+	private ZDBInterfaceFactory dbInterface;
 
-	public ZUpsert(FactoryService factorySvc, DTypeRegistry registry) {
+	public ZUpsert(FactoryService factorySvc, DTypeRegistry registry, ZDBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.registry = registry;
 		this.sqlHelperFactory = new H2SqlHelperFactory(factorySvc);
+		this.dbInterface = dbInterface;
 	}
 	
 	
@@ -63,11 +67,13 @@ public class ZUpsert extends ServiceBase {
 
 		if (noUpdateFlag) {
 			QueryBuilderService queryBuilder = factorySvc.getQueryBuilderService();
+			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
 			DValue keyVal = parser.getPrimaryKeyValue(spec, dval);
 			QueryExp queryExp = queryBuilder.createPrimaryKeyQuery(spec.queryExp.typeName, keyVal);
-			QuerySpec query = queryBuilder.buildSpec(queryExp, new DoNothingVarEvaluator());
-			QueryContext qtx = new QueryContext();
-			QueryResponse qresp = zexec.rawQuery(query, qtx);
+//			QuerySpec query = queryBuilder.buildSpec(queryExp, new DoNothingVarEvaluator());
+//			QueryContext qtx = new QueryContext();
+//			QueryResponse qresp = zexec.rawQuery(query, qtx);
+			QueryResponse qresp = querySvc.execQuery(queryExp, zexec);
 			if (!qresp.emptyResults()) {
 				return null;
 			}

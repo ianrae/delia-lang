@@ -33,7 +33,7 @@ import org.delia.runner.inputfunction.ProgramSpec;
 import org.delia.runner.inputfunction.SimpleImportMetricObserver;
 import org.delia.runner.inputfunction.ViaLineInfo;
 import org.delia.runner.inputfunction.ViaService;
-import org.delia.tlang.runner.TLangProgram;
+import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -44,7 +44,11 @@ import org.junit.Test;
 public class InputFunctionRunnerTests extends InputFunctionTestBase {
 	
 	@Test
-	public void test2() {
+	public void test1() {
+		String src = buildSrc();
+		this.session = delia.beginSession(src);
+		this.registry = session.getExecutionContext().registry;
+
 		InputFunctionRunner inFuncRunner = createXConv();
 		
 		delia.getLog().setLevel(LogLevel.DEBUG);
@@ -89,6 +93,40 @@ public class InputFunctionRunnerTests extends InputFunctionTestBase {
 		DValue dval = res.getAsDValue();
 		assertEquals("bob", dval.asStruct().getField("name").asString());
 	}
+	
+	@Test
+	public void test2() {
+		String src = buildSrc2();
+		this.session = delia.beginSession(src);
+		this.registry = session.getExecutionContext().registry;
+		InputFunctionRunner inFuncRunner = createXConv();
+		
+		delia.getLog().setLevel(LogLevel.DEBUG);
+		InputFunctionDefStatementExp inFnExp = findInputFn(session, "foo");
+		
+		HdrInfo hdr = createHdrFrom(inFnExp);
+		LineObj lineObj = createLineObj();
+		ProgramSet progset = createProgramSet(hdr, inFnExp);
+		progset.inFnExp = inFnExp;
+		DStructType structType = (DStructType) registry.getType("Customer");
+		ProgramSet.OutputSpec ospec = new ProgramSet.OutputSpec();
+		ospec.alias = "c";
+		ospec.structType = structType;
+		progset.outputSpecs.add(ospec);
+		addImportSpec(progset);
+		
+		inFuncRunner.setProgramSet(progset);
+		List<DeliaError> lineErrL = new ArrayList<>();
+		List<DValue> dvals = inFuncRunner.process(hdr, lineObj, lineErrL, new ViaLineInfo());
+		chkNoErrors(lineErrL);
+		chkNoErrors(localET.getErrors());
+		assertEquals(1, dvals.size());
+		
+		DValue dval = dvals.get(0);
+		assertEquals(101, dval.asStruct().getField("id").asInt());
+		assertEquals("bob", dval.asStruct().getField("name").asString());
+	}
+	
 
 	private ImportSpec addImportSpec(ProgramSet progset) {
 		ProgramSet.OutputSpec ospec = progset.outputSpecs.get(0);
@@ -109,10 +147,11 @@ public class InputFunctionRunnerTests extends InputFunctionTestBase {
 	}
 	
 	private void buildProgset(ProgramSet progset, InputFunctionDefStatementExp inFnExp) {
+		TLangProgramBuilder progBuilder = new TLangProgramBuilder(delia.getFactoryService(), registry);
 		for(Exp exp: inFnExp.bodyExp.statementL) {
 			InputFuncMappingExp mappingExp = (InputFuncMappingExp) exp;
 			ProgramSpec spec = new ProgramSpec();
-			spec.prog = new TLangProgram();
+			spec.prog = progBuilder.build(mappingExp);
 			spec.inputField = mappingExp.getInputField();
 			spec.outputField = mappingExp.outputField;
 			progset.fieldMap.put(mappingExp.getInputField(), spec);
@@ -144,7 +183,7 @@ public class InputFunctionRunnerTests extends InputFunctionTestBase {
 
 	private LineObj createLineObj() {
 		String[] ar = { "1", "33","bob" };
-		LineObj lineObj = new LineObj(ar, 1);
+		LineObj lineObj = new LineObj(ar, 100);
 		return lineObj;
 	}
 
@@ -169,18 +208,21 @@ public class InputFunctionRunnerTests extends InputFunctionTestBase {
 	// --
 	private DTypeRegistry registry;
 	private ErrorTracker localET;
+	private boolean useSrc2;
 
 	@Before
 	public void init() {
 		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
-		String src = buildSrc();
-		this.session = delia.beginSession(src);
-		this.registry = session.getExecutionContext().registry;
 	}
 	private String buildSrc() {
 		String src = " type Customer struct {id int unique, wid int, name string } end";
 		src += " input function foo(Customer c) { ID -> c.id, WID -> c.wid, NAME -> c.name}";
+		return src;
+	}
+	private String buildSrc2() {
+		String src = " type Customer struct {id int unique, wid int, name string } end";
+		src += " input function foo(Customer c) { ID -> c.id using { LINENUM }, WID -> c.wid, NAME -> c.name}";
 		
 		return src;
 	}

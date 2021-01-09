@@ -12,7 +12,6 @@ import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 //single use!!!
@@ -61,7 +60,7 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
 		mergeIntoFrag.paramStartIndex = statement.paramL.size() - 1;
-		cloneParams(statement, clonedL, 1, 0);
+		cloneParams(statement, 1, 0);
 //		cloneParams(statement, clonedL, 1, 0);
 		if (isPostgres) {
 			int n = statement.paramL.size();
@@ -148,19 +147,25 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		updateFrag.assocMergeIntoFrag = mergeIntoFrag;
 		
 		List<OpFragment> clonedL = WhereListHelper.cloneWhereList(updateFrag.whereL);
-		int extra = statement.paramL.size() - startingNumParams;
-		cloneParams(statement, clonedL, extra);
+		if (!clonedL.isEmpty()) {
+			int extra = statement.paramL.size() - startingNumParams;
+			cloneParams(statement, clonedL, extra);
+		} else {
+			List<SqlFragment> hldclonedL = WhereListHelper.cloneWhereListHLD(updateFrag.whereL);
+			int extra = statement.paramL.size() - startingNumParams;
+			cloneParamsEeex(statement, hldclonedL, extra);
+		}
 		addForeignKeyId(mmMap, fieldName, statement);
 		//and again for mergeInto
 		mergeIntoFrag.paramStartIndex = statement.paramL.size();
-		cloneParams(statement, clonedL, 2, 0);
+		cloneParams(statement, 2, 0);
 		if (assocFieldName.equals("leftv")) {
 			swapLastTwo(statement);
 		}
 
 		if (isPostgres) {
 			int n = statement.paramL.size();
-			cloneParams(statement, clonedL, 2, 0);
+			cloneParams(statement, 2, 0);
 		}
 	}
 	
@@ -280,10 +285,20 @@ public class AssocTableReplacer extends SelectFragmentParser {
 		for(SqlFragment ff: clonedL) {
 			numToAdd += ff.getNumSqlParams();
 		}
-		cloneParams(statement, clonedL, numToAdd, extra);
+		cloneParams(statement, numToAdd, extra);
 		return numToAdd;
 	}
-	protected void cloneParams(SqlStatement statement, List<OpFragment> clonedL, int numToAdd, int extra) {
+	//hack hack hack
+	protected int cloneParamsEeex(SqlStatement statement, List<SqlFragment> clonedL, int extra) {
+		//clone params 
+		int numToAdd = 0;
+		for(SqlFragment ff: clonedL) {
+			numToAdd += ff.getNumSqlParams();
+		}
+		cloneParams(statement, numToAdd, extra);
+		return numToAdd;
+	}
+	protected void cloneParams(SqlStatement statement, int numToAdd, int extra) {
 		//clone params 
 		int n = statement.paramL.size();
 		log.logDebug("cloneParams %d %d", numToAdd, n);

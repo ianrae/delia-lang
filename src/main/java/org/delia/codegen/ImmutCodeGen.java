@@ -25,9 +25,17 @@ public class ImmutCodeGen extends CodeGenBase {
 		ST st = g.getInstanceOf("t1");
 		sc.o(st.render());
 		
-		st = g.getInstanceOf("t2");
-		st.add("cname", typeName + "Immut");
-		st.add("iname", typeName);
+//		String baseType = (structType.getBaseType() == null) ? "DeliaImmutable" : structType.getBaseType().getName();
+		if (structType.getBaseType() == null) {
+			st = g.getInstanceOf("t2");
+			st.add("cname", typeName + "Immut");
+			st.add("iname", typeName);
+		} else {
+			st = g.getInstanceOf("t2base");
+			st.add("cname", typeName + "Immut");
+			st.add("base", structType.getBaseType().getName());
+			st.add("iname", typeName);
+		}
 		
 		sc.o(st.render());
 		sc.nl();

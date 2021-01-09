@@ -16,6 +16,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.error.DeliaError;
@@ -146,7 +147,10 @@ public class LetStatementRunner extends ServiceBase {
 			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 			qresp = result.qresp;
 		} else {
-			qresp = zexec.rawQuery(spec, qtx);
+			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
+//			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
+			HLSManagerResult mgrRes = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
+			qresp = mgrRes.qresp;
 		}
 		return qresp;
 	}

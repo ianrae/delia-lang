@@ -17,18 +17,19 @@ import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StringUtil;
 
-public class ImportToool extends ServiceBase {
+public class ImportTool extends ServiceBase {
 
 		private DeliaSession session;
 
-		public ImportToool(DeliaSession session) {
+		public ImportTool(DeliaSession session) {
 			super(session.getDelia().getFactoryService());
 			this.session = session;
 		}
 		
 		public String generateInputFunctionSourceCode(String typeName, String path) {
 			DStructType structType = (DStructType) getType(typeName); 
-			CSVFileLoader loader = new CSVFileLoader(path);
+			CSVFileLoader loader = new CSVFileLoader();
+			loader.init(path);
 			
 			StrCreator sc = new StrCreator();
 			String fnName = StringUtil.lowify(typeName);
@@ -63,12 +64,13 @@ public class ImportToool extends ServiceBase {
 				}
 			}
 			sc.o("}");
-			
+			loader.close();
 			return sc.toString();
 		}
 		
 		public String generateDeliaStructSourceCode(String typeName, String path, boolean addLineFeed) {
-			CSVFileLoader loader = new CSVFileLoader(path);
+			CSVFileLoader loader = new CSVFileLoader();
+			loader.init(path);
 			
 			StrCreator sc = new StrCreator();
 			String lf = addLineFeed ? "\n" : "";
@@ -91,7 +93,7 @@ public class ImportToool extends ServiceBase {
 			}
 			
 			sc.o("} end");
-			
+			loader.close();
 			return sc.toString();
 		}
 
@@ -114,15 +116,8 @@ public class ImportToool extends ServiceBase {
 		}
 
 		private List<String> readHeaderColumns(CSVFileLoader loader) {
-			LineObj hdrLineObj = null; //TODO support more than one later
-			int numToIgnore = loader.getNumHdrRows();
-			while (numToIgnore-- > 0) {
-				if (!loader.hasNext()) {
-					return null; //empty file
-				}
-				hdrLineObj = loader.next();
-			}
-			
+			LineObj hdrLineObj = loader.readHdrRow(); //TODO support more than one later
+			//for now assume is always hdr. fix later!!
 			List<String> columns = new ArrayList<>();
 			for(String col: hdrLineObj.elements) {
 				columns.add(col.trim());

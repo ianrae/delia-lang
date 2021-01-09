@@ -53,6 +53,10 @@ public class RelationManyRule extends RelationRuleBase {
 			return false;
 		} else {
 			boolean bb = ctx.isPopulateFKsFlag();
+			//add 5dec2020 as part of hls/part2
+			if (relInfo.isParent && ctx.isInsertFlag()) {
+				bb = true; 
+			}
 			if (!bb) {
 				return true;
 			}

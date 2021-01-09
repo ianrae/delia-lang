@@ -1,6 +1,5 @@
 package org.delia.bdd;
 
-import org.delia.api.DeliaFactory;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -38,7 +37,6 @@ public class AllBDDTests extends BDDBase {
 		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-struct.txt", 4);
 		runR400File("t0-struct-inheritance.txt", 6);
-		runR400File("t0-field-optional.txt", 4);
 		runR400File("t0-field-primarykey.txt", 6);
 		runR400File("t0-field-serial.txt", 7);
 	}
@@ -126,6 +124,7 @@ public class AllBDDTests extends BDDBase {
 		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
 		runR1000File("t0-upsert-mm-all.txt", 1);
 		runR1000File("t0-upsert-mm-other.txt", 1);
+		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
 	@Test
@@ -329,7 +328,9 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 		
-		runR1500File("t0-queryfn-orderby-2span.txt", 1);
+//		runR1000File("t0-upsert-unique.txt", 4);
+//		runR1000File("t0-upsert.txt", 4);
+		runR900File("t0-update-mm-all.txt", 4);
 	}
 	
 	//---

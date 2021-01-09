@@ -8,6 +8,7 @@ import org.delia.api.DeliaSession;
 import org.delia.codegen.DeliaEntity;
 import org.delia.codegen.DeliaImmutable;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DetailedError;
 import org.delia.runner.DValueIterator;
@@ -92,6 +93,9 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
     			if (val instanceof DeliaImmutable) {
     				DeliaImmutable immut = (DeliaImmutable) val;
     				DValue dval = immut.internalDValue();
+    				if (DRelationHelper.isRelation(structType, fieldName) && dval != null) {
+    					dval = createEmptyRelation(structType, fieldName, dval);
+    				}
     				builder.addField(fieldName, dval);
     			} else {
     				DValue dval = dvalConverter.buildFromObject(val, pair.type.getShape(), scalarBuilder);
@@ -114,15 +118,33 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
     	boolean b = builder.finish();
     	if (!b) {
     		DetailedError err = builder.getValidationErrors().get(builder.getValidationErrors().size() - 1);
-    		DeliaExceptionHelper.throwError("badsomething", err.toString());
+    		String msg = String.format("Type %s: field %s: %s", err.getTypeName(), err.getFieldName(), err.toString());
+    		DeliaExceptionHelper.throwError("dao-error", msg);
     	}
     	DValue finalVal = builder.getDValue();
     	return finalVal;
     }
+	private DValue createEmptyRelation(DStructType structType, String fieldName, DValue relValue) {
+		DValue newVal = DRelationHelper.createEmptyRelation(structType, fieldName, registry);
+		if (newVal != null) {
+			DRelationHelper.addFK(newVal, relValue);
+		}
+		return newVal;
+	}
 	
-    protected DValue getPrimaryKeyValue(DeliaImmutable immut) {
-		PrimaryKey pk = structType.getPrimaryKey();
-		DValue pkval = immut.internalDValue().asStruct().getField(pk.getFieldName());
+    protected DValue getPrimaryKeyValue(DeliaImmutable obj) {
+    	PrimaryKey pk = structType.getPrimaryKey();
+    	if (obj instanceof DeliaEntity) {
+    		String fieldName = pk.getKey().name;
+    		DeliaEntity entity = (DeliaEntity) obj;
+    		if (entity.internalSetValueMap().containsKey(fieldName)) {
+    			Object val = entity.internalSetValueMap().get(fieldName);
+				DValue dval = dvalConverter.buildFromObject(val, pk.getKey().type.getShape(), scalarBuilder);
+				return dval;
+    		}
+    	}
+    	
+		DValue pkval = obj.internalDValue().asStruct().getField(pk.getFieldName());
 		return pkval;
 
     }

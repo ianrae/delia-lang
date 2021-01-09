@@ -26,7 +26,7 @@ public interface ZDBExecutor extends AutoCloseable {
 		
 		//these can be called after init1
 		DValue rawInsert(DValue dval, InsertContext ctx);
-		QueryResponse rawQuery(QuerySpec spec, QueryContext qtx);
+//		QueryResponse rawQuery(QuerySpec spec, QueryContext qtx);
 		boolean rawTableDetect(String tableName);
 		boolean rawFieldDetect(String tableName, String fieldName);
 		void rawCreateTable(String tableName);

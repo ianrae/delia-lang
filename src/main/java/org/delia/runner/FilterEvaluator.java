@@ -87,4 +87,8 @@ public class FilterEvaluator extends ServiceBase {
 		return list;
 	}
 
+	public VarEvaluator getVarEvaluator() {
+		return varEvaluator;
+	}
+
 }

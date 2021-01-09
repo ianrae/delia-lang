@@ -40,7 +40,7 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		log.log("ziggy!");
+		log.logDebug("ziggy!");
 		qtx.pruneParentRelationFlag = false;
 		qtx.loadFKs = findAnyFKs(hls);
 		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx); //do main filter
@@ -75,11 +75,11 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
 		}
 		
-		//then do order,limit,offset
+		//then do orderBy,offset,limit
 		if (hlspan.oloEl != null) {
 			addIf(actionL, (hlspan.oloEl.orderBy != null), new MemOrderByFunction(registry));
-			addIf(actionL, (hlspan.oloEl.limit != null), new MemLimitFunction(registry));
 			addIf(actionL, (hlspan.oloEl.offset != null), new MemOffsetFunction(registry));
+			addIf(actionL, (hlspan.oloEl.limit != null), new MemLimitFunction(registry));
 		}
 		
 		if (! beginsWithScopeChange) {

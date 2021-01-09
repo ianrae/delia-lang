@@ -36,7 +36,8 @@ public class HLSEngine extends ServiceBase {
 		public HLSQueryStatement generateStatement(QueryExp queryExp, List<LetSpan> spanL) {
 			this.queryExp = queryExp;
 			this.spanL = spanL;
-			this.mainStructType = (DStructType) registry.getType(queryExp.typeName);
+			//Note. HLSSimpleQueryService used by CreateNewDatIdVisitor means typeName could be DELIA_ASSOC
+			this.mainStructType = (DStructType) registry.findTypeOrSchemaVersionType(queryExp.typeName);
 			
 			HLSQueryStatement hlstatement = new HLSQueryStatement();
 			hlstatement.queryExp = queryExp;

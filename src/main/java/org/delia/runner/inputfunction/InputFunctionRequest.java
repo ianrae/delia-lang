@@ -8,4 +8,5 @@ public class InputFunctionRequest {
 	public Delia delia;
 	public DeliaSession session;
 	public int stopAfterErrorThreshold = Integer.MAX_VALUE;
+	public ImportedValueListener importedValueListener;
 }

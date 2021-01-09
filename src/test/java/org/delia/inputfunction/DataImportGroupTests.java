@@ -59,14 +59,16 @@ public class DataImportGroupTests extends InputFunctionTestBase {
 	@Test
 	public void testCategories() {
 		String path = BASE_DIR + "categories.csv";
-		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		CSVFileLoader fileLoader = new CSVFileLoader();
+		fileLoader.init(path);
 		numExpectedColumnsProcessed = 4;
 		buildAndRun(1, "foo", fileLoader, 8);
 	}
 	@Test
 	public void testProducts() {
 		String path = BASE_DIR + "products.csv";
-		CSVFileLoader fileLoader = new CSVFileLoader(path);
+		CSVFileLoader fileLoader = new CSVFileLoader();
+		fileLoader.init(path);
 		log.log(path);
 		numExpectedColumnsProcessed = 4;
 		stopAfterErrorThreshold = 10;

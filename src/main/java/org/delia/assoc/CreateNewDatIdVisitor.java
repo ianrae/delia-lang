@@ -7,6 +7,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;
@@ -91,8 +92,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
-		QuerySpec spec = queryBuilder.buildSpec(exp, new DoNothingVarEvaluator());
-		QueryResponse qresp = dbexecutor.rawQuery(spec, new QueryContext());
+		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbexecutor.getDbInterface(), registry);
+		QueryResponse qresp = querySvc.execQuery(exp, dbexecutor);
 		
 		int maxDatId = loadDATRows(qresp);
 		log.log("DAT: max id %d.", maxDatId);

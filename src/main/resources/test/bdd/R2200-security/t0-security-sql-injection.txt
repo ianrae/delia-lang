@@ -1,4 +1,5 @@
 # security tests
+# TODO: add delia inject attack prevention tests. we test sql inject here, but also need to test delia injection
 
 FEATURE: sql-injection TODO: use prepared statements
 background:

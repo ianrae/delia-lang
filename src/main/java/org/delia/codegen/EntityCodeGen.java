@@ -24,13 +24,23 @@ public class EntityCodeGen extends CodeGenBase {
 		ST st = g.getInstanceOf("t1");
 		sc.o(st.render());
 
-		//t2(cname,iname,ename,immutname) ::= <<
-		st = g.getInstanceOf("t2");
-		st.add("cname", typeName + "Entity");
-		st.add("iname", typeName);
-		st.add("ename", typeName + "Setter");
-		st.add("immutname", typeName + "Immut");
-
+//		String baseType = (structType.getBaseType() == null) ? "DeliaImmutable" : structType.getBaseType().getName();
+		if (structType.getBaseType() == null) {
+			//t2(cname,iname,ename,immutname) ::= <<
+			st = g.getInstanceOf("t2");
+			st.add("cname", typeName + "Entity");
+			st.add("iname", typeName);
+			st.add("ename", typeName + "Setter");
+			st.add("immutname", typeName + "Immut");
+		} else {
+			st = g.getInstanceOf("t2base");
+			st.add("cname", typeName + "Entity");
+			st.add("base", structType.getBaseType().getName());
+			st.add("iname", typeName);
+			st.add("ename", typeName + "Setter");
+			st.add("immutname", typeName + "Immut");
+			
+		}
 		sc.o(st.render());
 		sc.nl();
 

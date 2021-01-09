@@ -14,6 +14,7 @@ import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.ImportMetricObserver;
 import org.delia.runner.inputfunction.ImportSpec;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
+import org.delia.runner.inputfunction.ImportedValueListener;
 import org.delia.runner.inputfunction.InputFunctionRequest;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.InputFunctionService;
@@ -35,6 +36,7 @@ public class DataImportService extends ServiceBase {
 	private int numRowsToImport;
 	private boolean logDetails;
 	private boolean useInsertStatement;
+	private ImportedValueListener importedValueListener;
 
 	public DataImportService(DeliaSession session, int stopAfterErrorThreshold) {
 		this(session, Integer.MAX_VALUE, stopAfterErrorThreshold, false);
@@ -82,8 +84,10 @@ public class DataImportService extends ServiceBase {
 		request.progset = progset;
 		request.session = session;
 		request.stopAfterErrorThreshold = stopAfterErrorThreshold;
+		request.importedValueListener = importedValueListener;
 		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
 		result.filename = lineObjIter.getFileName();
+		lineObjIter.close();
 		return result;
 	}
 
@@ -160,6 +164,8 @@ public class DataImportService extends ServiceBase {
 				if (err instanceof DetailedError) {
 					DetailedError derr = (DetailedError) err;
 					fieldName = derr.getFieldName();
+				} else {
+					fieldName = err.getArg1();
 				}
 				String msg = err.toString();
 				log.log("  line %d: %s - %s", err.getLineNum(), fieldName, msg);
@@ -182,6 +188,9 @@ public class DataImportService extends ServiceBase {
 	}
 	public void setUseInsertStatement(boolean useInsertStatement) {
 		this.useInsertStatement = useInsertStatement;
+	}
+	public void setImportedValueListener(ImportedValueListener importedValueListener) {
+		this.importedValueListener = importedValueListener;
 	}
 	
 }

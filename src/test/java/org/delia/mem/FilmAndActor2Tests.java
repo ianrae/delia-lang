@@ -14,7 +14,7 @@ import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ImportGroupSpec;
-import org.delia.dataimport.ImportToool;
+import org.delia.dataimport.ImportTool;
 import org.delia.db.DBType;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -35,7 +35,7 @@ public class FilmAndActor2Tests  extends BDDBase {
 		
 		Delia delia = createDelia();
 		DeliaSession session = delia.beginSession(deliaSrc);
-		ImportToool tool = new ImportToool(session);
+		ImportTool tool = new ImportTool(session);
 
 //		String csvPath = BASE_DIR + "film.csv";
 //		String s = tool.generateInputFunctionSourceCode("Film", csvPath);

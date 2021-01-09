@@ -32,7 +32,7 @@ public class UserFnRunnerTests extends RunnerTestBase {
 		assertSame(dval, dval2);
 	}
 	@Test
-	public void test2() {
+	public void test2() { //TODO: fix this failing unit test
 		NewLegacyRunner runner = createBasicActorType();
 		createUserFn1(runner, "foo", true);
 		chelper = helper.createCompilerHelper();

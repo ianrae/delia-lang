@@ -13,6 +13,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
@@ -39,7 +40,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
 	private DValueCompareService compareSvc;
-
+	private HLSSimpleQueryService querySvc;
 
 	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc, dbInterface);
@@ -62,6 +63,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		this.registry = registry;
+		this.querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
 	}
 
 	@Override
@@ -75,19 +77,19 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return executeInsert(dval, ctx);
 	}
 
-	@Override
-	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-		QueryResponse qresp = new QueryResponse();
-
-		try {
-			qresp = doExecuteQuery(spec, qtx);
-		} catch (InternalException e) {
-			qresp.ok = false;
-			qresp.err = e.getLastError();
-		}
-
-		return qresp;
-	}
+//	@Override
+//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
+//		QueryResponse qresp = new QueryResponse();
+//
+//		try {
+//			qresp = doExecuteQuery(spec, qtx);
+//		} catch (InternalException e) {
+//			qresp.ok = false;
+//			qresp.err = e.getLastError();
+//		}
+//
+//		return qresp;
+//	}
 
 	@Override
 	public FetchRunner createFetchRunner() {
@@ -336,8 +338,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
 			spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 			spec.evaluator.init(spec.queryExp);
-			QueryContext qtx = new QueryContext();
-			QueryResponse qresp = rawQuery(spec, qtx);
+			QueryResponse qresp = querySvc.execQuery(spec.queryExp, this);
 			if (qresp.ok && !qresp.emptyResults()) {
 				DetailedError err = new DetailedError("duplicate-unique-value", String.format("%s. row with unique field '%s' = '%s' already exists", structType.getName(), uniqueField, inner.asString()));
 				err.setFieldName(uniqueField);

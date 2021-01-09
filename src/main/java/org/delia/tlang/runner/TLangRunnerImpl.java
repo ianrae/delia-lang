@@ -20,6 +20,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 	private StringTrail trail = new StringTrail();
 	private VarEvaluator varEvaluator;
 	private Map<String, Object> inputDataMap;
+	private int lineNum;
 
 	public TLangRunnerImpl(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -53,7 +54,7 @@ public class TLangRunnerImpl extends ServiceBase implements TLangRunner {
 				ctx.builder = scalarBuilder;
 				ctx.varEvaluator = varEvaluator;
 				ctx.inputDataMap = inputDataMap;
-				
+
 				res.ok = true;
 				trail.add(statement.getName());
 				statement.execute(dval, res, ctx);

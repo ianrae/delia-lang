@@ -110,6 +110,8 @@ public class H2BDDTests extends BDDBase {
 		runR900File("t0-update-mm-id-othertbl.txt", 2);
 		runR900File("t0-update-mm-other.txt", 4);
 		runR900File("t0-update-mm-other-othertbl.txt", 2);
+		
+		//TODO: !!!need tests for 1:1 and 1:N especially update Customer[55] { addr:[100,101]}
 	}
 	
 	@Test
@@ -119,12 +121,13 @@ public class H2BDDTests extends BDDBase {
 	
 	@Test
 	public void testR1000() {
-		runR1000File("t0-upsert.txt", 5);
+		runR1000File("t0-upsert.txt", 4);
 		runR1000File("t0-upsert-no-update.txt", 2);
 		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
 		runR1000File("t0-upsert-mm-all.txt", 1);
 		runR1000File("t0-upsert-mm-other.txt", 1);
+		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
 	@Test
@@ -329,8 +332,11 @@ public class H2BDDTests extends BDDBase {
 //		runR560File("t0-self-N1.txt", 4);
 //		runR500File("t0-relation-one-to-many.txt", 9);
 //		runR1600File("t0-fetch.txt", 3);
-		runR560File("t0-self-NN.txt", 4);
+//		runR560File("t0-self-NN.txt", 4);
 //		runR560File("t0-self-N1.txt", 4);
+//		runR900File("t0-update-mm-all.txt", 4);
+		runR700File("t0-insert-parent.txt", 2);
+		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
 	//---

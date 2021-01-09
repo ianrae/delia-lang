@@ -1,0 +1,50 @@
+# CRUD upsert tests
+FEATURE: CRUD upsert - non-primary key upsert
+background:
+	type Customer struct {id int primaryKey serial, wid int, name string unique } end
+	insert Customer {wid: 33, name: 'c1'}
+	insert Customer {wid: 34, name: 'c2'}
+thenType: struct
+
+---
+title: upsert using pk
+thenType: int
+expectDVal:false
+when:
+  upsert Customer[1] {wid: 333, name: 'c1'}
+then:
+ERROR: upsert-filter-error
+
+---
+title: upsert using unique field - update
+when:
+  upsert Customer[name=='c1'] {wid: 333, name: 'c1'}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:333
+ vname:'c1'
+}
+---
+title: upsert using unique field - insert
+when:
+  upsert Customer[name=='c3'] {wid: 333, name: 'c3'}
+  let x = Customer[3]
+then:
+value:a:Customer {
+ vid:3
+ vwid:333
+ vname:'c3'
+}
+---
+title: upsert using other field
+when:
+  upsert Customer[wid==55] {wid:55, name: 'c1a'}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:33
+ vname:'c1'
+}

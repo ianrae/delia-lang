@@ -12,9 +12,9 @@ import org.delia.type.DRelation;
 
 t2(cname,iname,ename,immutname) ::= <<
   public class <cname> implements <iname>,<ename> {
-    private DValue dval;
-    private DStructHelper helper;
-    private Map\<String,Object> setMap = new HashMap\<>();
+    protected DValue dval;
+    protected DStructHelper helper;
+    protected Map\<String,Object> setMap = new HashMap\<>();
 
     public <cname>() {
     }
@@ -35,6 +35,20 @@ t2(cname,iname,ename,immutname) ::= <<
     @Override
     public Map\<String, Object> internalSetValueMap() {
       return setMap;
+    }
+
+>>
+
+t2base(cname,base,iname,ename,immutname) ::= <<
+  public class <cname> extends <base>Entity implements <iname>,<ename> {
+
+    public <cname>() {
+    }
+    public <cname>(DValue dval) {
+      super(dval);
+    }
+    public <cname>(<iname> immut) {
+      super(immut);
     }
 
 >>

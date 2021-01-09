@@ -18,9 +18,10 @@ public class DRuleContext {
 	private DBCapabilties dbCapabilities;
 	private FetchRunner fetchRunner;
 	private DValueCompareService compareSvc;
+	private boolean insertFlag;
 
 	public DRuleContext(ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
-					boolean populateFKsFlag, FetchRunner fetchRunner, DValueCompareService compareSvc) {
+					boolean populateFKsFlag, FetchRunner fetchRunner, DValueCompareService compareSvc, boolean insertFlag) {
 		this.et = et;
 		this.ruleText = ruleText;
 		this.enableRelationModifierFlag = enableRelationModifierFlag;
@@ -28,6 +29,7 @@ public class DRuleContext {
 		this.populateFKsFlag = populateFKsFlag;
 		this.fetchRunner = fetchRunner;
 		this.compareSvc = compareSvc;
+		this.insertFlag = insertFlag;
 	}
 	public DetailedError addError(String id, String msg) {
 		String msg2 = String.format("%s - in rule: %s", msg, ruleText);
@@ -91,5 +93,8 @@ public class DRuleContext {
 	}
 	public DValueCompareService getCompareSvc() {
 		return compareSvc;
+	}
+	public boolean isInsertFlag() {
+		return insertFlag;
 	}
 }

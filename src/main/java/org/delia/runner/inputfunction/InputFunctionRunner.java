@@ -61,9 +61,11 @@ public class InputFunctionRunner extends ServiceBase {
 		List<DValue> dvalL = new ArrayList<>();
 		haltNowFlag = false;
 		
+		
 		//map of inputField,raw value
 		Map<String,Object> inputData = createInputMap(hdr, lineObj);
 		viaLineInfo.inputData = inputData;
+		setLineNumVar(lineObj);
 		//it can produce multiple if input function has multiple args (Customer c, Address a)
 		List<ProcessedInputData> processedDataL = runTLang(inputData);
 		if (haltNowFlag) {
@@ -86,6 +88,11 @@ public class InputFunctionRunner extends ServiceBase {
 			}
 		}
 		return dvalL;
+	}
+
+	private void setLineNumVar(LineObj lineObj) {
+		DValue nval = this.scalarBuilder.buildInt(lineObj.lineNum + 1); //convert to 1-based
+		varEvaluator.setLineNum(nval);
 	}
 
 	private DValue buildFromData(ProcessedInputData data, List<DeliaError> errL, ViaLineInfo viaLineInfo, LineObj lineObj) {
@@ -209,6 +216,7 @@ public class InputFunctionRunner extends ServiceBase {
 					ImportSpec ispec = findImportSpec(data.structType);
 					metricsObserver.onInvalid1Error(ispec, pair.name);
 				}
+				err.setArg1(pair.name);
 				errL.add(err);
 				return null;
 			} else {

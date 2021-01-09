@@ -21,7 +21,8 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 		sc.nl();
 		sc.nl();
 		
-		sc.o("public interface %s extends DeliaEntity {", typeName + "Setter");
+		String baseType = (structType.getBaseType() == null) ? "DeliaEntity" : structType.getBaseType().getName();
+		sc.o("public interface %s extends %s {", typeName + "Setter", baseType);
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
