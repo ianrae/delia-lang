@@ -12,6 +12,8 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.TableExistenceService;
+import org.delia.db.sql.QueryType;
+import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.fragment.AliasedFragment;
 import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.fragment.FragmentHelper;
@@ -21,6 +23,7 @@ import org.delia.db.sql.fragment.SqlFragment;
 import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -443,8 +446,8 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	}
 	
 	private int nextAliasIndex = 0;
-//	private QueryTypeDetector queryDetectorSvc;
-//	private WhereFragmentGenerator whereGen;
+	private QueryTypeDetector queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
+	private WhereFragmentGenerator whereGen;
 //	private SelectFuncHelper selectFnHelper;
 	public TableExistenceService existSvc; //public as a hack
 //	private FKHelper fkHelper;
@@ -459,23 +462,28 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	}
 	
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
-		DeliaExceptionHelper.throwError("initWhere-not-impl", "");
-//		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
-//		switch(queryType) {
-//		case ALL_ROWS:
-//		{
-//		}
-//			break;
-//		case OP:
-//			whereGen.addWhereClauseOp(spec, structType, selectFrag);
-//			break;
-//		case PRIMARY_KEY:
-//		default:
-//		{
-//			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
-//		}
-//			break;
-//		}
+		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
+		
+		if (whereGen == null) {
+			whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator(), datIdMap);
+		}
+		
+		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
+		switch(queryType) {
+		case ALL_ROWS:
+		{
+		}
+			break;
+		case OP:
+			whereGen.addWhereClauseOp(spec, structType, selectFrag);
+			break;
+		case PRIMARY_KEY:
+		default:
+		{
+			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
+		}
+			break;
+		}
 	}
 	
 	private TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName) {

@@ -73,6 +73,22 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsert hldins = buildFromSrcInsert(src, 1); 
 		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
+	@Test
+	public void test1NInsertParent() {
+		//adapted from t0-insert-parent.txt: add workers
+		useCustomer1NSrc = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "insert Address {id: 100, y: 45}");
+		src = addSrc(src, "insert Address {id: '101', y:46 }");
+		src = addSrc(src, "insert Customer {cid: 56, x:66, addr: ['100','101'] }");
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 3); 
+		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
+		dumpGrp(stmgrp);
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
+		chkInsertSql(stmgrp, 1, "UPDATE Address SET cust = ? WHERE id = ?", "56", "100");
+		chkInsertSql(stmgrp, 2, "UPDATE Address SET cust = ? WHERE id = ?", "56", "101");
+	}
 	
 	// --- M:N ---
 	@Test
