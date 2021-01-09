@@ -1,5 +1,9 @@
 package org.delia.db.newhls.cud;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
@@ -33,6 +37,15 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsert hldins = buildFromSrcInsert(src, 0); 
 		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
 	}
+	@Test
+	public void test2a() {
+		useCustomer11Src = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 1); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+	}
 	
 	// --- 1:N ---
 	@Test
@@ -50,6 +63,15 @@ public class InsertTests extends NewHLSTestBase {
 		
 		HLDInsert hldins = buildFromSrcInsert(src, 0); 
 		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+	}
+	@Test
+	public void test1N2a() {
+		useCustomer1NSrc = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 1); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	
 	// --- M:N ---
@@ -69,29 +91,33 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsert hldins = buildFromSrcInsert(src, 0); 
 		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
 	}
+	@Test
+	public void testMN2a() {
+		useCustomerManyToManySrc = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 1); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+	}
 	
-	//TODO test inserting refs
 	
 	//-------------------------
-	protected HLDInsert buildFromSrcInsert(String src, int expectedJoins) {
-		InsertStatementExp insertExp = compileToInsertStatement(src);
+	protected HLDInsert buildFromSrcInsert(String src, int statementIndex) {
+		InsertStatementExp insertExp = compileToInsertStatement(src, statementIndex);
 		log.log(src);
 		
 		mgr = createManager(); 
 		HLDInsert hldins = mgr.fullBuildInsert(insertExp);
 		log.log(hldins.toString());
-//		assertEquals(expectedJoins, hldins.hld.joinL.size());
 		return hldins;
 	}
 
-	protected InsertStatementExp compileToInsertStatement(String src) {
+	protected InsertStatementExp compileToInsertStatement(String src, int statementIndex) {
 		DeliaSessionImpl sessimpl = doCompileStatement(src);
-		for(Exp exp: sessimpl.mostRecentContinueExpL) {
-			if (exp instanceof InsertStatementExp) {
-				return (InsertStatementExp) exp;
-			}
-		}
-		return null;
+		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof InsertStatementExp).collect(Collectors.toList());
+		Exp exp = list.get(statementIndex);
+		return (InsertStatementExp) exp;
 	}
 	
 	protected void chkInsertSql(HLDInsert hldins, int numStatements, String expected, String...args) {
@@ -101,8 +127,8 @@ public class InsertTests extends NewHLSTestBase {
 		assertEquals(numStatements, stmgrp.statementL.size());
 	}
 
-	private void assertEquals(int numStatements, int size) {
-		// TODO Auto-generated method stub
-		
+	
+	private String addSrc(String src0, String src) {
+		return src0 + "\n" + src;
 	}
 }
