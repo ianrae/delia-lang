@@ -230,7 +230,7 @@ public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragm
 		for(DValue inner: drel.getMultipleKeys()) {
 			InsertStatementFragment insertFrag = new InsertStatementFragment();
 			if (tblFrag == null) {
-				tblFrag = this.createAssocTable(insertFrag, tblinfo.assocTblName);
+				tblFrag = this.createAssocTable(insertFrag, tblinfo.assocTblName, info);
 			} else {
 				tblFrag = new TableFragment(tblFrag);
 			}
@@ -276,7 +276,7 @@ public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragm
 			
 			UpdateStatementFragment innerUpdateFrag = new UpdateStatementFragment();
 			if (tblFrag == null) {
-				tblFrag = this.createAssocTable(innerUpdateFrag, tblinfo.assocTblName);
+				tblFrag = this.createAssocTable(innerUpdateFrag, tblinfo.assocTblName, info);
 			} else {
 				tblFrag = new TableFragment(tblFrag);
 			}
@@ -304,7 +304,7 @@ public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragm
 		for(DValue inner: drel.getMultipleKeys()) {
 			DeleteStatementFragment deleteFrage = new DeleteStatementFragment();
 			if (tblFrag == null) {
-				tblFrag = this.createAssocTable(deleteFrage, tblinfo.assocTblName);
+				tblFrag = this.createAssocTable(deleteFrage, tblinfo.assocTblName, info);
 			} else {
 				tblFrag = new TableFragment(tblFrag);
 			}
@@ -321,7 +321,7 @@ public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragm
 			RelationInfo info, List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
 		//update assoctabl set leftv=x where rightv=y
 		TableInfo tblinfo = TableInfoHelper.findTableInfoAssoc(this.tblinfoL, info.nearType, info.farType);
-		assocUpdateFrag.tblFrag = this.createAssocTable(assocUpdateFrag, tblinfo.assocTblName);
+		assocUpdateFrag.tblFrag = this.createAssocTable(assocUpdateFrag, tblinfo.assocTblName, info);
 
 		//struct is Address AddressCustomerAssoc
 		String field1;
@@ -662,7 +662,7 @@ public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragm
 //		}
 	}
 	
-	public TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName) {
+	private TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName, RelationInfo relinfo) {
 		TableFragment tblFrag = selectFrag.findByTableName(tableName);
 		if (tblFrag != null) {
 			return tblFrag;
@@ -670,9 +670,9 @@ public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragm
 		
 		tblFrag = new TableFragment();
 		tblFrag.structType = null;
-		String fieldName = "fixlater"; //TODO fix!!
+//		String fieldName = "fixlater"; //TODO fix!!
 		DStructType structType = null;
-		AliasInfo info = this.aliasMgr.createAssocAlias(structType, fieldName, tableName);
+		AliasInfo info = this.aliasMgr.createAssocAlias(relinfo.nearType, relinfo.fieldName, tableName);
 		tblFrag.alias = info.alias;
 		//createAlias(tblFrag);
 		tblFrag.name = tableName;

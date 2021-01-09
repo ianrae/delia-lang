@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.QuerySpec;
+import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDWhereFragment;
 import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.sql.fragment.SqlFragment;
@@ -27,7 +29,9 @@ public class HLDWhereGenImpl implements HLDWhereGen {
 		String sqlwhere = gen.generateSqlWhere(hld, statement);
 		int n2 = statement.paramL.size();
 		
+
 		HLDWhereFragment frag = new HLDWhereFragment(sqlwhere, n2 - n1);
+		frag.isPKFilter = (hld.filter instanceof SingleFilterCond);
 		List<SqlFragment> list = new ArrayList<>();
 		list.add(frag);
 		return list;

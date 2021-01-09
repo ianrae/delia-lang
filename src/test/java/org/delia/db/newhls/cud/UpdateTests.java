@@ -3,6 +3,7 @@ package org.delia.db.newhls.cud;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.delia.api.DeliaSessionImpl;
@@ -11,6 +12,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.type.DValue;
 import org.junit.Test;
 
 /**
@@ -116,9 +118,11 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
-		chkUpdateSql(stmgrp, 0, "INSERT INTO Address (id, y) VALUES(?, ?)", "100", "45");
-		chkUpdateSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		dumpGrp(stmgrp);
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?", "55", "100");
+		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");
 	}
 	
 	@Test
@@ -142,7 +146,12 @@ public class UpdateTests extends NewHLSTestBase {
 	private void dumpGrp(SqlStatementGroup stmgrp) {
 		log.log("grp: %s", stmgrp.statementL.size());
 		for(SqlStatement stm: stmgrp.statementL) {
-			log.log(stm.sql);
+			StringJoiner joiner = new StringJoiner(",");
+			for(DValue dval: stm.paramL) {
+				joiner.add(dval.asString());
+			}
+
+			log.log("%s -- %s", stm.sql, joiner.toString());
 		}
 	}
 	

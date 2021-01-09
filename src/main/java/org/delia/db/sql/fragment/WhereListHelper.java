@@ -3,6 +3,7 @@ package org.delia.db.sql.fragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.db.newhls.cud.HLDWhereFragment;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
@@ -45,6 +46,11 @@ public class WhereListHelper  {
 				}
 				if (!opff.right.name.equals(pair.name) && !rightIsQuestionMark(opff)) {
 					failCount++;
+				}
+			} else if (ff instanceof HLDWhereFragment) {
+				HLDWhereFragment hldff = (HLDWhereFragment) ff;
+				if (existingWhereL.size() == 1) {
+					return hldff.isPKFilter;
 				}
 			}
 		}
