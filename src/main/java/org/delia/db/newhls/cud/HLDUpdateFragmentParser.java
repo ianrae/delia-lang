@@ -7,10 +7,15 @@ import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
+import org.delia.db.TableExistenceService;
+import org.delia.db.hls.AliasInfo;
 import org.delia.db.newhls.HLDAliasManager;
+import org.delia.db.sql.QueryTypeDetector;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.fragment.AliasedFragment;
 import org.delia.db.sql.fragment.AssocTableReplacer;
 import org.delia.db.sql.fragment.DeleteStatementFragment;
 import org.delia.db.sql.fragment.FieldFragment;
@@ -24,6 +29,7 @@ import org.delia.db.sql.fragment.SqlFragment;
 import org.delia.db.sql.fragment.StatementFragmentBase;
 import org.delia.db.sql.fragment.TableFragment;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
+import org.delia.db.sql.fragment.WhereFragmentGenerator;
 import org.delia.db.sql.fragment.WhereListHelper;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -31,6 +37,7 @@ import org.delia.db.sql.prepared.TableInfoHelper;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
+import org.delia.rule.rules.RelationOneRule;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -41,17 +48,18 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 //single use!!!
-public class HLDUpdateFragmentParser extends SelectFragmentParser {
+public class HLDUpdateFragmentParser extends ServiceBase { //extends SelectFragmentParser {
 
 	protected boolean useAliases = true;
 	protected AssocTableReplacer assocTblReplacer;
 	private DatIdMap datIdMap;
 	private HLDWhereGen hldWhereGen;
 	private HLDAliasManager aliasMgr;
+	private DTypeRegistry registry;
 
 	public HLDUpdateFragmentParser(FactoryService factorySvc, DatIdMap datIdMap, DTypeRegistry registry, 
 			HLDWhereGen hdlWhereGen, HLDAliasManager aliasMgr, AssocTableReplacer assocTblReplacer) {
-		super(factorySvc, null);
+		super(factorySvc);
 		this.assocTblReplacer = assocTblReplacer;
 		this.datIdMap = datIdMap;
 		this.registry = registry;
@@ -439,7 +447,7 @@ public class HLDUpdateFragmentParser extends SelectFragmentParser {
 	private void generateUpdateFns(QuerySpec spec, DStructType structType, UpdateStatementFragment selectFrag) {
 		//orderby supported only by MySQL which delia does not support
 		//			this.doOrderByIfPresent(spec, structType, selectFrag);
-		this.doLimitIfPresent(spec, structType, selectFrag);
+		//TODO why would we limit on update????   this.doLimitIfPresent(spec, structType, selectFrag);
 		//			this.doOffsetIfPresent(spec, structType, selectFrag);
 	}
 
@@ -592,4 +600,138 @@ public class HLDUpdateFragmentParser extends SelectFragmentParser {
 	public void useAliases(boolean b) {
 		this.useAliases = b;
 	}
+	
+	//added from base
+	protected DStructType getMainType(String typeName) {
+		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+		return structType;
+	}
+	public TableFragment createTable(DStructType structType, StatementFragmentBase selectFrag) {
+		TableFragment tblFrag = selectFrag.findByTableName(structType.getName());
+		if (tblFrag != null) {
+			return tblFrag;
+		}
+		
+		tblFrag = new TableFragment();
+		tblFrag.structType = structType;
+//		createAlias(tblFrag);
+		AliasInfo info = this.aliasMgr.createMainTableAlias(structType);
+		tblFrag.alias = info.alias;
+		tblFrag.name = structType.getName();
+		selectFrag.aliasMap.put(tblFrag.name, tblFrag);
+		return tblFrag;
+	}
+	
+//	private int nextAliasIndex = 0;
+	private QueryTypeDetector queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
+	private WhereFragmentGenerator whereGen;
+//	private SelectFuncHelper selectFnHelper;
+	public TableExistenceService existSvc; //public as a hack
+//	private FKHelper fkHelper;
+//	private JoinFragment savedJoinedFrag;
+	public List<TableInfo> tblinfoL; //public as a hack
+//	private SpanHelper spanHelper;
+	
+	
+//	private void createAlias(AliasedFragment frag) {
+//		char ch = (char) ('a' + nextAliasIndex++);
+//		frag.alias = String.format("%c", ch);
+//	}
+	
+	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
+		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
+
+		List<SqlFragment> fragL = hldWhereGen.createWhere(spec, structType, selectFrag.statement, aliasMgr);
+		selectFrag.whereL.addAll(fragL);
+		useAliases = true;
+		
+		
+//		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
+//		switch(queryType) {
+//		case ALL_ROWS:
+//		{
+//		}
+//			break;
+//		case OP:
+//			whereGen.addWhereClauseOp(spec, structType, selectFrag);
+//			break;
+//		case PRIMARY_KEY:
+//		default:
+//		{
+//			whereGen.addWhereClausePrimaryKey(spec, spec.queryExp.filter, structType, selectFrag);
+//		}
+//			break;
+//		}
+	}
+	
+	public TableFragment createAssocTable(StatementFragmentBase selectFrag, String tableName) {
+		TableFragment tblFrag = selectFrag.findByTableName(tableName);
+		if (tblFrag != null) {
+			return tblFrag;
+		}
+		
+		tblFrag = new TableFragment();
+		tblFrag.structType = null;
+		String fieldName = "fixlater"; //TODO fix!!
+		DStructType structType = null;
+		AliasInfo info = this.aliasMgr.createAssocAlias(structType, fieldName, tableName);
+		tblFrag.alias = info.alias;
+		//createAlias(tblFrag);
+		tblFrag.name = tableName;
+		selectFrag.aliasMap.put(tblFrag.name, tblFrag);
+		return tblFrag;
+	}
+	protected void fixupForParentFields(DStructType structType, StatementFragmentBase selectFrag) {
+//		public List<FieldFragment> fieldL = new ArsrayList<>();
+//		public OrderByFragment orderByFrag = null;
+
+		for(SqlFragment frag: selectFrag.whereL) {
+			if (frag instanceof OpFragment) {
+				OpFragment opfrag = (OpFragment) frag;
+				TableFragment tblFrag = selectFrag.findByAlias(opfrag.left.alias);
+				if (tblFrag != null && tblFrag.structType.equals(structType)) {
+					//this is the main type
+					doParentFixup(opfrag.left, tblFrag, selectFrag);
+				}
+				
+				tblFrag = selectFrag.findByAlias(opfrag.right.alias);
+				if (tblFrag != null && tblFrag.structType.equals(structType)) {
+					//this is the main type
+					doParentFixup(opfrag.right, tblFrag, selectFrag);
+				}
+			}
+		}
+	}
+
+	//SELECT a.id,b.id as addr FROM Customer as a LEFT JOIN Address as b ON b.cust=a.id WHERE  a.addr < ?  -- (111)
+	//a.addr is parent. change to b.id
+	protected void doParentFixup(AliasedFragment aliasFrag, TableFragment tblFrag, StatementFragmentBase selectFrag) {
+		String fieldName = aliasFrag.name;
+		RelationOneRule oneRule = DRuleHelper.findOneRule(tblFrag.structType.getName(), fieldName, registry);
+		if (oneRule != null && oneRule.relInfo.isParent) {
+			RelationInfo relInfo = oneRule.relInfo;
+			if (aliasFrag.name.equals(relInfo.fieldName)) {
+				changeToChild(aliasFrag, relInfo, selectFrag);
+			}
+		} else {
+			RelationManyRule manyRule = DRuleHelper.findManyRule(tblFrag.structType.getName(), fieldName, registry);
+			if (manyRule != null && manyRule.relInfo.isParent) {
+				RelationInfo relInfo = manyRule.relInfo;
+				changeToChild(aliasFrag, relInfo, selectFrag);
+			}
+		}
+	}
+
+	protected void changeToChild(AliasedFragment aliasFrag, RelationInfo relInfo, StatementFragmentBase selectFrag) {
+		TableFragment otherSide = selectFrag.aliasMap.get(relInfo.farType.getName());
+		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relInfo.farType);
+		log.log("fixup %s.%s -> %s.%s", aliasFrag.alias, aliasFrag.name, otherSide.alias, pair.name);
+		aliasFrag.alias = otherSide.alias;
+		aliasFrag.name = pair.name;
+	}
+	protected DStructType getMainType(QuerySpec spec) {
+		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(spec.queryExp.typeName);
+		return structType;
+	}
+
 }

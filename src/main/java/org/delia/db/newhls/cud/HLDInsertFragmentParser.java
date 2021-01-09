@@ -472,23 +472,12 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
-		//copyAliases(selectFrag, aliasMgr);
-//		for(String tbl: selectFrag.aliasMap.keySet()) {
-//			DStructType dtype = (DStructType) registry.getType(tbl);
-//			aliasMgr.createMainTableAlias(dtype);
-//		}
-//		AliasInfo info = aliasMgr.createMainTableAlias(structType); //doing get here, not create
-//		selectFrag.tblFrag.alias = info.alias;
 
 		List<SqlFragment> fragL = hldWhereGen.createWhere(spec, structType, selectFrag.statement, aliasMgr);
 		selectFrag.whereL.addAll(fragL);
 		useAliases = true;
 		
 		
-//		if (whereGen == null) {
-//			whereGen = new WhereFragmentGenerator(factorySvc, registry, new DoNothingVarEvaluator(), datIdMap);
-//		}
-//		
 //		QueryType queryType = queryDetectorSvc.detectQueryType(spec);
 //		switch(queryType) {
 //		case ALL_ROWS:

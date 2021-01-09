@@ -27,7 +27,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "1", "45");
 	}
 	@Test
 	public void test2() {
