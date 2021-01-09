@@ -19,6 +19,15 @@ public class WhereListHelper  {
 		}
 		return tmpL;
 	}
+	public static List<SqlFragment> cloneWhereListHLD(List<SqlFragment> existingWhereL) {
+		List<SqlFragment> tmpL = new ArrayList<>();
+		for(SqlFragment fff: existingWhereL) {
+			if (fff instanceof HLDWhereFragment) {
+				tmpL.add(fff);
+			}
+		}
+		return tmpL;
+	}
 
 	public static List<OpFragment> findPrimaryKeyQuery(List<SqlFragment> existingWhereL, DStructType farType) {
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(farType);
