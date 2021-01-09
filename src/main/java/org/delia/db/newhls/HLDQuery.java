@@ -112,7 +112,7 @@ public class HLDQuery {
 			for(HLDField rf: fieldL) {
 				joiner.add(rf.toString());
 			}
-			s += String.format(" {%s}", joiner.toString());
+			s += String.format(" (%d){%s}", fieldL.size(), joiner.toString());
 		}
 		return s;
 	}

@@ -127,7 +127,7 @@ public class HLDSQLGenerator {
 		
 		if (el.relinfo.isParent) {
 			//need to reverse, since parent doesn't have child id
-			TypePair pkpair = el.getOtherSidePK();
+			TypePair pkpair = el.getThisSidePK();
 			String parentName = el.getOtherSideField(); //TODO. can otherSide ever be null??
 			sc.o(" ON %s.%s=%s.%s", el.srcAlias, pkpair.name, alias, parentName);  
 		} else {
@@ -174,8 +174,16 @@ public class HLDSQLGenerator {
 				field = datIdMap.getAssocFieldFor(el.relinfo);
 			}
 			return new NamePair(el.aliasName, field);
+		} else if (el.relinfo.isParent) {
+			if (el.relinfo.fieldName.equals(fieldName)) {
+				TypePair pkpair = el.getOtherSidePK();
+				return new NamePair(el.aliasName, pkpair.name);
+			} else {
+				return new NamePair(alias, fieldName);
+			}
+		} else {
+			return new NamePair(alias, fieldName);
 		}
-		return new NamePair(alias, fieldName);
 	}
 
 

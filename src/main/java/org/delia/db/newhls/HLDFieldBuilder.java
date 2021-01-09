@@ -119,7 +119,7 @@ public class HLDFieldBuilder {
 					
 					//only get fk fields if is a join for it
 					JoinElement el = optJoin.orElse(null);
-					if (relinfo.notContainsFK() && el != null) {
+					if (relinfo.isManyToMany() && el != null) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();
 					} else if (!relinfo.isParent && !relinfo.isManyToMany()) {
 						addField(hld.fieldL, reftype, pair).source = optJoin.get();

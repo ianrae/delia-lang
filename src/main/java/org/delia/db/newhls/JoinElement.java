@@ -61,9 +61,14 @@ public class JoinElement  {
 		return new TypePair(relationField.fieldName, relationField.fieldType);
 	}
 	
-	public TypePair getOtherSidePK() {
+	public TypePair getThisSidePK() {
 		//need to reverse, since parent doesn't have child id
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(relationField.dtype);
+		return pkpair;
+	}
+	public TypePair getOtherSidePK() {
+		//need to reverse, since parent doesn't have child id
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(relinfo.farType);
 		return pkpair;
 	}
 	public String getOtherSideField() {
