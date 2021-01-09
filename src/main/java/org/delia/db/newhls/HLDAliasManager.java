@@ -129,10 +129,10 @@ public class HLDAliasManager extends ServiceBase {
 	
 	
 	
-	public void createAssocAlias(DStructType structType, String fieldName, String assocTbl) {
+	public AliasInfo createAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		AliasInfo info = getAssocAlias(structType, fieldName, assocTbl);
 		if (info != null) {
-			return;
+			return info;
 		}
 		//if is other side of same relation we don't need to add it again
 		TypePair pair = DValueHelper.findField(structType, fieldName);
@@ -154,6 +154,7 @@ public class HLDAliasManager extends ServiceBase {
 		
 		String key = String.format("%s.%s", structType.getName(), fieldName);
 		assocMap.put(key, info);
+		return info;
 	}
 	
 //	public void buildAliases(HLSQuerySpan hlspan, DatIdMap datIdMap) {

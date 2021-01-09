@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.db.newhls.HLDAliasManager;
 import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.TableInfo;
@@ -38,7 +39,8 @@ public class HLDInsertSQLGenerator {
 //				new DoNothingVarEvaluator(), tableCreator.alreadyCreatedL, dbctx, sqlHelperFactory, whereGen, null);
 //		ZTableExistenceService existSvc = new ZTableExistenceService();
 //		fpSvc.setExistSvc(existSvc);
-		HLDInsertFragmentParser parser = new HLDInsertFragmentParser(factorySvc, datIdMap, registry, whereGen);
+		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
+		HLDInsertFragmentParser parser = new HLDInsertFragmentParser(factorySvc, datIdMap, registry, whereGen, aliasMgr);
 		parser.existSvc = new ZTableExistenceService();
 		parser.tblinfoL = buildTblList(dval); 
 		

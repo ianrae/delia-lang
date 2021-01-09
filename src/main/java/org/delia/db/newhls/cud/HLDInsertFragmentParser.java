@@ -57,12 +57,14 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 	private DatIdMap datIdMap;
 	protected DTypeRegistry registry;
 	private HLDWhereGen hldWhereGen;
+	private HLDAliasManager aliasMgr;
 
-	public HLDInsertFragmentParser(FactoryService factorySvc, DatIdMap datIdMap, DTypeRegistry registry, HLDWhereGen hdlWhereGen) {
+	public HLDInsertFragmentParser(FactoryService factorySvc, DatIdMap datIdMap, DTypeRegistry registry, HLDWhereGen hdlWhereGen, HLDAliasManager aliasMgr) {
 		super(factorySvc);
 		this.registry = registry;
 		this.datIdMap = datIdMap;
 		this.hldWhereGen = hdlWhereGen;
+		this.aliasMgr = aliasMgr;
 	}
 
 	public InsertStatementFragment parseInsert(String typeName, DValue dval) {
@@ -436,7 +438,7 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 		DStructType structType = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
 		return structType;
 	}
-	public TableFragment createTable(DStructType structType, StatementFragmentBase selectFrag) {
+	private TableFragment createTable(DStructType structType, StatementFragmentBase selectFrag) {
 		TableFragment tblFrag = selectFrag.findByTableName(structType.getName());
 		if (tblFrag != null) {
 			return tblFrag;
@@ -444,13 +446,15 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 		
 		tblFrag = new TableFragment();
 		tblFrag.structType = structType;
-		createAlias(tblFrag);
+//		createAlias(tblFrag);
+		AliasInfo info = this.aliasMgr.createMainTableAlias(structType);
+		tblFrag.alias = info.alias;
 		tblFrag.name = structType.getName();
 		selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 		return tblFrag;
 	}
 	
-	private int nextAliasIndex = 0;
+//	private int nextAliasIndex = 0;
 	private QueryTypeDetector queryDetectorSvc = new QueryTypeDetector(factorySvc, registry);
 	private WhereFragmentGenerator whereGen;
 //	private SelectFuncHelper selectFnHelper;
@@ -461,21 +465,20 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 //	private SpanHelper spanHelper;
 	
 	
-	public void createAlias(AliasedFragment frag) {
-		char ch = (char) ('a' + nextAliasIndex++);
-		frag.alias = String.format("%c", ch);
-	}
+//	private void createAlias(AliasedFragment frag) {
+//		char ch = (char) ('a' + nextAliasIndex++);
+//		frag.alias = String.format("%c", ch);
+//	}
 	
 	protected void initWhere(QuerySpec spec, DStructType structType, StatementFragmentBase selectFrag) {
 		//DeliaExceptionHelper.throwError("initWhere-not-impl", "");
-		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 		//copyAliases(selectFrag, aliasMgr);
-		for(String tbl: selectFrag.aliasMap.keySet()) {
-			DStructType dtype = (DStructType) registry.getType(tbl);
-			aliasMgr.createMainTableAlias(dtype);
-		}
-		AliasInfo info = aliasMgr.createMainTableAlias(structType); //doing get here, not create
-		selectFrag.tblFrag.alias = info.alias;
+//		for(String tbl: selectFrag.aliasMap.keySet()) {
+//			DStructType dtype = (DStructType) registry.getType(tbl);
+//			aliasMgr.createMainTableAlias(dtype);
+//		}
+//		AliasInfo info = aliasMgr.createMainTableAlias(structType); //doing get here, not create
+//		selectFrag.tblFrag.alias = info.alias;
 
 		List<SqlFragment> fragL = hldWhereGen.createWhere(spec, structType, selectFrag.statement, aliasMgr);
 		selectFrag.whereL.addAll(fragL);
@@ -512,7 +515,11 @@ public class HLDInsertFragmentParser extends ServiceBase { //extends SelectFragm
 		
 		tblFrag = new TableFragment();
 		tblFrag.structType = null;
-		createAlias(tblFrag);
+		String fieldName = "fixlater"; //TODO fix!!
+		DStructType structType = null;
+		AliasInfo info = this.aliasMgr.createAssocAlias(structType, fieldName, tableName);
+		tblFrag.alias = info.alias;
+		//createAlias(tblFrag);
 		tblFrag.name = tableName;
 		selectFrag.aliasMap.put(tblFrag.name, tblFrag);
 		return tblFrag;
