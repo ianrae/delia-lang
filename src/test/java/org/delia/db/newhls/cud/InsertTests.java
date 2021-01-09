@@ -16,6 +16,7 @@ import org.junit.Test;
  */
 public class InsertTests extends NewHLSTestBase {
 	
+	// --- 1:1 ---
 	@Test
 	public void test1() {
 		useCustomer11Src = true;
@@ -24,22 +25,52 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsert hldins = buildFromSrcInsert(src, 0); 
 		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
 	}
-//	@Test
-//	public void test2() {
-//		useCustomer11Src = true;
-//		String src = "delete Address[100]";
-//		
-//		HLDDelete hldDelete = buildFromSrcDelete(src, 0); 
-//		chkDeleteSql(hldDelete, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
-//	}
-//	@Test
-//	public void test3() {
-//		useCustomer11Src = true;
-//		String src = "delete Customer[x > 10]";
-//		
-//		HLDDelete hldDelete = buildFromSrcDelete(src, 0); 
-//		chkDeleteSql(hldDelete, "DELETE FROM Customer as t0 WHERE t0.x > ?", "10");
-//	}
+	@Test
+	public void test2() {
+		useCustomer11Src = true;
+		String src = "insert Address {id: 1, y: 45}";
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+	}
+	
+	// --- 1:N ---
+	@Test
+	public void test1N() {
+		useCustomer1NSrc = true;
+		String src = "insert Customer {cid: 1, x: 45}";
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+	}
+	@Test
+	public void test1N2() {
+		useCustomer1NSrc = true;
+		String src = "insert Address {id: 1, y: 45}";
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+	}
+	
+	// --- M:N ---
+	@Test
+	public void testMN() {
+		useCustomerManyToManySrc = true;
+		String src = "insert Customer {cid: 1, x: 45}";
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+	}
+	@Test
+	public void testMN2() {
+		useCustomerManyToManySrc = true;
+		String src = "insert Address {id: 1, y: 45}";
+		
+		HLDInsert hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+	}
+	
+	//TODO test inserting refs
 	
 	//-------------------------
 	protected HLDInsert buildFromSrcInsert(String src, int expectedJoins) {
