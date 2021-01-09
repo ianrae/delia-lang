@@ -46,4 +46,34 @@ public class SqlColumnBuilder {
 			return new SqlColumn(alias, fieldName);
 		}
 	}
+	public SqlColumn adjustScalar(String alias, String fieldName, DStructType structType, JoinElement el) {
+		if (el.relinfo.isManyToMany()) {
+			String field;
+			if (el.aliasNameAdditional != null) {
+				return new SqlColumn(el.aliasNameAdditional, fieldName);
+			} else if (el.relinfo.nearType == structType) {
+				if (el.relinfo.fieldName.equals(fieldName)) {
+					field = datIdMap.getAssocFieldFor(el.relinfo);
+				} else {
+					field = datIdMap.getAssocOtherField(el.relinfo);
+				}
+			} else {
+				if (el.relinfo.fieldName.equals(fieldName)) {
+					field = datIdMap.getAssocFieldFor(el.relinfo);
+				} else {
+					field = datIdMap.getAssocOtherField(el.relinfo);
+				}
+			}
+			return new SqlColumn(el.aliasName, field);
+		} else if (el.relinfo.isParent) {
+			if (el.relinfo.fieldName.equals(fieldName)) {
+				TypePair pkpair = el.getOtherSidePK();
+				return new SqlColumn(el.aliasName, pkpair.name);
+			} else {
+				return new SqlColumn(alias, fieldName);
+			}
+		} else {
+			return new SqlColumn(alias, fieldName);
+		}
+	}
 }

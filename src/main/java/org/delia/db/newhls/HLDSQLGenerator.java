@@ -15,6 +15,7 @@ import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -77,7 +78,9 @@ public class HLDSQLGenerator {
 			if (el != null && el.relinfo.notContainsFK()) {
 				if (el.relinfo.isManyToMany()) {
 					//passing null here ok because we know its M:M
-					SqlColumn npair = doMapFieldIfNeeded(el.aliasName, null, fnspec.structField.dtype, el);
+//					SqlColumn npair = doMapFieldIfNeeded(el.aliasName, null, fnspec.structField.dtype, el);
+					DType fieldType = DValueHelper.findFieldType(fnspec.structField.dtype, fnspec.structField.fieldName);
+					SqlColumn npair = doMapFieldScalarOrRef(fieldType, el.aliasName, fnspec.structField.fieldName, fnspec.structField.dtype, el);
 					sc.o(" %s", npair.toString());  
 				} else {
 					//need to reverse, since parent doesn't have child id
@@ -150,12 +153,19 @@ public class HLDSQLGenerator {
 
 
 	private SqlColumn mapFieldIfNeeded(HLDField rf) {
-		if (rf.fieldType.isStructShape() && rf.source instanceof JoinElement) {
-//		if (rf.source instanceof JoinElement) {
+		if (rf.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) rf.source;
-			return doMapFieldIfNeeded(rf.alias, rf.fieldName, rf.structType, el);
+			return doMapFieldScalarOrRef(rf.fieldType, rf.alias, rf.fieldName, rf.structType, el);
+		} else {
+			return new SqlColumn(rf.alias, rf.fieldName);
 		}
-		return new SqlColumn(rf.alias, rf.fieldName);
+	}
+	private SqlColumn doMapFieldScalarOrRef(DType fieldType, String alias, String fieldName, DStructType structType, JoinElement el) {
+		if (fieldType.isStructShape()) {
+			return doMapFieldIfNeeded(alias, fieldName, structType, el);
+		} else {
+			return columnBuilder.adjustScalar(alias, fieldName, structType, el);
+		}
 	}
 	private SqlColumn doMapFieldIfNeeded(String alias, String fieldName, DStructType structType, JoinElement el) {
 		return columnBuilder.adjust(alias, structType, fieldName, el);
