@@ -75,6 +75,7 @@ public class UpdateTests extends NewHLSTestBase {
 	}
 	@Test
 	public void test1NInsertParent() {
+		//TODO: this is broken. fix!!
 		//adapted from t0-insert-parent.txt: add workers
 		useCustomer1NSrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
@@ -85,7 +86,7 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
+		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
 		chkUpdateSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
 		chkUpdateSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
 	}
@@ -94,26 +95,27 @@ public class UpdateTests extends NewHLSTestBase {
 	@Test
 	public void testMN() {
 		useCustomerManyToManySrc = true;
-		String src = "insert Customer {cid: 1, x: 45}";
+		String src = "update Customer[1] { x: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
+	
 	@Test
 	public void testMN2() {
 		useCustomerManyToManySrc = true;
-		String src = "insert Address {id: 1, y: 45}";
+		String src = "update Address[1] { y: 45}";
 		
 		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "1");
 	}
 	@Test
 	public void testMN2a() {
 		useCustomerManyToManySrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "insert Address {id: 100, y: 45, cust:55}");
+		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 1); 
+		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
 		chkUpdateSql(stmgrp, 0, "INSERT INTO Address (id, y) VALUES(?, ?)", "100", "45");
 		chkUpdateSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");

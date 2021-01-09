@@ -110,6 +110,8 @@ public class H2BDDTests extends BDDBase {
 		runR900File("t0-update-mm-id-othertbl.txt", 2);
 		runR900File("t0-update-mm-other.txt", 4);
 		runR900File("t0-update-mm-other-othertbl.txt", 2);
+		
+		//TODO: !!!need tests for 1:1 and 1:N especially update Customer[55] { addr:[100,101]}
 	}
 	
 	@Test

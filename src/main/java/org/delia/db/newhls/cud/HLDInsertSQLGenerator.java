@@ -3,7 +3,9 @@ package org.delia.db.newhls.cud;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
+import org.delia.assoc.DatIdMap.DatInfo;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.QueryDetails;
@@ -101,8 +103,16 @@ public class HLDInsertSQLGenerator {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo != null && relinfo.isManyToMany()) {
-					String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+					DatInfo datinfo = datIdMap.getAssocTblInfo(relinfo.getDatId());
+					String assocTbl = datinfo.tableName; //datIdMap.getAssocTblName(relinfo.getDatId());
 					TableInfo info = new TableInfo(structType.getName(), assocTbl);
+					if (datinfo.matchesLeft(relinfo)) {
+						info.tbl1 = StringUtils.substringBefore(datinfo.left, ".");
+						info.tbl2 = StringUtils.substringBefore(datinfo.right, ".");
+					} else {
+						info.tbl1 = StringUtils.substringBefore(datinfo.right, ".");
+						info.tbl2 = StringUtils.substringBefore(datinfo.left, ".");
+					}
 					tblinfoL.add(info);
 				}
 			}
