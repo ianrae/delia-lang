@@ -30,10 +30,10 @@ import org.delia.util.DValueHelper;
 		protected DTypeRegistry registry;
 		protected WhereFragmentGenerator whereGen;
 		protected SelectFuncHelper selectFnHelper;
-		protected TableExistenceService existSvc;
+		public TableExistenceService existSvc; //public as a hack
 		protected FKHelper fkHelper;
 		protected JoinFragment savedJoinedFrag;
-		protected List<TableInfo> tblinfoL;
+		public List<TableInfo> tblinfoL; //public as a hack
 		protected SpanHelper spanHelper;
 		
 		public FragmentParserBase(FactoryService factorySvc, FragmentParserService fpSvc) {

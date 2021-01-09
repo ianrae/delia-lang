@@ -98,7 +98,9 @@ public class InsertTests extends NewHLSTestBase {
 		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
 		
 		HLDInsert hldins = buildFromSrcInsert(src, 1); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
+		chkInsertSql(stmgrp, 0, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		chkInsertSql(stmgrp, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	
 	
@@ -121,12 +123,20 @@ public class InsertTests extends NewHLSTestBase {
 	}
 	
 	protected void chkInsertSql(HLDInsert hldins, int numStatements, String expected, String...args) {
-		SqlStatementGroup stmgrp = mgr.generateSql(hldins);
+		SqlStatementGroup stmgrp = genInsertSql(hldins, numStatements);
 		SqlStatement stm = stmgrp.statementL.get(0);
 		chkStm(stm, expected, args);
-		assertEquals(numStatements, stmgrp.statementL.size());
 	}
 
+	protected SqlStatementGroup genInsertSql(HLDInsert hldins, int numStatements) {
+		SqlStatementGroup stmgrp = mgr.generateSql(hldins);
+		assertEquals(numStatements, stmgrp.statementL.size());
+		return stmgrp;
+	}
+	protected void chkInsertSql(SqlStatementGroup stmgrp, int index, String expected, String...args) {
+		SqlStatement stm = stmgrp.statementL.get(index);
+		chkStm(stm, expected, args);
+	}
 	
 	private String addSrc(String src0, String src) {
 		return src0 + "\n" + src;

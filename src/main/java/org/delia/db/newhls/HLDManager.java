@@ -7,6 +7,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
+import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
