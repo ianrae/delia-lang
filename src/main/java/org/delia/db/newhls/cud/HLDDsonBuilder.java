@@ -209,6 +209,32 @@ public class HLDDsonBuilder {
 		
 		return hldins;
 	}
+	public HLDUpdate buildAssocUpdate(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DValue dval1, DValue dval2, DatIdMap datIdMap) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
+		
+		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		
+		ConversionResult cres = new ConversionResult();
+		cres.localET = new SimpleErrorTracker(log);
+
+		//create a temp type for the assoc table
+		DStructType structType = buildTempDatType(assocTbl); 
+		
+		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
+		builder.addField(fld1, dval1);
+		builder.addField(fld2, dval2);
+		if (!builder.finish()) {
+			DeliaExceptionHelper.throwError("buildSimpleUpdate-fail", structType.getName());
+		}
+		cres.dval = builder.getDValue();
+		
+		hld.cres = cres;
+		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
+		hld.hld = builderAdapter.buildQuery(queryExp);
+		return hld;
+	}
 	
 //    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 	public HLDDelete buildAssocDelete(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DValue dval1, DValue dval2, DatIdMap datIdMap) {

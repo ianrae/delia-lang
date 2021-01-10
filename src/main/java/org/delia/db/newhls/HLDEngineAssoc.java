@@ -125,6 +125,11 @@ public class HLDEngineAssoc {
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, dval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
+		
+		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, dval, fkval, datIdMap);
+		bundle.hlddelete.assocRelInfo = relinfo; 
+		//TOD add flag to hldupdate to make it render as MERGE INTO
+		
 		return Collections.singletonList(bundle);
 	}
 //	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
