@@ -79,7 +79,7 @@ public class NewHLSTestBase extends BDDBase {
 
 	protected HLDManager createManager() {
 		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		return new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap(), sprigSvc);
+		return new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc);
 	}
 	
 	protected void chkRawSql(HLDQueryStatement hld, String expected) {

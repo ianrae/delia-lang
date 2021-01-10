@@ -261,4 +261,8 @@ public class HLDAliasManager extends ServiceBase {
 //		}
 //	}
 
+	public DatIdMap getDatIdMap() {
+		return datIdMap;
+	}
+
 }

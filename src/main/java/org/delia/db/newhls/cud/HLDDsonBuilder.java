@@ -49,18 +49,7 @@ public class HLDDsonBuilder {
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		
-		DValue dval = hldins.cres.dval;
-		DStructHelper helper = dval.asStruct();
-		for(TypePair pair: helper.getType().getAllFields()) {
-			if (shouldSkipField(helper, pair)) {
-				continue;
-			}
-			if (helper.hasField(pair.name)) {
-				DValue inner = dval.asStruct().getField(pair.name);
-				hldins.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
-				hldins.valueL.add(inner);
-			}
-		}
+		fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
 		
 		return hldins;
 	}
@@ -122,21 +111,24 @@ public class HLDDsonBuilder {
 	}
 
 	private void fillArraysForUpdate(HLDUpdate hldupdate) {
-		DValue dval = hldupdate.cres.dval;
+		fillArrays(hldupdate.cres.dval, hldupdate.fieldL, hldupdate.valueL, false);
+	}
+
+	private void fillArrays(DValue dval, List<HLDField> fieldL, List<DValue> valueL, boolean includePK) {
 		DStructHelper helper = dval.asStruct();
-		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(helper.getType());
+		TypePair targetPKPair = (includePK) ? null : DValueHelper.findPrimaryKeyFieldPair(helper.getType());
 		
 		for(TypePair pair: helper.getType().getAllFields()) {
 			if (shouldSkipField(helper, pair)) {
 				continue;
 			}
-			if (targetPKPair.name.equals(pair.name)) {
+			if (targetPKPair != null && targetPKPair.name.equals(pair.name)) {
 				continue; //update doesn't include pk in fieldL
 			}
 			if (helper.hasField(pair.name)) {
 				DValue inner = dval.asStruct().getField(pair.name);
-				hldupdate.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
-				hldupdate.valueL.add(inner);
+				fieldL.add(createFieldVal(dval, pair.name, inner, helper));
+				valueL.add(inner);
 			}
 		}
 	}
@@ -160,6 +152,27 @@ public class HLDDsonBuilder {
 		fillArraysForUpdate(hldupdate);
 		
 		return hldupdate;
+	}
+
+	public HLDInsert buildSimpleInsert(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
+		HLDInsert hldins = new HLDInsert(new TypeOrTable(structType));
+		
+		ConversionResult cres = new ConversionResult();
+		cres.localET = new SimpleErrorTracker(log);
+
+		//build partial type with pk and one val
+		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
+		builder.addField(pkFieldName, pkval);
+		builder.addField(fieldName, fkval);
+		if (!builder.finish()) {
+			DeliaExceptionHelper.throwError("buildSimpleUpdate-fail", structType.getName());
+		}
+		cres.dval = builder.getDValue();
+		
+		hldins.cres = cres;
+		fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
+		
+		return hldins;
 	}
 	
 	

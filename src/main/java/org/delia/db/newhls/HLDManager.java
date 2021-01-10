@@ -1,11 +1,15 @@
 package org.delia.db.newhls;
 
+import java.util.List;
+
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
@@ -22,21 +26,19 @@ import org.delia.type.DTypeRegistry;
  * @author ian
  *
  */
-public class HLDManager {
+public class HLDManager extends ServiceBase {
 	private DTypeRegistry registry;
-	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
-	private Log log;
 	private SprigService sprigSvc;
 	private HLDEngine engine;
 	
 	public boolean newInsertSQLGen = true;
 
-	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
+	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+		super(factorySvc);
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
-		this.log = log;
 		this.sprigSvc = sprigSvc;
 		this.engine = new HLDEngine(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
@@ -56,6 +58,7 @@ public class HLDManager {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		stmt.updateL.addAll(engine.addParentUpdates(stmt.hldinsert));
+		stmt.assocInsertL = engine.addAssocInserts(stmt.hldinsert);
 		engine.assignAliases(stmt);
 		return stmt;
 	}
@@ -68,21 +71,24 @@ public class HLDManager {
 		return stmt;
 	}
 	
+	// -- sql generation --
 	public String generateRawSql(HLDQueryStatement hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		String sql = sqlgen.generateRawSql(hld.hldquery);
 		return sql;
 	}
-	
 	public SqlStatement generateSql(HLDQueryStatement hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
 		return sql;
 	}
+	
+	
 	public HLDSQLGenerator createSQLGenerator() {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		return sqlgen;
 	}
+	
 	public SqlStatement generateSql(HLDDeleteStatement hlddel) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hlddel);
@@ -106,10 +112,18 @@ public class HLDManager {
 	}
 
 	public SqlStatementGroup generateSql(HLDUpdateStatement hldupdate) {
-		HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
-		HLDInsertSQLGenerator updateSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
-		
-		SqlStatementGroup stmgrp = updateSqlGen.generateUpdate(hldupdate.hldupdate);
-		return stmgrp;
+		if (newInsertSQLGen) {
+			HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+			SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
+			return stmgrp;
+			
+		} else {
+			HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
+			HLDInsertSQLGenerator updateSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
+			
+			SqlStatementGroup stmgrp = updateSqlGen.generateUpdate(hldupdate.hldupdate);
+			return stmgrp;
+		}
 	}
 }

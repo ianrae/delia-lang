@@ -10,6 +10,7 @@ import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.TypePair;
@@ -157,6 +158,13 @@ public class HLDAliasBuilder {
 	
 	public void assignAliases(HLDInsert hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
+		hld.typeOrTbl.alias = info.alias;
+		doFieldList(hld.fieldL, hld.getStructType(), info);
+	}
+	public void assignAliasesAssoc(HLDInsert hld) {
+		RelationInfo relinfo = hld.assocRelInfo;
+		String assocTbl = aliasMgr.getDatIdMap().getAssocTblName(relinfo.getDatId());
+		AliasInfo info = aliasMgr.createAssocAlias(relinfo.nearType, relinfo.fieldName, assocTbl);
 		hld.typeOrTbl.alias = info.alias;
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 	}

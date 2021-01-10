@@ -5,7 +5,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDSQLGenerator;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.fragment.FieldFragment;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.ListWalker;
@@ -31,7 +30,6 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 
 	public SqlStatementGroup generate(HLDInsertStatement hldins) {
-		//SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		
 		SqlStatement stm = genInsertStatement(hldins.hldinsert);
@@ -41,6 +39,19 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			SqlStatement stmx = genUpdateStatement(hld);
 			stmgrp.add(stmx);
 		}
+		
+		return stmgrp;
+	}
+	public SqlStatementGroup generate(HLDUpdateStatement hld) {
+		SqlStatementGroup stmgrp = new SqlStatementGroup();
+		
+		SqlStatement stm = genUpdateStatement(hld.hldupdate);
+		stmgrp.add(stm);
+		
+//		for(HLDUpdate hld: hldins.updateL) {
+//			SqlStatement stmx = genUpdateStatement(hld);
+//			stmgrp.add(stmx);
+//		}
 		
 		return stmgrp;
 	}

@@ -2,6 +2,7 @@ package org.delia.db.newhls;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
@@ -16,15 +17,19 @@ import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
+import org.delia.rule.rules.RelationManyRule;
 import org.delia.sprig.SprigService;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -88,6 +93,11 @@ public class HLDEngine {
 	public List<HLDUpdate> addParentUpdates(HLDInsert hld) {
 		DStructType structType = hld.getStructType();
 		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld, hld.cres.dval);
+		return parentUpdates;
+	}
+	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
+		DStructType structType = hld.getStructType();
+		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld, hld.cres.dval);
 		return parentUpdates;
 	}
 
@@ -158,11 +168,49 @@ public class HLDEngine {
 		return hld;
 	}
 
+	private List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, HLDInsert hld, DValue dval) {
+		List<HLDInsert> insertL = new ArrayList<>();
+		
+		DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				if (inner == null) {
+					continue;
+				}
+				
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+				if (relinfo.isManyToMany()) {
+					for(DValue fkval: inner.asRelation().getMultipleKeys()) {
+						HLDInsert insert = addAssocInsertStatement(relinfo, pkpair.name, pkval, fkval);
+						insert.assocRelInfo = relinfo;
+						insertL.add(insert);
+					}
+				}
+			}
+		}
+		return insertL;
+	}
+	private HLDInsert addAssocInsertStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+
+		DStructType targetType = relinfo.farType;
+		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+		
+		HLDInsert hld = hldBuilder.buildSimpleInsert(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
+		return hld;
+	}
+	
+	// -- aliases --
 	public void assignAliases(HLDInsertStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hldinsert);
 		for(HLDUpdate hld: stmt.updateL) {
 			aliasBuilder.assignAliases(hld);
+		}
+		for(HLDInsert hld: stmt.assocInsertL) {
+			aliasBuilder.assignAliasesAssoc(hld);
 		}
 	}
 	public void assignAliases(HLDUpdateStatement stmt) {
