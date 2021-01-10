@@ -90,7 +90,12 @@ public class HLDEngine extends HLDEngineBase {
 	}
 	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
 		DStructType structType = hld.getStructType();
-		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld, hld.cres.dval);
+		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
+		return parentUpdates;
+	}
+	public List<HLDInsert> addAssocInserts(HLDUpdate hld) {
+		DStructType structType = hld.getStructType();
+		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
 		return parentUpdates;
 	}
 
@@ -124,6 +129,9 @@ public class HLDEngine extends HLDEngineBase {
 		aliasBuilder.assignAliases(stmt.hldupdate);
 		for(HLDUpdate hld: stmt.updateL) {
 			aliasBuilder.assignAliases(hld);
+		}
+		for(HLDInsert hld: stmt.assocInsertL) {
+			aliasBuilder.assignAliasesAssoc(hld);
 		}
 	}
 

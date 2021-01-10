@@ -65,7 +65,7 @@ public class HLDManager extends ServiceBase {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		stmt.updateL.addAll(engine.addParentUpdatesForUpdate(stmt.hldupdate));
-//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldinsert);
+		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
 		engine.assignAliases(stmt);
 		return stmt;
 	}

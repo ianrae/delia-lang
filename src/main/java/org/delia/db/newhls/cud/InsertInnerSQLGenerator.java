@@ -57,6 +57,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			stmgrp.add(stmx);
 		}
 		
+		for(HLDInsert hld: hldupdate.assocInsertL) {
+			SqlStatement stmx = genInsertStatement(hld);
+			stmgrp.add(stmx);
+		}
 		return stmgrp;
 	}
 	

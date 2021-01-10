@@ -101,7 +101,7 @@ public abstract class HLDEngineBase {
 		return hld;
 	}
 
-	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, HLDInsert hld, DValue dval) {
+	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
 		List<HLDInsert> insertL = new ArrayList<>();
 		
 		DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
