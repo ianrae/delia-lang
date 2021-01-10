@@ -143,18 +143,6 @@ public class UpdateTests extends NewHLSTestBase {
 	}
 	
 	
-	private void dumpGrp(SqlStatementGroup stmgrp) {
-		log.log("grp: %s", stmgrp.statementL.size());
-		for(SqlStatement stm: stmgrp.statementL) {
-			StringJoiner joiner = new StringJoiner(",");
-			for(DValue dval: stm.paramL) {
-				joiner.add(dval.asString());
-			}
-
-			log.log("%s -- %s", stm.sql, joiner.toString());
-		}
-	}
-	
 	
 	//-------------------------
 	protected HLDUpdateStatement buildFromSrcUpdate(String src, int statementIndex) {

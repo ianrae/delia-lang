@@ -22,7 +22,8 @@ public class HLDInsert {
 
 	@Override
 	public String toString() {
-		return "????";
+		String s = String.format("%s: todo!!" ,  typeOrTbl.getTblName());
+		return s;
 	}
 
 	public DStructType getStructType() {

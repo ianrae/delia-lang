@@ -23,6 +23,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.PartialStructValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
 public class HLDDsonBuilder {
@@ -109,7 +110,7 @@ public class HLDDsonBuilder {
 		cres.localET = new SimpleErrorTracker(log);
 
 		//build partial type with pk and one val
-		StructValueBuilder builder = new StructValueBuilder(structType);
+		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
 		builder.addField(pkFieldName, pkval);
 		builder.addField(fieldName, fkval);
 		if (!builder.finish()) {

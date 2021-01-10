@@ -5,4 +5,10 @@ import java.util.*;
 public class HLDInsertStatement {
 	public HLDInsert hldinsert;
 	public List<HLDUpdate> updateL = new ArrayList<>();
+	
+	@Override
+	public String toString() {
+		return hldinsert.toString();
+	}
+	
 }

@@ -1,25 +1,20 @@
 package org.delia.db.newhls;
 
-import java.util.List;
-
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
-import org.delia.db.newhls.cud.HLDDsonBuilder;
-import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
 import org.delia.db.newhls.cud.HLDInsertStatement;
-import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDWhereGen;
+import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
-import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 
 /**
@@ -34,6 +29,8 @@ public class HLDManager {
 	private Log log;
 	private SprigService sprigSvc;
 	private HLDEngine engine;
+	
+	public boolean newInsertSQLGen = true;
 
 	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -90,11 +87,18 @@ public class HLDManager {
 	}
 
 	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
-		HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
-		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
-		
-		SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.hldinsert.cres.dval);
-		return stmgrp;
+		if (newInsertSQLGen) {
+			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry);
+			SqlStatementGroup stmgrp = sqlgen.generate(hldins.hldinsert);
+			return stmgrp;
+			
+		} else {
+			HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
+			HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
+			
+			SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.hldinsert.cres.dval);
+			return stmgrp;
+		}
 	}
 
 	public SqlStatementGroup generateSql(HLDUpdateStatement hldupdate) {

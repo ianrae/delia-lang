@@ -3,6 +3,8 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.StringJoiner;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
@@ -17,6 +19,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.ResultValue;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
@@ -35,6 +38,18 @@ public class NewHLSTestBase extends BDDBase {
 	
 	protected HLDManager mgr;
 
+	protected void dumpGrp(SqlStatementGroup stmgrp) {
+		log.log("grp: %s", stmgrp.statementL.size());
+		for(SqlStatement stm: stmgrp.statementL) {
+			StringJoiner joiner = new StringJoiner(",");
+			for(DValue dval: stm.paramL) {
+				joiner.add(dval.asString());
+			}
+
+			log.log("%s -- %s", stm.sql, joiner.toString());
+		}
+	}
+	
 
 	protected HLDQueryStatement buildFromSrc(String src, int expectedJoins) {
 		QueryExp queryExp = compileQuery(src);

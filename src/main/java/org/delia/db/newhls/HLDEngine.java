@@ -16,7 +16,6 @@ import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -138,12 +137,16 @@ public class HLDEngine {
 
 	private HLDUpdate addFkUpdateStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-		HLDUpdate hld = hldBuilder.buildSimpleUpdate(relinfo.nearType, pkFieldName, pkval, relinfo.otherSide.fieldName, fkval);
+
+		DStructType targetType = relinfo.farType;
+		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+		
+		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
 		
 		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
 		hld.querySpec = new QuerySpec();
 		hld.querySpec.evaluator = null; //TODO fix
-		hld.querySpec.queryExp = queryBuilderSvc.createPrimaryKeyQuery(relinfo.nearType.getName(), pkval);
+		hld.querySpec.queryExp = queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
 		
 		hld.hld = this.buildQuery(hld.querySpec.queryExp);
 		return hld;

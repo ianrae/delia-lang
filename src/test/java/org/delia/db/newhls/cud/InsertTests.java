@@ -53,7 +53,10 @@ public class InsertTests extends NewHLSTestBase {
 		String src = addSrc(src0, "insert Customer {cid: 55, x: 45, addr:100}");
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
+		dumpGrp(stmgrp);
+		
+//		chkInsertSql(hldins, 2, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	
 	// --- 1:N ---
@@ -143,14 +146,6 @@ public class InsertTests extends NewHLSTestBase {
 		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
 		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "100");
 		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "101");
-	}
-	
-	
-	private void dumpGrp(SqlStatementGroup stmgrp) {
-		log.log("grp: %s", stmgrp.statementL.size());
-		for(SqlStatement stm: stmgrp.statementL) {
-			log.log(stm.sql);
-		}
 	}
 	
 	
