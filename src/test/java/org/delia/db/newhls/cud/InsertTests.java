@@ -56,7 +56,8 @@ public class InsertTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
 		dumpGrp(stmgrp);
 		
-//		chkInsertSql(hldins, 2, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (t0.cid, t0.x) VALUES(?, ?)", "55", "45");
+		chkInsertSql(stmgrp, 1, "UPDATE Address SET t1.id = ?, t1.cust = ? t0.id=?", "56", "100");
 	}
 	
 	// --- 1:N ---

@@ -21,6 +21,10 @@ public class DStructHelper {
 		return map.keySet();
 	}
 	
+	public boolean hasField(String fieldName) {
+		Map<String, DValue> map = dval.asMap();
+		return map.containsKey(fieldName);
+	}
 	public DValue getField(String fieldName) {
 		Map<String, DValue> map = dval.asMap();
 		return map.get(fieldName);

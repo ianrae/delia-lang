@@ -10,6 +10,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.newhls.HLDField;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
+import org.delia.relation.RelationInfo;
 import org.delia.runner.ConversionResult;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DsonToDValueConverter;
@@ -22,6 +23,8 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.PartialStructValueBuilder;
 
@@ -49,12 +52,25 @@ public class HLDDsonBuilder {
 		DValue dval = hldins.cres.dval;
 		DStructHelper helper = dval.asStruct();
 		for(TypePair pair: helper.getType().getAllFields()) {
-			DValue inner = dval.asStruct().getField(pair.name);
-			hldins.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
-			hldins.valueL.add(inner);
+			if (shouldSkipField(helper, pair)) {
+				continue;
+			}
+			if (helper.hasField(pair.name)) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				hldins.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
+				hldins.valueL.add(inner);
+			}
 		}
 		
 		return hldins;
+	}
+
+	private boolean shouldSkipField(DStructHelper helper, TypePair pair) {
+		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(helper.getType(), pair);
+		if (relinfo != null && relinfo.isParent) {
+			return true; //parent doesn't have fk value.
+		}
+		return false;
 	}
 
 	private HLDField createFieldVal(DValue dval, String fieldName, DValue inner, DStructHelper helper) {
@@ -108,10 +124,17 @@ public class HLDDsonBuilder {
 	private void fillArrays(HLDUpdate hldupdate) {
 		DValue dval = hldupdate.cres.dval;
 		DStructHelper helper = dval.asStruct();
+		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(helper.getType());
+		
 		for(TypePair pair: helper.getType().getAllFields()) {
-			DValue inner = dval.asStruct().getField(pair.name);
-			hldupdate.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
-			hldupdate.valueL.add(inner);
+			if (shouldSkipField(helper, pair)) {
+				continue;
+			}
+			if (helper.hasField(pair.name)) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				hldupdate.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
+				hldupdate.valueL.add(inner);
+			}
 		}
 	}
 
