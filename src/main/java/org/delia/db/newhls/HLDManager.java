@@ -10,6 +10,7 @@ import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
+import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -52,15 +53,17 @@ public class HLDManager {
 		HLDDelete hlddel = new HLDDelete(hld.hldquery);
 		return hlddel;
 	}
-	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
+	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-		HLDInsert hld = hldBuilder.buildInsert(insertExp);
-		return hld;
+		
+		HLDInsertStatement stmt = new HLDInsertStatement();
+		stmt.hldinsert = hldBuilder.buildInsert(insertExp);
+		return stmt;
 	}
 	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
-		hld.hld = fullBuildQuery(updateExp.queryExp);
+		hld.hld = engine.fullBuildQuery(updateExp.queryExp);
 		hld.querySpec = new QuerySpec();
 		hld.querySpec.evaluator = null; //TOOD fix
 		hld.querySpec.queryExp = updateExp.queryExp;
@@ -88,11 +91,11 @@ public class HLDManager {
 		return sql;
 	}
 
-	public SqlStatementGroup generateSql(HLDInsert hldins) {
+	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
 		HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
 		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
 		
-		SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.cres.dval);
+		SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.hldinsert.cres.dval);
 		return stmgrp;
 	}
 

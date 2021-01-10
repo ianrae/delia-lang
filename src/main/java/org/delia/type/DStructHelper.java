@@ -10,6 +10,10 @@ public class DStructHelper {
 	public DStructHelper(DValue dval) {
 		this.dval = dval;
 	}
+	
+	public DStructType getType() {
+		return (DStructType) dval.getType();
+	}
 
 	//names are not ordered by declaration order (use DStructType.orderedList for that)
 	public Set<String> getFieldNames() {

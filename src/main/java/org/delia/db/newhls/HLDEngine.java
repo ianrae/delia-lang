@@ -1,8 +1,12 @@
 package org.delia.db.newhls;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.newhls.cud.HLDDsonBuilder;
+import org.delia.db.newhls.cud.HLDInsert;
+import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -54,11 +58,11 @@ public class HLDEngine {
 //		HLDDelete hlddel = new HLDDelete(hld.hldquery);
 //		return hlddel;
 //	}
-//	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
-//		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-//		HLDInsert hld = hldBuilder.buildInsert(insertExp);
-//		return hld;
-//	}
+	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDInsert hld = hldBuilder.buildInsert(insertExp);
+		return hld;
+	}
 //	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
 //		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 //		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);

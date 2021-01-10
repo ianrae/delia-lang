@@ -1,9 +1,13 @@
 package org.delia.db.newhls.cud;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.db.newhls.HLDField;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.ConversionResult;
@@ -12,8 +16,12 @@ import org.delia.runner.DsonToDValueConverter;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigVarEvaluator;
+import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
+import org.delia.type.TypePair;
 
 public class HLDDsonBuilder {
 
@@ -35,7 +43,30 @@ public class HLDDsonBuilder {
 		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		
+		DValue dval = hldins.cres.dval;
+		DStructHelper helper = dval.asStruct();
+		for(String fieldName: dval.asStruct().getFieldNames()) {
+			DValue inner = dval.asStruct().getField(fieldName);
+			hldins.fieldL.add(createFieldVal(dval, fieldName, inner, helper));
+			hldins.valueL.add(inner);
+		}
+		
 		return hldins;
+	}
+
+	private HLDField createFieldVal(DValue dval, String fieldName, DValue inner, DStructHelper helper) {
+		HLDField fld = new HLDField();
+		fld.fieldName = fieldName;
+		fld.fieldType = inner == null ? determineField(fieldName, helper) : inner.getType();
+		fld.structType = helper.getType();
+		return fld;
+	}
+
+	private DType determineField(String fieldName, DStructHelper helper) {
+		List<TypePair> list = helper.getType().getAllFields();
+		Optional<TypePair> opt = list.stream().filter(x -> x.name.equals(fieldName)).findAny();
+		return opt.get().type;
 	}
 
 	private ConversionResult buildValue(boolean doFull, DStructType dtype, DsonExp dsonExp, DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {
