@@ -1,11 +1,14 @@
 package org.delia.db.newhls;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.log.Log;
+import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -35,7 +38,7 @@ public class HLDEngineAssoc {
 		this.sprigSvc = sprigSvc;
 	}
 	
-	public void xgenAssocField(HLDQuery hldQuery, DStructType structType, DValue dval, DValue pkval) {
+	public void xgenAssocField(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
 		//3 scenarios here:
 		// 1. updating all records in assoc table
 		// 2. updating where filter by primaykey only
@@ -47,7 +50,7 @@ public class HLDEngineAssoc {
 		} else if (isPKQuery(hldQuery)) {
 //			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.logDebug("m-to-n:scenario2");
-			buildUpdateByIdOnly(structType, dval, pkval);
+			buildUpdateByIdOnly(hldQuery, queryExp, structType, dval, pkval, builderAdapter);
 		} else {
 			log.logDebug("m-to-n:scenario3");
 //			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
@@ -77,7 +80,7 @@ public class HLDEngineAssoc {
 //			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 //		}		
 //	}
-	protected void buildUpdateByIdOnly(DStructType structType, DValue dval, DValue pkval) {
+	protected void buildUpdateByIdOnly(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
 //		  scenario 2 id:
 //		  update Customer[55] {wid: 333, addr: [100]}
 //		  has sql:
@@ -87,7 +90,7 @@ public class HLDEngineAssoc {
 
 		
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-		//HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
+		HLDInsert hld = hldBuilder.buildAssocDelete(builderAdapter, queryExp, RelationInfo relinfo, datIdMap);
 
 	}
 //	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,

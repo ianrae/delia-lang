@@ -6,9 +6,11 @@ import java.util.Optional;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.InsertStatementExp;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.HLDField;
+import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
@@ -203,6 +205,14 @@ public class HLDDsonBuilder {
 		fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
 		
 		return hldins;
+	}
+	public HLDDelete buildAssocDelete(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DatIdMap datIdMap) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		
+		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		hld.hld = builderAdapter.buildQuery(queryExp);
+		
+		return hld;
 	}
 
 	private DStructType buildTempDatType(String assocTbl) {

@@ -31,7 +31,7 @@ import org.delia.type.DValue;
  * @author ian
  *
  */
-public class HLDEngine extends HLDEngineBase {
+public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	private HLDAliasManager aliasMgr;
 
 	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
@@ -98,10 +98,10 @@ public class HLDEngine extends HLDEngineBase {
 		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
 		return parentUpdates;
 	}
-	public List<HLDInsert> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc) {
+	public List<HLDInsert> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {
 		DStructType structType = hld.getStructType();
 		List<HLDInsert> parentUpdates = null; //engineAssoc.xgenAssocField(structType, hld.cres.dval);
-		engineAssoc.xgenAssocField(hld.hld, structType, hld.cres.dval, null); //fix null
+		engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, null, this); //fix null
 		return parentUpdates;
 	}
 

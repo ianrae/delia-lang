@@ -9,6 +9,9 @@ public class HLDDelete extends HLDBase {
 		super(new TypeOrTable(hld.fromType));
 		this.hld = hld;
 	}
+	public HLDDelete(TypeOrTable typeOrTbl) {
+		super(typeOrTbl);
+	}
 
 	@Override
 	public String toString() {
