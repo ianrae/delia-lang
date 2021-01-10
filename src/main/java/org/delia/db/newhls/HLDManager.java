@@ -1,19 +1,25 @@
 package org.delia.db.newhls;
 
+import java.util.List;
+
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.newhls.cud.HLDDsonBuilder;
+import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
 import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 
 /**
@@ -51,8 +57,11 @@ public class HLDManager {
 	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		stmt.hldinsert = engine.buildInsert(insertExp);
+		stmt.updateL.addAll(engine.addParentUpdates(stmt.hldinsert));
 		return stmt;
 	}
+	
+	
 	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		stmt.hldupdate = engine.buildUpdate(updateExp);

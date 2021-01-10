@@ -40,9 +40,9 @@ public class HLDDsonBuilder {
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		HLDInsert hldins = new HLDInsert();
 		
 		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
+		HLDInsert hldins = new HLDInsert(new TypeOrTable(dtype));
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		

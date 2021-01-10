@@ -77,11 +77,12 @@ public class HLDEngine {
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
-		
+		return hld;
+	}
+	public List<HLDUpdate> addParentUpdates(HLDInsert hld) {
 		DStructType structType = hld.getStructType();
 		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld, hld.cres.dval);
-		
-		return hld;
+		return parentUpdates;
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {

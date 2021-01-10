@@ -15,6 +15,10 @@ public class HLDInsert {
     public List<HLDField> fieldL = new ArrayList<>();
     public List<DValue> valueL = new ArrayList<>();
     public ConversionResult cres;
+    
+    public HLDInsert(TypeOrTable typeOrTbl) {
+    	this.typeOrTbl = typeOrTbl;
+    }
 
 	@Override
 	public String toString() {

@@ -46,6 +46,15 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
 		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
+	@Test
+	public void test2bParent() {
+		useCustomer11Src = true;
+		String src0 = "insert Address {id: 100, y: 45}";
+		String src = addSrc(src0, "insert Customer {cid: 55, x: 45, addr:100}");
+		
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+	}
 	
 	// --- 1:N ---
 	@Test
