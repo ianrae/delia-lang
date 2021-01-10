@@ -1,6 +1,5 @@
 package org.delia.db.newhls;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.assoc.DatIdMap;
@@ -8,7 +7,6 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
-import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
@@ -18,14 +16,10 @@ import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.log.Log;
-import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
-import org.delia.util.DValueHelper;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -36,24 +30,15 @@ import org.delia.util.DValueHelper;
  * @author ian
  *
  */
-public class HLDEngine {
-	private DTypeRegistry registry;
-	private FactoryService factorySvc;
-	private DatIdMap datIdMap;
-	private Log log;
-	private SprigService sprigSvc;
+public class HLDEngine extends HLDEngineBase {
 	private HLDAliasManager aliasMgr;
 
 	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
-		this.registry = registry;
-		this.factorySvc = factorySvc;
-		this.datIdMap = datIdMap;
-		this.log = log;
-		this.sprigSvc = sprigSvc;
-		
+		super(registry, factorySvc, log,datIdMap, sprigSvc);
 		this.aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 	}
 	
+	@Override
 	public HLDQuery buildQuery(QueryExp queryExp) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 		return buildQuery(queryExp, aliasMgr);
@@ -123,95 +108,6 @@ public class HLDEngine {
 		return hld;
 	}
 
-	/**
-	 * if insert statement include values for parent relations we need to add an update
-	 * statement.
-	 * @param structType - main type being inserted
-	 * @param dval - values
-	 * @param pkval2 
-	 */
-	private List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, DValue dval, DValue pkval) {
-		List<HLDUpdate> updateL = new ArrayList<>();
-		
-		pkval = (pkval != null) ? pkval : DValueHelper.findPrimaryKeyValue(dval);
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
-		for(TypePair pair: structType.getAllFields()) {
-			if (pair.type.isStructShape()) {
-				DValue inner = dval.asStruct().getField(pair.name);
-				if (inner == null) {
-					continue;
-				}
-				
-				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.isParent) {
-					if (relinfo.isOneToOne()) {
-						DValue fkval = inner.asRelation().getForeignKey();
-						HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
-						updateL.add(update);
-					} else if (relinfo.isOneToMany()) {
-						for(DValue fkval: inner.asRelation().getMultipleKeys()) {
-							HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
-							updateL.add(update);
-						}
-					}
-				} 
-			}
-		}
-		return updateL;
-	}
-
-	private HLDUpdate addFkUpdateStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-
-		DStructType targetType = relinfo.farType;
-		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
-		QuerySpec querySpec = new QuerySpec();
-		querySpec.evaluator = null; //TODO fix
-		querySpec.queryExp = queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
-		
-		HLDQuery hldquery = this.buildQuery(querySpec.queryExp);
-		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
-		
-		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
-		hld.hld = hldquery;
-		return hld;
-	}
-
-	private List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, HLDInsert hld, DValue dval) {
-		List<HLDInsert> insertL = new ArrayList<>();
-		
-		DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
-		for(TypePair pair: structType.getAllFields()) {
-			if (pair.type.isStructShape()) {
-				DValue inner = dval.asStruct().getField(pair.name);
-				if (inner == null) {
-					continue;
-				}
-				
-				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.isManyToMany()) {
-					for(DValue fkval: inner.asRelation().getMultipleKeys()) {
-						HLDInsert insert = addAssocInsertStatement(relinfo, pkpair.name, pkval, fkval);
-						insert.assocRelInfo = relinfo;
-						insertL.add(insert);
-					}
-				}
-			}
-		}
-		return insertL;
-	}
-	private HLDInsert addAssocInsertStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-
-//		DStructType targetType = relinfo.farType;
-//		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
-		//getSchemaVersionType
-//		HLDInsert hld = hldBuilder.buildSimpleInsert(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
-		HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
-		return hld;
-	}
-	
 	// -- aliases --
 	public void assignAliases(HLDInsertStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
