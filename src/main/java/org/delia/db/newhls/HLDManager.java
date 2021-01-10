@@ -39,23 +39,23 @@ public class HLDManager {
 	}
 	
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp) {
-		HLDQuery hld = engine.fullBuildQuery(queryExp);
+		HLDQuery hld = engine.buildQuery(queryExp);
 		HLDQueryStatement stmt = new HLDQueryStatement(hld);
 		return stmt;
 	}
 	public HLDDeleteStatement fullBuildDelete(QueryExp queryExp) {
 		HLDDeleteStatement stmt = new HLDDeleteStatement();
-		stmt.hlddelete = engine.fullBuildDelete(queryExp);
+		stmt.hlddelete = engine.buildDelete(queryExp);
 		return stmt;
 	}
 	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
-		stmt.hldinsert = engine.fullBuildInsert(insertExp);
+		stmt.hldinsert = engine.buildInsert(insertExp);
 		return stmt;
 	}
 	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
-		stmt.hldupdate = engine.fullBuildUpdate(updateExp);
+		stmt.hldupdate = engine.buildUpdate(updateExp);
 		return stmt;
 	}
 	

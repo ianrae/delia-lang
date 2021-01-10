@@ -9,7 +9,6 @@ import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
-import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
@@ -37,11 +36,11 @@ public class HLDEngine {
 		this.sprigSvc = sprigSvc;
 	}
 	
-	public HLDQuery fullBuildQuery(QueryExp queryExp) {
+	public HLDQuery buildQuery(QueryExp queryExp) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-		return fullBuildQuery(queryExp, aliasMgr);
+		return buildQuery(queryExp, aliasMgr);
 	}
-	public HLDQuery fullBuildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
+	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
 		HLDQuery hld = hldBuilder.build(queryExp);
@@ -57,20 +56,20 @@ public class HLDEngine {
 		
 		return hld;
 	}
-	public HLDDelete fullBuildDelete(QueryExp queryExp) {
-		HLDQuery hld = fullBuildQuery(queryExp);
+	public HLDDelete buildDelete(QueryExp queryExp) {
+		HLDQuery hld = buildQuery(queryExp);
 		HLDDelete hlddel = new HLDDelete(hld);
 		return hlddel;
 	}
-	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
+	public HLDInsert buildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 		return hld;
 	}
-	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
+	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
-		hld.hld = fullBuildQuery(updateExp.queryExp);
+		hld.hld = buildQuery(updateExp.queryExp);
 		hld.querySpec = new QuerySpec();
 		hld.querySpec.evaluator = null; //TOOD fix
 		hld.querySpec.queryExp = updateExp.queryExp;

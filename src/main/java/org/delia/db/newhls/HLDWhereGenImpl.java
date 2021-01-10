@@ -24,7 +24,7 @@ public class HLDWhereGenImpl implements HLDWhereGen {
 
 	@Override
 	public List<SqlFragment> createWhere(QuerySpec spec, DStructType structType, SqlStatement statement, HLDAliasManager aliasMgr) {
-		HLDQuery hld = engine.fullBuildQuery(spec.queryExp, aliasMgr);
+		HLDQuery hld = engine.buildQuery(spec.queryExp, aliasMgr);
 		
 		HLDSQLGenerator gen = mgr.createSQLGenerator();
 		int n1 = statement.paramL.size();
