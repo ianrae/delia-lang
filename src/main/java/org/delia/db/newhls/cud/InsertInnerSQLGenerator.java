@@ -46,16 +46,16 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		return stmgrp;
 	}
-	public SqlStatementGroup generate(HLDUpdateStatement hld) {
+	public SqlStatementGroup generate(HLDUpdateStatement hldupdate) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		
-		SqlStatement stm = genUpdateStatement(hld.hldupdate);
+		SqlStatement stm = genUpdateStatement(hldupdate.hldupdate);
 		stmgrp.add(stm);
 		
-//		for(HLDUpdate hld: hldins.updateL) {
-//			SqlStatement stmx = genUpdateStatement(hld);
-//			stmgrp.add(stmx);
-//		}
+		for(HLDUpdate hld: hldupdate.updateL) {
+			SqlStatement stmx = genUpdateStatement(hld);
+			stmgrp.add(stmx);
+		}
 		
 		return stmgrp;
 	}

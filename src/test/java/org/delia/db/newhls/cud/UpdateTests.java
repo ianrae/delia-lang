@@ -3,7 +3,6 @@ package org.delia.db.newhls.cud;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.delia.api.DeliaSessionImpl;
@@ -12,7 +11,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
-import org.delia.type.DValue;
 import org.junit.Test;
 
 /**
@@ -46,7 +44,9 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.cust = ?, t0.y = ? WHERE t0.id=?", "55", "45", "1");
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
+		dumpGrp(stmgrp);
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "1");
 	}
 	
 	// --- 1:N ---
@@ -73,11 +73,13 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.cust = ?, t0.y = ? WHERE t0.id=?", "55", "45", "100");
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
+		dumpGrp(stmgrp);
+		
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "100");
 	}
 	@Test
 	public void test1NInsertParent() {
-		//TODO: this is broken. fix!!
 		//adapted from t0-insert-parent.txt: add workers
 		useCustomer1NSrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
@@ -86,11 +88,11 @@ public class UpdateTests extends NewHLSTestBase {
 		src = addSrc(src, "update Customer[56] {x:66, addr: ['100','101'] }");
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
-//fix		chkUpdateSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
-//		chkUpdateSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
+		chkUpdateSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
+		chkUpdateSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
 	}
 	
 	// --- M:N ---

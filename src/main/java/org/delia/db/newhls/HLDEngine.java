@@ -11,6 +11,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.db.newhls.cud.HLDBase;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
@@ -92,7 +93,12 @@ public class HLDEngine {
 	}
 	public List<HLDUpdate> addParentUpdates(HLDInsert hld) {
 		DStructType structType = hld.getStructType();
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld, hld.cres.dval);
+		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval);
+		return parentUpdates;
+	}
+	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld) {
+		DStructType structType = hld.getStructType();
+		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval);
 		return parentUpdates;
 	}
 	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
@@ -121,7 +127,7 @@ public class HLDEngine {
 	 * @param structType - main type being inserted
 	 * @param dval - values
 	 */
-	private List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, HLDInsert hld, DValue dval) {
+	private List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, DValue dval) {
 		List<HLDUpdate> updateL = new ArrayList<>();
 		
 		DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
@@ -217,9 +223,9 @@ public class HLDEngine {
 	public void assignAliases(HLDUpdateStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hldupdate);
-//		for(HLDUpdate hld: stmt.updateL) {
-//			aliasBuilder.assignAliases(hld);
-//		}
+		for(HLDUpdate hld: stmt.updateL) {
+			aliasBuilder.assignAliases(hld);
+		}
 	}
 
 	public void assignAliases(HLDQueryStatement stmt) {
