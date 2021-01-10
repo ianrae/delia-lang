@@ -44,6 +44,7 @@ public class HLDManager {
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp) {
 		HLDQuery hld = engine.buildQuery(queryExp);
 		HLDQueryStatement stmt = new HLDQueryStatement(hld);
+		engine.assignAliases(stmt);
 		return stmt;
 	}
 	public HLDDeleteStatement fullBuildDelete(QueryExp queryExp) {
@@ -55,6 +56,7 @@ public class HLDManager {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		stmt.updateL.addAll(engine.addParentUpdates(stmt.hldinsert));
+		engine.assignAliases(stmt);
 		return stmt;
 	}
 	
@@ -62,6 +64,7 @@ public class HLDManager {
 	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		stmt.hldupdate = engine.buildUpdate(updateExp);
+		engine.assignAliases(stmt);
 		return stmt;
 	}
 	

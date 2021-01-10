@@ -13,7 +13,9 @@ import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
+import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
@@ -28,6 +30,8 @@ import org.delia.util.DValueHelper;
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
  * The HLD statement classes contain one or more of these lower-level objects
  * 
+ * single use!!!
+ * 
  * @author ian
  *
  */
@@ -37,6 +41,7 @@ public class HLDEngine {
 	private DatIdMap datIdMap;
 	private Log log;
 	private SprigService sprigSvc;
+	private HLDAliasManager aliasMgr;
 
 	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -44,6 +49,8 @@ public class HLDEngine {
 		this.datIdMap = datIdMap;
 		this.log = log;
 		this.sprigSvc = sprigSvc;
+		
+		this.aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 	}
 	
 	public HLDQuery buildQuery(QueryExp queryExp) {
@@ -151,4 +158,25 @@ public class HLDEngine {
 		hld.hld = this.buildQuery(hld.querySpec.queryExp);
 		return hld;
 	}
+
+	public void assignAliases(HLDInsertStatement stmt) {
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		aliasBuilder.assignAliases(stmt.hldinsert);
+		for(HLDUpdate hld: stmt.updateL) {
+			aliasBuilder.assignAliases(hld);
+		}
+	}
+	public void assignAliases(HLDUpdateStatement stmt) {
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		aliasBuilder.assignAliases(stmt.hldupdate);
+//		for(HLDUpdate hld: stmt.updateL) {
+//			aliasBuilder.assignAliases(hld);
+//		}
+	}
+
+	public void assignAliases(HLDQueryStatement stmt) {
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		aliasBuilder.assignAliases(stmt.hldquery);
+	}
+	
 }

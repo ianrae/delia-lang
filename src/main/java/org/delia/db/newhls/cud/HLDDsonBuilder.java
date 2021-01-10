@@ -24,7 +24,6 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.PartialStructValueBuilder;
-import org.delia.valuebuilder.StructValueBuilder;
 
 public class HLDDsonBuilder {
 
@@ -100,7 +99,20 @@ public class HLDDsonBuilder {
 		
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		
+		fillArrays(hldupdate);
+		
 		return hldupdate;
+	}
+
+	private void fillArrays(HLDUpdate hldupdate) {
+		DValue dval = hldupdate.cres.dval;
+		DStructHelper helper = dval.asStruct();
+		for(String fieldName: dval.asStruct().getFieldNames()) {
+			DValue inner = dval.asStruct().getField(fieldName);
+			hldupdate.fieldL.add(createFieldVal(dval, fieldName, inner, helper));
+			hldupdate.valueL.add(inner);
+		}
 	}
 
 	public HLDUpdate buildSimpleUpdate(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
@@ -119,6 +131,7 @@ public class HLDDsonBuilder {
 		cres.dval = builder.getDValue();
 		
 		hldupdate.cres = cres;
+		fillArrays(hldupdate);
 		
 		return hldupdate;
 	}

@@ -8,6 +8,9 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
+import org.delia.db.newhls.cud.HLDInsert;
+import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
@@ -27,44 +30,10 @@ public class HLDAliasBuilder {
 	public void assignAliases(HLDQuery hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
 		hld.fromAlias = info.alias;
-		for(HLDField rf: hld.fieldL) {
-			if (rf.structType == hld.fromType) {
-				rf.alias = info.alias;
-			} else {
-				if (rf.source instanceof JoinElement) {
-					JoinElement el = (JoinElement) rf.source;
-					if (el.aliasName == null) {
-						AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
-						el.aliasName = info2.alias;
-						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
-						el.srcAlias = info2.alias;
-						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
-						//need to determine which instance of Customer this is!!
-					}
-					
-					//need 2nd alias if M:M and a fetch
-					if (el.relinfo.isManyToMany() && el.usedForFetch()) {
-						AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
-						el.aliasNameAdditional = infoAdd.alias;
-						rf.alias = el.aliasNameAdditional;
-					} else {
-						rf.alias = el.aliasName;
-					}
-
-				}
-				//TODO!!
-			}
-		}
+		doFieldList(hld.fieldL, hld.fromType, info);
 
 		//now populate SYMBOL FilterdVal
-		if (hld.filter instanceof SingleFilterCond) {
-			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
-			doFilterPKVal(sfc.val1, hld);
-		} else if (hld.filter instanceof OpFilterCond) {
-			OpFilterCond ofc = (OpFilterCond) hld.filter;
-			doFilterVal(ofc.val1, hld);
-			doFilterVal(ofc.val2, hld);
-		}
+		doFilter(hld);
 		
 		//now do any other implicit joins
 		for(JoinElement el: hld.joinL) {
@@ -94,6 +63,48 @@ public class HLDAliasBuilder {
 				}
 			} else {
 				fnspec.structField.alias = hld.fromAlias;
+			}
+		}
+	}
+
+	private void doFilter(HLDQuery hld) {
+		if (hld.filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
+			doFilterPKVal(sfc.val1, hld);
+		} else if (hld.filter instanceof OpFilterCond) {
+			OpFilterCond ofc = (OpFilterCond) hld.filter;
+			doFilterVal(ofc.val1, hld);
+			doFilterVal(ofc.val2, hld);
+		}
+	}
+
+	private void doFieldList(List<HLDField> fieldL, DStructType fromType, AliasInfo info) {
+		for(HLDField rf: fieldL) {
+			if (rf.structType == fromType) {
+				rf.alias = info.alias;
+			} else {
+				if (rf.source instanceof JoinElement) {
+					JoinElement el = (JoinElement) rf.source;
+					if (el.aliasName == null) {
+						AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
+						el.aliasName = info2.alias;
+						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
+						el.srcAlias = info2.alias;
+						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
+						//need to determine which instance of Customer this is!!
+					}
+					
+					//need 2nd alias if M:M and a fetch
+					if (el.relinfo.isManyToMany() && el.usedForFetch()) {
+						AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
+						el.aliasNameAdditional = infoAdd.alias;
+						rf.alias = el.aliasNameAdditional;
+					} else {
+						rf.alias = el.aliasName;
+					}
+
+				}
+				//TODO!!
 			}
 		}
 	}
@@ -142,6 +153,21 @@ public class HLDAliasBuilder {
 		String fieldName = pkpair.name;
 		val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
 		val1.alias = hld.fromAlias;
+	}
+	
+	public void assignAliases(HLDInsert hld) {
+		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
+		hld.typeOrTbl.alias = info.alias;
+		doFieldList(hld.fieldL, hld.getStructType(), info);
+	}
+	
+	public void assignAliases(HLDUpdate hld) {
+		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
+		hld.typeOrTbl.alias = info.alias;
+		doFieldList(hld.fieldL, hld.getStructType(), info);
+		
+		//now populate SYMBOL FilterdVal
+		doFilter(hld.hld);
 	}
 
 }

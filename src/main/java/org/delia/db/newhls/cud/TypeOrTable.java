@@ -5,6 +5,7 @@ import org.delia.type.DStructType;
 public class TypeOrTable {
 	private DStructType structType;
 	private String tblName; //a table that doesn't represent a DStructType, such as CustomerAddressDat1
+	public String alias;
 	
 	public TypeOrTable(DStructType structType) {
 		this.structType = structType;
