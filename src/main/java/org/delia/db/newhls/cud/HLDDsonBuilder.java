@@ -47,7 +47,6 @@ public class HLDDsonBuilder {
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		
 		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
 		HLDInsert hldins = new HLDInsert(new TypeOrTable(dtype));
 		DValueIterator insertPrebuiltValueIterator = null; //TODO

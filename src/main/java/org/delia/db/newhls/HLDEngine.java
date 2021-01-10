@@ -2,7 +2,6 @@ package org.delia.db.newhls;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
@@ -11,26 +10,22 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.cud.HLDBase;
+import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
-import org.delia.db.sql.fragment.InsertStatementFragment;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
-import org.delia.rule.rules.RelationManyRule;
 import org.delia.sprig.SprigService;
-import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -93,12 +88,19 @@ public class HLDEngine {
 	}
 	public List<HLDUpdate> addParentUpdates(HLDInsert hld) {
 		DStructType structType = hld.getStructType();
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval);
+		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, null);
 		return parentUpdates;
 	}
 	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld) {
 		DStructType structType = hld.getStructType();
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval);
+		
+		
+		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
+		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
+		SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
+		DValue pkval = pgen.convert(sfc.val1);
+		
+		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval);
 		return parentUpdates;
 	}
 	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
@@ -126,11 +128,12 @@ public class HLDEngine {
 	 * statement.
 	 * @param structType - main type being inserted
 	 * @param dval - values
+	 * @param pkval2 
 	 */
-	private List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, DValue dval) {
+	private List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, DValue dval, DValue pkval) {
 		List<HLDUpdate> updateL = new ArrayList<>();
 		
-		DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+		pkval = (pkval != null) ? pkval : DValueHelper.findPrimaryKeyValue(dval);
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
@@ -161,16 +164,16 @@ public class HLDEngine {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
+		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
+		QuerySpec querySpec = new QuerySpec();
+		querySpec.evaluator = null; //TODO fix
+		querySpec.queryExp = queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
+		
+		HLDQuery hldquery = this.buildQuery(querySpec.queryExp);
 		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 		
 		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
-		
-		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
-		hld.querySpec = new QuerySpec();
-		hld.querySpec.evaluator = null; //TODO fix
-		hld.querySpec.queryExp = queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
-		
-		hld.hld = this.buildQuery(hld.querySpec.queryExp);
+		hld.hld = hldquery;
 		return hld;
 	}
 
