@@ -48,9 +48,9 @@ public class HLDDsonBuilder {
 		
 		DValue dval = hldins.cres.dval;
 		DStructHelper helper = dval.asStruct();
-		for(String fieldName: dval.asStruct().getFieldNames()) {
-			DValue inner = dval.asStruct().getField(fieldName);
-			hldins.fieldL.add(createFieldVal(dval, fieldName, inner, helper));
+		for(TypePair pair: helper.getType().getAllFields()) {
+			DValue inner = dval.asStruct().getField(pair.name);
+			hldins.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
 			hldins.valueL.add(inner);
 		}
 		
@@ -108,9 +108,9 @@ public class HLDDsonBuilder {
 	private void fillArrays(HLDUpdate hldupdate) {
 		DValue dval = hldupdate.cres.dval;
 		DStructHelper helper = dval.asStruct();
-		for(String fieldName: dval.asStruct().getFieldNames()) {
-			DValue inner = dval.asStruct().getField(fieldName);
-			hldupdate.fieldL.add(createFieldVal(dval, fieldName, inner, helper));
+		for(TypePair pair: helper.getType().getAllFields()) {
+			DValue inner = dval.asStruct().getField(pair.name);
+			hldupdate.fieldL.add(createFieldVal(dval, pair.name, inner, helper));
 			hldupdate.valueL.add(inner);
 		}
 	}

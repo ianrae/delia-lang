@@ -23,6 +23,7 @@ import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.ResultValue;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
+import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -43,7 +44,15 @@ public class NewHLSTestBase extends BDDBase {
 		for(SqlStatement stm: stmgrp.statementL) {
 			StringJoiner joiner = new StringJoiner(",");
 			for(DValue dval: stm.paramL) {
-				joiner.add(dval.asString());
+				if (dval == null) {
+					joiner.add("null");
+				} else if (dval.getType().isRelationShape()) {
+					DRelation drel = (DRelation) dval.asRelation();
+					DValue inner = drel.getForeignKey();
+					joiner.add(inner.asString());
+				} else {
+					joiner.add(dval.asString());
+				}
 			}
 
 			log.log("%s -- %s", stm.sql, joiner.toString());
