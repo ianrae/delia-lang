@@ -46,16 +46,22 @@ public class NewHLSTestBase extends BDDBase {
 			for(DValue dval: stm.paramL) {
 				if (dval == null) {
 					joiner.add("null");
-				} else if (dval.getType().isRelationShape()) {
-					DRelation drel = (DRelation) dval.asRelation();
-					DValue inner = drel.getForeignKey();
-					joiner.add(inner.asString());
 				} else {
-					joiner.add(dval.asString());
+					joiner.add(resolveParamAsString(dval));
 				}
 			}
 
 			log.log("%s -- %s", stm.sql, joiner.toString());
+		}
+	}
+	
+	private String resolveParamAsString(DValue dval){
+		if (dval.getType().isRelationShape()) {
+			DRelation drel = (DRelation) dval.asRelation();
+			DValue inner = drel.getForeignKey();
+			return inner.asString();
+		} else {
+			return dval.asString();
 		}
 	}
 	
@@ -92,7 +98,8 @@ public class NewHLSTestBase extends BDDBase {
 		for(int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			DValue dval = stm.paramL.get(i);
-			assertEquals(arg, dval.asString());
+			String s = resolveParamAsString(dval);
+			assertEquals(arg, s);
 		}
 	}
 

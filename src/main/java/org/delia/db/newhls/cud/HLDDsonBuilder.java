@@ -116,12 +116,12 @@ public class HLDDsonBuilder {
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		
-		fillArrays(hldupdate);
+		fillArraysForUpdate(hldupdate);
 		
 		return hldupdate;
 	}
 
-	private void fillArrays(HLDUpdate hldupdate) {
+	private void fillArraysForUpdate(HLDUpdate hldupdate) {
 		DValue dval = hldupdate.cres.dval;
 		DStructHelper helper = dval.asStruct();
 		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(helper.getType());
@@ -129,6 +129,9 @@ public class HLDDsonBuilder {
 		for(TypePair pair: helper.getType().getAllFields()) {
 			if (shouldSkipField(helper, pair)) {
 				continue;
+			}
+			if (targetPKPair.name.equals(pair.name)) {
+				continue; //update doesn't include pk in fieldL
 			}
 			if (helper.hasField(pair.name)) {
 				DValue inner = dval.asStruct().getField(pair.name);
@@ -154,7 +157,7 @@ public class HLDDsonBuilder {
 		cres.dval = builder.getDValue();
 		
 		hldupdate.cres = cres;
-		fillArrays(hldupdate);
+		fillArraysForUpdate(hldupdate);
 		
 		return hldupdate;
 	}

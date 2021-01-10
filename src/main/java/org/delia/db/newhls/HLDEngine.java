@@ -125,12 +125,11 @@ public class HLDEngine {
 				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
-					if (relinfo.isOneToOne() || relinfo.isOneToMany()) {
+					if (relinfo.isOneToOne()) {
 						DValue fkval = inner.asRelation().getForeignKey();
 						HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
 						updateL.add(update);
-					} else if (relinfo.isManyToMany()) {
-
+					} else if (relinfo.isOneToMany()) {
 						for(DValue fkval: inner.asRelation().getMultipleKeys()) {
 							HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
 							updateL.add(update);
