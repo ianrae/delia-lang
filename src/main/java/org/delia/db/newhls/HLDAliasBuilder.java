@@ -176,6 +176,9 @@ public class HLDAliasBuilder {
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 	}
+	public void assignAliasesAssoc(HLDDelete hld) {
+		AliasInfo info = doAssignAliasesAssoc(hld);
+	}
 	private AliasInfo doAssignAliasesAssoc(HLDBase hld) {
 		RelationInfo relinfo = hld.assocRelInfo;
 		String assocTbl = aliasMgr.getDatIdMap().getAssocTblName(relinfo.getDatId());

@@ -82,7 +82,7 @@ public class HLDEngineAssoc {
 		} else if (isPKQuery(hldQuery)) {
 //			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.logDebug("m-to-n:scenario2");
-			return buildUpdateByIdOnly(relinfo, queryExp, structType, dval, pkval, builderAdapter);
+			return buildUpdateByIdOnly(relinfo, queryExp, structType, dval, pkval, fkval, builderAdapter);
 		} else {
 			log.logDebug("m-to-n:scenario3");
 //			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
@@ -113,7 +113,7 @@ public class HLDEngineAssoc {
 //			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 //		}		
 //	}
-	protected List<AssocBundle> buildUpdateByIdOnly(RelationInfo relinfo, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
+	protected List<AssocBundle> buildUpdateByIdOnly(RelationInfo relinfo, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
 //		  scenario 2 id:
 //		  update Customer[55] {wid: 333, addr: [100]}
 //		  has sql:
@@ -121,10 +121,10 @@ public class HLDEngineAssoc {
 //		    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 //		    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 
-		
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		AssocBundle bundle = new AssocBundle();
-		bundle.hlddete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, datIdMap);
+		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, datIdMap);
+		bundle.hlddelete.assocRelInfo = relinfo; 
 		return Collections.singletonList(bundle);
 	}
 //	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,

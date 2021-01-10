@@ -136,12 +136,16 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		for(HLDUpdate hld: stmt.updateL) {
 			aliasBuilder.assignAliases(hld);
 		}
-		for(HLDInsert hld: stmt.assocInsertL) {
-			aliasBuilder.assignAliasesAssoc(hld);
-		}
+//		for(HLDInsert hld: stmt.assocInsertL) {
+//			aliasBuilder.assignAliasesAssoc(hld);
+//		}
 		for(AssocBundle bundle: stmt.assocBundleL) {
-			aliasBuilder.assignAliases(bundle.hlddete);
+			if (bundle.hlddelete != null) {
+				aliasBuilder.assignAliasesAssoc(bundle.hlddelete);
+			}
+			if (bundle.hldupdate != null) {
 			aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
+			}
 		}
 	}
 	public void assignAliases(HLDQueryStatement stmt) {
