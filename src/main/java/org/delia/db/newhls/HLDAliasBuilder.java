@@ -164,6 +164,7 @@ public class HLDAliasBuilder {
 	public void assignAliases(HLDUpdate hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = info.alias;
+		hld.hld.fromAlias = info.alias;
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 		
 		//now populate SYMBOL FilterdVal

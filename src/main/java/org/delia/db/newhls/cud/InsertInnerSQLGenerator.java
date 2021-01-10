@@ -49,7 +49,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		SqlStatement stm = new SqlStatement();
 		StrCreator sc = new StrCreator();
 		sc.o("INSERT INTO");
-		sc.o(" %s", hldins.typeOrTbl.getTblName());
+		outTblName(sc, hldins);
 		
 		if (hldins.fieldL.isEmpty()) {
 			sc.o(" DEFAULT VALUES");
@@ -82,12 +82,15 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return stm;
 	}
 	
+	private void outTblName(StrCreator sc, HLDBase hld) {
+		sc.o(" %s as %s", hld.typeOrTbl.getTblName(), hld.typeOrTbl.alias);
+	}
+
 	private SqlStatement genUpdateStatement(HLDUpdate hld) {
 		SqlStatement stm = new SqlStatement();
 		StrCreator sc = new StrCreator();
 		sc.o("UPDATE");
-		//renderEarly(sc);
-		sc.o(" %s", hld.typeOrTbl.getTblName());
+		outTblName(sc, hld);
 		
 		if (hld.fieldL.isEmpty()) {
 			stm.sql = sc.toString();
@@ -108,7 +111,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		
 		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
-		sc.o(whereStr);
+		sc.o(" WHERE%s", whereStr);
 
 //		renderIfPresent(sc, orderByFrag);
 //		renderIfPresent(sc, limitFrag);  TODO is this needed?
