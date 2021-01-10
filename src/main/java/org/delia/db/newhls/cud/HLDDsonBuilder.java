@@ -3,6 +3,7 @@ package org.delia.db.newhls.cud;
 import java.util.List;
 import java.util.Optional;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -17,11 +18,14 @@ import org.delia.runner.DsonToDValueConverter;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigVarEvaluator;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.OrderedMap;
+import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -116,13 +120,13 @@ public class HLDDsonBuilder {
 
 	private void fillArrays(DValue dval, List<HLDField> fieldL, List<DValue> valueL, boolean includePK) {
 		DStructHelper helper = dval.asStruct();
-		TypePair targetPKPair = (includePK) ? null : DValueHelper.findPrimaryKeyFieldPair(helper.getType());
+		TypePair skipPKPair = (includePK) ? null : DValueHelper.findPrimaryKeyFieldPair(helper.getType());
 		
 		for(TypePair pair: helper.getType().getAllFields()) {
 			if (shouldSkipField(helper, pair)) {
 				continue;
 			}
-			if (targetPKPair != null && targetPKPair.name.equals(pair.name)) {
+			if (skipPKPair != null && skipPKPair.name.equals(pair.name)) {
 				continue; //update doesn't include pk in fieldL
 			}
 			if (helper.hasField(pair.name)) {
@@ -174,6 +178,36 @@ public class HLDDsonBuilder {
 		
 		return hldins;
 	}
-	
-	
+
+	public HLDInsert buildAssocInsert(RelationInfo relinfo, DValue dval1, DValue dval2, DatIdMap datIdMap) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
+		
+		HLDInsert hldins = new HLDInsert(new TypeOrTable(assocTbl));
+		
+		ConversionResult cres = new ConversionResult();
+		cres.localET = new SimpleErrorTracker(log);
+
+		//create a temp type for the assoc table
+		DType intType = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+		OrderedMap omap = new OrderedMap();
+		omap.add("leftv", intType, false, false, false, false);
+		omap.add("rightv", intType, false, false, false, false);
+		DStructType structType = new DStructType(Shape.STRUCT, assocTbl, null, omap, null);
+		//we don't register this type
+		
+		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
+		builder.addField(fld1, dval1);
+		builder.addField(fld2, dval2);
+		if (!builder.finish()) {
+			DeliaExceptionHelper.throwError("buildSimpleUpdate-fail", structType.getName());
+		}
+		cres.dval = builder.getDValue();
+		
+		hldins.cres = cres;
+		fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
+		
+		return hldins;
+	}
 }

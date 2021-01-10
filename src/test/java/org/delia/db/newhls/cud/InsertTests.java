@@ -127,6 +127,7 @@ public class InsertTests extends NewHLSTestBase {
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
+		dumpGrp(stmgrp);
 		chkInsertSql(stmgrp, 0, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "100", "45");
 		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t0 (t0.leftv, t0.rightv) VALUES(?, ?)", "55", "100");
 	}

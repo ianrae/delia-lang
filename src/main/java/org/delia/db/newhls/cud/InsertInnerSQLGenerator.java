@@ -40,6 +40,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			stmgrp.add(stmx);
 		}
 		
+		for(HLDInsert hld: hldins.assocInsertL) {
+			SqlStatement stmx = genInsertStatement(hld);
+			stmgrp.add(stmx);
+		}
 		return stmgrp;
 	}
 	public SqlStatementGroup generate(HLDUpdateStatement hld) {
