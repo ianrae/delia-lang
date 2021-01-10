@@ -3,10 +3,14 @@ package org.delia.db.newhls;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.db.QuerySpec;
+import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -53,24 +57,24 @@ public class HLDEngine {
 		
 		return hld;
 	}
-//	public HLDDelete fullBuildDelete(QueryExp queryExp) {
-//		HLDQueryStatement hld = fullBuildQuery(queryExp);
-//		HLDDelete hlddel = new HLDDelete(hld.hldquery);
-//		return hlddel;
-//	}
+	public HLDDelete fullBuildDelete(QueryExp queryExp) {
+		HLDQuery hld = fullBuildQuery(queryExp);
+		HLDDelete hlddel = new HLDDelete(hld);
+		return hlddel;
+	}
 	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 		return hld;
 	}
-//	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
-//		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-//		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
-//		hld.hld = fullBuildQuery(updateExp.queryExp);
-//		hld.querySpec = new QuerySpec();
-//		hld.querySpec.evaluator = null; //TOOD fix
-//		hld.querySpec.queryExp = updateExp.queryExp;
-//		return hld;
-//	}
+	public HLDUpdate fullBuildUpdate(UpdateStatementExp updateExp) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
+		hld.hld = fullBuildQuery(updateExp.queryExp);
+		hld.querySpec = new QuerySpec();
+		hld.querySpec.evaluator = null; //TOOD fix
+		hld.querySpec.queryExp = updateExp.queryExp;
+		return hld;
+	}
 	
 }

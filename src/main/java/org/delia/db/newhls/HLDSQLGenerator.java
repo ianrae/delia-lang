@@ -13,6 +13,7 @@ import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
 import org.delia.db.newhls.cud.HLDDelete;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DStructType;
@@ -248,11 +249,11 @@ public class HLDSQLGenerator {
 	}
 
 
-	public SqlStatement generateSqlStatement(HLDDelete hlddel) {
+	public SqlStatement generateSqlStatement(HLDDeleteStatement hlddel) {
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE FROM ");
 		
-		HLDQuery hld = hlddel.hld;
+		HLDQuery hld = hlddel.hlddelete.hld;
 		sc.o("%s as %s", hld.fromType.getName(), hld.fromAlias);
 		
 		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 

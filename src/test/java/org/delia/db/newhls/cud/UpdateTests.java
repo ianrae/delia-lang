@@ -28,7 +28,7 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "update Customer[1] {x: 45}";
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
 	@Test
@@ -36,7 +36,7 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "update Address[100] { y: 45}";
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
 	}
 	@Test
@@ -45,7 +45,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.cust = ?, t0.y = ? WHERE t0.id=?", "55", "45", "1");
 	}
 	
@@ -55,7 +55,7 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomer1NSrc = true;
 		String src = "update Customer[1] {x: 45}";
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
 	@Test
@@ -63,7 +63,7 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomer1NSrc = true;
 		String src = "update Address[100] {y: 45}";
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
 	}
 	@Test
@@ -72,7 +72,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.cust = ?, t0.y = ? WHERE t0.id=?", "55", "45", "100");
 	}
 	@Test
@@ -85,7 +85,7 @@ public class UpdateTests extends NewHLSTestBase {
 		src = addSrc(src, "insert Address {id: '101', y:46 }");
 		src = addSrc(src, "update Customer[56] {x:66, addr: ['100','101'] }");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
@@ -99,7 +99,7 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomerManyToManySrc = true;
 		String src = "update Customer[1] { x: 45}";
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
 	
@@ -108,7 +108,7 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomerManyToManySrc = true;
 		String src = "update Address[1] { y: 45}";
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "1");
 	}
 	@Test
@@ -117,7 +117,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
@@ -134,7 +134,7 @@ public class UpdateTests extends NewHLSTestBase {
 		src = addSrc(src, "insert Address {id: '101', y:46 }");
 		src = addSrc(src, "update Customer[56] { x:66, addr: ['100','101'] }");
 		
-		HLDUpdate hldupdate = buildFromSrcUpdate(src, 0); 
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
@@ -157,12 +157,12 @@ public class UpdateTests extends NewHLSTestBase {
 	
 	
 	//-------------------------
-	protected HLDUpdate buildFromSrcUpdate(String src, int statementIndex) {
+	protected HLDUpdateStatement buildFromSrcUpdate(String src, int statementIndex) {
 		UpdateStatementExp updateExp = compileToUpdateStatement(src, statementIndex);
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpdate hldupdate = mgr.fullBuildUpdate(updateExp);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
@@ -174,13 +174,13 @@ public class UpdateTests extends NewHLSTestBase {
 		return (UpdateStatementExp) exp;
 	}
 	
-	protected void chkUpdateSql(HLDUpdate hldupdate, int numStatements, String expected, String...args) {
+	protected void chkUpdateSql(HLDUpdateStatement hldupdate, int numStatements, String expected, String...args) {
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, numStatements);
 		SqlStatement stm = stmgrp.statementL.get(0);
 		chkStm(stm, expected, args);
 	}
 
-	protected SqlStatementGroup genUpdateSql(HLDUpdate hldupdate, int numStatements) {
+	protected SqlStatementGroup genUpdateSql(HLDUpdateStatement hldupdate, int numStatements) {
 		SqlStatementGroup stmgrp = mgr.generateSql(hldupdate);
 		assertEquals(numStatements, stmgrp.statementL.size());
 		return stmgrp;

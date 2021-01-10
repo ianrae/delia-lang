@@ -24,7 +24,7 @@ public class DeleteTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "delete Customer[55]";
 		
-		HLDDelete hldDelete = buildFromSrcDelete(src, 0); 
+		HLDDeleteStatement hldDelete = buildFromSrcDelete(src, 0); 
 		chkDeleteSql(hldDelete, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
@@ -32,7 +32,7 @@ public class DeleteTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "delete Address[100]";
 		
-		HLDDelete hldDelete = buildFromSrcDelete(src, 0); 
+		HLDDeleteStatement hldDelete = buildFromSrcDelete(src, 0); 
 		chkDeleteSql(hldDelete, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
 	}
 	@Test
@@ -40,20 +40,20 @@ public class DeleteTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "delete Customer[x > 10]";
 		
-		HLDDelete hldDelete = buildFromSrcDelete(src, 0); 
+		HLDDeleteStatement hldDelete = buildFromSrcDelete(src, 0); 
 		chkDeleteSql(hldDelete, "DELETE FROM Customer as t0 WHERE t0.x > ?", "10");
 	}
 	
 	//-------------------------
-	protected HLDDelete buildFromSrcDelete(String src, int expectedJoins) {
+	protected HLDDeleteStatement buildFromSrcDelete(String src, int expectedJoins) {
 		DeleteStatementExp deleteExp = compileToDeleteStatement(src);
 		QueryExp queryExp = deleteExp.queryExp;
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDDelete hlddel = mgr.fullBuildDelete(queryExp);
+		HLDDeleteStatement hlddel = mgr.fullBuildDelete(queryExp);
 		log.log(hlddel.toString());
-		assertEquals(expectedJoins, hlddel.hld.joinL.size());
+		assertEquals(expectedJoins, hlddel.hlddelete.hld.joinL.size());
 		return hlddel;
 	}
 
@@ -67,7 +67,7 @@ public class DeleteTests extends NewHLSTestBase {
 		return null;
 	}
 	
-	protected void chkDeleteSql(HLDDelete hlddel, String expected, String...args) {
+	protected void chkDeleteSql(HLDDeleteStatement hlddel, String expected, String...args) {
 		SqlStatement stm = mgr.generateSql(hlddel);
 		chkStm(stm, expected, args);
 	}
