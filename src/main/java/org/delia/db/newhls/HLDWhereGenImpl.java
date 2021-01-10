@@ -14,24 +14,26 @@ import org.delia.type.DStructType;
 
 public class HLDWhereGenImpl implements HLDWhereGen {
 	
+	private HLDEngine engine;
 	private HLDManager mgr;
 
-	public HLDWhereGenImpl(HLDManager mgr) {
+	public HLDWhereGenImpl(HLDManager mgr, HLDEngine engine) {
 		this.mgr = mgr;
+		this.engine = engine;
 	}
 
 	@Override
 	public List<SqlFragment> createWhere(QuerySpec spec, DStructType structType, SqlStatement statement, HLDAliasManager aliasMgr) {
-		HLDQueryStatement hld = mgr.fullBuildQuery(spec.queryExp, aliasMgr);
+		HLDQuery hld = engine.fullBuildQuery(spec.queryExp, aliasMgr);
 		
 		HLDSQLGenerator gen = mgr.createSQLGenerator();
 		int n1 = statement.paramL.size();
-		String sqlwhere = gen.generateSqlWhere(hld.hldquery, statement);
+		String sqlwhere = gen.generateSqlWhere(hld, statement);
 		int n2 = statement.paramL.size();
 		
 
 		HLDWhereFragment frag = new HLDWhereFragment(sqlwhere, n2 - n1);
-		frag.isPKFilter = (hld.hldquery.filter instanceof SingleFilterCond);
+		frag.isPKFilter = (hld.filter instanceof SingleFilterCond);
 		List<SqlFragment> list = new ArrayList<>();
 		list.add(frag);
 		return list;

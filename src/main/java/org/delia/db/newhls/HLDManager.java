@@ -31,6 +31,7 @@ public class HLDManager {
 	private DatIdMap datIdMap;
 	private Log log;
 	private SprigService sprigSvc;
+	private HLDEngine engine;
 
 	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -38,28 +39,13 @@ public class HLDManager {
 		this.datIdMap = datIdMap;
 		this.log = log;
 		this.sprigSvc = sprigSvc;
+		this.engine = new HLDEngine(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
 	
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp) {
-		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-		return fullBuildQuery(queryExp, aliasMgr);
-	}
-	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
-		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
-
-		HLDQuery hld = hldBuilder.build(queryExp);
-
-		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
-		joinBuilder.generateJoinTree(hld);
-
-		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
-		fieldBuilder.generateFields(hld);
-		
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
-		aliasBuilder.assignAliases(hld);
-		
-		HLDQueryStatement hldQueryStatement = new HLDQueryStatement(hld);
-		return hldQueryStatement;
+		HLDQuery hld = engine.fullBuildQuery(queryExp);
+		HLDQueryStatement stmt = new HLDQueryStatement(hld);
+		return stmt;
 	}
 	public HLDDelete fullBuildDelete(QueryExp queryExp) {
 		HLDQueryStatement hld = fullBuildQuery(queryExp);
@@ -103,7 +89,7 @@ public class HLDManager {
 	}
 
 	public SqlStatementGroup generateSql(HLDInsert hldins) {
-		HLDWhereGen whereGen = new HLDWhereGenImpl(this);
+		HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
 		HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
 		
 		SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.cres.dval);
@@ -111,7 +97,7 @@ public class HLDManager {
 	}
 
 	public SqlStatementGroup generateSql(HLDUpdate hldupdate) {
-		HLDWhereGen whereGen = new HLDWhereGenImpl(this);
+		HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
 		HLDInsertSQLGenerator updateSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
 		
 		SqlStatementGroup stmgrp = updateSqlGen.generateUpdate(hldupdate);
