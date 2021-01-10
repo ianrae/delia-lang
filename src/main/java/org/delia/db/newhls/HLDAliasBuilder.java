@@ -109,6 +109,11 @@ public class HLDAliasBuilder {
 			}
 		}
 	}
+	private void doFieldListAssoc(List<HLDField> fieldL, AliasInfo info) {
+		for(HLDField rf: fieldL) {
+			rf.alias = info.alias;
+		}
+	}
 
 	private JoinElement findMatch(QueryFnSpec fnspec, HLDQuery hld) {
 		if (fnspec.structField.fieldName == null) {
@@ -166,7 +171,7 @@ public class HLDAliasBuilder {
 		String assocTbl = aliasMgr.getDatIdMap().getAssocTblName(relinfo.getDatId());
 		AliasInfo info = aliasMgr.createAssocAlias(relinfo.nearType, relinfo.fieldName, assocTbl);
 		hld.typeOrTbl.alias = info.alias;
-		doFieldList(hld.fieldL, hld.getStructType(), info);
+		doFieldListAssoc(hld.fieldL, info);
 	}
 	
 	public void assignAliases(HLDUpdate hld) {

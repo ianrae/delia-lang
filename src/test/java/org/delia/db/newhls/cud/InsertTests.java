@@ -129,7 +129,7 @@ public class InsertTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
 		dumpGrp(stmgrp);
 		chkInsertSql(stmgrp, 0, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "100", "45");
-		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t0 (t0.leftv, t0.rightv) VALUES(?, ?)", "55", "100");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "55", "100");
 	}
 	
 	@Test
@@ -145,8 +145,8 @@ public class InsertTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
 		dumpGrp(stmgrp);
 		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
-		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t0 (t0.leftv, t0.rightv) VALUES(?, ?)", "56", "100");
-		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 as t0 (t0.leftv, t0.rightv) VALUES(?, ?)", "56", "101");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "56", "100");
+		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "56", "101");
 	}
 	
 	

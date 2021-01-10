@@ -60,7 +60,7 @@ public class HLDDsonBuilder {
 
 	private boolean shouldSkipField(DStructHelper helper, TypePair pair) {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(helper.getType(), pair);
-		if (relinfo != null && relinfo.isParent) {
+		if (relinfo != null && relinfo.notContainsFK()) {
 			return true; //parent doesn't have fk value.
 		}
 		return false;
