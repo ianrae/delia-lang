@@ -36,14 +36,14 @@ public class NewHLSTestBase extends BDDBase {
 	protected HLDManager mgr;
 
 
-	protected HLDQuery buildFromSrc(String src, int expectedJoins) {
+	protected HLDQueryStatement buildFromSrc(String src, int expectedJoins) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
 		
 		mgr = createManager();
-		HLDQuery hld = mgr.fullBuildQuery(queryExp);
+		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp);
 		log.log(hld.toString());
-		assertEquals(expectedJoins, hld.joinL.size());
+		assertEquals(expectedJoins, hld.hldquery.joinL.size());
 		return hld;
 	}
 
@@ -52,12 +52,12 @@ public class NewHLSTestBase extends BDDBase {
 		return new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), log, this.session.getDatIdMap(), sprigSvc);
 	}
 	
-	protected void chkRawSql(HLDQuery hld, String expected) {
+	protected void chkRawSql(HLDQueryStatement hld, String expected) {
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		assertEquals(expected, sql);
 	}
-	protected void chkFullSql(HLDQuery hld, String expected, String...args) {
+	protected void chkFullSql(HLDQueryStatement hld, String expected, String...args) {
 		SqlStatement stm = mgr.generateSql(hld);
 		chkStm(stm, expected, args);
 	}

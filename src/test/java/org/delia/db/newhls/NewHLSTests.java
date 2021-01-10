@@ -162,7 +162,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDField() {
 		String src = "let x = Flight[15]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -175,7 +175,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDField2() {
 		String src = "let x = Flight[field1 < 15]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -188,7 +188,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDFieldNot() {
 		String src = "let x = Flight[!(field1 < 15)]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -201,7 +201,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDFieldCount() {
 		String src = "let x = Flight[field1 < 15].count()";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);

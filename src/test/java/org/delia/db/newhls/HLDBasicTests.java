@@ -78,7 +78,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	@Test
 	public void testHLDField() {
 		String src = "let x = Flight[15]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15");
 		chkFullSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=?", "15");
 	}	
@@ -87,7 +87,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleTypes() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[15]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.id=15");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.id=?", "15");
 	}	
@@ -95,7 +95,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleBool() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[bfield==true]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.bfield == true");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.bfield == ?", "true");
 	}
@@ -103,7 +103,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleInt() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[nfield==-5]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.nfield == -5");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.nfield == ?", "-5");
 	}	
@@ -111,7 +111,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleLong() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[lfield==5]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.lfield == 5");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.lfield == ?", "5");
 	}	
@@ -119,7 +119,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleNumber() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[dfield==5.2]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dfield == 5.2");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dfield == ?", "5.2");
 	}	
@@ -127,7 +127,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleString() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[strfield=='abc']";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.strfield == 'abc'");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.strfield == ?", "abc");
 	}	
@@ -135,7 +135,7 @@ public class HLDBasicTests extends NewHLSTestBase {
 	public void testSimpleDate() {
 		srcSimpleTypes = true;
 		String src = "let x = Flight[dtfield=='2020']";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dtfield == '2020'");
 		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dtfield == ?", "2020");
 	}	

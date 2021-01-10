@@ -22,16 +22,16 @@ public class HLDWhereGenImpl implements HLDWhereGen {
 
 	@Override
 	public List<SqlFragment> createWhere(QuerySpec spec, DStructType structType, SqlStatement statement, HLDAliasManager aliasMgr) {
-		HLDQuery hld = mgr.fullBuildQuery(spec.queryExp, aliasMgr);
+		HLDQueryStatement hld = mgr.fullBuildQuery(spec.queryExp, aliasMgr);
 		
 		HLDSQLGenerator gen = mgr.createSQLGenerator();
 		int n1 = statement.paramL.size();
-		String sqlwhere = gen.generateSqlWhere(hld, statement);
+		String sqlwhere = gen.generateSqlWhere(hld.hldquery, statement);
 		int n2 = statement.paramL.size();
 		
 
 		HLDWhereFragment frag = new HLDWhereFragment(sqlwhere, n2 - n1);
-		frag.isPKFilter = (hld.filter instanceof SingleFilterCond);
+		frag.isPKFilter = (hld.hldquery.filter instanceof SingleFilterCond);
 		List<SqlFragment> list = new ArrayList<>();
 		list.add(frag);
 		return list;

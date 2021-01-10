@@ -40,11 +40,11 @@ public class HLDManager {
 		this.sprigSvc = sprigSvc;
 	}
 	
-	public HLDQuery fullBuildQuery(QueryExp queryExp) {
+	public HLDQueryStatement fullBuildQuery(QueryExp queryExp) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 		return fullBuildQuery(queryExp, aliasMgr);
 	}
-	public HLDQuery fullBuildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
+	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
 		HLDQuery hld = hldBuilder.build(queryExp);
@@ -57,11 +57,13 @@ public class HLDManager {
 		
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(hld);
-		return hld;
+		
+		HLDQueryStatement hldQueryStatement = new HLDQueryStatement(hld);
+		return hldQueryStatement;
 	}
 	public HLDDelete fullBuildDelete(QueryExp queryExp) {
-		HLDQuery hld = fullBuildQuery(queryExp);
-		HLDDelete hlddel = new  HLDDelete(hld);
+		HLDQueryStatement hld = fullBuildQuery(queryExp);
+		HLDDelete hlddel = new HLDDelete(hld.hldquery);
 		return hlddel;
 	}
 	public HLDInsert fullBuildInsert(InsertStatementExp insertExp) {
@@ -79,15 +81,15 @@ public class HLDManager {
 		return hld;
 	}
 	
-	public String generateRawSql(HLDQuery hld) {
+	public String generateRawSql(HLDQueryStatement hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		String sql = sqlgen.generateRawSql(hld);
+		String sql = sqlgen.generateRawSql(hld.hldquery);
 		return sql;
 	}
 	
-	public SqlStatement generateSql(HLDQuery hld) {
+	public SqlStatement generateSql(HLDQueryStatement hld) {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		SqlStatement sql = sqlgen.generateSqlStatement(hld);
+		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
 		return sql;
 	}
 	public HLDSQLGenerator createSQLGenerator() {

@@ -7,7 +7,6 @@ import java.util.StringJoiner;
 
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.relation.RelationInfo;
-import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 
