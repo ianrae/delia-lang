@@ -10,6 +10,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
@@ -139,10 +140,13 @@ public class HLDEngine extends HLDEngineBase {
 			aliasBuilder.assignAliasesAssoc(hld);
 		}
 	}
-
 	public void assignAliases(HLDQueryStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hldquery);
+	}
+	public void assignAliases(HLDDeleteStatement stmt) {
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		aliasBuilder.assignAliases(stmt.hlddelete);
 	}
 	
 }

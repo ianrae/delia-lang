@@ -8,6 +8,7 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
+import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.relation.RelationInfo;
@@ -179,6 +180,14 @@ public class HLDAliasBuilder {
 		hld.typeOrTbl.alias = info.alias;
 		hld.hld.fromAlias = info.alias;
 		doFieldList(hld.fieldL, hld.getStructType(), info);
+		
+		//now populate SYMBOL FilterdVal
+		doFilter(hld.hld);
+	}
+	public void assignAliases(HLDDelete hld) {
+		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
+		hld.typeOrTbl.alias = info.alias;
+		hld.hld.fromAlias = info.alias;
 		
 		//now populate SYMBOL FilterdVal
 		doFilter(hld.hld);

@@ -63,6 +63,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		return stmgrp;
 	}
+	public SqlStatementGroup generate(HLDDeleteStatement hld) {
+		SqlStatementGroup stmgrp = new SqlStatementGroup();
+		
+		SqlStatement stm = genDeleteStatement(hld.hlddelete);
+		stmgrp.add(stm);
+		
+		return stmgrp;
+	}
 	
 	private SqlStatement genInsertStatement(HLDInsert hldins) {
 		SqlStatement stm = new SqlStatement();
@@ -144,4 +152,17 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return s;
 	}
 
+	//DELETE FROM table_name WHERE condition;
+	private SqlStatement genDeleteStatement(HLDDelete hld) {
+		SqlStatement stm = new SqlStatement();
+		StrCreator sc = new StrCreator();
+		sc.o("DELETE FROM");
+		outTblName(sc, hld);
+		
+		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
+		sc.o(" WHERE%s", whereStr);
+
+		stm.sql = sc.toString();
+		return stm;
+	}
 }

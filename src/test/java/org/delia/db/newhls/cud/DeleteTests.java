@@ -7,7 +7,6 @@ import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.junit.Test;
