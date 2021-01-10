@@ -22,6 +22,8 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
+import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.StructValueBuilder;
 
 public class HLDDsonBuilder {
 
@@ -97,6 +99,26 @@ public class HLDDsonBuilder {
 		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		return hldupdate;
+	}
+
+	public HLDUpdate buildSimpleUpdate(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
+		HLDUpdate hldupdate = new HLDUpdate(null);//fill in later
+		
+		ConversionResult cres = new ConversionResult();
+		cres.localET = new SimpleErrorTracker(log);
+
+		//build partial type with pk and one val
+		StructValueBuilder builder = new StructValueBuilder(structType);
+		builder.addField(pkFieldName, pkval);
+		builder.addField(fieldName, fkval);
+		if (!builder.finish()) {
+			DeliaExceptionHelper.throwError("buildSimpleUpdate-fail", structType.getName());
+		}
+		cres.dval = builder.getDValue();
+		
+		hldupdate.cres = cres;
+		
 		return hldupdate;
 	}
 	

@@ -16,4 +16,9 @@ public class TypeOrTable {
 	public String getTblName() {
 		return (tblName != null) ? tblName : structType.getName();
 	}
+	
+	//may return null
+	public DStructType getStructTypeEx() {
+		return structType;
+	}
 }

@@ -7,7 +7,7 @@ import org.delia.runner.ConversionResult;
 
 public class HLDUpdate {
 	public HLDQuery hld;
-	public HLDInsert hldinsert; //values
+	//public HLDInsert hldinsert; //values
 	
 	public ConversionResult cres;
 	public QuerySpec querySpec;
