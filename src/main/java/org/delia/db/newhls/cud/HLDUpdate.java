@@ -1,18 +1,23 @@
 package org.delia.db.newhls.cud;
 
-import org.delia.db.QuerySpec;
-import org.delia.db.newhls.HLDQuery;
-import org.delia.db.newhls.HLDQueryStatement;
-import org.delia.runner.ConversionResult;
+import java.util.ArrayList;
+import java.util.List;
 
-public class HLDUpdate {
+import org.delia.db.QuerySpec;
+import org.delia.db.newhls.HLDField;
+import org.delia.db.newhls.HLDQuery;
+import org.delia.runner.ConversionResult;
+import org.delia.type.DValue;
+
+public class HLDUpdate extends HLDBase {
 	public HLDQuery hld;
-	//public HLDInsert hldinsert; //values
-	
 	public ConversionResult cres;
 	public QuerySpec querySpec;
+    public List<HLDField> fieldL = new ArrayList<>();
+    public List<DValue> valueL = new ArrayList<>();
 
-	public HLDUpdate(HLDQuery hld) {
+	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {
+		super(typeOrTbl);
 		this.hld = hld;
 	}
 

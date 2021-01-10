@@ -8,25 +8,20 @@ import org.delia.runner.ConversionResult;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
 
-public class HLDInsert {
+public class HLDInsert extends HLDBase {
 	//public HLDQuery hld; later if we support INSERT INTO SELECT 
-	public TypeOrTable typeOrTbl;
 	
     public List<HLDField> fieldL = new ArrayList<>();
     public List<DValue> valueL = new ArrayList<>();
     public ConversionResult cres;
     
     public HLDInsert(TypeOrTable typeOrTbl) {
-    	this.typeOrTbl = typeOrTbl;
+    	super(typeOrTbl);
     }
 
 	@Override
 	public String toString() {
 		String s = String.format("%s: todo!!" ,  typeOrTbl.getTblName());
 		return s;
-	}
-
-	public DStructType getStructType() {
-		return typeOrTbl.getStructTypeEx(); //we know its never null
 	}
 }

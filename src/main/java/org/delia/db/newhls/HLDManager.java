@@ -88,8 +88,9 @@ public class HLDManager {
 
 	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
 		if (newInsertSQLGen) {
-			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry);
-			SqlStatementGroup stmgrp = sqlgen.generate(hldins.hldinsert);
+			HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+			SqlStatementGroup stmgrp = sqlgen.generate(hldins);
 			return stmgrp;
 			
 		} else {

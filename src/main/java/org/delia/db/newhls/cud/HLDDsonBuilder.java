@@ -95,16 +95,16 @@ public class HLDDsonBuilder {
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
-		HLDUpdate hldupdate = new HLDUpdate(null);//fill in later
-		
 		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
+		HLDUpdate hldupdate = new HLDUpdate(new TypeOrTable(dtype), null);//fill in later
+		
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		return hldupdate;
 	}
 
 	public HLDUpdate buildSimpleUpdate(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
-		HLDUpdate hldupdate = new HLDUpdate(null);//fill in later
+		HLDUpdate hldupdate = new HLDUpdate(new TypeOrTable(structType), null);//fill in later
 		
 		ConversionResult cres = new ConversionResult();
 		cres.localET = new SimpleErrorTracker(log);
