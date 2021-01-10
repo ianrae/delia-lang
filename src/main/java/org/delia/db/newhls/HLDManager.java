@@ -30,6 +30,7 @@ public class HLDManager extends ServiceBase {
 	
 	public boolean newInsertSQLGen = true;
 	public boolean newUpdateSQLGen = true;
+	private HLDEngineAssoc engineAssoc;
 
 	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(factorySvc);
@@ -38,6 +39,7 @@ public class HLDManager extends ServiceBase {
 		this.datIdMap = datIdMap;
 		this.sprigSvc = sprigSvc;
 		this.engine = new HLDEngine(registry, factorySvc, log, datIdMap, sprigSvc);
+		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
 	
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp) {
@@ -66,6 +68,7 @@ public class HLDManager extends ServiceBase {
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		stmt.updateL.addAll(engine.addParentUpdatesForUpdate(stmt.hldupdate));
 		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
+		engine.addMoreAssoc(stmt.hldupdate, engineAssoc);
 		engine.assignAliases(stmt);
 		return stmt;
 	}

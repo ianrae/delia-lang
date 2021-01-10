@@ -79,7 +79,6 @@ public class HLDEngine extends HLDEngineBase {
 	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld) {
 		DStructType structType = hld.getStructType();
 		
-		
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
 		SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
@@ -96,6 +95,12 @@ public class HLDEngine extends HLDEngineBase {
 	public List<HLDInsert> addAssocInserts(HLDUpdate hld) {
 		DStructType structType = hld.getStructType();
 		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
+		return parentUpdates;
+	}
+	public List<HLDInsert> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc) {
+		DStructType structType = hld.getStructType();
+		List<HLDInsert> parentUpdates = null; //engineAssoc.xgenAssocField(structType, hld.cres.dval);
+		engineAssoc.xgenAssocField(hld.hld, structType, hld.cres.dval, null); //fix null
 		return parentUpdates;
 	}
 
