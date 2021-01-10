@@ -128,10 +128,6 @@ public abstract class HLDEngineBase {
 	protected HLDInsert addAssocInsertStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
-//		DStructType targetType = relinfo.farType;
-//		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
-		//getSchemaVersionType
-//		HLDInsert hld = hldBuilder.buildSimpleInsert(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
 		HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
 		return hld;
 	}

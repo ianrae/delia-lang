@@ -189,12 +189,7 @@ public class HLDDsonBuilder {
 		cres.localET = new SimpleErrorTracker(log);
 
 		//create a temp type for the assoc table
-		DType intType = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		OrderedMap omap = new OrderedMap();
-		omap.add("leftv", intType, false, false, false, false);
-		omap.add("rightv", intType, false, false, false, false);
-		DStructType structType = new DStructType(Shape.STRUCT, assocTbl, null, omap, null);
-		//we don't register this type
+		DStructType structType = buildTempDatType(assocTbl); 
 		
 		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
 		builder.addField(fld1, dval1);
@@ -208,5 +203,15 @@ public class HLDDsonBuilder {
 		fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
 		
 		return hldins;
+	}
+
+	private DStructType buildTempDatType(String assocTbl) {
+		DType intType = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+		OrderedMap omap = new OrderedMap();
+		omap.add("leftv", intType, false, false, false, false);
+		omap.add("rightv", intType, false, false, false, false);
+		DStructType structType = new DStructType(Shape.STRUCT, assocTbl, null, omap, null);
+		//we don't register this type
+		return structType;
 	}
 }

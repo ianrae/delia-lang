@@ -3,6 +3,8 @@ package org.delia.db.newhls;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cud.HLDDsonBuilder;
+import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
@@ -51,8 +53,6 @@ public class HLDEngineAssoc {
 //			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
 		}
 	}
-
-
 	private boolean isPKQuery(HLDQuery hldQuery) {
 		if (hldQuery.filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) hldQuery.filter;
@@ -60,7 +60,6 @@ public class HLDEngineAssoc {
 		}
 		return false;
 	}
-
 	private boolean isAllQuery(HLDQuery hldQuery) {
 		if (hldQuery.filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) hldQuery.filter;
@@ -79,7 +78,17 @@ public class HLDEngineAssoc {
 //		}		
 //	}
 	protected void buildUpdateByIdOnly(DStructType structType, DValue dval, DValue pkval) {
+//		  scenario 2 id:
+//		  update Customer[55] {wid: 333, addr: [100]}
+//		  has sql:
+//		    update Customer set wid=333 where id=55
+//		    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+//		    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
+
 		
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		//HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
+
 	}
 //	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 //			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,

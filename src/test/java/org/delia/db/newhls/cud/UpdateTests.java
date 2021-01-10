@@ -114,7 +114,7 @@ public class UpdateTests extends NewHLSTestBase {
 		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "1");
 	}
 	@Test
-	public void testMN2a() {
+	public void testMNScenario1() {
 		useCustomerManyToManySrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
@@ -126,6 +126,9 @@ public class UpdateTests extends NewHLSTestBase {
 		//TODO: fix chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?", "55", "100");
 		//fixchkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 KEY(leftv) VALUES(?,?)", "55", "100");
 	}
+	
+	//TODO: scenario 2 and 3
+	
 	
 	@Test
 	public void testMNUpdateParent() {
