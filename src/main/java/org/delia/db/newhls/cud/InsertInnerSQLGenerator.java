@@ -57,10 +57,16 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			stmgrp.add(stmx);
 		}
 		
-//		for(HLDInsert hld: hldupdate.assocInsertL) {
-//			SqlStatement stmx = genInsertStatement(hld);
-//			stmgrp.add(stmx);
-//		}
+		for(AssocBundle bundle: hldupdate.assocBundleL) {
+			if (bundle.hlddelete != null) {
+				SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
+				stmgrp.add(stmx);
+			}
+			if (bundle.hldupdate != null) {
+				SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
+				stmgrp.add(stmx);
+			}
+		}
 		return stmgrp;
 	}
 	public SqlStatementGroup generate(HLDDeleteStatement hld) {

@@ -123,11 +123,11 @@ public class HLDEngineAssoc {
 
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		AssocBundle bundle = new AssocBundle();
-		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, dval, fkval, datIdMap);
+		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
 		
-		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, dval, fkval, datIdMap);
-		bundle.hlddelete.assocRelInfo = relinfo; 
+		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap);
+		bundle.hldupdate.assocRelInfo = relinfo; 
 		//TOD add flag to hldupdate to make it render as MERGE INTO
 		
 		return Collections.singletonList(bundle);

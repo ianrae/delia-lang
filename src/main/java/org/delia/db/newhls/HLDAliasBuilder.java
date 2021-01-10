@@ -132,9 +132,12 @@ public class HLDAliasBuilder {
 
 	private void doFilterVal(FilterVal val1, HLDQuery hld) {
 		if (val1.isSymbol()) {
-			String fieldName = val1.exp.strValue();
-			DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
-			val1.structField = new StructField(hld.fromType, fieldName, fieldType);
+			//when DAT actions we've already filled in structType
+			if (val1.structField == null) {
+				String fieldName = val1.exp.strValue();
+				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
+				val1.structField = new StructField(hld.fromType, fieldName, fieldType);
+			} 
 			val1.alias = hld.fromAlias;
 		} else if (val1.isSymbolChain()) {
 			String fieldName = val1.exp.strValue();
@@ -175,9 +178,13 @@ public class HLDAliasBuilder {
 	public void assignAliasesAssoc(HLDUpdate hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
+		hld.hld.fromAlias = info.alias;
+		doFilter(hld.hld);
 	}
 	public void assignAliasesAssoc(HLDDelete hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
+		hld.hld.fromAlias = info.alias;
+		doFilter(hld.hld);
 	}
 	private AliasInfo doAssignAliasesAssoc(HLDBase hld) {
 		RelationInfo relinfo = hld.assocRelInfo;

@@ -87,13 +87,19 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		DStructType structType = hld.getStructType();
 		
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
-		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
-		SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
-		DValue pkval = pgen.convert(sfc.val1);
+		DValue pkval = getUpdatePK(hld); 
 		
 		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval);
 		return parentUpdates;
 	}
+	private DValue getUpdatePK(HLDUpdate hld) {
+		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
+		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
+		SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
+		DValue pkval = pgen.convert(sfc.val1);
+		return pkval;
+	}
+
 	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
 		DStructType structType = hld.getStructType();
 		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
@@ -106,7 +112,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	}
 	public List<AssocBundle> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {
 		DStructType structType = hld.getStructType();
-		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, null, this); //fix null
+		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
+		DValue pkval = getUpdatePK(hld); 
+		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, pkval, this); 
 		return parentUpdates;
 	}
 
@@ -149,7 +157,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 				aliasBuilder.assignAliasesAssoc(bundle.hlddelete);
 			}
 			if (bundle.hldupdate != null) {
-			aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
+				aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
 			}
 		}
 	}

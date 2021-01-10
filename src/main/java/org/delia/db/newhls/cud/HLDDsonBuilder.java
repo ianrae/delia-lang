@@ -13,6 +13,8 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
+import org.delia.db.newhls.StructField;
+import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
@@ -194,7 +196,7 @@ public class HLDDsonBuilder {
 		cres.localET = new SimpleErrorTracker(log);
 
 		//create a temp type for the assoc table
-		DStructType structType = buildTempDatType(assocTbl); 
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
 		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
 		builder.addField(fld1, dval1);
@@ -220,7 +222,7 @@ public class HLDDsonBuilder {
 		cres.localET = new SimpleErrorTracker(log);
 
 		//create a temp type for the assoc table
-		DStructType structType = buildTempDatType(assocTbl); 
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
 		PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
 		builder.addField(fld1, dval1);
@@ -247,7 +249,7 @@ public class HLDDsonBuilder {
 		cres.localET = new SimpleErrorTracker(log);
 
 		//create a temp type for the assoc table
-		DStructType structType = buildTempDatType(assocTbl); 
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp = builderSvc.createEqQuery(assocTbl, fld1, dval1);
@@ -255,15 +257,34 @@ public class HLDDsonBuilder {
 		
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
 		hld.hld = builderAdapter.buildQuery(exp);
+		//add structType. careful since it's not a registered type!1
+		OpFilterCond cond = (OpFilterCond) hld.hld.filter;
+		if (cond.val1.isSymbol()) {
+			TypePair pair = DValueHelper.findField(structType, fld1);
+			cond.val1.structField = new StructField(structType, fld1, pair.type);
+		}
+		if (cond.val2.isSymbol()) {
+			TypePair pair = DValueHelper.findField(structType, fld2);
+			cond.val2.structField = new StructField(structType, fld2, pair.type);
+		}
+		
 		
 		return hld;
 	}
 
-	private DStructType buildTempDatType(String assocTbl) {
-		DType intType = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+	private DStructType buildTempDatType(String assocTbl, RelationInfo relinfo, DatIdMap datIdMap) {
+		TypePair pkpair1 = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType);
+		TypePair pkpair2 = DValueHelper.findPrimaryKeyFieldPair(relinfo.farType);
+		boolean flipped = datIdMap.isFlipped(relinfo);
+		if (flipped) { //swap
+			TypePair tmp = pkpair1;
+			pkpair1 = pkpair2;
+			pkpair2 = tmp;
+		}
+		
 		OrderedMap omap = new OrderedMap();
-		omap.add("leftv", intType, false, false, false, false);
-		omap.add("rightv", intType, false, false, false, false);
+		omap.add("leftv", pkpair1.type, false, false, false, false);
+		omap.add("rightv", pkpair2.type, false, false, false, false);
 		DStructType structType = new DStructType(Shape.STRUCT, assocTbl, null, omap, null);
 		//we don't register this type
 		return structType;
