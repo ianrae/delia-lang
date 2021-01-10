@@ -1,9 +1,14 @@
 package org.delia.db.newhls;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
@@ -13,6 +18,9 @@ import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -38,7 +46,31 @@ public class HLDEngineAssoc {
 		this.sprigSvc = sprigSvc;
 	}
 	
-	public void xgenAssocField(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
+	public List<AssocBundle> xgenAssocField(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
+		List<AssocBundle> bundleL = new ArrayList<>();
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				DValue inner = dval.asStruct().getField(pair.name);
+				if (inner == null) {
+					continue;
+				}
+				
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+				if (relinfo.isManyToMany()) {
+					for(DValue fkval: inner.asRelation().getMultipleKeys()) {
+						List<AssocBundle> innerL = xdoAddAssocField(relinfo, hldQuery, queryExp, structType, dval, pkval, fkval, builderAdapter);
+//						insert.assocRelInfo = relinfo;
+						bundleL.addAll(innerL);
+					}
+				}
+			}
+		}
+		return bundleL;
+	}
+	public List<AssocBundle> xdoAddAssocField(RelationInfo relinfo, HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
+		
 		//3 scenarios here:
 		// 1. updating all records in assoc table
 		// 2. updating where filter by primaykey only
@@ -46,14 +78,15 @@ public class HLDEngineAssoc {
 		if (isAllQuery(hldQuery)) {
 			log.logDebug("m-to-n:scenario1");
 //			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, mainUpdateAlias, statement);
-			return;
+			return null;
 		} else if (isPKQuery(hldQuery)) {
 //			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.logDebug("m-to-n:scenario2");
-			buildUpdateByIdOnly(hldQuery, queryExp, structType, dval, pkval, builderAdapter);
+			return buildUpdateByIdOnly(relinfo, queryExp, structType, dval, pkval, builderAdapter);
 		} else {
 			log.logDebug("m-to-n:scenario3");
 //			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
+			return null;
 		}
 	}
 	private boolean isPKQuery(HLDQuery hldQuery) {
@@ -80,7 +113,7 @@ public class HLDEngineAssoc {
 //			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
 //		}		
 //	}
-	protected void buildUpdateByIdOnly(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
+	protected List<AssocBundle> buildUpdateByIdOnly(RelationInfo relinfo, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
 //		  scenario 2 id:
 //		  update Customer[55] {wid: 333, addr: [100]}
 //		  has sql:
@@ -90,8 +123,9 @@ public class HLDEngineAssoc {
 
 		
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-		HLDInsert hld = hldBuilder.buildAssocDelete(builderAdapter, queryExp, RelationInfo relinfo, datIdMap);
-
+		AssocBundle bundle = new AssocBundle();
+		bundle.hlddete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, datIdMap);
+		return Collections.singletonList(bundle);
 	}
 //	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
 //			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,

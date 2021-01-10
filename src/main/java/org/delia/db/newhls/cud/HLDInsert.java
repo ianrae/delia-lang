@@ -15,7 +15,6 @@ public class HLDInsert extends HLDBase {
     public List<HLDField> fieldL = new ArrayList<>();
     public List<DValue> valueL = new ArrayList<>();
     public ConversionResult cres;
-	public RelationInfo assocRelInfo; //null unless this is an assoc table insert
     
     public HLDInsert(TypeOrTable typeOrTbl) {
     	super(typeOrTbl);

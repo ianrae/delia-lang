@@ -9,6 +9,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
@@ -98,10 +99,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
 		return parentUpdates;
 	}
-	public List<HLDInsert> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {
+	public List<AssocBundle> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {
 		DStructType structType = hld.getStructType();
-		List<HLDInsert> parentUpdates = null; //engineAssoc.xgenAssocField(structType, hld.cres.dval);
-		engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, null, this); //fix null
+		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, null, this); //fix null
 		return parentUpdates;
 	}
 
@@ -138,6 +138,10 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		}
 		for(HLDInsert hld: stmt.assocInsertL) {
 			aliasBuilder.assignAliasesAssoc(hld);
+		}
+		for(AssocBundle bundle: stmt.assocBundleL) {
+			aliasBuilder.assignAliases(bundle.hlddete);
+			aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
 		}
 	}
 	public void assignAliases(HLDQueryStatement stmt) {

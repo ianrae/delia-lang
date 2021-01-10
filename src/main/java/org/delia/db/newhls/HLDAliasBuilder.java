@@ -8,6 +8,7 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
+import org.delia.db.newhls.cud.HLDBase;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
@@ -168,11 +169,19 @@ public class HLDAliasBuilder {
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 	}
 	public void assignAliasesAssoc(HLDInsert hld) {
+		AliasInfo info = doAssignAliasesAssoc(hld);
+		doFieldListAssoc(hld.fieldL, info);
+	}
+	public void assignAliasesAssoc(HLDUpdate hld) {
+		AliasInfo info = doAssignAliasesAssoc(hld);
+		doFieldListAssoc(hld.fieldL, info);
+	}
+	private AliasInfo doAssignAliasesAssoc(HLDBase hld) {
 		RelationInfo relinfo = hld.assocRelInfo;
 		String assocTbl = aliasMgr.getDatIdMap().getAssocTblName(relinfo.getDatId());
 		AliasInfo info = aliasMgr.createAssocAlias(relinfo.nearType, relinfo.fieldName, assocTbl);
 		hld.typeOrTbl.alias = info.alias;
-		doFieldListAssoc(hld.fieldL, info);
+		return info;
 	}
 	
 	public void assignAliases(HLDUpdate hld) {

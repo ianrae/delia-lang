@@ -6,4 +6,5 @@ public class HLDUpdateStatement {
 	public HLDUpdate hldupdate;
 	public List<HLDUpdate> updateL = new ArrayList<>();
 	public List<HLDInsert> assocInsertL;
+	public List<AssocBundle> assocBundleL;
 }
