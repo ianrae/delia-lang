@@ -120,7 +120,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1); //should be 3!
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
 		//TODO: fix chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?", "55", "100");

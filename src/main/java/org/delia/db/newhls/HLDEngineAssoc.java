@@ -117,13 +117,13 @@ public class HLDEngineAssoc {
 //		  scenario 2 id:
 //		  update Customer[55] {wid: 333, addr: [100]}
 //		  has sql:
-//		    update Customer set wid=333 where id=55
+//		   DONE ALREADY update Customer set wid=333 where id=55
 //		    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 //		    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		AssocBundle bundle = new AssocBundle();
-		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, datIdMap);
+		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, dval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
 		return Collections.singletonList(bundle);
 	}

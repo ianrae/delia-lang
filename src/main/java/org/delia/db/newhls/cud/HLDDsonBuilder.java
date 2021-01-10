@@ -9,6 +9,8 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.db.QueryBuilderService;
+import org.delia.db.QuerySpec;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.error.SimpleErrorTracker;
@@ -16,6 +18,7 @@ import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.ConversionResult;
 import org.delia.runner.DValueIterator;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.DsonToDValueConverter;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -206,11 +209,26 @@ public class HLDDsonBuilder {
 		
 		return hldins;
 	}
-	public HLDDelete buildAssocDelete(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DatIdMap datIdMap) {
+	
+//    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
+	public HLDDelete buildAssocDelete(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DValue dval1, DValue dval2, DatIdMap datIdMap) {
 		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 		
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
+		
+		ConversionResult cres = new ConversionResult();
+		cres.localET = new SimpleErrorTracker(log);
+
+		//create a temp type for the assoc table
+		DStructType structType = buildTempDatType(assocTbl); 
+		
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+		//TODO need full AND query
+		
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
-		hld.hld = builderAdapter.buildQuery(queryExp);
+		hld.hld = builderAdapter.buildQuery(exp);
 		
 		return hld;
 	}

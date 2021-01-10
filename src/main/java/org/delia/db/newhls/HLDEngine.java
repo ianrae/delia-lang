@@ -43,21 +43,26 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	@Override
 	public HLDQuery buildQuery(QueryExp queryExp) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-		return buildQuery(queryExp, aliasMgr);
+		return buildQuery(queryExp, aliasMgr, false);
 	}
 	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
+		return buildQuery(queryExp, aliasMgr, true);
+	}
+	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr, boolean doEverything) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
 		HLDQuery hld = hldBuilder.build(queryExp);
 
-		JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
-		joinBuilder.generateJoinTree(hld);
+		if (doEverything) {
+			JoinTreeBuilder joinBuilder = new JoinTreeBuilder();
+			joinBuilder.generateJoinTree(hld);
 
-		HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
-		fieldBuilder.generateFields(hld);
-		
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
-		aliasBuilder.assignAliases(hld);
+			HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
+			fieldBuilder.generateFields(hld);
+			
+			HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+			aliasBuilder.assignAliases(hld);
+		}
 		
 		return hld;
 	}
