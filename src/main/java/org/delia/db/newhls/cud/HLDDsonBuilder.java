@@ -13,6 +13,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.db.newhls.StructField;
+import org.delia.db.newhls.cond.OpAndOrFilter;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -260,19 +261,26 @@ public class HLDDsonBuilder {
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
 		hld.hld = builderAdapter.buildQuery(exp3);
 		//add structType. careful since it's not a registered type!1
-		OpFilterCond cond = (OpFilterCond) hld.hld.filter;
-		if (cond.val1.isSymbol()) {
-			TypePair pair = DValueHelper.findField(structType, fld1);
-			cond.val1.structField = new StructField(structType, fld1, pair.type);
-		}
-		if (cond.val2.isSymbol()) {
-			TypePair pair = DValueHelper.findField(structType, fld2);
-			cond.val2.structField = new StructField(structType, fld2, pair.type);
-		}
+		OpAndOrFilter cond = (OpAndOrFilter) hld.hld.filter;
+		OpFilterCond cond1 = (OpFilterCond) cond.cond1;
+		OpFilterCond cond2 = (OpFilterCond) cond.cond2;
 		
+		cond1.val1.structField = addStructField(cond1, structType, fld1);
+		cond1.val2.structField = addStructField(cond1, structType, fld2);
+		cond2.val1.structField = addStructField(cond2, structType, fld1);
+		cond2.val2.structField = addStructField(cond2, structType, fld2);
 		
 		return hld;
 	}
+
+	private StructField addStructField(OpFilterCond cond, DStructType structType, String fld1) {
+		if (cond.val1.isSymbol()) {
+			TypePair pair = DValueHelper.findField(structType, fld1);
+			return new StructField(structType, fld1, pair.type);
+		} else {
+			return null;
+		}
+}
 
 	private DStructType buildTempDatType(String assocTbl, RelationInfo relinfo, DatIdMap datIdMap) {
 		TypePair pkpair1 = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType);

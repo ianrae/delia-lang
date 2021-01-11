@@ -2,6 +2,7 @@ package org.delia.db.newhls.cond;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IntegerExp;
@@ -30,21 +31,26 @@ public class FilterCondBuilder {
 	
 	public FilterCond build(QueryExp queryExp) {
 		Exp cond = queryExp.filter.cond;
+		return doBuild(cond);
+	}
+	private FilterCond doBuild(Exp cond) {
 		if (cond instanceof BooleanExp) {
-			BooleanExp exp = (BooleanExp) queryExp.filter.cond;
+			BooleanExp exp = (BooleanExp) cond;
 			return new BooleanFilterCond(exp);
 		} else if (cond instanceof IntegerExp) {
-			IntegerExp exp = (IntegerExp) queryExp.filter.cond;
+			IntegerExp exp = (IntegerExp) cond;
 			return new IntFilterCond(exp);
 		} else if (cond instanceof LongExp) {
-			LongExp exp = (LongExp) queryExp.filter.cond;
+			LongExp exp = (LongExp) cond;
 			return new LongFilterCond(exp);
 		} else if (cond instanceof StringExp) {
-			StringExp exp = (StringExp) queryExp.filter.cond;
+			StringExp exp = (StringExp) cond;
 			return new StringFilterCond(exp);
 		} else if (cond instanceof FilterOpFullExp) {
-			FilterOpFullExp exp = (FilterOpFullExp) queryExp.filter.cond;
-			if (exp.opexp1 instanceof FilterOpExp) {
+			FilterOpFullExp exp = (FilterOpFullExp) cond;
+			if (isAndOrExp(exp.opexp1)) {
+				return doAndOrCond(exp);
+			} else if (exp.opexp1 instanceof FilterOpExp) {
 				FilterOpExp foexp = (FilterOpExp) exp.opexp1;
 				if (foexp.op1 instanceof XNAFMultiExp) {
 					XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op1;
@@ -69,6 +75,25 @@ public class FilterCondBuilder {
 		return null;
 	}
 
+
+	private boolean isAndOrExp(Exp opexp1) {
+		if (opexp1 instanceof FilterExp) {
+			if (((FilterExp) opexp1).cond instanceof FilterOpFullExp) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private FilterCond doAndOrCond(FilterOpFullExp exp) {
+		OpAndOrFilter filter = new OpAndOrFilter();
+		FilterExp fexp1 = (FilterExp) exp.opexp1;
+		FilterExp fexp2 = (FilterExp) exp.opexp2;
+		filter.cond1 = doBuild(fexp1.cond);
+		filter.cond2 = doBuild(fexp2.cond);
+		filter.isAnd = exp.isAnd;
+		return filter;
+	}
 
 	private FilterVal buildValOrFunc(FilterOpFullExp exp, FilterOpExp foexp, XNAFMultiExp xnaf) {
 		if (xnaf.qfeL.size() == 1) {
