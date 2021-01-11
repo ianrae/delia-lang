@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.db.memdb.filter.OP;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpAndOrFilter;
@@ -202,15 +203,30 @@ public class HLDSQLGenerator {
 			String s1 = renderVal(ofc.val1, paramGen, stm);
 			String s2 = renderVal(ofc.val2, paramGen, stm);
 			String not = ofc.isNot ? "NOT " : "";
-			return String.format("%s%s %s %s", not, s1, ofc.op.op, s2);
+			String op = opToSql(ofc.op.op);
+			return String.format("%s%s %s %s", not, s1, op, s2);
 		} else if (filter instanceof OpAndOrFilter) {
 			OpAndOrFilter ofc = (OpAndOrFilter) filter;
 			String s1 = doFilter(ofc.cond1, paramGen, stm); //** recursion **
 			String s2 = doFilter(ofc.cond2, paramGen, stm); //** recursion **
-			String and = ofc.isAnd ? "AND " : "OR ";
+			String and = ofc.isAnd ? "AND" : "OR";
 			return String.format("%s %s %s", s1, and, s2);
 		} else {
 			return null;
+		}
+	}
+
+
+	private String opToSql(String op) {
+		switch(op) {
+		case "==":
+			return "=";
+		case "!=":
+			return "<>";
+		case "like":
+			return "LIKE";
+		default:
+			return op;
 		}
 	}
 
