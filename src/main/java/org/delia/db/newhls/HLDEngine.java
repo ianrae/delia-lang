@@ -43,15 +43,20 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	@Override
 	public HLDQuery buildQuery(QueryExp queryExp) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-		return buildQuery(queryExp, aliasMgr, false);
+		return buildQuery(queryExp, aliasMgr, false, null);
+	}
+	@Override
+	public HLDQuery buildQueryEx(QueryExp queryExp, DStructType structType) {
+		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
+		return buildQuery(queryExp, aliasMgr, false, structType);
 	}
 	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
-		return buildQuery(queryExp, aliasMgr, true);
+		return buildQuery(queryExp, aliasMgr, true, null);
 	}
-	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr, boolean doEverything) {
+	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr, boolean doEverything, DStructType structType) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
-		HLDQuery hld = hldBuilder.build(queryExp);
+		HLDQuery hld = hldBuilder.build(queryExp, structType);
 
 		if (doEverything) {
 			JoinTreeBuilder joinBuilder = new JoinTreeBuilder();

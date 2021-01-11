@@ -31,8 +31,11 @@ public class HLDQueryBuilder {
 	}
 
 	public HLDQuery build(QueryExp queryExp) {
+		return build(queryExp, null);
+	}
+	public HLDQuery build(QueryExp queryExp, DStructType structTypeEx) {
 		HLDQuery hld = new HLDQuery();
-		hld.fromType = (DStructType) registry.getType(queryExp.typeName);
+		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
 		hld.mainStructType = hld.fromType; //TODO fix
 		hld.resultType = hld.fromType; //TODO fix
 
