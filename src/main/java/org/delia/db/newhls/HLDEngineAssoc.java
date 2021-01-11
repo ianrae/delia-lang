@@ -126,7 +126,7 @@ public class HLDEngineAssoc {
 		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
 		
-		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap);
+		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
 		bundle.hldupdate.assocRelInfo = relinfo; 
 		//TOD add flag to hldupdate to make it render as MERGE INTO
 		

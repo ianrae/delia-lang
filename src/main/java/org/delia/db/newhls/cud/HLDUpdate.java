@@ -15,6 +15,8 @@ public class HLDUpdate extends HLDBase {
 	public QuerySpec querySpec;
     public List<HLDField> fieldL = new ArrayList<>();
     public List<DValue> valueL = new ArrayList<>();
+	public boolean isMergeInto;
+	public String mergeKey;
 
 	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {
 		super(typeOrTbl);

@@ -211,7 +211,7 @@ public class HLDDsonBuilder {
 		
 		return hldins;
 	}
-	public HLDUpdate buildAssocUpdate(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DValue dval1, DValue dval2, DatIdMap datIdMap) {
+	public HLDUpdate buildAssocUpdate(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DValue dval1, DValue dval2, DatIdMap datIdMap, boolean isMergeInto) {
 		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
@@ -235,6 +235,10 @@ public class HLDDsonBuilder {
 		hld.cres = cres;
 		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
 		hld.hld = builderAdapter.buildQuery(queryExp);
+		if (isMergeInto) {
+			hld.isMergeInto = true;
+			hld.mergeKey = fld1;
+		}
 		return hld;
 	}
 	

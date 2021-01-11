@@ -123,8 +123,8 @@ public class UpdateTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
-		//TODO: fix chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?", "55", "100");
-		//fixchkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 KEY(leftv) VALUES(?,?)", "55", "100");
+	//	chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?", "55", "100");
+		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
 	}
 	
 	//TODO: scenario 2 and 3

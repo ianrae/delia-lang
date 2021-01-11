@@ -63,8 +63,13 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 				stmgrp.add(stmx);
 			}
 			if (bundle.hldupdate != null) {
-				SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
-				stmgrp.add(stmx);
+				if (bundle.hldupdate.isMergeInto) {
+					SqlStatement stmx = genMergeInfoStatement(bundle.hldupdate);
+					stmgrp.add(stmx);
+				} else {
+					SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
+					stmgrp.add(stmx);
+				}
 			}
 		}
 		return stmgrp;
@@ -152,6 +157,33 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		stm.sql = sc.toString();
 		return stm;
 	}
+	
+//    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
+	private SqlStatement genMergeInfoStatement(HLDUpdate hld) {
+		SqlStatement stm = new SqlStatement();
+		StrCreator sc = new StrCreator();
+		sc.o("MERGE INTO");
+		outTblName(sc, hld);
+		
+		sc.o(" KEY(%s)", hld.mergeKey);
+		
+		sc.o(" VALUES ");
+		int index = 0;
+		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
+		while(walker.hasNext()) {
+			HLDField ff = walker.next();
+			DValue inner = hld.valueL.get(index);
+			stm.paramL.add(inner);
+			
+			sc.o("?");
+			walker.addIfNotLast(sc, ", ");
+			index++;
+		}
+		
+		stm.sql = sc.toString();
+		return stm;
+	}
+	
 	
 	private String renderSetField(HLDField ff) {
 		String s = String.format("%s.%s", ff.alias, ff.fieldName); //TODO do asstr later
