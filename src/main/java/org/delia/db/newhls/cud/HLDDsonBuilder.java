@@ -337,6 +337,12 @@ public class HLDDsonBuilder {
 		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
 		hld.useDeleteIn = true;
 		hld.deleteInDVal = dval2;
+		hld.mergeKey = fld1;
+		DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
+		hld.mergeType = entityType.getName();
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
+		hld.mergePKField = pkpair.name;
+
 		return hld;
 	}
 	

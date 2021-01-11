@@ -245,19 +245,26 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		stm.sql = sc.toString();
 		return stm;
 	}
+	//DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv <> ? AND leftv IN (SELECT rightv FROM Customer as a WHERE  t1.rightv = ?) -- 999,55,55
+	//          delete CustomerAddressAssoc where leftv <> 100 and rightv in (SELECT id FROM Address as a WHERE a.z > ?)
 	//delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
 	private SqlStatement genDeleteInStatement(HLDDelete hld) {
 		SqlStatement stm = new SqlStatement();
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE FROM");
 		outTblName(sc, hld);
+		String alias = hld.typeOrTbl.alias;
 		
+		int n = stm.paramL.size();
 		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
-		//remove 999
-		//TODO: fix this! 999 might a valid value
 		DValue dval = hld.deleteInDVal;
+		stm.paramL.remove(n);
+		stm.paramL.add(dval);
 		int pos1 = whereStr.indexOf(" AND ");
-		int pos2 = whereStr.indexOf("999");
+		String s2 = whereStr.substring(pos1 + 5);
+		whereStr = whereStr.substring(0, pos1); //TODO wrong sometime
+		String s = String.format(" %s AND %s.%s IN (SELECT %s FROM %s as a WHERE %s)", s2, alias, hld.mergeKey, hld.mergePKField, hld.mergeType, whereStr);
+		sc.o(" WHERE%s", s);
 
 		stm.sql = sc.toString();
 		return stm;
