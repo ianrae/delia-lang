@@ -78,6 +78,13 @@ public class HLDDsonBuilder {
 		fld.structType = helper.getType();
 		return fld;
 	}
+	private HLDField createEmptyFieldVal(String fieldName, DStructType type) {
+		HLDField fld = new HLDField();
+		fld.fieldName = fieldName;
+		fld.fieldType = null;
+		fld.structType = type;
+		return fld;
+	}
 
 	private DType determineField(String fieldName, DStructHelper helper) {
 		List<TypePair> list = helper.getType().getAllFields();
@@ -236,6 +243,32 @@ public class HLDDsonBuilder {
 		hld.hld = builderAdapter.buildQuery(queryExp);
 		if (isMergeInto) {
 			hld.isMergeInto = true;
+			hld.mergeKey = fld1;
+		}
+		return hld;
+	}
+	public HLDUpdate buildAssocUpdateAll(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DatIdMap datIdMap, boolean isMergeInto) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+
+		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		
+		ConversionResult cres = new ConversionResult();
+		cres.localET = new SimpleErrorTracker(log);
+
+		//create a temp type for the assoc table
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
+		TypePair pair = DValueHelper.findField(structType, fld1);
+		
+		hld.cres = cres;
+//		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
+		DValue inner = null;
+		hld.fieldL.add(createEmptyFieldVal(pair.name, structType));
+		hld.valueL.add(inner);
+		
+		hld.hld = builderAdapter.buildQuery(queryExp);
+		if (isMergeInto) {
+			hld.isMergeAllInto = true;
 			hld.mergeKey = fld1;
 		}
 		return hld;

@@ -16,6 +16,7 @@ public class HLDUpdate extends HLDBase {
     public List<HLDField> fieldL = new ArrayList<>();
     public List<DValue> valueL = new ArrayList<>();
 	public boolean isMergeInto;
+	public boolean isMergeAllInto;
 	public String mergeKey;
 
 	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {

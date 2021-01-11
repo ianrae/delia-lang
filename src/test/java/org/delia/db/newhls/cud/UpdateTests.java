@@ -134,10 +134,10 @@ public class UpdateTests extends NewHLSTestBase {
 		//update all
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
-		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
+		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
 		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
 	}
 	
