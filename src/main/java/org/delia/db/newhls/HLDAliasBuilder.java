@@ -169,6 +169,9 @@ public class HLDAliasBuilder {
 		}
 	}
 	private void doFilterPKVal(FilterVal val1, HLDQuery hld) {
+		if (val1.isBoolean()) {
+			return;
+		}
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
 		String fieldName = pkpair.name;
 		val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);

@@ -3,6 +3,7 @@ package org.delia.db.newhls.cud;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDField;
+import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDSQLGenerator;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -148,8 +149,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			index++;
 		}
 		
-		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
-		sc.o(" WHERE%s", whereStr);
+		addWhereIfNeeded(sc, hld.hld, stm);
 
 //		renderIfPresent(sc, orderByFrag);
 //		renderIfPresent(sc, limitFrag);  TODO is this needed?
@@ -197,10 +197,16 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		sc.o("DELETE FROM");
 		outTblName(sc, hld);
 		
-		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
-		sc.o(" WHERE%s", whereStr);
+		addWhereIfNeeded(sc, hld.hld, stm);
 
 		stm.sql = sc.toString();
 		return stm;
+	}
+
+	private void addWhereIfNeeded(StrCreator sc, HLDQuery hld, SqlStatement stm) {
+		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
+		if (whereStr != null) {
+			sc.o(" WHERE%s", whereStr);
+		}
 	}
 }

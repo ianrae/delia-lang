@@ -118,9 +118,23 @@ public class UpdateTests extends NewHLSTestBase {
 		useCustomerManyToManySrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
-		
+		//update by pk
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		dumpGrp(stmgrp);
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
+		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
+	}
+	@Test
+	public void testMNScenario2() {
+		useCustomerManyToManySrc = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "update Address[true] {y: 45, cust:55}");
+		//update all
+		
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
@@ -140,11 +154,15 @@ public class UpdateTests extends NewHLSTestBase {
 		src = addSrc(src, "update Customer[56] { x:66, addr: ['100','101'] }");
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 5);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
-		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? and rightv <> ?", "56", "100");
-		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 KEY(leftv) VALUES(?,?)", "56", "100"); //wrong. should be 101 i think
+		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "100");
+		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES ?, ?", "56", "100"); 
+		chkUpdateSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "101");
+		chkUpdateSql(stmgrp, 4, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES ?, ?", "56", "101");
+		//TODO: the above is correct but not efficient. only need a single:
+		//DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = 56
 	}
 	
 	

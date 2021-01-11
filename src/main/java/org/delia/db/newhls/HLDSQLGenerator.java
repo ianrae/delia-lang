@@ -55,6 +55,9 @@ public class HLDSQLGenerator {
 	public String generateSqlWhere(HLDQuery hld, SqlStatement stm) {
 		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
 		String sql = generateWhereClause(hld, stm, paramGen);
+		if (sql == null) {
+			return null;
+		}
 		return " " + sql;
 	}
 	
@@ -183,7 +186,9 @@ public class HLDSQLGenerator {
 
 	private void generateWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		String fragment = generateWhereClause(hld, stm, paramGen);
-		sc.o(" WHERE %s", fragment);
+		if (fragment != null) {
+			sc.o(" WHERE %s", fragment);
+		}
 	}
 	private String generateWhereClause(HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		FilterCond filter = hld.filter;
@@ -194,6 +199,9 @@ public class HLDSQLGenerator {
 	private String doFilter(FilterCond filter, SqlParamGenerator paramGen, SqlStatement stm) {
 		if (filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) filter;
+			if (sfc.isAllQuery()) {
+				return null;
+			}
 			String alias = sfc.val1.alias;
 			String fieldName = sfc.val1.structField.fieldName;
 			String valsql = renderValParam(sfc, paramGen, stm);

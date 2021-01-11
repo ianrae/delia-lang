@@ -60,6 +60,9 @@ public class FilterVal {
 		return filterFn; 
 	}
 
+	public boolean isBoolean() {
+		return valType.equals(ValType.BOOLEAN);
+	}
 	public boolean isSymbol() {
 		return valType.equals(ValType.SYMBOL);
 	}

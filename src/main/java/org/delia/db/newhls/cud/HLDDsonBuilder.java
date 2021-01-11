@@ -248,9 +248,6 @@ public class HLDDsonBuilder {
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 		
-		ConversionResult cres = new ConversionResult();
-		cres.localET = new SimpleErrorTracker(log);
-
 		//create a temp type for the assoc table
 		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
@@ -262,14 +259,28 @@ public class HLDDsonBuilder {
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
 		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
 		//add structType. careful since it's not a registered type!1
-		OpAndOrFilter cond = (OpAndOrFilter) hld.hld.filter;
-		OpFilterCond cond1 = (OpFilterCond) cond.cond1;
-		OpFilterCond cond2 = (OpFilterCond) cond.cond2;
+//		OpAndOrFilter cond = (OpAndOrFilter) hld.hld.filter;
+//		OpFilterCond cond1 = (OpFilterCond) cond.cond1;
+//		OpFilterCond cond2 = (OpFilterCond) cond.cond2;
 		
 //		cond1.val1.structField = addStructField(cond1.val1, cond1.val2, structType, fld1);
 //		cond1.val2.structField = addStructField(cond1.val1, cond1.val2, structType, fld1);
 //		cond2.val1.structField = addStructField(cond2.val1, cond2.val2, structType, fld2);
 //		cond2.val2.structField = addStructField(cond2.val1, cond2.val2, structType, fld2);
+		
+		return hld;
+	}
+//  delete CustomerAddressAssoc 
+	public HLDDelete buildAssocDeleteAll(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DatIdMap datIdMap) {
+		//create a temp type for the assoc table
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
+		
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp1 = builderSvc.createAllRowsQuery(assocTbl);
+		
+		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		hld.hld = builderAdapter.buildQueryEx(exp1, structType);
 		
 		return hld;
 	}

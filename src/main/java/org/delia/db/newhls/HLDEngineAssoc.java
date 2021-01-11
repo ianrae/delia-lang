@@ -9,9 +9,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.AssocBundle;
-import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
-import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
@@ -77,18 +75,18 @@ public class HLDEngineAssoc {
 		// 3. updating where filter includes other fields (eg Customer.firstName) which may include primaryKey fields.
 		if (isAllQuery(hldQuery)) {
 			log.logDebug("m-to-n:scenario1");
-//			buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, mainUpdateAlias, statement);
-			return null;
+			return buildUpdateAll(relinfo, queryExp, structType, dval, fkval, builderAdapter);
 		} else if (isPKQuery(hldQuery)) {
 //			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.logDebug("m-to-n:scenario2");
-			return buildUpdateByIdOnly(relinfo, queryExp, structType, dval, pkval, fkval, builderAdapter);
+			return buildUpdateByIdOnly(relinfo, queryExp, structType, pkval, fkval, builderAdapter);
 		} else {
 			log.logDebug("m-to-n:scenario3");
 //			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
 			return null;
 		}
 	}
+
 	private boolean isPKQuery(HLDQuery hldQuery) {
 		if (hldQuery.filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) hldQuery.filter;
@@ -104,16 +102,29 @@ public class HLDEngineAssoc {
 		return false;
 	}
 
-//	protected void buildUpdateAll(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType, Map<String, DRelation> mmMap, 
-//				String fieldName, RelationInfo info, String assocFieldName, String assocField2, String mainUpdateAlias, SqlStatement statement) {
-//		if (assocTblReplacer != null) {
-//			log.logDebug("use assocTblReplacer");
-//			assocTblReplacer.buildUpdateAll(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, mainUpdateAlias, statement);
-//		} else {
-//			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
-//		}		
-//	}
-	protected List<AssocBundle> buildUpdateByIdOnly(RelationInfo relinfo, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
+	private List<AssocBundle> buildUpdateAll(RelationInfo relinfo, QueryExp queryExp, DStructType structType,
+			DValue dval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
+//		  scenario 1 all:
+//		  update Customer[true] {wid: 333, addr: [100]}
+//		  has sql:
+//		    DONE ALREADY update Customer set wid=333
+//		    delete CustomerAddressAssoc
+		//part 2. 
+//	    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
+//	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+		
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		AssocBundle bundle = new AssocBundle();
+		bundle.hlddelete = hldBuilder.buildAssocDeleteAll(builderAdapter, queryExp, relinfo, datIdMap);
+		bundle.hlddelete.assocRelInfo = relinfo; 
+		
+//		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
+//		bundle.hldupdate.assocRelInfo = relinfo; 
+		
+		return Collections.singletonList(bundle);
+	}
+	protected List<AssocBundle> buildUpdateByIdOnly(RelationInfo relinfo, QueryExp queryExp, DStructType structType, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
 //		  scenario 2 id:
 //		  update Customer[55] {wid: 333, addr: [100]}
 //		  has sql:
@@ -128,7 +139,6 @@ public class HLDEngineAssoc {
 		
 		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
 		bundle.hldupdate.assocRelInfo = relinfo; 
-		//TOD add flag to hldupdate to make it render as MERGE INTO
 		
 		return Collections.singletonList(bundle);
 	}
