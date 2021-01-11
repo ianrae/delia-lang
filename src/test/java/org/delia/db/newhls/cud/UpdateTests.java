@@ -149,7 +149,7 @@ public class UpdateTests extends NewHLSTestBase {
 		//update filter
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");

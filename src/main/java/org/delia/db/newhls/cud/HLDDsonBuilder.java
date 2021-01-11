@@ -12,10 +12,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
-import org.delia.db.newhls.StructField;
-import org.delia.db.newhls.cond.FilterVal;
-import org.delia.db.newhls.cond.OpAndOrFilter;
-import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
@@ -37,6 +33,7 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.PartialStructValueBuilder;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class HLDDsonBuilder {
 
@@ -78,13 +75,13 @@ public class HLDDsonBuilder {
 		fld.structType = helper.getType();
 		return fld;
 	}
-	private HLDField createEmptyFieldVal(String fieldName, DStructType type) {
-		HLDField fld = new HLDField();
-		fld.fieldName = fieldName;
-		fld.fieldType = null;
-		fld.structType = type;
-		return fld;
-	}
+//	private HLDField createEmptyFieldVal(String fieldName, DStructType type) {
+//		HLDField fld = new HLDField();
+//		fld.fieldName = fieldName;
+//		fld.fieldType = null;
+//		fld.structType = type;
+//		return fld;
+//	}
 
 	private DType determineField(String fieldName, DStructHelper helper) {
 		List<TypePair> list = helper.getType().getAllFields();
@@ -298,15 +295,6 @@ public class HLDDsonBuilder {
 		
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
 		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
-		//add structType. careful since it's not a registered type!1
-//		OpAndOrFilter cond = (OpAndOrFilter) hld.hld.filter;
-//		OpFilterCond cond1 = (OpFilterCond) cond.cond1;
-//		OpFilterCond cond2 = (OpFilterCond) cond.cond2;
-		
-//		cond1.val1.structField = addStructField(cond1.val1, cond1.val2, structType, fld1);
-//		cond1.val2.structField = addStructField(cond1.val1, cond1.val2, structType, fld1);
-//		cond2.val1.structField = addStructField(cond2.val1, cond2.val2, structType, fld2);
-//		cond2.val2.structField = addStructField(cond2.val1, cond2.val2, structType, fld2);
 		
 		return hld;
 	}
@@ -324,6 +312,46 @@ public class HLDDsonBuilder {
 		
 		return hld;
 	}
+//  delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
+	public HLDDelete buildAssocDeleteOther(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DValue dval1, DValue dval2, DatIdMap datIdMap) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
+		
+		//create a temp type for the assoc table
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
+		
+		//need a fake value just so fields created. we don't use the value in sql
+		DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
+		ScalarValueBuilder valBuilder = factorySvc.createScalarValueBuilder(registry);
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
+		switch(pkpair.type.getShape()) {
+		case INTEGER:
+			dval1 = valBuilder.buildInt("999");
+			break;
+		case LONG:
+			dval1 = valBuilder.buildInt("999");
+			break;
+		case DATE:
+		case STRING:
+			dval1 = valBuilder.buildInt("999");
+			break;
+		default:
+			DeliaExceptionHelper.throwError("unknown-pk-type", "%s: %s can't be pk", pkpair.name, pkpair.type);
+		}
+		
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
+		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
+		
+		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
+		hld.useDeleteIn = true;
+		return hld;
+	}
+	
 
 //	private StructField addStructField(FilterVal val1, FilterVal val2, DStructType structType, String fld1) {
 //		if (val1.isSymbol()) {

@@ -144,18 +144,18 @@ public class HLDEngineAssoc {
 //		  scenario 3 id:
 //		  update Customer[55] {wid: 333, addr: [100]}
 //		  has sql:
-//		    update Customer set wid=333 where wid>20
+//		    DONE ALREADY update Customer set wid=333 where wid>20
 //  	    delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
 //  	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 
 		//TODO write this!!!
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		AssocBundle bundle = new AssocBundle();
-		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
+		bundle.hlddelete = hldBuilder.buildAssocDeleteOther(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
 		
-		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
-		bundle.hldupdate.assocRelInfo = relinfo; 
+//		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
+//		bundle.hldupdate.assocRelInfo = relinfo; 
 		
 		return Collections.singletonList(bundle);
 	}

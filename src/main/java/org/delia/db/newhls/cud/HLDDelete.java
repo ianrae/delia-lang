@@ -4,6 +4,7 @@ import org.delia.db.newhls.HLDQuery;
 
 public class HLDDelete extends HLDBase {
 	public HLDQuery hld;
+	public boolean useDeleteIn;
 	
 	public HLDDelete(HLDQuery hld) {
 		super(new TypeOrTable(hld.fromType));
