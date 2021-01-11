@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.delia.db.hls.AliasInfo;
+import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.OpAndOrFilter;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
@@ -71,13 +73,20 @@ public class HLDAliasBuilder {
 	}
 
 	private void doFilter(HLDQuery hld) {
-		if (hld.filter instanceof SingleFilterCond) {
-			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
+		doInnerFilter(hld.filter, hld);
+	}
+	private void doInnerFilter(FilterCond filter, HLDQuery hld) {
+		if (filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) filter;
 			doFilterPKVal(sfc.val1, hld);
-		} else if (hld.filter instanceof OpFilterCond) {
-			OpFilterCond ofc = (OpFilterCond) hld.filter;
+		} else if (filter instanceof OpFilterCond) {
+			OpFilterCond ofc = (OpFilterCond) filter;
 			doFilterVal(ofc.val1, hld);
 			doFilterVal(ofc.val2, hld);
+		} else if (filter instanceof OpAndOrFilter) {
+			OpAndOrFilter ofc = (OpAndOrFilter) filter;
+			doInnerFilter(ofc.cond1, hld); //** recursion **
+			doInnerFilter(ofc.cond2, hld); //** recursion **
 		}
 	}
 

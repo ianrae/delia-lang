@@ -9,6 +9,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.OpAndOrFilter;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
@@ -185,22 +186,34 @@ public class HLDSQLGenerator {
 	}
 	private String generateWhereClause(HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		FilterCond filter = hld.filter;
-		String fragment = null;
+		String fragment = doFilter(filter, paramGen, stm);
+		return fragment;
+	}
+
+	private String doFilter(FilterCond filter, SqlParamGenerator paramGen, SqlStatement stm) {
 		if (filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) filter;
 			String alias = sfc.val1.alias;
 			String fieldName = sfc.val1.structField.fieldName;
 			String valsql = renderValParam(sfc, paramGen, stm);
-			fragment = String.format("%s.%s=%s", alias, fieldName, valsql);
+			return String.format("%s.%s=%s", alias, fieldName, valsql);
 		} else if (filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) filter;
 			String s1 = renderVal(ofc.val1, paramGen, stm);
 			String s2 = renderVal(ofc.val2, paramGen, stm);
 			String not = ofc.isNot ? "NOT " : "";
-			fragment = String.format("%s%s %s %s", not, s1, ofc.op.op, s2);
+			return String.format("%s%s %s %s", not, s1, ofc.op.op, s2);
+		} else if (filter instanceof OpAndOrFilter) {
+			OpAndOrFilter ofc = (OpAndOrFilter) filter;
+			String s1 = doFilter(ofc.cond1, paramGen, stm); //** recursion **
+			String s2 = doFilter(ofc.cond2, paramGen, stm); //** recursion **
+			String and = ofc.isAnd ? "AND " : "OR ";
+			return String.format("%s %s %s", s1, and, s2);
+		} else {
+			return null;
 		}
-		return fragment;
 	}
+
 
 	private String renderValParam(SingleFilterCond sfc, SqlParamGenerator paramGen, SqlStatement stm) {
 		if (paramGen == null) {
