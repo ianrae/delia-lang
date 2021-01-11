@@ -250,6 +250,7 @@ public class HLDDsonBuilder {
 	public HLDUpdate buildAssocUpdateAll(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DatIdMap datIdMap, boolean isMergeInto) {
 		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
 
 		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
 		
@@ -270,6 +271,12 @@ public class HLDDsonBuilder {
 		if (isMergeInto) {
 			hld.isMergeAllInto = true;
 			hld.mergeKey = fld1;
+			hld.mergeKeyOther = fld2;
+			DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
+			hld.mergeType = entityType.getName();
+			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
+			hld.mergePKField = pkpair.name;
+			
 		}
 		return hld;
 	}

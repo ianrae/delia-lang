@@ -65,7 +65,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			}
 			if (bundle.hldupdate != null) {
 				if (bundle.hldupdate.isMergeInto) {
-					SqlStatement stmx = genMergeInfoStatement(bundle.hldupdate);
+					SqlStatement stmx = genMergeIntoStatement(bundle.hldupdate);
+					stmgrp.add(stmx);
+				} else if (bundle.hldupdate.isMergeAllInto) {
+					SqlStatement stmx = genMergeAllIntoStatement(bundle.hldupdate);
 					stmgrp.add(stmx);
 				} else {
 					SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
@@ -158,8 +161,32 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return stm;
 	}
 	
-//    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
-	private SqlStatement genMergeInfoStatement(HLDUpdate hld) {
+//    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
+//    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+	private SqlStatement genMergeAllIntoStatement(HLDUpdate hld) {
+		SqlStatement stm = new SqlStatement();
+		StrCreator sc = new StrCreator();
+		sc.o("MERGE INTO");
+		outTblName(sc, hld);
+		String alias = hld.typeOrTbl.alias;
+		
+		//USING (SELECT id FROM CUSTOMER) AS S ON T.leftv = s.id
+		sc.o(" USING (SELECT %s FROM %s) AS S", hld.mergePKField, hld.mergeType);
+		sc.o(" ON %s.%s = s.%s", alias, hld.mergeKey, hld.mergePKField);
+		
+		//WHEN MATCHED THEN UPDATE SET T.rightv = ?
+		sc.o(" WHEN MATCHED THEN UPDATE SET %s.%s = ?", alias, hld.mergeKeyOther);
+		
+		//WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+		sc.o(" WHEN NOT MATCHED THEN INSERT (leftv, rightv)", hld.mergeKey, hld.mergeKeyOther);
+		sc.o(" VALUES(s.%s, ?)", hld.mergePKField);
+		
+		stm.sql = sc.toString();
+		return stm;
+	}
+//  merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
+	private SqlStatement genMergeIntoStatement(HLDUpdate hld) {
 		SqlStatement stm = new SqlStatement();
 		StrCreator sc = new StrCreator();
 		sc.o("MERGE INTO");

@@ -18,6 +18,9 @@ public class HLDUpdate extends HLDBase {
 	public boolean isMergeInto;
 	public boolean isMergeAllInto;
 	public String mergeKey;
+	public String mergeType;
+	public String mergePKField;
+	public String mergeKeyOther;
 
 	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {
 		super(typeOrTbl);

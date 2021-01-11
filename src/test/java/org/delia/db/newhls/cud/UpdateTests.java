@@ -138,7 +138,8 @@ public class UpdateTests extends NewHLSTestBase {
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
-		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
+		String s = "MERGE INTO CustomerAddressDat1 as t1 USING (SELECT cid FROM Customer) AS S ON t1.rightv = s.cid WHEN MATCHED THEN UPDATE SET t1.leftv = ? WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.cid, ?)";
+		chkUpdateSql(stmgrp, 2, s, "55", "100");
 	}
 	
 	//TODO: scenario 2 and 3
