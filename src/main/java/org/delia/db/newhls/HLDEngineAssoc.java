@@ -119,7 +119,7 @@ public class HLDEngineAssoc {
 		bundle.hlddelete = hldBuilder.buildAssocDeleteAll(builderAdapter, queryExp, relinfo, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
 		
-		bundle.hldupdate = hldBuilder.buildAssocUpdateAll(builderAdapter, relinfo, queryExp, datIdMap, true);
+		bundle.hldupdate = hldBuilder.buildAssocUpdateAll(builderAdapter, relinfo, queryExp, fkval, datIdMap, true);
 		bundle.hldupdate.assocRelInfo = relinfo; 
 		
 		return Collections.singletonList(bundle);

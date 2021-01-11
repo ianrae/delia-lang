@@ -224,6 +224,17 @@ public class HLDDsonBuilder {
 		
 		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
 		
+		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, dval2, relinfo, datIdMap);
+		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
+		hld.hld = builderAdapter.buildQuery(queryExp);
+		if (isMergeInto) {
+			hld.isMergeInto = true;
+			hld.mergeKey = fld1;
+		}
+		return hld;
+	}
+	private ConversionResult fillCResForUpdate(HLDUpdate hld, String fld1, String fld2, String assocTbl, DValue dval1,
+			DValue dval2, RelationInfo relinfo, DatIdMap datIdMap) {
 		ConversionResult cres = new ConversionResult();
 		cres.localET = new SimpleErrorTracker(log);
 
@@ -237,35 +248,25 @@ public class HLDDsonBuilder {
 			DeliaExceptionHelper.throwError("buildSimpleUpdate-fail", structType.getName());
 		}
 		cres.dval = builder.getDValue();
-		
-		hld.cres = cres;
-		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
-		hld.hld = builderAdapter.buildQuery(queryExp);
-		if (isMergeInto) {
-			hld.isMergeInto = true;
-			hld.mergeKey = fld1;
-		}
-		return hld;
+		return cres;
 	}
-	public HLDUpdate buildAssocUpdateAll(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DatIdMap datIdMap, boolean isMergeInto) {
+
+	public HLDUpdate buildAssocUpdateAll(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DValue dval1, DatIdMap datIdMap, boolean isMergeInto) {
 		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 
 		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
-		
-		ConversionResult cres = new ConversionResult();
-		cres.localET = new SimpleErrorTracker(log);
+		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, null, relinfo, datIdMap);
+		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
 
 		//create a temp type for the assoc table
-		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
-		TypePair pair = DValueHelper.findField(structType, fld1);
+//		DStructType structType = hld.cres.dval.asStruct().getType(); 
+//		TypePair pair = DValueHelper.findField(structType, fld1);
 		
-		hld.cres = cres;
-//		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
-		DValue inner = null;
-		hld.fieldL.add(createEmptyFieldVal(pair.name, structType));
-		hld.valueL.add(inner);
+//		DValue inner = null;
+//		hld.fieldL.add(createEmptyFieldVal(pair.name, structType));
+//		hld.valueL.add(inner);
 		
 		hld.hld = builderAdapter.buildQuery(queryExp);
 		if (isMergeInto) {
@@ -276,7 +277,6 @@ public class HLDDsonBuilder {
 			hld.mergeType = entityType.getName();
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
 			hld.mergePKField = pkpair.name;
-			
 		}
 		return hld;
 	}
@@ -348,8 +348,9 @@ public class HLDDsonBuilder {
 		}
 		
 		OrderedMap omap = new OrderedMap();
-		omap.add("leftv", pkpair1.type, false, false, false, false);
-		omap.add("rightv", pkpair2.type, false, false, false, false);
+		//normally not optional but sometimes for MERGE INTO it is
+		omap.add("leftv", pkpair1.type, true, false, false, false);
+		omap.add("rightv", pkpair2.type, true, false, false, false);
 		DStructType structType = new DStructType(Shape.STRUCT, assocTbl, null, omap, null);
 		//we don't register this type
 		return structType;

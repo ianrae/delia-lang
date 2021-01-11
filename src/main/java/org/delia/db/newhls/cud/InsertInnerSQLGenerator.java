@@ -1,5 +1,8 @@
 package org.delia.db.newhls.cud;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDField;
@@ -177,6 +180,9 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		
 		//WHEN MATCHED THEN UPDATE SET T.rightv = ?
 		sc.o(" WHEN MATCHED THEN UPDATE SET %s.%s = ?", alias, hld.mergeKeyOther);
+		DValue inner = findFirstNonNullValue(hld.valueL); 
+		stm.paramL.add(inner);
+		stm.paramL.add(inner);
 		
 		//WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		sc.o(" WHEN NOT MATCHED THEN INSERT (leftv, rightv)", hld.mergeKey, hld.mergeKeyOther);
@@ -185,6 +191,11 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		stm.sql = sc.toString();
 		return stm;
 	}
+	private DValue findFirstNonNullValue(List<DValue> valueL) {
+		Optional<DValue> opt = valueL.stream().filter(x -> x != null).findFirst();
+		return opt.orElse(null);
+	}
+
 //  merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 	private SqlStatement genMergeIntoStatement(HLDUpdate hld) {
 		SqlStatement stm = new SqlStatement();
