@@ -1,10 +1,12 @@
 package org.delia.db.newhls.cud;
 
 import org.delia.db.newhls.HLDQuery;
+import org.delia.type.DValue;
 
 public class HLDDelete extends HLDBase {
 	public HLDQuery hld;
 	public boolean useDeleteIn;
+	public DValue deleteInDVal;
 	
 	public HLDDelete(HLDQuery hld) {
 		super(new TypeOrTable(hld.fromType));

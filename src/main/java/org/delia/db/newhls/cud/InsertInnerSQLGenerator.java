@@ -63,8 +63,13 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		
 		for(AssocBundle bundle: hldupdate.assocBundleL) {
 			if (bundle.hlddelete != null) {
-				SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
-				stmgrp.add(stmx);
+				if (bundle.hlddelete.useDeleteIn) {
+					SqlStatement stmx = genDeleteInStatement(bundle.hlddelete);
+					stmgrp.add(stmx);
+				} else {
+					SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
+					stmgrp.add(stmx);
+				}
 			}
 			if (bundle.hldupdate != null) {
 				if (bundle.hldupdate.isMergeInto) {
@@ -236,6 +241,23 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		outTblName(sc, hld);
 		
 		addWhereIfNeeded(sc, hld.hld, stm);
+
+		stm.sql = sc.toString();
+		return stm;
+	}
+	//delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
+	private SqlStatement genDeleteInStatement(HLDDelete hld) {
+		SqlStatement stm = new SqlStatement();
+		StrCreator sc = new StrCreator();
+		sc.o("DELETE FROM");
+		outTblName(sc, hld);
+		
+		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
+		//remove 999
+		//TODO: fix this! 999 might a valid value
+		DValue dval = hld.deleteInDVal;
+		int pos1 = whereStr.indexOf(" AND ");
+		int pos2 = whereStr.indexOf("999");
 
 		stm.sql = sc.toString();
 		return stm;

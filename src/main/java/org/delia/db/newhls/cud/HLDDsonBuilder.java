@@ -323,6 +323,26 @@ public class HLDDsonBuilder {
 		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
 		//need a fake value just so fields created. we don't use the value in sql
+		dval1 = buildFakeValue(relinfo, datIdMap);
+		
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
+		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
+		
+		HLDUpdate tmphld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		tmphld.cres = fillCResForUpdate(tmphld, fld1, fld2, assocTbl, dval1, dval2, relinfo, datIdMap);
+		
+		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
+		hld.useDeleteIn = true;
+		hld.deleteInDVal = dval2;
+		return hld;
+	}
+	
+
+	private DValue buildFakeValue(RelationInfo relinfo, DatIdMap datIdMap) {
+		DValue dval1 = null;
 		DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
 		ScalarValueBuilder valBuilder = factorySvc.createScalarValueBuilder(registry);
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
@@ -340,18 +360,8 @@ public class HLDDsonBuilder {
 		default:
 			DeliaExceptionHelper.throwError("unknown-pk-type", "%s: %s can't be pk", pkpair.name, pkpair.type);
 		}
-		
-		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
-		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
-		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
-		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
-		
-		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
-		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
-		hld.useDeleteIn = true;
-		return hld;
+		return dval1;
 	}
-	
 
 //	private StructField addStructField(FilterVal val1, FilterVal val2, DStructType structType, String fld1) {
 //		if (val1.isSymbol()) {
