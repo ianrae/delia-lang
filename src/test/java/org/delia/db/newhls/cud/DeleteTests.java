@@ -12,7 +12,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.junit.Test;
 
 /**
- * 
+ * TODO: when delete also delete DAT table, and non-optional child
  * @author Ian Rae
  *
  */

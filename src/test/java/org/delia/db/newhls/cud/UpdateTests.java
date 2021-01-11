@@ -141,8 +141,21 @@ public class UpdateTests extends NewHLSTestBase {
 		String s = "MERGE INTO CustomerAddressDat1 as t1 USING (SELECT cid FROM Customer) AS S ON t1.rightv = s.cid WHEN MATCHED THEN UPDATE SET t1.leftv = ? WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.cid, ?)";
 		chkUpdateSql(stmgrp, 2, s, "55", "55");
 	}
-	
-	//TODO: scenario 2 and 3
+	@Test
+	public void testMNScenario3() {
+		useCustomerManyToManySrc = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "update Address[y > 10] {y: 45, cust:55}");
+		//update filter
+		
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
+		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
+		dumpGrp(stmgrp);
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
+		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
+		String s = "MERGE INTO CustomerAddressDat1 as t1 USING (SELECT cid FROM Customer) AS S ON t1.rightv = s.cid WHEN MATCHED THEN UPDATE SET t1.leftv = ? WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.cid, ?)";
+		chkUpdateSql(stmgrp, 2, s, "55", "55");
+	}
 	
 	
 	@Test

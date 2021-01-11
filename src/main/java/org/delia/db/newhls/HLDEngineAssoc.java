@@ -77,13 +77,11 @@ public class HLDEngineAssoc {
 			log.logDebug("m-to-n:scenario1");
 			return buildUpdateAll(relinfo, queryExp, structType, dval, fkval, builderAdapter);
 		} else if (isPKQuery(hldQuery)) {
-//			List<OpFragment> oplist = WhereListHelper.findPrimaryKeyQuery(existingWhereL, info.farType);
 			log.logDebug("m-to-n:scenario2");
 			return buildUpdateByIdOnly(relinfo, queryExp, structType, pkval, fkval, builderAdapter);
 		} else {
 			log.logDebug("m-to-n:scenario3");
-//			buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, field1, field2, existingWhereL, mainUpdateAlias, statement);
-			return null;
+			return buildUpdateOther(relinfo, queryExp, structType, pkval, fkval, builderAdapter);
 		}
 	}
 
@@ -142,37 +140,25 @@ public class HLDEngineAssoc {
 		
 		return Collections.singletonList(bundle);
 	}
-//	protected void buildUpdateOther(UpdateStatementFragment updateFrag, UpdateStatementFragment assocUpdateFrag, DStructType structType,
-//			Map<String, DRelation> mmMap, String fieldName, RelationInfo info, String assocFieldName, String assocField2,
-//			List<SqlFragment> existingWhereL, String mainUpdateAlias, SqlStatement statement) {
-//
-//		updateFrag.doUpdateLast = true; //in case we're updating any of the fields in the query
-//		if (assocTblReplacer != null) {
-//			log.logDebug("use assocTblReplacer");
-//			assocTblReplacer.buildUpdateOther(updateFrag, assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, assocField2, existingWhereL, mainUpdateAlias, statement);
-//		} else {
-//			int startingNumParams = statement.paramL.size();
-//			buildAssocTblUpdate(assocUpdateFrag, structType, mmMap, fieldName, info, assocFieldName, statement);
-//	
-//			//update CAAssoc set rightv=100 where (select id from customer where lastname='smith')
-//			//Create a sub-select whose where list is a copy of the main update statement's where list.
-//			TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(info.nearType);
-//			StrCreator sc = new StrCreator();
-//			sc.o(" %s.%s IN", assocUpdateFrag.tblFrag.alias, assocField2);
-//			sc.o(" (SELECT %s FROM %s as %s WHERE", keyPair.name, info.nearType.getName(), mainUpdateAlias);
-//	
-//			List<OpFragment> clonedL = WhereListHelper.cloneWhereList(existingWhereL);
-//			for(OpFragment opff: clonedL) {
-//				sc.o(opff.render());
-//			}
-//			sc.o(")");
-//			RawFragment rawFrag = new RawFragment(sc.toString());
-//	
-//			assocUpdateFrag.whereL.add(rawFrag);
-//			int extra = statement.paramL.size() - startingNumParams;
-//			cloneParams(statement, clonedL, extra);
-//		}
-//	}
+	protected List<AssocBundle> buildUpdateOther(RelationInfo relinfo, QueryExp queryExp, DStructType structType, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
+//		  scenario 3 id:
+//		  update Customer[55] {wid: 333, addr: [100]}
+//		  has sql:
+//		    update Customer set wid=333 where wid>20
+//  	    delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
+//  	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
+
+		//TODO write this!!!
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		AssocBundle bundle = new AssocBundle();
+		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
+		bundle.hlddelete.assocRelInfo = relinfo; 
+		
+		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
+		bundle.hldupdate.assocRelInfo = relinfo; 
+		
+		return Collections.singletonList(bundle);
+	}
 	
 	
 	

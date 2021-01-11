@@ -100,9 +100,13 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	private DValue getUpdatePK(HLDUpdate hld) {
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
-		SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
-		DValue pkval = pgen.convert(sfc.val1);
-		return pkval;
+		if (hld.hld.filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
+			DValue pkval = pgen.convert(sfc.val1);
+			return pkval;
+		} else {
+			return null;
+		}
 	}
 
 	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
