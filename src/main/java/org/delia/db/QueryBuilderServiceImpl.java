@@ -49,6 +49,19 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
 		return exp;
 	}
+	@Override
+	public QueryExp createNotEqQuery(String typeName, String fieldName, DValue targetValue) {
+		
+		//Address[cust=value]
+		XNAFMultiExp op1 = buildXNAFExp(fieldName);
+		Exp op2 = createExpFor(targetValue);
+		FilterOpExp filterOp0 = new FilterOpExp(99, op1, new StringExp("!="), op2);
+		FilterOpFullExp filterOp = new FilterOpFullExp(99, filterOp0);
+		
+		FilterExp filter = new FilterExp(99, filterOp);
+		QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
+		return exp;
+	}
 	
 	private XNAFMultiExp buildXNAFExp(String fieldName) {
 		XNAFMultiExp exp = new XNAFMultiExp(99, false, null);
@@ -128,6 +141,13 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		FilterExp filter = new FilterExp(99, new BooleanExp(true));
 		QueryExp exp = new QueryExp(0, new IdentExp(typeName), filter, null);
 		return exp;
+	}
+
+	@Override
+	public QueryExp createAndQuery(String typeName, QueryExp exp1, QueryExp exp2) {
+		FilterOpFullExp andExp = new FilterOpFullExp(0, false, exp1.filter, true, exp2.filter);
+		QueryExp exp3 = new QueryExp(0, new IdentExp(typeName), new FilterExp(0, andExp), null);
+		return exp3;
 	}
 
 }

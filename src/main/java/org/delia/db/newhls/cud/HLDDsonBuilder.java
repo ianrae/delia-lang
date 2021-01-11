@@ -5,15 +5,11 @@ import java.util.Optional;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.DsonExp;
-import org.delia.compiler.ast.FilterExp;
-import org.delia.compiler.ast.FilterOpFullExp;
-import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.QuerySpec;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.db.newhls.StructField;
@@ -23,12 +19,10 @@ import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.ConversionResult;
 import org.delia.runner.DValueIterator;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.DsonToDValueConverter;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigVarEvaluator;
-import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -260,10 +254,8 @@ public class HLDDsonBuilder {
 		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
-		QueryExp exp2 = builderSvc.createEqQuery(assocTbl, fld2, dval2);
-		FilterOpFullExp andExp = new FilterOpFullExp(0, false, exp1.filter, true, exp2.filter);
-		//TODO need full AND query
-		QueryExp exp3 = new QueryExp(0, new IdentExp(assocTbl), new FilterExp(0, andExp), null);
+		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
+		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
 		
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
 		hld.hld = builderAdapter.buildQuery(exp3);
