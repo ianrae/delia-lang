@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.DsonExp;
+import org.delia.compiler.ast.FilterExp;
+import org.delia.compiler.ast.FilterOpFullExp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -256,11 +259,14 @@ public class HLDDsonBuilder {
 		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
-		QueryExp exp = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+		QueryExp exp2 = builderSvc.createEqQuery(assocTbl, fld2, dval2);
+		FilterOpFullExp andExp = new FilterOpFullExp(0, false, exp1.filter, true, exp2.filter);
 		//TODO need full AND query
+		QueryExp exp3 = new QueryExp(0, new IdentExp(assocTbl), new FilterExp(0, andExp), null);
 		
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
-		hld.hld = builderAdapter.buildQuery(exp);
+		hld.hld = builderAdapter.buildQuery(exp3);
 		//add structType. careful since it's not a registered type!1
 		OpFilterCond cond = (OpFilterCond) hld.hld.filter;
 		if (cond.val1.isSymbol()) {
