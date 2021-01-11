@@ -10,6 +10,7 @@ public class HLDDelete extends HLDBase {
 	public String mergeKey;
 	public String mergeType;
 	public String mergePKField;
+	public String mergeOtherKey;
 	
 	public HLDDelete(HLDQuery hld) {
 		super(new TypeOrTable(hld.fromType));

@@ -258,12 +258,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		int n = stm.paramL.size();
 		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
 		DValue dval = hld.deleteInDVal;
-		stm.paramL.remove(n);
+		DValue sav = stm.paramL.remove(n);
 		stm.paramL.add(dval);
-		int pos1 = whereStr.indexOf(" AND ");
-		String s2 = whereStr.substring(pos1 + 5);
-		whereStr = whereStr.substring(0, pos1); //TODO wrong sometime
-		String s = String.format(" %s AND %s.%s IN (SELECT %s FROM %s as a WHERE %s)", s2, alias, hld.mergeKey, hld.mergePKField, hld.mergeType, whereStr);
+		stm.paramL.add(sav);
+		
+		whereStr = whereStr.replace(String.format("%s.", alias), "a.");
+		String s2 = String.format("%s.%s <> ?",  alias, hld.mergeOtherKey); //whereStr.substring(pos1 + 5);
+
+		String s = String.format(" %s AND %s.%s IN (SELECT %s FROM %s as a WHERE%s)", s2, alias, hld.mergeKey, hld.mergePKField, hld.mergeType, whereStr);
 		sc.o(" WHERE%s", s);
 
 		stm.sql = sc.toString();

@@ -151,8 +151,8 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
-		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.y > ?", "45", "10");
+		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv <> ? AND t1.rightv IN (SELECT cid FROM Customer as a WHERE a.y > ?)", "55", "10");
 		String s = "MERGE INTO CustomerAddressDat1 as t1 USING (SELECT cid FROM Customer) AS S ON t1.rightv = s.cid WHEN MATCHED THEN UPDATE SET t1.leftv = ? WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.cid, ?)";
 		chkUpdateSql(stmgrp, 2, s, "55", "55");
 	}

@@ -334,10 +334,11 @@ public class HLDDsonBuilder {
 		tmphld.cres = fillCResForUpdate(tmphld, fld1, fld2, assocTbl, dval1, dval2, relinfo, datIdMap);
 		
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
-		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
+		hld.hld = builderAdapter.buildQueryEx(queryExp, structType);
 		hld.useDeleteIn = true;
 		hld.deleteInDVal = dval2;
 		hld.mergeKey = fld1;
+		hld.mergeOtherKey = fld2;
 		DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
 		hld.mergeType = entityType.getName();
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
