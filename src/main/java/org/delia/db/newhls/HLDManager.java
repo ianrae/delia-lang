@@ -54,6 +54,8 @@ public class HLDManager extends ServiceBase {
 	public HLDDeleteStatement fullBuildDelete(QueryExp queryExp) {
 		HLDDeleteStatement stmt = new HLDDeleteStatement();
 		stmt.hlddelete = engine.buildDelete(queryExp);
+		stmt.updateL.addAll(engine.addParentUpdatesForDelete(stmt.hlddelete));
+		
 		engine.assignAliases(stmt);
 		return stmt;
 	}

@@ -47,7 +47,7 @@ public class DeleteTests extends NewHLSTestBase {
 	
 	// --- 1:1 ---
 	@Test
-	public void test2a() {
+	public void test11a() {
 		useCustomer11Src = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
@@ -56,7 +56,19 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "1");
+		chkDeleteSql(stmgrp, 0, " DELETE FROM Address as t0 WHERE t0.id=?", "1");
+	}
+	@Test
+	public void test11b() {
+		useCustomer11Src = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
+		src = addSrc(src, "delete Customer[55]");
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
+		dumpGrp(stmgrp);
+		chkDeleteSql(stmgrp, 0, " DELETE FROM Address as t0 WHERE t0.id=?", "1");
 	}
 	
 //	// --- 1:N ---

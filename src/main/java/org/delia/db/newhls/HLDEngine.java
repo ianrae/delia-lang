@@ -77,6 +77,15 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDDelete hlddel = new HLDDelete(hld);
 		return hlddel;
 	}
+	public List<HLDUpdate> addParentUpdatesForDelete(HLDDelete hld) {
+		DStructType structType = hld.getStructType();
+		
+		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
+		DValue pkval = getUpdatePK(hld.hld); 
+		
+		List<HLDUpdate> parentUpdates = generateParentUpdateForDelete(structType, pkval);
+		return parentUpdates;
+	}
 	
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
@@ -92,16 +101,16 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		DStructType structType = hld.getStructType();
 		
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
-		DValue pkval = getUpdatePK(hld); 
+		DValue pkval = getUpdatePK(hld.hld); 
 		
 		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval);
 		return parentUpdates;
 	}
-	private DValue getUpdatePK(HLDUpdate hld) {
+	private DValue getUpdatePK(HLDQuery hld) {
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
-		if (hld.hld.filter instanceof SingleFilterCond) {
-			SingleFilterCond sfc = (SingleFilterCond) hld.hld.filter;
+		if (hld.filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
 			DValue pkval = pgen.convert(sfc.val1);
 			return pkval;
 		} else {
@@ -122,7 +131,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public List<AssocBundle> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {
 		DStructType structType = hld.getStructType();
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
-		DValue pkval = getUpdatePK(hld); 
+		DValue pkval = getUpdatePK(hld.hld); 
 		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, pkval, this); 
 		return parentUpdates;
 	}

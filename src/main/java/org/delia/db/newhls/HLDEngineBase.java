@@ -132,4 +132,38 @@ public abstract class HLDEngineBase {
 		return hld;
 	}
 	
+	// --- delete stuff ---
+	/**
+	 * delete statement. find all 1:1 or 1:N relations where we are parent and far end is optional.
+	 * Since we are deleting the parent, update the child to set parent field to null.
+	 * @param structType - main type being deleted
+	 * @param dval - values
+	 * @param pkval2 
+	 */
+	protected List<HLDUpdate> generateParentUpdateForDelete(DStructType structType, DValue pkval) {
+		List<HLDUpdate> updateL = new ArrayList<>();
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+				if (relinfo.isParent) {
+					if (relinfo.isOneToOne()) {
+						DValue fkval = null;
+						HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
+						updateL.add(update);
+					} else if (relinfo.isOneToMany()) {
+//						for(DValue fkval: inner.asRelation().getMultipleKeys()) {
+							HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, null);
+							updateL.add(update);
+//						}
+					}
+				} 
+			}
+		}
+		return updateL;
+	}
+	
+	
 }
