@@ -277,6 +277,26 @@ public class HLDDsonBuilder {
 		}
 		return hld;
 	}
+	public HLDUpdate buildAssocUpdateOther(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DValue dval1, DValue dval2, DatIdMap datIdMap, boolean isMergeInto) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
+
+		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, null, relinfo, datIdMap);
+		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
+
+		hld.hld = builderAdapter.buildQuery(queryExp);
+		if (isMergeInto) {
+			hld.isMergeCTE = true;
+			hld.mergeKey = fld1;
+			hld.mergeKeyOther = fld2;
+			DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
+			hld.mergeType = entityType.getName();
+			hld.dvalCTE = dval2;
+		}
+		return hld;
+	}
 	
 //    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 	public HLDDelete buildAssocDelete(HLDQueryBuilderAdapter builderAdapter, QueryExp queryExp, RelationInfo relinfo, DValue dval1, DValue dval2, DatIdMap datIdMap) {

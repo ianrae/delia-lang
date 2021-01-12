@@ -154,8 +154,9 @@ public class HLDEngineAssoc {
 		bundle.hlddelete = hldBuilder.buildAssocDeleteOther(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
 		
-//		bundle.hldupdate = hldBuilder.buildAssocUpdate(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
-//		bundle.hldupdate.assocRelInfo = relinfo; 
+//	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
+		bundle.hldupdate = hldBuilder.buildAssocUpdateOther(builderAdapter, relinfo, queryExp, pkval, fkval, datIdMap, true);
+		bundle.hldupdate.assocRelInfo = relinfo; 
 		
 		return Collections.singletonList(bundle);
 	}

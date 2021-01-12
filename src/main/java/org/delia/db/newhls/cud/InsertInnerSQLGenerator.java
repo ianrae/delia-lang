@@ -78,6 +78,9 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 				} else if (bundle.hldupdate.isMergeAllInto) {
 					SqlStatement stmx = genMergeAllIntoStatement(bundle.hldupdate);
 					stmgrp.add(stmx);
+				} else if (bundle.hldupdate.isMergeCTE) {
+					SqlStatement stmx = genMergeIntoCTEStatement(bundle.hldupdate);
+					stmgrp.add(stmx);
 				} else {
 					SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
 					stmgrp.add(stmx);
@@ -199,6 +202,25 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	private DValue findFirstNonNullValue(List<DValue> valueL) {
 		Optional<DValue> opt = valueL.stream().filter(x -> x != null).findFirst();
 		return opt.orElse(null);
+	}
+
+//  WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
+	private SqlStatement genMergeIntoCTEStatement(HLDUpdate hld) {
+		SqlStatement stm = new SqlStatement();
+		StrCreator sc = new StrCreator();
+		sc.o("WITH cte1 AS (SELECT ? as leftv, id as rightv");
+		stm.paramL.add(hld.dvalCTE);
+		
+		sc.o(" FROM %s", hld.mergeType);
+		sc.o("INSERT INTO");		
+		outTblName(sc, hld);
+		String alias = hld.typeOrTbl.alias;
+		
+		sc.o(" SELECT * from cte1");		
+		
+		
+		stm.sql = sc.toString();
+		return stm;
 	}
 
 //  merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
