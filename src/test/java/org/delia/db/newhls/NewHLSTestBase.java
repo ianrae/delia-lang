@@ -38,6 +38,11 @@ import org.junit.After;
 public class NewHLSTestBase extends BDDBase {
 	
 	protected HLDManager mgr;
+	
+	
+	protected String addSrc(String src0, String src) {
+		return src0 + "\n" + src;
+	}
 
 	protected void dumpGrp(SqlStatementGroup stmgrp) {
 		log.log("grp: %s", stmgrp.statementL.size());

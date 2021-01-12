@@ -215,7 +215,4 @@ public class UpdateTests extends NewHLSTestBase {
 		chkStm(stm, expected, args);
 	}
 	
-	private String addSrc(String src0, String src) {
-		return src0 + "\n" + src;
-	}
 }

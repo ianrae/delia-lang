@@ -1,5 +1,7 @@
 package org.delia.db.newhls;
 
+import java.util.Collections;
+
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
@@ -93,16 +95,18 @@ public class HLDManager extends ServiceBase {
 		return sqlgen;
 	}
 	
-	public SqlStatement generateSql(HLDDeleteStatement hlddel) {
+	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
 		if (newInsertSQLGen) {
 			HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
 			SqlStatementGroup stmgrp = sqlgen.generate(hlddel);
-			return stmgrp.statementL.get(0);
+			return stmgrp;
 		} else {
 			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 			SqlStatement sql = sqlgen.generateSqlStatement(hlddel);
-			return sql;
+			SqlStatementGroup stmgrp = new SqlStatementGroup();
+			stmgrp.add(sql);
+			return stmgrp;
 		}
 	}
 
