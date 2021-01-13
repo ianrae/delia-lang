@@ -67,8 +67,8 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 			HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
 			fieldBuilder.generateFields(hld);
 			
-			HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
-			aliasBuilder.assignAliases(hld);
+//			HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+//			aliasBuilder.assignAliases(hld);
 		}
 		
 		return hld;
