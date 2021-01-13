@@ -33,6 +33,19 @@ public class DeleteTests extends NewHLSTestBase {
 		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
+	public void test1MandatoryChild() {
+		useCustomer11MandatoryChildSrc = true;
+		String src = "delete Customer[55]";
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
+		dumpGrp(stmgrp);
+		
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "55");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
+	}
+	
+	@Test
 	public void test2() {
 		useCustomer11Src = true;
 		String src = "delete Address[100]";
@@ -209,6 +222,24 @@ public class DeleteTests extends NewHLSTestBase {
 	
 	
 	//-------------------------
+	private boolean useCustomer11MandatoryChildSrc;
+	
+	@Override
+	protected String buildSrc() {
+		if (useCustomer11MandatoryChildSrc) {
+			return buildCustomer11MandatoryChildSrc();
+		} else {
+			return super.buildSrc();
+		}
+	}
+
+	
+	private String buildCustomer11MandatoryChildSrc() {
+		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional parent  } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer  one  } end";
+		return src;
+	}
+	
 	protected HLDDeleteStatement buildFromSrcDelete(String src, int expectedJoins) {
 		DeleteStatementExp deleteExp = compileToDeleteStatement(src);
 		QueryExp queryExp = deleteExp.queryExp;

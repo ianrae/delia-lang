@@ -12,6 +12,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
+import org.delia.db.newhls.QueryBuilderHelper;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
@@ -41,12 +42,14 @@ public class HLDDsonBuilder {
 	private Log log;
 	private FactoryService factorySvc;
 	private SprigService sprigSvc;
+	private QueryBuilderHelper queryBuilderHelper;
 
 	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc) {
 		this.registry = registry;
 		this.log = log;
 		this.factorySvc = factorySvc;
 		this.sprigSvc = sprigSvc;
+		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
@@ -165,6 +168,14 @@ public class HLDDsonBuilder {
 		fillArraysForUpdate(hldupdate);
 		
 		return hldupdate;
+	}
+	public HLDDelete buildSimpleDeletex(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
+		HLDDelete hlddel = new HLDDelete(new TypeOrTable(structType));
+		
+//		QueryExp exp = this.queryBuilderHelper.createEqQuery(targetType, fieldName, pkval)
+//		hlddel.hld =  builderAdapter.buildQueryEx(exp, structType);
+		
+		return hlddel;
 	}
 
 	public HLDInsert buildSimpleInsert(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {

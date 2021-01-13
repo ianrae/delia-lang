@@ -1,5 +1,6 @@
 package org.delia.db.newhls;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.delia.assoc.DatIdMap;
@@ -86,6 +87,17 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		List<HLDUpdate> parentUpdates = generateParentUpdateForDelete(structType, pkval);
 		return parentUpdates;
 	}
+
+	public List<HLDDelete> addParentDeleteForDelete(HLDDelete hlddelete) {
+		DStructType structType = hlddelete.getStructType();
+		
+		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
+		//DValue pkval = getUpdatePK(hld.hld); 
+		
+		List<HLDDelete> parentDeletes= generateParentDeleteForDelete(structType, null);
+		return parentDeletes;
+	}
+	
 	
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
@@ -190,5 +202,4 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 			aliasBuilder.assignAliases(hld);
 		}
 	}
-	
 }

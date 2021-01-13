@@ -8,6 +8,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
@@ -113,6 +114,19 @@ public abstract class HLDEngineBase {
 		hld.hld = hldquery;
 		return hld;
 	}
+	protected HLDDelete addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+
+		DStructType targetType = relinfo.farType;
+		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
+		
+		HLDQuery hldquery = this.buildQuery(queryExp);
+		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+		
+		HLDDelete hld = hldBuilder.buildSimpleDeletex(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+		hld.hld = hldquery;
+		return hld;
+	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
 		List<HLDInsert> insertL = new ArrayList<>();
@@ -162,14 +176,12 @@ public abstract class HLDEngineBase {
 				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
-					if (relinfo.isOneToOne()) {
+					if (relinfo.isOneToOne() && structType.fieldIsOptional(relinfo.fieldName)) {
 						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
 						updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
-//						for(DValue fkval: inner.asRelation().getMultipleKeys()) {
-							HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
-							updateL.add(update);
-//						}
+						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						updateL.add(update);
 					}
 				} 
 			}
@@ -177,5 +189,33 @@ public abstract class HLDEngineBase {
 		return updateL;
 	}
 	
+	/**
+	 * delete statement. find all 1:1 or 1:N relations where we are parent and far end is optional.
+	 * Since we are deleting the parent, update the child to set parent field to null.
+	 * @param structType - main type being deleted
+	 * @param dval - values
+	 * @param pkval2 
+	 */
+	protected List<HLDDelete> generateParentDeleteForDelete(DStructType structType, DValue pkval) {
+		List<HLDDelete> deleteL = new ArrayList<>();
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		for(TypePair pair: structType.getAllFields()) {
+			if (pair.type.isStructShape()) {
+				
+				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
+				if (relinfo.isParent) {
+					if (relinfo.isOneToOne() && structType.fieldIsOptional(relinfo.fieldName)) {
+						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						deleteL.add(update);
+					} else if (relinfo.isOneToMany()) {
+						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						deleteL.add(update);
+					}
+				} 
+			}
+		}
+		return deleteL;
+	}
 	
 }

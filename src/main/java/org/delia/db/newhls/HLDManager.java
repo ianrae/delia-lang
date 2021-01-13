@@ -1,7 +1,5 @@
 package org.delia.db.newhls;
 
-import java.util.Collections;
-
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
@@ -55,6 +53,7 @@ public class HLDManager extends ServiceBase {
 		HLDDeleteStatement stmt = new HLDDeleteStatement();
 		stmt.hlddelete = engine.buildDelete(queryExp);
 		stmt.updateL.addAll(engine.addParentUpdatesForDelete(stmt.hlddelete));
+		stmt.deleteL.addAll(engine.addParentDeleteForDelete(stmt.hlddelete));
 		
 		engine.assignAliases(stmt);
 		return stmt;
