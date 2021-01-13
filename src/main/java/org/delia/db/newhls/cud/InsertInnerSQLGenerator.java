@@ -163,17 +163,23 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		sc.o(" SET ");
 		int index = 0;
 		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
+		String conditionStr = null;
 		while(walker.hasNext()) {
 			HLDField ff = walker.next();
 			DValue inner = hld.valueL.get(index);
 			stm.paramL.add(inner);
 			
-			sc.o("%s = %s", renderSetField(ff), "?");
+			conditionStr = String.format("%s = %s", renderSetField(ff), "?");
+			sc.o(conditionStr);
 			walker.addIfNotLast(sc, ", ");
 			index++;
 		}
 		
-		addWhereIfNeeded(sc, hld.hld, stm);
+		if (hld.isSubSelect) {
+			addSubSelectWhere(sc, hld.hld, stm, conditionStr);
+		} else {
+			addWhereIfNeeded(sc, hld.hld, stm);
+		}
 
 //		renderIfPresent(sc, orderByFrag);
 //		renderIfPresent(sc, limitFrag);  TODO is this needed?
@@ -181,6 +187,15 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		stm.sql = sc.toString();
 		return stm;
 	}
+	private void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
+//		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
+
+		sc.o("WHERE %s IN ", conditionStr);
+		sc.o("(SELECT t2.cid FROM Customer as t2 WHERE");
+		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
+		sc.o(" %s", whereStr);
+	}
+
 	
 //    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
 //    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?

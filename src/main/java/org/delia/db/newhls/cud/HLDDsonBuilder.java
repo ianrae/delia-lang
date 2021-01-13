@@ -354,7 +354,7 @@ public class HLDDsonBuilder {
 		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
 		//need a fake value just so fields created. we don't use the value in sql
-		dval1 = buildFakeValue(relinfo, datIdMap);
+		dval1 = queryBuilderHelper.buildFakeValue(relinfo, datIdMap);
 		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
@@ -379,27 +379,6 @@ public class HLDDsonBuilder {
 	}
 	
 
-	private DValue buildFakeValue(RelationInfo relinfo, DatIdMap datIdMap) {
-		DValue dval1 = null;
-		DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
-		ScalarValueBuilder valBuilder = factorySvc.createScalarValueBuilder(registry);
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);
-		switch(pkpair.type.getShape()) {
-		case INTEGER:
-			dval1 = valBuilder.buildInt("999");
-			break;
-		case LONG:
-			dval1 = valBuilder.buildInt("999");
-			break;
-		case DATE:
-		case STRING:
-			dval1 = valBuilder.buildInt("999");
-			break;
-		default:
-			DeliaExceptionHelper.throwError("unknown-pk-type", "%s: %s can't be pk", pkpair.name, pkpair.type);
-		}
-		return dval1;
-	}
 
 //	private StructField addStructField(FilterVal val1, FilterVal val2, DStructType structType, String fld1) {
 //		if (val1.isSymbol()) {

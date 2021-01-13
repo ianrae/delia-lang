@@ -23,6 +23,7 @@ public class HLDUpdate extends HLDBase {
 	public String mergeKeyOther;
 	public boolean isMergeCTE;
 	public DValue dvalCTE;
+	public boolean isSubSelect;
 
 	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {
 		super(typeOrTbl);

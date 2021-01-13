@@ -21,6 +21,7 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -120,8 +121,11 @@ public abstract class HLDEngineBase {
 			HLDQuery hldquery = this.buildQuery(queryExp);
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
-			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
+			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
 			hld.hld = hldquery;
+			hld.isSubSelect = true;
+//			hld.subSelect
 			return hld;
 		}
 	}
