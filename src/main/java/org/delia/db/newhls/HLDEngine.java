@@ -186,6 +186,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public void assignAliases(HLDDeleteStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hlddelete);
+		for(HLDUpdate hld: stmt.updateL) {
+			aliasBuilder.assignAliases(hld);
+		}
 	}
 	
 }

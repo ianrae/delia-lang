@@ -25,8 +25,12 @@ public class DeleteTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "delete Customer[55]";
 		
-		HLDDeleteStatement hldDelete = buildFromSrcDelete(src, 0); 
-		chkDeleteSql(hldDelete, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
+		dumpGrp(stmgrp);
+		
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "55");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void test2() {
@@ -56,7 +60,7 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, " DELETE FROM Address as t0 WHERE t0.id=?", "1");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "1");
 	}
 	@Test
 	public void test11b() {
@@ -68,8 +72,10 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, " DELETE FROM Address as t0 WHERE t0.id=?", "1");
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t0 SET t0.cust = null WHERE t0.cust=?", "55");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t1 WHERE t1.id=?", "55");
 	}
+	//TODO make test when child is not optional
 	
 //	// --- 1:N ---
 //	@Test

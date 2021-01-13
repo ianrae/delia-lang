@@ -103,8 +103,12 @@ public class NewHLSTestBase extends BDDBase {
 		for(int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			DValue dval = stm.paramL.get(i);
-			String s = resolveParamAsString(dval);
-			assertEquals(arg, s);
+			if (arg == null) {
+				assertEquals(null, dval);
+			} else {
+				String s = resolveParamAsString(dval);
+				assertEquals(arg, s);
+			}
 		}
 	}
 

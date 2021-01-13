@@ -100,6 +100,22 @@ public abstract class HLDEngineBase {
 		hld.hld = hldquery;
 		return hld;
 	}
+	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+
+		DStructType targetType = relinfo.farType;
+		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
+		QuerySpec querySpec = new QuerySpec();
+		querySpec.evaluator = null; //TODO fix
+		querySpec.queryExp = queryBuilderSvc.createEqQuery(targetType.getName(), relinfo.otherSide.fieldName, pkval);
+		
+		HLDQuery hldquery = this.buildQuery(querySpec.queryExp);
+		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+		
+		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+		hld.hld = hldquery;
+		return hld;
+	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
 		List<HLDInsert> insertL = new ArrayList<>();
@@ -150,12 +166,11 @@ public abstract class HLDEngineBase {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
 					if (relinfo.isOneToOne()) {
-						DValue fkval = null;
-						HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
+						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
 						updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
 //						for(DValue fkval: inner.asRelation().getMultipleKeys()) {
-							HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, null);
+							HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
 							updateL.add(update);
 //						}
 					}
