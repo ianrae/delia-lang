@@ -104,7 +104,7 @@ public class Rel1NTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55]";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y == ?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y = ?", "55");
 	}
 	//then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
 	@Test
@@ -113,7 +113,7 @@ public class Rel1NTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55].orderBy('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y == ? ORDER BY t1.cust", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.y = ? ORDER BY t1.cust", "55");
 	}
 	
 	//-------------------------

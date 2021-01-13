@@ -45,12 +45,12 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	@Override
 	public HLDQuery buildQuery(QueryExp queryExp) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-		return buildQuery(queryExp, aliasMgr, false, null);
+		return buildQuery(queryExp, aliasMgr, true, null);
 	}
 	@Override
 	public HLDQuery buildQueryEx(QueryExp queryExp, DStructType structType) {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
-		return buildQuery(queryExp, aliasMgr, false, structType);
+		return buildQuery(queryExp, aliasMgr, true, structType);
 	}
 	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
 		return buildQuery(queryExp, aliasMgr, true, null);

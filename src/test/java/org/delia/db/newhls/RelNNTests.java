@@ -109,7 +109,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55]";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t1.rightv=t2.id WHERE t2.y == ?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t1.rightv=t2.id WHERE t2.y = ?", "55");
 	}
 	@Test
 	public void testImplicitFilter2() {
@@ -117,7 +117,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55].orderBy('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t1.rightv=t2.id WHERE t2.y == ? ORDER BY t1.rightv", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x FROM Customer as t0 JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t1.rightv=t2.id WHERE t2.y = ? ORDER BY t1.rightv", "55");
 	}
 	
 	//-------------------------
