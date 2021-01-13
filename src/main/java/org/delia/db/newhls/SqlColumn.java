@@ -2,7 +2,7 @@ package org.delia.db.newhls;
 
 import org.apache.commons.lang3.StringUtils;
 
-class SqlColumn {
+public class SqlColumn {
 	public String alias;
 	public String name;
 	
