@@ -9,6 +9,8 @@ import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
@@ -17,13 +19,18 @@ import org.junit.Test;
 
 public class BetterSQLGenTests extends NewHLSTestBase {
 
-	public static class SimpleSelect {
+	public static class SimpleBase {
 		public SqlColumn tblFrag;
+	}
+	public static class SimpleSelect extends SimpleBase {
 		public List<SqlColumn> fieldL = new ArrayList<>();
 		public FilterCond filter;
 	}
-	public static class SimpleDelete {
-		public SqlColumn tblFrag;
+	public static class SimpleDelete extends SimpleBase {
+		public FilterCond filter;
+	}
+	public static class SimpleUpdate extends SimpleBase {
+		public List<SqlColumn> fieldL = new ArrayList<>();
 		public FilterCond filter;
 	}
 
@@ -41,6 +48,16 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		public SimpleDelete buildFrom(HLDDelete hld) {
 			SimpleDelete sel = new SimpleDelete();
 			sel.tblFrag = new SqlColumn(hld.hld.fromAlias, hld.hld.fromType.getName());
+			sel.filter = hld.hld.filter;
+			return sel;
+		}
+		public SimpleUpdate buildFrom(HLDUpdate hld) {
+			SimpleUpdate sel = new SimpleUpdate();
+			sel.tblFrag = new SqlColumn(hld.hld.fromAlias, hld.hld.fromType.getName());
+			for(HLDField fld: hld.fieldL) {
+				SqlColumn ff = new SqlColumn(fld.alias, fld.fieldName);
+				sel.fieldL.add(ff);
+			}
 			sel.filter = hld.hld.filter;
 			return sel;
 		}
@@ -70,10 +87,14 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 				walker.addIfNotLast(sc, ", ");
 			}
 
-			sc.o(" FROM %s", sel.tblFrag.renderAsTable());
+			genTblName(sc, " FROM %s", sel);
 			outputWhere(sc, sel.filter);
 			return sc.toString();
 		}
+		private void genTblName(StrCreator sc, String fmt, SimpleBase sel) {
+			sc.o(fmt, sel.tblFrag.renderAsTable());
+		}
+
 		private void outputWhere(StrCreator sc, FilterCond filter) {
 			if (filter != null) {
 				SqlStatement stm = new SqlStatement();
@@ -85,7 +106,23 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		public String gen(SimpleDelete sel) {
 			StrCreator sc = new StrCreator();
 			sc.o("DELETE");
-			sc.o(" FROM %s", sel.tblFrag.renderAsTable());
+			genTblName(sc, " FROM %s", sel);
+			outputWhere(sc, sel.filter);
+			return sc.toString();
+		}
+		public String gen(SimpleUpdate sel) {
+			StrCreator sc = new StrCreator();
+			sc.o("UPDATE");
+			genTblName(sc, " %s", sel);
+			sc.o(" SET ");
+			ListWalker<SqlColumn> walker = new ListWalker<>(sel.fieldL);
+			while(walker.hasNext()) {
+				SqlColumn ff = walker.next();
+				sc.o("%s = %s", ff.render(), "?");
+				
+				walker.addIfNotLast(sc, ", ");
+			}
+
 			outputWhere(sc, sel.filter);
 			return sc.toString();
 		}
@@ -121,4 +158,20 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals("DELETE FROM Customer as t0 WHERE t0.x > ?", sql);
 	}
+	
+	@Test
+	public void testpUpdate() {
+		useCustomer1NSrc = true;
+		String src = "update Customer[1] {x: 45}";
+		
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
+		SimpleSqlBuilder builder = new SimpleSqlBuilder();
+		SimpleUpdate sel = builder.buildFrom(hldupdate.hldupdate);
+		
+		SimpleSqlGenerator gen = new SimpleSqlGenerator(this.session.getExecutionContext().registry, delia.getFactoryService());
+		String sql = gen.gen(sel);
+		log.log(sql);
+		assertEquals("UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", sql);
+	}
+	
 }

@@ -182,22 +182,6 @@ public class UpdateTests extends NewHLSTestBase {
 	
 	
 	//-------------------------
-	protected HLDUpdateStatement buildFromSrcUpdate(String src, int statementIndex) {
-		UpdateStatementExp updateExp = compileToUpdateStatement(src, statementIndex);
-		log.log(src);
-		
-		mgr = createManager(); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
-		log.log(hldupdate.toString());
-		return hldupdate;
-	}
-
-	protected UpdateStatementExp compileToUpdateStatement(String src, int statementIndex) {
-		DeliaSessionImpl sessimpl = doCompileStatement(src);
-		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof UpdateStatementExp).collect(Collectors.toList());
-		Exp exp = list.get(statementIndex);
-		return (UpdateStatementExp) exp;
-	}
 	
 	protected void chkUpdateSql(HLDUpdateStatement hldupdate, int numStatements, String expected, String...args) {
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, numStatements);

@@ -3,7 +3,9 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
@@ -17,9 +19,11 @@ import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.ResultValue;
@@ -260,6 +264,22 @@ public class NewHLSTestBase extends BDDBase {
 			}
 		}
 		return null;
+	}
+	protected HLDUpdateStatement buildFromSrcUpdate(String src, int statementIndex) {
+		UpdateStatementExp updateExp = compileToUpdateStatement(src, statementIndex);
+		log.log(src);
+		
+		mgr = createManager(); 
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
+		log.log(hldupdate.toString());
+		return hldupdate;
+	}
+
+	protected UpdateStatementExp compileToUpdateStatement(String src, int statementIndex) {
+		DeliaSessionImpl sessimpl = doCompileStatement(src);
+		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof UpdateStatementExp).collect(Collectors.toList());
+		Exp exp = list.get(statementIndex);
+		return (UpdateStatementExp) exp;
 	}
 	
 
