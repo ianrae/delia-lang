@@ -3,10 +3,6 @@ package org.delia.db.newhls.cud;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.DeliaSessionImpl;
-import org.delia.compiler.ast.DeleteStatementExp;
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.QueryExp;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -247,27 +243,6 @@ public class DeleteTests extends NewHLSTestBase {
 		return src;
 	}
 	
-	protected HLDDeleteStatement buildFromSrcDelete(String src, int expectedJoins) {
-		DeleteStatementExp deleteExp = compileToDeleteStatement(src);
-		QueryExp queryExp = deleteExp.queryExp;
-		log.log(src);
-		
-		mgr = createManager(); 
-		HLDDeleteStatement hlddel = mgr.fullBuildDelete(queryExp);
-		log.log(hlddel.toString());
-		assertEquals(expectedJoins, hlddel.hlddelete.hld.joinL.size());
-		return hlddel;
-	}
-
-	protected DeleteStatementExp compileToDeleteStatement(String src) {
-		DeliaSessionImpl sessimpl = doCompileStatement(src);
-		for(Exp exp: sessimpl.mostRecentContinueExpL) {
-			if (exp instanceof DeleteStatementExp) {
-				return (DeleteStatementExp) exp;
-			}
-		}
-		return null;
-	}
 	
 	protected SqlStatementGroup genDeleteSql(HLDDeleteStatement hldupdate, int numStatements) {
 		SqlStatementGroup stmgrp = mgr.generateSql(hldupdate);

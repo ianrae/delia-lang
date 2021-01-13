@@ -13,11 +13,13 @@ import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
+import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.ResultValue;
@@ -237,6 +239,29 @@ public class NewHLSTestBase extends BDDBase {
 		src += "\n type Address struct {id int unique, y int, relation cust Customer many optional } end";
 		return src;
 	}
+	
+	protected HLDDeleteStatement buildFromSrcDelete(String src, int expectedJoins) {
+		DeleteStatementExp deleteExp = compileToDeleteStatement(src);
+		QueryExp queryExp = deleteExp.queryExp;
+		log.log(src);
+		
+		mgr = createManager(); 
+		HLDDeleteStatement hlddel = mgr.fullBuildDelete(queryExp);
+		log.log(hlddel.toString());
+		assertEquals(expectedJoins, hlddel.hlddelete.hld.joinL.size());
+		return hlddel;
+	}
+
+	protected DeleteStatementExp compileToDeleteStatement(String src) {
+		DeliaSessionImpl sessimpl = doCompileStatement(src);
+		for(Exp exp: sessimpl.mostRecentContinueExpL) {
+			if (exp instanceof DeleteStatementExp) {
+				return (DeleteStatementExp) exp;
+			}
+		}
+		return null;
+	}
+	
 
 	@Override
 	public ZDBInterfaceFactory createForTest() {
