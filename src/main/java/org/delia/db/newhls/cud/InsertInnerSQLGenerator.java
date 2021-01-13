@@ -96,6 +96,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			SqlStatement stmx = genUpdateStatement(hldu);
 			stmgrp.add(stmx);
 		}
+		for(HLDDelete hldd: hld.deleteL) {
+			SqlStatement stmx = genDeleteStatement(hldd);
+			stmgrp.add(stmx);
+		}
 		
 		//do actual delete last
 		SqlStatement stm = genDeleteStatement(hld.hlddelete);

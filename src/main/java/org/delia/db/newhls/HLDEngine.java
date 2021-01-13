@@ -90,11 +90,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	public List<HLDDelete> addParentDeleteForDelete(HLDDelete hlddelete) {
 		DStructType structType = hlddelete.getStructType();
+		DValue pkval = getUpdatePK(hlddelete.hld); 
 		
-		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
-		//DValue pkval = getUpdatePK(hld.hld); 
-		
-		List<HLDDelete> parentDeletes= generateParentDeleteForDelete(structType, null);
+		List<HLDDelete> parentDeletes= generateParentDeleteForDelete(structType, pkval);
 		return parentDeletes;
 	}
 	
@@ -199,6 +197,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hlddelete);
 		for(HLDUpdate hld: stmt.updateL) {
+			aliasBuilder.assignAliases(hld);
+		}
+		for(HLDDelete hld: stmt.deleteL) {
 			aliasBuilder.assignAliases(hld);
 		}
 	}

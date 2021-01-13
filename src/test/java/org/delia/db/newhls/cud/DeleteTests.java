@@ -41,7 +41,7 @@ public class DeleteTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
 		dumpGrp(stmgrp);
 		
-		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "55");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.cust = ?", "55");
 		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	

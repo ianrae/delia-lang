@@ -176,7 +176,8 @@ public abstract class HLDEngineBase {
 				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
-					if (relinfo.isOneToOne() && structType.fieldIsOptional(relinfo.fieldName)) {
+					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
+					if (relinfo.isOneToOne() && childIsOptional) {
 						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
 						updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
@@ -205,7 +206,8 @@ public abstract class HLDEngineBase {
 				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
-					if (relinfo.isOneToOne() && structType.fieldIsOptional(relinfo.fieldName)) {
+					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
+					if (relinfo.isOneToOne() && !childIsOptional) {
 						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
 						deleteL.add(update);
 					} else if (relinfo.isOneToMany()) {
