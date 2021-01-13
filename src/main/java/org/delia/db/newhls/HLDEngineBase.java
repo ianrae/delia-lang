@@ -101,18 +101,29 @@ public abstract class HLDEngineBase {
 		return hld;
 	}
 
-	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
+	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldQuery2) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-
-		DStructType targetType = relinfo.farType;
-		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
-		
-		HLDQuery hldquery = this.buildQuery(queryExp);
-		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
-		
-		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
-		hld.hld = hldquery;
-		return hld;
+		if (hldQuery2.isPKQuery()) {
+			DStructType targetType = relinfo.farType;
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
+			
+			HLDQuery hldquery = this.buildQuery(queryExp);
+			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+			
+			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+			hld.hld = hldquery;
+			return hld;
+		} else {
+			DStructType targetType = relinfo.farType;
+			QueryExp queryExp = hldQuery2.originalQueryExp;
+			
+			HLDQuery hldquery = this.buildQuery(queryExp);
+			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+			
+			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+			hld.hld = hldquery;
+			return hld;
+		}
 	}
 	protected HLDDelete addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
@@ -164,10 +175,11 @@ public abstract class HLDEngineBase {
 	 * delete statement. find all 1:1 or 1:N relations where we are parent and far end is optional.
 	 * Since we are deleting the parent, update the child to set parent field to null.
 	 * @param structType - main type being deleted
+	 * @param hldQuery 
 	 * @param dval - values
 	 * @param pkval2 
 	 */
-	protected List<HLDUpdate> generateParentUpdateForDelete(DStructType structType, DValue pkval) {
+	protected List<HLDUpdate> generateParentUpdateForDelete(DStructType structType, DValue pkval, HLDQuery hldQuery) {
 		List<HLDUpdate> updateL = new ArrayList<>();
 		
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
@@ -178,10 +190,10 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && childIsOptional) {
-						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery);
 						updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
-						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery);
 						updateL.add(update);
 					}
 				} 

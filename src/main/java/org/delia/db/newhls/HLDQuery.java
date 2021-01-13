@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import org.delia.compiler.ast.QueryExp;
 import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -27,7 +29,8 @@ public class HLDQuery {
 	public List<FetchSpec> fetchL = new ArrayList<>(); //order matters: eg. .addr.fetch('country')
 	public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 	public List<HLDField> fieldL = new ArrayList<>(); 
-
+	public QueryExp originalQueryExp;
+	
 	//added after
 	public List<JoinElement> joinL = new ArrayList<>();
 	
@@ -53,6 +56,22 @@ public class HLDQuery {
 		Optional<JoinElement> optEl = hld.joinL.stream().filter(x -> x.aliasName.equals(alias)).findAny();
 		return optEl.orElse(null);
 	}
+	
+	public boolean isAllQuery() {
+		if (filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) filter;
+			return sfc.isAllQuery();
+		}
+		return false;
+	}
+	public boolean isPKQuery() {
+		if (filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) filter;
+			return sfc.isPKQuery();
+		}
+		return false;
+	}
+	
 
 	@Override
 	public String toString() {

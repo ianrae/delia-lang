@@ -43,6 +43,8 @@ public class HLDQueryBuilder {
 		hld.filter = builder.build(queryExp);
 		buildFinalFieldAndThroughChain(queryExp, hld); 
 		buildFns(queryExp, hld);
+		
+		hld.originalQueryExp = queryExp; //may be needed later
 		return hld;
 	}
 
