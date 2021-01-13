@@ -36,6 +36,7 @@ public abstract class HLDEngineBase {
 	protected DatIdMap datIdMap;
 	protected Log log;
 	protected SprigService sprigSvc;
+	protected QueryBuilderHelper queryBuilderHelper;
 
 	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -43,6 +44,7 @@ public abstract class HLDEngineBase {
 		this.datIdMap = datIdMap;
 		this.log = log;
 		this.sprigSvc = sprigSvc;
+		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 	}
 	
 	public abstract HLDQuery buildQuery(QueryExp queryExp);
@@ -88,28 +90,23 @@ public abstract class HLDEngineBase {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
-		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
-		QuerySpec querySpec = new QuerySpec();
-		querySpec.evaluator = null; //TODO fix
-		querySpec.queryExp = queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
+		QueryExp queryExp = queryBuilderHelper.buildPKQueryExp(targetType, fkval); //queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
 		
-		HLDQuery hldquery = this.buildQuery(querySpec.queryExp);
+		HLDQuery hldquery = buildQuery(queryExp);
 		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 		
 		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, fkval, relinfo.otherSide.fieldName, pkval);
 		hld.hld = hldquery;
 		return hld;
 	}
+
 	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
-		QueryBuilderService queryBuilderSvc = factorySvc.getQueryBuilderService();
-		QuerySpec querySpec = new QuerySpec();
-		querySpec.evaluator = null; //TODO fix
-		querySpec.queryExp = queryBuilderSvc.createEqQuery(targetType.getName(), relinfo.otherSide.fieldName, pkval);
+		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
 		
-		HLDQuery hldquery = this.buildQuery(querySpec.queryExp);
+		HLDQuery hldquery = this.buildQuery(queryExp);
 		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 		
 		HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
