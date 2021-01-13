@@ -3,6 +3,7 @@ package org.delia.db.newhls.cud;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDField;
@@ -190,10 +191,16 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	private void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
 //		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
 
-		sc.o("WHERE %s IN ", conditionStr);
-		sc.o("(SELECT t2.cid FROM Customer as t2 WHERE");
+		conditionStr = StringUtils.substringBefore(conditionStr, "=").trim();
+		sc.o(" WHERE %s IN ", conditionStr);
+		String alias = "t9"; //TODO fix later
+		sc.o("(SELECT %s.cid FROM %s as %s WHERE", alias, hld.fromType.getName(), alias);
 		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
-		sc.o(" %s", whereStr);
+
+		String s1 = "t9.";
+		String source = String.format("%s.", hld.fromAlias);
+		whereStr = whereStr.replace(source, s1);
+		sc.o("%s", whereStr);
 	}
 
 	

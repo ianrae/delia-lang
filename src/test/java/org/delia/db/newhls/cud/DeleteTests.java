@@ -63,10 +63,12 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust IN (SELECT t9.cid FROM Customer as t9 WHERE t9.x > ?", null, "10");
 		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.x > ?", "10");
 	}
 	
+	
+	//TODO: ****************** all remaining tests need to be done
 	// --- 1:1 ---
 	@Test
 	public void test11a() {
