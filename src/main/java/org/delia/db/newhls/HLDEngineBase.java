@@ -258,7 +258,17 @@ public abstract class HLDEngineBase {
 						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
 						deleteL.add(update);
 					}
-				} 
+				} else if (relinfo.isOneToOne()) {
+					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
+					if (!childIsOptional) { //we deleting child. 
+						
+						
+						//TODO: need new fn that does a subselect on the main filter!!!!!!!!!!!
+						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo.otherSide, pkpair.name, pkval);
+						deleteL.add(update);
+					}
+					//TODO: if 1:M we should delete parent if is only one child!!
+				}
 			}
 		}
 		return deleteL;

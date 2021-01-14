@@ -52,6 +52,17 @@ public class DeleteTests extends NewHLSTestBase {
 		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
 	}
 	@Test
+	public void test2Mandatory() {
+		useCustomer11MandatoryChildSrc = true;
+		String src = "delete Address[100]";
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
+		dumpGrp(stmgrp);
+		//DELETE from customer WHERE cid IN (SELECT t2.cust FROM Address as t2 WHERE t2.id = ?) 100
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
+	}
+	@Test
 	public void test3() {
 		useCustomer11Src = true;
 		String src = "delete Customer[x > 10]";
@@ -69,6 +80,18 @@ public class DeleteTests extends NewHLSTestBase {
 	@Test
 	public void test11a() {
 		useCustomer11Src = true;
+		String src0 = "insert Customer {cid: 55, x: 45}";
+		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
+		src = addSrc(src, "delete Address[1]");
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
+		dumpGrp(stmgrp);
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "1");
+	}
+	@Test
+	public void test11aM() {
+		useCustomer11MandatoryChildSrc = true;
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
 		src = addSrc(src, "delete Address[1]");
