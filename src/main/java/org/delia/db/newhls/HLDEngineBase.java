@@ -3,16 +3,20 @@ package org.delia.db.newhls;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.simple.SimpleBase;
+import org.delia.db.newhls.simple.SimpleSelect;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.db.newhls.simple.SimpleUpdate;
+import org.delia.db.newhls.simple.SubSelectRenderer;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
@@ -109,30 +113,41 @@ public abstract class HLDEngineBase {
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
 			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
-			
-			HLDQuery hldquery = this.buildQuery(queryExp);
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
 			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
-			hld.hld = hldquery;
-			SimpleUpdate simple = this.simpleBuilder.buildFrom(hld);
+			hld.hld = buildQuery(queryExp);
+			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
 			moreL.add(simple);
-			return hld;
+			return null;
 		} else {
 			DStructType targetType = relinfo.farType;
-			QueryExp queryExp = hldQuery2.originalQueryExp;
-			
-			HLDQuery hldquery = this.buildQuery(queryExp);
+			HLDQuery hldquery = buildQuery(hldQuery2.originalQueryExp);
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
 			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
 			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
 			hld.hld = hldquery;
 			hld.isSubSelect = true;
-//			hld.subSelect
-			return hld;
+			
+			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
+			moreL.add(simple);
+			
+//			WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
+			removeAllButLastFirstField(hldquery);
+			SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery);
+//			OpFilterCond sfc = (SingleFilterCond) hld.hld.filter;
+//			sfc.val1.customRenderer = new SubSelectRenderer(simpleSel);
+			
+			return null;
 		}
 	}
+	private void removeAllButLastFirstField(HLDQuery hldquery) {
+		HLDField fld = hldquery.fieldL.get(0);
+		hldquery.fieldL.clear();
+		hldquery.fieldL.add(fld);
+	}
+
 	protected HLDDelete addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
@@ -200,10 +215,10 @@ public abstract class HLDEngineBase {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && childIsOptional) {
 						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
-						updateL.add(update);
+						if (update != null) updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
 						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
-						updateL.add(update);
+						if (update != null) updateL.add(update);
 					}
 				} 
 			}
