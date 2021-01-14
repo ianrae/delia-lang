@@ -3,8 +3,7 @@ package org.delia.db.newhls.simple;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.db.newhls.HLDAliasBuilder;
-import org.delia.db.newhls.HLDAliasManager;
+import org.delia.db.newhls.HLDAliasBuilderAdapter;
 import org.delia.db.newhls.SqlColumn;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cud.HLDUpdate;
@@ -20,7 +19,7 @@ public class SimpleUpdate extends SimpleBase {
 	public HLDUpdate hld; //for aliases
 	
 	@Override
-	public void assignAliases(HLDAliasBuilder aliasBuilder) {
+	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
 		aliasBuilder.assignAliases(hld);
 		for(SqlColumn column: fieldL) {
 			column.alias = hld.getMainAlias();

@@ -1,6 +1,6 @@
 package org.delia.db.newhls.simple;
 
-import org.delia.db.newhls.HLDAliasBuilder;
+import org.delia.db.newhls.HLDAliasBuilderAdapter;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 
@@ -14,7 +14,7 @@ public class SimpleDelete extends SimpleBase {
 	HLDDelete hld; //for aliases
 	
 	@Override
-	public void assignAliases(HLDAliasBuilder aliasBuilder) {
+	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
 		aliasBuilder.assignAliases(hld);
 	}
 	

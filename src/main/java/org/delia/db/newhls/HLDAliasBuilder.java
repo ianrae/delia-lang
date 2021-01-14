@@ -26,7 +26,7 @@ import org.delia.util.DValueHelper;
  * @author ian
  *
  */
-public class HLDAliasBuilder {
+public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private HLDAliasManager aliasMgr;
 
 	public HLDAliasBuilder(HLDAliasManager aliasMgr) {
@@ -37,6 +37,7 @@ public class HLDAliasBuilder {
 		simple.assignAliases(this);
 	}
 
+	@Override
 	public void assignAliases(HLDQuery hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
 		hld.fromAlias = info.alias;
@@ -183,6 +184,7 @@ public class HLDAliasBuilder {
 		val1.alias = hld.fromAlias;
 	}
 	
+	@Override
 	public void assignAliases(HLDInsert hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = info.alias;
@@ -211,6 +213,7 @@ public class HLDAliasBuilder {
 		return info;
 	}
 	
+	@Override
 	public void assignAliases(HLDUpdate hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = info.alias;
@@ -220,6 +223,7 @@ public class HLDAliasBuilder {
 		//now populate SYMBOL FilterdVal
 		doFilter(hld.hld);
 	}
+	@Override
 	public void assignAliases(HLDDelete hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = info.alias;
