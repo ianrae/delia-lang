@@ -20,7 +20,7 @@ public class FilterVal {
 	public Exp exp;
 	public FilterFunc filterFn; //normally null
 	public SymbolChain symchain; //normally null
-	public CustomFilterValueRenderer customRenderer;
+	public CustomFilterValueRenderer customRenderer; //lower-level. renders single value
 	
 	//resolved later
 	public StructField structField; //only set if SYMBOL or if SingleFilterCond

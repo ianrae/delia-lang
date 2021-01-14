@@ -51,6 +51,9 @@ public class SQLWhereGenerator {
 			return String.format("%s.%s=%s", alias, fieldName, valsql);
 		} else if (filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) filter;
+			if (ofc.customRenderer != null) {
+				return ofc.customRenderer.render(ofc, paramGen, stm);
+			}
 			String s1 = renderVal(ofc.val1, paramGen, stm);
 			String s2 = renderVal(ofc.val2, paramGen, stm);
 			String not = ofc.isNot ? "NOT " : "";

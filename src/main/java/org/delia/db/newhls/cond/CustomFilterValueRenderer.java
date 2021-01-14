@@ -9,5 +9,12 @@ import org.delia.db.sql.prepared.SqlStatement;
  *
  */
 public interface CustomFilterValueRenderer {
-	String render(FilterVal val1, SqlParamGenerator paramGen, SqlStatement stm);
+	/**
+	 * 
+	 * @param obj  could be a FilterVal or a OpFilterCond
+	 * @param paramGen
+	 * @param stm
+	 * @return
+	 */
+	String render(Object obj, SqlParamGenerator paramGen, SqlStatement stm);
 }

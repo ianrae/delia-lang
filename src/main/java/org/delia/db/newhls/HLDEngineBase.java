@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
@@ -134,10 +135,13 @@ public abstract class HLDEngineBase {
 			moreL.add(simple);
 			
 //			WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
-			removeAllButLastFirstField(hldquery);
-			SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery);
-//			OpFilterCond sfc = (SingleFilterCond) hld.hld.filter;
-//			sfc.val1.customRenderer = new SubSelectRenderer(simpleSel);
+//			removeAllButLastFirstField(hldquery);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(hld.getStructType(), pkFieldName, junk);
+			HLDQuery hldquery2 = buildQuery(queryExp);
+			
+			SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
+			OpFilterCond sfc = (OpFilterCond) hld.hld.filter;
+			sfc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
 			
 			return null;
 		}
