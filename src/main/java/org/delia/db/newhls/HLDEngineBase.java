@@ -12,6 +12,7 @@ import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.simple.SimpleBase;
+import org.delia.db.newhls.simple.SimpleDelete;
 import org.delia.db.newhls.simple.SimpleSelect;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.db.newhls.simple.SimpleUpdate;
@@ -131,17 +132,17 @@ public abstract class HLDEngineBase {
 			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
 			moreL.add(simple);
 			
-			attachSubSelect(hld, hldQuery2.originalQueryExp);
+			attachSubSelect(hld.hld, hldQuery2.originalQueryExp);
 		}
 	}
 
-	private void attachSubSelect(HLDUpdate hld, QueryExp queryExp) {
+	private void attachSubSelect(HLDQuery hld, QueryExp queryExp) {
 //		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
 		HLDQuery hldquery2 = buildQuery(queryExp);
 		removeAllButLastFirstField(hldquery2);
 		
 		SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
-		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+		OpFilterCond ofc = (OpFilterCond) hld.filter;
 		ofc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
 	}
 
@@ -174,9 +175,23 @@ public abstract class HLDEngineBase {
 		HLDQuery hldquery = this.buildQuery(queryExp);
 		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 		
-		HLDDelete hld = hldBuilder.buildSimpleDeletex(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
 		hld.hld = hldquery;
 		return hld;
+	}
+	protected void xaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldquery2, List<SimpleBase> moreL) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		DStructType targetType = relinfo.farType;
+		HLDQuery hldquery = buildPKQuery(relinfo, true);
+		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+		
+		DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
+		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
+		hld.hld = hldquery;
+		
+		SimpleDelete simple = simpleBuilder.buildFrom(hld);
+		moreL.add(simple);
+		attachSubSelect(hld.hld, hldquery.originalQueryExp);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
@@ -245,10 +260,12 @@ public abstract class HLDEngineBase {
 	 * delete statement. find all 1:1 or 1:N relations where we are parent and far end is optional.
 	 * Since we are deleting the parent, update the child to set parent field to null.
 	 * @param structType - main type being deleted
+	 * @param hldquery 
+	 * @param moreL 
 	 * @param dval - values
 	 * @param pkval2 
 	 */
-	protected List<HLDDelete> generateParentDeleteForDelete(DStructType structType, DValue pkval) {
+	protected List<HLDDelete> generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL) {
 		List<HLDDelete> deleteL = new ArrayList<>();
 		
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
@@ -268,11 +285,7 @@ public abstract class HLDEngineBase {
 				} else if (relinfo.isOneToOne()) {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
 					if (!childIsOptional) { //we deleting child. 
-						
-						
-						//TODO: need new fn that does a subselect on the main filter!!!!!!!!!!!
-						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo.otherSide, pkpair.name, pkval);
-						deleteL.add(update);
+						xaddFkDeleteChildForDeleteParentStatement(relinfo.otherSide, pkpair.name, pkval, hldquery, moreL);
 					}
 					//TODO: if 1:M we should delete parent if is only one child!!
 				}

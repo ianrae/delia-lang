@@ -169,7 +169,7 @@ public class HLDDsonBuilder {
 		
 		return hldupdate;
 	}
-	public HLDDelete buildSimpleDeletex(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
+	public HLDDelete buildSimpleDelete(DStructType structType, String pkFieldName, DValue pkval, String fieldName, DValue fkval) {
 		HLDDelete hlddel = new HLDDelete(new TypeOrTable(structType));
 		
 //		QueryExp exp = this.queryBuilderHelper.createEqQuery(targetType, fieldName, pkval)
