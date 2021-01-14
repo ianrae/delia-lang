@@ -68,7 +68,6 @@ public abstract class HLDEngineBase {
 		List<HLDUpdate> updateL = new ArrayList<>();
 		
 		pkval = (pkval != null) ? pkval : DValueHelper.findPrimaryKeyValue(dval);
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				DValue inner = dval.asStruct().getField(pair.name);
@@ -80,11 +79,11 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					if (relinfo.isOneToOne()) {
 						DValue fkval = inner.asRelation().getForeignKey();
-						HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
+						HLDUpdate update = addFkUpdateStatement(relinfo, pkval, fkval);
 						updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
 						for(DValue fkval: inner.asRelation().getMultipleKeys()) {
-							HLDUpdate update = addFkUpdateStatement(relinfo, pkpair.name, pkval, fkval);
+							HLDUpdate update = addFkUpdateStatement(relinfo, pkval, fkval);
 							updateL.add(update);
 						}
 					}
@@ -94,7 +93,7 @@ public abstract class HLDEngineBase {
 		return updateL;
 	}
 
-	protected HLDUpdate addFkUpdateStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
+	protected HLDUpdate addFkUpdateStatement(RelationInfo relinfo, DValue pkval, DValue fkval) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
@@ -181,7 +180,7 @@ public abstract class HLDEngineBase {
 		hldquery.fieldL.add(fld);
 	}
 
-	protected void addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, List<SimpleBase> moreL) {
+	protected void addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
@@ -273,7 +272,6 @@ public abstract class HLDEngineBase {
 	 * @param pkval2 
 	 */
 	protected void generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL) {
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				
@@ -281,9 +279,9 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && !childIsOptional) {
-						addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval, moreL);
+						addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
 					} else if (relinfo.isOneToMany()) {
-						addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval, moreL);
+						addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
 					}
 				} else if (relinfo.isOneToOne()) {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
