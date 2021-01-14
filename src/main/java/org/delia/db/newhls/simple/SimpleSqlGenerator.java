@@ -9,6 +9,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Renders simple SQL statements
@@ -27,7 +28,19 @@ public class SimpleSqlGenerator {
 		this.sqlWhereGen = new SQLWhereGenerator(registry, factorySvc);
 		this.paramGen = new SqlParamGenerator(registry, factorySvc); 
 	}
-
+	
+	public String genAny(SimpleBase simple) {
+		if (simple instanceof SimpleSelect) {
+			return gen((SimpleSelect)simple);
+		} else if (simple instanceof SimpleDelete) {
+			return gen((SimpleDelete)simple);
+		} else if (simple instanceof SimpleUpdate) {
+			return gen((SimpleUpdate)simple);
+		} else {
+			DeliaExceptionHelper.throwError("unknown-simplesql", "unknown simple sql type");
+			return null;
+		}
+	}
 	public String gen(SimpleSelect sel) {
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");

@@ -22,7 +22,7 @@ public class DeleteTests extends NewHLSTestBase {
 		String src = "delete Customer[55]";
 		
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 3);
 		dumpGrp(stmgrp);
 		
 		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "55");

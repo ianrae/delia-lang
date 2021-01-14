@@ -9,6 +9,8 @@ import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDSQLGenerator;
+import org.delia.db.newhls.simple.SimpleBase;
+import org.delia.db.newhls.simple.SimpleSqlGenerator;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -27,11 +29,13 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private HLDSQLGenerator otherSqlGen;
+	private SimpleSqlGenerator simpleSqlGenerator;
 
 	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
 		super(factorySvc);
 		this.registry = registry;
 		this.otherSqlGen = otherSqlGen;
+		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 	}
 
 	public SqlStatementGroup generate(HLDInsertStatement hldins) {
@@ -99,6 +103,11 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		for(HLDDelete hldd: hld.deleteL) {
 			SqlStatement stmx = genDeleteStatement(hldd);
+			stmgrp.add(stmx);
+		}
+		for(SimpleBase simple: hld.moreL) {
+			SqlStatement stmx = new SqlStatement();
+			stmx.sql = simpleSqlGenerator.genAny(simple);
 			stmgrp.add(stmx);
 		}
 		

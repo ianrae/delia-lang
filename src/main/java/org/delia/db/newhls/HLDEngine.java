@@ -200,5 +200,8 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		for(HLDDelete hld: stmt.deleteL) {
 			aliasBuilder.assignAliases(hld);
 		}
+		for(SimpleBase simple: stmt.moreL) {
+			aliasBuilder.assignAliases(simple);
+		}
 	}
 }

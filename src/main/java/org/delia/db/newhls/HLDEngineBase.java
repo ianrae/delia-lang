@@ -12,6 +12,7 @@ import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
+import org.delia.db.newhls.simple.SimpleUpdate;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
@@ -114,6 +115,8 @@ public abstract class HLDEngineBase {
 			
 			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
 			hld.hld = hldquery;
+			SimpleUpdate simple = this.simpleBuilder.buildFrom(hld);
+			moreL.add(simple);
 			return hld;
 		} else {
 			DStructType targetType = relinfo.farType;
