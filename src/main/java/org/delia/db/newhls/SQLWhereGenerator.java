@@ -47,7 +47,7 @@ public class SQLWhereGenerator {
 			}
 			String alias = sfc.val1.alias;
 			String fieldName = sfc.val1.structField.fieldName;
-			String valsql = renderValParam(sfc, paramGen, stm);
+			String valsql = renderSingleParam(sfc, paramGen, stm);
 			return String.format("%s.%s=%s", alias, fieldName, valsql);
 		} else if (filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) filter;
@@ -82,7 +82,7 @@ public class SQLWhereGenerator {
 	}
 
 
-	private String renderValParam(SingleFilterCond sfc, SqlParamGenerator paramGen, SqlStatement stm) {
+	private String renderSingleParam(SingleFilterCond sfc, SqlParamGenerator paramGen, SqlStatement stm) {
 		if (paramGen == null) {
 			return sfc.renderSql();
 		} else {
@@ -92,6 +92,9 @@ public class SQLWhereGenerator {
 		}
 	}
 	private String renderVal(FilterVal val1, SqlParamGenerator paramGen, SqlStatement stm) {
+		if (val1.customRenderer != null) {
+			return val1.customRenderer.render(val1, paramGen, stm);
+		}
 		boolean notParam = val1.isFn() || val1.isSymbol() || val1.isSymbolChain();
 		if (paramGen == null || notParam) {
 			return doRenderVal(val1);
