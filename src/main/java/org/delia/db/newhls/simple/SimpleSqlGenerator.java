@@ -9,6 +9,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
 
 /**
@@ -29,66 +30,68 @@ public class SimpleSqlGenerator {
 		this.paramGen = new SqlParamGenerator(registry, factorySvc); 
 	}
 	
-	public String genAny(SimpleBase simple) {
+	public String genAny(SimpleBase simple, SqlStatement stm) {
 		if (simple instanceof SimpleSelect) {
-			return gen((SimpleSelect)simple);
+			return gen((SimpleSelect)simple, stm);
 		} else if (simple instanceof SimpleDelete) {
-			return gen((SimpleDelete)simple);
+			return gen((SimpleDelete)simple, stm);
 		} else if (simple instanceof SimpleUpdate) {
-			return gen((SimpleUpdate)simple);
+			return gen((SimpleUpdate)simple, stm);
 		} else {
 			DeliaExceptionHelper.throwError("unknown-simplesql", "unknown simple sql type");
 			return null;
 		}
 	}
-	public String gen(SimpleSelect sel) {
+	public String gen(SimpleSelect simple, SqlStatement stm) {
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");
 
-		ListWalker<SqlColumn> walker = new ListWalker<>(sel.fieldL);
+		ListWalker<SqlColumn> walker = new ListWalker<>(simple.fieldL);
 		while(walker.hasNext()) {
 			SqlColumn ff = walker.next();
 			sc.o(ff.render());
 			walker.addIfNotLast(sc, ", ");
 		}
 
-		genTblName(sc, " FROM %s", sel);
-		outputWhere(sc, sel.filter);
+		genTblName(sc, " FROM %s", simple);
+		outputWhere(sc, simple.filter, stm);
 		return sc.toString();
 	}
 	private void genTblName(StrCreator sc, String fmt, SimpleBase sel) {
 		sc.o(fmt, sel.tblFrag.renderAsTable());
 	}
 
-	private void outputWhere(StrCreator sc, FilterCond filter) {
+	private void outputWhere(StrCreator sc, FilterCond filter, SqlStatement stm) {
 		if (filter != null) {
-			SqlStatement stm = new SqlStatement();
 			String s = this.sqlWhereGen.doFilter(filter, paramGen, stm);
 			sc.o(" WHERE %s", s);
 		}
 	}
 
-	public String gen(SimpleDelete sel) {
+	public String gen(SimpleDelete simple, SqlStatement stm) {
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE");
-		genTblName(sc, " FROM %s", sel);
-		outputWhere(sc, sel.filter);
+		genTblName(sc, " FROM %s", simple);
+		outputWhere(sc, simple.filter, stm);
 		return sc.toString();
 	}
-	public String gen(SimpleUpdate sel) {
+	public String gen(SimpleUpdate simple, SqlStatement stm) {
 		StrCreator sc = new StrCreator();
 		sc.o("UPDATE");
-		genTblName(sc, " %s", sel);
+		genTblName(sc, " %s", simple);
 		sc.o(" SET ");
-		ListWalker<SqlColumn> walker = new ListWalker<>(sel.fieldL);
+		ListWalker<SqlColumn> walker = new ListWalker<>(simple.fieldL);
+		int index = 0;
 		while(walker.hasNext()) {
 			SqlColumn ff = walker.next();
 			sc.o("%s = %s", ff.render(), "?");
 			
 			walker.addIfNotLast(sc, ", ");
+			DValue inner = simple.hld.valueL.get(index++);
+			stm.paramL.add(inner);
 		}
 
-		outputWhere(sc, sel.filter);
+		outputWhere(sc, simple.filter, stm);
 		return sc.toString();
 	}
 }

@@ -24,6 +24,7 @@ public class SimpleSelect extends SimpleBase {
 		for(SqlColumn column: fieldL) {
 			column.alias = hld.fromAlias;
 		}
+		tblFrag.alias = hld.fromAlias;
 	}
 	
 }

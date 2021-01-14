@@ -24,6 +24,7 @@ public class SimpleUpdate extends SimpleBase {
 		for(SqlColumn column: fieldL) {
 			column.alias = hld.getMainAlias();
 		}
+		tblFrag.alias = hld.getMainAlias();
 	}
 
 }

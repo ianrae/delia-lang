@@ -16,6 +16,7 @@ public class SimpleDelete extends SimpleBase {
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
 		aliasBuilder.assignAliases(hld);
+		tblFrag.alias = hld.getMainAlias();
 	}
 	
 }

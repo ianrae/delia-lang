@@ -9,6 +9,7 @@ import org.delia.db.newhls.simple.SimpleSelect;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.db.newhls.simple.SimpleSqlGenerator;
 import org.delia.db.newhls.simple.SimpleUpdate;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.junit.Test;
 
 public class BetterSQLGenTests extends NewHLSTestBase {
@@ -23,7 +24,8 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		SimpleSelect sel = builder.buildFrom(hld.hldquery);
 		
 		SimpleSqlGenerator gen = new SimpleSqlGenerator(this.session.getExecutionContext().registry, delia.getFactoryService());
-		String sql = gen.gen(sel);
+		SqlStatement stm = new SqlStatement();
+		String sql = gen.gen(sel, stm);
 		log.log(sql);
 		assertEquals("SELECT t0.cid, t0.x FROM Customer as t0 WHERE t0.cid=?", sql);
 	}
@@ -38,7 +40,8 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		SimpleDelete sel = builder.buildFrom(hld.hlddelete);
 		
 		SimpleSqlGenerator gen = new SimpleSqlGenerator(this.session.getExecutionContext().registry, delia.getFactoryService());
-		String sql = gen.gen(sel);
+		SqlStatement stm = new SqlStatement();
+		String sql = gen.gen(sel, stm);
 		log.log(sql);
 		assertEquals("DELETE FROM Customer as t0 WHERE t0.x > ?", sql);
 	}
@@ -53,7 +56,8 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		SimpleUpdate sel = builder.buildFrom(hldupdate.hldupdate);
 		
 		SimpleSqlGenerator gen = new SimpleSqlGenerator(this.session.getExecutionContext().registry, delia.getFactoryService());
-		String sql = gen.gen(sel);
+		SqlStatement stm = new SqlStatement();
+		String sql = gen.gen(sel, stm);
 		log.log(sql);
 		assertEquals("UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", sql);
 	}
