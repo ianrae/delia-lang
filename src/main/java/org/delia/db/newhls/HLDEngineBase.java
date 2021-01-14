@@ -6,12 +6,11 @@ import java.util.List;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
-import org.delia.db.QueryBuilderService;
-import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.sprig.SprigService;
@@ -21,7 +20,6 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
-import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -39,6 +37,7 @@ public abstract class HLDEngineBase {
 	protected Log log;
 	protected SprigService sprigSvc;
 	protected QueryBuilderHelper queryBuilderHelper;
+	private SimpleSqlBuilder simpleBuilder;
 
 	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -47,6 +46,7 @@ public abstract class HLDEngineBase {
 		this.log = log;
 		this.sprigSvc = sprigSvc;
 		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
+		this.simpleBuilder = new SimpleSqlBuilder();
 	}
 	
 	public abstract HLDQuery buildQuery(QueryExp queryExp);
