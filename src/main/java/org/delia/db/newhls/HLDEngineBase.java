@@ -254,7 +254,7 @@ public abstract class HLDEngineBase {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && childIsOptional) {
 						addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
-					} else if (relinfo.isOneToMany()) {
+					} else if (relinfo.isOneToMany() && childIsOptional) {
 						addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
 					}
 				} 
@@ -280,7 +280,7 @@ public abstract class HLDEngineBase {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && !childIsOptional) {
 						addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
-					} else if (relinfo.isOneToMany()) {
+					} else if (relinfo.isOneToMany() && !childIsOptional) {
 						addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
 					}
 				} else if (relinfo.isOneToOne()) {

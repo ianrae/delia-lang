@@ -77,15 +77,18 @@ public class DeleteTests extends NewHLSTestBase {
 	
 	//TODO: ****************** all remaining tests need to be done
 	
-//	// --- 1:N ---
-//	@Test
-//	public void test1N() {
-//		useCustomer1NSrc = true;
-//		String src = "update Customer[1] {x: 45}";
-//		
-//		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-//		chkDeleteSql(hlddelete, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
-//	}
+	// --- 1:N ---
+	@Test
+	public void test1N() {
+		useCustomer1NSrc = true;
+		String src = "delete Customer[1]";
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
+		dumpGrp(stmgrp);
+		//delete from Address inner join Customer as t0.id=t1.cust where (select count(*) from Address where t0.cust=1) > 0
+		chkDeleteSql(stmgrp, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+	}
 //	@Test
 //	public void test1N2() {
 //		useCustomer1NSrc = true;
