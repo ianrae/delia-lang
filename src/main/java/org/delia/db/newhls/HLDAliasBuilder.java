@@ -33,6 +33,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		this.aliasMgr = aliasMgr;
 	}
 	
+	@Override
 	public void assignAliases(SimpleBase simple) {
 		simple.assignAliases(this);
 	}
@@ -87,6 +88,9 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			doFilterPKVal(sfc.val1, hld);
 		} else if (filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) filter;
+			if (ofc.customRenderer != null) {
+				ofc.customRenderer.assignAliases(ofc, hld, (HLDAliasBuilderAdapter) this);
+			}
 			doFilterVal(ofc.val1, hld);
 			doFilterVal(ofc.val2, hld);
 		} else if (filter instanceof OpAndOrFilter) {

@@ -137,18 +137,19 @@ public abstract class HLDEngineBase {
 			moreL.add(simple);
 			
 //			WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
-//			removeAllButLastFirstField(hldquery);
 			HLDQuery hldquery2 = buildQuery(hldQuery2.originalQueryExp);
-			OpFilterCond ofc = (OpFilterCond) hldquery2.filter;
-			ofc.val1.structField = new StructField(hldquery2.fromType, pkFieldName, null);
+			removeAllButLastFirstField(hldquery2);
+//			OpFilterCond ofc = (OpFilterCond) hldquery2.filter;
+//			ofc.val1.structField = new StructField(hldquery2.fromType, pkFieldName, null);
 			
 			SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
-			ofc = (OpFilterCond) hld.hld.filter;
+			OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
 			ofc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
 			
 			return null;
 		}
 	}
+
 	private void removeAllButLastFirstField(HLDQuery hldquery) {
 		HLDField fld = hldquery.fieldL.get(0);
 		hldquery.fieldL.clear();

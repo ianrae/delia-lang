@@ -1,5 +1,7 @@
 package org.delia.db.newhls.cond;
 
+import org.delia.db.newhls.HLDAliasBuilderAdapter;
+import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.SqlParamGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 
@@ -17,4 +19,6 @@ public interface CustomFilterValueRenderer {
 	 * @return
 	 */
 	String render(Object obj, SqlParamGenerator paramGen, SqlStatement stm);
+
+	void assignAliases(Object obj, HLDQuery hld, HLDAliasBuilderAdapter hldAliasBuilderAdapter);
 }
