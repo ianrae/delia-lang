@@ -17,6 +17,7 @@ import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
@@ -77,12 +78,12 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDDelete hlddel = new HLDDelete(hld);
 		return hlddel;
 	}
-	public List<HLDUpdate> addParentUpdatesForDelete(HLDDelete hld) {
+	public List<HLDUpdate> addParentUpdatesForDelete(HLDDelete hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
 		
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		DValue pkval = getUpdatePK(hld.hld); 
-		return generateParentUpdateForDelete(structType, pkval, hld.hld);
+		return generateParentUpdateForDelete(structType, pkval, hld.hld, moreL);
 	}
 
 	public List<HLDDelete> addParentDeleteForDelete(HLDDelete hlddelete) {

@@ -10,6 +10,7 @@ import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
@@ -102,7 +103,7 @@ public abstract class HLDEngineBase {
 		return hld;
 	}
 
-	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldQuery2) {
+	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
@@ -180,10 +181,11 @@ public abstract class HLDEngineBase {
 	 * Since we are deleting the parent, update the child to set parent field to null.
 	 * @param structType - main type being deleted
 	 * @param hldQuery 
+	 * @param moreL 
 	 * @param dval - values
 	 * @param pkval2 
 	 */
-	protected List<HLDUpdate> generateParentUpdateForDelete(DStructType structType, DValue pkval, HLDQuery hldQuery) {
+	protected List<HLDUpdate> generateParentUpdateForDelete(DStructType structType, DValue pkval, HLDQuery hldQuery, List<SimpleBase> moreL) {
 		List<HLDUpdate> updateL = new ArrayList<>();
 		
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
@@ -194,10 +196,10 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && childIsOptional) {
-						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery);
+						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
 						updateL.add(update);
 					} else if (relinfo.isOneToMany()) {
-						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery);
+						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
 						updateL.add(update);
 					}
 				} 
