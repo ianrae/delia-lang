@@ -3,12 +3,10 @@ package org.delia.db.newhls;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.OpFilterCond;
-import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
@@ -109,7 +107,7 @@ public abstract class HLDEngineBase {
 		return hld;
 	}
 
-	protected HLDUpdate addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
+	protected void addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
@@ -120,15 +118,12 @@ public abstract class HLDEngineBase {
 			hld.hld = buildQuery(queryExp);
 			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
 			moreL.add(simple);
-			return null;
 		} else {
 			DStructType targetType = relinfo.farType;
-			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
-			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, junk);
-			HLDQuery hldquery = buildQuery(queryExp);
-			
+			HLDQuery hldquery = buildPKQuery(relinfo, true);
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
 			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
 			hld.hld = hldquery;
 			hld.isSubSelect = true;
@@ -136,17 +131,31 @@ public abstract class HLDEngineBase {
 			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
 			moreL.add(simple);
 			
-//			WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
-			HLDQuery hldquery2 = buildQuery(hldQuery2.originalQueryExp);
-			removeAllButLastFirstField(hldquery2);
-//			OpFilterCond ofc = (OpFilterCond) hldquery2.filter;
-//			ofc.val1.structField = new StructField(hldquery2.fromType, pkFieldName, null);
-			
-			SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
-			OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-			ofc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
-			
-			return null;
+			attachSubSelect(hld, hldQuery2.originalQueryExp);
+		}
+	}
+
+	private void attachSubSelect(HLDUpdate hld, QueryExp queryExp) {
+//		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
+		HLDQuery hldquery2 = buildQuery(queryExp);
+		removeAllButLastFirstField(hldquery2);
+		
+		SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
+		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+		ofc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
+	}
+
+	private HLDQuery buildPKQuery(RelationInfo relinfo, boolean isFlipped) {
+		if (isFlipped) {
+			DStructType targetType = relinfo.farType;
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, junk);
+			return buildQuery(queryExp);
+		} else {
+			DStructType targetType = relinfo.nearType;
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.farType);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, junk);
+			return buildQuery(queryExp);
 		}
 	}
 
@@ -222,11 +231,9 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && childIsOptional) {
-						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
-						if (update != null) updateL.add(update);
+						addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
 					} else if (relinfo.isOneToMany()) {
-						HLDUpdate update = addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
-						if (update != null) updateL.add(update);
+						addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
 					}
 				} 
 			}
