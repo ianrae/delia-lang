@@ -121,7 +121,7 @@ public abstract class HLDEngineBase {
 			moreL.add(simple);
 		} else {
 			DStructType targetType = relinfo.farType;
-			HLDQuery hldquery = buildPKQuery(relinfo, true);
+			HLDQuery hldquery = buildRelQuery(relinfo, true);
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
 			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
@@ -132,21 +132,22 @@ public abstract class HLDEngineBase {
 			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
 			moreL.add(simple);
 			
-			attachSubSelect(hld.hld, hldQuery2.originalQueryExp);
+			targetPKPair = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType);
+			attachSubSelect(hld.hld, hldQuery2.originalQueryExp, targetPKPair.name);
 		}
 	}
 
-	private void attachSubSelect(HLDQuery hld, QueryExp queryExp) {
+	private void attachSubSelect(HLDQuery hld, QueryExp queryExp, String targetFieldName) {
 //		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
 		HLDQuery hldquery2 = buildQuery(queryExp);
-		removeAllButLastFirstField(hldquery2);
+		removeAllButTargetField(hldquery2, targetFieldName);
 		
 		SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
 		OpFilterCond ofc = (OpFilterCond) hld.filter;
 		ofc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
 	}
 
-	private HLDQuery buildPKQuery(RelationInfo relinfo, boolean isFlipped) {
+	private HLDQuery buildRelQuery(RelationInfo relinfo, boolean isFlipped) {
 		if (isFlipped) {
 			DStructType targetType = relinfo.farType;
 			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
@@ -159,9 +160,24 @@ public abstract class HLDEngineBase {
 			return buildQuery(queryExp);
 		}
 	}
+	private HLDQuery buildPKQuery(RelationInfo relinfo, boolean isFlipped) {
+		if (isFlipped) {
+			DStructType targetType = relinfo.farType;
+			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, pkpair.name, junk);
+			return buildQuery(queryExp);
+		} else {
+			DStructType targetType = relinfo.nearType;
+			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.farType);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, pkpair.name, junk);
+			return buildQuery(queryExp);
+		}
+	}
 
-	private void removeAllButLastFirstField(HLDQuery hldquery) {
-		HLDField fld = hldquery.fieldL.get(0);
+	private void removeAllButTargetField(HLDQuery hldquery, String fieldName) {
+		HLDField fld = hldquery.fieldL.stream().filter(x -> x.fieldName.equals(fieldName)).findAny().get();
 		hldquery.fieldL.clear();
 		hldquery.fieldL.add(fld);
 	}
@@ -177,7 +193,7 @@ public abstract class HLDEngineBase {
 		hld.hld = hldquery;
 		return hld;
 	}
-	protected void xaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldquery2, List<SimpleBase> moreL) {
+	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldquery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		DStructType targetType = relinfo.nearType;
 		HLDQuery hldquery = buildPKQuery(relinfo, false);
@@ -187,7 +203,7 @@ public abstract class HLDEngineBase {
 		
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
 		moreL.add(simple);
-		attachSubSelect(hld.hld, hldquery2.originalQueryExp);
+		attachSubSelect(hld.hld, hldquery2.originalQueryExp, relinfo.otherSide.fieldName);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
@@ -281,7 +297,7 @@ public abstract class HLDEngineBase {
 				} else if (relinfo.isOneToOne()) {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
 					if (!childIsOptional) { //we deleting child. 
-						xaddFkDeleteChildForDeleteParentStatement(relinfo.otherSide, pkpair.name, pkval, hldquery, moreL);
+						xaddFkDeleteParentStatement(relinfo.otherSide, pkpair.name, pkval, hldquery, moreL);
 					}
 					//TODO: if 1:M we should delete parent if is only one child!!
 				}

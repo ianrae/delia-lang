@@ -59,8 +59,8 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
 		dumpGrp(stmgrp);
-		//DELETE from customer WHERE cid IN (SELECT t2.cust FROM Address as t2 WHERE t2.id = ?) 100
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Customer as t1 WHERE t1.cid IN (SELECT t2.cust FROM Address as t2 WHERE t2.id=?)", "100");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
 	}
 	@Test
 	public void test3() {
@@ -76,45 +76,6 @@ public class DeleteTests extends NewHLSTestBase {
 	
 	
 	//TODO: ****************** all remaining tests need to be done
-	// --- 1:1 ---
-	@Test
-	public void test11a() {
-		useCustomer11Src = true;
-		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
-		src = addSrc(src, "delete Address[1]");
-		
-		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
-		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "1");
-	}
-	@Test
-	public void test11aM() {
-		useCustomer11MandatoryChildSrc = true;
-		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
-		src = addSrc(src, "delete Address[1]");
-		
-		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
-		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "1");
-	}
-	@Test
-	public void test11b() {
-		useCustomer11Src = true;
-		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "update Address[1] {y: 45, cust:55}");
-		src = addSrc(src, "delete Customer[55]");
-		
-		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
-		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "UPDATE Address as t0 SET t0.cust = null WHERE t0.cust=?", "55");
-		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t1 WHERE t1.id=?", "55");
-	}
-	//TODO make test when child is not optional
 	
 //	// --- 1:N ---
 //	@Test
