@@ -108,7 +108,7 @@ public abstract class HLDEngineBase {
 		return hld;
 	}
 
-	protected void addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
+	protected void addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
@@ -121,12 +121,11 @@ public abstract class HLDEngineBase {
 			moreL.add(simple);
 		} else {
 			DStructType targetType = relinfo.farType;
-			HLDQuery hldquery = buildRelQuery(relinfo, true);
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
 			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
 			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
-			hld.hld = hldquery;
+			hld.hld = buildRelQuery(relinfo, true);
 			hld.isSubSelect = true;
 			
 			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
@@ -193,13 +192,11 @@ public abstract class HLDEngineBase {
 		hld.hld = hldquery;
 		return hld;
 	}
-	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldquery2, List<SimpleBase> moreL) {
+	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 		DStructType targetType = relinfo.nearType;
-		HLDQuery hldquery = buildPKQuery(relinfo, false);
-		
 		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
-		hld.hld = hldquery;
+		hld.hld = buildPKQuery(relinfo, false);
 		
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
 		moreL.add(simple);
@@ -247,10 +244,7 @@ public abstract class HLDEngineBase {
 	 * @param dval - values
 	 * @param pkval2 
 	 */
-	protected List<HLDUpdate> generateParentUpdateForDelete(DStructType structType, DValue pkval, HLDQuery hldQuery, List<SimpleBase> moreL) {
-		List<HLDUpdate> updateL = new ArrayList<>();
-		
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+	protected void generateParentUpdateForDelete(DStructType structType, DValue pkval, HLDQuery hldQuery, List<SimpleBase> moreL) {
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				
@@ -258,14 +252,13 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && childIsOptional) {
-						addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
+						addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
 					} else if (relinfo.isOneToMany()) {
-						addFkUpdateChildForDeleteParentStatement(relinfo, pkpair.name, pkval, hldQuery, moreL);
+						addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
 					}
 				} 
 			}
 		}
-		return updateL;
 	}
 	
 	/**
@@ -288,16 +281,16 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && !childIsOptional) {
-						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
-						deleteL.add(update);
+						HLDDelete deleteX = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						deleteL.add(deleteX);
 					} else if (relinfo.isOneToMany()) {
-						HLDDelete update = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
-						deleteL.add(update);
+						HLDDelete deleteX = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
+						deleteL.add(deleteX);
 					}
 				} else if (relinfo.isOneToOne()) {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
 					if (!childIsOptional) { //we deleting child. 
-						xaddFkDeleteParentStatement(relinfo.otherSide, pkpair.name, pkval, hldquery, moreL);
+						xaddFkDeleteParentStatement(relinfo.otherSide, hldquery, moreL);
 					}
 					//TODO: if 1:M we should delete parent if is only one child!!
 				}
