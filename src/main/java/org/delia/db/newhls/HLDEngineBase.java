@@ -173,25 +173,21 @@ public abstract class HLDEngineBase {
 		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
 		
 		HLDQuery hldquery = this.buildQuery(queryExp);
-		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
-		
-		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType, targetPKPair.name, pkval, relinfo.otherSide.fieldName, null);
+		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
 		hld.hld = hldquery;
 		return hld;
 	}
 	protected void xaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, HLDQuery hldquery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-		DStructType targetType = relinfo.farType;
-		HLDQuery hldquery = buildPKQuery(relinfo, true);
-		TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
+		DStructType targetType = relinfo.nearType;
+		HLDQuery hldquery = buildPKQuery(relinfo, false);
 		
-		DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
-		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
+		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
 		hld.hld = hldquery;
 		
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
 		moreL.add(simple);
-		attachSubSelect(hld.hld, hldquery.originalQueryExp);
+		attachSubSelect(hld.hld, hldquery2.originalQueryExp);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
