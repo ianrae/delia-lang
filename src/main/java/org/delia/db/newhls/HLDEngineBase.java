@@ -123,10 +123,12 @@ public abstract class HLDEngineBase {
 			return null;
 		} else {
 			DStructType targetType = relinfo.farType;
-			HLDQuery hldquery = buildQuery(hldQuery2.originalQueryExp);
+			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, junk);
+			HLDQuery hldquery = buildQuery(queryExp);
+			
 			TypePair targetPKPair = DValueHelper.findPrimaryKeyFieldPair(targetType);
 			
-			DValue junk = queryBuilderHelper.buildFakeValue(relinfo.nearType);
 			HLDUpdate hld = hldBuilder.buildSimpleUpdate(targetType, targetPKPair.name, junk, relinfo.otherSide.fieldName, null);
 			hld.hld = hldquery;
 			hld.isSubSelect = true;
@@ -136,12 +138,13 @@ public abstract class HLDEngineBase {
 			
 //			WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
 //			removeAllButLastFirstField(hldquery);
-			QueryExp queryExp = queryBuilderHelper.createEqQuery(hld.getStructType(), pkFieldName, junk);
-			HLDQuery hldquery2 = buildQuery(queryExp);
+			HLDQuery hldquery2 = buildQuery(hldQuery2.originalQueryExp);
+			OpFilterCond ofc = (OpFilterCond) hldquery2.filter;
+			ofc.val1.structField = new StructField(hldquery2.fromType, pkFieldName, null);
 			
 			SimpleSelect simpleSel = simpleBuilder.buildFrom(hldquery2);
-			OpFilterCond sfc = (OpFilterCond) hld.hld.filter;
-			sfc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
+			ofc = (OpFilterCond) hld.hld.filter;
+			ofc.customRenderer = new SubSelectRenderer(factorySvc, registry, simpleSel);
 			
 			return null;
 		}
