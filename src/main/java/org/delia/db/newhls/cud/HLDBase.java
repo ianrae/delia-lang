@@ -14,4 +14,7 @@ public class HLDBase {
 	public DStructType getStructType() {
 		return typeOrTbl.getStructTypeEx(); //we know its never null
 	}
+	public String getMainAlias() {
+		return typeOrTbl.getAlias(); //only valid after alias has been assigned
+	}
 }

@@ -3,6 +3,8 @@ package org.delia.db.newhls.simple;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.db.newhls.HLDAliasBuilder;
+import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.SqlColumn;
 import org.delia.db.newhls.cond.FilterCond;
 
@@ -14,4 +16,14 @@ import org.delia.db.newhls.cond.FilterCond;
 public class SimpleSelect extends SimpleBase {
 	public List<SqlColumn> fieldL = new ArrayList<>();
 	public FilterCond filter;
+	public HLDQuery hld; //for aliases
+	
+	@Override
+	public void assignAliases(HLDAliasBuilder aliasBuilder) {
+		aliasBuilder.assignAliases(hld);
+		for(SqlColumn column: fieldL) {
+			column.alias = hld.fromAlias;
+		}
+	}
+	
 }

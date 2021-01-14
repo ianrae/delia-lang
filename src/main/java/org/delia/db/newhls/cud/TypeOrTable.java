@@ -22,4 +22,7 @@ public class TypeOrTable {
 	public DStructType getStructTypeEx() {
 		return structType;
 	}
+	public String getAlias() {
+		return alias;
+	}
 }

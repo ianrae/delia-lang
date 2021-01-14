@@ -14,6 +14,7 @@ import org.delia.db.newhls.cud.HLDBase;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -30,6 +31,10 @@ public class HLDAliasBuilder {
 
 	public HLDAliasBuilder(HLDAliasManager aliasMgr) {
 		this.aliasMgr = aliasMgr;
+	}
+	
+	public void assignAliases(SimpleBase simple) {
+		simple.assignAliases(this);
 	}
 
 	public void assignAliases(HLDQuery hld) {
