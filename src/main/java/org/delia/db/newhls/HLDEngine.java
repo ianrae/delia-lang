@@ -86,12 +86,11 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		generateParentUpdateForDelete(structType, pkval, hld.hld, moreL);
 	}
 
-	public List<HLDDelete> addParentDeleteForDelete(HLDDelete hlddelete, List<SimpleBase> moreL) {
+	public void addParentDeleteForDelete(HLDDelete hlddelete, List<SimpleBase> moreL) {
 		DStructType structType = hlddelete.getStructType();
 		DValue pkval = getUpdatePK(hlddelete.hld); 
 		
-		List<HLDDelete> parentDeletes= generateParentDeleteForDelete(structType, pkval, hlddelete.hld, moreL);
-		return parentDeletes;
+		generateParentDeleteForDelete(structType, pkval, hlddelete.hld, moreL);
 	}
 	
 	
@@ -194,9 +193,6 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public void assignAliases(HLDDeleteStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hlddelete);
-		for(HLDDelete hld: stmt.deleteL) {
-			aliasBuilder.assignAliases(hld);
-		}
 		for(SimpleBase simple: stmt.moreL) {
 			aliasBuilder.assignAliases(simple);
 		}

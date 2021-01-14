@@ -181,7 +181,7 @@ public abstract class HLDEngineBase {
 		hldquery.fieldL.add(fld);
 	}
 
-	protected HLDDelete addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval) {
+	protected void addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
@@ -190,7 +190,9 @@ public abstract class HLDEngineBase {
 		HLDQuery hldquery = this.buildQuery(queryExp);
 		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
 		hld.hld = hldquery;
-		return hld;
+		
+		SimpleDelete simple = simpleBuilder.buildFrom(hld);
+		moreL.add(simple);
 	}
 	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
@@ -270,9 +272,7 @@ public abstract class HLDEngineBase {
 	 * @param dval - values
 	 * @param pkval2 
 	 */
-	protected List<HLDDelete> generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL) {
-		List<HLDDelete> deleteL = new ArrayList<>();
-		
+	protected void generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL) {
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
@@ -281,11 +281,9 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (relinfo.isOneToOne() && !childIsOptional) {
-						HLDDelete deleteX = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
-						deleteL.add(deleteX);
+						addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval, moreL);
 					} else if (relinfo.isOneToMany()) {
-						HLDDelete deleteX = addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval);
-						deleteL.add(deleteX);
+						addFkDeleteChildForDeleteParentStatement(relinfo, pkpair.name, pkval, moreL);
 					}
 				} else if (relinfo.isOneToOne()) {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
@@ -296,7 +294,6 @@ public abstract class HLDEngineBase {
 				}
 			}
 		}
-		return deleteL;
 	}
 	
 }
