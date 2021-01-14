@@ -16,4 +16,6 @@ public interface HLDAliasBuilderAdapter {
 	void assignAliases(HLDUpdate hld);
 	void assignAliases(HLDDelete hld);
 	void assignAliases(SimpleBase simple);
+	void pushAliasScope(String scope);
+	void popAliasScope();
 }

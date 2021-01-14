@@ -237,4 +237,14 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFilter(hld.hld);
 	}
 
+	@Override
+	public void pushAliasScope(String scope) {
+		aliasMgr.pushScope(scope);
+	}
+
+	@Override
+	public void popAliasScope() {
+		aliasMgr.popScope();
+	}
+
 }

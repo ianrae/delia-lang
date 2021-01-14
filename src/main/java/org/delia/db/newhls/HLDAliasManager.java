@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ public class HLDAliasManager extends ServiceBase {
 	private Map<String,AliasInfo> assocMap = new HashMap<>(); //key is type.field
 	protected int nextAliasIndex = 0;
 	private DatIdMap datIdMap;
+	private Stack<String> scopeStack = new Stack<>();
 	
 	public HLDAliasManager(FactoryService factorySvc, DatIdMap datIdMap) {
 		super(factorySvc);
@@ -33,6 +35,7 @@ public class HLDAliasManager extends ServiceBase {
 //		char ch = (char) ('a' + nextAliasIndex++);
 //		String alias = String.format("%c", ch);
 		String alias = String.format("t%d", nextAliasIndex++);
+//		System.out.println("ALIAS " + alias);
 		return alias;
 	}
 	
@@ -76,7 +79,7 @@ public class HLDAliasManager extends ServiceBase {
 		info.tblType = structType;
 		info.tblName = info.tblType.getName();
 		
-		String key = String.format("%s", structType.getName());
+		String key = makeMainTableKey(structType.getName());
 		map.put(key, info);
 		return info;
 	}
@@ -97,7 +100,7 @@ public class HLDAliasManager extends ServiceBase {
 		info.tblName = info.tblType.getName();
 		
 		String key = String.format("%s.%s", structType.getName(), fieldName);
-		map.put(key, info);
+		map.put(key, info); //TODO: support scope later
 		return info;
 	}
 	public AliasInfo createOrGetFieldAliasAdditional(DStructType structType, String fieldName) {
@@ -115,7 +118,7 @@ public class HLDAliasManager extends ServiceBase {
 		info.tblName = info.tblType.getName();
 		
 		String key = String.format("ADD_%s.%s", structType.getName(), fieldName);
-		map.put(key, info);
+		map.put(key, info); //TODO: support scope later
 		return info;
 	}
 	public AliasInfo getFieldAlias(DStructType structType, String fieldName) {
@@ -190,7 +193,7 @@ public class HLDAliasManager extends ServiceBase {
 //	}
 
 	private AliasInfo getMainTableAlias(DStructType structType) {
-		String key = String.format("%s", structType.getName());
+		String key = makeMainTableKey(structType.getName());
 		return map.get(key);
 	}
 //	public AliasInfo findAlias(DStructType structType) {
@@ -263,6 +266,19 @@ public class HLDAliasManager extends ServiceBase {
 
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
+	}
+
+	public void pushScope(String scope) {
+		scopeStack.push(scope);
+	}
+
+	public void popScope() {
+		scopeStack.pop();
+	}
+	private String makeMainTableKey(String typeName) {
+		String prefix = scopeStack.isEmpty() ? "" : scopeStack.peek();
+		String key = String.format("%s%s", prefix, typeName);
+		return key;
 	}
 
 }
