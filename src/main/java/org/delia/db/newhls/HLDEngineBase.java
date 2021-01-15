@@ -237,6 +237,31 @@ public abstract class HLDEngineBase {
 		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
 		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
 	}
+	protected void mmaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+
+		boolean areSame = relinfo.nearType == hldquery2.fromType;
+		DStructType targetType;
+		boolean isParent;
+		HLDDelete hld;
+		if (areSame) {
+			targetType = relinfo.farType;
+			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
+			isParent = relinfo.otherSide.isParent;
+		} else {
+			targetType = relinfo.nearType;
+			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
+			isParent = relinfo.isParent;
+		}
+		
+		SimpleDelete simple = simpleBuilder.buildFrom(hld);
+		moreL.add(simple);
+//		//(select a.cid from customer as a inner join address as b on a.cid=b.cust group by a.cid having count(a.cid)=1);
+//		SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
+//		boolean flipped = simpleSel.hld.fromType != targetType;
+//		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+//		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
+	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
 		List<HLDInsert> insertL = new ArrayList<>();
@@ -301,14 +326,17 @@ public abstract class HLDEngineBase {
 	 * @param structType - main type being deleted
 	 * @param hldquery 
 	 * @param moreL 
+	 * @param hldEngine 
 	 * @param dval - values
 	 * @param pkval2 
 	 */
-	protected void generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL) {
+	protected void generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.isParent) {
+				if (relinfo.isManyToMany()) {
+					mmaddFkDeleteChildForDeleteParentStatement(relinfo, hldquery, pkval, moreL, builderAdapter);
+				} else if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (! childIsOptional) {
 						if (relinfo.isOneToOne()) {

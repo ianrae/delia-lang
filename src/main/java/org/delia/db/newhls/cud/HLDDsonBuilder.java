@@ -34,7 +34,6 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.PartialStructValueBuilder;
-import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class HLDDsonBuilder {
 
@@ -327,6 +326,22 @@ public class HLDDsonBuilder {
 		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
 		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
 		
+		return hld;
+	}
+//  delete CustomerAddressAssoc where leftv=55
+	public HLDDelete buildAssocDeleteOne(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, DValue dval1, DatIdMap datIdMap) {
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		
+		//create a temp type for the assoc table
+		DStructType structType = buildTempDatType(assocTbl, relinfo, datIdMap); 
+		
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+		
+		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		hld.hld = builderAdapter.buildQueryEx(exp1, structType);
 		return hld;
 	}
 //  delete CustomerAddressAssoc 

@@ -82,7 +82,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		DValue pkval = getUpdatePK(hld.hld); 
 		generateParentUpdateForDelete(hld.getStructType(), pkval, hld.hld, moreL);
-		generateParentDeleteForDelete(hld.getStructType(), pkval, hld.hld, moreL);
+		generateParentDeleteForDelete(hld.getStructType(), pkval, hld.hld, moreL, this);
 	}
 	
 	
