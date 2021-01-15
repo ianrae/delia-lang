@@ -240,27 +240,49 @@ public abstract class HLDEngineBase {
 	}
 	protected void mmaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
-		boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 
-//		boolean areSame = relinfo.nearType == hldquery2.fromType;
-		DStructType targetType;
-		HLDDelete hld;
-		targetType = relinfo.farType;
-		hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
-		SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
-		
-		if (!childIsOptional) {
-			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
-			hld = hldBuilder.buildSimpleDelete(targetType);
-			hld.hld = buildQuery(queryExp);
-			SimpleDelete simple = simpleBuilder.buildFrom(hld);
-			moreL.add(simple);
-			SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
-			boolean flipped = simpleSel.hld.fromType != targetType;
-			OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-			ofc.customRenderer = new AssocOneSideSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, datIdMap);
+		boolean areSame = relinfo.nearType == hldquery2.fromType;
+		if (! areSame) {
+			boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
+			DStructType targetType;
+			HLDDelete hld;
+			targetType = relinfo.farType;
+			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
+			SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
+			
+			if (!childIsOptional) {
+				QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
+				hld = hldBuilder.buildSimpleDelete(targetType);
+				hld.hld = buildQuery(queryExp);
+				SimpleDelete simple = simpleBuilder.buildFrom(hld);
+				moreL.add(simple);
+				SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
+				boolean flipped = simpleSel.hld.fromType != targetType;
+				OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+				ofc.customRenderer = new AssocOneSideSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, datIdMap);
+			}
+			moreL.add(simple1); //want this one last
+		} else {
+			boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
+			DStructType targetType;
+			HLDDelete hld;
+			targetType = relinfo.farType;
+			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
+			SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
+			
+			if (!childIsOptional) {
+				QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
+				hld = hldBuilder.buildSimpleDelete(targetType);
+				hld.hld = buildQuery(queryExp);
+				SimpleDelete simple = simpleBuilder.buildFrom(hld);
+				moreL.add(simple);
+				SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
+				boolean flipped = simpleSel.hld.fromType != targetType;
+				OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+				ofc.customRenderer = new AssocOneSideSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, datIdMap);
+			}
+			moreL.add(simple1); //want this one last
 		}
-		moreL.add(simple1); //want this one last
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
@@ -336,6 +358,7 @@ public abstract class HLDEngineBase {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isManyToMany()) {
 					mmaddFkDeleteChildForDeleteParentStatement(relinfo, hldquery, pkval, moreL, builderAdapter);
+					continue;
 				} else if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (! childIsOptional) {
