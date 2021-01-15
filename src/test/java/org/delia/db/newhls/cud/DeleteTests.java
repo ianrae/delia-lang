@@ -98,46 +98,22 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE (SELECT t2.cid FROM Customer as t2 INNER JOIN Address as t3 ON t2.cid=t3.cust WHERE t2.cid=? GROUP BY t2.cid HAVING COUNT(t2.cid)=1)", "1");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.id IN (SELECT t2.cid FROM Customer as t2 INNER JOIN Address as t3 ON t2.cid=t3.cust WHERE t2.cid=? GROUP BY t2.cid HAVING COUNT(t2.cid)=1)", "1");
 		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
 	}
-//	@Test
-//	public void test1N2() {
-//		useCustomer1NSrc = true;
-//		String src = "update Address[100] {y: 45}";
-//		
-//		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-//		chkDeleteSql(hlddelete, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
-//	}
-//	@Test
-//	public void test1N2a() {
-//		useCustomer1NSrc = true;
-//		String src0 = "insert Customer {cid: 55, x: 45}";
-//		String src = addSrc(src0, "update Address[100] {y: 45, cust:55}");
-//		
-//		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-//		SqlStatementGroup stmgrp = genUpdateSql(hlddelete, 1);
-//		dumpGrp(stmgrp);
-//		
-//		chkDeleteSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "100");
-//	}
-//	@Test
-//	public void test1NInsertParent() {
-//		//adapted from t0-insert-parent.txt: add workers
-//		useCustomer1NSrc = true;
-//		String src0 = "insert Customer {cid: 55, x: 45}";
-//		String src = addSrc(src0, "insert Address {id: 100, y: 45}");
-//		src = addSrc(src, "insert Address {id: '101', y:46 }");
-//		src = addSrc(src, "update Customer[56] {x:66, addr: ['100','101'] }");
-//		
-//		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
-//		SqlStatementGroup stmgrp = genUpdateSql(hlddelete, 3);
-//		dumpGrp(stmgrp);
-//		chkDeleteSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
-//		chkDeleteSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
-//		chkDeleteSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
-//	}
-//	
+	@Test
+	public void test1Na() {
+		useCustomer1NSrc = true;
+		String src = "delete Address[100]";
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
+		dumpGrp(stmgrp);
+		//delete from Address inner join Customer as t0.id=t1.cust where (select count(*) from Address where t0.cust=1) > 0
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "1");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
+	}
+	
 //	// --- M:N ---
 //	@Test
 //	public void testMN() {

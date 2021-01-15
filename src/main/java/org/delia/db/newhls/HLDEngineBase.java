@@ -218,9 +218,9 @@ public abstract class HLDEngineBase {
 		moreL.add(simple);
 		//(select a.cid from customer as a inner join address as b on a.cid=b.cust group by a.cid having count(a.cid)=1);
 		SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
-		
+		boolean flipped = datIdMap.isFlipped(relinfo);
 		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, false);
+		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
@@ -292,7 +292,6 @@ public abstract class HLDEngineBase {
 	protected void generateParentDeleteForDelete(DStructType structType, DValue pkval, HLDQuery hldquery, List<SimpleBase> moreL) {
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
-				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
