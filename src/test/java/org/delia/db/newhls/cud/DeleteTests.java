@@ -87,7 +87,20 @@ public class DeleteTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
 		dumpGrp(stmgrp);
 		//delete from Address inner join Customer as t0.id=t1.cust where (select count(*) from Address where t0.cust=1) > 0
-		chkDeleteSql(stmgrp, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "1");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
+	}
+	@Test
+	public void test1NMandatory() {
+		useCustomer1NMandatoryChildSrc = true;
+		String src = "delete Customer[1]";
+		
+		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
+		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
+		dumpGrp(stmgrp);
+		//delete from Address inner join Customer as t0.id=t1.cust where (select count(*) from Address where t0.cust=1) > 0
+		chkDeleteSql(stmgrp, 0, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.cust = ?", null, "1");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
 	}
 //	@Test
 //	public void test1N2() {
@@ -213,11 +226,14 @@ public class DeleteTests extends NewHLSTestBase {
 	
 	//-------------------------
 	private boolean useCustomer11MandatoryChildSrc;
+	private boolean useCustomer1NMandatoryChildSrc;
 	
 	@Override
 	protected String buildSrc() {
 		if (useCustomer11MandatoryChildSrc) {
 			return buildCustomer11MandatoryChildSrc();
+		} else if (useCustomer1NMandatoryChildSrc) {
+			return buildCustomer1NMandatoryChildSrc();
 		} else {
 			return super.buildSrc();
 		}
@@ -227,6 +243,11 @@ public class DeleteTests extends NewHLSTestBase {
 	private String buildCustomer11MandatoryChildSrc() {
 		String src = " type Customer struct {cid int unique, x int, relation addr Address one optional parent  } end";
 		src += "\n type Address struct {id int unique, y int, relation cust Customer  one  } end";
+		return src;
+	}
+	private String buildCustomer1NMandatoryChildSrc() {
+		String src = " type Customer struct {cid int unique, x int, relation addr Address many optional  } end";
+		src += "\n type Address struct {id int unique, y int, relation cust Customer one } end";
 		return src;
 	}
 	

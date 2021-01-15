@@ -203,6 +203,19 @@ public abstract class HLDEngineBase {
 		moreL.add(simple);
 		attachSubSelect(hld.hld, hldquery2.originalQueryExp, relinfo.otherSide.fieldName);
 	}
+	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, List<SimpleBase> moreL) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+
+		DStructType targetType = relinfo.farType;
+		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
+		
+		HLDQuery hldquery = this.buildQuery(queryExp);
+		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
+		hld.hld = hldquery;
+		
+		SimpleDelete simple = simpleBuilder.buildFrom(hld);
+		moreL.add(simple);
+	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
 		List<HLDInsert> insertL = new ArrayList<>();
@@ -248,14 +261,13 @@ public abstract class HLDEngineBase {
 	protected void generateParentUpdateForDelete(DStructType structType, DValue pkval, HLDQuery hldQuery, List<SimpleBase> moreL) {
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
-				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
-					if (relinfo.isOneToOne() && childIsOptional) {
-						addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
-					} else if (relinfo.isOneToMany() && childIsOptional) {
-						addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
+					if (childIsOptional) {
+						if (relinfo.isOneToOne() || relinfo.isOneToMany()) {
+							addFkUpdateChildForDeleteParentStatement(relinfo, pkval, hldQuery, moreL);
+						}
 					}
 				} 
 			}
@@ -278,10 +290,10 @@ public abstract class HLDEngineBase {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
-					if (relinfo.isOneToOne() && !childIsOptional) {
-						addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
-					} else if (relinfo.isOneToMany() && !childIsOptional) {
-						addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
+					if (! childIsOptional) {
+						if (relinfo.isOneToOne() || relinfo.isOneToMany()) {
+							xxaddFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
+						}
 					}
 				} else if (relinfo.isOneToOne()) {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
