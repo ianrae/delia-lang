@@ -55,7 +55,7 @@ public class HavingOneSubSelectRenderer extends CustomFilterValueRendererBase im
 			
 			sc.o(" GROUP BY %s.%s HAVING COUNT(%s.%s)=1)", alias1, field1, alias1, field1);
 		} else {
-			//(select a.cid from customer as a inner join address as b on a.cid=b.cust where a.cid=? group by a.cid having count(a.cid)=1);
+			//DELETE FROM Customer as t0 WHERE t0.cid IN (SELECT t1.cust FROM Address as t1 INNER JOIN Customer as t2 ON t1.cust=t2.cid WHERE t1.id=? GROUP BY t1.cust HAVING COUNT(t1.cid)=1)
 			String field1 = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType).name;
 			String tbl1 = relinfo.nearType.getName();
 			sc.o("(SELECT %s.%s FROM %s as %s", alias1, field1, tbl1, alias1);

@@ -207,12 +207,24 @@ public abstract class HLDEngineBase {
 	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
-		DStructType targetType = relinfo.farType;
-		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
-		
-		HLDQuery hldquery = this.buildQuery(queryExp);
-		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
-		hld.hld = hldquery;
+		boolean areSame = relinfo.nearType == hldquery2.fromType;
+		DStructType targetType;
+		HLDDelete hld;
+		if (areSame) {
+			targetType = relinfo.farType;
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
+			
+			HLDQuery hldquery = this.buildQuery(queryExp);
+			hld = hldBuilder.buildSimpleDelete(targetType);
+			hld.hld = hldquery;
+		} else {
+			targetType = relinfo.nearType;
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
+			
+			HLDQuery hldquery = this.buildQuery(queryExp);
+			hld = hldBuilder.buildSimpleDelete(targetType);
+			hld.hld = hldquery;
+		}
 		
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
 		moreL.add(simple);
@@ -296,16 +308,21 @@ public abstract class HLDEngineBase {
 				if (relinfo.isParent) {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (! childIsOptional) {
-						if (relinfo.isOneToOne() || relinfo.isOneToMany()) {
+						if (relinfo.isOneToOne()) {
+							addFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
+						} else if (relinfo.isOneToMany()) {
 							xxaddFkDeleteChildForDeleteParentStatement(relinfo, hldquery, pkval, moreL);
 						}
 					}
-				} else if (relinfo.isOneToOne()) {
+				} else {
 					boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
 					if (!childIsOptional) { //we deleting child. 
-						xaddFkDeleteParentStatement(relinfo.otherSide, hldquery, moreL);
+						if (relinfo.isOneToOne()) {
+							xaddFkDeleteParentStatement(relinfo.otherSide, hldquery, moreL);
+						} else if (relinfo.isOneToMany()) {
+							xxaddFkDeleteChildForDeleteParentStatement(relinfo.otherSide, hldquery, pkval, moreL);
+						}
 					}
-					//TODO: if 1:M we should delete parent if is only one child!!
 				}
 			}
 		}
