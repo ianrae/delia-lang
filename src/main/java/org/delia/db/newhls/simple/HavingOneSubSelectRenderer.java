@@ -1,5 +1,6 @@
 package org.delia.db.newhls.simple;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.HLDAliasBuilderAdapter;
 import org.delia.db.newhls.HLDQuery;
@@ -9,21 +10,22 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
 
-public class HavingOneSubSelectRenderer implements CustomFilterValueRenderer {
+public class HavingOneSubSelectRenderer extends CustomFilterValueRendererBase implements CustomFilterValueRenderer {
 
 	private RelationInfo relinfo;
 	private boolean flipped;
 	private String alias1;
 	private String alias2;
-	private DValue pkval;
+	private SimpleSelect simple;
+	private SimpleSqlGenerator sqlgen;
 	
-	public HavingOneSubSelectRenderer(FactoryService factorySvc, DTypeRegistry registry, RelationInfo relinfo, boolean flipped, DValue pkval) {
+	public HavingOneSubSelectRenderer(FactoryService factorySvc, DTypeRegistry registry, SimpleSelect simpleSel, RelationInfo relinfo, boolean flipped) {
 		this.relinfo = relinfo;
 		this.flipped = flipped;
-		this.pkval = pkval;
+		this.simple = simpleSel;
+		this.sqlgen = new SimpleSqlGenerator(registry, factorySvc);
 	}
 
 	@Override
@@ -40,8 +42,9 @@ public class HavingOneSubSelectRenderer implements CustomFilterValueRenderer {
 		String tbl2 = relinfo.farType.getName();
 		
 		sc.o(" INNER JOIN %s as %s ON %s.%s=%s.%s", tbl2, alias2, alias1, field1, alias2, field2);
-		sc.o(" WHERE %s.%s=?", alias1, field1);
-		stm.paramL.add(pkval);
+		String tmp = sqlgen.genAny(simple, stm);
+		String clause = StringUtils.substringAfter(tmp, " WHERE ");
+		sc.o(" WHERE %s", clause);
 		
 		sc.o(" GROUP BY %s.%s HAVING COUNT(%s.%s)=1)", alias1, field1, alias1, field1);
 		
@@ -50,7 +53,8 @@ public class HavingOneSubSelectRenderer implements CustomFilterValueRenderer {
 
 	@Override
 	public void assignAliases(Object obj, HLDQuery hld, HLDAliasBuilderAdapter aliasBuilder) {
-		this.alias1 = aliasBuilder.createAlias();
+		assignAliasesToFilter(simple, aliasBuilder);
+		this.alias1 = simple.tblFrag.alias;
 		this.alias2 = aliasBuilder.createAlias();
 	}
 

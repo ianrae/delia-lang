@@ -217,8 +217,10 @@ public abstract class HLDEngineBase {
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
 		moreL.add(simple);
 		//(select a.cid from customer as a inner join address as b on a.cid=b.cust group by a.cid having count(a.cid)=1);
+		SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
+		
 		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, relinfo, false, pkval);
+		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, false);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {

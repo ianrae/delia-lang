@@ -6,13 +6,11 @@ import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.SqlParamGenerator;
 import org.delia.db.newhls.StructField;
 import org.delia.db.newhls.cond.CustomFilterValueRenderer;
-import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
-import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DTypeRegistry;
 
-public class SubSelectRenderer implements CustomFilterValueRenderer {
+public class SubSelectRenderer extends CustomFilterValueRendererBase implements CustomFilterValueRenderer {
 
 	private SimpleSelect simple;
 	private SimpleSqlGenerator sqlgen;
@@ -39,22 +37,6 @@ public class SubSelectRenderer implements CustomFilterValueRenderer {
 		String fieldName = ofc.val1.asSymbol();
 		ofc.val1.structField = new StructField(null, fieldName, null);
 
-		if (simple.filter instanceof SingleFilterCond) {
-			addInnerAliases(null, aliasBuilder);
-		} else if (simple.filter instanceof OpFilterCond) {
-			ofc = (OpFilterCond) simple.filter;
-			addInnerAliases(ofc.val1, aliasBuilder);
-		}
-	}
-
-	private void addInnerAliases(FilterVal val1, HLDAliasBuilderAdapter aliasBuilder) {
-		if (val1 != null) {
-			String fieldName = val1.asSymbol();
-			val1.structField = new StructField(simple.hld.fromType, fieldName, null);
-		}
-		
-		aliasBuilder.pushAliasScope("CUSTOM");
-		aliasBuilder.assignAliases(simple);
-		aliasBuilder.popAliasScope();
+		assignAliasesToFilter(simple, aliasBuilder);
 	}
 }
