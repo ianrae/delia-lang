@@ -247,11 +247,12 @@ public abstract class HLDEngineBase {
 		HLDDelete hld;
 		targetType = relinfo.farType;
 		hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
-		
 		SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
 		
 		if (!childIsOptional) {
-			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo.otherSide, pkval, datIdMap);
+			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
+			hld = hldBuilder.buildSimpleDelete(targetType);
+			hld.hld = buildQuery(queryExp);
 			SimpleDelete simple = simpleBuilder.buildFrom(hld);
 			moreL.add(simple);
 			SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));

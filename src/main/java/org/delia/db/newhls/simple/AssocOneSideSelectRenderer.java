@@ -13,6 +13,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 public class AssocOneSideSelectRenderer extends CustomFilterValueRendererBase implements CustomFilterValueRenderer {
@@ -38,10 +39,11 @@ public class AssocOneSideSelectRenderer extends CustomFilterValueRendererBase im
 		StrCreator sc = new StrCreator();
 		
 		if (flipped) {
-			//where t1.rightv IN (select t2.rightv from DAT as t2 where t2.leftv=55)
 			String field1 = datIdMap.getAssocOtherField(relinfo);
+			String field2 = datIdMap.getAssocFieldFor(relinfo);
 			String tbl1 = datIdMap.getAssocTblName(relinfo.getDatId());
-			String s1 = String.format("%s.%s", ofc.val1.alias, field1);
+			String field0 = DValueHelper.findPrimaryKeyFieldPair(relinfo.farType).name;
+			String s1 = String.format("%s.%s", ofc.val1.alias, field0);
 			sc.o("%s IN ", s1);
 			sc.o("(SELECT %s.%s FROM %s as %s", alias1, field1, tbl1, alias1);
 			

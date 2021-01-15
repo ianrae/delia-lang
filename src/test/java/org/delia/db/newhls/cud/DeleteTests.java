@@ -144,8 +144,9 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 3);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ?", "1");
-		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.id IN (SELECT t2.rightv FROM CustomerAddressDat1 as t2 WHERE t2.leftv=?)", "1");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ?", "1");
+		chkDeleteSql(stmgrp, 2, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
 	}
 	@Test
 	public void testNNChild() {
