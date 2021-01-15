@@ -66,10 +66,10 @@ public class HLDManager extends ServiceBase {
 	}
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
-		HLDQueryStatement hld = buildHLD(spec.queryExp);
+		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec);
 //		hls.querySpec = spec;
 
-		HLDInnerManager mgr = createManager();
+		HLDInnerManager mgr = createManager(zexec);
 		SqlStatement stm = mgr.generateSql(hld);
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		stmgrp.add(stm);
@@ -103,36 +103,36 @@ public class HLDManager extends ServiceBase {
 //		}
 //	}
 	
-	public HLDQueryStatement buildHLD(QueryExp queryExp) {
-		HLDInnerManager mgr = createManager();
+	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec) {
+		HLDInnerManager mgr = createManager(zexec);
 		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp);
 		log.log(hld.toString());
 		return hld;
 	}
-	public HLDDeleteStatement buildHLD(DeleteStatementExp deleteExp) {
+	public HLDDeleteStatement buildHLD(DeleteStatementExp deleteExp, ZDBExecutor zexec) {
 		QueryExp queryExp = deleteExp.queryExp;
 		
-		HLDInnerManager mgr = createManager(); 
+		HLDInnerManager mgr = createManager(zexec); 
 		HLDDeleteStatement hlddel = mgr.fullBuildDelete(queryExp);
 		log.log(hlddel.toString());
 		return hlddel;
 	}
-	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp) {
-		HLDInnerManager mgr = createManager(); 
+	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec) {
+		HLDInnerManager mgr = createManager(zexec); 
 		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
-	public HLDInsertStatement buildHLD(InsertStatementExp insertExp) {
-		HLDInnerManager mgr = createManager(); 
+	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec) {
+		HLDInnerManager mgr = createManager(zexec); 
 		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp);
 		log.log(hldins.toString());
 		return hldins;
 	}
 	
-	protected HLDInnerManager createManager() {
-		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		return new HLDInnerManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc);
+	protected HLDInnerManager createManager(ZDBExecutor zexec) {
+		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
+		return new HLDInnerManager(registry, factorySvc, zexec.getDatIdMap(), sprigSvc);
 	}
 
 
