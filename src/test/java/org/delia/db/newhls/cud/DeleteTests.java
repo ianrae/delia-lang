@@ -98,7 +98,7 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 2);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.id IN (SELECT t2.cid FROM Customer as t2 INNER JOIN Address as t3 ON t2.cid=t3.cust WHERE t2.cid=? GROUP BY t2.cid HAVING COUNT(t2.cid)=1)", "1");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.id IN (SELECT t2.id FROM Address as t2 INNER JOIN Customer as t3 ON t2.cust=t3.cid WHERE t3.cid=? GROUP BY t2.id HAVING COUNT(t2.id)=1)", "1");
 		chkDeleteSql(stmgrp, 1, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
 	}
 	@Test

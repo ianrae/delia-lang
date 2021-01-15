@@ -218,7 +218,7 @@ public abstract class HLDEngineBase {
 		moreL.add(simple);
 		//(select a.cid from customer as a inner join address as b on a.cid=b.cust group by a.cid having count(a.cid)=1);
 		SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
-		boolean flipped = datIdMap.isFlipped(relinfo);
+		boolean flipped = simpleSel.hld.fromType != targetType;
 		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
 		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped);
 	}
