@@ -39,17 +39,16 @@ public class HavingOneSubSelectRenderer extends CustomFilterValueRendererBase im
 		sc.o(" %s IN ", s1);
 		
 		if (flipped) {
-			//" t1.id IN (SELECT t2.id FROM Address as t2 INNER JOIN Customer as t3 ON t2.cust=t3.cid WHERE t3.cid=? GROUP BY t2.id HAVING COUNT(t2.id)=1)", "1");
-			DStructType structType = relinfo.farType;
+			//" t1.cust IN (SELECT t2.cid FROM Customer as t2 INNER JOIN Address as t3 ON t2.cid=t3.cust WHERE t2.cid=? GROUP BY t2.cid HAVING COUNT(t2.cid)=1)", "1");
+			DStructType structType = relinfo.nearType;
 			String field1 = DValueHelper.findPrimaryKeyFieldPair(structType).name;
-			String field1a = relinfo.otherSide.fieldName; //
 			String tbl1 = structType.getName();
 			sc.o("(SELECT %s.%s FROM %s as %s", alias1, field1, tbl1, alias1);
 			
-			String field2 = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType).name;
-			String tbl2 = relinfo.nearType.getName();
+			String field2 = relinfo.otherSide.fieldName; //DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType).name;
+			String tbl2 = relinfo.farType.getName();
 			
-			sc.o(" INNER JOIN %s as %s ON %s.%s=%s.%s", tbl2, alias2, alias1, field1a, alias2, field2);
+			sc.o(" INNER JOIN %s as %s ON %s.%s=%s.%s", tbl2, alias2, alias1, field1, alias2, field2);
 			String tmp = sqlgen.genAny(simple, stm);
 			String clause = StringUtils.substringAfter(tmp, " WHERE ");
 			sc.o(" WHERE %s", clause);
