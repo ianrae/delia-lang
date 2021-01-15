@@ -1,5 +1,6 @@
 package org.delia.bdd;
 
+import org.delia.api.DeliaImpl;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -327,7 +328,7 @@ public class AllBDDTests extends BDDBase {
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
-		
+		DeliaImpl.useNewHLD = true;
 //		runR1000File("t0-upsert-unique.txt", 4);
 //		runR1000File("t0-upsert.txt", 4);
 //		runR900File("t0-update-mm-all.txt", 4);

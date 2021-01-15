@@ -19,6 +19,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerResult;
+import org.delia.db.newhls.HLDManager;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
@@ -47,9 +48,10 @@ public class LetStatementRunner extends ServiceBase {
 	private RunnerImpl runner;
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
+	private HLDManager hldManager;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
+			FetchRunner fetchRunner, HLSManager mgr, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.runner = runner;
@@ -57,6 +59,7 @@ public class LetStatementRunner extends ServiceBase {
 		this.fetchRunner = fetchRunner;
 		this.zexec = zexec;
 		this.mgr = mgr;
+		this.hldManager = hldManager;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 		this.datIdMap = datIdMap;
 	}
@@ -140,9 +143,14 @@ public class LetStatementRunner extends ServiceBase {
 		QuerySpec spec = resolveFilterVars(queryExp);
 		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
-		boolean flag = mgr != null;
+		boolean flag1 = hldManager != null;
+		boolean flag2 = mgr != null;
 		QueryResponse qresp;
-		if (flag) {
+		if (flag1) {
+			spec.queryExp = queryExp;
+			HLSManagerResult result = hldManager.execute(spec, qtx, zexec);
+			qresp = result.qresp;
+		} else if (flag2) {
 			spec.queryExp = queryExp;
 			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 			qresp = result.qresp;

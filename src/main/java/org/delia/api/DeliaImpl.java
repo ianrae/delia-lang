@@ -9,6 +9,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.hls.manager.HLSManager;
+import org.delia.db.newhls.HLDManager;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
@@ -32,6 +33,8 @@ public class DeliaImpl implements Delia {
 	private static class MigrationExtraInfo {
 		public DatIdMap datIdMap;
 	}
+	
+	public static boolean useNewHLD = true;
 	
 	private Log log;
 	private ZDBInterfaceFactory dbInterface;
@@ -111,9 +114,13 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		
-		HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
-		runner.setHLSManager(mgr);
-		
+		if (useNewHLD) {
+			HLDManager mgr = new HLDManager(this, runner.getRegistry(), dbsess, runner);
+			runner.setHLDManager(mgr);
+		} else {
+			HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
+			runner.setHLSManager(mgr);
+		}
 		return runner;
 	}
 

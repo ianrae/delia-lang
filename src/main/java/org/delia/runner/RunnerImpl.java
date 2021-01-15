@@ -27,6 +27,7 @@ import org.delia.db.DBException;
 import org.delia.db.DBHelper;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
+import org.delia.db.newhls.HLDManager;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -40,7 +41,6 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.PrimaryKeyHelperService;
-import org.delia.validation.ValidationRuleRunnerImpl;
 import org.delia.validation.ValidationRunner;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -68,6 +68,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private LetStatementRunner letStatementRunner;
 		private InsertStatementRunner insertStatementRunner;
 		private HLSManager mgr;
+		private HLDManager hldManager;
 		private DatIdMap datIdMap;
 		
 		public RunnerImpl(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
@@ -434,7 +435,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, hldManager, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
@@ -519,5 +520,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setDatIdMap(DatIdMap datIdMap) {
 			this.datIdMap = datIdMap;
+		}
+		@Override
+		public void setHLDManager(HLDManager mgr) {
+			this.hldManager = mgr;
 		}
 	}
