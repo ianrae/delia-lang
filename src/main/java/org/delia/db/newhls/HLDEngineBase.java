@@ -11,6 +11,7 @@ import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.simple.AssocOneSideSelectRenderer;
 import org.delia.db.newhls.simple.HavingOneSubSelectRenderer;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleDelete;
@@ -239,28 +240,26 @@ public abstract class HLDEngineBase {
 	}
 	protected void mmaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 
-		boolean areSame = relinfo.nearType == hldquery2.fromType;
+//		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		DStructType targetType;
-		boolean isParent;
 		HLDDelete hld;
-		if (areSame) {
-			targetType = relinfo.farType;
-			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
-			isParent = relinfo.otherSide.isParent;
-		} else {
-			targetType = relinfo.nearType;
-			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
-			isParent = relinfo.isParent;
-		}
+		targetType = relinfo.farType;
+		hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
 		
-		SimpleDelete simple = simpleBuilder.buildFrom(hld);
-		moreL.add(simple);
-//		//(select a.cid from customer as a inner join address as b on a.cid=b.cust group by a.cid having count(a.cid)=1);
-//		SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
-//		boolean flipped = simpleSel.hld.fromType != targetType;
-//		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-//		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
+		SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
+		
+		if (!childIsOptional) {
+			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo.otherSide, pkval, datIdMap);
+			SimpleDelete simple = simpleBuilder.buildFrom(hld);
+			moreL.add(simple);
+			SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
+			boolean flipped = simpleSel.hld.fromType != targetType;
+			OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+			ofc.customRenderer = new AssocOneSideSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, datIdMap);
+		}
+		moreL.add(simple1); //want this one last
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
