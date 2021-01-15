@@ -144,8 +144,8 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 3);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.id IN (SELECT t2.rightv FROM CustomerAddressDat1 as t2 WHERE t2.leftv=?)", "1");
-		chkDeleteSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ?", "1");
+		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t1 WHERE t1.id IN (SELECT t3.rightv FROM CustomerAddressDat1 as t3 JOIN Customer as t2 ON t3.leftv=t2.cid WHERE t2.cid=?)", "1");
+		chkDeleteSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t4 WHERE t4.leftv = ?", "1");
 		chkDeleteSql(stmgrp, 2, "DELETE FROM Customer as t0 WHERE t0.cid=?", "1");
 	}
 	@Test
@@ -156,7 +156,7 @@ public class DeleteTests extends NewHLSTestBase {
 		HLDDeleteStatement hlddelete = buildFromSrcDelete(src, 0); 
 		SqlStatementGroup stmgrp = genDeleteSql(hlddelete, 1);
 		dumpGrp(stmgrp);
-		chkDeleteSql(stmgrp, 0, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
+		chkDeleteSql(stmgrp, 0, "xxDELETE FROM Address as t0 WHERE t0.id=?", "100");
 	}
 	@Test
 	public void testNNMandatoryChild() {
@@ -168,7 +168,7 @@ public class DeleteTests extends NewHLSTestBase {
 		dumpGrp(stmgrp);
 		//		chkDeleteSql(stmgrp, 0, "DELETE FROM Customer as t0 WHERE t0.cid IN (SELECT t1.cust FROM Address as t1 INNER JOIN Customer as t2 ON t1.cust=t2.cid WHERE t1.id=? GROUP BY t1.cust HAVING COUNT(t1.cid)=1)", null, "100");
 		chkDeleteSql(stmgrp, 0, "DELETE FROM Customer as t1 WHERE t1.cid IN (SELECT t2.cid FROM Customer as t2 INNER JOIN Address as t3 ON t2.cid=t3.cust WHERE t2.id=? GROUP BY t2.cid HAVING COUNT(t2.cid)=1)", "100");
-		chkDeleteSql(stmgrp, 1, "DELETE FROM Address as t0 WHERE t0.id=?", "100");
+		chkDeleteSql(stmgrp, 1, "xxDELETE FROM Address as t0 WHERE t0.id=?", "100");
 	}
 
 

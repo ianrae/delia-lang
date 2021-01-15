@@ -24,6 +24,7 @@ public class AssocOneSideSelectRenderer extends CustomFilterValueRendererBase im
 	private SimpleSelect simple;
 	private SimpleSqlGenerator sqlgen;
 	private DatIdMap datIdMap;
+	private String alias2;
 	
 	public AssocOneSideSelectRenderer(FactoryService factorySvc, DTypeRegistry registry, SimpleSelect simpleSel, RelationInfo relinfo, boolean flipped, DatIdMap datIdMap) {
 		this.relinfo = relinfo;
@@ -46,6 +47,10 @@ public class AssocOneSideSelectRenderer extends CustomFilterValueRendererBase im
 			String s1 = String.format("%s.%s", ofc.val1.alias, field0);
 			sc.o("%s IN ", s1);
 			sc.o("(SELECT %s.%s FROM %s as %s", alias1, field1, tbl1, alias1);
+			//(SELECT t2.rightv FROM CustomerAddressDat1 as t2 JOIN Customer as t3 ON t2.leftv=t3.cid WHERE t3.cid=?)", "1");
+			String tbl2 = relinfo.nearType.getName();
+			String fieldx = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType).name;
+			sc.o(" JOIN %s as %s ON %s.%s=%s.%s", tbl2, alias2, alias1,field2, alias2,fieldx);
 			
 			String tmp = sqlgen.genAny(simple, stm);
 			String clause = StringUtils.substringAfter(tmp, " WHERE ");
@@ -77,7 +82,8 @@ public class AssocOneSideSelectRenderer extends CustomFilterValueRendererBase im
 		ofc.val1.structField = new StructField(null, fieldName, null);
 
 		assignAliasesToFilter(simple, aliasBuilder);
-		this.alias1 = simple.tblFrag.alias;
+		this.alias1 = aliasBuilder.createAlias();
+		this.alias2 = simple.tblFrag.alias;
 	}
 
 }
