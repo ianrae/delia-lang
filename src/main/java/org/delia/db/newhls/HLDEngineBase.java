@@ -325,7 +325,7 @@ public abstract class HLDEngineBase {
 						} else if (relinfo.isOneToMany()) {
 							xxaddFkDeleteChildForDeleteParentStatement(relinfo.otherSide, hldquery, pkval, moreL);
 						}
-					}
+					} 
 				}
 			}
 		}
