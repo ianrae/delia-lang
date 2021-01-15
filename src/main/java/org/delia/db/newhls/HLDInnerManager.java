@@ -22,7 +22,7 @@ import org.delia.type.DTypeRegistry;
  * @author ian
  *
  */
-public class HLDManager extends ServiceBase {
+public class HLDInnerManager extends ServiceBase {
 	private DTypeRegistry registry;
 	private DatIdMap datIdMap;
 	private SprigService sprigSvc;
@@ -33,7 +33,7 @@ public class HLDManager extends ServiceBase {
 	public boolean newDeleteSQLGen = true;
 	private HLDEngineAssoc engineAssoc;
 
-	public HLDManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(factorySvc);
 		this.registry = registry;
 		this.factorySvc = factorySvc;

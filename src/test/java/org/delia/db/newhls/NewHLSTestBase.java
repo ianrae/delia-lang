@@ -43,7 +43,7 @@ import org.junit.After;
  */
 public class NewHLSTestBase extends BDDBase {
 	
-	protected HLDManager mgr;
+	protected HLDInnerManager mgr;
 	
 	
 	protected String addSrc(String src0, String src) {
@@ -88,9 +88,9 @@ public class NewHLSTestBase extends BDDBase {
 		return hld;
 	}
 
-	protected HLDManager createManager() {
+	protected HLDInnerManager createManager() {
 		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		return new HLDManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc);
+		return new HLDInnerManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc);
 	}
 	
 	protected void chkRawSql(HLDQueryStatement hld, String expected) {

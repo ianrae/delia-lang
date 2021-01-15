@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDWhereFragment;
 import org.delia.db.newhls.cud.HLDWhereGen;
@@ -15,9 +14,9 @@ import org.delia.type.DStructType;
 public class HLDWhereGenImpl implements HLDWhereGen {
 	
 	private HLDEngine engine;
-	private HLDManager mgr;
+	private HLDInnerManager mgr;
 
-	public HLDWhereGenImpl(HLDManager mgr, HLDEngine engine) {
+	public HLDWhereGenImpl(HLDInnerManager mgr, HLDEngine engine) {
 		this.mgr = mgr;
 		this.engine = engine;
 	}
