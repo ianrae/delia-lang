@@ -16,7 +16,7 @@ import org.delia.type.DType;
  * @author ian
  *
  */
-public class HLDQueryStatement {
+public class HLDQueryStatement extends HLDStatement {
 	public HLDQuery hldquery;
 	
 	

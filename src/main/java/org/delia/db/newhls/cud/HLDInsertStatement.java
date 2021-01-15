@@ -2,7 +2,9 @@ package org.delia.db.newhls.cud;
 
 import java.util.*;
 
-public class HLDInsertStatement {
+import org.delia.db.newhls.HLDStatement;
+
+public class HLDInsertStatement extends HLDStatement {
 	public HLDInsert hldinsert;
 	public List<HLDUpdate> updateL = new ArrayList<>();
 	public List<HLDInsert> assocInsertL;
