@@ -18,4 +18,5 @@ public interface HLDAliasBuilderAdapter {
 	void assignAliases(SimpleBase simple);
 	void pushAliasScope(String scope);
 	void popAliasScope();
+	String createAlias();
 }

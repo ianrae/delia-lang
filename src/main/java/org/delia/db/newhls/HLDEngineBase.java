@@ -11,6 +11,7 @@ import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.simple.HavingOneSubSelectRenderer;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleDelete;
 import org.delia.db.newhls.simple.SimpleSelect;
@@ -203,7 +204,7 @@ public abstract class HLDEngineBase {
 		moreL.add(simple);
 		attachSubSelect(hld.hld, hldquery2.originalQueryExp, relinfo.otherSide.fieldName);
 	}
-	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, List<SimpleBase> moreL) {
+	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL) {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
 
 		DStructType targetType = relinfo.farType;
@@ -215,6 +216,9 @@ public abstract class HLDEngineBase {
 		
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
 		moreL.add(simple);
+		//(select a.cid from customer as a inner join address as b on a.cid=b.cust group by a.cid having count(a.cid)=1);
+		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
+		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, relinfo, false, pkval);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
@@ -292,7 +296,7 @@ public abstract class HLDEngineBase {
 					boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 					if (! childIsOptional) {
 						if (relinfo.isOneToOne() || relinfo.isOneToMany()) {
-							xxaddFkDeleteChildForDeleteParentStatement(relinfo, pkval, moreL);
+							xxaddFkDeleteChildForDeleteParentStatement(relinfo, hldquery, pkval, moreL);
 						}
 					}
 				} else if (relinfo.isOneToOne()) {

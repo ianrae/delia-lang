@@ -31,7 +31,7 @@ public class HLDAliasManager extends ServiceBase {
 		this.datIdMap = datIdMap;
 	}
 	
-	private String createAlias() {
+	public String createAlias() {
 //		char ch = (char) ('a' + nextAliasIndex++);
 //		String alias = String.format("%c", ch);
 		String alias = String.format("t%d", nextAliasIndex++);

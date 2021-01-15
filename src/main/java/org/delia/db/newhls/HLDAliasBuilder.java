@@ -247,4 +247,9 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		aliasMgr.popScope();
 	}
 
+	@Override
+	public String createAlias() {
+		return aliasMgr.createAlias();
+	}
+
 }

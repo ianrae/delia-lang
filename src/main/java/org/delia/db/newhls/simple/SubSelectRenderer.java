@@ -10,7 +10,6 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 
 public class SubSelectRenderer implements CustomFilterValueRenderer {
