@@ -204,10 +204,11 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		hld.hld.fromAlias = info.alias;
 		doFilter(hld.hld);
 	}
-	public void assignAliasesAssoc(HLDDelete hld) {
+	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		hld.hld.fromAlias = info.alias;
 		doFilter(hld.hld);
+		return info;
 	}
 	private AliasInfo doAssignAliasesAssoc(HLDBase hld) {
 		RelationInfo relinfo = hld.assocRelInfo;
@@ -229,12 +230,17 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	}
 	@Override
 	public void assignAliases(HLDDelete hld) {
-		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
-		hld.typeOrTbl.alias = info.alias;
-		hld.hld.fromAlias = info.alias;
-		
-		//now populate SYMBOL FilterdVal
-		doFilter(hld.hld);
+		AliasInfo info;
+		if (hld.typeOrTbl.isAssocTbl) {
+			info = assignAliasesAssoc(hld);
+		} else {
+			info = aliasMgr.createMainTableAlias(hld.getStructType());
+			hld.typeOrTbl.alias = info.alias;
+			hld.hld.fromAlias = info.alias;
+			
+			//now populate SYMBOL FilterdVal
+			doFilter(hld.hld);
+		}
 	}
 
 	@Override

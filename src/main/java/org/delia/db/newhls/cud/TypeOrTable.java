@@ -6,12 +6,14 @@ public class TypeOrTable {
 	private DStructType structType;
 	private String tblName; //a table that doesn't represent a DStructType, such as CustomerAddressDat1
 	public String alias;
+	public boolean isAssocTbl;
 	
 	public TypeOrTable(DStructType structType) {
 		this.structType = structType;
 	}
-	public TypeOrTable(String tblName) {
+	public TypeOrTable(String tblName, boolean isAssocTbl) {
 		this.tblName = tblName;
+		this.isAssocTbl = isAssocTbl;
 	}
 	
 	public String getTblName() {

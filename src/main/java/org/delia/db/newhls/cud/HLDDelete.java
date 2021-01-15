@@ -1,6 +1,7 @@
 package org.delia.db.newhls.cud;
 
 import org.delia.db.newhls.HLDQuery;
+import org.delia.type.DStructType;
 import org.delia.type.DValue;
 
 public class HLDDelete extends HLDBase {
@@ -16,8 +17,11 @@ public class HLDDelete extends HLDBase {
 		super(new TypeOrTable(hld.fromType));
 		this.hld = hld;
 	}
-	public HLDDelete(TypeOrTable typeOrTbl) {
-		super(typeOrTbl);
+	public HLDDelete(DStructType structType) {
+		super(new TypeOrTable(structType));
+	}
+	public HLDDelete(String tblName, boolean isAssocTbl) {
+		super(new TypeOrTable(tblName, isAssocTbl));
 	}
 
 	@Override

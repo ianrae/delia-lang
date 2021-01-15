@@ -169,7 +169,7 @@ public class HLDDsonBuilder {
 		return hldupdate;
 	}
 	public HLDDelete buildSimpleDelete(DStructType structType) {
-		HLDDelete hlddel = new HLDDelete(new TypeOrTable(structType));
+		HLDDelete hlddel = new HLDDelete(structType);
 		
 //		QueryExp exp = this.queryBuilderHelper.createEqQuery(targetType, fieldName, pkval)
 //		hlddel.hld =  builderAdapter.buildQueryEx(exp, structType);
@@ -203,7 +203,7 @@ public class HLDDsonBuilder {
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 		
-		HLDInsert hldins = new HLDInsert(new TypeOrTable(assocTbl));
+		HLDInsert hldins = new HLDInsert(new TypeOrTable(assocTbl, true));
 		
 		ConversionResult cres = new ConversionResult();
 		cres.localET = new SimpleErrorTracker(log);
@@ -229,7 +229,7 @@ public class HLDDsonBuilder {
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 		
-		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl, true), null);
 		
 		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, dval2, relinfo, datIdMap);
 		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
@@ -263,7 +263,7 @@ public class HLDDsonBuilder {
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 
-		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl, true), null);
 		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, null, relinfo, datIdMap);
 		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
 
@@ -292,7 +292,7 @@ public class HLDDsonBuilder {
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 
-		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl, true), null);
 		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, null, relinfo, datIdMap);
 		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
 
@@ -323,7 +323,7 @@ public class HLDDsonBuilder {
 		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
 		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
 		
-		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		HLDDelete hld = new HLDDelete(assocTbl, true);
 		hld.hld = builderAdapter.buildQueryEx(exp3, structType);
 		
 		return hld;
@@ -340,7 +340,8 @@ public class HLDDsonBuilder {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
 		
-		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		HLDDelete hld = new HLDDelete(assocTbl, true);
+		hld.assocRelInfo = relinfo;
 		hld.hld = builderAdapter.buildQueryEx(exp1, structType);
 		return hld;
 	}
@@ -353,7 +354,7 @@ public class HLDDsonBuilder {
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		QueryExp exp1 = builderSvc.createAllRowsQuery(assocTbl);
 		
-		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		HLDDelete hld = new HLDDelete(assocTbl, true);
 		hld.hld = builderAdapter.buildQueryEx(exp1, structType);
 		
 		return hld;
@@ -376,10 +377,10 @@ public class HLDDsonBuilder {
 		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
 		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
 		
-		HLDUpdate tmphld = new HLDUpdate(new TypeOrTable(assocTbl), null);
+		HLDUpdate tmphld = new HLDUpdate(new TypeOrTable(assocTbl, true), null);
 		tmphld.cres = fillCResForUpdate(tmphld, fld1, fld2, assocTbl, dval1, dval2, relinfo, datIdMap);
 		
-		HLDDelete hld = new HLDDelete(new TypeOrTable(assocTbl));
+		HLDDelete hld = new HLDDelete(assocTbl, true);
 		hld.hld = builderAdapter.buildQueryEx(queryExp, structType);
 		hld.useDeleteIn = true;
 		hld.deleteInDVal = dval2;
