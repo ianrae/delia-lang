@@ -18,4 +18,9 @@ public class DeliaExceptionHelper {
 		DeliaError err = new DeliaError(id, msg);
 		return err;
 	}
+	public static void throwNotImplementedError(String fmt, Object... args) {
+		String msg = String.format(fmt, args);
+		DeliaError err = new DeliaError("not-implemented", msg);
+		throw new DeliaException(err);
+	}
 }

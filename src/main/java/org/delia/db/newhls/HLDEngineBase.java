@@ -209,6 +209,7 @@ public abstract class HLDEngineBase {
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		DStructType targetType;
+		boolean isParent;
 		HLDDelete hld;
 		if (areSame) {
 			targetType = relinfo.farType;
@@ -217,6 +218,7 @@ public abstract class HLDEngineBase {
 			HLDQuery hldquery = this.buildQuery(queryExp);
 			hld = hldBuilder.buildSimpleDelete(targetType);
 			hld.hld = hldquery;
+			isParent = relinfo.otherSide.isParent;
 		} else {
 			targetType = relinfo.nearType;
 			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
@@ -224,6 +226,7 @@ public abstract class HLDEngineBase {
 			HLDQuery hldquery = this.buildQuery(queryExp);
 			hld = hldBuilder.buildSimpleDelete(targetType);
 			hld.hld = hldquery;
+			isParent = relinfo.isParent;
 		}
 		
 		SimpleDelete simple = simpleBuilder.buildFrom(hld);
@@ -232,7 +235,7 @@ public abstract class HLDEngineBase {
 		SimpleSelect simpleSel = simpleBuilder.buildFrom(buildQuery(hldquery2.originalQueryExp));
 		boolean flipped = simpleSel.hld.fromType != targetType;
 		OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped);
+		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
 	}
 
 	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
