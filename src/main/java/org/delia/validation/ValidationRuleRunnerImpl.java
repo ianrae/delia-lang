@@ -23,6 +23,7 @@ import org.delia.type.DValue;
 import org.delia.type.DValueInternal;
 import org.delia.type.TypePair;
 import org.delia.type.ValidationState;
+import org.delia.util.DValueHelper;
 
 public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationRunner {
 
@@ -31,6 +32,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private DBCapabilties dbCapabilties;
 		boolean populateFKsFlag;
 		private boolean insertFlag;
+		private boolean upsertFlag;
 		private FetchRunner fetchRunner;
 		private DValueCompareService compareSvc;
 
@@ -146,13 +148,16 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private void validateStruct(DValue dval, List<DRule> ruleL, boolean validateFieldsOnly) {
 			//first, validated each member dval
 			DStructType dtype = (DStructType) dval.getType();
+			TypePair pkpair = (upsertFlag) ? DValueHelper.findPrimaryKeyFieldPair(dtype) : null;
 			int failCount = 0;
 			for(TypePair pair: dtype.getAllFields()) {
 				DValue inner = dval.asStruct().getField(pair.name);
 				if (inner == null) {
 					//on update validateFieldsOnly is true and not all fields are present
 					boolean skip = false;
-					if (dtype.fieldIsSerial(pair.name) && insertFlag) {
+					if (upsertFlag && pair.name.equals(pkpair.name)) {
+						skip = true;
+					} else if (dtype.fieldIsSerial(pair.name) && insertFlag) {
 						skip = true;
 					}
 					
@@ -287,4 +292,9 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		public void enableInsertFlag(boolean b) {
 			this.insertFlag = b;
 		}
+		@Override
+		public void enableUpsertFlag(boolean b) {
+			this.upsertFlag = b;
+		}
+		
 	}

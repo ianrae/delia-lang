@@ -27,4 +27,6 @@ public interface ValidationRunner {
 
 	void enableInsertFlag(boolean b);
 
+	void enableUpsertFlag(boolean b);
+
 }
