@@ -12,6 +12,7 @@ import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.QueryExp;
+import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
@@ -82,6 +83,12 @@ public class FilterCondBuilder {
 					opfiltercond.val2 = buildValOrFunc(exp, foexp, xnaf); 
 					return opfiltercond;
 				}
+			} else if (exp.opexp1 instanceof QueryInExp) {
+				QueryInExp inexp = (QueryInExp) exp.opexp1;
+				InFilterCond incod = new InFilterCond();
+				incod.isNot = exp.negFlag;
+				incod.val1 = new FilterVal(ValType.SYMBOL, new StringExp(inexp.fieldName));
+				return incod;
 			}
 		}
 		return null;

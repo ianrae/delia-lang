@@ -330,7 +330,7 @@ public class AllBDDTests extends BDDBase {
 //		diagnosticFilter = "I"; //log insert statements
 //		runR700File("t0-insert.txt", 6);
 //		runR950File("t0-crud-assoc-insert.txt", 6);
-		runR1350File("t0-filter-op-relation.txt", 14);
+		runR1350File("t0-filter-in.txt", 3);
 	}
 	
 	//---

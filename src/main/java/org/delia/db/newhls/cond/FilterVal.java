@@ -5,6 +5,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
+import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.newhls.StructField;
 import org.delia.db.newhls.ValType;
@@ -51,6 +52,7 @@ public class FilterVal {
 		return exp.strValue(); //return any valtype as strings
 	}
 	public String asSymbol() {
+		if (exp instanceof StringExp) return ((StringExp) exp).strValue();
 		XNAFSingleExp nafexp = (XNAFSingleExp) exp;
 		return nafexp.funcName;
 	}

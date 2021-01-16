@@ -9,6 +9,7 @@ import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.InFilterCond;
 import org.delia.db.newhls.cond.IntFilterCond;
 import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
@@ -135,6 +136,10 @@ public class NewHLSTests extends NewHLSTestBase {
 	public void testOp1() {
 		chkbuilderOpSymbolInt("let x = Flight[field1 < 15]", "field1", "<", 15);
 		chkbuilderOpIntSymbol("let x = Flight[15 < field1]", 15, "<", "field1");
+	}	
+	@Test
+	public void testIn() {
+		chkbuilderInInt("let x = Flight[field1 in [55]]", "field1", "IN", 55);
 	}	
 
 	@Test
@@ -280,6 +285,14 @@ public class NewHLSTests extends NewHLSTestBase {
 		chkFn(fieldName, val2, ofc.val2, 0);
 	}
 
+	private void chkbuilderInInt(String src, String val1, String op, int val2) {
+		FilterCond cond = buildCond(src);
+		InFilterCond ofc = (InFilterCond) cond;
+		chkSymbol(val1, ofc.val1);
+		assertEquals(op, ofc.op.toString());
+		chkInt(val2, ofc.list.get(0));
+	}
+	
 	private void chkFn(String fieldName, String fnName, FilterVal fval, int n) {
 		assertEquals(ValType.FUNCTION, fval.valType);
 		FilterFunc func = fval.filterFn;
