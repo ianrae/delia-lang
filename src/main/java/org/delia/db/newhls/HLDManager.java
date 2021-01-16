@@ -74,7 +74,7 @@ public class HLDManager extends ServiceBase {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		stmgrp.add(stm);
 		
-		QueryResponse qresp = null;// strategy.execute(hls, sql, qtx, zexec);
+		QueryResponse qresp = zexec.executeHLDQuery(hld, stm.sql, qtx);
 
 		HLSManagerResult result = new HLSManagerResult();
 		result.qresp = qresp;

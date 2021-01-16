@@ -109,25 +109,35 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	public DValue rawInsert(DValue dval, InsertContext ctx) {
 		failIfNotInit1();
 		ZTableCreator partialTableCreator = createPartialTableCreator();
+		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, partialTableCreator, cacheData, this);
 
 		if (ctx.extractGeneratedKeys) {
-			return doInsert(dval, ctx, partialTableCreator);
+			return doInsert(stgroup, ctx);
 		} else {
-			doInsert(dval, ctx, partialTableCreator);
+			doInsert(stgroup, ctx);
+			return null;
+		}
+	}
+	@Override
+	public DValue executeInsert(SqlStatementGroup stmgrp, InsertContext ctx) {
+		failIfNotInit1();
+
+		if (ctx.extractGeneratedKeys) {
+			return doInsert(stmgrp, ctx);
+		} else {
+			doInsert(stmgrp, ctx);
 			return null;
 		}
 	}
 
-	private DValue doInsert(DValue dval, InsertContext ctx, ZTableCreator tmpTableCreator) {
-		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tmpTableCreator, cacheData, this);
-
-		logStatementGroup(stgroup);
+	private DValue doInsert(SqlStatementGroup stmgroup, InsertContext ctx) {
+		logStatementGroup(stmgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;
 		ZDBExecuteContext dbctxMain = null; //can only be one statement that generates keys
 		try {
 			ZDBExecuteContext dbctx = createContext();
-			for(SqlStatement statement: stgroup.statementL) {
+			for(SqlStatement statement: stmgroup.statementL) {
 				int n = conn.executeCommandStatementGenKey(statement, keyType, dbctx);
 				nTotal += n;
 				dbctxMain = dbctx;
@@ -217,11 +227,12 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx) {
 		failIfNotInit2(); 
+		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator, cacheData, this);
 
 		if (ctx.extractGeneratedKeys) {
-			return doInsert(dval, ctx, tableCreator);
+			return doInsert(stgroup, ctx);
 		} else {
-			doInsert(dval, ctx, tableCreator);
+			doInsert(stgroup, ctx);
 			return null;
 		}
 	}

@@ -328,7 +328,6 @@ public class AllBDDTests extends BDDBase {
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
-		DeliaImpl.useNewHLD = true;
 //		runR1000File("t0-upsert-unique.txt", 4);
 //		runR1000File("t0-upsert.txt", 4);
 //		runR900File("t0-update-mm-all.txt", 4);
@@ -341,6 +340,7 @@ public class AllBDDTests extends BDDBase {
 	@Before
 	public void init() {
 //		DeliaFactory.useHLSMEM = true;
+		DeliaImpl.useNewHLD = false;
 	}
 	@After
 	public void shutdown() {
