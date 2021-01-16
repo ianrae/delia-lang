@@ -39,5 +39,10 @@ public class RelationInfo {
 		}
 		return false;
 	}
+	@Override
+	public String toString() {
+		String s = String.format("%s: %s.%s", cardinality.name(), nearType, fieldName);
+		return s;
+	}
 
 }

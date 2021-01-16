@@ -20,7 +20,7 @@ public class HLDInsert extends HLDBase {
 
 	@Override
 	public String toString() {
-		String s = String.format("%s: todo!!" ,  typeOrTbl.getTblName());
+		String s = String.format("%s:", typeOrTbl.getTblName());
 		return s;
 	}
 
