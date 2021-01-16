@@ -10,9 +10,13 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.QuerySpec;
 import org.delia.db.newhls.HLDManager;
+import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.sprig.SprigService;
+import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -30,17 +34,18 @@ import org.delia.zdb.ZDBInterfaceFactory;
 public class UpdateStatementRunner extends ServiceBase {
 		private DTypeRegistry registry;
 		private ZDBInterfaceFactory dbInterface;
-		private ZDBExecutor dbexecutor;
 		private FetchRunner fetchRunner;
 		private SprigService sprigSvc;
 		private DValueIterator insertPrebuiltValueIterator;
 		private VarEvaluator varEvaluator;
 		private HLDManager hldManager;
+		private Runner runner;
 		
-		public UpdateStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, VarEvaluator varEvaluator, DTypeRegistry registry) {
+		public UpdateStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, Runner runner, DTypeRegistry registry) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
-			this.varEvaluator = varEvaluator;
+			this.runner = runner;
+			this.varEvaluator = runner;
 			this.registry = registry;
 		}
 		
@@ -48,9 +53,8 @@ public class UpdateStatementRunner extends ServiceBase {
 			return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 		}
 
-		public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDManager hldManager, ZDBExecutor dbexecutor2, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+		public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDManager hldManager, ZDBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
 			this.hldManager = hldManager;
-			this.dbexecutor = dbexecutor2;
 			this.fetchRunner = fetchRunner2;
 			this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 			this.sprigSvc = sprigSvc2;
@@ -67,8 +71,19 @@ public class UpdateStatementRunner extends ServiceBase {
 				return;
 			}
 			
+			ConversionResult cres = null;
+			HLDUpdateStatement hldup = null;
+			SqlStatementGroup stmgrp = null;
+			if (hldManager != null) {
+				VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
+				hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator);
+				stmgrp = hldManager.generateSQL(hldup, dbexecutor);
+				cres = hldup.hldupdate.cres;
+			} else {
+				cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
+			}
+			
 			//get list of changed fields
-			ConversionResult cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
 			if (cres.dval == null) {
 				res.errors.addAll(cres.localET.getErrors());
 				res.ok = false;
@@ -95,7 +110,12 @@ public class UpdateStatementRunner extends ServiceBase {
 			
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				int numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
+				int numRowsAffected;
+				if (hldManager != null) {
+					numRowsAffected = dbexecutor.executeUpdate(hldup, stmgrp);
+				} else {
+					numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
+				}
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -106,9 +126,8 @@ public class UpdateStatementRunner extends ServiceBase {
 				return;
 			}
 		}
-		public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDManager hldManager2, ZDBExecutor dbexecutor2, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
-			this.hldManager = hldManager;
-			this.dbexecutor = dbexecutor2;
+		public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDManager hldManager2, ZDBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+			this.hldManager = hldManager2;
 			this.fetchRunner = fetchRunner2;
 			this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 			this.sprigSvc = sprigSvc2;
