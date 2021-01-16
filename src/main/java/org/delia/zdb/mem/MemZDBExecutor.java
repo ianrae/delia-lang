@@ -242,7 +242,12 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
-		//TODO
+		//TODO later when we make new HLDRowSelector, rewrite this
+		//for now use existing code
+		QuerySpec spec = new QuerySpec();
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.queryExp = hld.hlddelete.hld.originalQueryExp;
+		executeDelete(spec);
 	}
 
 	@Override
