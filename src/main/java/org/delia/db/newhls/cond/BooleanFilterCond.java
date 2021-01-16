@@ -7,6 +7,7 @@ public class BooleanFilterCond extends SingleFilterCond {
 	public BooleanFilterCond(BooleanExp exp) {
 		this.val1 = new FilterVal(ValType.BOOLEAN, exp);
 	}
+	
 	public boolean asBoolean() {
 		return val1.asBoolean();
 	}

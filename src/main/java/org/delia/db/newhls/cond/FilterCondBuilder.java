@@ -1,10 +1,13 @@
 package org.delia.db.newhls.cond;
 
+import java.util.List;
+
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.FilterOpFullExp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
@@ -17,8 +20,10 @@ import org.delia.db.newhls.ValType;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 public class FilterCondBuilder {
 
@@ -49,6 +54,8 @@ public class FilterCondBuilder {
 		} else if (cond instanceof StringExp) {
 			StringExp exp = (StringExp) cond;
 			return new StringFilterCond(exp);
+		} else if (cond instanceof IdentExp) {
+			return handleVarReference((IdentExp)cond);
 		} else if (cond instanceof FilterOpFullExp) {
 			FilterOpFullExp exp = (FilterOpFullExp) cond;
 			if (isAndOrExp(exp.opexp1)) {
@@ -80,6 +87,39 @@ public class FilterCondBuilder {
 		return null;
 	}
 
+
+	private FilterCond handleVarReference(IdentExp iexp) {
+		String varName = iexp.name();
+		List<DValue> list = varEvaluator.lookupVar(varName);
+		if (list.size() == 0) {
+			DeliaExceptionHelper.throwError("bad-var-value", "Var '%s' used in filter is empty. Not allowed", varName);
+		} else if (list.size() > 1) {
+			DeliaExceptionHelper.throwError("bad-var-value", "Var '%s' used in filter has %d values. Only one value is allowed", varName, list.size());
+		} else {
+			DValue dval = list.get(0);
+			if (dval == null) {
+				DeliaExceptionHelper.throwError("bad-var-value", "Var '%s' used in filter has null value. Not allowed", varName);
+			} 
+			return singleFilterFromDVal(dval, varName);
+		}
+		return null;
+	}
+
+	private FilterCond singleFilterFromDVal(DValue dval, String varName) {
+		switch(dval.getType().getShape()) {
+		case BOOLEAN:
+			return new BooleanFilterCond(new BooleanExp(dval.asBoolean()));
+		case INTEGER:
+			return new IntFilterCond(new IntegerExp(dval.asInt()));
+		case LONG:
+			return new LongFilterCond(new LongExp(dval.asLong()));
+		case STRING:
+			return new StringFilterCond(new StringExp(dval.asString()));
+			default:
+				DeliaExceptionHelper.throwError("bad-filter-var-type", "Var '%s' used in filter has type '%s'. Not allowed", varName, dval.getType().getName());
+		}
+		return null;
+	}
 
 	private boolean isOtherAndOrExp(FilterOpFullExp exp) {
 		if (exp.opexp1 instanceof FilterOpFullExp) {
