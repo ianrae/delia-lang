@@ -50,6 +50,8 @@ public class FilterCondBuilder {
 			FilterOpFullExp exp = (FilterOpFullExp) cond;
 			if (isAndOrExp(exp.opexp1)) {
 				return doAndOrCond(exp);
+			} else if (isOtherAndOrExp(exp)) {
+				return doOtherAndOrCond(exp);
 			} else if (exp.opexp1 instanceof FilterOpExp) {
 				FilterOpExp foexp = (FilterOpExp) exp.opexp1;
 				if (foexp.op1 instanceof XNAFMultiExp) {
@@ -76,6 +78,13 @@ public class FilterCondBuilder {
 	}
 
 
+	private boolean isOtherAndOrExp(FilterOpFullExp exp) {
+		if (exp.opexp1 instanceof FilterOpFullExp) {
+			return true;
+		}
+		return false;
+	}
+
 	private boolean isAndOrExp(Exp opexp1) {
 		if (opexp1 instanceof FilterExp) {
 			if (((FilterExp) opexp1).cond instanceof FilterOpFullExp) {
@@ -93,6 +102,43 @@ public class FilterCondBuilder {
 		filter.cond2 = doBuild(fexp2.cond);
 		filter.isAnd = exp.isAnd;
 		return filter;
+	}
+	private FilterCond doOtherAndOrCond(FilterOpFullExp exp) {
+		OpAndOrFilter filter = new OpAndOrFilter();
+		FilterOpFullExp outerfexp1 = (FilterOpFullExp) exp.opexp1;
+		FilterOpFullExp outerfexp2 = (FilterOpFullExp) exp.opexp2;
+		FilterOpExp fexp1 = (FilterOpExp) outerfexp1.opexp1;
+		FilterOpExp fexp2 = (FilterOpExp) outerfexp2.opexp1;
+		filter.cond1 = doBuild2(outerfexp1, fexp1);
+		filter.cond2 = doBuild2(outerfexp2, fexp2);
+		filter.isAnd = exp.isAnd;
+		return filter;
+	}
+
+
+	private FilterCond doBuild2(FilterOpFullExp outerfexp1, Exp cond) {
+		if (cond instanceof FilterOpExp) {
+			FilterOpExp foexp = (FilterOpExp) cond;
+			if (foexp.op1 instanceof XNAFMultiExp) {
+				XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op1;
+				OpFilterCond opfiltercond = new OpFilterCond();
+				opfiltercond.isNot = outerfexp1.negFlag;
+				opfiltercond.op = new FilterOp(foexp.op);
+				opfiltercond.val1 = buildValOrFunc(outerfexp1, foexp, xnaf); 
+				opfiltercond.val2 = new FilterVal(createValType(foexp.op2), foexp.op2);
+				return opfiltercond;
+			} else if (foexp.op2 instanceof XNAFMultiExp) {
+				XNAFMultiExp xnaf = (XNAFMultiExp) foexp.op2;
+
+				OpFilterCond opfiltercond = new OpFilterCond();
+				opfiltercond.isNot = outerfexp1.negFlag;
+				opfiltercond.op = new FilterOp(foexp.op);
+				opfiltercond.val1 = new FilterVal(createValType(foexp.op1), foexp.op1);
+				opfiltercond.val2 = buildValOrFunc(outerfexp1, foexp, xnaf); 
+				return opfiltercond;
+			}
+		}
+		return null; //TODO: fix
 	}
 
 	private FilterVal buildValOrFunc(FilterOpFullExp exp, FilterOpExp foexp, XNAFMultiExp xnaf) {
