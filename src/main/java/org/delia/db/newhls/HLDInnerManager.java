@@ -59,7 +59,7 @@ public class HLDInnerManager extends ServiceBase {
 	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		stmt.hldinsert = engine.buildInsert(insertExp);
-		stmt.updateL.addAll(engine.addParentUpdates(stmt.hldinsert));
+		engine.addParentUpdates(stmt.hldinsert, stmt.moreL);
 		stmt.assocInsertL = engine.addAssocInserts(stmt.hldinsert);
 		engine.assignAliases(stmt);
 		return stmt;
@@ -69,7 +69,7 @@ public class HLDInnerManager extends ServiceBase {
 	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		stmt.hldupdate = engine.buildUpdate(updateExp);
-		stmt.updateL.addAll(engine.addParentUpdatesForUpdate(stmt.hldupdate));
+		stmt.updateL.addAll(engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL));
 //		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
 		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp);
 		engine.assignAliases(stmt);

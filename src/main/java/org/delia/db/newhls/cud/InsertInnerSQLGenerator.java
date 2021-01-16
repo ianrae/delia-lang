@@ -44,8 +44,13 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		SqlStatement stm = genInsertStatement(hldins.hldinsert);
 		stmgrp.add(stm);
 		
-		for(HLDUpdate hld: hldins.updateL) {
-			SqlStatement stmx = genUpdateStatement(hld);
+//		for(HLDUpdate hld: hldins.updateL) {
+//			SqlStatement stmx = genUpdateStatement(hld);
+//			stmgrp.add(stmx);
+//		}
+		for(SimpleBase simple: hldins.moreL) {
+			SqlStatement stmx = new SqlStatement();
+			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
 		

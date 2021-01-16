@@ -64,11 +64,12 @@ public abstract class HLDEngineBase {
 	 * statement.
 	 * @param structType - main type being inserted
 	 * @param dval - values
+	 * @param moreL 
 	 * @param pkval2 
 	 */
-	protected List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, DValue dval, DValue pkval) {
+	protected List<HLDUpdate> generateParentUpdateIfNeeded(DStructType structType, DValue dval, DValue pkval, List<SimpleBase> moreL) {
 		List<HLDUpdate> updateL = new ArrayList<>();
-		
+
 		pkval = (pkval != null) ? pkval : DValueHelper.findPrimaryKeyValue(dval);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
@@ -91,6 +92,10 @@ public abstract class HLDEngineBase {
 					}
 				} 
 			}
+		}
+		for(HLDUpdate hld: updateL) {
+			SimpleUpdate simple = simpleBuilder.buildFrom(hld);
+			moreL.add(simple);
 		}
 		return updateL;
 	}

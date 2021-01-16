@@ -91,18 +91,18 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 		return hld;
 	}
-	public List<HLDUpdate> addParentUpdates(HLDInsert hld) {
+	public List<HLDUpdate> addParentUpdates(HLDInsert hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, null);
+		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, null, moreL);
 		return parentUpdates;
 	}
-	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld) {
+	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
 		
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		DValue pkval = getUpdatePK(hld.hld); 
 		
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval);
+		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval, moreL);
 		return parentUpdates;
 	}
 	private DValue getUpdatePK(HLDQuery hld) {
@@ -153,8 +153,11 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public void assignAliases(HLDInsertStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hldinsert);
-		for(HLDUpdate hld: stmt.updateL) {
-			aliasBuilder.assignAliases(hld);
+//		for(HLDUpdate hld: stmt.updateL) {
+//			aliasBuilder.assignAliases(hld);
+//		}
+		for(SimpleBase simple: stmt.moreL) {
+			aliasBuilder.assignAliases(simple);
 		}
 		for(HLDInsert hld: stmt.assocInsertL) {
 			aliasBuilder.assignAliasesAssoc(hld);
