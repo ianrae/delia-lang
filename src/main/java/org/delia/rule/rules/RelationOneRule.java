@@ -60,6 +60,8 @@ public class RelationOneRule extends RelationRuleBase {
 			//add 5dec2020 as part of hls/part2
 			if (relInfo.isParent && ctx.isInsertFlag()) {
 				bb = true; 
+			} else if (ctx.isUpsertFlag()) {
+				return true; //TODO: add some way to check uniqueness here!
 			}
 			
 			if (!bb) {

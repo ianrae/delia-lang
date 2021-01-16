@@ -324,12 +324,13 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+		testIndexToRun = 13;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 //		runR700File("t0-insert.txt", 6);
-		runR950File("t0-crud-assoc-insert.txt", 6);
+//		runR950File("t0-crud-assoc-insert.txt", 6);
+		runR1350File("t0-filter-op-relation.txt", 14);
 	}
 	
 	//---

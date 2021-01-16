@@ -88,7 +88,7 @@ public class HLDAliasManager extends ServiceBase {
 	public AliasInfo createFieldAlias(DStructType structType, String fieldName) {
 		AliasInfo info = getFieldAlias(structType, fieldName);
 		if (info != null) {
-			return null;
+			return info;
 		}
 		info = new AliasInfo();
 		info.alias = createAlias();
