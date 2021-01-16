@@ -247,6 +247,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		QuerySpec spec = new QuerySpec();
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.queryExp = hld.hlddelete.hld.originalQueryExp;
+		spec.evaluator.init(spec.queryExp);
 		executeDelete(spec);
 	}
 
