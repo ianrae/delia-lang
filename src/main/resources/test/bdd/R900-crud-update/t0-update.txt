@@ -23,7 +23,7 @@ expectDVal:false
 when:
   insert Flight {id: 55, wid: 20 }
   insert Flight {id: 56, wid: 20 }
-  update Flight {wid: 22}
+  update Flight[true] {wid: 22}
 then:
 2
 
@@ -43,7 +43,7 @@ value:a:Flight {
 title: update-optional
 when:
   insert Flight {id: 55, wid: 20 }
-  update Flight {}
+  update Flight[true] {}
   let x = Flight[55]
 then:
 value:a:Flight {
@@ -55,7 +55,7 @@ value:a:Flight {
 title: update-mandatory-missing
 when:
   insert Flight2 {id: 55, wid: 20 }
-  update Flight2 {}
+  update Flight2[true] {}
   let x = Flight2[55]
 then:
 value:a:Flight2 {
@@ -76,7 +76,7 @@ title: update-using-var
 when:
   let y int = 22
   insert Flight {id: 55, wid: 20 }
-  update Flight {wid: y}
+  update Flight[true] {wid: y}
   let x = Flight[55]
 then:
 value:a:Flight {
@@ -88,7 +88,7 @@ value:a:Flight {
 SKIP: update-no-field-names -TODO: implement this
 when:
   insert Flight {id: 55, wid: 20 }
-  update Flight {22}
+  update Flight[true] {22}
   let x = Flight[55]
 then:
 value:a:Flight {
