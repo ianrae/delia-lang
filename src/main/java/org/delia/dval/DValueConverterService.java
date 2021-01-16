@@ -13,7 +13,7 @@ import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.cond.FilterCond;
-import org.delia.db.newhls.cond.IntFilterCond;
+import org.delia.db.newhls.cond.IntegerFilterCond;
 import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.type.DValue;
@@ -156,8 +156,8 @@ public class DValueConverterService extends ServiceBase {
 		}
 	}
 	public DValue createDValueFrom(FilterCond cond, ScalarValueBuilder builder) {
-		if (cond instanceof IntFilterCond) {
-			IntFilterCond cc = (IntFilterCond) cond;
+		if (cond instanceof IntegerFilterCond) {
+			IntegerFilterCond cc = (IntegerFilterCond) cond;
 			return builder.buildInt(cc.asInt());
 		} else if (cond instanceof LongFilterCond) {
 			LongFilterCond cc = (LongFilterCond) cond;

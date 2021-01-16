@@ -9,6 +9,7 @@ import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
+import org.delia.compiler.ast.ListExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.QueryExp;
@@ -48,7 +49,7 @@ public class FilterCondBuilder {
 			return new BooleanFilterCond(exp);
 		} else if (cond instanceof IntegerExp) {
 			IntegerExp exp = (IntegerExp) cond;
-			return new IntFilterCond(exp);
+			return new IntegerFilterCond(exp);
 		} else if (cond instanceof LongExp) {
 			LongExp exp = (LongExp) cond;
 			return new LongFilterCond(exp);
@@ -85,10 +86,16 @@ public class FilterCondBuilder {
 				}
 			} else if (exp.opexp1 instanceof QueryInExp) {
 				QueryInExp inexp = (QueryInExp) exp.opexp1;
-				InFilterCond incod = new InFilterCond();
-				incod.isNot = exp.negFlag;
-				incod.val1 = new FilterVal(ValType.SYMBOL, new StringExp(inexp.fieldName));
-				return incod;
+				InFilterCond incond = new InFilterCond();
+				incond.isNot = exp.negFlag;
+				incond.val1 = new FilterVal(ValType.SYMBOL, new StringExp(inexp.fieldName));
+				
+				ListExp listexp = inexp.listExp;
+				for(Exp tmp: listexp.valueL) {
+					FilterVal fval = new FilterVal(createValType(tmp), tmp); 
+					incond.list.add(fval);
+				}
+				return incond;
 			}
 		}
 		return null;
@@ -117,7 +124,7 @@ public class FilterCondBuilder {
 		case BOOLEAN:
 			return new BooleanFilterCond(new BooleanExp(dval.asBoolean()));
 		case INTEGER:
-			return new IntFilterCond(new IntegerExp(dval.asInt()));
+			return new IntegerFilterCond(new IntegerExp(dval.asInt()));
 		case LONG:
 			return new LongFilterCond(new LongExp(dval.asLong()));
 		case STRING:

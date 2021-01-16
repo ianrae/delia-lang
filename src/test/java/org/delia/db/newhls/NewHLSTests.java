@@ -10,7 +10,7 @@ import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.InFilterCond;
-import org.delia.db.newhls.cond.IntFilterCond;
+import org.delia.db.newhls.cond.IntegerFilterCond;
 import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
@@ -205,6 +205,20 @@ public class NewHLSTests extends NewHLSTestBase {
 	}	
 	
 	@Test
+	public void testHLDFieldIn() {
+		String src = "let x = Flight[field1 in [55]]";
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
+
+		String sql = mgr.generateRawSql(hld);
+		log.log(sql);
+		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < 15", sql);
+
+		SqlStatement stm = mgr.generateSql(hld);
+		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < ?", "15");
+	}	
+	
+	
+	@Test
 	public void testHLDFieldCount() {
 		String src = "let x = Flight[field1 < 15].count()";
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
@@ -234,7 +248,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	}
 	private void chkbuilderInt(String src, int expected) {
 		FilterCond cond = buildCond(src);
-		IntFilterCond bfc = (IntFilterCond) cond;
+		IntegerFilterCond bfc = (IntegerFilterCond) cond;
 		assertEquals(expected, bfc.asInt());
 	}
 	private void chkbuilderLong(String src, long expected) {

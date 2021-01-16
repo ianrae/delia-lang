@@ -3,11 +3,15 @@ package org.delia.db.newhls;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.InFilterCond;
+import org.delia.db.newhls.cond.IntegerFilterCond;
 import org.delia.db.newhls.cond.OpAndOrFilter;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cond.SymbolChain;
+import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.table.ListWalker;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
@@ -65,6 +69,21 @@ public class SQLWhereGenerator {
 			String s2 = doFilter(ofc.cond2, paramGen, stm); //** recursion **
 			String and = ofc.isAnd ? "AND" : "OR";
 			return String.format("%s %s %s", s1, and, s2);
+		} else if (filter instanceof InFilterCond) {
+			InFilterCond ifc = (InFilterCond) filter;
+			String s1 = renderVal(ifc.val1, paramGen, stm);
+			
+			StrCreator sc = new StrCreator();
+			sc.o("%s IN (", s1);
+			ListWalker<FilterVal> walker = new ListWalker<>(ifc.list);
+			while(walker.hasNext()) {
+				FilterVal ff = walker.next();
+				String s = renderVal(ff, paramGen, stm);
+				sc.o(s);
+				walker.addIfNotLast(sc, ", ");
+			}
+			sc.o(")");
+			return sc.toString();
 		} else {
 			return null;
 		}
