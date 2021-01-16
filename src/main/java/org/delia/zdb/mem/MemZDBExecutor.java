@@ -22,6 +22,7 @@ import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
@@ -221,9 +222,14 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public int executeUpsert(HLDUpdateStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
+		//TODO later when we make new HLDRowSelector, rewrite this
+		//for now use existing code
+		QuerySpec spec = new QuerySpec();
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.queryExp = hld.hldupdate.hld.originalQueryExp;
+		spec.evaluator.init(spec.queryExp);
+		return executeUpsert(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, noUpdateFlag);
 	}
 
 	@Override

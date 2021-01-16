@@ -11,6 +11,7 @@ import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
@@ -112,7 +113,7 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	}
 
 	@Override
-	public int executeUpsert(HLDUpdateStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
+	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
 		return zexec.executeUpsert(hld, stmgrp, noUpdateFlag);
 	}
 

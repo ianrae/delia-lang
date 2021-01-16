@@ -12,6 +12,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
@@ -146,7 +147,7 @@ public class UpdateStatementRunner extends ServiceBase {
 			}
 			
 			ConversionResult cres = null;
-			HLDUpdateStatement hldup = null;
+			HLDUpsertStatement hldup = null;
 			SqlStatementGroup stmgrp = null;
 			if (hldManager != null) {
 				VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
