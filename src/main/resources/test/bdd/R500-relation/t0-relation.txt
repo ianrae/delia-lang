@@ -8,8 +8,8 @@ thenType: struct
 ---
 title: int-relation-not-allowed
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, relation cust int optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, relation cust int optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -21,8 +21,8 @@ ERROR: relation-wrong-type
 ---
 title: struct-must-be-relation
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -34,8 +34,8 @@ ERROR: missing-relation-decl
 ---
 SKIP: multiple relations - test multiple relations. TODO implement
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:

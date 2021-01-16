@@ -2,8 +2,8 @@
 
 FEATURE: rules
 background:
- type Flight struct {id int unique, name string } name.maxlen(4) end
- type Flight2 struct {id int unique, name string optional } name.maxlen(4) end
+ type Flight struct {id int primaryKey, name string } name.maxlen(4) end
+ type Flight2 struct {id int primaryKey, name string optional } name.maxlen(4) end
 thenType: struct
 
 # -- Mandatory --

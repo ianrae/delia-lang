@@ -3,7 +3,7 @@
 
 FEATURE: rules
 background:
-  type Flight struct {id int unique, wid long optional }  end
+  type Flight struct {id int primaryKey, wid long optional }  end
 thenType: struct
 
 ---

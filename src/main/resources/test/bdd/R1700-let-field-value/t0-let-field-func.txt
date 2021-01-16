@@ -9,8 +9,8 @@ thenType: struct
 ---
 title: function
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
   insert Customer {id: 56 }
@@ -22,8 +22,8 @@ value:a:int:56
 ---
 title: func missing
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
   insert Customer {id: 56 }
@@ -35,8 +35,8 @@ null
 ---
 title: multiple bad ref
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
   insert Customer {id: 56 }

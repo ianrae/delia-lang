@@ -39,7 +39,7 @@ value:a:Flight {
 ---
 title: serial and unique
 given:
-  type Flight struct {field1 int unique serial, field2 int  } end
+  type Flight struct {field1 int primaryKey serial, field2 int  } end
   insert Flight {field2: 57 }
 when:
   let x = Flight[1]
@@ -52,7 +52,7 @@ value:a:Flight {
 ---
 title: serial but insert value
 given:
-  type Flight struct {field1 int unique serial, field2 int  } end
+  type Flight struct {field1 int primaryKey serial, field2 int  } end
 when:
   insert Flight {field1: 22, field2: 57 }
 then:

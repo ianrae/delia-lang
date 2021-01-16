@@ -15,8 +15,8 @@ thenType: struct
 ---
 title: single
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -28,8 +28,8 @@ value:a:int:100
 ---
 title: single missing
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -41,8 +41,8 @@ null
 ---
 title: single bad ref
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -55,8 +55,8 @@ ERROR: unknown-field
 ---
 title: multiple
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -70,8 +70,8 @@ value:a:int:101
 ---
 title: multiple partial missing
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -84,8 +84,8 @@ value:a:int:101
 ---
 title: multiple all missing
 given:
- type Customer struct {id int unique, relation addr Address optional parent one } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:

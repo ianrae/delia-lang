@@ -1,1 +1,1 @@
-  type Customer struct {field1 int unique } end
+  type Customer struct {field1 int primaryKey } end

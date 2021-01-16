@@ -7,7 +7,7 @@ thenType: struct
 ---
 title: mandatory
 given:
-  type Flight struct {field1 int unique, field2 int  } end
+  type Flight struct {field1 int primaryKey, field2 int  } end
   insert Flight {field1: 55, field2: 57 }
 when:
   let x = Flight[55]
@@ -20,7 +20,7 @@ value:a:Flight {
 ---
 title: mandatory-missing
 given:
-  type Flight struct {field1 int unique, field2 int  } end
+  type Flight struct {field1 int primaryKey, field2 int  } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55];ERROR: MISSINGFIELD
@@ -28,7 +28,7 @@ when:
 ---
 title: optional-supplied
 given:
-  type Flight struct {field1 int unique, field2 int optional } end
+  type Flight struct {field1 int primaryKey, field2 int optional } end
   insert Flight {field1: 55, field2: 57 }
 when:
   let x = Flight[55]
@@ -41,7 +41,7 @@ value:a:Flight {
 ---
 title: optional
 given:
-  type Flight struct {field1 int unique, field2 int optional } end
+  type Flight struct {field1 int primaryKey, field2 int optional } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55]
