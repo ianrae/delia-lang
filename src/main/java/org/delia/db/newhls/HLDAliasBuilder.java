@@ -190,6 +190,10 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	
 	@Override
 	public void assignAliases(HLDInsert hld) {
+		if (hld.typeOrTbl.isAssocTbl) {
+			assignAliasesAssoc(hld);
+			return;
+		}
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = info.alias;
 		doFieldList(hld.fieldL, hld.getStructType(), info);

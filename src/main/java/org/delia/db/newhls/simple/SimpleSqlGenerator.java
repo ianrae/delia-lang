@@ -37,6 +37,8 @@ public class SimpleSqlGenerator {
 			return gen((SimpleDelete)simple, stm);
 		} else if (simple instanceof SimpleUpdate) {
 			return gen((SimpleUpdate)simple, stm);
+		} else if (simple instanceof SimpleInsert) {
+			return gen((SimpleInsert)simple, stm);
 		} else {
 			DeliaExceptionHelper.throwError("unknown-simplesql", "unknown simple sql type");
 			return null;
@@ -94,4 +96,35 @@ public class SimpleSqlGenerator {
 		outputWhere(sc, simple.filter, stm);
 		return sc.toString();
 	}
+	public String gen(SimpleInsert simple, SqlStatement stm) {
+		StrCreator sc = new StrCreator();
+		sc.o("INSERT INTO");
+		genTblName(sc, " %s", simple);
+		
+		sc.o(" (");
+		ListWalker<SqlColumn> walker = new ListWalker<>(simple.fieldL);
+		int index = 0;
+		while(walker.hasNext()) {
+			SqlColumn ff = walker.next();
+			sc.o("%s", ff.render());
+			walker.addIfNotLast(sc, ", ");
+		}
+		sc.o(")");
+		
+		sc.o(" VALUES(");
+		walker = new ListWalker<>(simple.fieldL);
+		index = 0;
+		while(walker.hasNext()) {
+			SqlColumn ff = walker.next();
+			sc.o("%s", "?");
+			
+			walker.addIfNotLast(sc, ", ");
+			DValue inner = simple.hld.valueL.get(index++);
+			stm.paramL.add(inner);
+		}
+		sc.o(")");
+
+		return sc.toString();
+	}
+	
 }
