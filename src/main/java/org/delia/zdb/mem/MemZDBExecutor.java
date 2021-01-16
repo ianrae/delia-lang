@@ -221,6 +221,12 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
+	public int executeUpsert(HLDUpdateStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
 	public void executeDelete(QuerySpec spec) {
 		QueryResponse qresp = new QueryResponse();
 		try {

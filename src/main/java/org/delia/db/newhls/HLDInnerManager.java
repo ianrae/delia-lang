@@ -16,7 +16,6 @@ import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -85,7 +84,7 @@ public class HLDInnerManager extends ServiceBase {
 		return stmt;
 	}
 
-	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, DoNothingVarEvaluator varEvaluator) {
+	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator) {
 		HLDUpsertStatement stmt = new HLDUpsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);

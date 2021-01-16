@@ -9,6 +9,7 @@ import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
@@ -21,6 +22,7 @@ import org.delia.db.hls.manager.StandardHLSStragey;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -122,6 +124,12 @@ public class HLDManager extends ServiceBase {
 		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator);
 		log.log(hldupdate.toString());
 		return hldupdate;
+	}
+	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+		HLDInnerManager mgr = createManager(zexec); 
+		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator);
+		log.log(upsertExp.toString());
+		return hldupsert;
 	}
 	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec, VarEvaluator varEvaluator2) {
 		HLDInnerManager mgr = createManager(zexec); 

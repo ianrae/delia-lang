@@ -120,37 +120,8 @@ public class UpsertTests extends NewHLSTestBase {
 		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
 		chkUpsertSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
 	}
-	@Test
-	public void testMNScenario2() {
-		useCustomerManyToManySrc = true;
-		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "upsert Address[true] {y: 45, cust:55}");
-		//upsert all
-		
-		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 3);
-		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
-		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
-		String s = "MERGE INTO CustomerAddressDat1 as t1 USING (SELECT cid FROM Customer) AS S ON t1.rightv = s.cid WHEN MATCHED THEN UPDATE SET t1.leftv = ? WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.cid, ?)";
-		chkUpsertSql(stmgrp, 2, s, "55", "55");
-	}
-	@Test
-	public void testMNScenario3() {
-		useCustomerManyToManySrc = true;
-		String src0 = "insert Customer {cid: 55, x: 45}";
-		String src = addSrc(src0, "upsert Address[y > 10] {y: 45, cust:55}");
-		//upsert filter
-		
-		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 3);
-		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.y > ?", "45", "10");
-		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv <> ? AND t1.rightv IN (SELECT cid FROM Customer as a WHERE a.y > ?)", "55", "10");
-		String s = "WITH cte1 AS (SELECT ? as leftv, id as rightv FROM CustomerINSERT INTO CustomerAddressDat1 as t1 SELECT * from cte1";
-		chkUpsertSql(stmgrp, 2, s, "55");
-	}
-	
+	//scenario2 not support by upsert
+	//scenario3 not support by upsert
 	
 	@Test
 	public void testMNUpsertParent() {

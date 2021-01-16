@@ -295,7 +295,7 @@ public class NewHLSTestBase extends BDDBase {
 	}
 	protected UpsertStatementExp compileToUpsertStatement(String src, int statementIndex) {
 		DeliaSessionImpl sessimpl = doCompileStatement(src);
-		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof UpdateStatementExp).collect(Collectors.toList());
+		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof UpsertStatementExp).collect(Collectors.toList());
 		Exp exp = list.get(statementIndex);
 		return (UpsertStatementExp) exp;
 	}

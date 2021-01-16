@@ -145,8 +145,19 @@ public class UpdateStatementRunner extends ServiceBase {
 				return;
 			}
 			
+			ConversionResult cres = null;
+			HLDUpdateStatement hldup = null;
+			SqlStatementGroup stmgrp = null;
+			if (hldManager != null) {
+				VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
+				hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator);
+				stmgrp = hldManager.generateSQL(hldup, dbexecutor);
+				cres = hldup.hldupdate.cres;
+			} else {
+				cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
+			}
+			
 			//get list of changed fields
-			ConversionResult cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
 			if (cres.dval == null) {
 				res.errors.addAll(cres.localET.getErrors());
 				res.ok = false;
@@ -196,7 +207,12 @@ public class UpdateStatementRunner extends ServiceBase {
 			try {
 				QuerySpec spec = resolveFilterVars(exp.queryExp);
 				boolean noUpdateFlag = exp.optionExp != null;
-				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
+				int numRowsAffected;
+				if (hldManager != null) {
+					numRowsAffected = dbexecutor.executeUpsert(hldup, stmgrp, noUpdateFlag);
+				} else {
+					numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
+				}
 				
 				res.ok = true;
 				res.shape = Shape.INTEGER;

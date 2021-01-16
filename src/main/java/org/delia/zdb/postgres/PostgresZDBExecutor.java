@@ -309,6 +309,12 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	@Override
+	public int executeUpsert(HLDUpdateStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
 	public void executeDelete(QuerySpec spec) {
 		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
 		if (stgroup.statementL.isEmpty()) {
