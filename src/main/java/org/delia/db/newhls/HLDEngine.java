@@ -95,14 +95,12 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		DStructType structType = hld.getStructType();
 		generateParentUpdateIfNeeded(structType, hld.cres.dval, null, moreL);
 	}
-	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld, List<SimpleBase> moreL) {
+	public void addParentUpdatesForUpdate(HLDUpdate hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
 		
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		DValue pkval = getUpdatePK(hld.hld); 
-		
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval, moreL);
-		return parentUpdates;
+		generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval, moreL);
 	}
 	private DValue getUpdatePK(HLDQuery hld) {
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
@@ -116,10 +114,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		}
 	}
 
-	public List<HLDInsert> addAssocInserts(HLDInsert hld, List<SimpleBase> moreL) {
+	public void addAssocInserts(HLDInsert hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
-		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval, moreL);
-		return parentUpdates;
+		 generateAssocInsertsIfNeeded(structType, hld.cres.dval, moreL);
 	}
 	public List<HLDInsert> addAssocInsertsForUpdate(HLDUpdate hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
@@ -165,8 +162,11 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public void assignAliases(HLDUpdateStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		aliasBuilder.assignAliases(stmt.hldupdate);
-		for(HLDUpdate hld: stmt.updateL) {
-			aliasBuilder.assignAliases(hld);
+//		for(HLDUpdate hld: stmt.updateL) {
+//			aliasBuilder.assignAliases(hld);
+//		}
+		for(SimpleBase simple: stmt.moreL) {
+			aliasBuilder.assignAliases(simple);
 		}
 //		for(HLDInsert hld: stmt.assocInsertL) {
 //			aliasBuilder.assignAliasesAssoc(hld);
