@@ -148,7 +148,9 @@ public class NewHLSTestBase extends BDDBase {
 			initialSrc = buildCustomer1NSrc();
 		} else if (useCustomer1NOtherWaySrc) {
 			initialSrc = buildCustomer1NOtherWaySrc();
-		} else {
+		} else if (useStringSrc) {
+			initialSrc = buildSrcString();
+		} else { 
 			initialSrc = buildSrc();
 		}
 		log.log("initial: " + initialSrc);
@@ -178,6 +180,7 @@ public class NewHLSTestBase extends BDDBase {
 	//---
 	protected Delia delia;
 	protected DeliaSession session;
+	protected boolean useStringSrc = false;
 	protected boolean useCustomerManyToManySrc = false;
 	protected boolean useCustomer11Src = false;
 	protected boolean useCustomer11OtherWaySrc = false;
@@ -212,6 +215,12 @@ public class NewHLSTestBase extends BDDBase {
 		String src = "type Flight struct {field1 int primaryKey, field2 int } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";
 		src += "\n insert Flight {field1: 2, field2: 20}";
+		return src;
+	}
+	protected String buildSrcString() {
+		String src = "type Flight struct {field1 string primaryKey, field2 int } end";
+		src += "\n insert Flight {field1: '1', field2: 10}";
+		src += "\n insert Flight {field1: '2', field2: 20}";
 		return src;
 	}
 	protected String buildCustomerNNSrc() {

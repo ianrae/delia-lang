@@ -139,7 +139,12 @@ public class NewHLSTests extends NewHLSTestBase {
 	}	
 	@Test
 	public void testIn() {
-		chkbuilderInInt("let x = Flight[field1 in [55]]", "field1", "IN", 55);
+		chkbuilderInInt("let x = Flight[field1 in [55]]", "field1", "in", 55);
+	}	
+	@Test
+	public void testLike() {
+		useStringSrc = true;
+		chkbuilderOpSymbolStr("let x = Flight[field1 like '%ab']", "field1", "like", "%ab");
 	}	
 
 	@Test
@@ -274,6 +279,13 @@ public class NewHLSTests extends NewHLSTestBase {
 		assertEquals(op, ofc.op.toString());
 		chkInt(val2, ofc.val2);
 	}
+	private void chkbuilderOpSymbolStr(String src, String val1, String op, String str) {
+		FilterCond cond = buildCond(src);
+		OpFilterCond ofc = (OpFilterCond) cond;
+		chkSymbol(val1, ofc.val1);
+		assertEquals(op, ofc.op.toString());
+		chkString(str, ofc.val2);
+	}
 	private void chkbuilderOpIntSymbol(String src, int val1, String op, String val2) {
 		FilterCond cond = buildCond(src);
 		OpFilterCond ofc = (OpFilterCond) cond;
@@ -318,6 +330,10 @@ public class NewHLSTests extends NewHLSTestBase {
 	private void chkInt(int val1, FilterVal fval) {
 		assertEquals(ValType.INT, fval.valType);
 		assertEquals(val1, fval.asInt());
+	}
+	private void chkString(String val1, FilterVal fval) {
+		assertEquals(ValType.STRING, fval.valType);
+		assertEquals(val1, fval.asString());
 	}
 
 

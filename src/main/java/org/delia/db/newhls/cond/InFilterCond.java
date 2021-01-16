@@ -14,7 +14,7 @@ public class InFilterCond implements FilterCond {
 	//[not] val in (...)
 	public boolean isNot;
 	public FilterVal val1;
-	public FilterOp op = new FilterOp("IN");
+	public FilterOp op = new FilterOp("in");
 	public List<FilterVal> list = new ArrayList<>();
 
 	@Override
