@@ -4,16 +4,19 @@ import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -70,7 +73,6 @@ public class HLDInnerManager extends ServiceBase {
 		return stmt;
 	}
 	
-	
 	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		engine.setVarEvaluator(varEvaluator);
@@ -79,6 +81,18 @@ public class HLDInnerManager extends ServiceBase {
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 //		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
 		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp);
+		engine.assignAliases(stmt);
+		return stmt;
+	}
+
+	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, DoNothingVarEvaluator varEvaluator) {
+		HLDUpsertStatement stmt = new HLDUpsertStatement();
+		engine.setVarEvaluator(varEvaluator);
+		engineAssoc.setVarEvaluator(varEvaluator);
+		stmt.hldupdate = engine.buildUpsert(upsertExp);
+		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
+//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
+		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, upsertExp.queryExp);
 		engine.assignAliases(stmt);
 		return stmt;
 	}

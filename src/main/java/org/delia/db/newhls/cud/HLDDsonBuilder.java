@@ -8,6 +8,7 @@ import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.newhls.HLDField;
@@ -118,8 +119,17 @@ public class HLDDsonBuilder {
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		
 		fillArraysForUpdate(hldupdate);
-		
 		return hldupdate;
+	}
+	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
+		DStructType dtype = (DStructType) registry.getType(upsertExp.typeName);
+		HLDUpsert hld = new HLDUpsert(new TypeOrTable(dtype), null);//fill in later
+		
+		DValueIterator insertPrebuiltValueIterator = null; //TODO
+		hld.cres = buildValue(false, dtype, upsertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		
+		fillArraysForUpdate(hld);
+		return hld;
 	}
 
 	private void fillArraysForUpdate(HLDUpdate hldupdate) {

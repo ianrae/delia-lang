@@ -20,10 +20,12 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -275,12 +277,27 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
-
 	protected UpdateStatementExp compileToUpdateStatement(String src, int statementIndex) {
 		DeliaSessionImpl sessimpl = doCompileStatement(src);
 		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof UpdateStatementExp).collect(Collectors.toList());
 		Exp exp = list.get(statementIndex);
 		return (UpdateStatementExp) exp;
+	}
+	
+	protected HLDUpsertStatement buildFromSrcUpsert(String src, int statementIndex) {
+		UpsertStatementExp upsertExp = compileToUpsertStatement(src, statementIndex);
+		log.log(src);
+		
+		mgr = createManager(); 
+		HLDUpsertStatement hld = mgr.fullBuildUpsert(upsertExp, new DoNothingVarEvaluator());
+		log.log(hld.toString());
+		return hld;
+	}
+	protected UpsertStatementExp compileToUpsertStatement(String src, int statementIndex) {
+		DeliaSessionImpl sessimpl = doCompileStatement(src);
+		List<Exp> list = sessimpl.mostRecentContinueExpL.stream().filter(exp -> exp instanceof UpdateStatementExp).collect(Collectors.toList());
+		Exp exp = list.get(statementIndex);
+		return (UpsertStatementExp) exp;
 	}
 	
 

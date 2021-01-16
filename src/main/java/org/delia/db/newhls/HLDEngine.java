@@ -6,6 +6,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cond.SingleFilterCond;
@@ -17,6 +18,7 @@ import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsert;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.log.Log;
 import org.delia.runner.VarEvaluator;
@@ -136,6 +138,12 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
 		return doBuildUpdate(hld, updateExp.queryExp);
+	}
+	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp);
+		doBuildUpdate(hld, upsertExp.queryExp);
+		return hld;
 	}
 	
 	private HLDUpdate doBuildUpdate(HLDUpdate hld, QueryExp queryExp) {
