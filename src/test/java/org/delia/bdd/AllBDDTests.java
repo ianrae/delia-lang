@@ -124,7 +124,7 @@ public class AllBDDTests extends BDDBase {
 		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
 		runR1000File("t0-upsert-mm-all.txt", 1);
-		runR1000File("t0-upsert-mm-other.txt", 1);
+		runR1000File("t0-upsert-mm-other.txt", 2);
 		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
@@ -331,7 +331,7 @@ public class AllBDDTests extends BDDBase {
 //		runR700File("t0-insert.txt", 6);
 //		runR800File("t0-delete.txt", 4);
 //		runR900File("t0-update.txt", 7);
-		runR1000File("t0-upsert-mm-other.txt", 1);
+		runR1000File("t0-upsert-mm-other.txt", 2);
 //		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
