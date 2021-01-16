@@ -19,6 +19,7 @@ import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.log.Log;
+import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -87,7 +88,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	
 	
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 		return hld;
 	}
@@ -132,7 +133,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
 		return doBuildUpdate(hld, updateExp.queryExp);
 	}
@@ -190,5 +191,13 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		for(SimpleBase simple: stmt.moreL) {
 			aliasBuilder.assignAliases(simple);
 		}
+	}
+
+	public VarEvaluator getVarEvaluator() {
+		return varEvaluator;
+	}
+
+	public void setVarEvaluator(VarEvaluator varEvaluator) {
+		this.varEvaluator = varEvaluator;
 	}
 }

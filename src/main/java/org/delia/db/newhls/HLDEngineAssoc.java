@@ -12,6 +12,7 @@ import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
+import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -35,6 +36,7 @@ public class HLDEngineAssoc {
 	protected DatIdMap datIdMap;
 	protected Log log;
 	protected SprigService sprigSvc;
+	protected VarEvaluator varEvaluator; //set after ctor
 
 	public HLDEngineAssoc(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -112,7 +114,7 @@ public class HLDEngineAssoc {
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDeleteAll(builderAdapter, queryExp, relinfo, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
@@ -130,7 +132,7 @@ public class HLDEngineAssoc {
 //		    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 //		    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
@@ -149,7 +151,7 @@ public class HLDEngineAssoc {
 //  	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 
 		//TODO write this!!!
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDeleteOther(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
@@ -159,6 +161,14 @@ public class HLDEngineAssoc {
 		bundle.hldupdate.assocRelInfo = relinfo; 
 		
 		return Collections.singletonList(bundle);
+	}
+
+	public VarEvaluator getVarEvaluator() {
+		return varEvaluator;
+	}
+
+	public void setVarEvaluator(VarEvaluator varEvaluator) {
+		this.varEvaluator = varEvaluator;
 	}
 	
 	

@@ -11,6 +11,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.junit.Test;
 
 /**
@@ -110,7 +111,7 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator());
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}

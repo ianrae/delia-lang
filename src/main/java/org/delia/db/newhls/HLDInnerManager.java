@@ -14,6 +14,7 @@ import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
 
@@ -56,8 +57,10 @@ public class HLDInnerManager extends ServiceBase {
 		engine.assignAliases(stmt);
 		return stmt;
 	}
-	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp) {
+	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
+		engine.setVarEvaluator(varEvaluator);
+		engineAssoc.setVarEvaluator(varEvaluator);
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		if (stmt.hldinsert.buildSuccessful()) {
 			engine.addParentUpdates(stmt.hldinsert, stmt.moreL);
@@ -68,8 +71,10 @@ public class HLDInnerManager extends ServiceBase {
 	}
 	
 	
-	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp) {
+	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
+		engine.setVarEvaluator(varEvaluator);
+		engineAssoc.setVarEvaluator(varEvaluator);
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 //		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);

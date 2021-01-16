@@ -26,6 +26,7 @@ import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
@@ -270,7 +271,7 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator());
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}

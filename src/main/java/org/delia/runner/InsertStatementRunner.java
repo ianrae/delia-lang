@@ -64,7 +64,8 @@ public class InsertStatementRunner extends ServiceBase {
 		HLDInsertStatement hldins = null;
 		SqlStatementGroup stmgrp = null;
 		if (hldManager != null) {
-			hldins = hldManager.buildHLD(exp, dbexecutor);
+			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
+			hldins = hldManager.buildHLD(exp, dbexecutor, varEvaluator);
 			stmgrp = hldManager.generateSQL(hldins, dbexecutor);
 			cres = hldins.hldinsert.cres;
 		} else {

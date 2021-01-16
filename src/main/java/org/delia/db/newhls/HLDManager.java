@@ -117,15 +117,15 @@ public class HLDManager extends ServiceBase {
 		log.log(hlddel.toString());
 		return hlddel;
 	}
-	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec) {
+	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
-	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec) {
+	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec, VarEvaluator varEvaluator2) {
 		HLDInnerManager mgr = createManager(zexec); 
-		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp);
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator);
 		log.log(hldins.toString());
 		return hldins;
 	}

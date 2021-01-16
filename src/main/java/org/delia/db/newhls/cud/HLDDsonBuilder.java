@@ -21,7 +21,6 @@ import org.delia.runner.DValueIterator;
 import org.delia.runner.DsonToDValueConverter;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
-import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructHelper;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -42,13 +41,15 @@ public class HLDDsonBuilder {
 	private FactoryService factorySvc;
 	private SprigService sprigSvc;
 	private QueryBuilderHelper queryBuilderHelper;
+	private VarEvaluator varEvaluator;
 
-	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc) {
+	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc, VarEvaluator varEvaluator) {
 		this.registry = registry;
 		this.log = log;
 		this.factorySvc = factorySvc;
 		this.sprigSvc = sprigSvc;
 		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
+		this.varEvaluator = varEvaluator;
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
@@ -99,11 +100,6 @@ public class HLDDsonBuilder {
 			cres.dval = insertPrebuiltValueIterator.next();
 			return cres;
 		}
-
-		VarEvaluator varEvaluator = null;//runner;
-		//			if (sprigSvc.haveEnabledFor(dtype.getName())) {
-		varEvaluator = new SprigVarEvaluator(factorySvc, null); //TODO fixrunner);
-		//			}
 
 		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, varEvaluator, sprigSvc);
 		if (doFull) {

@@ -21,6 +21,7 @@ import org.delia.db.newhls.simple.SimpleUpdate;
 import org.delia.db.newhls.simple.SubSelectRenderer;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
+import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -46,6 +47,7 @@ public abstract class HLDEngineBase {
 	protected SprigService sprigSvc;
 	protected QueryBuilderHelper queryBuilderHelper;
 	private SimpleSqlBuilder simpleBuilder;
+	protected VarEvaluator varEvaluator; //set after ctor
 
 	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -101,7 +103,7 @@ public abstract class HLDEngineBase {
 	}
 
 	protected HLDUpdate addFkUpdateStatement(RelationInfo relinfo, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 
 		DStructType targetType = relinfo.farType;
 		QueryExp queryExp = queryBuilderHelper.buildPKQueryExp(targetType, fkval); //queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
@@ -115,7 +117,7 @@ public abstract class HLDEngineBase {
 	}
 
 	protected void addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
 			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
@@ -188,7 +190,7 @@ public abstract class HLDEngineBase {
 	}
 
 	protected void addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 
 		DStructType targetType = relinfo.farType;
 		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
@@ -201,7 +203,7 @@ public abstract class HLDEngineBase {
 		moreL.add(simple);
 	}
 	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 		DStructType targetType = relinfo.nearType;
 		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
 		hld.hld = buildPKQuery(relinfo, false);
@@ -211,7 +213,7 @@ public abstract class HLDEngineBase {
 		attachSubSelect(hld.hld, hldquery2.originalQueryExp, relinfo.otherSide.fieldName);
 	}
 	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		DStructType targetType;
@@ -244,7 +246,7 @@ public abstract class HLDEngineBase {
 		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
 	}
 	protected void mmaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		if (! areSame) {
@@ -319,7 +321,7 @@ public abstract class HLDEngineBase {
 		return insertL;
 	}
 	protected HLDInsert addAssocInsertStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
 
 		HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
 		return hld;

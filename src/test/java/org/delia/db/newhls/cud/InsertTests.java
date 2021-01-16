@@ -11,6 +11,7 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.junit.Test;
 
 /**
@@ -156,7 +157,7 @@ public class InsertTests extends NewHLSTestBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp);
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator());
 		log.log(hldins.toString());
 		return hldins;
 	}
