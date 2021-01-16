@@ -331,10 +331,22 @@ public class LetStatementRunner extends ServiceBase {
 					
 					queryExp.typeName = first.getType().getName();
 					//TODO add code to handle var refs deeper in statement. ex: let x = y.orderBy(z)
+					
+					if (!queryExp.qfelist.isEmpty()) {
+						String fieldName = queryExp.qfelist.get(0).funcName; //TODO support more fields or funcs later
+						DValue inner = first.asStruct().getField(fieldName);
+						//if scalar then just return
+						if (inner != null && inner.getType().isScalarShape()) {
+							varRef.qresp = null;
+							varRef.dval = inner;
+							return varRef;
+						}
+					}
+					
 				}
 				
 				
-				QueryResponse qresp2 = executeDBQuery(queryExp, qresp);
+				QueryResponse qresp2 = qresp; //TODO: why did we call db here? executeDBQuery(queryExp, qresp);
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {
 					if (qresp2.dvalList == null) {

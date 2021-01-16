@@ -186,7 +186,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		return runBDDFile(BDDGroup.R2300_multi_relation, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
-		log.log("********* FILE: %s", filename);
+		log.log("********* FILE: %s *********************", filename);
 		currentGroup = group;
 		filesExecutedL.add(filename);
 		String path = testFile(group, filename);
