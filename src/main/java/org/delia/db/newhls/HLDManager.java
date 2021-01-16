@@ -129,6 +129,10 @@ public class HLDManager extends ServiceBase {
 		log.log(hldins.toString());
 		return hldins;
 	}
+	public SqlStatementGroup generateSQL(HLDInsertStatement hldins, ZDBExecutor zexec) {
+		HLDInnerManager mgr = createManager(zexec);
+		return mgr.generateSql(hldins);
+	}
 	
 	protected HLDInnerManager createManager(ZDBExecutor zexec) {
 		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);

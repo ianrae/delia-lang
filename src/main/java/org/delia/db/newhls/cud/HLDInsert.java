@@ -23,4 +23,8 @@ public class HLDInsert extends HLDBase {
 		String s = String.format("%s: todo!!" ,  typeOrTbl.getTblName());
 		return s;
 	}
+
+	public boolean buildSuccessful() {
+		return cres.dval != null;
+	}
 }

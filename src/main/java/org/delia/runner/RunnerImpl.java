@@ -404,7 +404,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeInsertStatement(InsertStatementExp exp, ResultValue res) {
-			insertStatementRunner.executeInsertStatement(exp, res, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			insertStatementRunner.executeInsertStatement(exp, res, hldManager, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private boolean failIfNotStruct(DType dtype, String typeName, ResultValue res) {
 			if (! dtype.isStructShape()) {

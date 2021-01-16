@@ -56,8 +56,9 @@ public class HLDDsonBuilder {
 		HLDInsert hldins = new HLDInsert(new TypeOrTable(dtype));
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
-		
-		fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
+		if (hldins.buildSuccessful()) {
+			fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
+		}
 		
 		return hldins;
 	}
