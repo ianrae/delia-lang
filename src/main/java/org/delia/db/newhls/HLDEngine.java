@@ -91,10 +91,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 		return hld;
 	}
-	public List<HLDUpdate> addParentUpdates(HLDInsert hld, List<SimpleBase> moreL) {
+	public void addParentUpdates(HLDInsert hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
-		List<HLDUpdate> parentUpdates = generateParentUpdateIfNeeded(structType, hld.cres.dval, null, moreL);
-		return parentUpdates;
+		generateParentUpdateIfNeeded(structType, hld.cres.dval, null, moreL);
 	}
 	public List<HLDUpdate> addParentUpdatesForUpdate(HLDUpdate hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
@@ -117,14 +116,14 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		}
 	}
 
-	public List<HLDInsert> addAssocInserts(HLDInsert hld) {
+	public List<HLDInsert> addAssocInserts(HLDInsert hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
-		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
+		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval, moreL);
 		return parentUpdates;
 	}
-	public List<HLDInsert> addAssocInserts(HLDUpdate hld) {
+	public List<HLDInsert> addAssocInsertsForUpdate(HLDUpdate hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
-		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval);
+		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval, moreL);
 		return parentUpdates;
 	}
 	public List<AssocBundle> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {

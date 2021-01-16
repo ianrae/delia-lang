@@ -290,7 +290,7 @@ public abstract class HLDEngineBase {
 		}
 	}
 
-	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval) {
+	protected List<HLDInsert> generateAssocInsertsIfNeeded(DStructType structType, DValue dval, List<SimpleBase> moreL) {
 		List<HLDInsert> insertL = new ArrayList<>();
 		
 		DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
@@ -311,6 +311,10 @@ public abstract class HLDEngineBase {
 					}
 				}
 			}
+		}
+		
+		for(HLDInsert hld: insertL) {
+			moreL.add(simpleBuilder.buildFrom(hld));
 		}
 		return insertL;
 	}

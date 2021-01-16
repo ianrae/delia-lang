@@ -60,7 +60,7 @@ public class HLDInnerManager extends ServiceBase {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		engine.addParentUpdates(stmt.hldinsert, stmt.moreL);
-		stmt.assocInsertL = engine.addAssocInserts(stmt.hldinsert);
+		stmt.assocInsertL = engine.addAssocInserts(stmt.hldinsert, stmt.moreL);
 		engine.assignAliases(stmt);
 		return stmt;
 	}

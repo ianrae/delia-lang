@@ -4,6 +4,7 @@ import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.SqlColumn;
 import org.delia.db.newhls.cud.HLDDelete;
+import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 
 /**
@@ -38,6 +39,16 @@ public class SimpleSqlBuilder {
 			simple.fieldL.add(ff);
 		}
 		simple.filter = hld.hld.filter;
+		simple.hld = hld;
+		return simple;
+	}
+	public SimpleInsert buildFrom(HLDInsert hld) {
+		SimpleInsert simple = new SimpleInsert();
+		simple.tblFrag = new SqlColumn(hld.typeOrTbl.alias, hld.typeOrTbl.getTblName());
+		for(HLDField fld: hld.fieldL) {
+			SqlColumn ff = new SqlColumn(fld.alias, fld.fieldName);
+			simple.fieldL.add(ff);
+		}
 		simple.hld = hld;
 		return simple;
 	}
