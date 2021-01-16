@@ -127,7 +127,6 @@ public class HLDDsonBuilder {
 		
 		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hld.cres = buildValue(false, dtype, upsertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
-		
 		fillArraysForUpdate(hld);
 		return hld;
 	}
