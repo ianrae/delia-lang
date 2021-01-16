@@ -387,7 +387,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			
 			try {
 				if (hldManager != null) {
-//					VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
 					HLDDeleteStatement hld = hldManager.buildHLD(exp, dbexecutor);
 					SqlStatementGroup stmgrp = hldManager.generateSQL(hld, dbexecutor);
 					

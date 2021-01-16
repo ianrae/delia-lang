@@ -23,6 +23,7 @@ import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
@@ -271,6 +272,12 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 			convertAndRethrow(e);
 		}
 		return updateCount;
+	}
+
+	@Override
+	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	@Override

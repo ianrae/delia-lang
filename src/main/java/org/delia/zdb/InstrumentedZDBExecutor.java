@@ -10,6 +10,7 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
@@ -98,6 +99,11 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	@Override
 	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
 		return zexec.executeUpdate(spec, dvalPartial, assocCrudMap);
+	}
+
+	@Override
+	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
+		return zexec.executeUpdate(hld, stmgrp);
 	}
 
 	@Override
