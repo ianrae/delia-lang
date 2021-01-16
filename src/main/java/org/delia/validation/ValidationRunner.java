@@ -29,4 +29,6 @@ public interface ValidationRunner {
 
 	void enableUpsertFlag(boolean b);
 
+	void setUpsertPKVal(DValue keyval);
+
 }

@@ -35,6 +35,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private boolean upsertFlag;
 		private FetchRunner fetchRunner;
 		private DValueCompareService compareSvc;
+		private DValue upsertPKVal;
 
 		public ValidationRuleRunnerImpl(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
 			super(factorySvc);
@@ -296,5 +297,9 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		public void enableUpsertFlag(boolean b) {
 			this.upsertFlag = b;
 		}
-		
+
+		@Override
+		public void setUpsertPKVal(DValue keyval) {
+			this.upsertPKVal = keyval;
+		}
 	}

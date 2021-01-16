@@ -13,6 +13,7 @@ import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.sprig.SprigService;
@@ -20,9 +21,10 @@ import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.util.PrimaryKeyHelperService;
 import org.delia.validation.ValidationRunner;
+import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -40,6 +42,7 @@ public class UpdateStatementRunner extends ServiceBase {
 	private VarEvaluator varEvaluator;
 	private HLDManager hldManager;
 	private Runner runner;
+	private DValueConverterService dvalConverterSvc;
 
 	public UpdateStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, Runner runner, DTypeRegistry registry) {
 		super(factorySvc);
@@ -47,6 +50,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		this.runner = runner;
 		this.varEvaluator = runner;
 		this.registry = registry;
+		this.dvalConverterSvc = new DValueConverterService(factorySvc);
 	}
 
 	private ValidationRunner createValidationRunner() {
@@ -169,6 +173,11 @@ public class UpdateStatementRunner extends ServiceBase {
 			ValidationRunner ruleRunner = createValidationRunner();
 			ruleRunner.enableRelationModifier(true);
 			ruleRunner.enableUpsertFlag(true);
+			if (hldManager != null) {
+				ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(registry);
+				DValue keyval = dvalConverterSvc.createDValueFrom(hldup.hldupdate.hld.filter, scalarBuilder);
+				ruleRunner.setUpsertPKVal(keyval);
+			}
 			ConfigureService configSvc = factorySvc.getConfigureService();
 
 			//upsert doesn't have primary key in field set, so temporarily add it
