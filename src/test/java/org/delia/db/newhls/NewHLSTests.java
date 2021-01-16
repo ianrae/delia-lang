@@ -218,6 +218,16 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 IN (55)", sql);
 	}	
+	@Test
+	public void testHLDFieldLike() {
+		useStringSrc = true;
+		String src = "let x = Flight[field1 like '%a']";
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
+
+		String sql = mgr.generateRawSql(hld);
+		log.log(sql);
+		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 LIKE '%a'", sql);
+	}	
 	
 	
 	@Test
