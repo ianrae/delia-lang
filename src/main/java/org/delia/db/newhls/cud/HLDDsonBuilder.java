@@ -108,6 +108,10 @@ public class HLDDsonBuilder {
 		} else {
 			cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
 		}
+		
+		if (converter.getAssocCrudMap() != null) {
+			cres.assocCrudMap = converter.getAssocCrudMap();
+		}
 		return cres;
 	}
 
@@ -273,14 +277,6 @@ public class HLDDsonBuilder {
 		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, null, relinfo, datIdMap);
 		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
 
-		//create a temp type for the assoc table
-//		DStructType structType = hld.cres.dval.asStruct().getType(); 
-//		TypePair pair = DValueHelper.findField(structType, fld1);
-		
-//		DValue inner = null;
-//		hld.fieldL.add(createEmptyFieldVal(pair.name, structType));
-//		hld.valueL.add(inner);
-		
 		hld.hld = builderAdapter.buildQuery(queryExp);
 		if (isMergeInto) {
 			hld.isMergeAllInto = true;
@@ -378,10 +374,10 @@ public class HLDDsonBuilder {
 		//need a fake value just so fields created. we don't use the value in sql
 		dval1 = queryBuilderHelper.buildFakeValue(relinfo, datIdMap);
 		
-		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
-		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
-		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
-		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
+//		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+//		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, dval1);
+//		QueryExp exp2 = builderSvc.createNotEqQuery(assocTbl, fld2, dval2);
+//		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
 		
 		HLDUpdate tmphld = new HLDUpdate(new TypeOrTable(assocTbl, true), null);
 		tmphld.cres = fillCResForUpdate(tmphld, fld1, fld2, assocTbl, dval1, dval2, relinfo, datIdMap);
