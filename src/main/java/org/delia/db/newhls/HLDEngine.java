@@ -9,7 +9,6 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDelete;
@@ -63,7 +62,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr, boolean doEverything, DStructType structType) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
-		HLDQuery hld = hldBuilder.build(queryExp, structType);
+		HLDQuery hld = hldBuilder.build(queryExp, structType, varEvaluator);
 
 		if (doEverything) {
 			JoinTreeBuilder joinBuilder = new JoinTreeBuilder();

@@ -46,7 +46,8 @@ public class HLDInnerManager extends ServiceBase {
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
 	
-	public HLDQueryStatement fullBuildQuery(QueryExp queryExp) {
+	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, VarEvaluator varEvaluator) {
+		engine.setVarEvaluator(varEvaluator);
 		HLDQuery hld = engine.buildQuery(queryExp);
 		HLDQueryStatement stmt = new HLDQueryStatement(hld);
 		engine.assignAliases(stmt);

@@ -2,7 +2,7 @@
 
 FEATURE: let-query
 background:
-  type Flight struct {id int unique, wid int optional }  end
+  type Flight struct {id int primaryKey, wid int optional }  end
 thenType: struct
 
 ---
@@ -22,7 +22,7 @@ given:
   insert Flight {id: 55, wid: 1 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight
+  let x = Flight[true]
 then:
 value:a:Flight {
  vid:55

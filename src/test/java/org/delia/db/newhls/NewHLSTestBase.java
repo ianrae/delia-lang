@@ -85,7 +85,7 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(src);
 		
 		mgr = createManager();
-		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp);
+		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp, new DoNothingVarEvaluator());
 		log.log(hld.toString());
 		assertEquals(expectedJoins, hld.hldquery.joinL.size());
 		return hld;

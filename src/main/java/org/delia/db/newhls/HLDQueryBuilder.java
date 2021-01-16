@@ -9,8 +9,8 @@ import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
-import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -30,16 +30,16 @@ public class HLDQueryBuilder {
 		this.registry = registry;
 	}
 
-	public HLDQuery build(QueryExp queryExp) {
-		return build(queryExp, null);
+	public HLDQuery build(QueryExp queryExp, VarEvaluator varEvaluator) {
+		return build(queryExp, null, varEvaluator);
 	}
-	public HLDQuery build(QueryExp queryExp, DStructType structTypeEx) {
+	public HLDQuery build(QueryExp queryExp, DStructType structTypeEx, VarEvaluator varEvaluator) {
 		HLDQuery hld = new HLDQuery();
 		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
 		hld.mainStructType = hld.fromType; //TODO fix
 		hld.resultType = hld.fromType; //TODO fix
 
-		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType);
+		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType, varEvaluator);
 		hld.filter = builder.build(queryExp);
 		buildFinalFieldAndThroughChain(queryExp, hld); 
 		buildFns(queryExp, hld);

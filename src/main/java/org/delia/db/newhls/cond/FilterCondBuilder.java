@@ -14,6 +14,7 @@ import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.newhls.ValType;
+import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
@@ -23,10 +24,12 @@ public class FilterCondBuilder {
 
 	private DTypeRegistry registry;
 	private DStructType fromType;
+	private VarEvaluator varEvaluator;
 
-	public FilterCondBuilder(DTypeRegistry registry, DStructType fromType) {
+	public FilterCondBuilder(DTypeRegistry registry, DStructType fromType, VarEvaluator varEvaluator) {
 		this.registry = registry;
 		this.fromType = fromType;
+		this.varEvaluator = varEvaluator;
 	}
 	
 	public FilterCond build(QueryExp queryExp) {

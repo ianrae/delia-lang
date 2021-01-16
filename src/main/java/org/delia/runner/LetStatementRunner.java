@@ -148,7 +148,7 @@ public class LetStatementRunner extends ServiceBase {
 		QueryResponse qresp;
 		if (flag1) {
 			spec.queryExp = queryExp;
-			HLSManagerResult result = hldManager.execute(spec, qtx, zexec);
+			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
 			qresp = result.qresp;
 		} else if (flag2) {
 			spec.queryExp = queryExp;

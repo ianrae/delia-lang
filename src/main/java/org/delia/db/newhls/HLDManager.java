@@ -67,8 +67,8 @@ public class HLDManager extends ServiceBase {
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
 
-	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
-		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec);
+	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec, varEvaluator);
 		hld.querySpec = spec;
 
 		HLDInnerManager mgr = createManager(zexec);
@@ -105,9 +105,9 @@ public class HLDManager extends ServiceBase {
 //		}
 //	}
 	
-	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec) {
+	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
-		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp);
+		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp, varEvaluator);
 		log.log(hld.toString());
 		return hld;
 	}
