@@ -175,7 +175,7 @@ public class UpdateStatementRunner extends ServiceBase {
 			ruleRunner.enableUpsertFlag(true);
 			if (hldManager != null) {
 				ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(registry);
-				DValue keyval = dvalConverterSvc.createDValueFrom(hldup.hldupdate.hld.filter, scalarBuilder);
+				DValue keyval = dvalConverterSvc.createDValueFrom(hldup.hldupdate.hld.filter, scalarBuilder, true);
 				ruleRunner.setUpsertPKVal(keyval);
 			}
 			ConfigureService configSvc = factorySvc.getConfigureService();

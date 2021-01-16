@@ -124,7 +124,7 @@ public class AllBDDTests extends BDDBase {
 		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
 		runR1000File("t0-upsert-mm-all.txt", 1);
-		runR1000File("t0-upsert-mm-other.txt", 2);
+		runR1000File("t0-upsert-mm-other.txt", 2); 
 		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
@@ -324,13 +324,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 13;
+//		testIndexToRun = 1;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
-//		runR700File("t0-insert.txt", 6);
-//		runR950File("t0-crud-assoc-insert.txt", 6);
-		runR1350File("t0-filter-in.txt", 3);
+//		runR1000File("t0-upsert-mm-other.txt", 2);
+		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
 	//---

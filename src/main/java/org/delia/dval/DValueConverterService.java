@@ -155,7 +155,7 @@ public class DValueConverterService extends ServiceBase {
 			return null;
 		}
 	}
-	public DValue createDValueFrom(FilterCond cond, ScalarValueBuilder builder) {
+	public DValue createDValueFrom(FilterCond cond, ScalarValueBuilder builder, boolean dontThrowException) {
 		if (cond instanceof IntegerFilterCond) {
 			IntegerFilterCond cc = (IntegerFilterCond) cond;
 			return builder.buildInt(cc.asInt());
@@ -166,7 +166,9 @@ public class DValueConverterService extends ServiceBase {
 			StringFilterCond cc = (StringFilterCond) cond;
 			return builder.buildString(cc.asString());
 		} else {
-			DeliaExceptionHelper.throwError("invalid-filter-value-type", "can't convert filter");
+			if (!dontThrowException) {
+				DeliaExceptionHelper.throwError("invalid-filter-value-type", "can't convert filter");
+			}
 			return null;
 		}
 	}
