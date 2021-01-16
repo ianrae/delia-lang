@@ -8,6 +8,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
@@ -88,8 +89,8 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.executeInsert(dval, ctx);
 	}
 	@Override
-	public DValue executeInsert(SqlStatementGroup stmgrp, InsertContext ctx) {
-		return zexec.executeInsert(stmgrp, ctx);
+	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
+		return zexec.executeInsert(hld, stmgrp, ctx);
 	}
 
 

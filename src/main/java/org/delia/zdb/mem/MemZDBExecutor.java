@@ -18,6 +18,8 @@ import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDInsert;
+import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
@@ -148,9 +150,19 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public DValue executeInsert(SqlStatementGroup stmgrp, InsertContext ctx) {
-		// TODO Auto-generated method stub
-		return null;
+	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
+		//we can use ZMemInsert here
+		HLDInsert hldinsert = hld.hldinsert;
+		DValue dval = hldinsert.cres.dval;
+		String typeName = dval.getType().getName();
+		MemDBTable tbl = tableMap.get(typeName);
+		if (tbl == null) {
+			tbl = handleUnknownTable(typeName);
+		}
+
+		ZStuff stuff = findOrCreateStuff();
+		ZMemInsert memInsert = new ZMemInsert(this.factorySvc);
+		return memInsert.doExecuteInsert(tbl, dval, ctx, this, stuff);
 	}
 
 	@Override

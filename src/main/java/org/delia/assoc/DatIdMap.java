@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.delia.db.newhls.RelationSpec;
 import org.delia.relation.RelationInfo;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -85,6 +86,26 @@ public class DatIdMap {
 		return tmp.size();
 	}
 
+	public RelationSpec createRelationSpec(RelationInfo relinfo) {
+		RelationSpec relspec = new RelationSpec();
+		relspec.relinfo = relinfo;
+		if (isFlipped(relinfo)) {
+			relspec.fieldName = relinfo.otherSide.fieldName;
+			relspec.flipped = true;
+			relspec.otherFieldName = relinfo.fieldName; //TODO: fix if one sided
+			relspec.otherStructType = relinfo.nearType;
+			relspec.structType = relinfo.farType;
+		} else {
+			relspec.fieldName = relinfo.fieldName;
+			relspec.flipped = false;
+			relspec.otherFieldName = relinfo.otherSide.fieldName; //TODO: fix if one sided
+			relspec.otherStructType = relinfo.farType;
+			relspec.structType = relinfo.nearType;
+		}
+		
+		return relspec;
+	}
+	
 	public boolean isFlipped(RelationInfo relinfo) {
 		String field = getAssocFieldFor(relinfo);
 		return field.equals("rightv");

@@ -331,7 +331,8 @@ public class AllBDDTests extends BDDBase {
 //		runR1000File("t0-upsert-unique.txt", 4);
 //		runR1000File("t0-upsert.txt", 4);
 //		runR900File("t0-update-mm-all.txt", 4);
-		runR1350File("t0-filter-and-or.txt", 7);
+//		runR1350File("t0-filter-and-or.txt", 7);
+		runR700File("t0-insert.txt", 6);
 	}
 	
 	//---

@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.newhls.HLDField;
-import org.delia.relation.RelationInfo;
 import org.delia.runner.ConversionResult;
-import org.delia.type.DStructType;
 import org.delia.type.DValue;
 
 public class HLDInsert extends HLDBase {

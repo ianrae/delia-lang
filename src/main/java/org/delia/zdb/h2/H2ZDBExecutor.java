@@ -21,6 +21,7 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -119,7 +120,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		}
 	}
 	@Override
-	public DValue executeInsert(SqlStatementGroup stmgrp, InsertContext ctx) {
+	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
 		failIfNotInit1();
 
 		if (ctx.extractGeneratedKeys) {
