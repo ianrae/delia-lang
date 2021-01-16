@@ -211,10 +211,7 @@ public class NewHLSTests extends NewHLSTestBase {
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
-		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < 15", sql);
-
-		SqlStatement stm = mgr.generateSql(hld);
-		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < ?", "15");
+		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 IN (55)", sql);
 	}	
 	
 	

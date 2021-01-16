@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.delia.db.hls.AliasInfo;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.InFilterCond;
 import org.delia.db.newhls.cond.OpAndOrFilter;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
@@ -97,6 +98,12 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			OpAndOrFilter ofc = (OpAndOrFilter) filter;
 			doInnerFilter(ofc.cond1, hld); //** recursion **
 			doInnerFilter(ofc.cond2, hld); //** recursion **
+		} else if (filter instanceof InFilterCond) {
+			InFilterCond ifc = (InFilterCond)filter;
+			doFilterVal(ifc.val1, hld);
+			for(FilterVal fval: ifc.list) {
+				doFilterVal(fval, hld);
+			}
 		}
 	}
 
