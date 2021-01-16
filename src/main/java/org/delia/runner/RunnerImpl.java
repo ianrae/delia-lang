@@ -28,11 +28,14 @@ import org.delia.db.DBHelper;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.newhls.HLDManager;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
+import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -383,8 +386,16 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			}
 			
 			try {
-				QuerySpec spec = this.resolveFilterVars(exp.queryExp);
-				dbexecutor.executeDelete(spec);
+				if (hldManager != null) {
+//					VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
+					HLDDeleteStatement hld = hldManager.buildHLD(exp, dbexecutor);
+					SqlStatementGroup stmgrp = hldManager.generateSQL(hld, dbexecutor);
+					
+					dbexecutor.executeDelete(hld, stmgrp);
+				} else {
+					QuerySpec spec = this.resolveFilterVars(exp.queryExp);
+					dbexecutor.executeDelete(spec);
+				}
 			} catch (DBException e) {
 				res.errors.add(e.getLastError());
 				res.ok = false;

@@ -8,6 +8,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
@@ -44,7 +45,7 @@ public interface ZDBExecutor extends AutoCloseable {
 		DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx);
 //		int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
 //		int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag); 
-//		void executeDelete(QuerySpec spec);
+		void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp);
 		
 		//schema actions (only be called after init2)
 		boolean doesTableExist(String tableName);

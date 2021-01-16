@@ -21,6 +21,7 @@ import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
@@ -316,6 +317,10 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		} catch (DBValidationException e) {
 			convertAndRethrow(e);
 		}
+	}
+	@Override
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
+		//TODO
 	}
 
 	@Override

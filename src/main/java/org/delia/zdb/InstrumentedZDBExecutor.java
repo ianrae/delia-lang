@@ -8,6 +8,7 @@ import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
@@ -107,6 +108,11 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	@Override
 	public void executeDelete(QuerySpec spec) {
 		zexec.executeDelete(spec);
+	}
+
+	@Override
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
+		zexec.executeDelete(hld, stmgrp);
 	}
 
 	@Override

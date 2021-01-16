@@ -18,6 +18,7 @@ import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -238,6 +239,10 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		qresp.dvalList = null;
 		qresp.ok = true;
 		return qresp;
+	}
+	@Override
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
+		//TODO
 	}
 
 	@Override
