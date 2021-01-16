@@ -61,7 +61,7 @@ public class RelationOneRule extends RelationRuleBase {
 			if (relInfo.isParent && ctx.isInsertFlag()) {
 				bb = true; 
 			} else if (ctx.isUpsertFlag()) {
-				return true; //TODO: add some way to check uniqueness here!
+				bb = true; //TODO: add some way to check uniqueness here!
 			}
 			
 			if (!bb) {
@@ -133,7 +133,7 @@ public class RelationOneRule extends RelationRuleBase {
 				DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
 				String typeName = dval.getType().getName();
 				RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
-				String keyValString = getPrimaryKey(dval);
+				String keyValString = getPrimaryKey(dval, ctx);
 				builder.buildFromString(keyValString);
 				boolean b = builder.finish();
 				if (!b) {
@@ -164,7 +164,12 @@ public class RelationOneRule extends RelationRuleBase {
 		}
 		return true;
 	}
-	private String getPrimaryKey(DValue dval) {
+	private String getPrimaryKey(DValue dval, DRuleContext ctx) {
+		//during upsert there is no pk
+		if (ctx.isUpsertFlag()) {
+			return ctx.getUpsertPKVal().asString();
+		}
+		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		return dval.asStruct().getField(pair.name).asString();
 	}

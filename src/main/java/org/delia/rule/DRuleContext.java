@@ -8,6 +8,7 @@ import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.runner.FetchRunner;
+import org.delia.type.DValue;
 
 public class DRuleContext {
 	private ErrorTracker et;
@@ -20,10 +21,11 @@ public class DRuleContext {
 	private DValueCompareService compareSvc;
 	private boolean insertFlag;
 	private boolean upsertFlag;
+	private DValue upsertPKVal;
 
 	public DRuleContext(ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
 					boolean populateFKsFlag, FetchRunner fetchRunner, DValueCompareService compareSvc, 
-					boolean insertFlag, boolean upsertFlag) {
+					boolean insertFlag, boolean upsertFlag, DValue upsertPKVal) {
 		this.et = et;
 		this.ruleText = ruleText;
 		this.enableRelationModifierFlag = enableRelationModifierFlag;
@@ -33,6 +35,7 @@ public class DRuleContext {
 		this.compareSvc = compareSvc;
 		this.insertFlag = insertFlag;
 		this.upsertFlag = upsertFlag;
+		this.upsertPKVal = upsertPKVal;
 	}
 	public DetailedError addError(String id, String msg) {
 		String msg2 = String.format("%s - in rule: %s", msg, ruleText);
@@ -102,6 +105,9 @@ public class DRuleContext {
 	}
 	public boolean isUpsertFlag() {
 		return upsertFlag;
+	}
+	public DValue getUpsertPKVal() {
+		return upsertPKVal;
 	}
 	
 }

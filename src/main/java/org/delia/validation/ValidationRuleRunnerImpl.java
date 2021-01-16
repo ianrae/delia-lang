@@ -210,7 +210,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 			
 			ErrorTracker tmpET = new SimpleErrorTracker(log);
 			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, 
-					fetchRunner, compareSvc, insertFlag, upsertFlag); 
+					fetchRunner, compareSvc, insertFlag, upsertFlag, upsertPKVal); 
 			boolean b = rule.validate(dval, ctx);
 			if (!b) {
 				localET.getErrors().addAll(ctx.getErrors());
