@@ -9,7 +9,6 @@ import java.util.Map;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.ConfigureStatementExp;
 import org.delia.compiler.ast.DeleteStatementExp;
-import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
@@ -31,20 +30,15 @@ import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
-import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
-import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DTypeRegistryBuilder;
 import org.delia.type.DValue;
-import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.util.PrimaryKeyHelperService;
-import org.delia.validation.ValidationRunner;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 
@@ -73,6 +67,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private HLSManager mgr;
 		private HLDManager hldManager;
 		private DatIdMap datIdMap;
+		private UpdateStatementRunner updateStatementRunner;
 		
 		public RunnerImpl(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
 			super(factorySvc);
@@ -139,6 +134,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				this.sprigSvc = ctx.sprigSvc;
 			}
 			this.insertStatementRunner = new InsertStatementRunner(factorySvc, dbInterface, this, registry, varMap);
+			this.updateStatementRunner = new UpdateStatementRunner(factorySvc, dbInterface, this, registry);
 
 			return true;
 		}
@@ -222,9 +218,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				res.errors.add(e.getLastError());
 			}
 		}
-		private ValidationRunner createValidationRunner() {
-			return factorySvc.createValidationRunner(dbInterface, fetchRunner);
-		}
 		private void executeUserFuncDefStatement(UserFunctionDefStatementExp exp, ResultValue res) {
 			userFnMap.put(exp.funcName, exp);
 			res.ok = true;
@@ -243,133 +236,10 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeUpdateStatement(UpdateStatementExp exp, ResultValue res) {
-			//find DType for typename Actor
-			DType dtype = registry.getType(exp.getTypeName());
-			if (failIfNull(dtype, exp.typeName, res)) {
-				return;
-			} else if (failIfNotStruct(dtype, exp.typeName, res)) {
-				return;
-			}
-			
-			if (dtype == null) {
-				addError(res, "type.not.found", String.format("can't find type '%s'", exp.getTypeName()));
-				return;
-			}
-			
-			//get list of changed fields
-			ConversionResult cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
-			if (cres.dval == null) {
-				res.errors.addAll(cres.localET.getErrors());
-				res.ok = false;
-				return;
-			} else {
-				//validate the fields of the partial DValue
-				ValidationRunner ruleRunner = createValidationRunner();
-				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
-					ruleRunner.propogateErrors(res);
-				}
-				
-				//then validate the affected rules (of the struct)
-				//We determine the rules dependent on each field in partial dval
-				//and execute those rules only
-				if (! ruleRunner.validateDependentRules(cres.dval)) {
-					ruleRunner.propogateErrors(res);
-				}
-
-				if (!res.errors.isEmpty()) {
-					res.ok = false;
-					return;
-				}
-			}
-			
-			try {
-				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				int numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
-				
-				res.ok = true;
-				res.shape = Shape.INTEGER;
-				res.val = numRowsAffected;
-			} catch (DBException e) {
-				res.errors.add(e.getLastError());
-				res.ok = false;
-				return;
-			}
+			updateStatementRunner.executeUpdateStatement(exp, res, hldManager, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private void executeUpsertStatement(UpsertStatementExp exp, ResultValue res) {
-			//find DType for typename Actor
-			DType dtype = registry.getType(exp.getTypeName());
-			if (failIfNull(dtype, exp.typeName, res)) {
-				return;
-			} else if (failIfNotStruct(dtype, exp.typeName, res)) {
-				return;
-			}
-			
-			if (dtype == null) {
-				addError(res, "type.not.found", String.format("can't find type '%s'", exp.getTypeName()));
-				return;
-			}
-			
-			//get list of changed fields
-			ConversionResult cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
-			if (cres.dval == null) {
-				res.errors.addAll(cres.localET.getErrors());
-				res.ok = false;
-				return;
-			} else {
-				cres.assocCrudMap = null; //clear. not supported for upsert
-				
-				//validate the fields of the partial DValue
-				ValidationRunner ruleRunner = createValidationRunner();
-				ruleRunner.enableRelationModifier(true);
-				ruleRunner.enableInsertFlag(true);
-				ConfigureService configSvc = factorySvc.getConfigureService();
-				
-				//upsert doesn't have primary key in field set, so temporarily add it
-				//so we can run validation 
-				PrimaryKeyHelperService pkSvc = new PrimaryKeyHelperService(factorySvc, registry);
-				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				boolean addedPK = pkSvc.addPrimaryKeyIfMissing(spec, cres.dval);
-
-				ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
-				if (! ruleRunner.validateDVal(cres.dval)) {
-					ruleRunner.propogateErrors(res);
-				}
-				
-				if (addedPK) {
-					pkSvc.removePrimayKey(cres.dval);
-				}
-				
-				
-//				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
-//					ruleRunner.propogateErrors(res);
-//				}
-//				
-//				//then validate the affected rules (of the struct)
-//				//We determine the rules dependent on each field in partial dval
-//				//and execute those rules only
-//				if (! ruleRunner.validateDependentRules(cres.dval)) {
-//					ruleRunner.propogateErrors(res);
-//				}
-
-				if (!res.errors.isEmpty()) {
-					res.ok = false;
-					return;
-				}
-			}
-			
-			try {
-				QuerySpec spec = resolveFilterVars(exp.queryExp);
-				boolean noUpdateFlag = exp.optionExp != null;
-				int numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
-				
-				res.ok = true;
-				res.shape = Shape.INTEGER;
-				res.val = numRowsAffected;
-			} catch (DBException e) {
-				res.errors.add(e.getLastError());
-				res.ok = false;
-				return;
-			}
+			updateStatementRunner.executeUpsertStatement(exp, res, hldManager, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private void executeDeleteStatement(DeleteStatementExp exp, ResultValue res) {
 			//find DType for typename Actor
@@ -430,20 +300,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			}
 			return false;
 		}
-		private ConversionResult buildPartialValue(DStructType dtype, DsonExp dsonExp) {
-			ConversionResult cres = new ConversionResult();
-			cres.localET = new SimpleErrorTracker(log);
-			if (insertPrebuiltValueIterator != null) {
-				cres.dval = insertPrebuiltValueIterator.next();
-				return cres;
-			}
-			
-			DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, this, sprigSvc);
-			cres.dval = converter.convertOnePartial(dtype.getName(), dsonExp);
-			cres.assocCrudMap = converter.getAssocCrudMap();
-			return cres;
-		}
-
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
 			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, hldManager, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);

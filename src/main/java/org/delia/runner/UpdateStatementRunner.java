@@ -1,6 +1,5 @@
 package org.delia.runner;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.DsonExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -35,21 +34,26 @@ public class UpdateStatementRunner extends ServiceBase {
 		private FetchRunner fetchRunner;
 		private SprigService sprigSvc;
 		private DValueIterator insertPrebuiltValueIterator;
-		private HLDManager hldManager;
-		private DatIdMap datIdMap;
 		private VarEvaluator varEvaluator;
+		private HLDManager hldManager;
 		
-		public UpdateStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, VarEvaluator varEvaluator) {
+		public UpdateStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, VarEvaluator varEvaluator, DTypeRegistry registry) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
 			this.varEvaluator = varEvaluator;
+			this.registry = registry;
 		}
 		
 		private ValidationRunner createValidationRunner() {
 			return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 		}
 
-		public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res) {
+		public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDManager hldManager, ZDBExecutor dbexecutor2, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+			this.hldManager = hldManager;
+			this.dbexecutor = dbexecutor2;
+			this.fetchRunner = fetchRunner2;
+			this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
+			this.sprigSvc = sprigSvc2;
 			//find DType for typename Actor
 			DType dtype = registry.getType(exp.getTypeName());
 			if (failIfNull(dtype, exp.typeName, res)) {
@@ -102,7 +106,13 @@ public class UpdateStatementRunner extends ServiceBase {
 				return;
 			}
 		}
-		public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res) {
+		public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDManager hldManager2, ZDBExecutor dbexecutor2, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+			this.hldManager = hldManager;
+			this.dbexecutor = dbexecutor2;
+			this.fetchRunner = fetchRunner2;
+			this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
+			this.sprigSvc = sprigSvc2;
+			
 			//find DType for typename Actor
 			DType dtype = registry.getType(exp.getTypeName());
 			if (failIfNull(dtype, exp.typeName, res)) {
