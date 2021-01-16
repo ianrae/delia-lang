@@ -7,6 +7,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSQueryStatement;
+import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
@@ -104,6 +105,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
 		return zexec.executeHLSQuery(hls, sql, qtx);
+	}
+	@Override
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+		return zexec.executeHLDQuery(hld, sql, qtx);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
@@ -18,6 +19,7 @@ import org.delia.type.DType;
  */
 public class HLDQueryStatement extends HLDStatement {
 	public HLDQuery hldquery;
+	public QuerySpec querySpec;
 	
 	
 	public HLDQueryStatement(HLDQuery hld) {

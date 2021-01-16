@@ -17,6 +17,7 @@ import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
+import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
@@ -224,6 +225,11 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
 		return this.doExecuteQuery(hls.querySpec, qtx);
 	}
+	@Override
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+		return this.doExecuteQuery(hld.querySpec, qtx);
+	}
+
 
 	@Override
 	public boolean doesTableExist(String tableName) {
@@ -356,5 +362,4 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
 	}
-
 }

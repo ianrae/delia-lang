@@ -20,6 +20,7 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
+import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
@@ -332,6 +333,12 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 			qresp.ok = true;
 		}
 		return qresp;
+	}
+
+	@Override
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

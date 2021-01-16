@@ -67,7 +67,7 @@ public class HLDManager extends ServiceBase {
 
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec) {
 		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec);
-//		hls.querySpec = spec;
+		hld.querySpec = spec;
 
 		HLDInnerManager mgr = createManager(zexec);
 		SqlStatement stm = mgr.generateSql(hld);
