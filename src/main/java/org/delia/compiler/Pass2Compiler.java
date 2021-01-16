@@ -20,6 +20,12 @@ import org.delia.error.DeliaError;
 import org.delia.runner.InternalCompileState;
 import org.delia.type.BuiltInTypes;
 
+/**
+ * Enforce language rules that parser can't enforce.
+ * Types are not yet available.
+ * @author ian
+ *
+ */
 public class Pass2Compiler extends CompilerPassBase {
 
 	public Pass2Compiler(FactoryService factorySvc, ErrorLineFinder errorLineFinder, InternalCompileState execCtx) {
@@ -160,7 +166,7 @@ public class Pass2Compiler extends CompilerPassBase {
 //		log.log("a" + letExp.strValue());
 		if (letExp.value instanceof QueryExp) {
 			QueryExp qexp = (QueryExp) letExp.value;
-			doMissingFilterCheck(results, qexp, letExp.typeName, letExp);
+			
 			if (qexp.filter != null && qexp.filter.cond instanceof FilterOpExp) {
 				FilterOpExp fexp = (FilterOpExp) qexp.filter.cond;
 				

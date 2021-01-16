@@ -27,6 +27,7 @@ import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 /**
@@ -151,30 +152,23 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		//TODO: enforce single row in db layer
 		if (hld.hld.isAllQuery()) {
 			DeliaExceptionHelper.throwError("upsert-filter-error", "[true] filter not allowed for upsert: %s", upsertExp.typeName);  
+		} else if (isPKQueryOrUniqueQuery(hld)) {
+			DeliaExceptionHelper.throwError("upsert-filter-error", "upsert filter cannot contain a serial primary key: %s", upsertExp.typeName);  
 		}
 		
 		return hld;
 	}
 	
-//	private boolean isPKQueryOrUniqueQuery(HLDUpsert hld) {
-//		if (hld.hld.filter instanceof SingleFilterCond) {
-//			return true;
-//		} else if (hld.hld.filter instanceof OpFilterCond) {
-//			OpFilterCond ofc = (OpFilterCond) hld.hld.filter;
-//			DStructType dtype = hld.hld.fromType;
-//			if (ofc.val1.isSymbol()) {
-//				if (dtype.fieldIsUnique(ofc.val1.asSymbol())) {
-//					return true;
-//				}
-//			}
-//			if (ofc.val2.isSymbol()) {
-//				if (dtype.fieldIsUnique(ofc.val2.asSymbol())) {
-//					return true;
-//				}
-//			}
-//		}
-//		return false;
-//	}
+	private boolean isPKQueryOrUniqueQuery(HLDUpsert hld) {
+		if (hld.hld.filter instanceof SingleFilterCond) {
+			DStructType dtype = hld.hld.fromType;
+			String pkfield = DValueHelper.findPrimaryKeyFieldPair(dtype).name;
+			if (dtype.fieldIsSerial(pkfield)) {
+				return true;
+			}
+		} 
+		return false;
+	}
 
 	private HLDUpdate doBuildUpdate(HLDUpdate hld, QueryExp queryExp) {
 		hld.hld = buildQuery(queryExp);

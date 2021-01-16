@@ -6,6 +6,8 @@ import org.delia.compiler.ast.DsonFieldExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.InsertStatementExp;
+import org.delia.compiler.ast.LetStatementExp;
+import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
@@ -17,6 +19,7 @@ import org.delia.error.DeliaError;
 import org.delia.relation.RelationCardinality;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.runner.InternalCompileState;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -51,10 +54,34 @@ public class Pass4Compiler extends CompilerPassBase {
 			} else if (exp instanceof InputFunctionDefStatementExp) {
 				InputFunctionDefStatementExp funcExp = (InputFunctionDefStatementExp) exp;
 				chkInputFunc(funcExp, results);
+			} else if (exp instanceof LetStatementExp) {
+				checkLet((LetStatementExp)exp, results);
 			}
 		}
 		
 		return results;
+	}
+
+	private void checkLet(LetStatementExp letExp, CompilerResults results) {
+		if (!BuiltInTypes.isBuiltInScalarType(letExp.typeName)) {
+			DType dtype = registry.getType(letExp.typeName);
+			if (dtype != null && dtype.isStructShape()) {
+				if (letExp.value instanceof QueryExp) {
+					QueryExp qexp = (QueryExp) letExp.value;
+					doMissingFilterCheck(results, qexp, letExp.typeName, letExp);
+				}
+			}
+		}
+	}
+	private void doMissingFilterCheck(CompilerResults results, QueryExp queryExp, String typeName, Exp exp) {
+		if (queryExp.filter == null) {
+			String msg = String.format("update: filter is missing on '%s'", typeName);
+			addError(results, "missing-filter", msg, exp);
+		}
+	}
+	private void addError(CompilerResults results, String id, String msg, Exp exp) {
+		DeliaError err = createError(id, msg, exp);
+		results.errors.add(err);
 	}
 
 	private void chkInputFunc(InputFunctionDefStatementExp funcExp, CompilerResults results) {

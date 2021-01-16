@@ -324,15 +324,15 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 0;
+		testIndexToRun = 0;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
 //		runR700File("t0-insert.txt", 6);
 //		runR800File("t0-delete.txt", 4);
 //		runR900File("t0-update.txt", 7);
-		runR1000File("t0-upsert-mm-other.txt", 2);
-//		runR1000File("t0-upsert-unique.txt", 4);
+//		runR1000File("t0-upsert-mm-other.txt", 2);
+		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
 	//---
