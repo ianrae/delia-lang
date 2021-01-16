@@ -31,7 +31,7 @@ then:
 title: update
 when:
   insert Flight {id: 55, wid: 20 }
-  update Flight {wid: 22}
+  update Flight[true] {wid: 22}
   let x = Flight[55]
 then:
 value:a:Flight {
@@ -67,7 +67,7 @@ value:a:Flight2 {
 title: update-unknown-class
 when:
   insert Flight {id: 55, wid: 20 }
-  update NoSuchName { wid: 22}
+  update NoSuchName[true] { wid: 22}
 then:
 ERROR: type.not.found
 

@@ -181,8 +181,13 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
 	@Override
 	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
-		// TODO Auto-generated method stub
-		return 0;
+		//TODO later when we make new HLDRowSelector, rewrite this
+		//for now use existing code
+		QuerySpec spec = new QuerySpec();
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.queryExp = hld.hldupdate.hld.originalQueryExp;
+		spec.evaluator.init(spec.queryExp);
+		return executeUpdate(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap);
 	}
 
 	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {

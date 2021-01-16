@@ -324,7 +324,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 0;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 //		diagnosticFilter = "I"; //log insert statements
@@ -339,7 +339,7 @@ public class AllBDDTests extends BDDBase {
 	@Before
 	public void init() {
 //		DeliaFactory.useHLSMEM = true;
-		DeliaImpl.useNewHLD = false;
+		DeliaImpl.useNewHLD = true;
 	}
 	@After
 	public void shutdown() {
