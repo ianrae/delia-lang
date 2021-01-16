@@ -2,7 +2,7 @@
 
 FEATURE: queryfn-ith
 background:
-  type Flight struct {id int unique, wid int optional }  end
+  type Flight struct {id int primaryKey, wid int optional }  end
 thenType: struct
 
 ---

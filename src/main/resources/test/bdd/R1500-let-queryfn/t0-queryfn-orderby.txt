@@ -2,7 +2,7 @@
 
 FEATURE: queryfn-orderBy. TODO fix. currently we sort in memory which works but better to let db sort
 background:
-  type Flight struct {id int unique, wid int optional }  end
+  type Flight struct {id int primaryKey, wid int optional }  end
 thenType: struct
 
 ---

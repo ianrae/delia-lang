@@ -3,7 +3,7 @@
 FEATURE: queryfn-max-boolean 
 #TODO: drop support. postgress doesn't support max() of bool
 background:
-  type Flight struct {id int unique, wid boolean optional }  end
+  type Flight struct {id int primaryKey, wid boolean optional }  end
 thenType: struct
 
 ---

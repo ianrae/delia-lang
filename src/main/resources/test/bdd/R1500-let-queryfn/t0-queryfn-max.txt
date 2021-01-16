@@ -4,7 +4,7 @@
 
 FEATURE: queryfn-max row
 background:
-  type Flight struct {id int unique, wid int optional }  end
+  type Flight struct {id int primaryKey, wid int optional }  end
 thenType: struct
 
 ---

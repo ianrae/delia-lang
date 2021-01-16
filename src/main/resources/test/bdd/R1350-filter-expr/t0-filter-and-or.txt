@@ -2,7 +2,7 @@
 
 FEATURE: filter-expr and/or/not
 background:
-  type Flight struct {id int unique, wid int optional, h int optional }  end
+  type Flight struct {id int primaryKey, wid int optional, h int optional }  end
 thenType: struct
 
 ---
