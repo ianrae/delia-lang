@@ -333,7 +333,7 @@ public class AllBDDTests extends BDDBase {
 //		runR1500File("t0-queryfn-distinct-relation.txt", 2);
 //		runR1500File("t0-queryfn-ith.txt", 4);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
-		runR1500File("t0-queryfn-min-int.txt", 4);
+		runR1500File("t0-queryfn-limit.txt", 5);
 	}
 	
 	//---

@@ -242,8 +242,8 @@ public class MemFunctionHelper extends ServiceBase {
 	private QueryResponse runFn(QueryFnSpec fnspec, QueryResponse qresp, MemFunction fn, int i, boolean isFirstFn) {
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
-
 		QueryResponse outputQresp = fn.process(fnspec, qresp, ctx);
+
 		if (isFirstFn && (i == 0 || ctx.scope.hasChanged())) {
 			//			pruneParentsAfterScopeChange(fnspec, qresp);
 		}

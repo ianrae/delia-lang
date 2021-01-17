@@ -19,6 +19,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Creates HLDQuery from a QueryExp
@@ -73,6 +74,9 @@ public class HLDQueryBuilder {
 			if (qfnexp instanceof QueryFieldExp) {
 				QueryFieldExp qfe = (QueryFieldExp) qfnexp;
 				DType type = DValueHelper.findFieldType(currentScope, qfe.funcName);
+				if (type == null) {
+					DeliaExceptionHelper.throwError("unknown-field", "Type '%s', field '%s' doesn't exist", currentScope.getName(), qfe.funcName);
+				}
 				FinalField ff = new FinalField();
 				ff.structField = new StructField(currentScope, qfe.funcName, type);
 				ff.rf = currentRF;

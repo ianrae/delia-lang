@@ -176,7 +176,7 @@ public class MemFieldFunction extends MemFunctionBase {
 				}
 
 				DValue inner = dval.asStruct().getField(fieldName);
-				if (inner.getType().isRelationShape()) {
+				if (inner != null && inner.getType().isRelationShape()) {
 					DRelation drel = inner.asRelation();
 					List<DValue> fetchedL = drel.getFetchedItems();
 					if (fetchedL == null) {
@@ -185,7 +185,7 @@ public class MemFieldFunction extends MemFunctionBase {
 						newList.addAll(fetchedL);
 					}
 				} else {
-					newList.add(inner);
+					newList.add(inner); //hmm. so newList can contain nulls. i think that's ok
 				}
 			} else if (dval.getType().isRelationShape()) {
 				DeliaExceptionHelper.throwError("let-unexpected-relation", "why this %s", fieldName);
