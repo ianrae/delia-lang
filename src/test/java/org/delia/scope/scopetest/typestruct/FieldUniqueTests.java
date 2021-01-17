@@ -177,7 +177,7 @@ public class FieldUniqueTests extends ScopeTestBase {
 		
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 	private ResultValue insertFail(String valStr, int expectedErrorCount, String errId) {

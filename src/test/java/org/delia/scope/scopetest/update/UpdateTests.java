@@ -236,7 +236,7 @@ public class UpdateTests extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 
@@ -258,7 +258,7 @@ public class UpdateTests extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		DValue dval = qresp.getOne();
 		assertEquals(null, dval.asStruct().getField("field1"));
@@ -266,12 +266,12 @@ public class UpdateTests extends ScopeTestBase {
 
 
 	private DValue updateAndQuery(String valStr, int expectedSize) {
-		String src = String.format("update Flight {field1:%s}", valStr);
+		String src = String.format("update Flight[true] {field1:%s}", valStr);
 		execUpdateStatement(src);
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		QueryResponse qresp = execLetStatementMulti(src, expectedSize);
 		return qresp.getOne();
 	}
