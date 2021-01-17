@@ -204,7 +204,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 	}
 	protected void updateFail(String typeName, String valStr, int expectedErrCount, String errId) {
 		String sid = addIdFlag ? String.format(" id:%d", nextId) : "";
-		String src = String.format("update %s {%s field1:%s}", typeName, sid, valStr);
+		String src = String.format("update %s[true] {%s field1:%s}", typeName, sid, valStr);
 		this.execUpdateFail(src, expectedErrCount, errId);
 	}
 	protected void chkDeleteRow() {
