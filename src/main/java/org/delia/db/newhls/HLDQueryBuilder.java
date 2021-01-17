@@ -39,6 +39,9 @@ public class HLDQueryBuilder {
 	public HLDQuery build(QueryExp queryExp, DStructType structTypeEx, VarEvaluator varEvaluator) {
 		HLDQuery hld = new HLDQuery();
 		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
+		if (hld.fromType == null) {
+			DeliaExceptionHelper.throwUnknownTypeError(queryExp.typeName);
+		}
 		hld.mainStructType = hld.fromType; //TODO fix
 		hld.resultType = hld.fromType; //TODO fix
 
