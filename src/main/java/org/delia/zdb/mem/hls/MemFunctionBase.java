@@ -10,6 +10,7 @@ import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
@@ -25,6 +26,7 @@ public abstract class MemFunctionBase implements MemFunction {
 			this.registry = registry;
 		}
 		public abstract QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx);
+		public abstract QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx);
 		
 		protected String getStringArg(QueryFuncExp qfe, QueryFuncContext ctx) {
 			String s = qfe.argL.get(0).strValue();

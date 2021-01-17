@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.log.Log;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
@@ -140,6 +141,12 @@ public class MemFieldFunction extends MemFunctionBase {
 		} else {
 			return qresp;
 		}
+	}
+
+	@Override
+	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		HLSQuerySpan jj = null;
+		return process(jj, qresp, ctx);
 	}
 
 
