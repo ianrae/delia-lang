@@ -26,11 +26,13 @@ public class ZMemUpdate extends ServiceBase {
 
 	DateFormatService fmtSvc;
 	private DTypeRegistry registry;
+	private RelationPruner relationPruner;
 
 	public ZMemUpdate(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fmtSvc = factorySvc.getDateFormatService();
+		this.relationPruner = new RelationPruner(factorySvc);
 	}
 
 	public int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, RowSelector selector, MemZDBExecutor memDBInterface) {
@@ -63,6 +65,7 @@ public class ZMemUpdate extends ServiceBase {
 			//replace it in tbl
 			for(DValue tmp: dvalList) {
 				if (tmp == dd) {
+					relationPruner.pruneOtherSide(tmp, dvalUpdate, memDBInterface);
 					DValue clone = DValueHelper.mergeOne(dvalUpdate, tmp, assocCrudMap);
 					if (assocCrudMap != null) {
 						doAssocCrud(dvalUpdate, clone, assocCrudMap);
