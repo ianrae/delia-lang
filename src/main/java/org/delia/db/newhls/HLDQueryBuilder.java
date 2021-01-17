@@ -42,14 +42,27 @@ public class HLDQueryBuilder {
 
 		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType, varEvaluator);
 		hld.filter = builder.build(queryExp);
-		buildFinalFieldAndThroughChain(queryExp, hld); 
-		buildFns(queryExp, hld);
 		
+		List<QScope> scopeL = prepareScopeList(queryExp);
+		buildFinalFieldAndThroughChain(queryExp, hld, scopeL); 
+		buildFns(queryExp, hld, scopeL);
+		hld.scopeL = scopeL;
 		hld.originalQueryExp = queryExp; //may be needed later
 		return hld;
 	}
 
-	private void buildFinalFieldAndThroughChain(QueryExp queryExp, HLDQuery hld) {
+	private List<QScope> prepareScopeList(QueryExp queryExp) {
+		List<QScope> list =  new ArrayList<>();
+		int i = 0;
+		for(QueryFuncExp qfnexp: queryExp.qfelist) {
+			QScope scope = new QScope(qfnexp);
+			scope.index = i++;
+			list.add(scope);
+		}
+		return list;
+	}
+
+	private void buildFinalFieldAndThroughChain(QueryExp queryExp, HLDQuery hld, List<QScope> scopeL) {
 		DStructType currentScope = hld.fromType;
 		RelationField currentRF = null;
 		List<RelationField> pendingL = new ArrayList<>();
@@ -67,6 +80,8 @@ public class HLDQueryBuilder {
 					currentRF = rf;
 					pendingL.add(rf);
 					currentScope = (DStructType) type;
+					QScope scope = scopeL.stream().filter(x -> x.qfnexp == qfnexp).findAny().get();
+					scope.setDetails(currentScope, rf.fieldName);
 				} else {
 					//only add to throughchain if we ref a field in it. eg. addr.y
 					for(RelationField rf: pendingL) {
@@ -76,22 +91,22 @@ public class HLDQueryBuilder {
 				}
 			}
 		}
-		
 	}
 
 
-	private void buildFns(QueryExp queryExp, HLDQuery hld) {
+	private void buildFns(QueryExp queryExp, HLDQuery hld, List<QScope> scopeL) {
 		DStructType currentScope = hld.fromType; //TODO implement scope changes when see .addr
 		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
 			if (fnexp instanceof QueryFieldExp) {
 				continue;
 			}
-			
+			QScope scope = scopeL.stream().filter(x -> x.qfnexp == fnexp).findAny().get();
+
 			if (fnexp.funcName.equals("fks")) {
-				addFKS(currentScope, hld);
+				addFKS(currentScope, hld, scope);
 			} else if (fnexp.funcName.equals("fetch")) {
-				addFetch(fnexp, currentScope, hld);
+				addFetch(fnexp, currentScope, hld, scope);
 			} else {
 				QueryFnSpec spec = new QueryFnSpec();
 				spec.structField = new StructFieldOpt(currentScope, null, null); //?? correct?
@@ -99,6 +114,7 @@ public class HLDQueryBuilder {
 				spec.filterFn.fnName = fnexp.funcName;
 				addArgs(spec, fnexp);
 				hld.funcL.add(spec);
+				scope.setDetails(currentScope, fnexp.funcName);
 			}
 		}
 	}
@@ -118,16 +134,17 @@ public class HLDQueryBuilder {
 		
 	}
 
-	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld) {
+	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld, QScope scope) {
 		for(Exp exp: fnexp.argL) {
 			String fieldToFetch = exp.strValue();
 			FetchSpec spec = new FetchSpec(currentScope, fieldToFetch);
 			spec.isFK = false;
 			hld.fetchL.add(spec);
+			scope.setDetails(currentScope, fieldToFetch);
 		}
 	}
 
-	private void addFKS(DStructType currentScope, HLDQuery hld) {
+	private void addFKS(DStructType currentScope, HLDQuery hld, QScope scope) {
 		for(TypePair pair: currentScope.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(currentScope, pair);
@@ -135,6 +152,7 @@ public class HLDQueryBuilder {
 					FetchSpec spec = new FetchSpec(currentScope, pair.name);
 					spec.isFK = true;
 					hld.fetchL.add(spec);
+					scope.setDetails(currentScope, pair.name);
 				}
 			}
 		}

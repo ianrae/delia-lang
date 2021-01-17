@@ -30,6 +30,7 @@ public class HLDQuery {
 	public List<QueryFnSpec> funcL = new ArrayList<>(); //list and calc fns. order matters: eg. .addr.first().city
 	public List<HLDField> fieldL = new ArrayList<>(); 
 	public QueryExp originalQueryExp;
+	public List<QScope> scopeL;
 	
 	//added after
 	public List<JoinElement> joinL = new ArrayList<>();
