@@ -31,4 +31,6 @@ public interface ValidationRunner {
 
 	void setUpsertPKVal(DValue keyval);
 
+	void setSoftMandatoryRelationFlag(boolean b);
+
 }

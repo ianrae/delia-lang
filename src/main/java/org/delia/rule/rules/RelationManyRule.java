@@ -31,7 +31,7 @@ public class RelationManyRule extends RelationRuleBase {
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (isMandatoryFK()) {
+			if (isMandatoryFK() && ! ctx.isSoftMandatoryRelationFlag()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' many -  a foreign key value must be specified.", key);
 				addDetailedError(ctx, msg, getSubject(), dval.getType().getName());

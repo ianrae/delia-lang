@@ -36,6 +36,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private FetchRunner fetchRunner;
 		private DValueCompareService compareSvc;
 		private DValue upsertPKVal;
+		private boolean softMandatoryRelationFlag;
 
 		public ValidationRuleRunnerImpl(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
 			super(factorySvc);
@@ -162,7 +163,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 						skip = true;
 					}
 					
-					if (!validateFieldsOnly && !skip) {
+					if (!validateFieldsOnly && !skip && softMandatoryRelationFlag) {
 						MandatoryRule mandatoryRule = new MandatoryRule(new AlwaysRuleGuard(), pair.name);
 						if (!execRule(mandatoryRule, dval)) {
 							failCount++;
@@ -210,7 +211,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 			
 			ErrorTracker tmpET = new SimpleErrorTracker(log);
 			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, 
-					fetchRunner, compareSvc, insertFlag, upsertFlag, upsertPKVal); 
+					fetchRunner, compareSvc, insertFlag, upsertFlag, upsertPKVal, softMandatoryRelationFlag); 
 			boolean b = rule.validate(dval, ctx);
 			if (!b) {
 				localET.getErrors().addAll(ctx.getErrors());
@@ -301,5 +302,10 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		@Override
 		public void setUpsertPKVal(DValue keyval) {
 			this.upsertPKVal = keyval;
+		}
+
+		@Override
+		public void setSoftMandatoryRelationFlag(boolean b) {
+			this.softMandatoryRelationFlag = b;
 		}
 	}

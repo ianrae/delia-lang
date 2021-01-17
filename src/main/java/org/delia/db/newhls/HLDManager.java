@@ -53,6 +53,7 @@ public class HLDManager extends ServiceBase {
 	protected AliasManager aliasManager;
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
 	private SprigService sprigSvc; //set after ctor
+	private HLDQueryStatement mostRecentLetStatement;
 
 //	private DeliaSession session;
 //	private Delia delia;
@@ -71,7 +72,8 @@ public class HLDManager extends ServiceBase {
 	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec, varEvaluator);
 		hld.querySpec = spec;
-
+		mostRecentLetStatement = hld;
+		
 		HLDInnerManager mgr = createManager(zexec);
 		SqlStatement stm = mgr.generateSql(hld);
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
@@ -178,5 +180,9 @@ public class HLDManager extends ServiceBase {
 
 	public void setSprigSvc(SprigService sprigSvc) {
 		this.sprigSvc = sprigSvc;
+	}
+
+	public HLDQueryStatement getMostRecentLetStatement() {
+		return mostRecentLetStatement;
 	}
 }

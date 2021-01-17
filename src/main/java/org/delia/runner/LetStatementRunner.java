@@ -20,6 +20,8 @@ import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.db.newhls.HLDManager;
+import org.delia.db.newhls.HLDQuery;
+import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
@@ -49,6 +51,7 @@ public class LetStatementRunner extends ServiceBase {
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
 	private HLDManager hldManager;
+	private HLDQueryStatement mostRecentStatment;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLSManager mgr, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
@@ -149,6 +152,7 @@ public class LetStatementRunner extends ServiceBase {
 		if (flag1) {
 			spec.queryExp = queryExp;
 			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
+			mostRecentStatment = hldManager.getMostRecentLetStatement();
 			qresp = result.qresp;
 		} else if (flag2) {
 			spec.queryExp = queryExp;
@@ -274,6 +278,13 @@ public class LetStatementRunner extends ServiceBase {
 		//validate (assume that we don't fully trust db storage - someone may have tampered with data)
 		if (qresp.ok && CollectionUtils.isNotEmpty(qresp.dvalList)) {
 			ValidationRunner ruleRunner = createValidationRunner();
+			if (mostRecentStatment != null) {
+				HLDQuery hld = mostRecentStatment.hldquery;
+				if (!hld.fetchL.isEmpty()) {
+					ruleRunner.setSoftMandatoryRelationFlag(true);
+				}
+			}
+			
 			if (! ruleRunner.validateDVals(qresp.dvalList)) {
 				ruleRunner.propogateErrors(res);
 			}
