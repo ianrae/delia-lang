@@ -282,7 +282,7 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator());
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator(), null);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
@@ -298,7 +298,7 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpsertStatement hld = mgr.fullBuildUpsert(upsertExp, new DoNothingVarEvaluator());
+		HLDUpsertStatement hld = mgr.fullBuildUpsert(upsertExp, new DoNothingVarEvaluator(), null);
 		log.log(hld.toString());
 		return hld;
 	}

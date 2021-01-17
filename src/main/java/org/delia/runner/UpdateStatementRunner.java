@@ -80,7 +80,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldManager != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator);
+			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
 			stmgrp = hldManager.generateSQL(hldup, dbexecutor);
 			cres = hldup.hldupdate.cres;
 		} else {
@@ -154,7 +154,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldManager != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator);
+			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
 			stmgrp = hldManager.generateSQL(hldup, dbexecutor);
 			cres = hldup.hldupdate.cres;
 		} else {

@@ -43,6 +43,7 @@ public class HLDDsonBuilder {
 	private SprigService sprigSvc;
 	private QueryBuilderHelper queryBuilderHelper;
 	private VarEvaluator varEvaluator;
+	private DValueIterator insertPrebuiltValueIterator = null; 
 
 	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc, VarEvaluator varEvaluator) {
 		this.registry = registry;
@@ -119,7 +120,6 @@ public class HLDDsonBuilder {
 		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
 		HLDUpdate hldupdate = new HLDUpdate(new TypeOrTable(dtype), null);//fill in later
 		
-		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		
 		fillArraysForUpdate(hldupdate);
@@ -427,5 +427,13 @@ public class HLDDsonBuilder {
 		DStructType structType = new DStructType(Shape.STRUCT, assocTbl, null, omap, null);
 		//we don't register this type
 		return structType;
+	}
+
+	public DValueIterator getInsertPrebuiltValueIterator() {
+		return insertPrebuiltValueIterator;
+	}
+
+	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
+		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
 	}
 }

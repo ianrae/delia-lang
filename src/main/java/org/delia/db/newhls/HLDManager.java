@@ -26,6 +26,7 @@ import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DValueIterator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -53,13 +54,13 @@ public class HLDManager extends ServiceBase {
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
 	private SprigService sprigSvc; //set after ctor
 
-	private DeliaSession session;
-	private Delia delia;
+//	private DeliaSession session;
+//	private Delia delia;
 	
 	public HLDManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
-		this.session = session;
-		this.delia = delia;
+//		this.session = session;
+//		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
@@ -119,15 +120,15 @@ public class HLDManager extends ServiceBase {
 		log.log(hlddel.toString());
 		return hlddel;
 	}
-	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
-	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, ZDBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
-		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator);
+		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator);
 		log.log(upsertExp.toString());
 		return hldupsert;
 	}

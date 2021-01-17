@@ -21,6 +21,7 @@ import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsert;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.log.Log;
+import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
@@ -40,6 +41,7 @@ import org.delia.util.DeliaExceptionHelper;
  */
 public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	private HLDAliasManager aliasMgr;
+	private DValueIterator insertPrebuiltValueIterator;
 
 	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(registry, factorySvc, log,datIdMap, sprigSvc);
@@ -92,10 +94,16 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	
 	
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
 		HLDInsert hld = hldBuilder.buildInsert(insertExp);
 		return hld;
 	}
+	private HLDDsonBuilder createDsonBuilder() {
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		hldBuilder.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		return hldBuilder;
+	}
+
 	public void addParentUpdates(HLDInsert hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
 		generateParentUpdateIfNeeded(structType, hld.cres.dval, null, moreL);
@@ -137,12 +145,12 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
 		return doBuildUpdate(hld, updateExp.queryExp);
 	}
 	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
 		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp);
 		doBuildUpdate(hld, upsertExp.queryExp);
 		
@@ -230,5 +238,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	public void setVarEvaluator(VarEvaluator varEvaluator) {
 		this.varEvaluator = varEvaluator;
+	}
+
+	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
+		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
 	}
 }

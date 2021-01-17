@@ -16,6 +16,7 @@ import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -28,7 +29,7 @@ import org.delia.type.DTypeRegistry;
 public class HLDInnerManager extends ServiceBase {
 	private DTypeRegistry registry;
 	private DatIdMap datIdMap;
-	private SprigService sprigSvc;
+//	private SprigService sprigSvc;
 	private HLDEngine engine;
 	
 	public boolean newInsertSQLGen = true;
@@ -41,7 +42,7 @@ public class HLDInnerManager extends ServiceBase {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
-		this.sprigSvc = sprigSvc;
+//		this.sprigSvc = sprigSvc;
 		this.engine = new HLDEngine(registry, factorySvc, log, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
@@ -73,9 +74,10 @@ public class HLDInnerManager extends ServiceBase {
 		return stmt;
 	}
 	
-	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator) {
+	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		engine.setVarEvaluator(varEvaluator);
+		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		engineAssoc.setVarEvaluator(varEvaluator);
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
@@ -85,10 +87,11 @@ public class HLDInnerManager extends ServiceBase {
 		return stmt;
 	}
 
-	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator) {
+	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDUpsertStatement stmt = new HLDUpsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);
+		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		stmt.hldupdate = engine.buildUpsert(upsertExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 //		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
