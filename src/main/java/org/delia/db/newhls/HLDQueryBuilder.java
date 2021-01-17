@@ -10,6 +10,7 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.FilterValHelper;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
@@ -122,18 +123,11 @@ public class HLDQueryBuilder {
 	}
 
 	private void addArgs(QueryFnSpec spec, QueryFuncExp fnexp) {
-		if (spec.isFn("orderBy")) {
-			String fieldName = fnexp.argL.get(0).strValue();
-			spec.structField.fieldName = fieldName;
-			for(int i = 0; i < fnexp.argL.size(); i++) {
-				Exp exp = fnexp.argL.get(i);
-				//TODO: do proper converion to filterval here!
-				FilterVal fval = new FilterVal(ValType.STRING, exp);
-				spec.filterFn.argL.add(fval);
-			}
+		for(int i = 0; i < fnexp.argL.size(); i++) {
+			Exp exp = fnexp.argL.get(i);
+			FilterVal fval = FilterValHelper.createFromExp(exp); //new FilterVal(ValType.STRING, exp);
+			spec.filterFn.argL.add(fval);
 		}
-		// TODO add more later
-		
 	}
 
 	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld, QScope scope) {

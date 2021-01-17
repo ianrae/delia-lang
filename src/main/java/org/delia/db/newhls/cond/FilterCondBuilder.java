@@ -11,7 +11,6 @@ import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.ListExp;
 import org.delia.compiler.ast.LongExp;
-import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
@@ -120,19 +119,7 @@ public class FilterCondBuilder {
 	}
 
 	private FilterCond singleFilterFromDVal(DValue dval, String varName) {
-		switch(dval.getType().getShape()) {
-		case BOOLEAN:
-			return new BooleanFilterCond(new BooleanExp(dval.asBoolean()));
-		case INTEGER:
-			return new IntegerFilterCond(new IntegerExp(dval.asInt()));
-		case LONG:
-			return new LongFilterCond(new LongExp(dval.asLong()));
-		case STRING:
-			return new StringFilterCond(new StringExp(dval.asString()));
-			default:
-				DeliaExceptionHelper.throwError("bad-filter-var-type", "Var '%s' used in filter has type '%s'. Not allowed", varName, dval.getType().getName());
-		}
-		return null;
+		return FilterValHelper.singleFilterFromDVal(dval, varName);
 	}
 
 	private boolean isOtherAndOrExp(FilterOpFullExp exp) {
@@ -223,18 +210,6 @@ public class FilterCondBuilder {
 	}
 
 	private ValType createValType(Exp op2) {
-		if (op2 instanceof BooleanExp) {
-			return ValType.BOOLEAN;
-		} else if (op2 instanceof IntegerExp) {
-			return ValType.INT;
-		} else if (op2 instanceof LongExp) {
-			return ValType.LONG;
-		} else if (op2 instanceof NumberExp) {
-			return ValType.NUMBER;
-		} else if (op2 instanceof StringExp) {
-			return ValType.STRING;
-		} else {
-			return null; //TODO: error
-		}
+		return FilterValHelper.createValType(op2);
 	}
 }
