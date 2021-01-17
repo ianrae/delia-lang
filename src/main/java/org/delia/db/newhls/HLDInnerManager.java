@@ -61,10 +61,11 @@ public class HLDInnerManager extends ServiceBase {
 		engine.assignAliases(stmt);
 		return stmt;
 	}
-	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator) {
+	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);
+		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		if (stmt.hldinsert.buildSuccessful()) {
 			engine.addParentUpdates(stmt.hldinsert, stmt.moreL);

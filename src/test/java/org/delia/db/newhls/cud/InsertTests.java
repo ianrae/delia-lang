@@ -157,7 +157,7 @@ public class InsertTests extends NewHLSTestBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator());
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator(), null);
 		log.log(hldins.toString());
 		return hldins;
 	}

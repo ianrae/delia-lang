@@ -36,6 +36,7 @@ public class InsertStatementRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ZDBInterfaceFactory dbInterface;
 	private Runner runner;
+	private DValueIterator insertPrebuiltValueIterator;
 
 	public InsertStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, Runner runner, 
 			DTypeRegistry registry, Map<String,ResultValue> varMap) {
@@ -51,8 +52,9 @@ public class InsertStatementRunner extends ServiceBase {
 	}
 
 	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDManager hldManager, ZDBExecutor dbexecutor, FetchRunner fetchRunner, 
-			DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {
+			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
 
+		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 		DType dtype = registry.getType(exp.getTypeName());
 		if (failIfNull(dtype, exp.typeName, res)) {
 			return;
@@ -65,7 +67,7 @@ public class InsertStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldManager != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldins = hldManager.buildHLD(exp, dbexecutor, varEvaluator);
+			hldins = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
 			stmgrp = hldManager.generateSQL(hldins, dbexecutor);
 			cres = hldins.hldinsert.cres;
 		} else {
