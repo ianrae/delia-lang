@@ -25,7 +25,7 @@ public class DeliaExceptionHelper {
 	}
 	public static void throwUnknownTypeError(String typeName) {
 		String msg = String.format("Type '%s' doesn't exist", typeName);
-		DeliaError err = new DeliaError("unknown-field", msg);
+		DeliaError err = new DeliaError("unknown-type", msg);
 		throw new DeliaException(err);
 	}
 	public static void throwUnknownFieldError(String typeName, String fieldName) {

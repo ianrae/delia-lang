@@ -42,7 +42,7 @@ public class BDDQueryHelper {
 		helper.chkResQueryEmpty(res);
 	}
 	public void chkQueryAll(String typeName, int size) {
-		String dang = String.format("let a%d = %s", nextVarNum++, typeName);
+		String dang = String.format("let a%d = %s[true]", nextVarNum++, typeName);
 		LetStatementExp exp2 = chelper.chkQueryLet(dang, null);
 		ResultValue res = runner.executeOneStatement(exp2);
 		QueryResponse qresp = helper.chkResQueryMany(res, size);

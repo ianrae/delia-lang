@@ -180,7 +180,7 @@ public class DeliaDaoTests extends DaoTestBase {
 			log.log(e.getMessage());
 			failMsg = e.getMessage();
 		}
-		assertEquals("struct-unknown-type-in-query: unknown struct type 'bb'", failMsg);
+		assertEquals("unknown-type: Type 'bb' doesn't exist", failMsg);
 	}
 	
 	
