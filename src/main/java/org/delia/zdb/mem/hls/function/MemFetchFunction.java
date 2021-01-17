@@ -73,7 +73,7 @@ public class MemFetchFunction extends MemFunctionBase {
 	
 	@Override
 	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		String targetFieldName = hlspan.filterFn.argL.get(0).asString();
+		String targetFieldName = hlspan.structField.fieldName; //.filterFn.argL.get(0).asString();
 		return doProcess(targetFieldName, qresp, ctx);
 	}
 	

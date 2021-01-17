@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.newhls.FetchSpec;
 import org.delia.db.newhls.FinalField;
 import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.newhls.QScope;
@@ -21,8 +22,10 @@ import org.delia.zdb.mem.hls.MemFunction;
 import org.delia.zdb.mem.hls.function.MemCountFunction;
 import org.delia.zdb.mem.hls.function.MemDistinctFunction;
 import org.delia.zdb.mem.hls.function.MemExistsFunction;
+import org.delia.zdb.mem.hls.function.MemFetchFunction;
 import org.delia.zdb.mem.hls.function.MemFieldFunction;
 import org.delia.zdb.mem.hls.function.MemFirstFunction;
+import org.delia.zdb.mem.hls.function.MemFksFunction;
 import org.delia.zdb.mem.hls.function.MemLimitFunction;
 import org.delia.zdb.mem.hls.function.MemMaxFunction;
 import org.delia.zdb.mem.hls.function.MemMinFunction;
@@ -44,12 +47,14 @@ public class MemFunctionHelper extends ServiceBase {
 
 		for(QScope scope: list) {
 			Object obj = scope.thing;
-			log.logDebug("fn: %d: %s", scope.index, obj.getClass().getSimpleName());
+			log.log("fn: %d: %s", scope.index, obj.toString());
 
 			if (obj instanceof FinalField) {
 				qresp = doField((FinalField) obj, qresp);
 			} else if (scope.thing instanceof QueryFnSpec) {
 				qresp = doFunction((QueryFnSpec)obj, qresp);
+			} else if (scope.thing instanceof FetchSpec) {
+				qresp = doFetch((FetchSpec)obj, qresp);
 			} else {
 				DeliaExceptionHelper.throwNotImplementedError("unknown scope thing '%s'", obj == null ? "?" : obj.getClass().getSimpleName());
 			}
@@ -64,6 +69,9 @@ public class MemFunctionHelper extends ServiceBase {
 	 * Since wid is scalar field, we'll move the orderBy before it.
 	 * But need to be careful, and only reorder within a scope span
 	 * (that is, up to the next field)
+	 * 
+	 * Also, offset, orderBy, and limit need to be done in correct order.
+	 * 
 	 * @param scopeL
 	 * @return
 	 */
@@ -81,20 +89,27 @@ public class MemFunctionHelper extends ServiceBase {
 				if (ff.isScalarField()) {
 					int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
 					//re-order between i..k
-					QScope fnscope = findFn("orderBy", i+1, iEndSpan, scopeL);
-					addIf(fnscope, list, skipList);
-					fnscope = findFn("offset", i+1, iEndSpan, scopeL);
-					addIf(fnscope, list, skipList);
-					fnscope = findFn("limit", i+1, iEndSpan, scopeL);
-					addIf(fnscope, list, skipList);
+					reOrderPagingFns(i+1, iEndSpan, list, skipList, scopeL);
 				}
 				list.add(scope);
 			} else if (! skipList.contains(scope)) {
+				int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
+				reOrderPagingFns(i, iEndSpan, list, skipList, scopeL);
+
 				list.add(scope);
 			}
 			i++;
 		}
 		return list;
+	}
+
+	private void reOrderPagingFns(int i, int iEndSpan, List<QScope> list, List<QScope> skipList, List<QScope> scopeL) {
+		QScope fnscope = findFn("orderBy", i+1, iEndSpan, scopeL);
+		addIf(fnscope, list, skipList);
+		fnscope = findFn("offset", i+1, iEndSpan, scopeL);
+		addIf(fnscope, list, skipList);
+		fnscope = findFn("limit", i+1, iEndSpan, scopeL);
+		addIf(fnscope, list, skipList);
 	}
 
 	private QScope findFn(String fnName, int iStart, int iEndSpan, List<QScope> scopeL) {
@@ -112,10 +127,10 @@ public class MemFunctionHelper extends ServiceBase {
 		return null;
 	}
 
-	private void addIf(QScope fnscope, List<QScope> list, List<QScope> skipList) {
-		if (fnscope != null) {
-			list.add(fnscope);
-			skipList.add(fnscope);
+	private void addIf(QScope scope, List<QScope> list, List<QScope> skipList) {
+		if (scope != null && ! skipList.contains(scope)) {
+			list.add(scope);
+			skipList.add(scope);
 		}
 	}
 
@@ -157,14 +172,35 @@ public class MemFunctionHelper extends ServiceBase {
 	private QueryResponse doField(FinalField ff, QueryResponse qresp) {
 		MemFieldFunction fn = new MemFieldFunction(registry, log, fetchRunner);
 
-		QueryFnSpec fnspec = new QueryFnSpec();
-		fnspec.filterFn = new FilterFunc();
-		fnspec.filterFn.fnName = "$FIELD";
+		QueryFnSpec fnspec = createFnSpec("$FIELD");
 		fnspec.structField = new StructFieldOpt(ff.structField.dtype, ff.structField.fieldName, ff.structField.fieldType);
 		qresp = runFn(fnspec, qresp, fn, 0, false);
 		return qresp;
 	}
+	private QueryResponse doFetch(FetchSpec fetch, QueryResponse qresp) {
+		if (fetch.isFK) {
+			MemFksFunction fn = new MemFksFunction(registry);
+			QueryFnSpec fnspec = createFnSpec("$FKS");
+			fnspec.structField = new StructFieldOpt(fetch.structType, fetch.fieldName, null);
+			qresp = runFn(fnspec, qresp, fn, 0, false);
+			return qresp;
+		} else {
+			MemFetchFunction fn = new MemFetchFunction(registry, fetchRunner, false);
+			QueryFnSpec fnspec = createFnSpec("$FETCH");
+			fnspec.structField = new StructFieldOpt(fetch.structType, fetch.fieldName, null);
+			qresp = runFn(fnspec, qresp, fn, 0, false);
+			return qresp;
+		}
+	}
 
+	
+	private QueryFnSpec createFnSpec(String fakeName) {
+		QueryFnSpec fnspec = new QueryFnSpec();
+		fnspec.filterFn = new FilterFunc();
+		fnspec.filterFn.fnName = fakeName;
+		return fnspec;
+	}
+ 
 	private MemFunction createMemFn(QueryFnSpec fnspec) {
 		switch(fnspec.filterFn.fnName) {
 		case "min":
