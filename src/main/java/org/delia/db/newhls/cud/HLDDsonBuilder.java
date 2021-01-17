@@ -57,7 +57,6 @@ public class HLDDsonBuilder {
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
 		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
 		HLDInsert hldins = new HLDInsert(new TypeOrTable(dtype));
-		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		if (hldins.buildSuccessful()) {
 			fillArrays(hldins.cres.dval, hldins.fieldL, hldins.valueL, true);
@@ -129,7 +128,6 @@ public class HLDDsonBuilder {
 		DStructType dtype = (DStructType) registry.getType(upsertExp.typeName);
 		HLDUpsert hld = new HLDUpsert(new TypeOrTable(dtype), null);//fill in later
 		
-		DValueIterator insertPrebuiltValueIterator = null; //TODO
 		hld.cres = buildValue(false, dtype, upsertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		fillArraysForUpdate(hld);
 		return hld;
