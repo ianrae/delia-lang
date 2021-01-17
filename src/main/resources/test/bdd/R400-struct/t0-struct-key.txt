@@ -8,7 +8,7 @@ thenType: struct
 ---
 title: int-primary-key
 given:
-  type Flight struct {field1 int unique } end
+  type Flight struct {field1 int primaryKey } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55]
@@ -39,7 +39,7 @@ value:a:Flight {
 ---  
 title: string-primary-key
 given:
-  type Flight struct {field1 string unique } end
+  type Flight struct {field1 string primaryKey } end
   insert Flight {field1: '55' }
 when:
   let x = Flight['55']
@@ -50,7 +50,7 @@ value:a:Flight {
 ---
 title: long-primary-key
 given:
-  type Flight struct {field1 long unique } end
+  type Flight struct {field1 long primaryKey } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55]
@@ -61,14 +61,14 @@ value:a:Flight {
 ---
 title: number-primary-key
 given:
-  type Flight struct {field1 number unique } end
+  type Flight struct {field1 number primaryKey } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55];ERROR: primary-key-type-not-allowed
 ---
 title: boolean-primary-key
 given:
-  type Flight struct {field1 boolean unique } end
+  type Flight struct {field1 boolean primaryKey } end
   insert Flight {field1: true }
 when:
   let x = Flight[true]
@@ -79,7 +79,7 @@ value:a:Flight {
 ---
 title: date-primary-key
 given:
-  type Flight struct {field1 date unique } end
+  type Flight struct {field1 date primaryKey } end
   insert Flight {field1: '2019' }
 when:
   let x = Flight['2019']
@@ -90,7 +90,7 @@ value:a:Flight {
 ---
 title: struct-primary-key
 given:
-  type Flight struct {field1 struct unique } end
+  type Flight struct {field1 struct primaryKey } end
   insert Flight {field1: '2019' }
 when:
   let x = Flight['2019'];ERROR: parse-error

@@ -57,7 +57,7 @@ value:a:Flight {
 ---
 title: optional-dup
 given:
-  type Flight struct {field1 int unique, field2 int optional unique } end
+  type Flight struct {field1 int primaryKey, field2 int optional unique } end
   insert Flight {field1: 55, field2: 10 }
   insert Flight {field1: 56, field2: 10 }
 when:

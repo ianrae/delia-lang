@@ -259,7 +259,13 @@ public class AssocTableReplacer extends SelectFragmentParser {
 
 	protected void addForeignKeyId(Map<String, DRelation> mmMap, String fieldName, SqlStatement statement) {
 		DRelation drel = mmMap.get(fieldName); //100
-		DValue dvalToUse  = drel.getForeignKey(); 
+		//hack hack hack
+		DValue dvalToUse;
+		if (drel.isMultipleKey()) {
+			dvalToUse = drel.getMultipleKeys().get(0); //probably not always correct 
+		} else {
+			dvalToUse = drel.getForeignKey(); 
+		}
 		statement.paramL.add(dvalToUse);
 	}
 	protected boolean isForeignKeyIdNull(Map<String, DRelation> mmMap, String fieldName) {

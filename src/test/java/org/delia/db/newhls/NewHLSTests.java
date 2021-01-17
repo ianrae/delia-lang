@@ -9,11 +9,13 @@ import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
-import org.delia.db.newhls.cond.IntFilterCond;
+import org.delia.db.newhls.cond.InFilterCond;
+import org.delia.db.newhls.cond.IntegerFilterCond;
 import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.junit.Before;
@@ -135,12 +137,14 @@ public class NewHLSTests extends NewHLSTestBase {
 		chkbuilderOpSymbolInt("let x = Flight[field1 < 15]", "field1", "<", 15);
 		chkbuilderOpIntSymbol("let x = Flight[15 < field1]", 15, "<", "field1");
 	}	
-
 	@Test
-	public void testDateFn() {
-		addOrderDate = true;
-		chkbuilderOpFnInt("let x = Flight[orderDate.day() == 31]", "orderDate", "day", "==", 31);
-		chkbuilderOpIntFn("let x = Flight[31 == orderDate.day()]", 31, "==", "orderDate", "day");
+	public void testIn() {
+		chkbuilderInInt("let x = Flight[field1 in [55]]", "field1", "in", 55);
+	}	
+	@Test
+	public void testLike() {
+		useStringSrc = true;
+		chkbuilderOpSymbolStr("let x = Flight[field1 like '%ab']", "field1", "like", "%ab");
 	}	
 
 	@Test
@@ -150,7 +154,7 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(src);
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(this.session.getExecutionContext().registry);
 
-		HLDQuery hld = hldBuilder.build(queryExp);
+		HLDQuery hld = hldBuilder.build(queryExp, new DoNothingVarEvaluator());
 		log.log(hld.toString());
 		//		assertEquals()
 
@@ -162,7 +166,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDField() {
 		String src = "let x = Flight[15]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -175,7 +179,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDField2() {
 		String src = "let x = Flight[field1 < 15]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -188,7 +192,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	@Test
 	public void testHLDFieldNot() {
 		String src = "let x = Flight[!(field1 < 15)]";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -199,9 +203,30 @@ public class NewHLSTests extends NewHLSTestBase {
 	}	
 	
 	@Test
+	public void testHLDFieldIn() {
+		String src = "let x = Flight[field1 in [55]]";
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
+
+		String sql = mgr.generateRawSql(hld);
+		log.log(sql);
+		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 IN (55)", sql);
+	}	
+	@Test
+	public void testHLDFieldLike() {
+		useStringSrc = true;
+		String src = "let x = Flight[field1 like '%a']";
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
+
+		String sql = mgr.generateRawSql(hld);
+		log.log(sql);
+		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 LIKE '%a'", sql);
+	}	
+	
+	
+	@Test
 	public void testHLDFieldCount() {
 		String src = "let x = Flight[field1 < 15].count()";
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
@@ -214,7 +239,6 @@ public class NewHLSTests extends NewHLSTestBase {
 	
 	//-------------------------
 	private String pkType = "int";
-	private boolean addOrderDate = false;
 
 	@Before
 	public void init() {
@@ -228,7 +252,7 @@ public class NewHLSTests extends NewHLSTestBase {
 	}
 	private void chkbuilderInt(String src, int expected) {
 		FilterCond cond = buildCond(src);
-		IntFilterCond bfc = (IntFilterCond) cond;
+		IntegerFilterCond bfc = (IntegerFilterCond) cond;
 		assertEquals(expected, bfc.asInt());
 	}
 	private void chkbuilderLong(String src, long expected) {
@@ -246,7 +270,7 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(src);
 		DTypeRegistry registry = session.getExecutionContext().registry;
 		DStructType dtype = (DStructType) registry.getType("Flight");
-		FilterCondBuilder builder = new FilterCondBuilder(registry, dtype);
+		FilterCondBuilder builder = new FilterCondBuilder(registry, dtype, new DoNothingVarEvaluator());
 		FilterCond cond = builder.build(queryExp);
 		return cond;
 	}
@@ -256,6 +280,13 @@ public class NewHLSTests extends NewHLSTestBase {
 		chkSymbol(val1, ofc.val1);
 		assertEquals(op, ofc.op.toString());
 		chkInt(val2, ofc.val2);
+	}
+	private void chkbuilderOpSymbolStr(String src, String val1, String op, String str) {
+		FilterCond cond = buildCond(src);
+		OpFilterCond ofc = (OpFilterCond) cond;
+		chkSymbol(val1, ofc.val1);
+		assertEquals(op, ofc.op.toString());
+		chkString(str, ofc.val2);
 	}
 	private void chkbuilderOpIntSymbol(String src, int val1, String op, String val2) {
 		FilterCond cond = buildCond(src);
@@ -279,6 +310,14 @@ public class NewHLSTests extends NewHLSTestBase {
 		chkFn(fieldName, val2, ofc.val2, 0);
 	}
 
+	private void chkbuilderInInt(String src, String val1, String op, int val2) {
+		FilterCond cond = buildCond(src);
+		InFilterCond ofc = (InFilterCond) cond;
+		chkSymbol(val1, ofc.val1);
+		assertEquals(op, ofc.op.toString());
+		chkInt(val2, ofc.list.get(0));
+	}
+	
 	private void chkFn(String fieldName, String fnName, FilterVal fval, int n) {
 		assertEquals(ValType.FUNCTION, fval.valType);
 		FilterFunc func = fval.filterFn;
@@ -294,14 +333,18 @@ public class NewHLSTests extends NewHLSTestBase {
 		assertEquals(ValType.INT, fval.valType);
 		assertEquals(val1, fval.asInt());
 	}
+	private void chkString(String val1, FilterVal fval) {
+		assertEquals(ValType.STRING, fval.valType);
+		assertEquals(val1, fval.asString());
+	}
 
 
 	@Override
 	protected String buildSrc() {
-		String s = addOrderDate ? ", orderDate date" : "";
+		String s = "";
 		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int %s } end", pkType, s);
 
-		s = addOrderDate ? ", orderDate: '2019'" : "";
+		s = "";
 		if (pkType.equals("string")) {
 			src += String.format("\n insert Flight {field1: 'ab', field2: 10 %s}", s);
 			src += String.format("\n insert Flight {field1: 'cd', field2: 20 %s}", s);

@@ -2,20 +2,34 @@
 
 FEATURE: CRUD update - many-to-many scenario 3 - arbitrary query
 background:
-	type Customer struct {id int unique, wid int, relation addr Address optional many } end
-	type Address struct {id int unique, z int, relation cust Customer optional many } end
+	type Customer struct {id int primaryKey, wid int, relation addr Address optional many } end
+	type Address struct {id int primaryKey, z int, relation cust Customer optional many } end
 	insert Customer {id: 55, wid: 33}
-	insert Customer {id: 56, wid: 34}
-	insert Address {id: 100, z:5, cust: [55,56] }
-	insert Address {id: 101, z:6, cust: [55,56] }
 thenType: struct
 
 
 ---
 title: update without relation query back
 when:
+	insert Customer {id: 56, wid: 33}
+	insert Address {id: 100, z:5, cust: [55,56] }
+	insert Address {id: 101, z:6, cust: [55,56] }
   upsert Customer[wid == 33] {wid: 333}
   let x = Customer[55].fks()
 then:
-ERROR: upsert-filter-error
+ERROR:  upsert-unique-violation
 
+---
+title: update ok because single row
+when:
+	insert Customer {id: 56, wid: 34}
+	insert Address {id: 100, z:5, cust: [55,56] }
+	insert Address {id: 101, z:6, cust: [55,56] }
+  upsert Customer[wid == 33] {wid: 333}
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+vid:55
+vwid:333
+vaddr:{[100,101]}
+}

@@ -92,14 +92,14 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 	private void chkPass(DValue dval, DRule rule) {
 		FetchRunner fetchRunner = createFetchRunner();
 		DValueCompareService compareSvc = factorySvc.getDValueCompareService();
-		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc, false);
+		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc, false, false, null, false);
 		assertEquals(true, rule.validate(dval, ctx));
 		assertEquals(false, ctx.hasErrors());
 	}
 	private void chkFail(DValue dval, DRule rule) {
 		FetchRunner fetchRunner = createFetchRunner();
 		DValueCompareService compareSvc = factorySvc.getDValueCompareService();
-		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc, false);
+		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc, false, false, null, false);
 		assertEquals(false, rule.validate(dval, ctx));
 		assertEquals(true, ctx.hasErrors());
 	}

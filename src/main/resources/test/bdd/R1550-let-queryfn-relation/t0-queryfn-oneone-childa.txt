@@ -3,8 +3,8 @@
 FEATURE: one-to-one child TODO Fix - .addr.id not yet supported
 background:
  configure loadFKs = true
- type Customer struct {id int unique, relation addr Address one optional parent } end
- type Address struct {id int unique, relation cust Customer  one } end
+ type Customer struct {id int primaryKey, relation addr Address one optional parent } end
+ type Address struct {id int primaryKey, relation cust Customer  one } end
   insert Customer {id: 55 }
   insert Customer {id: 56 }
  

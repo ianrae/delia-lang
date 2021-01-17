@@ -10,8 +10,8 @@ thenType: struct
 ---
 title: pass
 given:
- type Customer struct {id int unique, relation addr Address optional parent one }  end
- type Address struct {id int unique, relation cust Customer optional one } cust < 100 end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one }  end
+ type Address struct {id int primaryKey, relation cust Customer optional one } cust < 100 end
 
   insert Customer {id: 55 }
 when:
@@ -26,8 +26,8 @@ value:a:Customer {
 ---
 title: fail
 given:
- type Customer struct {id int unique, relation addr Address optional parent one }  end
- type Address struct {id int unique, relation cust Customer optional one } cust < 100 end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one }  end
+ type Address struct {id int primaryKey, relation cust Customer optional one } cust < 100 end
 
   insert Customer {id: 155 }
 when:

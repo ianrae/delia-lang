@@ -12,8 +12,13 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.newhls.cond.IntegerFilterCond;
+import org.delia.db.newhls.cond.LongFilterCond;
+import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class DValueConverterService extends ServiceBase {
@@ -147,6 +152,23 @@ public class DValueConverterService extends ServiceBase {
 		}
 		default:
 			//err
+			return null;
+		}
+	}
+	public DValue createDValueFrom(FilterCond cond, ScalarValueBuilder builder, boolean dontThrowException) {
+		if (cond instanceof IntegerFilterCond) {
+			IntegerFilterCond cc = (IntegerFilterCond) cond;
+			return builder.buildInt(cc.asInt());
+		} else if (cond instanceof LongFilterCond) {
+			LongFilterCond cc = (LongFilterCond) cond;
+			return builder.buildLong(cc.asLong());
+		} else if (cond instanceof StringFilterCond) {
+			StringFilterCond cc = (StringFilterCond) cond;
+			return builder.buildString(cc.asString());
+		} else {
+			if (!dontThrowException) {
+				DeliaExceptionHelper.throwError("invalid-filter-value-type", "can't convert filter");
+			}
 			return null;
 		}
 	}

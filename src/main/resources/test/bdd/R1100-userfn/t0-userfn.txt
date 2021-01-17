@@ -11,8 +11,8 @@
 
 FEATURE: user-fns
 background:
-  type Flight struct {id int unique, wid int optional }  end
-  type Flight2 struct {id int unique, wid int }  end
+  type Flight struct {id int primaryKey, wid int optional }  end
+  type Flight2 struct {id int primaryKey, wid int }  end
 thenType: struct
 
 

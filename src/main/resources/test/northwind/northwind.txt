@@ -1,5 +1,5 @@
 type Category struct {
-categoryID int unique,
+categoryID int primaryKey,
 categoryName string,
 description string,
 picture string
@@ -7,7 +7,7 @@ picture string
 end
 
 type Customer struct {
-customerID string unique,
+customerID string primaryKey,
 companyName string,
 contactName string,
 contactTitle string,
@@ -22,7 +22,7 @@ fax string
 end
 
 type Employee struct {
-employeeID int unique,
+employeeID int primaryKey,
 lastName string,
 firstName string,
 title string,
@@ -44,7 +44,7 @@ photoPath string
 end
 
 type Order struct {
-orderID int unique,
+orderID int primaryKey,
 customer Customer optional, //customerID string,
 employee Employee optional, //employeeID int,
 orderDate string,
@@ -71,20 +71,20 @@ discount number optional
 end
 
 type Region struct {
-regionID int unique,
+regionID int primaryKey,
 regionDescription string
 }
 end
 
 type Shipper struct {
-shipperID int unique,
+shipperID int primaryKey,
 companyName string,
 phone string
 }
 end
 
 type Supplier struct {
-supplierID int unique,
+supplierID int primaryKey,
 companyName string,
 contactName string,
 contactTitle string,
@@ -100,7 +100,7 @@ homePage string
 end
 
 type Territory struct {
-territoryID int unique,
+territoryID int primaryKey,
 territoryDescription string,
 region Region //regionID int
 }
@@ -113,7 +113,7 @@ territory Territory  //territoryID int
 end
 
 type Product struct {
-productID int unique,
+productID int primaryKey,
 productName string,
 supplier Supplier, //supplierID int,
 category Category, //categoryID int,

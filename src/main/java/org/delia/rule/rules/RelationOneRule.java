@@ -34,7 +34,7 @@ public class RelationOneRule extends RelationRuleBase {
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (isMandatoryFK()) {
+			if (isMandatoryFK() && ! ctx.isSoftMandatoryRelationFlag() ) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' one -  a foreign key value must be specified.", key);
 				addDetailedError(ctx, msg, getSubject());
@@ -60,6 +60,8 @@ public class RelationOneRule extends RelationRuleBase {
 			//add 5dec2020 as part of hls/part2
 			if (relInfo.isParent && ctx.isInsertFlag()) {
 				bb = true; 
+			} else if (ctx.isUpsertFlag()) {
+				bb = true; //TODO: add some way to check uniqueness here!
 			}
 			
 			if (!bb) {
@@ -131,7 +133,7 @@ public class RelationOneRule extends RelationRuleBase {
 				DType relType = this.registry.getType(BuiltInTypes.RELATION_SHAPE);
 				String typeName = dval.getType().getName();
 				RelationValueBuilder builder = new RelationValueBuilder(relType, typeName, registry);
-				String keyValString = getPrimaryKey(dval);
+				String keyValString = getPrimaryKey(dval, ctx);
 				builder.buildFromString(keyValString);
 				boolean b = builder.finish();
 				if (!b) {
@@ -162,7 +164,12 @@ public class RelationOneRule extends RelationRuleBase {
 		}
 		return true;
 	}
-	private String getPrimaryKey(DValue dval) {
+	private String getPrimaryKey(DValue dval, DRuleContext ctx) {
+		//during upsert there is no pk
+		if (ctx.isUpsertFlag()) {
+			return ctx.getUpsertPKVal().asString();
+		}
+		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		return dval.asStruct().getField(pair.name).asString();
 	}
@@ -185,9 +192,11 @@ public class RelationOneRule extends RelationRuleBase {
 		RelationInfo info = this.relInfo;
 		DValue existing = dval.asStruct().getField(info.fieldName);
 		if (existing != null) {
-			return;
+			DRelation drel = existing.asRelation();
+			if (drel.haveFetched() && drel.getMultipleKeys().size() == drel.getFetchedItems().size()) {
+				return;
+			}
 		}
-		
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		DValue keyVal = dval.asStruct().getField(pair.name);

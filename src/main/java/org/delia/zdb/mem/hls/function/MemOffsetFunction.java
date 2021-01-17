@@ -7,13 +7,16 @@ import java.util.TreeMap;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.mem.hls.MemFunctionBase;
 
 public class MemOffsetFunction extends MemFunctionBase {
+	private int offsetAmount;
 	public MemOffsetFunction(DTypeRegistry registry) {
 		super(registry);
 	}
@@ -25,7 +28,7 @@ public class MemOffsetFunction extends MemFunctionBase {
 			return qresp; //nothing to sort
 		}
 		
-		int offset = hlspan.oloEl.offset; //getIntArg(qfe, ctx);
+		int offset = hlspan == null ? offsetAmount : hlspan.oloEl.offset; //getIntArg(qfe, ctx);
 		ctx.currentOffset = offset;
 		
 		if (ctx.offsetLimitDirtyFlag) {
@@ -59,6 +62,15 @@ public class MemOffsetFunction extends MemFunctionBase {
 			
 			qresp.dvalList = newlist;
 		}
+	}
+	@Override
+	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		if (hlspan.filterFn.argL.isEmpty()) {
+			DeliaExceptionHelper.throwError("queryfn-missing-arg", "offset function needs one int arg.");				
+		}
+		offsetAmount = hlspan.filterFn.argL.get(0).asInt();
+		HLSQuerySpan jj = null;
+		return process(jj, qresp, ctx);
 	}
 
 }

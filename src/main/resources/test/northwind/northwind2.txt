@@ -1,5 +1,5 @@
 type Category struct {
-categoryID int unique,
+categoryID int primaryKey,
 categoryName string,
 description string,
 picture string
@@ -7,7 +7,7 @@ picture string
 end
 
 type Customer struct {
-customerID string unique,
+customerID string primaryKey,
 companyName string,
 contactName string,
 contactTitle string,
@@ -23,7 +23,7 @@ relation orders Order many optional
 end
 
 type Employee struct {
-employeeID int unique,
+employeeID int primaryKey,
 lastName string,
 firstName string,
 title string,
@@ -46,7 +46,7 @@ relation orders Order many optional
 end
 
 type Order struct {
-orderID int unique,
+orderID int primaryKey,
 relation customer Customer one optional, //customerID string,
 relation employee Employee one optional, //employeeID int,
 orderDate string,

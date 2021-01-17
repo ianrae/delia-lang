@@ -7,8 +7,8 @@ thenType: struct
 ---
 title: not loading parent fks
 given:
- type Customer struct {id int unique, relation addr Address optional one parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -23,8 +23,8 @@ value:a:Customer {
 ---
 title: loading parent fks
 given:
- type Customer struct {id int unique, relation addr Address optional one parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -39,8 +39,8 @@ value:a:Customer {
 ---
 title: one-to-many
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -56,8 +56,8 @@ value:a:Customer {
 ---
 title: one-to-many2
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:

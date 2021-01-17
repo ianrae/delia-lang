@@ -2,8 +2,8 @@
 
 FEATURE: rules
 background:
- type Flight struct {id int unique, name string } name.contains('bb') end
- type Flight2 struct {id int unique, name string optional } name.contains('bb') end
+ type Flight struct {id int primaryKey, name string } name.contains('bb') end
+ type Flight2 struct {id int primaryKey, name string optional } name.contains('bb') end
 thenType: struct
 
 # -- Mandatory --

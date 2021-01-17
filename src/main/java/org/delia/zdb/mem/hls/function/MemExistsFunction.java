@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.db.hls.GElement;
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
@@ -32,4 +33,10 @@ public class MemExistsFunction extends GelMemFunctionBase {
 		}
 		return false;
 	}
+	@Override
+	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		HLSQuerySpan hlspanx = null;
+		return process(hlspanx, qresp, ctx);
+	}
+
 }

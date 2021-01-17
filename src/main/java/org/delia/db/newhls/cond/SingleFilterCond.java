@@ -1,5 +1,8 @@
 package org.delia.db.newhls.cond;
 
+import org.delia.db.newhls.HLDQuery;
+import org.delia.db.newhls.ValType;
+
 /**
  * If filter is single value then is query on pk
  * for [true], [16], [x], [myfunc(13)]
@@ -15,4 +18,12 @@ public abstract class SingleFilterCond implements FilterCond {
 	}
 
 	public abstract String renderSql();
+	
+	public boolean isAllQuery() {
+		return val1.valType.equals(ValType.BOOLEAN);
+	}
+	public boolean isPKQuery() {
+		return !val1.valType.equals(ValType.BOOLEAN);
+	}
+	
 }

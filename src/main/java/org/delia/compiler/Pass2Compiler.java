@@ -3,6 +3,7 @@ package org.delia.compiler;
 import java.util.List;
 
 import org.delia.compiler.ast.ConfigureStatementExp;
+import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.LetStatementExp;
@@ -10,6 +11,7 @@ import org.delia.compiler.ast.OptionExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.StructFieldExp;
 import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.ConfigureService;
 import org.delia.core.FactoryService;
@@ -18,6 +20,12 @@ import org.delia.error.DeliaError;
 import org.delia.runner.InternalCompileState;
 import org.delia.type.BuiltInTypes;
 
+/**
+ * Enforce language rules that parser can't enforce.
+ * Types are not yet available.
+ * @author ian
+ *
+ */
 public class Pass2Compiler extends CompilerPassBase {
 
 	public Pass2Compiler(FactoryService factorySvc, ErrorLineFinder errorLineFinder, InternalCompileState execCtx) {
@@ -39,15 +47,39 @@ public class Pass2Compiler extends CompilerPassBase {
 			} else if (exp instanceof ConfigureStatementExp) {
 				ConfigureStatementExp typeExp = (ConfigureStatementExp) exp;
 				checkConfigureStatement(results, typeExp);
+			} else if (exp instanceof UpdateStatementExp) {
+				UpdateStatementExp upExp = (UpdateStatementExp) exp;
+				checkUpdateStatement(results, upExp);
 			} else if (exp instanceof UpsertStatementExp) {
 				UpsertStatementExp upExp = (UpsertStatementExp) exp;
 				checkUpsertStatement(results, upExp);
+			} else if (exp instanceof DeleteStatementExp) {
+				checkDeleteStatement(results, (DeleteStatementExp) exp);
 			}
 		}
 		return results;
 	}
 
+	/**
+	 * We used to support update Customer, but is too dangerous. 
+	 * Now you must suppy a filter, such as update Customer[true]
+	 * @param results
+	 * @param upExp
+	 */
+	private void checkUpdateStatement(CompilerResults results, UpdateStatementExp upExp) {
+		doMissingFilterCheck(results, upExp.queryExp, upExp.typeName, upExp);
+	}
+	private void checkDeleteStatement(CompilerResults results, DeleteStatementExp upExp) {
+		doMissingFilterCheck(results, upExp.queryExp, upExp.typeName, upExp);
+	}
+	private void doMissingFilterCheck(CompilerResults results, QueryExp queryExp, String typeName, Exp exp) {
+		if (queryExp.filter == null) {
+			String msg = String.format("update: filter is missing on '%s'", typeName);
+			addError(results, "missing-filter", msg, exp);
+		}
+	}
 	private void checkUpsertStatement(CompilerResults results, UpsertStatementExp upExp) {
+		doMissingFilterCheck(results, upExp.queryExp, upExp.typeName, upExp);
 		OptionExp optionExp = upExp.optionExp;
 		if (optionExp != null && !optionExp.strValue().equals("noUpdate")) {
 			String msg = String.format("upsert: unknown option '%s'", optionExp.strValue());
@@ -134,6 +166,7 @@ public class Pass2Compiler extends CompilerPassBase {
 //		log.log("a" + letExp.strValue());
 		if (letExp.value instanceof QueryExp) {
 			QueryExp qexp = (QueryExp) letExp.value;
+			
 			if (qexp.filter != null && qexp.filter.cond instanceof FilterOpExp) {
 				FilterOpExp fexp = (FilterOpExp) qexp.filter.cond;
 				

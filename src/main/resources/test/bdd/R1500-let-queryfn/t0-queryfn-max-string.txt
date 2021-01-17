@@ -2,7 +2,7 @@
 
 FEATURE: queryfn-max-string
 background:
-  type Flight struct {id int unique, wid string optional }  end
+  type Flight struct {id int primaryKey, wid string optional }  end
 thenType: struct
 
 ---

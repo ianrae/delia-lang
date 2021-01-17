@@ -51,7 +51,7 @@ public class TypeDefinitionTests extends ScopeTestBase {
 		//TODO find all occurences of structtype.getFields() -- doesn't handle inheritance
 		
 		//now query it
-		src = String.format("let a = Employee");
+		src = String.format("let a = Employee[true]");
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		DValue dval = qresp.getOne();
 		assertEquals(10, dval.asStruct().getField("f1").asInt());

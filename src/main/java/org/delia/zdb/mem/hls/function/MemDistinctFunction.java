@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.delia.db.hls.GElement;
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
@@ -80,6 +81,11 @@ public class MemDistinctFunction extends GelMemFunctionBase {
 			DValue dval = builder.getDValue();
 			return dval;
 		}
+	}
+	@Override
+	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		HLSQuerySpan hlspanx = null;
+		return process(hlspanx, qresp, ctx);
 	}
 
 }

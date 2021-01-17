@@ -63,6 +63,8 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 
 		QueryResponse qresp = null;
 		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+			dbexecutor.init1(externalSession.getExecutionContext().registry);
+			dbexecutor.init2(externalSession.getDatIdMap(), varEvaluator);
 			HLSManagerResult result = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());
 			qresp = result.qresp;
 		} catch (Exception e) {

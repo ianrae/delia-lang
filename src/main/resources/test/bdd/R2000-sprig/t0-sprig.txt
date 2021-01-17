@@ -9,7 +9,7 @@ thenType: struct
 title: using-sprig int
 given:
  type Customer struct {id int primaryKey serial, relation addr Address optional one parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
  configure Customer.synthetic_id='sid'
 
   insert Customer { sid:33}
@@ -26,7 +26,7 @@ value:a:Customer {
 title: using-sprig long
 given:
  type Customer struct {id long unique serial, relation addr Address optional one parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
  configure Customer.synthetic_id='sid'
 
   insert Customer { sid:33}
@@ -42,8 +42,8 @@ value:a:Customer {
 ---
 SKIP: using-sprig string //string serial not supported
 given:
- type Customer struct {id string unique serial, relation addr Address optional one parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id string primaryKey serial, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
  configure Customer.synthetic_id='sid'
 
   insert Customer { sid:33}
@@ -59,8 +59,8 @@ value:a:Customer {
 ---
 title: not-using-sprig
 given:
- type Customer struct {id int unique serial, relation addr Address optional one parent } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey serial, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer { }
 when:

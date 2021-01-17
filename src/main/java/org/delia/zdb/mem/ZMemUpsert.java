@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.compiler.ast.BooleanExp;
-import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -17,7 +16,6 @@ import org.delia.db.memdb.RowSelector;
 import org.delia.dval.DValueExConverter;
 import org.delia.error.DeliaError;
 import org.delia.runner.FilterEvaluator;
-import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -28,10 +26,12 @@ public class ZMemUpsert extends ServiceBase {
 
 	DateFormatService fmtSvc;
 	private DTypeRegistry registry;
+	private RelationPruner relationPruner;
 
 	public ZMemUpsert(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
+		this.relationPruner = new RelationPruner(factorySvc);
 	}
 
 	public int doExecuteUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, RowSelector selector, 
@@ -79,6 +79,7 @@ public class ZMemUpsert extends ServiceBase {
 			//replace it in tbl
 			for(DValue tmp: dvalList) {
 				if (tmp == dd) {
+					relationPruner.pruneOtherSide(tmp, dvalFull, memDBInterface);
 					DValue clone = DValueHelper.mergeOne(dvalFull, tmp);
 					dvalList.remove(tmp);
 					tbl.rowL.set(i, clone);
@@ -92,6 +93,7 @@ public class ZMemUpsert extends ServiceBase {
 		}
 		return numRowsAffected;
 	}
+	
 
 	private void addPrimaryKey(QuerySpec spec, DValue dvalFull, RowSelector selector) {
 		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dvalFull.getType());

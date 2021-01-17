@@ -3,8 +3,8 @@
 FEATURE: filter-expr op int
 background:
  configure loadFKs = true
- type Customer struct {id int unique, relation addr Address optional parent one }  end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional parent one }  end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
  insert Customer {id: 55 }
 thenType: struct
 

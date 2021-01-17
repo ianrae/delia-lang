@@ -198,6 +198,7 @@ public class DValueHelper {
 		if (inner.getObject() instanceof DRelation) {
 			DRelation rel = (DRelation) inner.getObject();
 			DRelation copy = new DRelation(rel.getTypeName(), rel.getMultipleKeys());
+			//TODO: should we also clone fetched items???
 			clone = new DValueImpl(inner.getType(), copy);
 		} else {
 			Object obj = inner.getObject();

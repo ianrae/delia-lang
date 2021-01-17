@@ -1,13 +1,30 @@
 package org.delia.db.newhls.cud;
 
-import org.delia.runner.ConversionResult;
+import java.util.ArrayList;
+import java.util.List;
 
-public class HLDInsert {
+import org.delia.db.newhls.HLDField;
+import org.delia.runner.ConversionResult;
+import org.delia.type.DValue;
+
+public class HLDInsert extends HLDBase {
 	//public HLDQuery hld; later if we support INSERT INTO SELECT 
-	public ConversionResult cres;
+	
+    public List<HLDField> fieldL = new ArrayList<>();
+    public List<DValue> valueL = new ArrayList<>();
+    public ConversionResult cres;
+    
+    public HLDInsert(TypeOrTable typeOrTbl) {
+    	super(typeOrTbl);
+    }
 
 	@Override
 	public String toString() {
-		return "????";
+		String s = String.format("%s:", typeOrTbl.getTblName());
+		return s;
+	}
+
+	public boolean buildSuccessful() {
+		return cres.dval != null;
 	}
 }

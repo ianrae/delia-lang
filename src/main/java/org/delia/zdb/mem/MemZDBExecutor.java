@@ -17,6 +17,13 @@ import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
+import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.newhls.cud.HLDInsert;
+import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
@@ -146,6 +153,22 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
+	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
+		//we can use ZMemInsert here
+		HLDInsert hldinsert = hld.hldinsert;
+		DValue dval = hldinsert.cres.dval;
+		String typeName = dval.getType().getName();
+		MemDBTable tbl = tableMap.get(typeName);
+		if (tbl == null) {
+			tbl = handleUnknownTable(typeName);
+		}
+
+		ZStuff stuff = findOrCreateStuff();
+		ZMemInsert memInsert = new ZMemInsert(this.factorySvc);
+		return memInsert.doExecuteInsert(tbl, dval, ctx, this, stuff);
+	}
+
+	@Override
 	public int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
 		int numRowsAffected = 0;
 
@@ -155,6 +178,17 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 			throw new DBException(e.getLastError());
 		}
 		return numRowsAffected;
+	}
+
+	@Override
+	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
+		//TODO later when we make new HLDRowSelector, rewrite this
+		//for now use existing code
+		QuerySpec spec = new QuerySpec();
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.queryExp = hld.hldupdate.hld.originalQueryExp;
+		spec.evaluator.init(spec.queryExp);
+		return executeUpdate(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap);
 	}
 
 	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
@@ -185,6 +219,17 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		ZMemUpsert memUpsert = new ZMemUpsert(factorySvc, registry);
 		ZStuff stuff = findOrCreateStuff();
 		return memUpsert.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, noUpdateFlag, selector, this, stuff);
+	}
+
+	@Override
+	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
+		//TODO later when we make new HLDRowSelector, rewrite this
+		//for now use existing code
+		QuerySpec spec = new QuerySpec();
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.queryExp = hld.hldupdate.hld.originalQueryExp;
+		spec.evaluator.init(spec.queryExp);
+		return executeUpsert(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, noUpdateFlag);
 	}
 
 	@Override
@@ -219,10 +264,28 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		qresp.ok = true;
 		return qresp;
 	}
+	@Override
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
+		//TODO later when we make new HLDRowSelector, rewrite this
+		//for now use existing code
+		QuerySpec spec = new QuerySpec();
+		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
+		spec.queryExp = hld.hlddelete.hld.originalQueryExp;
+		spec.evaluator.init(spec.queryExp);
+		executeDelete(spec);
+	}
 
 	@Override
 	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
 		return this.doExecuteQuery(hls.querySpec, qtx);
+	}
+	@Override
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+		QueryResponse qresp = doExecuteQuery(hld.querySpec, qtx);
+		
+		MemFunctionHelper helper = new MemFunctionHelper(factorySvc, dbInterface, registry, createFetchRunner());
+		qresp = helper.executeHLDQuery(hld, qresp);
+		return qresp;
 	}
 
 	@Override
@@ -356,5 +419,4 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
 	}
-
 }

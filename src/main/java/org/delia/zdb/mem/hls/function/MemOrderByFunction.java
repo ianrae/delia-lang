@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
@@ -19,12 +20,16 @@ public class MemOrderByFunction extends MemFunctionBase {
 
 	@Override
 	public QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		String fieldName = hlspan.oloEl.orderBy;// .finalWhereSql getStringArg(qfe, ctx); //"wid";
+		boolean asc = hlspan.oloEl.isAsc; //isAsc(qfe, ctx);
+		return doProcess(fieldName, asc, qresp, ctx);
+	}
+	
+	private QueryResponse doProcess(String fieldName, boolean asc, QueryResponse qresp, QueryFuncContext ctx) {
 		List<DValue> dvalList = ctx.getDValList(); //use scope
 		if (dvalList == null || dvalList.size() <= 1) {
 			return qresp; //nothing to sort
 		}
-		
-		String fieldName = hlspan.oloEl.orderBy;// .finalWhereSql getStringArg(qfe, ctx); //"wid";
 		
 		TreeMap<Object,List<DValue>> map = new TreeMap<>();
 		List<DValue> nulllist = new ArrayList<>();
@@ -52,7 +57,6 @@ public class MemOrderByFunction extends MemFunctionBase {
 		}
 		
 		//add null values
-		boolean asc = hlspan.oloEl.isAsc; //isAsc(qfe, ctx);
 		if (asc) {
 			nulllist.addAll(newlist);
 			newlist = nulllist;
@@ -66,6 +70,19 @@ public class MemOrderByFunction extends MemFunctionBase {
 		
 		qresp.dvalList = newlist;
 		return qresp;
+	}
+	
+	@Override
+	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		String fieldName = hlspan.structField.fieldName;
+		boolean asc = true;
+		if (hlspan.filterFn.argL.size() > 1) {
+			String s = hlspan.filterFn.argL.get(1).asString();
+			if (s.toLowerCase().equals("desc")) {
+				asc = false;
+			}
+		}
+		return doProcess(fieldName, asc, qresp, ctx);
 	}
 
 }

@@ -13,7 +13,7 @@ public class Rel1NOtherWayFinalFieldTests extends NewHLSTestBase {
 		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[55].x";
 		
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkFullSql(hld, "SELECT t0.x FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
@@ -21,7 +21,7 @@ public class Rel1NOtherWayFinalFieldTests extends NewHLSTestBase {
 		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[55].addr";
 		
-		HLDQuery hld = buildFromSrc(src, 0); 
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkFullSql(hld, "SELECT t0.addr FROM Customer as t0 WHERE t0.cid=?", "55");
 	}
 	@Test
@@ -29,7 +29,7 @@ public class Rel1NOtherWayFinalFieldTests extends NewHLSTestBase {
 		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Address[100].cust";
 		
-		HLDQuery hld = buildFromSrc(src, 1); 
+		HLDQueryStatement hld = buildFromSrc(src, 1); 
 		chkFullSql(hld, "SELECT t1.addr FROM Address as t0 JOIN Customer as t1 ON t0.id=t1.addr WHERE t0.id=?", "100");
 	}
 	
@@ -39,7 +39,7 @@ public class Rel1NOtherWayFinalFieldTests extends NewHLSTestBase {
 		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[55].addr.y";
 		
-		HLDQuery hld = buildFromSrc(src, 1); 
+		HLDQueryStatement hld = buildFromSrc(src, 1); 
 		chkFullSql(hld, "SELECT t1.y FROM Customer as t0 JOIN Address as t1 ON t0.addr=t1.id WHERE t0.cid=?", "55");
 	}
 //	@Test

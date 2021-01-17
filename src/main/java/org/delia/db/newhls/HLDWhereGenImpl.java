@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.HLDWhereFragment;
 import org.delia.db.newhls.cud.HLDWhereGen;
@@ -14,15 +13,17 @@ import org.delia.type.DStructType;
 
 public class HLDWhereGenImpl implements HLDWhereGen {
 	
-	private HLDManager mgr;
+	private HLDEngine engine;
+	private HLDInnerManager mgr;
 
-	public HLDWhereGenImpl(HLDManager mgr) {
+	public HLDWhereGenImpl(HLDInnerManager mgr, HLDEngine engine) {
 		this.mgr = mgr;
+		this.engine = engine;
 	}
 
 	@Override
 	public List<SqlFragment> createWhere(QuerySpec spec, DStructType structType, SqlStatement statement, HLDAliasManager aliasMgr) {
-		HLDQuery hld = mgr.fullBuildQuery(spec.queryExp, aliasMgr);
+		HLDQuery hld = engine.buildQuery(spec.queryExp, aliasMgr);
 		
 		HLDSQLGenerator gen = mgr.createSQLGenerator();
 		int n1 = statement.paramL.size();

@@ -31,7 +31,7 @@ public class RelationManyRule extends RelationRuleBase {
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		DRelation drel = oper1.asRelation(dval);
 		if (drel == null) {
-			if (isMandatoryFK()) {
+			if (isMandatoryFK() && ! ctx.isSoftMandatoryRelationFlag()) {
 				String key = oper1.getSubject();
 				String msg = String.format("relation field '%s' many -  a foreign key value must be specified.", key);
 				addDetailedError(ctx, msg, getSubject(), dval.getType().getName());
@@ -151,7 +151,10 @@ public class RelationManyRule extends RelationRuleBase {
 		
 		DValue existing = dval.asStruct().getField(info.fieldName);
 		if (existing != null) {
-			return;
+			DRelation drel = existing.asRelation();
+			if (drel.haveFetched() && drel.getMultipleKeys().size() == drel.getFetchedItems().size()) {
+				return;
+			}
 		}
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
@@ -178,7 +181,11 @@ public class RelationManyRule extends RelationRuleBase {
 			//err
 		} else {
 			Map<String,DValue> map = dval.asMap();
-			map.put(relInfo.fieldName, builder.getDValue());
+			
+			DValue xx = map.get(relInfo.fieldName);
+			
+			DValue yy =  builder.getDValue();
+			map.put(relInfo.fieldName, yy);
 		}
 	}
 }

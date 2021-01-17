@@ -157,7 +157,7 @@ public class InsertTests extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 
@@ -179,7 +179,7 @@ public class InsertTests extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		DValue dval = qresp.getOne();
 		assertEquals(null, dval.asStruct().getField("field1"));

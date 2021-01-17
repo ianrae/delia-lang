@@ -19,6 +19,9 @@ import org.delia.db.QuerySpec;
 import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.hls.manager.HLSManagerResult;
+import org.delia.db.newhls.HLDManager;
+import org.delia.db.newhls.HLDQuery;
+import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
@@ -47,9 +50,11 @@ public class LetStatementRunner extends ServiceBase {
 	private RunnerImpl runner;
 	private HLSManager mgr;
 	private DatIdMap datIdMap;
+	private HLDManager hldManager;
+	private HLDQueryStatement mostRecentStatment;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLSManager mgr, RunnerImpl runner, DatIdMap datIdMap) {
+			FetchRunner fetchRunner, HLSManager mgr, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.runner = runner;
@@ -57,6 +62,7 @@ public class LetStatementRunner extends ServiceBase {
 		this.fetchRunner = fetchRunner;
 		this.zexec = zexec;
 		this.mgr = mgr;
+		this.hldManager = hldManager;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 		this.datIdMap = datIdMap;
 	}
@@ -140,9 +146,15 @@ public class LetStatementRunner extends ServiceBase {
 		QuerySpec spec = resolveFilterVars(queryExp);
 		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
-		boolean flag = mgr != null;
+		boolean flag1 = hldManager != null;
+		boolean flag2 = mgr != null;
 		QueryResponse qresp;
-		if (flag) {
+		if (flag1) {
+			spec.queryExp = queryExp;
+			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
+			mostRecentStatment = hldManager.getMostRecentLetStatement();
+			qresp = result.qresp;
+		} else if (flag2) {
 			spec.queryExp = queryExp;
 			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
 			qresp = result.qresp;
@@ -266,6 +278,13 @@ public class LetStatementRunner extends ServiceBase {
 		//validate (assume that we don't fully trust db storage - someone may have tampered with data)
 		if (qresp.ok && CollectionUtils.isNotEmpty(qresp.dvalList)) {
 			ValidationRunner ruleRunner = createValidationRunner();
+			if (mostRecentStatment != null) {
+				HLDQuery hld = mostRecentStatment.hldquery;
+				if (hld.fetchL.isEmpty()) {
+					ruleRunner.setSoftMandatoryRelationFlag(true);
+				}
+			}
+			
 			if (! ruleRunner.validateDVals(qresp.dvalList)) {
 				ruleRunner.propogateErrors(res);
 			}
@@ -323,10 +342,22 @@ public class LetStatementRunner extends ServiceBase {
 					
 					queryExp.typeName = first.getType().getName();
 					//TODO add code to handle var refs deeper in statement. ex: let x = y.orderBy(z)
+					
+					if (!queryExp.qfelist.isEmpty()) {
+						String fieldName = queryExp.qfelist.get(0).funcName; //TODO support more fields or funcs later
+						DValue inner = first.asStruct().getField(fieldName);
+						//if scalar then just return
+						if (inner != null && inner.getType().isScalarShape()) {
+							varRef.qresp = null;
+							varRef.dval = inner;
+							return varRef;
+						}
+					}
+					
 				}
 				
 				
-				QueryResponse qresp2 = executeDBQuery(queryExp, qresp);
+				QueryResponse qresp2 = qresp; //TODO: why did we call db here? executeDBQuery(queryExp, qresp);
 				//TODO: propogate errors from qresp2.err
 				if (qresp2.ok) {
 					if (qresp2.dvalList == null) {

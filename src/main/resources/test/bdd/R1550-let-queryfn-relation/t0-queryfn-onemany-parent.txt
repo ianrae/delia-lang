@@ -3,8 +3,8 @@
 FEATURE: one-to-many parent
 background:
  configure loadFKs = true
- type Customer struct {id int unique, relation addr Address many optional  } end
- type Address struct {id int unique, relation cust Customer  one } end
+ type Customer struct {id int primaryKey, relation addr Address many optional  } end
+ type Address struct {id int primaryKey, relation cust Customer  one } end
  
 thenType: struct
 

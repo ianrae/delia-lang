@@ -8,7 +8,7 @@ thenType: struct
 ---
 title: int-primary-key
 given:
-  type Flight struct {field1 int unique } end
+  type Flight struct {field1 int primaryKey } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55]
@@ -20,7 +20,7 @@ value:a:Flight {
 ---
 SKIP:fix let statement where type (Flight) is specified
 given:
-  type Flight struct {field1 int unique } end
+  type Flight struct {field1 int primaryKey } end
   insert Flight {field1: 55 }
 when:
   let x Flight = Flight[55]
@@ -42,7 +42,7 @@ when:
 ---
 title: all-types-1
 given:
-  type Flight struct {field1 int unique, sfield string, lfield long, nfield number } end
+  type Flight struct {field1 int primaryKey, sfield string, lfield long, nfield number } end
   insert Flight {field1: 55, sfield: 'abc', lfield: 444, nfield: -56.3 }
 when:
   let x = Flight[55]
@@ -56,7 +56,7 @@ value:a:Flight {
 ---
 title: all-types-2
 given:
-  type Flight struct {field1 int unique, bfield boolean, dtfield date } end
+  type Flight struct {field1 int primaryKey, bfield boolean, dtfield date } end
   insert Flight {field1: 55, bfield: true, dtfield: '1990' }
 when:
   let x = Flight[55]

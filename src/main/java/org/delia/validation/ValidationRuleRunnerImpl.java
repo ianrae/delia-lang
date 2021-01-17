@@ -23,6 +23,7 @@ import org.delia.type.DValue;
 import org.delia.type.DValueInternal;
 import org.delia.type.TypePair;
 import org.delia.type.ValidationState;
+import org.delia.util.DValueHelper;
 
 public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationRunner {
 
@@ -31,8 +32,11 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private DBCapabilties dbCapabilties;
 		boolean populateFKsFlag;
 		private boolean insertFlag;
+		private boolean upsertFlag;
 		private FetchRunner fetchRunner;
 		private DValueCompareService compareSvc;
+		private DValue upsertPKVal;
+		private boolean softMandatoryRelationFlag;
 
 		public ValidationRuleRunnerImpl(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
 			super(factorySvc);
@@ -146,17 +150,20 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private void validateStruct(DValue dval, List<DRule> ruleL, boolean validateFieldsOnly) {
 			//first, validated each member dval
 			DStructType dtype = (DStructType) dval.getType();
+			TypePair pkpair = (upsertFlag) ? DValueHelper.findPrimaryKeyFieldPair(dtype) : null;
 			int failCount = 0;
 			for(TypePair pair: dtype.getAllFields()) {
 				DValue inner = dval.asStruct().getField(pair.name);
 				if (inner == null) {
 					//on update validateFieldsOnly is true and not all fields are present
 					boolean skip = false;
-					if (dtype.fieldIsSerial(pair.name) && insertFlag) {
+					if (upsertFlag && pair.name.equals(pkpair.name)) {
+						skip = true;
+					} else if (dtype.fieldIsSerial(pair.name) && insertFlag) {
 						skip = true;
 					}
 					
-					if (!validateFieldsOnly && !skip) {
+					if (!validateFieldsOnly && !skip && !softMandatoryRelationFlag) {
 						MandatoryRule mandatoryRule = new MandatoryRule(new AlwaysRuleGuard(), pair.name);
 						if (!execRule(mandatoryRule, dval)) {
 							failCount++;
@@ -204,7 +211,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 			
 			ErrorTracker tmpET = new SimpleErrorTracker(log);
 			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, 
-					fetchRunner, compareSvc, insertFlag); 
+					fetchRunner, compareSvc, insertFlag, upsertFlag, upsertPKVal, softMandatoryRelationFlag); 
 			boolean b = rule.validate(dval, ctx);
 			if (!b) {
 				localET.getErrors().addAll(ctx.getErrors());
@@ -286,5 +293,19 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		@Override
 		public void enableInsertFlag(boolean b) {
 			this.insertFlag = b;
+		}
+		@Override
+		public void enableUpsertFlag(boolean b) {
+			this.upsertFlag = b;
+		}
+
+		@Override
+		public void setUpsertPKVal(DValue keyval) {
+			this.upsertPKVal = keyval;
+		}
+
+		@Override
+		public void setSoftMandatoryRelationFlag(boolean b) {
+			this.softMandatoryRelationFlag = b;
 		}
 	}

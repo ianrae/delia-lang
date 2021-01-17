@@ -24,7 +24,7 @@ public class InsertInheritanceTests extends ScopeTestBase {
 		execInsertStatement(src);
 		
 		//now query it
-		src = String.format("let a = Employee");
+		src = String.format("let a = Employee[true]");
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		DValue dval = qresp.getOne();
 		assertEquals(10, dval.asStruct().getField("f1").asInt());
@@ -48,7 +48,7 @@ public class InsertInheritanceTests extends ScopeTestBase {
 		execInsertStatement(src);
 		
 		//now query it
-		src = String.format("let a = User");
+		src = String.format("let a = User[true]");
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		dval = qresp.getOne();
 		assertEquals(10, dval.asStruct().getField("f1").asInt());
@@ -68,7 +68,7 @@ public class InsertInheritanceTests extends ScopeTestBase {
 		execInsertStatement(src);
 		
 		//now query it
-		src = String.format("let a = User");
+		src = String.format("let a = User[true]");
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		dval = qresp.getOne();
 		assertEquals(10, dval.asStruct().getField("f1").asInt());
@@ -87,7 +87,7 @@ public class InsertInheritanceTests extends ScopeTestBase {
 		execInsertStatement(src);
 		
 		//now query it
-		src = String.format("let a = User");
+		src = String.format("let a = User[true]");
 		QueryResponse qresp = execLetStatementMulti(src, 1);
 		dval = qresp.getOne();
 		assertEquals(10, dval.asStruct().getField("f1").asInt());
@@ -101,47 +101,6 @@ public class InsertInheritanceTests extends ScopeTestBase {
 		runner = initRunner();
 	}
 
-	private void createFlightType(String type, String modifier) {
-		String src = String.format("type Flight struct {field1 %s %s} end", type, modifier);
-		this.execTypeStatement(src);
-	}
-	private DValue insertAndQueryEx(String valStr, boolean expectNull, int expectedSize) {
-		QueryResponse qresp= insertAndQuery(valStr, expectedSize);
-		return getLastOne("field1", qresp, expectNull, expectedSize);
-	}
-	private QueryResponse insertAndQuery(String valStr, int expectedSize) {
-		String src = String.format("insert Flight {field1:%s}", valStr);
-		execInsertStatement(src);
-
-		//now query it
-		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
-		return execLetStatementMulti(src, expectedSize);
-	}
-
-	private DValue createAndInsert(String type, boolean isOptional, String valStr) {
-		createFlightType(type, isOptional ? "optional" : "");
-		DValue dval = insertAndQueryEx(valStr, false, 1);
-		return dval;
-	}
-	private DValue createAndInsertNull(String type, boolean isOptional, String valStr) {
-		createFlightType(type, isOptional ? "optional" : "");
-		DValue dval = insertAndQueryEx(valStr, true, 1);
-		return dval;
-	}
-	private void testNullImplicit(String type) {
-		createFlightType(type, "optional");
-
-		String src = String.format("insert Flight {}"); //no value passed
-		execInsertStatement(src);
-
-		//now query it
-		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
-		QueryResponse qresp = execLetStatementMulti(src, 1);
-		DValue dval = qresp.getOne();
-		assertEquals(null, dval.asStruct().getField("field1"));
-	}
 	private void createSomeType(String type, String baseType, String field1) {
 		String src = String.format("type %s %s {%s} end", type, baseType, field1);
 		this.execTypeStatement(src);

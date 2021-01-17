@@ -1,6 +1,9 @@
 package org.delia.bdd;
 
+import org.delia.api.DeliaImpl;
+import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTesterEx;
+import org.delia.log.LogLevel;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
@@ -118,12 +121,12 @@ public class AllBDDTests extends BDDBase {
 
 	@Test
 	public void testR1000() {
-		runR1000File("t0-upsert.txt", 5);
+		runR1000File("t0-upsert.txt", 4);
 		runR1000File("t0-upsert-no-update.txt", 2);
 		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
 		runR1000File("t0-upsert-mm-all.txt", 1);
-		runR1000File("t0-upsert-mm-other.txt", 1);
+		runR1000File("t0-upsert-mm-other.txt", 2); 
 		runR1000File("t0-upsert-unique.txt", 4);
 	}
 	
@@ -326,11 +329,13 @@ public class AllBDDTests extends BDDBase {
 //		testIndexToRun = 3;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-		
-//		runR1000File("t0-upsert-unique.txt", 4);
-//		runR1000File("t0-upsert.txt", 4);
-		runR900File("t0-update-mm-all.txt", 4);
+//		runR1500File("t0-queryfn-distinct.txt", 3);
+//		runR1550File("t0-queryfn-oneone-childa.txt", 7);
+//		runR500File("t0-relation-one-to-one.txt", 9);
+//		runR900File("t0-update-mm-all.txt", 4);
+		runR2000File("t0-sprig.txt", 3);
 	}
 	
 	//---
@@ -339,6 +344,7 @@ public class AllBDDTests extends BDDBase {
 	@Before
 	public void init() {
 //		DeliaFactory.useHLSMEM = true;
+		DeliaImpl.useNewHLD = true;
 	}
 	@After
 	public void shutdown() {

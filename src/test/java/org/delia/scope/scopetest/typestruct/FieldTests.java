@@ -201,7 +201,7 @@ public class FieldTests extends ScopeTestBase {
 		execInsertStatement(src);
 		
 		//now query it
-		src = String.format("let a = Flight");
+		src = String.format("let a = Flight[true]");
 		return execLetStatementOne(src, "Flight");
 	}
 

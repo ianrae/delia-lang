@@ -20,6 +20,11 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
 import org.delia.db.hls.ResultTypeInfo;
+import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
+import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.newhls.cud.HLDUpdateStatement;
+import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
@@ -108,25 +113,35 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	public DValue rawInsert(DValue dval, InsertContext ctx) {
 		failIfNotInit1();
 		ZTableCreator partialTableCreator = createPartialTableCreator();
+		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, partialTableCreator, cacheData, this);
 
 		if (ctx.extractGeneratedKeys) {
-			return doInsert(dval, ctx, partialTableCreator);
+			return doInsert(stgroup, ctx);
 		} else {
-			doInsert(dval, ctx, partialTableCreator);
+			doInsert(stgroup, ctx);
+			return null;
+		}
+	}
+	@Override
+	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
+		failIfNotInit1();
+
+		if (ctx.extractGeneratedKeys) {
+			return doInsert(stmgrp, ctx);
+		} else {
+			doInsert(stmgrp, ctx);
 			return null;
 		}
 	}
 
-	private DValue doInsert(DValue dval, InsertContext ctx, ZTableCreator tmpTableCreator) {
-		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tmpTableCreator, cacheData, this);
-
-		logStatementGroup(stgroup);
+	private DValue doInsert(SqlStatementGroup stmgroup, InsertContext ctx) {
+		logStatementGroup(stmgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;
 		ZDBExecuteContext dbctxMain = null; //can only be one statement that generates keys
 		try {
 			ZDBExecuteContext dbctx = createContext();
-			for(SqlStatement statement: stgroup.statementL) {
+			for(SqlStatement statement: stmgroup.statementL) {
 				int n = conn.executeCommandStatementGenKey(statement, keyType, dbctx);
 				nTotal += n;
 				dbctxMain = dbctx;
@@ -216,11 +231,12 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	@Override
 	public DValue executeInsert(DValue dval, InsertContext ctx) {
 		failIfNotInit2(); 
+		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator, cacheData, this);
 
 		if (ctx.extractGeneratedKeys) {
-			return doInsert(dval, ctx, tableCreator);
+			return doInsert(stgroup, ctx);
 		} else {
-			doInsert(dval, ctx, tableCreator);
+			doInsert(stgroup, ctx);
 			return null;
 		}
 	}
@@ -246,6 +262,12 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 			convertAndRethrow(e);
 		}
 		return updateCount;
+	}
+
+	@Override
+	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	@Override
@@ -277,6 +299,12 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
+	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
 	public void executeDelete(QuerySpec spec) {
 		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
 		if (stgroup.statementL.isEmpty()) {
@@ -292,6 +320,10 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		} catch (DBValidationException e) {
 			convertAndRethrow(e);
 		}
+	}
+	@Override
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
+		//TODO
 	}
 
 	@Override
@@ -323,6 +355,12 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 			qresp.ok = true;
 		}
 		return qresp;
+	}
+
+	@Override
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

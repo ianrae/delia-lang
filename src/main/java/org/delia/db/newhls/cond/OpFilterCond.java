@@ -12,6 +12,7 @@ public class OpFilterCond implements FilterCond {
 	public FilterVal val1;
 	public FilterOp op;
 	public FilterVal val2;
+	public CustomFilterValueRenderer customRenderer; //higher-level. renders entire a op b
 
 	@Override
 	public String toString() {

@@ -10,6 +10,10 @@ public class DStructHelper {
 	public DStructHelper(DValue dval) {
 		this.dval = dval;
 	}
+	
+	public DStructType getType() {
+		return (DStructType) dval.getType();
+	}
 
 	//names are not ordered by declaration order (use DStructType.orderedList for that)
 	public Set<String> getFieldNames() {
@@ -17,6 +21,10 @@ public class DStructHelper {
 		return map.keySet();
 	}
 	
+	public boolean hasField(String fieldName) {
+		Map<String, DValue> map = dval.asMap();
+		return map.containsKey(fieldName);
+	}
 	public DValue getField(String fieldName) {
 		Map<String, DValue> map = dval.asMap();
 		return map.get(fieldName);

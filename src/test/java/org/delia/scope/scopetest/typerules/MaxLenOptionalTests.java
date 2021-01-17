@@ -134,7 +134,7 @@ public class MaxLenOptionalTests extends ScopeTestBase {
 		return qresp.getOne();
 	}
 	private void updateAndQueryFail(String valStr, int expectedErrorCount, String errId) {
-		String src = String.format("update Actor {firstName:%s}", valStr);
+		String src = String.format("update Actor[true] {firstName:%s}", valStr);
 		execUpdateFail(src, expectedErrorCount, errId);
 	}
 	

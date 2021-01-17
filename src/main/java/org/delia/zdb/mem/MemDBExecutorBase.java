@@ -92,9 +92,9 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 
 			//add fks if needed
 			if (qtx.loadFKs) {
-				for(DValue dval: dvalList) {
-					addAnyFKs(dval);
-				}
+//				for(DValue dval: dvalList) {
+//					addAnyFKs(dval);
+//				}
 			} else if (qtx.pruneParentRelationFlag) {
 				dvalList = removeParentSideRelations(dvalList);
 			}
@@ -256,4 +256,8 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 		return stuff;
 	}
 
+	public MemDBTable getTbl(String typeName) {
+		MemDBTable tbl = tableMap.get(typeName);
+		return tbl;
+	}
 }

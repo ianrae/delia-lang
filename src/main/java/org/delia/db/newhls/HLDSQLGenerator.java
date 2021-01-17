@@ -8,17 +8,12 @@ import java.util.stream.Collectors;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
-import org.delia.db.newhls.cond.FilterVal;
-import org.delia.db.newhls.cond.OpFilterCond;
-import org.delia.db.newhls.cond.SingleFilterCond;
-import org.delia.db.newhls.cond.SymbolChain;
-import org.delia.db.newhls.cud.HLDDelete;
+import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
@@ -32,12 +27,14 @@ public class HLDSQLGenerator {
 	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
 	private SqlColumnBuilder columnBuilder;
+	private SQLWhereGenerator sqlWhereGen;
 
 	public HLDSQLGenerator(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
 		this.columnBuilder = new SqlColumnBuilder(datIdMap);
+		this.sqlWhereGen = new SQLWhereGenerator(registry, factorySvc);
 	}
 
 	
@@ -50,9 +47,7 @@ public class HLDSQLGenerator {
 		return stm.sql;
 	}
 	public String generateSqlWhere(HLDQuery hld, SqlStatement stm) {
-		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
-		String sql = generateWhereClause(hld, stm, paramGen);
-		return " " + sql;
+		return sqlWhereGen.generateSqlWhere(hld, stm);
 	}
 	
 	private SqlStatement doGenerateSql(HLDQuery hld, SqlParamGenerator paramGen) {
@@ -180,79 +175,21 @@ public class HLDSQLGenerator {
 
 	private void generateWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		String fragment = generateWhereClause(hld, stm, paramGen);
-		sc.o(" WHERE %s", fragment);
+		if (fragment != null) {
+			sc.o(" WHERE %s", fragment);
+		}
 	}
 	private String generateWhereClause(HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		FilterCond filter = hld.filter;
-		String fragment = null;
-		if (filter instanceof SingleFilterCond) {
-			SingleFilterCond sfc = (SingleFilterCond) filter;
-			String alias = sfc.val1.alias;
-			String fieldName = sfc.val1.structField.fieldName;
-			String valsql = renderValParam(sfc, paramGen, stm);
-			fragment = String.format("%s.%s=%s", alias, fieldName, valsql);
-		} else if (filter instanceof OpFilterCond) {
-			OpFilterCond ofc = (OpFilterCond) filter;
-			String s1 = renderVal(ofc.val1, paramGen, stm);
-			String s2 = renderVal(ofc.val2, paramGen, stm);
-			String not = ofc.isNot ? "NOT " : "";
-			fragment = String.format("%s%s %s %s", not, s1, ofc.op.op, s2);
-		}
+		String fragment = sqlWhereGen.doFilter(filter, paramGen, stm);
 		return fragment;
 	}
 
-	private String renderValParam(SingleFilterCond sfc, SqlParamGenerator paramGen, SqlStatement stm) {
-		if (paramGen == null) {
-			return sfc.renderSql();
-		} else {
-			DValue dval = paramGen.convert(sfc.val1);
-			stm.paramL.add(dval);
-			return "?";
-		}
-	}
-	private String renderVal(FilterVal val1, SqlParamGenerator paramGen, SqlStatement stm) {
-		boolean notParam = val1.isFn() || val1.isSymbol() || val1.isSymbolChain();
-		if (paramGen == null || notParam) {
-			return doRenderVal(val1);
-		} else {
-			DValue dval = paramGen.convert(val1);
-			stm.paramL.add(dval);
-			return "?";
-		}
-	}
-
-	private String doRenderVal(FilterVal val1) {
-		switch(val1.valType) {
-		case BOOLEAN:
-		case INT:
-		case LONG:
-		case NUMBER:
-			return val1.exp.strValue();
-		case STRING:
-			return String.format("'%s'", val1.exp.strValue());
-		case SYMBOL:
-			return String.format("%s.%s", val1.alias, val1.structField.fieldName);
-		case SYMBOLCHAIN:
-		{
-			SymbolChain chain = val1.asSymbolChain();
-			if (chain.el != null && chain.el.aliasNameAdditional != null) {
-				return String.format("%s.%s", chain.el.aliasNameAdditional, chain.list.get(0)); //TODO: later support list > 1
-			} else {
-				return String.format("%s.%s", val1.alias, chain.list.get(0)); //TODO: later support list > 1
-			}
-		}
-		case FUNCTION:
-		default:
-			throw new HLDException("renderVal not impl1");
-		}
-	}
-
-
-	public SqlStatement generateSqlStatement(HLDDelete hlddel) {
+	public SqlStatement generateSqlStatement(HLDDeleteStatement hlddel) {
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE FROM ");
 		
-		HLDQuery hld = hlddel.hld;
+		HLDQuery hld = hlddel.hlddelete.hld;
 		sc.o("%s as %s", hld.fromType.getName(), hld.fromAlias);
 		
 		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 

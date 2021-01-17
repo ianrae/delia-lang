@@ -5,6 +5,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
+import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.newhls.StructField;
 import org.delia.db.newhls.ValType;
@@ -20,6 +21,7 @@ public class FilterVal {
 	public Exp exp;
 	public FilterFunc filterFn; //normally null
 	public SymbolChain symchain; //normally null
+	public CustomFilterValueRenderer customRenderer; //lower-level. renders single value
 	
 	//resolved later
 	public StructField structField; //only set if SYMBOL or if SingleFilterCond
@@ -50,6 +52,7 @@ public class FilterVal {
 		return exp.strValue(); //return any valtype as strings
 	}
 	public String asSymbol() {
+		if (exp instanceof StringExp) return ((StringExp) exp).strValue();
 		XNAFSingleExp nafexp = (XNAFSingleExp) exp;
 		return nafexp.funcName;
 	}
@@ -60,6 +63,9 @@ public class FilterVal {
 		return filterFn; 
 	}
 
+	public boolean isBoolean() {
+		return valType.equals(ValType.BOOLEAN);
+	}
 	public boolean isSymbol() {
 		return valType.equals(ValType.SYMBOL);
 	}

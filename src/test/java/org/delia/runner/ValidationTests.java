@@ -121,7 +121,7 @@ public class ValidationTests extends RunnerTestBase {
 		chkResOK(res);
 		
 		//now query it
-		src = "let a = Customer";
+		src = "let a = Customer[true]";
 		res = runner.beginOrContinue(src, true);
 		assertEquals(true, res.ok);
 		QueryResponse qresp = chkResQuery(res, "Customer");

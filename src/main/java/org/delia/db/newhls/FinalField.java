@@ -8,4 +8,8 @@ public class FinalField {
 	public String toString() {
 		return structField.toString();
 	}
+	
+	public boolean isScalarField()  {
+		return !structField.fieldType.isStructShape();
+	}
 }

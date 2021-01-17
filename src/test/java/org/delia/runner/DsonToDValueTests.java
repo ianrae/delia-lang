@@ -86,7 +86,7 @@ public class DsonToDValueTests {
 		assertEquals(true, dval.getType().isStructShape());
 		assertEquals("Employee", dval.getType().getName());
 		
-		src = "update Employee {firstName:'bobby', dept:44 }";
+		src = "update Employee[44] {firstName:'bobby', dept:44 }";
 		UpdateStatementExp uexp = chelper.chkUpdate(src, null);
 		
 		DValue dvalPartial = converter.convertOnePartial("Employee", uexp.dsonExp);
@@ -113,7 +113,7 @@ public class DsonToDValueTests {
 		assertEquals(true, dval.getType().isStructShape());
 		assertEquals("Employee", dval.getType().getName());
 		
-		src = "update Employee {firstName:'bobby', dept:44 }";
+		src = "update Employee[44] {firstName:'bobby', dept:44 }";
 		UpdateStatementExp uexp = chelper.chkUpdate(src, null);
 		
 		DValue dvalPartial = converter.convertOnePartial("Employee", uexp.dsonExp);

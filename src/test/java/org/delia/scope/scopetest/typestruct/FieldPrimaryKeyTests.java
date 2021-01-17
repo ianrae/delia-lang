@@ -177,7 +177,7 @@ public class FieldPrimaryKeyTests extends ScopeTestBase {
 		
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 	private ResultValue insertFail(String valStr, int expectedErrorCount, String errId) {
@@ -185,13 +185,6 @@ public class FieldPrimaryKeyTests extends ScopeTestBase {
 		return execInsertFail(src, expectedErrorCount, errId);
 	}
 
-	private DValue createAndInsertFail(String type, String valStr) {
-		createFlightType(type);
-		baseBeginSession(false);
-
-		DValue dval = insertAndQueryEx(valStr, false, 1);
-		return dval;
-	}
 	private DValue createAndInsert(String type, String valStr) {
 		createFlightType(type);
 		baseBeginSession();

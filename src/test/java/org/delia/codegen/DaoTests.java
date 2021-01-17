@@ -162,6 +162,7 @@ public class DaoTests extends DaoTestBase {
 	}
 
 	protected String buildSrc() {
+		//one-sided relation
 		String src = "type Wing struct {id int primaryKey serial, width int } end";
 		src += "\n type Flight struct {field1 int primaryKey, field2 int, dd date optional, relation wing Wing one optional } end";
 		src += "\n insert Flight {field1: 1, field2: 10}";

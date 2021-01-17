@@ -3,8 +3,8 @@ package org.delia.db.newhls.cond;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.db.newhls.ValType;
 
-public class IntFilterCond extends SingleFilterCond  {
-	public IntFilterCond(IntegerExp exp) {
+public class IntegerFilterCond extends SingleFilterCond  {
+	public IntegerFilterCond(IntegerExp exp) {
 		this.val1 = new FilterVal(ValType.INT, exp);
 	}
 	public int asInt() {

@@ -3,7 +3,7 @@
 
 FEATURE: sql-injection TODO: use prepared statements
 background:
-  type Flight struct {id string unique, wid string optional , z int optional}  end
+  type Flight struct {id string primaryKey, wid string optional , z int optional}  end
 thenType: struct
 
 ---

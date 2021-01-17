@@ -8,8 +8,8 @@ thenType: struct
 ---
 title: multiple
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
   insert Customer {id: 56 }
@@ -22,8 +22,8 @@ value:a:int:56
 ---
 title: orderBy with relations (that will be null since no fk())
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Address {id: 100}
   insert Customer {id: 55, addr: 100}
@@ -43,8 +43,8 @@ vaddr:null
 ---
 title: limit with relations (that will be null since no fk())
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Address {id: 100}
   insert Customer {id: 55, addr: 100}
@@ -64,8 +64,8 @@ vaddr:null
 ---
 title: multiple missing
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
   insert Customer {id: 56 }
@@ -77,8 +77,8 @@ null
 ---
 title: multiple bad ref
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
   insert Customer {id: 56 }

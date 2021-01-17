@@ -134,7 +134,7 @@ public class DeleteTests extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		return execLetStatementMulti(src, expectedSize, null);
 	}
 
@@ -151,7 +151,7 @@ public class DeleteTests extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = Flight", varName);
+		src = String.format("let %s = Flight[true]", varName);
 		QueryResponse qresp = execLetStatementMulti(src, expectedSize, null);
 		if (expectedSize == 0) {
 			return null;

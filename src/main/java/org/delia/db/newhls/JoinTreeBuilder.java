@@ -146,12 +146,9 @@ public class JoinTreeBuilder {
 		String target = el.toString();
 		Optional<JoinElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
 		if (optExisting.isPresent()) {
-//			if (el.usedForFK()) {
-//				optExisting.get().usedForFK = true; //propogate
-//			}
-//			if (el.usedForFetch) {
-//				optExisting.get().usedForFetch = true; //propogate
-//			}
+			if (el.usedForFetch() && optExisting.get().usedForFK()) {
+				optExisting.get().fetchSpec.isFK = false; //upgrade from fk to fetch
+			}
 			return optExisting.get();
 		}
 

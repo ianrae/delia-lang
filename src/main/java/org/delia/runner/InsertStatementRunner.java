@@ -9,9 +9,11 @@ import org.delia.core.DiagnosticService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
-import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
+import org.delia.db.newhls.HLDManager;
+import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.sprig.SprigService;
@@ -34,6 +36,7 @@ public class InsertStatementRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ZDBInterfaceFactory dbInterface;
 	private Runner runner;
+	private DValueIterator insertPrebuiltValueIterator;
 
 	public InsertStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, Runner runner, 
 			DTypeRegistry registry, Map<String,ResultValue> varMap) {
@@ -48,18 +51,31 @@ public class InsertStatementRunner extends ServiceBase {
 		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
-	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, ZDBExecutor dbexecutor, FetchRunner fetchRunner, 
-			DValueIterator insertPrebuiltValueIterator, SprigService sprigSvc) {
+	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDManager hldManager, ZDBExecutor dbexecutor, FetchRunner fetchRunner, 
+			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
 
+		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 		DType dtype = registry.getType(exp.getTypeName());
 		if (failIfNull(dtype, exp.typeName, res)) {
 			return;
 		} else if (failIfNotStruct(dtype, exp.typeName, res)) {
 			return;
 		}
+		
+		ConversionResult cres = null;
+		HLDInsertStatement hldins = null;
+		SqlStatementGroup stmgrp = null;
+		if (hldManager != null) {
+			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
+			hldins = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			stmgrp = hldManager.generateSQL(hldins, dbexecutor);
+			cres = hldins.hldinsert.cres;
+		} else {
+			cres = buildValue((DStructType) dtype, exp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		}
+		
 
 		//execute db insert
-		ConversionResult cres = buildValue((DStructType) dtype, exp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		if (cres.dval == null) {
 			res.errors.addAll(cres.localET.getErrors());
 			res.ok = false;
@@ -94,14 +110,14 @@ public class InsertStatementRunner extends ServiceBase {
 			if (hasSerialId) {
 				ctx.extractGeneratedKeys = true;
 				ctx.genKeytype = DValueHelper.findPrimaryKeyFieldPair(cres.dval.getType()).type;
-				DValue generatedId = dbexecutor.executeInsert(cres.dval, ctx);
+				DValue generatedId = doDBInsert(hldins, stmgrp, cres, ctx, dbexecutor); 
 				assignSerialVar(generatedId);
 				boolean sprigFlag = sprigSvc.haveEnabledFor(typeName);
 				if (sprigFlag) {
 					sprigSvc.rememberSynthId(typeName, cres.dval, generatedId, cres.extraMap);
 				}
 			} else {
-				dbexecutor.executeInsert(cres.dval, ctx);
+				doDBInsert(hldins, stmgrp, cres, ctx, dbexecutor);
 			}
 
 		} catch (DBException e) {
@@ -125,6 +141,15 @@ public class InsertStatementRunner extends ServiceBase {
 		res.shape = null;
 		res.val = null;
 	}
+	private DValue doDBInsert(HLDInsertStatement hldins, SqlStatementGroup stmgrp, ConversionResult cres,
+			InsertContext ctx, ZDBExecutor dbexecutor) {
+		if (hldins != null) {
+			return dbexecutor.executeInsert(hldins, stmgrp, ctx);
+		} else {
+			return dbexecutor.executeInsert(cres.dval, ctx);
+		}
+	}
+
 	private boolean failIfNotStruct(DType dtype, String typeName, ResultValue res) {
 		if (! dtype.isStructShape()) {
 			addError(res, "type.not.struct", String.format("cannot insert a scalar type '%s'", typeName));

@@ -165,7 +165,7 @@ public class NorthwindTests extends DaoTestBase {
 		assertEquals("Beverages", dval.asStruct().getField("categoryName").asString());
 	}
 	
-	@Test
+//too slow. manually run it if you want	@Test
 	public void test3() {
 		String src = buildSrc2();
 		DeliaGenericDao dao = createDao(); 

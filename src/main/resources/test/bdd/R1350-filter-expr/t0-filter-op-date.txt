@@ -2,7 +2,7 @@
 
 FEATURE: filter-expr op date
 background:
-  type Flight struct {id int unique, wid date optional }  end
+  type Flight struct {id int primaryKey, wid date optional }  end
 thenType: struct
 
 ---

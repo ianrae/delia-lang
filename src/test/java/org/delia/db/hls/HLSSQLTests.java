@@ -15,7 +15,7 @@ import org.junit.Test;
  */
 public class HLSSQLTests extends HLSTestBase {
 
-	@Test
+//dead code	@Test
 	public void testOneSpanNoSubSQL() {
 		sqlchkP("let x = Flight[55]", 			"SELECT * FROM Flight as a WHERE a.field1 = ?", "55");
 		sqlchkP("let x = Flight[55].count()", 	"SELECT COUNT(*) FROM Flight as a WHERE a.field1 = ?", "55");

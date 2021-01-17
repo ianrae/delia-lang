@@ -3,11 +3,6 @@ package org.delia.db.memdb.filter;
 import java.time.ZonedDateTime;
 
 import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.IntegerExp;
-import org.delia.compiler.ast.LongExp;
-import org.delia.compiler.ast.NumberExp;
-import org.delia.compiler.ast.StringExp;
-import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.dval.DValueConverterService;
 import org.delia.type.DRelation;
@@ -38,6 +33,12 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 					return true;
 				}
 			}
+			return false;
+		}
+		
+		//we are checking if dval.fieldName (a relation) has an FK equal to rightVal
+		//However, the relation may be empty (if relation is optinal).
+		if (drel1.getMultipleKeys().size() == 0) {
 			return false;
 		}
 		DValue keyVal = drel1.getForeignKey();

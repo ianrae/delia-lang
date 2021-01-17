@@ -10,8 +10,8 @@ thenType: struct
 ---
 title: normal
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -26,8 +26,8 @@ value:a:Customer {
 ---
 title: normal2
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -43,8 +43,8 @@ value:a:Customer {
 ---
 title: normal3
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -62,8 +62,8 @@ value:a:Customer {
 title: optional-missing
 given:
  //note forward-ref
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -78,8 +78,8 @@ value:a:Customer {
 ---
 title: bad-ref
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer optional one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
@@ -93,8 +93,8 @@ ERROR: rule-relationOne
 ---
 title: child-mandatory-normal
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer one } end
 
   insert Customer {id: 55 }
 when:
@@ -111,8 +111,8 @@ value:a:Customer {
 title: child-mandatory-optional-missing
 given:
  //note forward-ref
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer one } end
 
   insert Customer {id: 55 }
 when:
@@ -124,8 +124,8 @@ ERROR: rule-relationOne
 ---
 title: bad-ref
 given:
- type Customer struct {id int unique, relation addr Address optional many } end
- type Address struct {id int unique, relation cust Customer one } end
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer one } end
 
   insert Customer {id: 55 }
 when:
@@ -138,8 +138,8 @@ ERROR: rule-relationOne
 ---
 title: mandatory-normal-other-way
 given:
- type Customer struct {id int unique, relation addr Address one } end
- type Address struct {id int unique, relation cust Customer optional many } end
+ type Customer struct {id int primaryKey, relation addr Address one } end
+ type Address struct {id int primaryKey, relation cust Customer optional many } end
 
   insert Address {id: 100 }
 when:

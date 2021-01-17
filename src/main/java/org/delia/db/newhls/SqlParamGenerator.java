@@ -27,6 +27,7 @@ public class SqlParamGenerator {
 			//TODO: implement date!!
 		case FUNCTION:
 		case SYMBOL:
+		case NULL:
 		case SYMBOLCHAIN:
 			default:
 				return null;

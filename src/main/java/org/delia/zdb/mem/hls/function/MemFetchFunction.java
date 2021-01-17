@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
@@ -26,6 +27,10 @@ public class MemFetchFunction extends MemFunctionBase {
 	@Override
 	public QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
 		String targetFieldName = (doRFetch) ? hlspan.rEl.rfieldPair.name : hlspan.subEl.fetchL.get(0); //getStringArg(qfe, ctx);
+		return doProcess(targetFieldName, qresp, ctx);
+	}
+	
+	private QueryResponse doProcess(String targetFieldName, QueryResponse qresp, QueryFuncContext ctx) {
 		//TODO support multiple fetch('aaa','bbbb')
 
 		//find type of targetFieldName. Address
@@ -66,6 +71,11 @@ public class MemFetchFunction extends MemFunctionBase {
 		return qresp;
 	}
 	
+	@Override
+	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
+		String targetFieldName = hlspan.structField.fieldName; //.filterFn.argL.get(0).asString();
+		return doProcess(targetFieldName, qresp, ctx);
+	}
 	
 
 }

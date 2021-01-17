@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class BDDTests extends BDDTestBase {
 
-	//let x = Actor  //no filter
+	//let x = Actor[true]  
 	@Test
 	public void testEmptyFilter()  {
 		qhelper.chkQueryAll(TYPE0, 0);

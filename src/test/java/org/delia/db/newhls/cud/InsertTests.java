@@ -11,6 +11,7 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.junit.Test;
 
 /**
@@ -26,16 +27,16 @@ public class InsertTests extends NewHLSTestBase {
 		useCustomer11Src = true;
 		String src = "insert Customer {cid: 1, x: 45}";
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test2() {
 		useCustomer11Src = true;
 		String src = "insert Address {id: 1, y: 45}";
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test2a() {
@@ -43,8 +44,20 @@ public class InsertTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 1); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y, t0.cust) VALUES(?, ?, ?)", "1", "45", "55");
+	}
+	@Test
+	public void test2bParent() {
+		useCustomer11Src = true;
+		String src0 = "insert Address {id: 100, y: 45}";
+		String src = addSrc(src0, "insert Customer {cid: 55, x: 45, addr:100}");
+		
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
+		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
+		dumpGrp(stmgrp);
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "55", "45");
+		chkInsertSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "55", "100");
 	}
 	
 	// --- 1:N ---
@@ -53,16 +66,16 @@ public class InsertTests extends NewHLSTestBase {
 		useCustomer1NSrc = true;
 		String src = "insert Customer {cid: 1, x: 45}";
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test1N2() {
 		useCustomer1NSrc = true;
 		String src = "insert Address {id: 1, y: 45}";
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test1N2a() {
@@ -70,8 +83,8 @@ public class InsertTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 1); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y, t0.cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	@Test
 	public void test1NInsertParent() {
@@ -82,7 +95,7 @@ public class InsertTests extends NewHLSTestBase {
 		src = addSrc(src, "insert Address {id: '101', y:46 }");
 		src = addSrc(src, "insert Customer {cid: 56, x:66, addr: ['100','101'] }");
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 3); 
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 3); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
 		dumpGrp(stmgrp);
 		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
@@ -96,16 +109,16 @@ public class InsertTests extends NewHLSTestBase {
 		useCustomerManyToManySrc = true;
 		String src = "insert Customer {cid: 1, x: 45}";
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void testMN2() {
 		useCustomerManyToManySrc = true;
 		String src = "insert Address {id: 1, y: 45}";
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
+		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void testMN2a() {
@@ -113,10 +126,11 @@ public class InsertTests extends NewHLSTestBase {
 		String src0 = "insert Customer {cid: 55, x: 45}";
 		String src = addSrc(src0, "insert Address {id: 100, y: 45, cust:55}");
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 1); 
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Address (id, y) VALUES(?, ?)", "100", "45");
-		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");
+		dumpGrp(stmgrp);
+		chkInsertSql(stmgrp, 0, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "100", "45");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "55", "100");
 	}
 	
 	@Test
@@ -128,30 +142,22 @@ public class InsertTests extends NewHLSTestBase {
 		src = addSrc(src, "insert Address {id: '101', y:46 }");
 		src = addSrc(src, "insert Customer {cid: 56, x:66, addr: ['100','101'] }");
 		
-		HLDInsert hldins = buildFromSrcInsert(src, 3); 
+		HLDInsertStatement hldins = buildFromSrcInsert(src, 3); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
 		dumpGrp(stmgrp);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
-		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "100");
-		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "101");
-	}
-	
-	
-	private void dumpGrp(SqlStatementGroup stmgrp) {
-		log.log("grp: %s", stmgrp.statementL.size());
-		for(SqlStatement stm: stmgrp.statementL) {
-			log.log(stm.sql);
-		}
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "56", "100");
+		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "56", "101");
 	}
 	
 	
 	//-------------------------
-	protected HLDInsert buildFromSrcInsert(String src, int statementIndex) {
+	protected HLDInsertStatement buildFromSrcInsert(String src, int statementIndex) {
 		InsertStatementExp insertExp = compileToInsertStatement(src, statementIndex);
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDInsert hldins = mgr.fullBuildInsert(insertExp);
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator(), null);
 		log.log(hldins.toString());
 		return hldins;
 	}
@@ -163,13 +169,13 @@ public class InsertTests extends NewHLSTestBase {
 		return (InsertStatementExp) exp;
 	}
 	
-	protected void chkInsertSql(HLDInsert hldins, int numStatements, String expected, String...args) {
+	protected void chkInsertSql(HLDInsertStatement hldins, int numStatements, String expected, String...args) {
 		SqlStatementGroup stmgrp = genInsertSql(hldins, numStatements);
 		SqlStatement stm = stmgrp.statementL.get(0);
 		chkStm(stm, expected, args);
 	}
 
-	protected SqlStatementGroup genInsertSql(HLDInsert hldins, int numStatements) {
+	protected SqlStatementGroup genInsertSql(HLDInsertStatement hldins, int numStatements) {
 		SqlStatementGroup stmgrp = mgr.generateSql(hldins);
 		assertEquals(numStatements, stmgrp.statementL.size());
 		return stmgrp;
@@ -179,7 +185,4 @@ public class InsertTests extends NewHLSTestBase {
 		chkStm(stm, expected, args);
 	}
 	
-	private String addSrc(String src0, String src) {
-		return src0 + "\n" + src;
-	}
 }

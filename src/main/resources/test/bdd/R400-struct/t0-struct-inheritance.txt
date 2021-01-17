@@ -8,7 +8,7 @@ thenType: struct
 title: empty-base-class
 given:
   type Base struct { } end
-  type Flight Base {field1 int unique } end
+  type Flight Base {field1 int primaryKey } end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55]
@@ -20,7 +20,7 @@ value:a:Flight {
 ---
 title: empty-derived-class
 given:
-  type Base struct {field1 int unique } end
+  type Base struct {field1 int primaryKey } end
   type Flight Base { } end
   insert Flight {field1: 55 }
 when:
@@ -33,7 +33,7 @@ value:a:Flight {
 ---
 title: duplicate-field
 given:
-  type Base struct {field1 int unique } end
+  type Base struct {field1 int primaryKey } end
   type Flight Base {field1 int  } end
   insert Flight {field1: 55 }
 when:
@@ -42,7 +42,7 @@ when:
 ---
 title: normal-derived-class
 given:
-  type Base struct {field1 int unique } end
+  type Base struct {field1 int primaryKey } end
   type Flight Base {field2 int } end
   insert Flight {field1: 55, field2: 101 }
 when:
@@ -56,7 +56,7 @@ value:a:Flight {
 ---
 title: empty-middle-derived
 given:
-  type Base struct {field1 int unique } end
+  type Base struct {field1 int primaryKey } end
   type Base2 Base {} end
   type Flight Base2 {field2 int } end
   insert Flight {field1: 55, field2: 101 }
@@ -71,7 +71,7 @@ value:a:Flight {
 ---
 title: normal-middle-derived
 given:
-  type Base struct {field1 int unique } end
+  type Base struct {field1 int primaryKey } end
   type Base2 Base {field2 int} end
   type Flight Base2 {field3 int } end
   insert Flight {field1: 55, field2: 101, field3: -1 }

@@ -145,7 +145,7 @@ public class DeliaStatementRunnerTests extends RunnerTestBase {
 		chkResOK(res);
 		assertEquals(false, runner.exists("a"));
 		
-		res = xchkString("update Customer {id:44, firstName:'bobby',flag:false}");
+		res = xchkString("update Customer[44] {firstName:'bobby',flag:false}");
 		chkResOK(res);
 		Integer numRowsAffected = (Integer) res.val;
 		assertEquals(1, numRowsAffected.intValue());
@@ -169,7 +169,7 @@ public class DeliaStatementRunnerTests extends RunnerTestBase {
 		chkResOK(res);
 		
 		//now query it
-		res = xchkString("let a = Customer");
+		res = xchkString("let a = Customer[true]");
 		assertEquals(true, res.ok);
 		QueryResponse qresp = chkResQuery(res, "Customer");
 		DValue dval = qresp.getOne();
