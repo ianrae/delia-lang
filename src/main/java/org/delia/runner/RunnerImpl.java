@@ -390,5 +390,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setHLDManager(HLDManager mgr) {
 			this.hldManager = mgr;
+			hldManager.setSprigSvc(sprigSvc);
 		}
 	}

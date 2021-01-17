@@ -29,7 +29,6 @@ import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
-import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -52,6 +51,7 @@ public class HLDManager extends ServiceBase {
 	protected MiniSelectFragmentParser miniSelectParser;
 	protected AliasManager aliasManager;
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
+	private SprigService sprigSvc; //set after ctor
 
 	private DeliaSession session;
 	private Delia delia;
@@ -151,7 +151,6 @@ public class HLDManager extends ServiceBase {
 	}
 	
 	protected HLDInnerManager createManager(ZDBExecutor zexec) {
-		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
 		return new HLDInnerManager(registry, factorySvc, zexec.getDatIdMap(), sprigSvc);
 	}
 
@@ -170,5 +169,13 @@ public class HLDManager extends ServiceBase {
 
 	public void setVarEvaluator(VarEvaluator varEvaluator) {
 		this.varEvaluator = varEvaluator;
+	}
+
+	public SprigService getSprigSvc() {
+		return sprigSvc;
+	}
+
+	public void setSprigSvc(SprigService sprigSvc) {
+		this.sprigSvc = sprigSvc;
 	}
 }

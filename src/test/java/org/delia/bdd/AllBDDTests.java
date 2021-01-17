@@ -312,7 +312,6 @@ public class AllBDDTests extends BDDBase {
 		//runR2150File("t0-migrate-many-to-many6.txt", 1);
 		//runR2150File("t0-migrate-many-to-many6a.txt", 2);
 		//runR2150File("t0-migrate-many-to-many7.txt", 2);
-		runR2000File("t0-sprig.txt", 3);
 	}
 	
 	@Test
@@ -327,7 +326,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-		testIndexToRun = 3;
+//		testIndexToRun = 3;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
@@ -336,6 +335,7 @@ public class AllBDDTests extends BDDBase {
 //		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR900File("t0-update-mm-all.txt", 4);
+		runR2000File("t0-sprig.txt", 3);
 	}
 	
 	//---
