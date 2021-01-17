@@ -163,7 +163,7 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 						skip = true;
 					}
 					
-					if (!validateFieldsOnly && !skip && softMandatoryRelationFlag) {
+					if (!validateFieldsOnly && !skip && !softMandatoryRelationFlag) {
 						MandatoryRule mandatoryRule = new MandatoryRule(new AlwaysRuleGuard(), pair.name);
 						if (!execRule(mandatoryRule, dval)) {
 							failCount++;

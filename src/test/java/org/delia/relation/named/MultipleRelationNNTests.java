@@ -42,7 +42,8 @@ public class MultipleRelationNNTests extends MultipleRelationTestBase {
 		doInsert("insert Address { z:20, cust1:1, cust2:2 }");
 		doInsert("insert Address { z:21, cust1:1 }");
 		
-		DValue dvalA = doQuery("Address[1]");
+		//useful test of isSoftMandatoryRelationFlag() if remove the .fks() here
+		DValue dvalA = doQuery("Address[1].fks()");
 		//Note. ManyToMany relations in SQL always fill in fks. Kind of a quirk of the language. Perhaps fix later
 //		chkRelation(dvalA, "cust1", null);
 //		chkRelation(dvalA, "cust2", null);
@@ -57,7 +58,7 @@ public class MultipleRelationNNTests extends MultipleRelationTestBase {
 		doInsert("insert Customer { wid:13 }");
 		doInsert("insert Customer { wid:14 }");
 		doInsert("insert Address { z:21, cust1:3, cust2:4 }");
-		dvalA = doQuery("Address[3]");
+		dvalA = doQuery("Address[3].fks()");
 		chkRelation(dvalA, "cust1", 3);
 		chkRelation(dvalA, "cust2", 4);
 		

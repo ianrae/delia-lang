@@ -280,7 +280,7 @@ public class LetStatementRunner extends ServiceBase {
 			ValidationRunner ruleRunner = createValidationRunner();
 			if (mostRecentStatment != null) {
 				HLDQuery hld = mostRecentStatment.hldquery;
-				if (!hld.fetchL.isEmpty()) {
+				if (hld.fetchL.isEmpty()) {
 					ruleRunner.setSoftMandatoryRelationFlag(true);
 				}
 			}
