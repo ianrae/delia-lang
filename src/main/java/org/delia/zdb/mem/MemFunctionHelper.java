@@ -10,6 +10,7 @@ import org.delia.db.newhls.FinalField;
 import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.newhls.QScope;
 import org.delia.db.newhls.QueryFnSpec;
+import org.delia.db.newhls.RelationField;
 import org.delia.db.newhls.StructFieldOpt;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.queryresponse.FuncScope;
@@ -51,10 +52,12 @@ public class MemFunctionHelper extends ServiceBase {
 
 			if (obj instanceof FinalField) {
 				qresp = doField((FinalField) obj, qresp);
-			} else if (scope.thing instanceof QueryFnSpec) {
+			} else if (obj instanceof QueryFnSpec) {
 				qresp = doFunction((QueryFnSpec)obj, qresp);
-			} else if (scope.thing instanceof FetchSpec) {
+			} else if (obj instanceof FetchSpec) {
 				qresp = doFetch((FetchSpec)obj, qresp);
+			} else if (obj instanceof RelationField) {
+				qresp = doRelField((RelationField) obj, qresp);
 			} else {
 				DeliaExceptionHelper.throwNotImplementedError("unknown scope thing '%s'", obj == null ? "?" : obj.getClass().getSimpleName());
 			}
@@ -177,6 +180,16 @@ public class MemFunctionHelper extends ServiceBase {
 		qresp = runFn(fnspec, qresp, fn, 0, false);
 		return qresp;
 	}
+	private QueryResponse doRelField(RelationField rf, QueryResponse qresp) {
+		MemFieldFunction fn = new MemFieldFunction(registry, log, fetchRunner);
+
+		QueryFnSpec fnspec = createFnSpec("$FIELD");
+		fnspec.structField = new StructFieldOpt(rf.dtype, rf.fieldName, rf.fieldType);
+		qresp = runFn(fnspec, qresp, fn, 0, false);
+		return qresp;
+	}
+
+	
 	private QueryResponse doFetch(FetchSpec fetch, QueryResponse qresp) {
 		if (fetch.isFK) {
 			MemFksFunction fn = new MemFksFunction(registry);

@@ -3,12 +3,16 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
+import org.delia.runner.DeliaException;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -32,16 +36,30 @@ public class HLDDateTests extends NewHLSTestBase {
 	@Test
 	public void testDate() {
 		addOrderDate = true;
-		String src = "let x = Flight[orderDate.day() == 31]";
+		List<String> allFns = Arrays.asList("year", "month", "day", "hour", "minute", "second");
+		for(String fn: allFns) {
+			chkDate(fn);
+		}
+	}	
+	
+	@Test(expected=DeliaException.class)
+	public void testUnknownFn() {
+		addOrderDate = true;
+		chkDate("mississippi");
+	}	
+	
+	private void chkDate(String fn) {
+		String src = String.format("let x = Flight[orderDate.%s() == 31]", fn);
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		//not alias would normally be present on orderDate
-		assertEquals("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE DATEPART(day,orderDate) = 31", sql);
-	}	
-	
-	
+		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE DATEPART(%s,orderDate) = 31", fn);
+		assertEquals(s, sql);
+	}
+
+
 	//-------------------------
 	private String pkType = "int";
 	private boolean addOrderDate = false;

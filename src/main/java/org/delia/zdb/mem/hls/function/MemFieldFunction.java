@@ -156,7 +156,7 @@ public class MemFieldFunction extends MemFunctionBase {
 		if (hlspan.structField.fieldType.isStructShape()) {
 			DValue firstRel = xfirstValueIsRelation(hlspan.structField, qresp, ctx);
 			if (firstRel != null) {
-				qresp = xdoImplicitFetchIfNeeded(firstRel, hlspan.structField, qresp, ctx);
+				//qresp = xdoImplicitFetchIfNeeded(firstRel, hlspan.structField, qresp, ctx);
 //				if (hlspan.fEl == null) {
 //					return qresp;
 //				}
@@ -180,7 +180,17 @@ public class MemFieldFunction extends MemFunctionBase {
 				}
 
 				DValue inner = dval.asStruct().getField(fieldName);
-				newList.add(inner);
+				if (inner.getType().isRelationShape()) {
+					DRelation drel = inner.asRelation();
+					List<DValue> fetchedL = drel.getFetchedItems();
+					if (fetchedL == null) {
+						System.out.println("sdfsdfd");
+					} else {
+						newList.addAll(fetchedL);
+					}
+				} else {
+					newList.add(inner);
+				}
 			} else if (dval.getType().isRelationShape()) {
 				DeliaExceptionHelper.throwError("let-unexpected-relation", "why this %s", fieldName);
 			} else {
