@@ -17,8 +17,8 @@ public class QueryCountTests extends ScopeTestBase {
 	public void testInt() {
 		createAndInsert("int", "55");
 		
-		queryOneInt("Flight.count()", 1);
-		queryOneInt("Flight.count()", 1); //again
+		queryOneInt("Flight[true].count()", 1);
+		queryOneInt("Flight[true].count()", 1); //again
 		queryOneInt("Flight[55].count()", 1);
 		
 		queryOneInt("Flight[66].count()", 0);
@@ -31,8 +31,8 @@ public class QueryCountTests extends ScopeTestBase {
 		createAndInsert("int", "55");
 		insert("56");
 		
-		queryOneInt("Flight.count()", 2);
-		queryOneInt("Flight.count()", 2); //again
+		queryOneInt("Flight[true].count()", 2);
+		queryOneInt("Flight[true].count()", 2); //again
 		queryOneInt("Flight[55].count()", 1);
 		queryOneInt("Flight[56].count()", 1);
 		
@@ -46,7 +46,7 @@ public class QueryCountTests extends ScopeTestBase {
 		createAndInsert("int", "55");
 		insert("56");
 		
-		queryOneInt("Flight.field1.max()", 56);
+		queryOneInt("Flight[true].field1.max()", 56);
 		runLetInt("a1.max()", 56);
 	}
 	
@@ -55,7 +55,7 @@ public class QueryCountTests extends ScopeTestBase {
 		createAndInsert("int", "55");
 		insert("56");
 		
-		queryOneInt("Flight.field1.min()", 55);
+		queryOneInt("Flight[true].field1.min()", 55);
 		runLetInt("a1", 55);
 		runLetInt("a1.min()", 55); //this is wierd. a1 is 55.
 		//TODO - fix. we store qresp results a list, even if single value
@@ -68,7 +68,7 @@ public class QueryCountTests extends ScopeTestBase {
 
 		//https://dba.stackexchange.com/questions/25435/why-does-ansi-sql-define-sumno-rows-as-null
 		//sql standard returns NULL for min of empty set.
-		queryNullInt("Flight.field1.min()");
+		queryNullInt("Flight[true].field1.min()");
 		runLetNull("a1");
 	}
 	
@@ -79,10 +79,10 @@ public class QueryCountTests extends ScopeTestBase {
 		insert("null");
 		insert("47");
 		
-		queryOneInt("Flight.field1.min()", 47);
-		queryOneInt("Flight.field1.max()", 55);
-		queryOneInt("Flight.field1.count()", 2); //we don't count null values
-		queryOneInt("Flight.count()", 3); //are 3 records
+		queryOneInt("Flight[true].field1.min()", 47);
+		queryOneInt("Flight[true].field1.max()", 55);
+		queryOneInt("Flight[true].field1.count()", 2); //we don't count null values
+		queryOneInt("Flight[true].count()", 3); //are 3 records
 	}
 	
 	// --

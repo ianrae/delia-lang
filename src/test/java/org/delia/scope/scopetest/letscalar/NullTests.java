@@ -9,7 +9,7 @@ public class NullTests extends ScopeTestBase {
 	//-- int --
 	@Test
 	public void testNullInt() {
-		runItNull(null); //implicit
+		//NOT ALLOWED runItNull(null); //implicit
 		
 		initRunner();
 		runItNull("int");
