@@ -184,8 +184,9 @@ public class MemFieldFunction extends MemFunctionBase {
 					} else {
 						newList.addAll(fetchedL);
 					}
-				} else {
-					newList.add(inner); //hmm. so newList can contain nulls. i think that's ok
+				} else if (inner != null) {
+					//TODO review this. is it ok to not include nulls?
+					newList.add(inner); //hmm. newList doesn't contain nulls. i think that's ok
 				}
 			} else if (dval.getType().isRelationShape()) {
 				DeliaExceptionHelper.throwError("let-unexpected-relation", "why this %s", fieldName);

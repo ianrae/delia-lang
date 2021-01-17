@@ -23,4 +23,12 @@ public class DeliaExceptionHelper {
 		DeliaError err = new DeliaError("not-implemented", msg);
 		throw new DeliaException(err);
 	}
+	public static void throwUnknownFieldError(String typeName, String fieldName) {
+		String msg = String.format("Type '%s', field '%s' doesn't exist", typeName, fieldName);
+		DeliaError err = new DeliaError("unknown-field", msg);
+		throw new DeliaException(err);
+	}
+	
+	
+
 }

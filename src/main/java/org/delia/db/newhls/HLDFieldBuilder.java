@@ -8,6 +8,7 @@ import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Determines which fields should be mentioned in the query.
@@ -103,6 +104,10 @@ public class HLDFieldBuilder {
 
 	private void addFetchField(FetchSpec spec, HLDQuery hld) {
 		DStructType reftype = (DStructType) DValueHelper.findFieldType(spec.structType, spec.fieldName);
+		if (reftype == null) {
+			DeliaExceptionHelper.throwUnknownFieldError(spec.structType.getName(), spec.fieldName);
+		}
+		
 		Optional<JoinElement> optJoin = hld.joinL.stream().filter(x -> x.fetchSpec == spec).findAny(); //should only be one
 		if (spec.isFK) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(reftype);

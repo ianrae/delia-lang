@@ -75,7 +75,7 @@ public class HLDQueryBuilder {
 				QueryFieldExp qfe = (QueryFieldExp) qfnexp;
 				DType type = DValueHelper.findFieldType(currentScope, qfe.funcName);
 				if (type == null) {
-					DeliaExceptionHelper.throwError("unknown-field", "Type '%s', field '%s' doesn't exist", currentScope.getName(), qfe.funcName);
+					DeliaExceptionHelper.throwUnknownFieldError(currentScope.getName(), qfe.funcName);
 				}
 				FinalField ff = new FinalField();
 				ff.structField = new StructField(currentScope, qfe.funcName, type);
