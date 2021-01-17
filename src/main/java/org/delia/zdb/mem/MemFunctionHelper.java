@@ -1,20 +1,18 @@
 package org.delia.zdb.mem;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.QScope;
 import org.delia.db.newhls.QueryFnSpec;
 import org.delia.db.newhls.RelationField;
-import org.delia.db.newhls.StructField;
 import org.delia.db.newhls.StructFieldOpt;
 import org.delia.queryresponse.FuncScope;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.mem.hls.MemFunction;
 import org.delia.zdb.mem.hls.function.MemCountFunction;
 import org.delia.zdb.mem.hls.function.MemDistinctFunction;
@@ -38,77 +36,117 @@ public class MemFunctionHelper extends ServiceBase {
 	}
 
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, QueryResponse qresp) {
-		//do all spans after first
-		for(int i = 0; i < hld.hldquery.funcL.size(); i++) {
-			QueryFnSpec hlspan = hld.hldquery.funcL.get(i);
-			boolean beginsWithScopeChange = (i == 0 ) && !(hlspan.structField.dtype.getName().equals(hld.hldquery.fromType.getName()));
-
-			List<MemFunction> actionL = buildActionsInOrder(hlspan, hld, beginsWithScopeChange);
-			
-			boolean isFirstFn = true;
-			for(MemFunction fn: actionL) {
-				qresp = runFn(hlspan, qresp, fn, i, isFirstFn);
-				isFirstFn = false;
+		for(QScope scope: hld.hldquery.scopeL) {
+			if (scope.thing instanceof RelationField) {
+				qresp = doField((RelationField) scope.thing, qresp);
+			} else if (scope.thing instanceof QueryFnSpec) {
+				qresp = doFunction((QueryFnSpec)scope.thing, qresp);
 			}
 		}
 		
-		if (hld.hldquery.finalField != null) {
-			MemFunction fn = new MemFieldFunction(registry, log, fetchRunner);
-			QueryFnSpec hlspan = new QueryFnSpec();
-			StructField rf = hld.hldquery.finalField.structField;
-			hlspan.structField = new StructFieldOpt(rf.dtype, rf.fieldName, rf.fieldType);
-			qresp = runFn(hlspan, qresp, fn, 0, false);
-		}
+//		
+//		//do all spans after first
+//		for(int i = 0; i < hld.hldquery.funcL.size(); i++) {
+//			QueryFnSpec fnspec = hld.hldquery.funcL.get(i);
+//			boolean beginsWithScopeChange = (i == 0 ) && !(fnspec.structField.dtype.getName().equals(hld.hldquery.fromType.getName()));
+//
+//			List<MemFunction> actionL = buildActionsInOrder(fnspec, hld, beginsWithScopeChange);
+//			
+//			boolean isFirstFn = true;
+//			for(MemFunction fn: actionL) {
+//				qresp = runFn(fnspec, qresp, fn, i, isFirstFn);
+//				isFirstFn = false;
+//			}
+//		}
+//		
+//		if (hld.hldquery.finalField != null) {
+//			MemFunction fn = new MemFieldFunction(registry, log, fetchRunner);
+//			QueryFnSpec fnspec = new QueryFnSpec();
+//			StructField rf = hld.hldquery.finalField.structField;
+//			fnspec.structField = new StructFieldOpt(rf.dtype, rf.fieldName, rf.fieldType);
+//			qresp = runFn(fnspec, qresp, fn, 0, false);
+//		}
 		
 		return qresp;
 	}
-	private List<MemFunction> buildActionsInOrder(QueryFnSpec hlspan, HLDQueryStatement hls, boolean beginsWithScopeChange) {
-		List<MemFunction> actionL = new ArrayList<>();
-		if (beginsWithScopeChange) {
-			actionL.add(new MemFieldFunction(registry, log, fetchRunner));
+	private QueryResponse doFunction(QueryFnSpec fnspec, QueryResponse qresp) {
+		MemFunction fn;
+		if (fnspec.isFn("orderBy")) {
+			fn = new MemOrderByFunction(registry);
+		} else if (fnspec.isFn("offset")) {
+			fn =  new MemOffsetFunction(registry);
+		} else if (fnspec.isFn("limit")) {
+			fn =  new MemLimitFunction(registry);
+		} else {
+			fn = createMemFn(fnspec);
 		}
-		
-		//then do orderBy,offset,limit
-		int n = actionL.size();
-		addIf(actionL, hlspan.isFn("orderBy"), new MemOrderByFunction(registry));
-		addIf(actionL, hlspan.isFn("offset"), new MemOffsetFunction(registry));
-		addIf(actionL, hlspan.isFn("limit"), new MemLimitFunction(registry));
 
-		if (actionL.size() == n) {
-			MemFunction fn = createMemFn(hlspan);
-			if (fn != null) {
-				actionL.add(fn);
-			}
+		if (fn == null) {
+			DeliaExceptionHelper.throwNotImplementedError("unknown MEM fn '%s'", fnspec.filterFn.fnName);
+			return null;
+		} else {
+			qresp = runFn(fnspec, qresp, fn, 0, false);
+			return qresp;
 		}
+	}
+
+	private QueryResponse doField(RelationField rf, QueryResponse qresp) {
+		MemFieldFunction fn = new MemFieldFunction(registry, log, fetchRunner);
 		
-		//TODO fix need the original order of Customer[1].fetch(sd).addr.limit(3)
-//		if (! beginsWithScopeChange) {
-//			if (hlspan..rEl != null) {
-//				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-//			} else if (hlspan.fEl != null) {
-//				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-//			}
+		QueryFnSpec fnspec = new QueryFnSpec();
+		fnspec.filterFn.fnName = "$FIELD";
+		fnspec.structField = new StructFieldOpt(rf.dtype, rf.fieldName, rf.fieldType);
+		qresp = runFn(fnspec, qresp, fn, 0, false);
+		return qresp;
+	}
+
+//	private List<MemFunction> buildActionsInOrder(QueryFnSpec fnspec, HLDQueryStatement hls, boolean beginsWithScopeChange) {
+//		List<MemFunction> actionL = new ArrayList<>();
+//		if (beginsWithScopeChange) {
+//			actionL.add(new MemFieldFunction(registry, log, fetchRunner));
 //		}
-				
-//		if (hlspan.subEl != null) {
-//			if (hlspan.subEl.allFKs) {
-//				actionL.add(new MemFksFunction(registry));
-//			} else if (!hlspan.subEl.fetchL.isEmpty()) {
-//				actionL.add(new MemFetchFunction(registry, createFetchRunner(), false));
-//			}			
-//		}
-		
-//		for(GElement op: hlspan.gElList) {
-//			MemFunction fn = createGelMemFn(op);
+//		
+//		//then do orderBy,offset,limit
+//		int n = actionL.size();
+//		addIf(actionL, fnspec.isFn("orderBy"), new MemOrderByFunction(registry));
+//		addIf(actionL, fnspec.isFn("offset"), new MemOffsetFunction(registry));
+//		addIf(actionL, fnspec.isFn("limit"), new MemLimitFunction(registry));
+//
+//		if (actionL.size() == n) {
+//			MemFunction fn = createMemFn(fnspec);
 //			if (fn != null) {
 //				actionL.add(fn);
 //			}
 //		}
-		
-		return actionL;
-	}
-	private MemFunction createMemFn(QueryFnSpec hlspan) {
-		switch(hlspan.filterFn.fnName) {
+//		
+//		//TODO fix need the original order of Customer[1].fetch(sd).addr.limit(3)
+////		if (! beginsWithScopeChange) {
+////			if (fnspec..rEl != null) {
+////				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+////			} else if (fnspec.fEl != null) {
+////				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
+////			}
+////		}
+//				
+////		if (fnspec.subEl != null) {
+////			if (fnspec.subEl.allFKs) {
+////				actionL.add(new MemFksFunction(registry));
+////			} else if (!fnspec.subEl.fetchL.isEmpty()) {
+////				actionL.add(new MemFetchFunction(registry, createFetchRunner(), false));
+////			}			
+////		}
+//		
+////		for(GElement op: fnspec.gElList) {
+////			MemFunction fn = createGelMemFn(op);
+////			if (fn != null) {
+////				actionL.add(fn);
+////			}
+////		}
+//		
+//		return actionL;
+//	}
+	private MemFunction createMemFn(QueryFnSpec fnspec) {
+		switch(fnspec.filterFn.fnName) {
 		case "min":
 			return new MemMinFunction(factorySvc, registry, null);
 		case "max":
@@ -130,19 +168,19 @@ public class MemFunctionHelper extends ServiceBase {
 		}
 	}
 
-	private void addIf(List<MemFunction> actionL, boolean b, MemFunction fn) {
-		if (b) {
-			actionL.add(fn);
-		}
-	}
-	private QueryResponse runFn(QueryFnSpec hlspan, QueryResponse qresp, MemFunction fn, int i, boolean isFirstFn) {
+//	private void addIf(List<MemFunction> actionL, boolean b, MemFunction fn) {
+//		if (b) {
+//			actionL.add(fn);
+//		}
+//	}
+	private QueryResponse runFn(QueryFnSpec fnspec, QueryResponse qresp, MemFunction fn, int i, boolean isFirstFn) {
 		QueryFuncContext ctx = new QueryFuncContext();
 		ctx.scope = new FuncScope(qresp);
-//		ctx.offsetLimitDirtyFlag = hlspan.oloEl != null && hlspan.oloEl.limit != null;
+//		ctx.offsetLimitDirtyFlag = fnspec.oloEl != null && fnspec.oloEl.limit != null;
 		
-		QueryResponse outputQresp = fn.process(hlspan, qresp, ctx);
+		QueryResponse outputQresp = fn.process(fnspec, qresp, ctx);
 		if (isFirstFn && (i == 0 || ctx.scope.hasChanged())) {
-//			pruneParentsAfterScopeChange(hlspan, qresp);
+//			pruneParentsAfterScopeChange(fnspec, qresp);
 		}
 		return outputQresp;
 	}
