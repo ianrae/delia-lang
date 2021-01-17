@@ -133,7 +133,7 @@ public class HLDManager extends ServiceBase {
 	}
 	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec, VarEvaluator varEvaluator2) {
 		HLDInnerManager mgr = createManager(zexec); 
-		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator);
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2);
 		log.log(hldins.toString());
 		return hldins;
 	}
