@@ -36,9 +36,11 @@ import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 public class MemFunctionHelper extends ServiceBase {
 	private DTypeRegistry registry;
 	private FetchRunner fetchRunner;
+	private MemZDBInterfaceFactory dbInterface;
 
 	public MemFunctionHelper(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner) {
 		super(factorySvc);
+		this.dbInterface = dbInterface;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
 	}
@@ -192,7 +194,7 @@ public class MemFunctionHelper extends ServiceBase {
 	
 	private QueryResponse doFetch(FetchSpec fetch, QueryResponse qresp) {
 		if (fetch.isFK) {
-			MemFksFunction fn = new MemFksFunction(registry);
+			MemFksFunction fn = new MemFksFunction(registry, factorySvc, fetchRunner, dbInterface);
 			QueryFnSpec fnspec = createFnSpec("$FKS");
 			fnspec.structField = new StructFieldOpt(fetch.structType, fetch.fieldName, null);
 			qresp = runFn(fnspec, qresp, fn, 0, false);
