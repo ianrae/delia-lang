@@ -181,7 +181,11 @@ public class RelationManyRule extends RelationRuleBase {
 			//err
 		} else {
 			Map<String,DValue> map = dval.asMap();
-			map.put(relInfo.fieldName, builder.getDValue());
+			
+			DValue xx = map.get(relInfo.fieldName);
+			
+			DValue yy =  builder.getDValue();
+			map.put(relInfo.fieldName, yy);
 		}
 	}
 }
