@@ -68,6 +68,7 @@ public class HLDQueryBuilder {
 		List<RelationField> pendingL = new ArrayList<>();
 		
 		for(QueryFuncExp qfnexp: queryExp.qfelist) {
+			QScope scope = scopeL.stream().filter(x -> x.qfnexp == qfnexp).findAny().get();
 			if (qfnexp instanceof QueryFieldExp) {
 				QueryFieldExp qfe = (QueryFieldExp) qfnexp;
 				DType type = DValueHelper.findFieldType(currentScope, qfe.funcName);
@@ -80,14 +81,15 @@ public class HLDQueryBuilder {
 					currentRF = rf;
 					pendingL.add(rf);
 					currentScope = (DStructType) type;
+					scope.setDetails(currentScope, rf.fieldName, rf);
 				} else {
 					//only add to throughchain if we ref a field in it. eg. addr.y
 					for(RelationField rf: pendingL) {
-						QScope scope = scopeL.stream().filter(x -> x.qfnexp == qfnexp).findAny().get();
-						scope.setDetails(currentScope, rf.fieldName, rf);
+//						scope.setDetails(currentScope, rf.fieldName, rf);
 						hld.throughChain.add(rf);
 					}
 					pendingL.clear();
+					scope.setDetails(currentScope, ff.structField.fieldName, ff);
 				}
 			}
 		}
