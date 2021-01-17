@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.newhls.QueryFnSpec;
-import org.delia.db.newhls.RelationField;
 import org.delia.db.newhls.StructFieldOpt;
 import org.delia.log.Log;
 import org.delia.queryresponse.QueryFuncContext;
@@ -154,12 +153,9 @@ public class MemFieldFunction extends MemFunctionBase {
 		
 		//span may start with a relation field (eg .addr)
 		if (hlspan.structField.fieldType.isStructShape()) {
-			DValue firstRel = xfirstValueIsRelation(hlspan.structField, qresp, ctx);
+			DValue firstRel = hldfirstValueIsRelation(hlspan.structField, qresp, ctx);
 			if (firstRel != null) {
-				//qresp = xdoImplicitFetchIfNeeded(firstRel, hlspan.structField, qresp, ctx);
-//				if (hlspan.fEl == null) {
-//					return qresp;
-//				}
+				hlddoImplicitFetchIfNeeded(firstRel, hlspan.structField, qresp, ctx);
 			} else {
 				return qresp;
 			}
@@ -202,11 +198,7 @@ public class MemFieldFunction extends MemFunctionBase {
 		return qresp;
 	}
 
-	private DValue xfirstValueIsRelation(StructFieldOpt structField, QueryResponse qresp, QueryFuncContext ctx) {
-//		if (hlspan.rEl == null) {
-//			return null;
-//		}
-		
+	private DValue hldfirstValueIsRelation(StructFieldOpt structField, QueryResponse qresp, QueryFuncContext ctx) {
 		String fieldName = structField.fieldName;
 
 		//find any dval whose .field is non null
@@ -236,9 +228,7 @@ public class MemFieldFunction extends MemFunctionBase {
 		return inner;
 	}
 	
-	private QueryResponse xdoImplicitFetchIfNeeded(DValue firstRel, StructFieldOpt structField, QueryResponse qresp, QueryFuncContext ctx) {
-		String fieldName = structField.fieldName; //hlspan.rEl.rfieldPair.name;
-		
+	private QueryResponse hlddoImplicitFetchIfNeeded(DValue firstRel, StructFieldOpt structField, QueryResponse qresp, QueryFuncContext ctx) {
 		if (firstRel != null && firstRel.getType().isRelationShape()) {
 			QueryFnSpec hlspan = new QueryFnSpec();
 			hlspan.structField = structField;
@@ -246,21 +236,6 @@ public class MemFieldFunction extends MemFunctionBase {
 			MemFetchFunction fn = new MemFetchFunction(registry, fetchRunner, true);
 			qresp = fn.process(hlspan, qresp, ctx);
 			
-			List<DValue> newList = new ArrayList<>();
-			for(DValue dval: qresp.dvalList) {
-				DValue inner = dval.asStruct().getField(fieldName);
-				if (inner == null) {
-					continue;
-				}
-				DRelation drel = inner.asRelation();
-				newList.addAll(drel.getFetchedItems());
-			}
-			QueryResponse newRes = new QueryResponse();
-			newRes.ok = true;
-			newRes.dvalList = newList;
-			ctx.scope.changeScope(newRes);  //new scope
-			
-			qresp.dvalList = newList;
 			return qresp;
 		} else {
 			return qresp;

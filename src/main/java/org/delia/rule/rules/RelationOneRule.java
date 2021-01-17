@@ -192,9 +192,11 @@ public class RelationOneRule extends RelationRuleBase {
 		RelationInfo info = this.relInfo;
 		DValue existing = dval.asStruct().getField(info.fieldName);
 		if (existing != null) {
-			return;
+			DRelation drel = existing.asRelation();
+			if (drel.haveFetched() && drel.getMultipleKeys().size() == drel.getFetchedItems().size()) {
+				return;
+			}
 		}
-		
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 		DValue keyVal = dval.asStruct().getField(pair.name);

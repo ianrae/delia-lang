@@ -151,7 +151,10 @@ public class RelationManyRule extends RelationRuleBase {
 		
 		DValue existing = dval.asStruct().getField(info.fieldName);
 		if (existing != null) {
-			return;
+			DRelation drel = existing.asRelation();
+			if (drel.haveFetched() && drel.getMultipleKeys().size() == drel.getFetchedItems().size()) {
+				return;
+			}
 		}
 		
 		TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
