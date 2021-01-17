@@ -50,6 +50,9 @@ public class MemFunctionHelper extends ServiceBase {
 
 		for(QScope scope: list) {
 			Object obj = scope.thing;
+			if (obj == null) {
+				continue; //can occur when child does .fks, which is a no-op
+			}
 			log.log("fn: %d: %s", scope.index, obj.toString());
 
 			if (obj instanceof FinalField) {
