@@ -74,7 +74,7 @@ public class MemOrderByFunction extends MemFunctionBase {
 	
 	@Override
 	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		String fieldName = hlspan.filterFn.argL.get(0).asString();
+		String fieldName = hlspan.structField.fieldName;
 		boolean asc = true;
 		if (hlspan.filterFn.argL.size() > 1) {
 			String s = hlspan.filterFn.argL.get(1).asString();

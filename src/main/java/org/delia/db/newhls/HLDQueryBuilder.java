@@ -9,6 +9,7 @@ import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
+import org.delia.db.newhls.cond.FilterVal;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DStructType;
@@ -106,6 +107,12 @@ public class HLDQueryBuilder {
 		if (spec.isFn("orderBy")) {
 			String fieldName = fnexp.argL.get(0).strValue();
 			spec.structField.fieldName = fieldName;
+			for(int i = 0; i < fnexp.argL.size(); i++) {
+				Exp exp = fnexp.argL.get(i);
+				//TODO: do proper converion to filterval here!
+				FilterVal fval = new FilterVal(ValType.STRING, exp);
+				spec.filterFn.argL.add(fval);
+			}
 		}
 		// TODO add more later
 		

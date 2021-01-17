@@ -1,6 +1,5 @@
 package org.delia.zdb.mem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,15 +12,12 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.GElement;
-import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.newhls.HLDQueryStatement;
-import org.delia.db.newhls.QueryFnSpec;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDInsertStatement;
@@ -32,8 +28,6 @@ import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.log.Log;
-import org.delia.queryresponse.FuncScope;
-import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FilterEvaluator;
 import org.delia.runner.QueryResponse;
@@ -47,13 +41,6 @@ import org.delia.util.DValueHelper;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.hls.MemFunction;
-import org.delia.zdb.mem.hls.function.MemFetchFunction;
-import org.delia.zdb.mem.hls.function.MemFieldFunction;
-import org.delia.zdb.mem.hls.function.MemFksFunction;
-import org.delia.zdb.mem.hls.function.MemLimitFunction;
-import org.delia.zdb.mem.hls.function.MemOffsetFunction;
-import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 
 public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 
@@ -296,75 +283,10 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
 		QueryResponse qresp = doExecuteQuery(hld.querySpec, qtx);
 		
-		
-		//do all spans after first
-		for(int i = 0; i < hld.hldquery.funcL.size(); i++) {
-			QueryFnSpec hlspan = hld.hldquery.funcL.get(i);
-			boolean beginsWithScopeChange = (i == 0 ) && !(hlspan.structField.dtype.getName().equals(hld.hldquery.fromType.getName()));
-
-			List<MemFunction> actionL = buildActionsInOrder(hlspan, hld, beginsWithScopeChange);
-			boolean isFirstFn = true;
-			for(MemFunction fn: actionL) {
-				qresp = runFn(hlspan, qresp, fn, i, isFirstFn);
-				isFirstFn = false;
-			}
-		}
+		MemFunctionHelper helper = new MemFunctionHelper(factorySvc, dbInterface, registry, createFetchRunner());
+		qresp = helper.executeHLDQuery(hld, qresp);
 		return qresp;
 	}
-	private List<MemFunction> buildActionsInOrder(QueryFnSpec hlspan, HLDQueryStatement hls, boolean beginsWithScopeChange) {
-		List<MemFunction> actionL = new ArrayList<>();
-		if (beginsWithScopeChange) {
-			actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-		}
-		
-		//then do orderBy,offset,limit
-		addIf(actionL, hlspan.isFn("orderBy"), new MemOrderByFunction(registry));
-		addIf(actionL, hlspan.isFn("offset"), new MemOffsetFunction(registry));
-		addIf(actionL, hlspan.isFn("limit"), new MemLimitFunction(registry));
-
-		//TODO fix need the original order of Customer[1].fetch(sd).addr.limit(3)
-//		if (! beginsWithScopeChange) {
-//			if (hlspan..rEl != null) {
-//				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-//			} else if (hlspan.fEl != null) {
-//				actionL.add(new MemFieldFunction(registry, log, createFetchRunner()));
-//			}
-//		}
-				
-//		if (hlspan.subEl != null) {
-//			if (hlspan.subEl.allFKs) {
-//				actionL.add(new MemFksFunction(registry));
-//			} else if (!hlspan.subEl.fetchL.isEmpty()) {
-//				actionL.add(new MemFetchFunction(registry, createFetchRunner(), false));
-//			}			
-//		}
-		
-//		for(GElement op: hlspan.gElList) {
-//			MemFunction fn = createGelMemFn(op);
-//			if (fn != null) {
-//				actionL.add(fn);
-//			}
-//		}
-		
-		return actionL;
-	}
-	private void addIf(List<MemFunction> actionL, boolean b, MemFunction fn) {
-		if (b) {
-			actionL.add(fn);
-		}
-	}
-	private QueryResponse runFn(QueryFnSpec hlspan, QueryResponse qresp, MemFunction fn, int i, boolean isFirstFn) {
-		QueryFuncContext ctx = new QueryFuncContext();
-		ctx.scope = new FuncScope(qresp);
-//		ctx.offsetLimitDirtyFlag = hlspan.oloEl != null && hlspan.oloEl.limit != null;
-		
-		QueryResponse outputQresp = fn.process(hlspan, qresp, ctx);
-		if (isFirstFn && (i == 0 || ctx.scope.hasChanged())) {
-//			pruneParentsAfterScopeChange(hlspan, qresp);
-		}
-		return outputQresp;
-	}
-
 
 	@Override
 	public boolean doesTableExist(String tableName) {
