@@ -5,6 +5,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
+import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.db.newhls.ValType;
@@ -14,6 +15,10 @@ import org.delia.util.DeliaExceptionHelper;
 public class FilterValHelper {
 
 	public static FilterCond singleFilterFromDVal(DValue dval, String varName) {
+		if (dval == null) {
+			return new NullFilterCond(new NullExp());
+		}
+		
 		switch(dval.getType().getShape()) {
 		case BOOLEAN:
 			return new BooleanFilterCond(new BooleanExp(dval.asBoolean()));
@@ -40,6 +45,8 @@ public class FilterValHelper {
 			return ValType.NUMBER;
 		} else if (exp instanceof StringExp) {
 			return ValType.STRING;
+		} else if (exp instanceof NullExp) {
+			return ValType.NULL;
 		} else {
 			return null; //TODO: error
 		}

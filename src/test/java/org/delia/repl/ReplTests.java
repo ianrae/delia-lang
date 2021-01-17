@@ -14,7 +14,7 @@ import org.junit.Test;
 
 public class ReplTests extends BDDBase {
 
-	@Test
+//	@Test
 	public void test() throws IOException {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		DeliaRepl repl = new DeliaRepl(info, BASE_DIR);

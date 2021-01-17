@@ -8,7 +8,9 @@ import org.delia.error.DeliaError;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.ScopeTestBase;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
 
 public class TypeLayerTestBase extends ScopeTestBase {
 
@@ -72,7 +74,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = %s", varName, typeName);
+		src = String.format("let %s = %s[true]", varName, typeName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 	protected ResultValue insertRaw(String typeName, String valStr) {
@@ -92,7 +94,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = %s", varName, typeName);
+		src = String.format("let %s = %s[true]", varName, typeName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 	protected QueryResponse deleteAndQuery(String typeName, int expectedSize) {
@@ -102,7 +104,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 
 		//now query it
 		String varName = String.format("a%d", nextVarNum++);
-		src = String.format("let %s = %s", varName, typeName);
+		src = String.format("let %s = %s[true]", varName, typeName);
 		return execLetStatementMulti(src, expectedSize);
 	}
 
@@ -213,7 +215,7 @@ public class TypeLayerTestBase extends ScopeTestBase {
 		if (!deleteBeforeInsertFlag) {
 			return;
 		}
-		String src = String.format("delete %s", typeName);
+		String src = String.format("delete %s[true]", typeName);
 		DeleteStatementExp exp = (DeleteStatementExp) chelper.parseOne(src);
 		ResultValue res = runner.beginOrContinue(src, true);
 		chkResOK(res);
@@ -221,10 +223,29 @@ public class TypeLayerTestBase extends ScopeTestBase {
 
 	protected DValue doChkLetFieldOrFn(String valStr, String typeName) {
 		String varName = String.format("a%d", nextVarNum++);
-		String src = String.format("let %s = %s", varName, valStr);
-		QueryResponse qresp = execLetStatementOne(src, typeName);
-		DValue dval = qresp.getOne();
-		return dval;
+		String src;
+		
+		String type1 = BuiltInTypes.convertDTypeNameToDeliaName(typeName); 
+		BuiltInTypes bitype = BuiltInTypes.fromDeliaTypeName(type1);
+		if (bitype != null) {
+			src = String.format("let %s = %s", varName, valStr);
+		} else{
+			src = String.format("let %s = %s[true]", varName, valStr);
+		}
+		
+		//TODO: review. should this be returning a list or a dval?
+		ResultValue res = runner.beginOrContinue(src, true);
+		assertEquals(true, res.ok);
+//		assertEquals(expectedShape, res.shape);
+		if (res.val instanceof QueryResponse) {
+			QueryResponse qresp = (QueryResponse) res.val;
+//		assertEquals(size, qresp.dvalList.size());
+			DValue dval = qresp.getOne();
+			return dval;
+		} else {
+			DValue dvalx = res.getAsDValue();
+			return dvalx;
+		}
 	}
 
 }

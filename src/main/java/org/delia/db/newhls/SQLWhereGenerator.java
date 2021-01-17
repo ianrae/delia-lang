@@ -142,6 +142,8 @@ public class SQLWhereGenerator {
 			return String.format("'%s'", val1.exp.strValue());
 		case SYMBOL:
 			return String.format("%s.%s", val1.alias, val1.structField.fieldName);
+		case NULL:
+			return "null";
 		case SYMBOLCHAIN:
 		{
 			SymbolChain chain = val1.asSymbolChain();
