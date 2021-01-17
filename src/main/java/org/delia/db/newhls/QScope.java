@@ -8,13 +8,15 @@ public class QScope {
 	public DStructType structType;
 	public String fieldName;
 	public QueryFuncExp qfnexp;
+	public Object thing; //some hld thing
 	
 	public QScope(QueryFuncExp qfnexp) {
 		this.qfnexp = qfnexp;
 	}
 	
-	public void setDetails(DStructType dtype, String fieldName) {
+	public void setDetails(DStructType dtype, String fieldName, Object thing) {
 		this.structType = dtype;
 		this.fieldName = fieldName;
+		this.thing = thing;
 	}
 }

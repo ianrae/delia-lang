@@ -80,11 +80,11 @@ public class HLDQueryBuilder {
 					currentRF = rf;
 					pendingL.add(rf);
 					currentScope = (DStructType) type;
-					QScope scope = scopeL.stream().filter(x -> x.qfnexp == qfnexp).findAny().get();
-					scope.setDetails(currentScope, rf.fieldName);
 				} else {
 					//only add to throughchain if we ref a field in it. eg. addr.y
 					for(RelationField rf: pendingL) {
+						QScope scope = scopeL.stream().filter(x -> x.qfnexp == qfnexp).findAny().get();
+						scope.setDetails(currentScope, rf.fieldName, rf);
 						hld.throughChain.add(rf);
 					}
 					pendingL.clear();
@@ -114,7 +114,7 @@ public class HLDQueryBuilder {
 				spec.filterFn.fnName = fnexp.funcName;
 				addArgs(spec, fnexp);
 				hld.funcL.add(spec);
-				scope.setDetails(currentScope, fnexp.funcName);
+				scope.setDetails(currentScope, fnexp.funcName, spec);
 			}
 		}
 	}
@@ -140,7 +140,7 @@ public class HLDQueryBuilder {
 			FetchSpec spec = new FetchSpec(currentScope, fieldToFetch);
 			spec.isFK = false;
 			hld.fetchL.add(spec);
-			scope.setDetails(currentScope, fieldToFetch);
+			scope.setDetails(currentScope, fieldToFetch, spec);
 		}
 	}
 
@@ -152,7 +152,7 @@ public class HLDQueryBuilder {
 					FetchSpec spec = new FetchSpec(currentScope, pair.name);
 					spec.isFK = true;
 					hld.fetchL.add(spec);
-					scope.setDetails(currentScope, pair.name);
+					scope.setDetails(currentScope, pair.name, spec);
 				}
 			}
 		}
