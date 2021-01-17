@@ -61,10 +61,12 @@ public class MemFirstFunction extends GelMemFunctionBase {
 	
 	@Override
 	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
-		if (hlspan.filterFn.argL.isEmpty()) {
-			DeliaExceptionHelper.throwError("queryfn-bad-index", "bad index!! no index provided");				
+		if (ithFlag) {
+			if (hlspan.filterFn.argL.isEmpty()) {
+				DeliaExceptionHelper.throwError("queryfn-bad-index", "bad index!! no index provided");				
+			}
+			indexToRetrieve = hlspan.filterFn.argL.get(0).asInt();
 		}
-		indexToRetrieve = hlspan.filterFn.argL.get(0).asInt();
 		
 		HLSQuerySpan jj = null;
 		return process(jj, qresp, ctx);

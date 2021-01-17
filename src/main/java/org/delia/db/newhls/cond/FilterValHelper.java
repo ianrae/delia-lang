@@ -2,6 +2,7 @@ package org.delia.db.newhls.cond;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
@@ -45,6 +46,13 @@ public class FilterValHelper {
 	}
 
 	public static FilterVal createFromExp(Exp exp) {
+		//special code for asc and desc
+		//TODO: arg might be a varname. add code for this. need to resolve vars before calling here
+		if (exp instanceof IdentExp) {
+			StringExp sexp = new StringExp(exp.strValue());
+			return new FilterVal(ValType.STRING, sexp);
+		}
+		
 		ValType valType = createValType(exp);
 		return new FilterVal(valType, exp);
 	}

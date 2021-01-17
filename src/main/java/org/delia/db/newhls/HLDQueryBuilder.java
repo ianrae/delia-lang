@@ -128,6 +128,11 @@ public class HLDQueryBuilder {
 			FilterVal fval = FilterValHelper.createFromExp(exp); //new FilterVal(ValType.STRING, exp);
 			spec.filterFn.argL.add(fval);
 		}
+		
+		if (spec.isFn("orderBy")) {
+			String fieldName = fnexp.argL.get(0).strValue();
+			spec.structField.fieldName = fieldName;
+		}		
 	}
 
 	private void addFetch(QueryFuncExp fnexp, DStructType currentScope, HLDQuery hld, QScope scope) {
