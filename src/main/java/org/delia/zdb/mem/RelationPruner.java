@@ -60,6 +60,9 @@ public class RelationPruner extends ServiceBase {
 	}
 
 	private void pruneRelations(List<DValue> allOthers, TypePair pair, RelationInfo relinfo, DValue pkval) {
+		if (relinfo.otherSide == null) {
+			return;
+		}
 		String fieldName = relinfo.otherSide.fieldName;
 		for(DValue dval: allOthers) {
 			DValue inner = dval.asStruct().getField(fieldName);
@@ -96,6 +99,10 @@ public class RelationPruner extends ServiceBase {
 	private List<DValue> findOthers(TypePair pair, MemZDBExecutor memDBInterface, RelationInfo relinfo, DValue pkval) {
 		List<DValue> allFoundL = new ArrayList<>();
 		MemDBTable tbl = memDBInterface.getTbl(pair.type.getName());
+		if (tbl == null && relinfo.otherSide == null) {
+			return allFoundL; //one-sided relation
+		}
+		
 		for(DValue dval: tbl.rowL) {
 			DValue inner = dval.asStruct().getField(relinfo.otherSide.fieldName);
 			if (inner != null) {

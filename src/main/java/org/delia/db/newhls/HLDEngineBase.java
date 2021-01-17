@@ -250,6 +250,7 @@ public abstract class HLDEngineBase {
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		if (! areSame) {
+			boolean parentIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
 			boolean childIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 			DStructType targetType;
 			HLDDelete hld;
@@ -257,7 +258,7 @@ public abstract class HLDEngineBase {
 			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
 			SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
 			
-			if (!childIsOptional) {
+			if (!childIsOptional || !parentIsOptional) {
 				QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
 				hld = hldBuilder.buildSimpleDelete(targetType);
 				hld.hld = buildQuery(queryExp);
@@ -270,6 +271,7 @@ public abstract class HLDEngineBase {
 			}
 			moreL.add(simple1); //want this one last
 		} else {
+			boolean parentIsOptional = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
 			boolean childIsOptional = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
 			DStructType targetType;
 			HLDDelete hld;
@@ -277,7 +279,7 @@ public abstract class HLDEngineBase {
 			hld = hldBuilder.buildAssocDeleteOne(builderAdapter, relinfo, pkval, datIdMap);
 			SimpleDelete simple1 = simpleBuilder.buildFrom(hld);
 			
-			if (!childIsOptional) {
+			if (!childIsOptional || !parentIsOptional) {
 				QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.fieldName, pkval);
 				hld = hldBuilder.buildSimpleDelete(targetType);
 				hld.hld = buildQuery(queryExp);
