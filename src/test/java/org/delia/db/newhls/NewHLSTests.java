@@ -148,13 +148,6 @@ public class NewHLSTests extends NewHLSTestBase {
 	}	
 
 	@Test
-	public void testDateFn() {
-		addOrderDate = true;
-		chkbuilderOpFnInt("let x = Flight[orderDate.day() == 31]", "orderDate", "day", "==", 31);
-		chkbuilderOpIntFn("let x = Flight[31 == orderDate.day()]", 31, "==", "orderDate", "day");
-	}	
-
-	@Test
 	public void testHLD() {
 		String src = "let x = Flight[15]";
 		QueryExp queryExp = compileQuery(src);
@@ -246,7 +239,6 @@ public class NewHLSTests extends NewHLSTestBase {
 	
 	//-------------------------
 	private String pkType = "int";
-	private boolean addOrderDate = false;
 
 	@Before
 	public void init() {
@@ -349,10 +341,10 @@ public class NewHLSTests extends NewHLSTestBase {
 
 	@Override
 	protected String buildSrc() {
-		String s = addOrderDate ? ", orderDate date" : "";
+		String s = "";
 		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int %s } end", pkType, s);
 
-		s = addOrderDate ? ", orderDate: '2019'" : "";
+		s = "";
 		if (pkType.equals("string")) {
 			src += String.format("\n insert Flight {field1: 'ab', field2: 10 %s}", s);
 			src += String.format("\n insert Flight {field1: 'cd', field2: 20 %s}", s);

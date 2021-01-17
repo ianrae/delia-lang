@@ -1,10 +1,13 @@
 package org.delia.db.newhls;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.InFilterCond;
-import org.delia.db.newhls.cond.IntegerFilterCond;
 import org.delia.db.newhls.cond.OpAndOrFilter;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
@@ -14,6 +17,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * @author ian
@@ -148,8 +152,27 @@ public class SQLWhereGenerator {
 			}
 		}
 		case FUNCTION:
+		{
+			FilterFunc fn = val1.asFunc();
+			return genFnSQL(val1, fn);
+		}
 		default:
 			throw new HLDException("renderVal not impl1");
+		}
+	}
+
+	private String genFnSQL(FilterVal val1, FilterFunc fn) {
+		List<String> allFns = Arrays.asList("year", "month", "day", "hour", "minute", "second");
+
+		//DATEPART(year, '2017/08/25')
+		if (allFns.contains(fn.fnName)) {
+			String fieldName = val1.exp.strValue();
+			String ss = val1.alias == null ? fieldName : String.format("%s.%s", val1.alias, fieldName);
+			String s = String.format("DATEPART(%s,%s)", fn.fnName, ss);
+			return s;
+		} else {
+			DeliaExceptionHelper.throwNotImplementedError("unknown filter fn '%s'", fn.fnName);
+			return null;
 		}
 	}
 }

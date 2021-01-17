@@ -332,7 +332,8 @@ public class AllBDDTests extends BDDBase {
 //		runR1000File("t0-upsert-unique.txt", 4);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
 //		runR1500File("t0-queryfn-distinct.txt", 3);
-		runR1000File("t0-upsert-mm-id.txt", 4);
+//		runR1000File("t0-upsert-mm-id.txt", 4);
+		runR1400File("t0-filterfn-date.txt", 12);
 	}
 	
 	//---
