@@ -132,8 +132,8 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.executeHLSQuery(hls, sql, qtx);
 	}
 	@Override
-	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
-		return zexec.executeHLDQuery(hld, sql, qtx);
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
+		return zexec.executeHLDQuery(hld, stmgrp, qtx);
 	}
 
 	@Override

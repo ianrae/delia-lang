@@ -369,7 +369,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	@Override
-	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
 		// TODO Auto-generated method stub
 		return null;
 	}

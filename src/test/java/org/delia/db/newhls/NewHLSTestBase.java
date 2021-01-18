@@ -102,7 +102,8 @@ public class NewHLSTestBase extends BDDBase {
 		assertEquals(expected, sql);
 	}
 	protected void chkFullSql(HLDQueryStatement hld, String expected, String...args) {
-		SqlStatement stm = mgr.generateSql(hld);
+		SqlStatementGroup stgroup = mgr.generateSql(hld);
+		SqlStatement stm = stgroup.statementL.get(0);
 		chkStm(stm, expected, args);
 	}
 	protected void chkStm(SqlStatement stm, String expected, String... args) {

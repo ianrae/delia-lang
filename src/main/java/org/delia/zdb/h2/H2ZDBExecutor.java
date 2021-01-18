@@ -358,9 +358,35 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
-		// TODO Auto-generated method stub
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
+		failIfNotInit2(); 
 		return null;
+//		SqlStatement statement = createSqlStatement(sql);
+//		for(HLSQuerySpan hlspan: hls.hlspanL) {
+//			statement.paramL.addAll(hlspan.paramL);
+//		}
+//		logSql(statement);
+//
+//		ZDBExecuteContext dbctx = createContext();
+//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+//		//TODO: do we need to catch and interpret execptions here??
+//
+//		QueryDetails details = hls.details;
+//
+//		QueryResponse qresp = new QueryResponse();
+//		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
+//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
+//		if (selectResultType.isScalarShape()) {
+//			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
+//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+//			qresp.ok = true;
+//		} else {
+//			String typeName = hls.querySpec.queryExp.getTypeName();
+//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+//			qresp.dvalList = buildDValueList(rs, dtype, details, hls);
+//			qresp.ok = true;
+//		}
+//		return qresp;
 	}
 
 	@Override

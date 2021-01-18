@@ -75,15 +75,13 @@ public class HLDManager extends ServiceBase {
 		mostRecentLetStatement = hld;
 		
 		HLDInnerManager mgr = createManager(zexec);
-		SqlStatement stm = mgr.generateSql(hld);
-		SqlStatementGroup stmgrp = new SqlStatementGroup();
-		stmgrp.add(stm);
+		SqlStatementGroup stmgrp = mgr.generateSql(hld);
 		
-		QueryResponse qresp = zexec.executeHLDQuery(hld, stm.sql, qtx);
+		QueryResponse qresp = zexec.executeHLDQuery(hld, stmgrp, qtx);
 
 		HLSManagerResult result = new HLSManagerResult();
 		result.qresp = qresp;
-		result.sql = stm.sql;
+		result.sql = stmgrp.statementL.get(0).sql;
 		return result;
 	}
 

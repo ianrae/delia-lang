@@ -32,6 +32,7 @@ public class HLDInnerManager extends ServiceBase {
 //	private SprigService sprigSvc;
 	private HLDEngine engine;
 	
+	public boolean newSelectSQLGen = true;
 	public boolean newInsertSQLGen = true;
 	public boolean newUpdateSQLGen = true;
 	public boolean newDeleteSQLGen = true;
@@ -103,14 +104,27 @@ public class HLDInnerManager extends ServiceBase {
 	
 	// -- sql generation --
 	public String generateRawSql(HLDQueryStatement hld) {
+		//TODO: can we use InsertInnerSQLGenerator here??
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		String sql = sqlgen.generateRawSql(hld.hldquery);
 		return sql;
 	}
-	public SqlStatement generateSql(HLDQueryStatement hld) {
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
-		return sql;
+	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
+		if (this.newSelectSQLGen) {
+			//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
+			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+			SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
+			SqlStatementGroup stgrp = new SqlStatementGroup();
+			stgrp.add(sql);
+			return stgrp;
+		} else {
+			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+			SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
+			SqlStatementGroup stgrp = new SqlStatementGroup();
+			stgrp.add(sql);
+			return stgrp;
+			
+		}
 	}
 	
 	

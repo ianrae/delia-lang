@@ -15,6 +15,7 @@ import org.delia.db.newhls.cond.LongFilterCond;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.StringFilterCond;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -172,10 +173,14 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15", sql);
 
-		SqlStatement stm = mgr.generateSql(hld);
+		SqlStatement stm = doQueryGenSQL(hld); 
 		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=?", "15");
 	}	
 
+	private SqlStatement doQueryGenSQL(HLDQueryStatement hld) {
+		SqlStatementGroup stgroup = mgr.generateSql(hld);
+		return stgroup.statementL.get(0);
+	}
 	@Test
 	public void testHLDField2() {
 		String src = "let x = Flight[field1 < 15]";
@@ -185,7 +190,8 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < 15", sql);
 
-		SqlStatement stm = mgr.generateSql(hld);
+		SqlStatement stm = doQueryGenSQL(hld); 
+
 		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1 < ?", "15");
 	}	
 
@@ -198,7 +204,7 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals("SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < 15", sql);
 
-		SqlStatement stm = mgr.generateSql(hld);
+		SqlStatement stm = doQueryGenSQL(hld); 
 		chkStm(stm, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE NOT t0.field1 < ?", "15");
 	}	
 	
@@ -232,7 +238,7 @@ public class NewHLSTests extends NewHLSTestBase {
 		log.log(sql);
 		assertEquals("SELECT count(*) FROM Flight as t0 WHERE t0.field1 < 15", sql);
 
-		SqlStatement stm = mgr.generateSql(hld);
+		SqlStatement stm = doQueryGenSQL(hld); 
 		chkStm(stm, "SELECT count(*) FROM Flight as t0 WHERE t0.field1 < ?", "15");
 	}	
 	

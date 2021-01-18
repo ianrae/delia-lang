@@ -280,7 +280,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return this.doExecuteQuery(hls.querySpec, qtx);
 	}
 	@Override
-	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
 		QueryResponse qresp = doExecuteQuery(hld.querySpec, qtx);
 		
 		MemFunctionHelper helper = new MemFunctionHelper(factorySvc, dbInterface, registry, createFetchRunner());
