@@ -11,7 +11,6 @@ import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsertStatement;
-import org.delia.db.newhls.cud.HLDWhereGen;
 import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
