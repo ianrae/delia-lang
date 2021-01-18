@@ -104,7 +104,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			}
 			doFilterVal(ofc.val1, hld);
 			doFilterVal(ofc.val2, hld);
-			convertValueIfNeeded(ofc.val1, ofc.val2, hld);
+			convertValueIfNeeded(ofc.val1, ofc.val2);
 		} else if (filter instanceof OpAndOrFilter) {
 			OpAndOrFilter ofc = (OpAndOrFilter) filter;
 			doInnerFilter(ofc.cond1, hld); //** recursion **
@@ -114,7 +114,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			doFilterVal(ifc.val1, hld);
 			for(FilterVal fval: ifc.list) {
 				doFilterVal(fval, hld);
-				convertValueIfNeeded(ifc.val1, fval, hld);
+				convertValueIfNeeded(ifc.val1, fval);
 			}
 		}
 	}
@@ -208,6 +208,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
 		val1.alias = assign(hld.fromAlias);
 //		convertIfNeeded(val1);
+		doConvertValueIfNeeded(val1, pkpair.type);
 	}
 	
 //	private void convertIfNeeded(FilterVal val1) {
@@ -217,15 +218,15 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 //			}
 //		}
 //	}
-	private void convertValueIfNeeded(FilterVal val1, FilterVal val2, HLDQuery hld) {
+	private void convertValueIfNeeded(FilterVal val1, FilterVal val2) {
 		//TODO. if we ever support defining date values as long, then add LONG support here
 		if (val1.isSymbol()) {
-			doConvertValueIfNeeded(val2, val1.structField.fieldType, hld);
+			doConvertValueIfNeeded(val2, val1.structField.fieldType);
 		} else if (val2.isSymbol()) {
-			doConvertValueIfNeeded(val1, val2.structField.fieldType, hld);
+			doConvertValueIfNeeded(val1, val2.structField.fieldType);
 		}
 	}
-	private void doConvertValueIfNeeded(FilterVal val2, DType fieldType, HLDQuery hld) {
+	private void doConvertValueIfNeeded(FilterVal val2, DType fieldType) {
 		//TODO. if we ever support defining date values as long, then add LONG support here
 		if (val2.valType.equals(ValType.STRING)) {
 			System.out.println("sunny2..");

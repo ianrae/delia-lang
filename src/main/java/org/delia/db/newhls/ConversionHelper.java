@@ -27,6 +27,9 @@ public class ConversionHelper {
 
 	public DValue convertDValToActual(DType fieldType, String str) {
 		if (str == null) return null;
-		return scalarBuilder.buildDate(str);
+		if (fieldType.isShape(Shape.DATE)) {
+			return scalarBuilder.buildDate(str);
+		}
+		return null;
 	}
 }
