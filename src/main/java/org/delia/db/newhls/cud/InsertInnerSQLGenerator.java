@@ -19,7 +19,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
 /**
- * Copy of InsertFragmentParser but seperated from SelectFragmentParser.
+ * 
  * 
  * single use!!!
  * @author ian

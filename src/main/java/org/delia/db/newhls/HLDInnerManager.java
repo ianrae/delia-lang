@@ -8,7 +8,6 @@ import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
-import org.delia.db.newhls.cud.HLDInsertSQLGenerator;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsertStatement;
@@ -32,10 +31,10 @@ public class HLDInnerManager extends ServiceBase {
 //	private SprigService sprigSvc;
 	private HLDEngine engine;
 	
-	public boolean newSelectSQLGen = true;
-	public boolean newInsertSQLGen = true;
-	public boolean newUpdateSQLGen = true;
-	public boolean newDeleteSQLGen = true;
+//	public boolean newSelectSQLGen = true;
+//	public boolean newInsertSQLGen = true;
+//	public boolean newUpdateSQLGen = true;
+//	public boolean newDeleteSQLGen = true;
 	private HLDEngineAssoc engineAssoc;
 
 	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
@@ -110,21 +109,12 @@ public class HLDInnerManager extends ServiceBase {
 		return sql;
 	}
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
-		if (this.newSelectSQLGen) {
-			//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
-			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-			SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
-			SqlStatementGroup stgrp = new SqlStatementGroup();
-			stgrp.add(sql);
-			return stgrp;
-		} else {
-			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-			SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
-			SqlStatementGroup stgrp = new SqlStatementGroup();
-			stgrp.add(sql);
-			return stgrp;
-			
-		}
+		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
+		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
+		SqlStatementGroup stgrp = new SqlStatementGroup();
+		stgrp.add(sql);
+		return stgrp;
 	}
 	
 	
@@ -134,48 +124,24 @@ public class HLDInnerManager extends ServiceBase {
 	}
 	
 	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
-		if (newInsertSQLGen) {
-			HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
-			SqlStatementGroup stmgrp = sqlgen.generate(hlddel);
-			return stmgrp;
-		} else {
-			HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-			SqlStatement sql = sqlgen.generateSqlStatement(hlddel);
-			SqlStatementGroup stmgrp = new SqlStatementGroup();
-			stmgrp.add(sql);
-			return stmgrp;
-		}
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		SqlStatementGroup stmgrp = sqlgen.generate(hlddel);
+		return stmgrp;
 	}
 
 	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
-		if (newInsertSQLGen) {
-			HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
-			SqlStatementGroup stmgrp = sqlgen.generate(hldins);
-			return stmgrp;
-		} else {
-			HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
-			HLDInsertSQLGenerator insertSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
-			
-			SqlStatementGroup stmgrp = insertSqlGen.generate(hldins.hldinsert.cres.dval);
-			return stmgrp;
-		}
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		SqlStatementGroup stmgrp = sqlgen.generate(hldins);
+		return stmgrp;
 	}
 
 	public SqlStatementGroup generateSql(HLDUpdateStatement hldupdate) {
-		if (newUpdateSQLGen) {
-			HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-			InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
-			SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
-			return stmgrp;
-		} else {
-			HLDWhereGen whereGen = new HLDWhereGenImpl(this, engine);
-			HLDInsertSQLGenerator updateSqlGen = new HLDInsertSQLGenerator(registry, factorySvc, datIdMap, whereGen);
-			
-			SqlStatementGroup stmgrp = updateSqlGen.generateUpdate(hldupdate.hldupdate);
-			return stmgrp;
-		}
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
+		return stmgrp;
 	}
 	
 	

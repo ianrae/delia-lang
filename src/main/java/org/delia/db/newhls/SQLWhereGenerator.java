@@ -56,7 +56,7 @@ public class SQLWhereGenerator {
 			String alias = sfc.val1.alias;
 			String fieldName = sfc.val1.structField.fieldName;
 			String valsql = renderSingleParam(sfc, paramGen, stm);
-			return String.format("%s.%s=%s", alias, fieldName, valsql);
+			return String.format("%s=%s", renderTerm(alias, fieldName), valsql);
 		} else if (filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) filter;
 			if (ofc.customRenderer != null) {
@@ -141,16 +141,16 @@ public class SQLWhereGenerator {
 		case STRING:
 			return String.format("'%s'", val1.exp.strValue());
 		case SYMBOL:
-			return String.format("%s.%s", val1.alias, val1.structField.fieldName);
+			return renderTerm(val1.alias, val1.structField.fieldName);
 		case NULL:
 			return "null";
 		case SYMBOLCHAIN:
 		{
 			SymbolChain chain = val1.asSymbolChain();
 			if (chain.el != null && chain.el.aliasNameAdditional != null) {
-				return String.format("%s.%s", chain.el.aliasNameAdditional, chain.list.get(0)); //TODO: later support list > 1
+				return renderTerm(chain.el.aliasNameAdditional, chain.list.get(0)); //TODO: later support list > 1
 			} else {
-				return String.format("%s.%s", val1.alias, chain.list.get(0)); //TODO: later support list > 1
+				return renderTerm(val1.alias, chain.list.get(0)); //TODO: later support list > 1
 			}
 		}
 		case FUNCTION:
@@ -169,12 +169,19 @@ public class SQLWhereGenerator {
 		//DATEPART(year, '2017/08/25')
 		if (allFns.contains(fn.fnName)) {
 			String fieldName = val1.exp.strValue();
-			String ss = val1.alias == null ? fieldName : String.format("%s.%s", val1.alias, fieldName);
+			String ss = val1.alias == null ? fieldName : renderTerm(val1.alias, fieldName);
 			String s = String.format("DATEPART(%s,%s)", fn.fnName, ss);
 			return s;
 		} else {
 			DeliaExceptionHelper.throwNotImplementedError("unknown filter fn '%s'", fn.fnName);
 			return null;
 		}
+	}
+
+	private String renderTerm(String alias, String fieldName) {
+		if (alias == null) {
+			return fieldName;
+		}
+		return String.format("%s.%s", alias, fieldName);
 	}
 }
