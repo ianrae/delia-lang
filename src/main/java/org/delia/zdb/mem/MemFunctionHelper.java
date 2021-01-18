@@ -100,6 +100,10 @@ public class MemFunctionHelper extends ServiceBase {
 					reOrderPagingFns(i+1, iEndSpan, list, skipList, scopeL);
 				}
 				list.add(scope);
+			} else if (obj instanceof RelationField) {
+				if (! skipList.contains(scope)) {
+					list.add(scope);
+				}
 			} else if (! skipList.contains(scope)) {
 				int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
 				reOrderPagingFns(i, iEndSpan, list, skipList, scopeL);
