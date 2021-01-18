@@ -11,6 +11,7 @@ import org.delia.db.QuerySpec;
 public class HLDQueryStatement extends HLDStatement {
 	public HLDQuery hldquery;
 	public QuerySpec querySpec;
+	// no public QueryDetails details;
 	
 	
 	public HLDQueryStatement(HLDQuery hld) {

@@ -10,7 +10,7 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * The return type of an sql statement.
- * Logical type is the type that Delia is expecing. eg Customer.count() would be long
+ * Logical type is the type that Delia is expecting. eg Customer.count() would be long
  * Physical type is what's actually in the result set. (for exists() physical type is long but logical type is boolean)
  * @author irae
  *

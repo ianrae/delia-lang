@@ -16,6 +16,7 @@ import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
+import org.delia.db.hld.HLDSelectHelper;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.hls.HLSSelectHelper;
@@ -361,29 +362,24 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
 		failIfNotInit2(); 
 		return null;
-//		SqlStatement statement = createSqlStatement(sql);
-//		for(HLSQuerySpan hlspan: hls.hlspanL) {
-//			statement.paramL.addAll(hlspan.paramL);
-//		}
+//		SqlStatement statement = stmgrp.statementL.get(0);
 //		logSql(statement);
 //
 //		ZDBExecuteContext dbctx = createContext();
 //		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-//		//TODO: do we need to catch and interpret execptions here??
+//		//TODO: do we need to catch and interpret exceptions here??
 //
-//		QueryDetails details = hls.details;
+//		QueryDetails details = hld.details;
 //
 //		QueryResponse qresp = new QueryResponse();
-//		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
-//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
+//		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
+//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
 //		if (selectResultType.isScalarShape()) {
 //			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
-//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
 //			qresp.ok = true;
 //		} else {
-//			String typeName = hls.querySpec.queryExp.getTypeName();
-//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-//			qresp.dvalList = buildDValueList(rs, dtype, details, hls);
+//			DStructType dtype = hld.hldquery.fromType;
+//			qresp.dvalList = buildDValueList(rs, dtype, details, hld);
 //			qresp.ok = true;
 //		}
 //		return qresp;
