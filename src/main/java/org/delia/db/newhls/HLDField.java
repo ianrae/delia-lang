@@ -3,6 +3,7 @@ package org.delia.db.newhls;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.TypePair;
 
 /**
 	 * Represents a field mentioned in a query. Has all the info for rendering SQL or doing MEM query.
@@ -20,6 +21,7 @@ import org.delia.type.DType;
 		
 		public Object source; //null means main struct, else is joinelement
 		public int columnIndex;
+		private TypePair pair;
 
 		@Override
 		public String toString() {
@@ -34,6 +36,13 @@ import org.delia.type.DType;
 			} else {
 				return String.format("%s.%s", alias, fieldName); //TODO do as cust later
 			}
+		}
+
+		public TypePair getAsPair() {
+			if (pair == null) {
+				pair = new TypePair(fieldName, fieldType);
+			}
+			return pair;
 		}
 		
 	}

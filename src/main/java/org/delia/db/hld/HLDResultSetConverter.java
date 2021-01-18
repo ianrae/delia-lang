@@ -224,8 +224,8 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		return resultL;
 	}
 	private void copyToRunList(ColumnRun run, int iEnd, List<HLDField> rfList) {
-//		List<HLDField> tmpL = rfList.subList(run.iStart, iEnd+1);
-//		run.runList.addAll(tmpL);
+		List<HLDField> tmpL = rfList.subList(run.iStart, iEnd+1);
+		run.runList.addAll(tmpL);
 	}
 	private DStructType getFieldStructType(HLDField rff, DStructType currentType) {
 		if (rff.structType != null) {
@@ -254,7 +254,6 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 //					DeliaError err = new DeliaError("db-resultset-error-assoc", String.format("type %s has no relation field %s",  dtype.getName(), fld));
 //					throw new DBException(err);
 //				}
-				
 //				HLDField copyrff = new HLDField(rff);
 //				copyrff.pair.name = fld;
 //				copyrff.pair.type = ddd;
@@ -270,23 +269,25 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 //					structBuilder.addField(fieldPair.name, inner);
 //				}
 //			} else {
-//				DValue inner = rsw.readFieldByColumnIndex(rff.pair, rff.columnIndex, dbctx);
-//				if (inner == null && rff.pair.name.equals(pk.getFieldName())) {
-//					//is optional relation and is null
-//					return null;
-//				}
-//				
-//				//handle relation. inner is the pkval
-//				if (inner != null && rff.pair.type.isStructShape()) {
-//					DValue pkval = inner;
-////					inner = this.createEmptyRelation(dbctx, (DStructType) rff.pair.type, rff.pair.name);
-//					inner = this.createEmptyRelation(dbctx, (DStructType) rff.structType, rff.pair.name);
-//					DRelation drel = inner.asRelation();
-//					drel.addKey(pkval);
-//				}
-//				structBuilder.addField(rff.pair.name, inner);
-//			}
+
+			TypePair pair = rff.getAsPair();
+			DValue inner = rsw.readFieldByColumnIndex(rff.getAsPair(), rff.columnIndex, dbctx);
+			if (inner == null && pair.name.equals(pk.getFieldName())) {
+				//is optional relation and is null
+				return null;
+			}
+
+			//handle relation. inner is the pkval
+			if (inner != null && pair.type.isStructShape()) {
+				DValue pkval = inner;
+				//					inner = this.createEmptyRelation(dbctx, (DStructType) rff.pair.type, rff.pair.name);
+				inner = this.createEmptyRelation(dbctx, (DStructType) rff.structType, pair.name);
+				DRelation drel = inner.asRelation();
+				drel.addKey(pkval);
+			}
+			structBuilder.addField(pair.name, inner);
 		}
+//		}
 		
 		boolean b = structBuilder.finish();
 		if (! b) {
