@@ -3,11 +3,13 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
+import org.delia.core.DateFormatService;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
@@ -85,10 +87,16 @@ public class HLDDateTests extends NewHLSTestBase {
 		SqlStatement stm = stgroup.getFirst();
 		assertEquals(1, stm.paramL.size());
 		
-		//lives in SqlStatement as string. Converted to date by ValueHelper in zdb layer
+		//Dates values are strings in delia. So in FieldVal its a ValType.STRING
+		//But during rendering sql we set FieldVal.actualDateVal to a Date so that 
+		//it can be passed as a Date to the DB
 		DValue param = stm.paramL.get(0);
 		assertEquals(Shape.DATE, param.getType().getShape());
-		assertEquals("1955", param.asString());
+		
+		ZonedDateTime zdt = param.asDate();
+		DateFormatService fmtSvc = delia.getFactoryService().getDateFormatService();
+		String ss = fmtSvc.format(zdt);
+		assertEquals("1955-01-01T00:00:00.000+0000", ss);
 		log.log(stm.sql);
 		//not alias would normally be present on orderDate
 		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE t0.orderDate = ?");
