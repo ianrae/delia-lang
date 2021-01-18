@@ -105,7 +105,7 @@ public class ValueHelper extends ServiceBase {
 		return index;
 	}
 	
-	protected DValue extractGeneratedKey(ResultSet rs, Shape keyShape, DTypeRegistry registry) throws SQLException {
+	public DValue extractGeneratedKey(ResultSet rs, Shape keyShape, DTypeRegistry registry) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(registry);
 
 		DValue genVal = null;

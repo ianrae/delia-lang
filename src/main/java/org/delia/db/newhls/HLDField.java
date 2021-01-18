@@ -19,6 +19,7 @@ import org.delia.type.DType;
 		public String asStr;
 		
 		public Object source; //null means main struct, else is joinelement
+		public int columnIndex;
 
 		@Override
 		public String toString() {
