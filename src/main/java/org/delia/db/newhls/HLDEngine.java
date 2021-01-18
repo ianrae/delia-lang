@@ -187,7 +187,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	// -- aliases --
 	public void assignAliases(HLDInsertStatement stmt) {
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		HLDAliasBuilder aliasBuilder = createAliasBuilder();
 		//H2 doesn't like tbl alias so we won't use any aliases for INSERT
 		aliasBuilder.setOutputAliases(false);
 		aliasBuilder.assignAliases(stmt.hldinsert);
@@ -196,7 +196,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		}
 	}
 	public void assignAliases(HLDUpdateStatement stmt) {
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		HLDAliasBuilder aliasBuilder = createAliasBuilder();
 		aliasBuilder.assignAliases(stmt.hldupdate);
 //		for(HLDUpdate hld: stmt.updateL) {
 //			aliasBuilder.assignAliases(hld);
@@ -217,15 +217,21 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		}
 	}
 	public void assignAliases(HLDQueryStatement stmt) {
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		HLDAliasBuilder aliasBuilder = createAliasBuilder();
 		aliasBuilder.assignAliases(stmt.hldquery);
 	}
 	public void assignAliases(HLDDeleteStatement stmt) {
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		HLDAliasBuilder aliasBuilder = createAliasBuilder(); 
 		aliasBuilder.assignAliases(stmt.hlddelete);
 		for(SimpleBase simple: stmt.moreL) {
 			aliasBuilder.assignAliases(simple);
 		}
+	}
+
+	private HLDAliasBuilder createAliasBuilder() {
+		ConversionHelper helper = new ConversionHelper(registry, factorySvc);
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr, helper);
+		return aliasBuilder;
 	}
 
 	public VarEvaluator getVarEvaluator() {

@@ -13,6 +13,10 @@ public class SqlParamGenerator {
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 	}
 	public DValue convert(FilterVal fval) {
+		if (fval.actualDateVal != null) {
+			return fval.actualDateVal;
+		}
+		
 		switch(fval.valType) {
 		case BOOLEAN:
 			return scalarBuilder.buildBoolean(fval.asBoolean());

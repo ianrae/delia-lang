@@ -19,6 +19,7 @@ import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
@@ -32,9 +33,11 @@ import org.delia.util.DValueHelper;
 public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private HLDAliasManager aliasMgr;
 	private boolean outputAliases = true; //used to disable aliases
+	private ConversionHelper conversionHelper;
 
-	public HLDAliasBuilder(HLDAliasManager aliasMgr) {
+	public HLDAliasBuilder(HLDAliasManager aliasMgr, ConversionHelper helper) {
 		this.aliasMgr = aliasMgr;
+		this.conversionHelper = helper;
 	}
 	
 	@Override
@@ -101,6 +104,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			}
 			doFilterVal(ofc.val1, hld);
 			doFilterVal(ofc.val2, hld);
+			convertValueIfNeeded(ofc.val1, ofc.val2, hld);
 		} else if (filter instanceof OpAndOrFilter) {
 			OpAndOrFilter ofc = (OpAndOrFilter) filter;
 			doInnerFilter(ofc.cond1, hld); //** recursion **
@@ -110,6 +114,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			doFilterVal(ifc.val1, hld);
 			for(FilterVal fval: ifc.list) {
 				doFilterVal(fval, hld);
+				convertValueIfNeeded(ifc.val1, fval, hld);
 			}
 		}
 	}
@@ -170,6 +175,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 				String fieldName = val1.exp.strValue();
 				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
 				val1.structField = new StructField(hld.fromType, fieldName, fieldType);
+//				convertIfNeeded(val1);
 			} 
 			val1.alias = assign(hld.fromAlias);
 		} else if (val1.isSymbolChain()) {
@@ -190,6 +196,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 					el.aliasNameAdditional = assign(infoAdd.alias);
 				}						
 			}
+//			convertIfNeeded(val1);
 		}
 	}
 	private void doFilterPKVal(FilterVal val1, HLDQuery hld) {
@@ -200,8 +207,33 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		String fieldName = pkpair.name;
 		val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
 		val1.alias = assign(hld.fromAlias);
+//		convertIfNeeded(val1);
 	}
 	
+//	private void convertIfNeeded(FilterVal val1) {
+//		if (val1.structField.fieldType != null) {
+//			if (val1.structField.fieldType.isShape(Shape.DATE)) {
+//				System.out.println("sunny..");
+//			}
+//		}
+//	}
+	private void convertValueIfNeeded(FilterVal val1, FilterVal val2, HLDQuery hld) {
+		//TODO. if we ever support defining date values as long, then add LONG support here
+		if (val1.isSymbol()) {
+			doConvertValueIfNeeded(val2, val1.structField.fieldType, hld);
+		} else if (val2.isSymbol()) {
+			doConvertValueIfNeeded(val1, val2.structField.fieldType, hld);
+		}
+	}
+	private void doConvertValueIfNeeded(FilterVal val2, DType fieldType, HLDQuery hld) {
+		//TODO. if we ever support defining date values as long, then add LONG support here
+		if (val2.valType.equals(ValType.STRING)) {
+			System.out.println("sunny2..");
+			val2.actualDateVal = conversionHelper.convertDValToActual(fieldType, val2.asString());
+		}
+	}
+
+
 	@Override
 	public void assignAliases(HLDInsert hld) {
 		if (hld.typeOrTbl.isAssocTbl) {

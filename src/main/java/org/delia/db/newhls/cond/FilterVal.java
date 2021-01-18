@@ -9,6 +9,7 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.newhls.StructField;
 import org.delia.db.newhls.ValType;
+import org.delia.type.DValue;
 
 /**
  * A value, symbol, or fn in a filter
@@ -26,6 +27,7 @@ public class FilterVal {
 	//resolved later
 	public StructField structField; //only set if SYMBOL or if SingleFilterCond
 	public String alias;
+	public DValue actualDateVal; //for date value
 
 	public FilterVal(ValType valType, Exp exp) {
 		this.valType = valType;
