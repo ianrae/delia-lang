@@ -4,18 +4,27 @@ package org.delia.db.newhls;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
+import org.delia.core.DateFormatService;
+import org.delia.core.DateFormatServiceImpl;
+import org.delia.core.TimeZoneService;
+import org.delia.core.TimeZoneServiceImpl;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
+import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DeliaException;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
+import org.delia.type.WrappedDate;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,6 +57,56 @@ public class HLDDateTests extends NewHLSTestBase {
 		chkDate("mississippi");
 	}	
 	
+	@Test
+	public void testDateParam() {
+		addOrderDate = true;
+		String fn = "month";
+		String src = String.format("let x = Flight[orderDate.%s() == 31]", fn);
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
+
+		SqlStatementGroup stgroup = mgr.generateSql(hld);
+		assertEquals(1, stgroup.size());
+		SqlStatement stm = stgroup.getFirst();
+		assertEquals(1, stm.paramL.size());
+		assertEquals(31, stm.paramL.get(0).asInt());
+		log.log(stm.sql);
+		//not alias would normally be present on orderDate
+		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE DATEPART(%s,orderDate) = ?", fn);
+		assertEquals(s, stm.sql);
+	}
+	
+	@Test
+	public void testWholeDateParam() {
+		String dateStr = "1955";
+		Date actualDateVal = createDateFromStr(dateStr);
+
+		addOrderDate = true;
+		String src = String.format("let x = Flight[orderDate == '%s']", dateStr);
+		HLDQueryStatement hld = buildFromSrc(src, 0); 
+
+		SqlStatementGroup stgroup = mgr.generateSql(hld);
+		assertEquals(1, stgroup.size());
+		SqlStatement stm = stgroup.getFirst();
+		assertEquals(1, stm.paramL.size());
+		
+		//lives in SqlStatement as string. Converted to date by ValueHelper in zdb layer
+		DValue param = stm.paramL.get(0);
+		assertEquals("1955", param.asString());
+		log.log(stm.sql);
+		//not alias would normally be present on orderDate
+		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE t0.orderDate = ?");
+		assertEquals(s, stm.sql);
+	}
+
+	//-------------------------
+	private String pkType = "int";
+	private boolean addOrderDate = false;
+
+	@Before
+	public void init() {
+	}
+	
+	
 	private void chkDate(String fn) {
 		String src = String.format("let x = Flight[orderDate.%s() == 31]", fn);
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
@@ -57,15 +116,6 @@ public class HLDDateTests extends NewHLSTestBase {
 		//not alias would normally be present on orderDate
 		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE DATEPART(%s,orderDate) = 31", fn);
 		assertEquals(s, sql);
-	}
-
-
-	//-------------------------
-	private String pkType = "int";
-	private boolean addOrderDate = false;
-
-	@Before
-	public void init() {
 	}
 
 	private FilterCond buildCond(String src) {

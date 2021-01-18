@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;
-import org.delia.type.DValue;
 
 /**
  * H2 doesn't support a prepared-statement with multiple sql statments,
@@ -31,6 +30,11 @@ public class SqlStatementGroup {
 		}
 		String sql = sc.toString(); 
 		return sql;
-		
+	}
+	public int size() {
+		return statementL.size();
+	}
+	public SqlStatement getFirst() {
+		return statementL.get(0);
 	}
 }
