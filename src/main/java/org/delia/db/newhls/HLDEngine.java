@@ -187,12 +187,13 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	// -- aliases --
 	public void assignAliases(HLDInsertStatement stmt) {
-//		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
 		//H2 doesn't like tbl alias so we won't use any aliases for INSERT
-//		aliasBuilder.assignAliases(stmt.hldinsert);
-//		for(SimpleBase simple: stmt.moreL) {
-//			aliasBuilder.assignAliases(simple);
-//		}
+		aliasBuilder.setOutputAliases(false);
+		aliasBuilder.assignAliases(stmt.hldinsert);
+		for(SimpleBase simple: stmt.moreL) {
+			aliasBuilder.assignAliases(simple);
+		}
 	}
 	public void assignAliases(HLDUpdateStatement stmt) {
 		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);

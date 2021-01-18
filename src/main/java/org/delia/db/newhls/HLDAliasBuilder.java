@@ -23,12 +23,15 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
 /**
- * Final step of creating HLDQuery is assigning aliases
+ * Final step of creating HLDQuery is assigning aliases.
+ * This classes also fills in struct info on HLDFields.
+ * Some SQL (like INSERT) don't like aliases so we have an outputAliases flag
  * @author ian
  *
  */
 public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private HLDAliasManager aliasMgr;
+	private boolean outputAliases = true; //used to disable aliases
 
 	public HLDAliasBuilder(HLDAliasManager aliasMgr) {
 		this.aliasMgr = aliasMgr;
@@ -42,7 +45,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	@Override
 	public void assignAliases(HLDQuery hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
-		hld.fromAlias = info.alias;
+		hld.fromAlias = assign(info.alias);
 		doFieldList(hld.fieldL, hld.fromType, info);
 
 		//now populate SYMBOL FilterdVal
@@ -52,13 +55,13 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		for(JoinElement el: hld.joinL) {
 			if (el.aliasName == null) {
 				AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
-				el.aliasName = info2.alias;
+				el.aliasName = assign(info2.alias);
 				info2 = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
-				el.srcAlias = info2.alias;
+				el.srcAlias = assign(info2.alias);
 				
 				List<HLDField> fields = hld.fieldL.stream().filter(x -> x.source == el).collect(Collectors.toList());
 				for(HLDField fld: fields) {
-					fld.alias = info2.alias;
+					fld.alias = assign(info2.alias);
 				}
 			}
 		}
@@ -68,16 +71,20 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			JoinElement el = findMatch(fnspec, hld);
 			if (el != null) {
 				if (el.relinfo.notContainsFK()) {
-					fnspec.structField.alias = el.aliasName;
+					fnspec.structField.alias = assign(el.aliasName);
 				} else if (el.relationField.dtype == hld.fromType) {
-					fnspec.structField.alias = hld.fromAlias;
+					fnspec.structField.alias = assign(hld.fromAlias);
 				} else {
-					fnspec.structField.alias = el.aliasName;
+					fnspec.structField.alias = assign(el.aliasName);
 				}
 			} else {
-				fnspec.structField.alias = hld.fromAlias;
+				fnspec.structField.alias = assign(hld.fromAlias);
 			}
 		}
+	}
+
+	private String assign(String alias) {
+		return outputAliases ? alias : null;
 	}
 
 	private void doFilter(HLDQuery hld) {
@@ -110,15 +117,15 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private void doFieldList(List<HLDField> fieldL, DStructType fromType, AliasInfo info) {
 		for(HLDField rf: fieldL) {
 			if (rf.structType == fromType) {
-				rf.alias = info.alias;
+				rf.alias = assign(info.alias);
 			} else {
 				if (rf.source instanceof JoinElement) {
 					JoinElement el = (JoinElement) rf.source;
 					if (el.aliasName == null) {
 						AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
-						el.aliasName = info2.alias;
+						el.aliasName = assign(info2.alias);
 						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
-						el.srcAlias = info2.alias;
+						el.srcAlias = assign(info2.alias);
 						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
 						//need to determine which instance of Customer this is!!
 					}
@@ -126,10 +133,10 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 					//need 2nd alias if M:M and a fetch
 					if (el.relinfo.isManyToMany() && el.usedForFetch()) {
 						AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
-						el.aliasNameAdditional = infoAdd.alias;
-						rf.alias = el.aliasNameAdditional;
+						el.aliasNameAdditional = assign(infoAdd.alias);
+						rf.alias = assign(el.aliasNameAdditional);
 					} else {
-						rf.alias = el.aliasName;
+						rf.alias = assign(el.aliasName);
 					}
 
 				}
@@ -139,7 +146,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	}
 	private void doFieldListAssoc(List<HLDField> fieldL, AliasInfo info) {
 		for(HLDField rf: fieldL) {
-			rf.alias = info.alias;
+			rf.alias = assign(info.alias);
 		}
 	}
 
@@ -164,23 +171,23 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
 				val1.structField = new StructField(hld.fromType, fieldName, fieldType);
 			} 
-			val1.alias = hld.fromAlias;
+			val1.alias = assign(hld.fromAlias);
 		} else if (val1.isSymbolChain()) {
 			String fieldName = val1.exp.strValue();
 			SymbolChain chain = val1.asSymbolChain();
 			DType fieldType = DValueHelper.findFieldType(chain.fromType, fieldName);
 			val1.structField = new StructField(chain.fromType, fieldName, fieldType);
 			AliasInfo info = aliasMgr.createFieldAlias(chain.fromType, fieldName);
-			val1.alias = info.alias;
+			val1.alias = assign(info.alias);
 			JoinElement el = hld.findMatch(chain.fromType, fieldName, hld);
 			if (el != null && el.aliasName == null) {
-				el.aliasName = info.alias;
+				el.aliasName = assign(info.alias);
 				info = aliasMgr.createMainTableAlias(el.relationField.dtype); //TODO fix later
-				el.srcAlias = info.alias;
+				el.srcAlias = assign(info.alias);
 				
 				if (el.relinfo.isManyToMany()) {
 					AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
-					el.aliasNameAdditional = infoAdd.alias;
+					el.aliasNameAdditional = assign(infoAdd.alias);
 				}						
 			}
 		}
@@ -192,7 +199,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
 		String fieldName = pkpair.name;
 		val1.structField = new StructField(hld.fromType, fieldName, pkpair.type);
-		val1.alias = hld.fromAlias;
+		val1.alias = assign(hld.fromAlias);
 	}
 	
 	@Override
@@ -202,7 +209,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			return;
 		}
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
-		hld.typeOrTbl.alias = info.alias;
+		hld.typeOrTbl.alias = assign(info.alias);
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 	}
 	public void assignAliasesAssoc(HLDInsert hld) {
@@ -212,12 +219,12 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	public void assignAliasesAssoc(HLDUpdate hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
-		hld.hld.fromAlias = info.alias;
+		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
 	}
 	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
-		hld.hld.fromAlias = info.alias;
+		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
 		return info;
 	}
@@ -225,15 +232,15 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		RelationInfo relinfo = hld.assocRelInfo;
 		String assocTbl = aliasMgr.getDatIdMap().getAssocTblName(relinfo.getDatId());
 		AliasInfo info = aliasMgr.createAssocAlias(relinfo.nearType, relinfo.fieldName, assocTbl);
-		hld.typeOrTbl.alias = info.alias;
+		hld.typeOrTbl.alias = assign(info.alias);
 		return info;
 	}
 	
 	@Override
 	public void assignAliases(HLDUpdate hld) {
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
-		hld.typeOrTbl.alias = info.alias;
-		hld.hld.fromAlias = info.alias;
+		hld.typeOrTbl.alias = assign(info.alias);
+		hld.hld.fromAlias = assign(info.alias);
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 		
 		//now populate SYMBOL FilterdVal
@@ -246,8 +253,8 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			info = assignAliasesAssoc(hld);
 		} else {
 			info = aliasMgr.createMainTableAlias(hld.getStructType());
-			hld.typeOrTbl.alias = info.alias;
-			hld.hld.fromAlias = info.alias;
+			hld.typeOrTbl.alias = assign(info.alias);
+			hld.hld.fromAlias = assign(info.alias);
 			
 			//now populate SYMBOL FilterdVal
 			doFilter(hld.hld);
@@ -267,6 +274,14 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	@Override
 	public String createAlias() {
 		return aliasMgr.createAlias();
+	}
+
+	public boolean isOutputAliases() {
+		return outputAliases;
+	}
+
+	public void setOutputAliases(boolean outputAliases) {
+		this.outputAliases = outputAliases;
 	}
 
 }

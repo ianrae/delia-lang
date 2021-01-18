@@ -28,7 +28,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = "insert Customer {cid: 1, x: 45}";
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "1", "45");
+		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test2() {
@@ -36,7 +36,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = "insert Address {id: 1, y: 45}";
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "1", "45");
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test2a() {
@@ -45,7 +45,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y, t0.cust) VALUES(?, ?, ?)", "1", "45", "55");
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	@Test
 	public void test2bParent() {
@@ -56,8 +56,8 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
 		dumpGrp(stmgrp);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "55", "45");
-		chkInsertSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "55", "100");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "55", "45");
+		chkInsertSql(stmgrp, 1, "UPDATE Address SET cust = ? WHERE id=?", "55", "100");
 	}
 	
 	// --- 1:N ---
@@ -67,7 +67,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = "insert Customer {cid: 1, x: 45}";
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "1", "45");
+		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test1N2() {
@@ -75,7 +75,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = "insert Address {id: 1, y: 45}";
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "1", "45");
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test1N2a() {
@@ -84,7 +84,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = addSrc(src0, "insert Address {id: 1, y: 45, cust:55}");
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y, t0.cust) VALUES(?, ?, ?)", "1", "45", "55");
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y, cust) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	@Test
 	public void test1NInsertParent() {
@@ -98,9 +98,9 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 3); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
 		dumpGrp(stmgrp);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
-		chkInsertSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
-		chkInsertSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
+		chkInsertSql(stmgrp, 1, "UPDATE Address SET cust = ? WHERE id=?", "56", "100");
+		chkInsertSql(stmgrp, 2, "UPDATE Address SET cust = ? WHERE id=?", "56", "101");
 	}
 	
 	// --- M:N ---
@@ -110,7 +110,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = "insert Customer {cid: 1, x: 45}";
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "1", "45");
+		chkInsertSql(hldins, 1, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void testMN2() {
@@ -118,7 +118,7 @@ public class InsertTests extends NewHLSTestBase {
 		String src = "insert Address {id: 1, y: 45}";
 		
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 0); 
-		chkInsertSql(hldins, 1, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "1", "45");
+		chkInsertSql(hldins, 1, "INSERT INTO Address (id, y) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void testMN2a() {
@@ -129,8 +129,8 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 1); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 2);
 		dumpGrp(stmgrp);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Address as t0 (t0.id, t0.y) VALUES(?, ?)", "100", "45");
-		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "55", "100");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Address (id, y) VALUES(?, ?)", "100", "45");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "55", "100");
 	}
 	
 	@Test
@@ -145,9 +145,9 @@ public class InsertTests extends NewHLSTestBase {
 		HLDInsertStatement hldins = buildFromSrcInsert(src, 3); 
 		SqlStatementGroup stmgrp = genInsertSql(hldins, 3);
 		dumpGrp(stmgrp);
-		chkInsertSql(stmgrp, 0, "INSERT INTO Customer as t0 (t0.cid, t0.x) VALUES(?, ?)", "56", "66");
-		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "56", "100");
-		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 as t1 (t1.leftv, t1.rightv) VALUES(?, ?)", "56", "101");
+		chkInsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?)", "56", "66");
+		chkInsertSql(stmgrp, 1, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "100");
+		chkInsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 (leftv, rightv) VALUES(?, ?)", "56", "101");
 	}
 	
 	
