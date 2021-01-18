@@ -4,6 +4,7 @@ import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
 import org.delia.db.ResultSetToDValConverter;
+import org.delia.db.hld.HLDResultSetConverterBase;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -320,11 +321,13 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 2;
+//		testIndexToRun = 2;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
-		ResultSetToDValConverter.logResultSetDetails = true;
+//		ResultSetToDValConverter.logResultSetDetails = true;
+		HLDResultSetConverterBase.logResultSetDetails = true; 
+		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
 		runR400File("t0-struct-key.txt", 9);

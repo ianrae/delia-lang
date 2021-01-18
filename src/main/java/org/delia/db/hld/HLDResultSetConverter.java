@@ -2,9 +2,7 @@ package org.delia.db.hld;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
@@ -22,7 +20,7 @@ import org.delia.relation.RelationInfo;
 import org.delia.runner.ValueException;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
@@ -51,72 +49,15 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		}
 		
 	}
-	
-	static class ObjectPool {
-		private Map<String,DValue> map = new HashMap<>(); //Customer.55 is key
-		
-		public void add(DValue dval) {
-			String key = makeKey(dval);
-			if (map.containsKey(key)) {
-				//harvest the fks
-				DStructType dtype = (DStructType) dval.getType();
-				for(TypePair pair: dtype.getAllFields()) {
-					if (pair.type.isStructShape()) {
-						DValue inner = dval.asStruct().getField(pair.name);
-						if (inner != null) {
-							DRelation drel = inner.asRelation();
-							addForeignKeys(key, pair, drel);
-						}
-					}
-				}
-			} else {
-				map.put(key, dval);
-			}
-		}
 
-		private void addForeignKeys(String key, TypePair pair, DRelation drelSrc) {
-			DValue current = map.get(key);
-			DValue inner = current.asStruct().getField(pair.name);
-			
-			//when doing fks() and are multiple relations then we load each one at a time, and one might be missing
-			if (inner != null) {
-				DRelation drelTarget = inner.asRelation();
-				
-				for(DValue srcval: drelSrc.getMultipleKeys()) {
-					if (drelTarget.findMatchingKey(srcval) == null) { //avoid duplicates
-						drelTarget.addKey(srcval);
-					}
-				}
-			}
-		}
-
-		private String makeKey(DValue dval) {
-			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
-			return makeKey(dval.getType(), pkval);
-		}
-		private String makeKey(DType dtype, DValue pkval) {
-			String key = String.format("%s.%s", dtype.getName(), pkval.asString());
-			return key;
-		}
-
-		public boolean contains(DValue dval) {
-			String key = makeKey(dval);
-			DValue current = map.get(key);
-			return current == dval;
-		}
-
-		//should always be a match
-		public DValue findMatch(DType dtype, DValue pkval) {
-			String key = makeKey(dtype, pkval);
-			return map.get(key);
-		}
-	}
+	private DTypeRegistry registry;
 	
 	public HLDResultSetConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
 		super(dbType, factorySvc, connFactory, sqlhelperFactory);
 	}
-	public HLDResultSetConverter(FactoryService factorySvc, ValueHelper valueHelper) {
+	public HLDResultSetConverter(FactoryService factorySvc, ValueHelper valueHelper, DTypeRegistry registry) {
 		super(factorySvc, valueHelper);
+		this.registry = registry;
 	}
 
 	public void init(FactoryService factorySvc) {
@@ -133,11 +74,9 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 //			}
 //		}
 		
-		HLDResultSetConverterBase.logResultSetDetails = true; //!!
-		
 		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
 		List<DValue> list = null;
-		ObjectPool pool = new ObjectPool();
+		ObjectPool pool = new ObjectPool(factorySvc, registry);
 		try {
 			list = doBuildDValueList(rsw, dbctx, hld, pool);
 		} catch (ValueException e) {

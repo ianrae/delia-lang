@@ -378,7 +378,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
 		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
 		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc));
+		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
 		if (selectResultType.isScalarShape()) {
 			QueryDetails details = new QueryDetails(); //TODO delete later
 //				return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
