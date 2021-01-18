@@ -10,7 +10,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.DBType;
-import org.delia.db.QueryDetails;
 import org.delia.db.ResultSetWrapper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
@@ -25,11 +24,11 @@ import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
-import org.delia.type.DValueImpl;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.StructValueBuilder;
 
 /**
@@ -134,6 +133,8 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 //			}
 //		}
 		
+		HLDResultSetConverterBase.logResultSetDetails = true; //!!
+		
 		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
 		List<DValue> list = null;
 		ObjectPool pool = new ObjectPool();
@@ -148,7 +149,6 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 			throw new DBException(err);
 		}
 		
-//		chkObjects(list, "addr", "cust"); //TODO remove
 		return list;
 	}
 	
@@ -195,7 +195,6 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		List<ColumnRun> resultL = new ArrayList<>();
 		ColumnRun run = new ColumnRun(0, dtype);
-//		run.fieldGroup = new FieldGroup(true, null); //main group
 		resultL.add(run);
 		
 		DStructType currentType = dtype;
@@ -205,14 +204,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 			HLDField rff = rfList.get(i);
 			
 			DStructType tmp = getFieldStructType(rff, currentType);
-			String tmpKey = rff.alias; //.fieldGroup.getUniqueKey();
+			String tmpKey = rff.alias; 
 			if (tmpKey.equals(currentKey)) {
 				iEnd = i;
 			} else {
 				copyToRunList(run, iEnd, rfList);
 				
 				run = new ColumnRun(i, tmp);
-				// TODO fix  run.fieldGroup = rff.alias; //fieldGroup;
 				resultL.add(run);
 				currentType = tmp;
 				currentKey = tmpKey;
@@ -231,13 +229,15 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		if (rff.structType != null) {
 			return rff.structType;
 		} else {
-			//alias
-			String fieldName = HLDFieldHelper.getAssocFieldName(rff);
-			DType type = DValueHelper.findFieldType(currentType, fieldName);
-			if (type != null) {
-				return currentType;
-			}
-			return (DStructType)type; //is this right?
+//			//alias
+//			String fieldName = HLDFieldHelper.getAssocFieldName(rff);
+//			DType type = DValueHelper.findFieldType(currentType, fieldName);
+//			if (type != null) {
+//				return currentType;
+//			}
+//			return (DStructType)type; //is this right?
+			DeliaExceptionHelper.throwNotImplementedError("wtf!");
+			return null;
 		}
 	}
 	
@@ -291,18 +291,18 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		boolean b = structBuilder.finish();
 		if (! b) {
-//			JTElement el = columnRun.getJTElementIfExist();
-//			boolean needAllColumns = el == null ? true : !el.usedForFK;
-//			//if we're doing .fks() then are only getting pk, not all the columns
-//			//TODO: only ignore missing field errors. other types of validation errors should still be thrown!
-//			if (needAllColumns) {
-//				throw new ValueException(structBuilder.getValidationErrors()); 
-//			}
+			//JTElement el = columnRun.getJTElementIfExist();
+			boolean needAllColumns = true; //el == null ? true : !el.usedForFK;
+			//if we're doing .fks() then are only getting pk, not all the columns
+			//TODO: only ignore missing field errors. other types of validation errors should still be thrown!
+			if (needAllColumns) {
+				throw new ValueException(structBuilder.getValidationErrors()); 
+			}
 		}
 		DValue dval = structBuilder.getDValue();
 		return dval;
 	}
-	protected DRelation addAsSubObjectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
+	private DRelation addAsSubObjectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
 		if (DValueHelper.findPrimaryKeyValue(subDVal) == null) {
 			return null;
 		}
@@ -413,40 +413,40 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 //		}
 		return false;
 	}
-	protected void chkObjects(List<DValue> list, String relField, String backField) {
-		int id = 100;
-		for(DValue dval: list) {
-			DValueImpl impl = (DValueImpl) dval;
-			if (impl.getPersistenceId() == null) {
-				impl.setPersistenceId(id++);
-			}
-			log.log("%s: %d", dval.getType().getName(), dval.getPersistenceId());
-
-			id = chkSubObj(dval, relField, id, backField);
-		}
-	}
-	private int chkSubObj(DValue dval, String relField, int id, String backField) {
-		DValue inner = dval.asStruct().getField(relField);
-		if (inner == null) {
-			return -1;
-		}
-		DRelation rel = inner.asRelation();
-		if (!rel.haveFetched()) {
-			return -1;
-		}
-		for(DValue xx: rel.getFetchedItems()) {
-			DValueImpl impl = (DValueImpl) xx;
-			if (impl.getPersistenceId() == null) {
-				impl.setPersistenceId(id++);
-			}
-			log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
-			
-			if (backField != null) {
-				id = chkSubObj(xx, backField, id, null);
-			}
-		}
-		return id;
-	}
+//	private void chkObjects(List<DValue> list, String relField, String backField) {
+//		int id = 100;
+//		for(DValue dval: list) {
+//			DValueImpl impl = (DValueImpl) dval;
+//			if (impl.getPersistenceId() == null) {
+//				impl.setPersistenceId(id++);
+//			}
+//			log.log("%s: %d", dval.getType().getName(), dval.getPersistenceId());
+//
+//			id = chkSubObj(dval, relField, id, backField);
+//		}
+//	}
+//	private int chkSubObj(DValue dval, String relField, int id, String backField) {
+//		DValue inner = dval.asStruct().getField(relField);
+//		if (inner == null) {
+//			return -1;
+//		}
+//		DRelation rel = inner.asRelation();
+//		if (!rel.haveFetched()) {
+//			return -1;
+//		}
+//		for(DValue xx: rel.getFetchedItems()) {
+//			DValueImpl impl = (DValueImpl) xx;
+//			if (impl.getPersistenceId() == null) {
+//				impl.setPersistenceId(id++);
+//			}
+//			log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
+//			
+//			if (backField != null) {
+//				id = chkSubObj(xx, backField, id, null);
+//			}
+//		}
+//		return id;
+//	}
 	
 	
 }

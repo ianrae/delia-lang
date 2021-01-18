@@ -369,7 +369,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		logSql(statement);
 
 		ZDBExecuteContext dbctx = createContext();
-		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+		ResultSet rs = conn.execQueryStatement(statement, dbctx);   // *** call the DB ***
 		//TODO: do we need to catch and interpret exceptions here??
 
 //		QueryDetails details = hld.details;
@@ -379,8 +379,8 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
 		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
 		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc));
-		QueryDetails details = new QueryDetails(); //TODO delete later
 		if (selectResultType.isScalarShape()) {
+			QueryDetails details = new QueryDetails(); //TODO delete later
 //				return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
 //			protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, HLSQueryStatement hls) {
 //				DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());

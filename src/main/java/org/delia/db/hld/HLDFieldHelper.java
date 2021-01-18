@@ -30,7 +30,7 @@ public class HLDFieldHelper {
 //			if (rf.pair != null) {
 //				sc.o(".%s)", rf.pair.name);
 //			}
-			
+			sc.o(")");
 			joiner.add(sc.toString());
 		}
 		scx.o(joiner.toString());

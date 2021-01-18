@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
@@ -16,7 +14,6 @@ import org.delia.db.DBException;
 import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryDetails;
-import org.delia.db.ResultSetWrapper;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
@@ -25,7 +22,6 @@ import org.delia.db.ValueHelper;
 //import org.delia.db.hls.RenderedFieldHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.newhls.HLDField;
-import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.dval.DValueConverterService;
@@ -43,7 +39,6 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.valuebuilder.StructValueBuilder;
 
 /**
  * @author Ian Rae
@@ -197,7 +192,7 @@ public class HLDResultSetConverterBase extends ServiceBase {
 		return list;
 	}
 	//TODO: fix. very inefficient when many fks
-	protected boolean alreadyExist(DValue inner1, DValue foreignKey) {
+	private boolean alreadyExist(DValue inner1, DValue foreignKey) {
 		Object obj2 = foreignKey.getObject();
 		DRelation drel = inner1.asRelation();
 		for(DValue keyval: drel.getMultipleKeys()) {
@@ -221,135 +216,135 @@ public class HLDResultSetConverterBase extends ServiceBase {
 		return builder.getDValue();
 	}
 
-	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLDQueryStatement hls) throws Exception {
-		List<DValue> list = new ArrayList<>();
-
-		List<HLDField> rfList = null;
-		if (hls != null) {
-			HLDFieldHelper.logRenderedFieldList(hls, log);
-			rfList = hls.hldquery.fieldL;
-		}
-		
-		HLDField rf = CollectionUtils.isEmpty(rfList) ? null : rfList.get(0);
-		if (rf != null) {
-			//add column indexes
-			int j = 1;
-			for(HLDField rff: rfList) {
-				rff.columnIndex = j++;;
-			}
-		}		
-		
-		while(rsw.next()) {  //get row
-			
-			//first columns are the main object
-			ColumnReadInfo columnReadInfo = new ColumnReadInfo();
-			DValue dval = readStructDValue(rsw, dtype, dbctx, rf, columnReadInfo);
-			list.add(dval);
-			
-			//now read sub-objects (if are any)
-			if (rf != null) {
-				//look for sub-objects to the right the main object
-				for(int k = columnReadInfo.numColumnsRead; k < rfList.size(); k++) {
-					HLDField rff =  rfList.get(k);
-					if (rff.structType != null && rff.structType != dtype) { //FUTURE: full name compare later
-						DValue subDVal= readStructDValueUsingIndex(rsw, dbctx, rff, rfList);
-						if (subDVal != null) {
-							addAsSubOjbect(dval, subDVal, rff, rfList);
-						}
-					}
-				}
-			}
-		}
-
-		return list;
-	}
-	
-	private void addAsSubOjbect(DValue dval, DValue subDVal, HLDField rff, List<HLDField> rfList) {
-		//rff is something like b.id as addr
-		String targetAlias = getAlias(rff.fieldName);
-		
-		for(HLDField rf: rfList) {
-			String alias = getAlias(rf.fieldName);
-			if (alias != null && alias.equals(targetAlias)) {
-				String fieldName = StringUtils.substringAfter(rf.fieldName, " as ");
-				DValue inner = dval.asStruct().getField(fieldName);
-				DRelation drel = inner.asRelation();
-				DRelationHelper.addToFetchedItems(drel, subDVal);
-				return;
-			}
-		}
-	}
-
-	private String getAlias(String field) {
-		return StringUtils.substringBefore(field, ".");
-	}
-
-	protected DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, HLDField rfTarget, List<HLDField> rfList) throws SQLException {
-		DStructType dtype = rfTarget.structType;
-		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
-		PrimaryKey pk = dtype.getPrimaryKey();
-		
-		for(HLDField rff: rfList) {
-			if (rff.structType == rfTarget.structType) {
-//				if (rff.pair.type.isStructShape()) {
-//					//FK only goes in child so it may not be here.
-//					//However if .fks() was used then it is
-//					String strValue = rsw.getString(rff.columnIndex);
-//					if (strValue == null) {
-//						structBuilder.addField(rff.pair.name, null);
-//					} else {
-//						DValue inner = createRelation(dtype, rff.pair, strValue, dbctx, rff);
-//						structBuilder.addField(rff.pair.name, inner);
+//	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLDQueryStatement hls) throws Exception {
+//		List<DValue> list = new ArrayList<>();
+//
+//		List<HLDField> rfList = null;
+//		if (hls != null) {
+//			HLDFieldHelper.logRenderedFieldList(hls, log);
+//			rfList = hls.hldquery.fieldL;
+//		}
+//		
+//		HLDField rf = CollectionUtils.isEmpty(rfList) ? null : rfList.get(0);
+//		if (rf != null) {
+//			//add column indexes
+//			int j = 1;
+//			for(HLDField rff: rfList) {
+//				rff.columnIndex = j++;;
+//			}
+//		}		
+//		
+//		while(rsw.next()) {  //get row
+//			
+//			//first columns are the main object
+//			ColumnReadInfo columnReadInfo = new ColumnReadInfo();
+//			DValue dval = readStructDValue(rsw, dtype, dbctx, rf, columnReadInfo);
+//			list.add(dval);
+//			
+//			//now read sub-objects (if are any)
+//			if (rf != null) {
+//				//look for sub-objects to the right the main object
+//				for(int k = columnReadInfo.numColumnsRead; k < rfList.size(); k++) {
+//					HLDField rff =  rfList.get(k);
+//					if (rff.structType != null && rff.structType != dtype) { //FUTURE: full name compare later
+//						DValue subDVal= readStructDValueUsingIndex(rsw, dbctx, rff, rfList);
+//						if (subDVal != null) {
+//							addAsSubOjbect(dval, subDVal, rff, rfList);
+//						}
 //					}
-//				} else {
-//					DValue inner = rsw.readFieldByColumnIndex(rff.pair, rff.columnIndex, dbctx);
-//					if (inner == null && rff.pair.name.equals(pk.getFieldName())) {
-//						//is optional relation and is null
-//						return null;
-//					}
-//					structBuilder.addField(rff.pair.name, inner);
 //				}
-			}
-		}
-		
-		boolean b = structBuilder.finish();
-		if (! b) {
-			throw new ValueException(structBuilder.getValidationErrors()); 
-		}
-		DValue dval = structBuilder.getDValue();
-		return dval;
-	}
-	
-	private DValue readStructDValue(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLDField rf, ColumnReadInfo rsstuff) throws SQLException {
-		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
-		for(TypePair pair: dtype.getAllFields()) {
-			
-			if (pair.type.isStructShape()) {
-				//FK only goes in child so it may not be here.
-				//However if .fks() was used then it is
-				if (rsw.hasColumn(pair.name)) {
-					rsstuff.numColumnsRead++;
-					String strValue = rsw.getString(pair.name);
-					if (strValue == null) {
-						structBuilder.addField(pair.name, null);
-					} else {
-						DValue inner = createRelation(dtype, pair, strValue, dbctx, rf);
-						structBuilder.addField(pair.name, inner);
-					}
-				}
-			} else {
-				DValue inner = readField(pair, rsw, dbctx);
-				structBuilder.addField(pair.name, inner);
-				rsstuff.numColumnsRead++;
-			}
-		}
-		boolean b = structBuilder.finish();
-		if (! b) {
-			throw new ValueException(structBuilder.getValidationErrors()); 
-		}
-		DValue dval = structBuilder.getDValue();
-		return dval;
-	}
+//			}
+//		}
+//
+//		return list;
+//	}
+//	
+//	private void addAsSubOjbect(DValue dval, DValue subDVal, HLDField rff, List<HLDField> rfList) {
+//		//rff is something like b.id as addr
+//		String targetAlias = getAlias(rff.fieldName);
+//		
+//		for(HLDField rf: rfList) {
+//			String alias = getAlias(rf.fieldName);
+//			if (alias != null && alias.equals(targetAlias)) {
+//				String fieldName = StringUtils.substringAfter(rf.fieldName, " as ");
+//				DValue inner = dval.asStruct().getField(fieldName);
+//				DRelation drel = inner.asRelation();
+//				DRelationHelper.addToFetchedItems(drel, subDVal);
+//				return;
+//			}
+//		}
+//	}
+//
+//	private String getAlias(String field) {
+//		return StringUtils.substringBefore(field, ".");
+//	}
+
+//	private DValue readStructDValueUsingIndex(ResultSetWrapper rsw, DBAccessContext dbctx, HLDField rfTarget, List<HLDField> rfList) throws SQLException {
+//		DStructType dtype = rfTarget.structType;
+//		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
+//		PrimaryKey pk = dtype.getPrimaryKey();
+//		
+//		for(HLDField rff: rfList) {
+//			if (rff.structType == rfTarget.structType) {
+////				if (rff.pair.type.isStructShape()) {
+////					//FK only goes in child so it may not be here.
+////					//However if .fks() was used then it is
+////					String strValue = rsw.getString(rff.columnIndex);
+////					if (strValue == null) {
+////						structBuilder.addField(rff.pair.name, null);
+////					} else {
+////						DValue inner = createRelation(dtype, rff.pair, strValue, dbctx, rff);
+////						structBuilder.addField(rff.pair.name, inner);
+////					}
+////				} else {
+////					DValue inner = rsw.readFieldByColumnIndex(rff.pair, rff.columnIndex, dbctx);
+////					if (inner == null && rff.pair.name.equals(pk.getFieldName())) {
+////						//is optional relation and is null
+////						return null;
+////					}
+////					structBuilder.addField(rff.pair.name, inner);
+////				}
+//			}
+//		}
+//		
+//		boolean b = structBuilder.finish();
+//		if (! b) {
+//			throw new ValueException(structBuilder.getValidationErrors()); 
+//		}
+//		DValue dval = structBuilder.getDValue();
+//		return dval;
+//	}
+//	
+//	private DValue readStructDValue(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLDField rf, ColumnReadInfo rsstuff) throws SQLException {
+//		StructValueBuilder structBuilder = new StructValueBuilder(dtype);
+//		for(TypePair pair: dtype.getAllFields()) {
+//			
+//			if (pair.type.isStructShape()) {
+//				//FK only goes in child so it may not be here.
+//				//However if .fks() was used then it is
+//				if (rsw.hasColumn(pair.name)) {
+//					rsstuff.numColumnsRead++;
+//					String strValue = rsw.getString(pair.name);
+//					if (strValue == null) {
+//						structBuilder.addField(pair.name, null);
+//					} else {
+//						DValue inner = createRelation(dtype, pair, strValue, dbctx, rf);
+//						structBuilder.addField(pair.name, inner);
+//					}
+//				}
+//			} else {
+//				DValue inner = readField(pair, rsw, dbctx);
+//				structBuilder.addField(pair.name, inner);
+//				rsstuff.numColumnsRead++;
+//			}
+//		}
+//		boolean b = structBuilder.finish();
+//		if (! b) {
+//			throw new ValueException(structBuilder.getValidationErrors()); 
+//		}
+//		DValue dval = structBuilder.getDValue();
+//		return dval;
+//	}
 
 	protected DValue createRelation(DStructType structType, TypePair targetPair, String strValue, DBAccessContext dbctx, HLDField rf) throws SQLException {
 		//get as string and let builder convert
@@ -385,7 +380,7 @@ public class HLDResultSetConverterBase extends ServiceBase {
 		}
 	}
 
-	private DValue readField(TypePair pair, ResultSetWrapper rsw, DBAccessContext dbctx) throws SQLException {
-		return rsw.readField(pair, dbctx);
-	}
+//	private DValue readField(TypePair pair, ResultSetWrapper rsw, DBAccessContext dbctx) throws SQLException {
+//		return rsw.readField(pair, dbctx);
+//	}
 }
