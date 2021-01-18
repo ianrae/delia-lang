@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import org.apache.commons.collections.CollectionUtils;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
@@ -16,11 +14,6 @@ import org.delia.db.QueryDetails;
 import org.delia.db.ResultSetWrapper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
-//import org.delia.db.hls.HLSQueryStatement;
-//import org.delia.db.hls.RenderedField;
-//import org.delia.db.hls.RenderedFieldHelper;
-import org.delia.db.hls.join.FieldGroup;
-import org.delia.db.hls.join.JTElement;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.sql.ConnectionFactory;
@@ -51,19 +44,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		public DStructType dtype;
 		public List<HLDField> runList = new ArrayList<>();
 		public int iStart;
-		public FieldGroup fieldGroup;
+//		public FieldGroup fieldGroup;
 
 		public ColumnRun(int i, DStructType dtype) {
 			this.iStart = i;
 			this.dtype = dtype;
 		}
 		
-		public JTElement getJTElementIfExist() {
-			if (fieldGroup != null) {
-				return fieldGroup.el;
-			}
-			return null;
-		}
 	}
 	
 	static class ObjectPool {
@@ -137,8 +124,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		super.init(factorySvc);
 	}
 
-	@Override
-	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLDQueryStatement hls) {
+	public List<DValue> buildDValueList(ResultSet rs, DBAccessContext dbctx, HLDQueryStatement hld) {
 //		if (hls == null) { //TODO: or if is select *
 //			return super.buildDValueList(rs, dtype, details, dbctx, hls);
 //		} else if (!hls.hlspanL.isEmpty() && !hls.hlspanL.get(0).renderedFieldL.isEmpty()) {
@@ -152,7 +138,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		List<DValue> list = null;
 		ObjectPool pool = new ObjectPool();
 		try {
-			list = doBuildDValueList(rsw, dtype, dbctx, hls, pool);
+			list = doBuildDValueList(rsw, dbctx, hld, pool);
 		} catch (ValueException e) {
 			ValueException ve = (ValueException)e;
 			throw new DBException(ve.errL);
@@ -167,25 +153,19 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 	}
 	
 	
-	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DStructType dtype, DBAccessContext dbctx, HLDQueryStatement hls, ObjectPool pool) throws Exception {
+	private List<DValue> doBuildDValueList(ResultSetWrapper rsw, DBAccessContext dbctx, HLDQueryStatement hld, ObjectPool pool) throws Exception {
 		List<DValue> list = new ArrayList<>();
 
-		List<HLDField> rfList = null;
-		if (hls != null) {
-			HLDFieldHelper.logRenderedFieldList(hls, log);
-			rfList = hls.hldquery.fieldL; //.getRenderedFields();
+		HLDFieldHelper.logRenderedFieldList(hld, log);
+		List<HLDField> rfList = hld.hldquery.fieldL; //.getRenderedFields();
+		
+		//add column indexes
+		int j = 1;
+		for(HLDField rff: rfList) {
+			rff.columnIndex = j++;;
 		}
 		
-		HLDField rf = CollectionUtils.isEmpty(rfList) ? null : rfList.get(0);
-		if (rf != null) {
-			//add column indexes
-			int j = 1;
-			for(HLDField rff: rfList) {
-				rff.columnIndex = j++;;
-			}
-		}		
-		
-		List<ColumnRun> columnRunL = buildColumnRuns(dtype, rfList);
+		List<ColumnRun> columnRunL = buildColumnRuns(hld, rfList);
 		
 		while(rsw.next()) {  //get row
 			//do main type
@@ -210,14 +190,16 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		return list;
 	}
 	
-	private List<ColumnRun> buildColumnRuns(DStructType dtype, List<HLDField> rfList) {
+	private List<ColumnRun> buildColumnRuns(HLDQueryStatement hld, List<HLDField> rfList) {
+		DStructType dtype = hld.hldquery.fromType;
+		
 		List<ColumnRun> resultL = new ArrayList<>();
 		ColumnRun run = new ColumnRun(0, dtype);
-		run.fieldGroup = new FieldGroup(true, null); //main group
+//		run.fieldGroup = new FieldGroup(true, null); //main group
 		resultL.add(run);
 		
 		DStructType currentType = dtype;
-		String currentKey = run.fieldGroup.getUniqueKey();
+		String currentKey = "t0"; //TODO: is the main type always t0???
 		int iEnd = 0;
 		for(int i = 0; i < rfList.size(); i++) {
 			HLDField rff = rfList.get(i);
@@ -308,13 +290,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		boolean b = structBuilder.finish();
 		if (! b) {
-			JTElement el = columnRun.getJTElementIfExist();
-			boolean needAllColumns = el == null ? true : !el.usedForFK;
-			//if we're doing .fks() then are only getting pk, not all the columns
-			//TODO: only ignore missing field errors. other types of validation errors should still be thrown!
-			if (needAllColumns) {
-				throw new ValueException(structBuilder.getValidationErrors()); 
-			}
+//			JTElement el = columnRun.getJTElementIfExist();
+//			boolean needAllColumns = el == null ? true : !el.usedForFK;
+//			//if we're doing .fks() then are only getting pk, not all the columns
+//			//TODO: only ignore missing field errors. other types of validation errors should still be thrown!
+//			if (needAllColumns) {
+//				throw new ValueException(structBuilder.getValidationErrors()); 
+//			}
 		}
 		DValue dval = structBuilder.getDValue();
 		return dval;
@@ -420,14 +402,14 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 	}
 	
 	private boolean isAFetchedColumn(DStructType dtype, TypePair pair, List<ColumnRun> columnRunL) {
-		for(ColumnRun run: columnRunL) {
-			if (run.fieldGroup != null && run.fieldGroup.el != null) {
-				JTElement el = run.fieldGroup.el;
-				if (el.dtype == dtype && el.fieldName.equals(pair.name)) {
-					return el.usedForFetch;
-				}
-			}
-		}
+//		for(ColumnRun run: columnRunL) {
+//			if (run.fieldGroup != null && run.fieldGroup.el != null) {
+//				JTElement el = run.fieldGroup.el;
+//				if (el.dtype == dtype && el.fieldName.equals(pair.name)) {
+//					return el.usedForFetch;
+//				}
+//			}
+//		}
 		return false;
 	}
 	protected void chkObjects(List<DValue> list, String relField, String backField) {

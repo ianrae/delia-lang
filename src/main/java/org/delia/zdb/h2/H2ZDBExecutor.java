@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
@@ -15,7 +16,9 @@ import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlExecuteContext;
+import org.delia.db.ValueHelper;
 import org.delia.db.h2.DBListingType;
+import org.delia.db.hld.HLDResultSetConverter;
 import org.delia.db.hld.HLDSelectHelper;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
@@ -30,6 +33,7 @@ import org.delia.db.sql.prepared.RawStatementGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -361,28 +365,34 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
 		failIfNotInit2(); 
-		return null;
-//		SqlStatement statement = stmgrp.statementL.get(0);
-//		logSql(statement);
-//
-//		ZDBExecuteContext dbctx = createContext();
-//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-//		//TODO: do we need to catch and interpret exceptions here??
-//
+		SqlStatement statement = stmgrp.statementL.get(0);
+		logSql(statement);
+
+		ZDBExecuteContext dbctx = createContext();
+		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+		//TODO: do we need to catch and interpret exceptions here??
+
 //		QueryDetails details = hld.details;
-//
-//		QueryResponse qresp = new QueryResponse();
-//		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
-//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
-//		if (selectResultType.isScalarShape()) {
-//			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
-//			qresp.ok = true;
-//		} else {
-//			DStructType dtype = hld.hldquery.fromType;
-//			qresp.dvalList = buildDValueList(rs, dtype, details, hld);
-//			qresp.ok = true;
-//		}
-//		return qresp;
+
+		QueryResponse qresp = new QueryResponse();
+		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
+		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
+		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc));
+		QueryDetails details = new QueryDetails(); //TODO delete later
+		if (selectResultType.isScalarShape()) {
+//				return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
+//			protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, HLSQueryStatement hls) {
+//				DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+//				return resultSetConverter.buildDValueList(rs, dtype, details, dbctx, hls);
+//			}
+			qresp.dvalList = hldRSCconverter.buildScalarResult(rs, selectResultType, details, dbactx);
+			qresp.ok = true;
+		} else {
+			qresp.dvalList = hldRSCconverter.buildDValueList(rs, dbactx, hld);
+			qresp.ok = true;
+		}
+		return qresp;
 	}
 
 	@Override

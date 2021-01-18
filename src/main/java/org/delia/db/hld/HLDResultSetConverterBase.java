@@ -93,29 +93,29 @@ public class HLDResultSetConverterBase extends ServiceBase {
 		return null;
 	}
 
-	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLDQueryStatement hls) {
-		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
-		List<DValue> list = null;
-		try {
-			list = doBuildDValueList(rsw, dtype, dbctx, hls);
-			if (details.mergeRows) {
-				if (details.isManyToMany) {
-					list = mergeRowsOneToMany(list, dtype, details, dbctx);
-				} else {
-					list = mergeRowsOneToMany(list, dtype, details, dbctx);
-				}
-			}
-		} catch (ValueException e) {
-			ValueException ve = (ValueException)e;
-			throw new DBException(ve.errL);
-		} catch (Exception e) {
-						e.printStackTrace();
-			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
-			throw new DBException(err);
-		}
-		return list;
-	}
-	
+//	public List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, DBAccessContext dbctx, HLDQueryStatement hls) {
+//		ResultSetWrapper rsw = new ResultSetWrapper(rs, valueHelper, logResultSetDetails, log);
+//		List<DValue> list = null;
+//		try {
+//			list = doBuildDValueList(rsw, dtype, dbctx, hls);
+//			if (details.mergeRows) {
+//				if (details.isManyToMany) {
+//					list = mergeRowsOneToMany(list, dtype, details, dbctx);
+//				} else {
+//					list = mergeRowsOneToMany(list, dtype, details, dbctx);
+//				}
+//			}
+//		} catch (ValueException e) {
+//			ValueException ve = (ValueException)e;
+//			throw new DBException(ve.errL);
+//		} catch (Exception e) {
+//						e.printStackTrace();
+//			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
+//			throw new DBException(err);
+//		}
+//		return list;
+//	}
+//	
 	
 	public List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details, DBAccessContext dbctx) {
 		List<DValue> list = new ArrayList<>();
