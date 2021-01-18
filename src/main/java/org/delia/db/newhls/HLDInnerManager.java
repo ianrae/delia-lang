@@ -18,6 +18,7 @@ import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 
 /**
  * Main HLD class for building sql and HLDQuery objects
@@ -30,11 +31,8 @@ public class HLDInnerManager extends ServiceBase {
 //	private SprigService sprigSvc;
 	private HLDEngine engine;
 	
-//	public boolean newSelectSQLGen = true;
-//	public boolean newInsertSQLGen = true;
-//	public boolean newUpdateSQLGen = true;
-//	public boolean newDeleteSQLGen = true;
 	private HLDEngineAssoc engineAssoc;
+private ConversionHelper conversionHelper;
 
 	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(factorySvc);
@@ -44,6 +42,7 @@ public class HLDInnerManager extends ServiceBase {
 //		this.sprigSvc = sprigSvc;
 		this.engine = new HLDEngine(registry, factorySvc, log, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
+		this.conversionHelper = new ConversionHelper(registry, factorySvc);
 	}
 	
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, VarEvaluator varEvaluator) {
@@ -111,6 +110,14 @@ public class HLDInnerManager extends ServiceBase {
 		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
+		
+		//convert strings to dates where needed
+		for(DValue dval: sql.paramL) {
+			if (dval != null) {
+				DValue xx = conversionHelper.convertDValToActual(dval.getType(), dval);
+			}
+		}
+		
 		SqlStatementGroup stgrp = new SqlStatementGroup();
 		stgrp.add(sql);
 		return stgrp;

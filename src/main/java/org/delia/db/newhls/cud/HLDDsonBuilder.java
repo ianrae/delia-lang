@@ -11,6 +11,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
+import org.delia.db.newhls.ConversionHelper;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.db.newhls.QueryBuilderHelper;
@@ -43,7 +44,8 @@ public class HLDDsonBuilder {
 	private SprigService sprigSvc;
 	private QueryBuilderHelper queryBuilderHelper;
 	private VarEvaluator varEvaluator;
-	private DValueIterator insertPrebuiltValueIterator = null; 
+	private DValueIterator insertPrebuiltValueIterator = null;
+	private ConversionHelper conversionHelper;
 
 	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc, VarEvaluator varEvaluator) {
 		this.registry = registry;
@@ -52,6 +54,7 @@ public class HLDDsonBuilder {
 		this.sprigSvc = sprigSvc;
 		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 		this.varEvaluator = varEvaluator;
+		this.conversionHelper = new ConversionHelper(registry, factorySvc);
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
@@ -150,8 +153,9 @@ public class HLDDsonBuilder {
 			}
 			if (helper.hasField(pair.name)) {
 				DValue inner = dval.asStruct().getField(pair.name);
-				fieldL.add(createFieldVal(dval, pair.name, inner, helper));
-				valueL.add(inner);
+				HLDField field = createFieldVal(dval, pair.name, inner, helper);
+				fieldL.add(field);
+				valueL.add(conversionHelper.convertDValToActual(field.fieldType, inner));
 			}
 		}
 	}

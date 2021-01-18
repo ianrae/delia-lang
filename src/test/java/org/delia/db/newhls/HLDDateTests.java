@@ -8,10 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
-import org.delia.core.DateFormatService;
-import org.delia.core.DateFormatServiceImpl;
-import org.delia.core.TimeZoneService;
-import org.delia.core.TimeZoneServiceImpl;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;
@@ -24,7 +20,7 @@ import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.WrappedDate;
+import org.delia.type.Shape;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -91,6 +87,7 @@ public class HLDDateTests extends NewHLSTestBase {
 		
 		//lives in SqlStatement as string. Converted to date by ValueHelper in zdb layer
 		DValue param = stm.paramL.get(0);
+		assertEquals(Shape.DATE, param.getType().getShape());
 		assertEquals("1955", param.asString());
 		log.log(stm.sql);
 		//not alias would normally be present on orderDate
