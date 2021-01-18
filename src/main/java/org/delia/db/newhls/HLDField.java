@@ -26,4 +26,13 @@ import org.delia.type.DType;
 			String s = String.format("%s.%s(%s,%s)", structType.getName(), fieldName, fldType, alias);
 			return s;
 		}
+		
+		public String render() {
+			if (alias == null) {
+				return fieldName;
+			} else {
+				return String.format("%s.%s", alias, fieldName); //TODO do as cust later
+			}
+		}
+		
 	}

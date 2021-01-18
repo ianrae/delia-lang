@@ -137,8 +137,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		ListWalker<HLDField> walker = new ListWalker<>(hldins.fieldL);
 		while(walker.hasNext()) {
 			HLDField ff = walker.next();
-			String s = String.format("%s.%s", ff.alias, ff.fieldName); //TODO do asstr later
-			sc.o(s);
+			sc.o(ff.render());
 			walker.addIfNotLast(sc, ", ");
 		}
 		sc.o(")");
@@ -159,7 +158,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 	
 	private void outTblName(StrCreator sc, HLDBase hld) {
-		sc.o(" %s as %s", hld.typeOrTbl.getTblName(), hld.typeOrTbl.alias);
+		sc.o(hld.typeOrTbl.render());
 	}
 
 	private SqlStatement genUpdateStatement(HLDUpdate hld) {
@@ -295,8 +294,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	
 	
 	private String renderSetField(HLDField ff) {
-		String s = String.format("%s.%s", ff.alias, ff.fieldName); //TODO do asstr later
-		return s;
+		return ff.render();
 	}
 
 	//DELETE FROM table_name WHERE condition;

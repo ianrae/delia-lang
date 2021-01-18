@@ -1,5 +1,6 @@
 package org.delia.db.newhls.cud;
 
+import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 
 public class TypeOrTable {
@@ -27,4 +28,13 @@ public class TypeOrTable {
 	public String getAlias() {
 		return alias;
 	}
+	
+	public String render() {
+		if (alias == null) {
+			return String.format(" %s", getTblName());
+		} else {
+			return String.format(" %s as %s", getTblName(), alias);
+		}
+	}
+	
 }

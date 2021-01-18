@@ -320,23 +320,14 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 1;
+		testIndexToRun = 0;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		ResultSetToDValConverter.logResultSetDetails = true;
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		
-//		runR550File("t0-multirel-NtoN-1.txt", 1);
-//		runR1350File("t0-filter-in-twitter.txt", 4);
-//		runR560File("t0-self-N1.txt", 4);
-//		runR500File("t0-relation-one-to-many.txt", 9);
-//		runR1600File("t0-fetch.txt", 3);
-//		runR560File("t0-self-NN.txt", 4);
-//		runR560File("t0-self-N1.txt", 4);
-		runR900File("t0-update-mm-all.txt", 4);
-//		runR700File("t0-insert-parent.txt", 2);
-//		runR700File("t0-insert-parent2.txt", 1);
+		runR400File("t0-struct-key.txt", 9);
 	}
 	
 	//---
