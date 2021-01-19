@@ -40,7 +40,7 @@ private ConversionHelper conversionHelper;
 		this.factorySvc = factorySvc;
 		this.datIdMap = datIdMap;
 //		this.sprigSvc = sprigSvc;
-		this.engine = new HLDEngine(registry, factorySvc, log, datIdMap, sprigSvc);
+		this.engine = new HLDEngine(registry, factorySvc, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
 		this.conversionHelper = new ConversionHelper(registry, factorySvc);
 	}

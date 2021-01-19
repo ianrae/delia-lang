@@ -43,8 +43,8 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	private HLDAliasManager aliasMgr;
 	private DValueIterator insertPrebuiltValueIterator;
 
-	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
-		super(registry, factorySvc, log,datIdMap, sprigSvc);
+	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 	}
 	

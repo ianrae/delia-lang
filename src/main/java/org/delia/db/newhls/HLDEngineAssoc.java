@@ -62,10 +62,11 @@ public class HLDEngineAssoc {
 				}
 				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.isManyToMany() || relinfo.isOneToMany()) {
-					if (updateCrudAssoc.isCrudAction(hld, relinfo.fieldName)) {
+				
+				if (updateCrudAssoc.isCrudAction(hld, relinfo.fieldName)) {
+					if (relinfo.isManyToMany() || relinfo.isOneToMany()) {
 						updateCrudAssoc.genAssocCrudZZ(hld, dval, pkval, relinfo, hldBuilder, builderAdapter, bundleL, moreL);
-					}
+					}		
 				} else if (relinfo.isManyToMany()) {
 					for(DValue fkval: inner.asRelation().getMultipleKeys()) {
 						List<AssocBundle> innerL = xdoAddAssocField(relinfo, hldQuery, queryExp, structType, dval, pkval, fkval, builderAdapter);

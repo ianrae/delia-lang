@@ -39,22 +39,14 @@ import org.delia.util.DValueHelper;
  * @author ian
  *
  */
-public abstract class HLDEngineBase {
-	protected DTypeRegistry registry;
-	protected FactoryService factorySvc;
-	protected DatIdMap datIdMap;
-	protected Log log;
-	protected SprigService sprigSvc;
+public abstract class HLDEngineBase extends HLDServiceBase {
 	protected QueryBuilderHelper queryBuilderHelper;
 	private SimpleSqlBuilder simpleBuilder;
 	protected VarEvaluator varEvaluator; //set after ctor
 
-	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
-		this.registry = registry;
+	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.factorySvc = factorySvc;
-		this.datIdMap = datIdMap;
-		this.log = log;
-		this.sprigSvc = sprigSvc;
 		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 		this.simpleBuilder = new SimpleSqlBuilder();
 	}
