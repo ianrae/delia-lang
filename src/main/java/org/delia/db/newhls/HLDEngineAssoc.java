@@ -12,7 +12,6 @@ import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.simple.SimpleBase;
-import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -31,22 +30,13 @@ import org.delia.util.DRuleHelper;
  * @author ian
  *
  */
-public class HLDEngineAssoc {
-	protected DTypeRegistry registry;
-	protected FactoryService factorySvc;
-	protected DatIdMap datIdMap;
-	protected Log log;
-	protected SprigService sprigSvc;
+public class HLDEngineAssoc extends HLDServiceBase {
 	protected VarEvaluator varEvaluator; //set after ctor
 	private HLDUpdateCrudAssoc updateCrudAssoc;
 
-	public HLDEngineAssoc(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
-		this.registry = registry;
-		this.factorySvc = factorySvc;
-		this.datIdMap = datIdMap;
-		this.log = log;
-		this.sprigSvc = sprigSvc;
-		this.updateCrudAssoc = new HLDUpdateCrudAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
+	public HLDEngineAssoc(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+		super(registry, factorySvc, datIdMap, sprigSvc);
+		this.updateCrudAssoc = new HLDUpdateCrudAssoc(registry, factorySvc, datIdMap, sprigSvc);
 	}
 	
 	public List<AssocBundle> xgenAssocField(HLDUpdate hld, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter, HLDDsonBuilder hldBuilder, List<SimpleBase> moreL) {

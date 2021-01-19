@@ -13,7 +13,6 @@ import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleInsert;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
-import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -32,22 +31,14 @@ import org.delia.util.DeliaExceptionHelper;
  * @author ian
  *
  */
-public class HLDUpdateCrudAssoc {
-	protected DTypeRegistry registry;
-	protected FactoryService factorySvc;
-	protected DatIdMap datIdMap;
-	protected Log log;
+public class HLDUpdateCrudAssoc extends HLDServiceBase {
 	protected SprigService sprigSvc;
 	protected VarEvaluator varEvaluator; //set after ctor
 	private SimpleSqlBuilder simpleBuilder;
 //	private QueryBuilderHelper queryBuilderHelper;
 
-	public HLDUpdateCrudAssoc(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
-		this.registry = registry;
-		this.factorySvc = factorySvc;
-		this.datIdMap = datIdMap;
-		this.log = log;
-		this.sprigSvc = sprigSvc;
+	public HLDUpdateCrudAssoc(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.simpleBuilder = new SimpleSqlBuilder();
 //		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 	}

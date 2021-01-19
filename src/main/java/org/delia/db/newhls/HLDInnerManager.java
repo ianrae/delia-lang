@@ -6,7 +6,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
-import org.delia.core.ServiceBase;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
@@ -25,26 +24,19 @@ import org.delia.type.DValue;
  * @author ian
  *
  */
-public class HLDInnerManager extends ServiceBase {
-	private DTypeRegistry registry;
-	private DatIdMap datIdMap;
-//	private SprigService sprigSvc;
+public class HLDInnerManager extends HLDServiceBase {
 	private HLDEngine engine;
-	
+
 	private HLDEngineAssoc engineAssoc;
-private ConversionHelper conversionHelper;
+	private ConversionHelper conversionHelper;
 
 	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
-		super(factorySvc);
-		this.registry = registry;
-		this.factorySvc = factorySvc;
-		this.datIdMap = datIdMap;
-//		this.sprigSvc = sprigSvc;
+		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.engine = new HLDEngine(registry, factorySvc, datIdMap, sprigSvc);
-		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
+		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, datIdMap, sprigSvc);
 		this.conversionHelper = new ConversionHelper(registry, factorySvc);
 	}
-	
+
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, VarEvaluator varEvaluator) {
 		engine.setVarEvaluator(varEvaluator);
 		HLDQuery hld = engine.buildQuery(queryExp);
@@ -72,7 +64,7 @@ private ConversionHelper conversionHelper;
 		}
 		return stmt;
 	}
-	
+
 	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		engine.setVarEvaluator(varEvaluator);
@@ -92,12 +84,12 @@ private ConversionHelper conversionHelper;
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		stmt.hldupdate = engine.buildUpsert(upsertExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
-//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
+		//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
 		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, upsertExp.queryExp, stmt.moreL);
 		engine.assignAliases(stmt);
 		return stmt;
 	}
-	
+
 	// -- sql generation --
 	public String generateRawSql(HLDQueryStatement hld) {
 		//TODO: can we use InsertInnerSQLGenerator here??
@@ -109,25 +101,25 @@ private ConversionHelper conversionHelper;
 		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
-		
+
 		//convert strings to dates where needed
 		for(DValue dval: sql.paramL) {
 			if (dval != null) {
 				DValue xx = conversionHelper.convertDValToActual(dval.getType(), dval);
 			}
 		}
-		
+
 		SqlStatementGroup stgrp = new SqlStatementGroup();
 		stgrp.add(sql);
 		return stgrp;
 	}
-	
-	
+
+
 	public HLDSQLGenerator createSQLGenerator() {
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		return sqlgen;
 	}
-	
+
 	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
 		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
@@ -148,7 +140,7 @@ private ConversionHelper conversionHelper;
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
 		return stmgrp;
 	}
-	
-	
-	
+
+
+
 }

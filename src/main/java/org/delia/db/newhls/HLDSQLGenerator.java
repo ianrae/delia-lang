@@ -22,21 +22,15 @@ import org.delia.util.DValueHelper;
  * @author ian
  *
  */
-public class HLDSQLGenerator {
-	private DTypeRegistry registry;
-	private FactoryService factorySvc;
-	private DatIdMap datIdMap;
+public class HLDSQLGenerator extends HLDServiceBase {
 	private SqlColumnBuilder columnBuilder;
 	private SQLWhereGenerator sqlWhereGen;
 
 	public HLDSQLGenerator(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap) {
-		this.registry = registry;
-		this.factorySvc = factorySvc;
-		this.datIdMap = datIdMap;
+		super(registry, factorySvc, datIdMap, null);
 		this.columnBuilder = new SqlColumnBuilder(datIdMap);
 		this.sqlWhereGen = new SQLWhereGenerator(registry, factorySvc);
 	}
-
 	
 	public SqlStatement generateSqlStatement(HLDQuery hld) {
 		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
