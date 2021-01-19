@@ -25,7 +25,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.StructValueBuilder;
@@ -260,13 +259,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		//rff is something like b.id as addr
 		HLDField rff = columnRun.runList.get(0);
-		String fieldName = HLDFieldHelper.getAssocFieldName(rff);
+		JoinElement jel = (JoinElement) rff.source;
+		String fieldName = jel.relationField.fieldName;
 		
 		//setting dval's relation (fieldName) to have subDVal
 		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
 		
-		TypePair tp = new TypePair(fieldName, null); //type part not needed;
-		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) dval.getType(), tp);
+		RelationInfo relinfo = jel.relinfo;
 //		if (relinfo.isManyToMany()) {
 			//do the inverse. setting subDVal's relation to have dval
 			String otherField = relinfo.otherSide.fieldName;
@@ -274,14 +273,14 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 //		}
 	}
 
-	private DRelation getOrCreateRelation(DValue subDVal, String otherField, DValue parentDVal, DBAccessContext dbctx) {
-		DValue inner2 = subDVal.asStruct().getField(otherField);
+	private DRelation getOrCreateRelation(DValue dval, String relField, DValue subDVal, DBAccessContext dbctx) {
+		DValue inner2 = dval.asStruct().getField(relField);
 		if (inner2 == null) {
-			inner2 = this.createEmptyRelation(dbctx, (DStructType) subDVal.getType(), otherField);
-			subDVal.asMap().put(otherField, inner2);
+			inner2 = createEmptyRelation(dbctx, (DStructType) dval.getType(), relField);
+			dval.asMap().put(relField, inner2);
 			DRelation drel = inner2.asRelation();
 			
-			DValue pkval = DValueHelper.findPrimaryKeyValue(parentDVal);
+			DValue pkval = DValueHelper.findPrimaryKeyValue(subDVal);
 			if (pkval == null) {
 				return null; //happens in self.join c.leftv as workers
 			}

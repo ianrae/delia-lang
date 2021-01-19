@@ -38,13 +38,14 @@ public class HLDFieldHelper {
 	}
 	
 	public static String getAssocFieldName(HLDField rff) {
-//		if (rff.structType != null) {
-//			return rff.pair.name;
-//		} else {
-//			//alias
-			String fieldName = StringUtils.substringAfter(rff.fieldName, " as ");
-			return fieldName;
-//		}
+		if (rff.structType != null) {
+			return rff.fieldName;
+		} else {
+			//alias
+//			String fieldName = StringUtils.substringAfter(rff.fieldName, " as ");
+//			return fieldName;
+			return null;
+		}
 	}
 
 }
