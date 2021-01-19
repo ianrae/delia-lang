@@ -282,10 +282,8 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 			ZDBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				//ignore empty statements. 
-				if (hld.hldupdate.isEmpty()) {
-					if (statement.owner == hld.hldupdate) {
-						continue;
-					}
+				if (statement.owner == hld.hldupdate && hld.hldupdate.isEmpty()) {
+					continue;
 				}
 				
 				int n = conn.executeCommandStatement(statement, dbctx);

@@ -49,7 +49,7 @@ public class HLDEngineAssoc {
 	public List<AssocBundle> xgenAssocField(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
 		List<AssocBundle> bundleL = new ArrayList<>();
 		
-		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+//		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				DValue inner = dval.asStruct().getField(pair.name);
