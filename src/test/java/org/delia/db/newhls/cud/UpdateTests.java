@@ -24,6 +24,15 @@ public class UpdateTests extends NewHLSTestBase {
 		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
 	}
 	@Test
+	public void test1Empty() {
+		useCustomer11Src = true;
+		String src = "update Customer[1] {}";
+		
+		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
+		assertEquals(true, hldupdate.isEmpty());
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0");
+	}
+	@Test
 	public void test2() {
 		useCustomer11Src = true;
 		String src = "update Address[100] { y: 45}";

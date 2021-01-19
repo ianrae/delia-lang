@@ -24,7 +24,6 @@ import org.delia.db.newhls.cud.HLDInsertStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.QueryResponse;
@@ -85,27 +84,6 @@ public class HLDManager extends ServiceBase {
 		return result;
 	}
 
-//	private HLSSQLGenerator chooseGenerator(ZDBExecutor zexec) {
-//		//later we will have dbspecific ones
-//		HLSSQLGenerator gen = new HLSSQLGeneratorImpl(factorySvc, miniSelectParser, varEvaluator, aliasManager, zexec.getDatIdMap());
-//		switch(dbInterface.getDBType()) {
-//		case MEM:
-//		{
-//			if (generateSQLforMemFlag) {
-//				return new DoNothingSQLGenerator(gen);
-//			} else {
-//				return new DoNothingSQLGenerator(null);
-//			}
-//		}
-//		case H2:
-//			return gen;
-//		case POSTGRES:
-//			return new PostgresHLSSQLGeneratorImpl(factorySvc, zexec.getDatIdMap(), miniSelectParser, varEvaluator, aliasManager);
-//		default:
-//			return null; //should never happen
-//		}
-//	}
-	
 	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
 		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp, varEvaluator);
