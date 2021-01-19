@@ -188,7 +188,7 @@ public class H2MigrationTests extends TopoTestBase {
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2);
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 //			zexec.getDBConnection().execStatement(statement, null);
 			ZDBExecuteContext dbctx = new ZDBExecuteContext();

@@ -219,7 +219,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		failIfNotInit1(); 
 		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 		String sql = sqlgen.generateFieldDetect(tableName, fieldName);
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
 		return execResultBoolean(conn, statement);
 	}
@@ -281,6 +281,13 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		try {
 			ZDBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
+				//ignore empty statements. 
+				if (hld.hldupdate.isEmpty()) {
+					if (statement.owner == hld.hldupdate) {
+						continue;
+					}
+				}
+				
 				int n = conn.executeCommandStatement(statement, dbctx);
 				updateCountL.add(n);
 			}

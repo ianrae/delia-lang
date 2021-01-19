@@ -49,7 +49,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 //			stmgrp.add(stmx);
 //		}
 		for(SimpleBase simple: hldins.moreL) {
-			SqlStatement stmx = new SqlStatement();
+			SqlStatement stmx = new SqlStatement(simple);
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
@@ -71,7 +71,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 //			stmgrp.add(stmx);
 //		}
 		for(SimpleBase simple: hldupdate.moreL) {
-			SqlStatement stmx = new SqlStatement();
+			SqlStatement stmx = new SqlStatement(simple);
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
@@ -109,7 +109,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		
 		for(SimpleBase simple: hld.moreL) {
-			SqlStatement stmx = new SqlStatement();
+			SqlStatement stmx = new SqlStatement(simple);
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
@@ -122,7 +122,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 	
 	private SqlStatement genInsertStatement(HLDInsert hldins) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hldins);
 		StrCreator sc = new StrCreator();
 		sc.o("INSERT INTO");
 		outTblName(sc, hldins);
@@ -162,7 +162,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 
 	private SqlStatement genUpdateStatement(HLDUpdate hld) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("UPDATE");
 		outTblName(sc, hld);
@@ -219,7 +219,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 //    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 	private SqlStatement genMergeAllIntoStatement(HLDUpdate hld) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("MERGE INTO");
 		outTblName(sc, hld);
@@ -249,7 +249,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 //  WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 	private SqlStatement genMergeIntoCTEStatement(HLDUpdate hld) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("WITH cte1 AS (SELECT ? as leftv, id as rightv");
 		stm.paramL.add(hld.dvalCTE);
@@ -268,7 +268,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 //  merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 	private SqlStatement genMergeIntoStatement(HLDUpdate hld) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("MERGE INTO");
 		outTblName(sc, hld);
@@ -299,7 +299,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 	//DELETE FROM table_name WHERE condition;
 	private SqlStatement genDeleteStatement(HLDDelete hld) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE FROM");
 		outTblName(sc, hld);
@@ -313,7 +313,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	//          delete CustomerAddressAssoc where leftv <> 100 and rightv in (SELECT id FROM Address as a WHERE a.z > ?)
 	//delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
 	private SqlStatement genDeleteInStatement(HLDDelete hld) {
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE FROM");
 		outTblName(sc, hld);

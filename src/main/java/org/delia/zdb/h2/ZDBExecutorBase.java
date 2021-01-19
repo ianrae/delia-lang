@@ -105,7 +105,7 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 	}
 
 	protected SqlStatement createSqlStatement(String sql) {
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
 		return statement;
 	}

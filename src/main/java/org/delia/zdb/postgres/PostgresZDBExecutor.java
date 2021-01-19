@@ -213,7 +213,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		failIfNotInit1(); 
 		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
 		String sql = sqlgen.generateFieldDetect(tableName, fieldName);
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
 		return execResultBoolean(conn, statement);
 	}

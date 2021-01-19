@@ -35,7 +35,7 @@ public class ListDBTablesCmd extends CmdBase {
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType());
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			zexec.getDBConnection().execStatement(statement, null);
 		} catch (Exception e) {

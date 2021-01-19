@@ -29,6 +29,15 @@ public class HLDUpdate extends HLDBase {
 		super(typeOrTbl);
 		this.hld = hld;
 	}
+	
+	/**
+	 * Return true if statement will do nothing (no need to execute on DB)
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return fieldL.isEmpty();
+	}
+	
 
 	@Override
 	public String toString() {

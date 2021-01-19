@@ -59,7 +59,7 @@ public class HLDSQLGenerator {
 		
 		sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
 		
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hld);
 		generateJoins(sc, hld, stm, paramGen);
 		generateWhere(sc, hld, stm, paramGen);
 		generateOrderBy(sc, hld);
@@ -193,7 +193,7 @@ public class HLDSQLGenerator {
 		sc.o("%s as %s", hld.fromType.getName(), hld.fromAlias);
 		
 		SqlParamGenerator paramGen = new SqlParamGenerator(registry, factorySvc); 
-		SqlStatement stm = new SqlStatement();
+		SqlStatement stm = new SqlStatement(hlddel);
 		generateWhere(sc, hld, stm, paramGen);
 		stm.sql = sc.toString();
 		return stm;
