@@ -13,6 +13,7 @@ import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.JoinElement;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.error.DeliaError;
@@ -231,7 +232,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		boolean b = structBuilder.finish();
 		if (! b) {
 			//JTElement el = columnRun.getJTElementIfExist();
-			boolean needAllColumns = true; //el == null ? true : !el.usedForFK;
+			boolean needAllColumns = !areAnyJoinsFKJoins(columnRun);
 			//if we're doing .fks() then are only getting pk, not all the columns
 			//TODO: only ignore missing field errors. other types of validation errors should still be thrown!
 			if (needAllColumns) {
@@ -240,6 +241,17 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		}
 		DValue dval = structBuilder.getDValue();
 		return dval;
+	}
+	private boolean areAnyJoinsFKJoins(ColumnRun columnRun) {
+		for(HLDField field: columnRun.runList) {
+			if (field.source instanceof JoinElement) {
+				JoinElement jel = (JoinElement) field.source;
+				if (jel.usedForFK()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	private DRelation addAsSubObjectX(DValue dval, DValue subDVal, ColumnRun columnRun, DBAccessContext dbctx) {
 		if (DValueHelper.findPrimaryKeyValue(subDVal) == null) {
