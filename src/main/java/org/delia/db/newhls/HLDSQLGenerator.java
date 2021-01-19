@@ -94,7 +94,7 @@ public class HLDSQLGenerator extends HLDServiceBase {
 			if (el.relinfo.isManyToMany()) {
 				//select t0.cid,t0.x,t1.leftv,t1.rightv from Customers as t0 join cat on t1 as t0.cid=cat.leftv where t0.cid=?
 				String tbl = datIdMap.getAssocTblName(el.relinfo.getDatId());
-				sc.o(" JOIN %s as %s", tbl, el.aliasName);
+				sc.o(" LEFT JOIN %s as %s", tbl, el.aliasName);
 				
 				String field1 = datIdMap.getAssocFieldFor(el.relinfo);
 //				String field2 = datIdMap.getAssocOtherField(el.relinfo);

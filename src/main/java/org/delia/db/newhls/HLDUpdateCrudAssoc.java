@@ -7,6 +7,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.newhls.cud.AssocBundle;
+import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
@@ -61,14 +62,13 @@ public class HLDUpdateCrudAssoc extends HLDServiceBase {
 		case "update":
 			assocCrudUpdate(hld, dval, pkval, relinfo, hldBuilder, builderAdapter, bundleL, moreL);
 			break;
-//		case "delete":
-//			assocCrudDelete(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
-//			break;
+		case "delete":
+			assocCrudDelete(hld, dval, pkval, relinfo, hldBuilder, builderAdapter, bundleL, moreL);
+			break;
 		default:
 			break;
 		}
 	}
-
 
 	private void assocCrudInsert(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo, HLDDsonBuilder hldBuilder, List<SimpleBase> moreL) {
 		DValue dd = dval.asStruct().getField(relinfo.fieldName);
@@ -99,15 +99,10 @@ public class HLDUpdateCrudAssoc extends HLDServiceBase {
 		//create a temp type for the assoc table
 		DStructType structType = hldBuilder.buildTempDatType(assocTbl, relinfo, datIdMap); 
 		
-		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
-		
 		for(int i = 0; i < list.size(); i+=2) {
 			DValue oldval = list.get(i);
 			DValue newval = list.get(i+1);
-			
-			QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld2, oldval); //leftv=55
-			QueryExp exp2 = builderSvc.createEqQuery(assocTbl, fld1, pkval); //right=100
-			QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
+			QueryExp exp3 = buildLeftRightEqQuery(assocTbl, fld2, oldval, fld1, pkval); 
 			
 			//TODO: [1] SQL: UPDATE CustomerAddressDat1 as t1 SET t1.leftv = ?, t1.rightv = ? WHERE t1.rightv = ? AND t1.leftv = ?  -- ('57','100','55','100')
 			//TODO fix later. remove set leftv. we're only changing rightv
@@ -118,6 +113,41 @@ public class HLDUpdateCrudAssoc extends HLDServiceBase {
 		}
 	}
 
+//	  delete Address[100] { delete cust:[55]}
+	// delete from CAD where leftv=55 and rightv=100
+	private void assocCrudDelete(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo,
+			HLDDsonBuilder hldBuilder, HLDQueryBuilderAdapter builderAdapter, List<AssocBundle> bundleL,
+			List<SimpleBase> moreL) {
+		
+		DValue dd = dval.asStruct().getField(relinfo.fieldName);
+		DRelation drel = dd.asRelation();
+		
+		List<DValue> list = drel.getMultipleKeys();
+		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = datIdMap.getAssocOtherField(relinfo);
+		
+		//create a temp type for the assoc table
+		DStructType structType = hldBuilder.buildTempDatType(assocTbl, relinfo, datIdMap); 
+		
+		//TODO later use an IN statement so can delete all in single HLDDelete
+		for(DValue fkval: list) {
+			QueryExp exp3 = buildLeftRightEqQuery(assocTbl, fld2, fkval, fld1, pkval); 
+			HLDDelete hlddel = new HLDDelete(assocTbl, true);
+			hlddel.hld = builderAdapter.buildQueryEx(exp3, structType);
+			hlddel.assocRelInfo = relinfo;
+			
+			AssocBundle bundle = new AssocBundle();
+			bundle.hlddelete = hlddel;
+			bundleL.add(bundle);
+		}
+	}
 
-
+	private QueryExp buildLeftRightEqQuery(String assocTbl, String fld2, DValue fkval, String fld1, DValue pkval) {
+		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
+		QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld2, fkval); //leftv=55
+		QueryExp exp2 = builderSvc.createEqQuery(assocTbl, fld1, pkval); //right=100
+		QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
+		return exp3;
+	}
 }
