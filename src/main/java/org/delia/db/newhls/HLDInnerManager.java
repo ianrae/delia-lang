@@ -141,6 +141,12 @@ public class HLDInnerManager extends HLDServiceBase {
 		return stmgrp;
 	}
 
+	public SqlStatementGroup generateSql(HLDUpsertStatement hldupsert) {
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		SqlStatementGroup stmgrp = sqlgen.generate(hldupsert);
+		return stmgrp;
+	}
 
 
 }

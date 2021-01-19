@@ -105,6 +105,37 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		return stmgrp;
 	}
+	public SqlStatementGroup generate(HLDUpsertStatement hldupsert) {
+		SqlStatementGroup stmgrp = new SqlStatementGroup();
+		
+		SqlStatement stm = genUpsertStatement(hldupsert.hldupdate);
+		stmgrp.add(stm);
+		
+		for(SimpleBase simple: hldupsert.moreL) {
+			SqlStatement stmx = new SqlStatement(simple);
+			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
+			stmgrp.add(stmx);
+		}
+		
+		
+		for(AssocBundle bundle: hldupsert.assocBundleL) {
+			if (bundle.hlddelete != null) {
+				SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
+				stmgrp.add(stmx);
+			}
+			if (bundle.hldupdate != null) {
+				SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
+				stmgrp.add(stmx);
+			}
+		}
+		return stmgrp;
+	}
+	
+	
+	private SqlStatement genUpsertStatement(HLDUpdate hldupdate) {
+		return genMergeIntoStatement(hldupdate);
+	}
+
 	public SqlStatementGroup generate(HLDDeleteStatement hld) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		

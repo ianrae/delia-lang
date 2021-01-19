@@ -128,6 +128,10 @@ public class HLDManager extends ServiceBase {
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldupd);
 	}
+	public SqlStatementGroup generateSQL(HLDUpsertStatement hldupd, ZDBExecutor zexec) {
+		HLDInnerManager mgr = createManager(zexec);
+		return mgr.generateSql(hldupd);
+	}
 	
 	protected HLDInnerManager createManager(ZDBExecutor zexec) {
 		return new HLDInnerManager(registry, factorySvc, zexec.getDatIdMap(), sprigSvc);

@@ -21,7 +21,8 @@ public class UpsertTests extends NewHLSTestBase {
 		String src = "upsert Customer[1] {x: 45}";
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		chkUpsertSql(hldupsert, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+//		chkUpsertSql(hldupsert, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Customer as t1 KEY(t0.cid) VALUES(?, ?)", "45", "1");
 	}
 	@Test
 	public void test2() {

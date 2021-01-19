@@ -82,7 +82,7 @@ public class RelNNTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr1', 'addr2')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 2); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv,t3.rightv,t2.id,t2.y,t1.leftv,t4.id,t4.y,t3.leftv FROM Customer as t0 LEFT JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t1.rightv=t2.id LEFT JOIN CustomerAddressDat2 as t3 ON t0.cid=t3.leftv LEFT JOIN Address as t4 ON t3.rightv=t4.id WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.rightv,t3.rightv,t2.id,t2.y,t1.leftv,t4.id,t4.y,t3.leftv FROM Customer as t0 LEFT JOIN CustomerAddressDat1 as t1 ON t0.cid=t1.leftv JOIN Address as t2 ON t1.rightv=t2.id LEFT JOIN CustomerAddressDat2 as t3 ON t0.cid=t3.leftv JOIN Address as t4 ON t3.rightv=t4.id WHERE t0.cid=?", "55");
 	}
 	
 	@Test
