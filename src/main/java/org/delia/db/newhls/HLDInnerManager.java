@@ -80,7 +80,6 @@ private ConversionHelper conversionHelper;
 		engineAssoc.setVarEvaluator(varEvaluator);
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
-//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
 		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp, stmt.moreL);
 		engine.assignAliases(stmt);
 		return stmt;

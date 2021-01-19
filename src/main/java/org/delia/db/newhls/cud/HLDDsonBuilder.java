@@ -412,7 +412,7 @@ public class HLDDsonBuilder {
 //		}
 //	}
 
-	private DStructType buildTempDatType(String assocTbl, RelationInfo relinfo, DatIdMap datIdMap) {
+	public DStructType buildTempDatType(String assocTbl, RelationInfo relinfo, DatIdMap datIdMap) {
 		TypePair pkpair1 = DValueHelper.findPrimaryKeyFieldPair(relinfo.nearType);
 		TypePair pkpair2 = DValueHelper.findPrimaryKeyFieldPair(relinfo.farType);
 		boolean flipped = datIdMap.isFlipped(relinfo);
