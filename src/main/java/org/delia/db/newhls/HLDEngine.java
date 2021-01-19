@@ -8,7 +8,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
-import org.delia.db.QuerySpec;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDelete;
@@ -108,17 +107,6 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		DValue pkval = getUpdatePK(hld.hld); 
 		generateParentUpdateIfNeeded(structType, hld.cres.dval, pkval, moreL);
 	}
-	private DValue getUpdatePK(HLDQuery hld) {
-		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
-		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
-		if (hld.filter instanceof SingleFilterCond) {
-			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
-			DValue pkval = pgen.convert(sfc.val1);
-			return pkval;
-		} else {
-			return null;
-		}
-	}
 
 	public void addAssocInserts(HLDInsert hld, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
@@ -139,13 +127,13 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
 		HLDDsonBuilder hldBuilder = getHldBuilder(); 
-		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
-		return doBuildUpdate(hld, updateExp.queryExp);
+		HLDUpdate hld = hldBuilder.buildUpdate(updateExp, this);
+		return hld;// doBuildUpdate(hld, updateExp.queryExp);
 	}
 	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
 		HLDDsonBuilder hldBuilder = getHldBuilder(); 
-		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp);
-		doBuildUpdate(hld, upsertExp.queryExp);
+		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp, this);
+		//doBuildUpdate(hld, upsertExp.queryExp);
 		
 		//the filter for upsert must not be [true].
 		//other filters are allowed as long as they result in only a single row
@@ -168,14 +156,6 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 			}
 		} 
 		return false;
-	}
-
-	private HLDUpdate doBuildUpdate(HLDUpdate hld, QueryExp queryExp) {
-		hld.hld = buildQuery(queryExp);
-		hld.querySpec = new QuerySpec();
-		hld.querySpec.evaluator = null; //TOOD fix
-		hld.querySpec.queryExp = queryExp;
-		return hld;
 	}
 
 	// -- aliases --

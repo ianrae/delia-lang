@@ -11,8 +11,10 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.QueryBuilderService;
+import org.delia.db.QuerySpec;
 import org.delia.db.newhls.ConversionHelper;
 import org.delia.db.newhls.HLDField;
+import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.db.newhls.HLDServiceBase;
 import org.delia.db.newhls.QueryBuilderHelper;
@@ -111,23 +113,40 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		return cres;
 	}
 
-	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
+	public HLDUpdate buildUpdate(UpdateStatementExp updateExp, HLDQueryBuilderAdapter builderAdapter) {
 		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
 		HLDUpdate hldupdate = new HLDUpdate(new TypeOrTable(dtype), null);//fill in later
-		
+		doBuildUpdate(hldupdate, updateExp.queryExp, builderAdapter);
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		
 		fillArraysForUpdate(hldupdate);
 		return hldupdate;
 	}
-	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
+	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp, HLDQueryBuilderAdapter builderAdapter) {
 		DStructType dtype = (DStructType) registry.getType(upsertExp.typeName);
 		HLDUpsert hld = new HLDUpsert(new TypeOrTable(dtype), null);//fill in later
-		
+		doBuildUpdate(hld, upsertExp.queryExp, builderAdapter);
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+		hld.mergeKey = pkpair.name;
 		hld.cres = buildValue(false, dtype, upsertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
+		
+		DValue pkval = getUpdatePK(hld.hld);
+		if (pkval != null && hld.cres.dval != null) { //no errors?
+			hld.cres.dval.asMap().put(pkpair.name, pkval);
+		}
+		
 		fillArraysForUpdate(hld);
 		return hld;
 	}
+	private HLDUpdate doBuildUpdate(HLDUpdate hld, QueryExp queryExp, HLDQueryBuilderAdapter builderAdapter) {
+		hld.hld = builderAdapter.buildQuery(queryExp);
+		hld.querySpec = new QuerySpec();
+		hld.querySpec.evaluator = null; //TOOD fix
+		hld.querySpec.queryExp = queryExp;
+		return hld;
+	}
+
+	
 
 	private void fillArraysForUpdate(HLDUpdate hldupdate) {
 		fillArrays(hldupdate.cres.dval, hldupdate.fieldL, hldupdate.valueL, false);

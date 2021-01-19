@@ -3,9 +3,11 @@ package org.delia.db.newhls;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 
 /**
  * Base class for most of the HLD generators.
@@ -30,17 +32,29 @@ public abstract class HLDServiceBase extends ServiceBase {
 		this.sprigSvc = sprigSvc;
 	}
 
-	public QueryBuilderHelper getQueryBuilderHelper() {
+	protected QueryBuilderHelper getQueryBuilderHelper() {
 		if (queryBuilderHelper == null) {
 			this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 		}
 		return queryBuilderHelper;
 	}
 
-	public SimpleSqlBuilder getSimpleBuilder() {
+	protected SimpleSqlBuilder getSimpleBuilder() {
 		if (simpleBuilder == null) {
 			this.simpleBuilder = new SimpleSqlBuilder();
 		}
 		return simpleBuilder;
+	}
+	
+	protected DValue getUpdatePK(HLDQuery hld) {
+		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
+		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
+		if (hld.filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
+			DValue pkval = pgen.convert(sfc.val1);
+			return pkval;
+		} else {
+			return null;
+		}
 	}
 }
