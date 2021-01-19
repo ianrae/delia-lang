@@ -95,7 +95,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 	}
 
 	protected HLDUpdate addFkUpdateStatement(RelationInfo relinfo, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 
 		DStructType targetType = relinfo.farType;
 		QueryExp queryExp = queryBuilderHelper.buildPKQueryExp(targetType, fkval); //queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
@@ -109,7 +109,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 	}
 
 	protected void addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
 			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
@@ -182,7 +182,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 	}
 
 	protected void addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 
 		DStructType targetType = relinfo.farType;
 		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
@@ -195,7 +195,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		moreL.add(simple);
 	}
 	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 		DStructType targetType = relinfo.nearType;
 		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
 		hld.hld = buildPKQuery(relinfo, false);
@@ -205,7 +205,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		attachSubSelect(hld.hld, hldquery2.originalQueryExp, relinfo.otherSide.fieldName);
 	}
 	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		DStructType targetType;
@@ -238,7 +238,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
 	}
 	protected void mmaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		if (! areSame) {
@@ -315,7 +315,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		return insertL;
 	}
 	protected HLDInsert addAssocInsertStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 
 		HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
 		return hld;

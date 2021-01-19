@@ -27,13 +27,13 @@ import org.delia.type.DValue;
  */
 public class InsertInnerSQLGenerator extends ServiceBase { 
 
-	private DTypeRegistry registry;
+//	private DTypeRegistry registry;
 	private HLDSQLGenerator otherSqlGen;
 	private SimpleSqlGenerator simpleSqlGenerator;
 
 	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
 		super(factorySvc);
-		this.registry = registry;
+//		this.registry = registry;
 		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 	}

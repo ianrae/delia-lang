@@ -99,7 +99,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		return hld;
 	}
 	private HLDDsonBuilder createDsonBuilder() {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, log, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
 		hldBuilder.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		return hldBuilder;
 	}

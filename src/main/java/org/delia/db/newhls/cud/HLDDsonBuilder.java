@@ -14,6 +14,7 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.newhls.ConversionHelper;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryBuilderAdapter;
+import org.delia.db.newhls.HLDServiceBase;
 import org.delia.db.newhls.QueryBuilderHelper;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -36,22 +37,15 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.PartialStructValueBuilder;
 
-public class HLDDsonBuilder {
+public class HLDDsonBuilder extends HLDServiceBase {
 
-	private DTypeRegistry registry;
-	private Log log;
-	private FactoryService factorySvc;
-	private SprigService sprigSvc;
 	private QueryBuilderHelper queryBuilderHelper;
 	private VarEvaluator varEvaluator;
 	private DValueIterator insertPrebuiltValueIterator = null;
 	private ConversionHelper conversionHelper;
 
-	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, Log log, SprigService sprigSvc, VarEvaluator varEvaluator) {
-		this.registry = registry;
-		this.log = log;
-		this.factorySvc = factorySvc;
-		this.sprigSvc = sprigSvc;
+	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, SprigService sprigSvc, VarEvaluator varEvaluator) {
+		super(registry, factorySvc, null, sprigSvc); //TODO do we need datIdMap
 		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 		this.varEvaluator = varEvaluator;
 		this.conversionHelper = new ConversionHelper(registry, factorySvc);
