@@ -137,7 +137,8 @@ public class HLDBasicTests extends NewHLSTestBase {
 		String src = "let x = Flight[dtfield=='2020']";
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
 		chkRawSql(hld,  "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dtfield = '2020'");
-		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dtfield = ?", "2020");
+		String dateStr = "2020-01-01T00:00:00.000+0000";
+		chkFullSql(hld, "SELECT t0.id,t0.bfield,t0.nfield,t0.lfield,t0.dfield,t0.strfield,t0.dtfield FROM Flight as t0 WHERE t0.dtfield = ?", dateStr);
 	}	
 	
 
