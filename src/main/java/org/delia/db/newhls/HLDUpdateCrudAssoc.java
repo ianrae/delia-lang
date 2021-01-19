@@ -40,7 +40,7 @@ public class HLDUpdateCrudAssoc {
 	protected SprigService sprigSvc;
 	protected VarEvaluator varEvaluator; //set after ctor
 	private SimpleSqlBuilder simpleBuilder;
-	private QueryBuilderHelper queryBuilderHelper;
+//	private QueryBuilderHelper queryBuilderHelper;
 
 	public HLDUpdateCrudAssoc(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -49,7 +49,7 @@ public class HLDUpdateCrudAssoc {
 		this.log = log;
 		this.sprigSvc = sprigSvc;
 		this.simpleBuilder = new SimpleSqlBuilder();
-		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
+//		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 	}
 	
 
@@ -105,17 +105,22 @@ public class HLDUpdateCrudAssoc {
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 		
+		//create a temp type for the assoc table
+		DStructType structType = hldBuilder.buildTempDatType(assocTbl, relinfo, datIdMap); 
+		
 		QueryBuilderService builderSvc = factorySvc.getQueryBuilderService();
 		
 		for(int i = 0; i < list.size(); i+=2) {
 			DValue oldval = list.get(i);
 			DValue newval = list.get(i+1);
 			
-			QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld1, oldval); //leftv=55
-			QueryExp exp2 = builderSvc.createEqQuery(assocTbl, fld2, pkval); //right=100
+			QueryExp exp1 = builderSvc.createEqQuery(assocTbl, fld2, oldval); //leftv=55
+			QueryExp exp2 = builderSvc.createEqQuery(assocTbl, fld1, pkval); //right=100
 			QueryExp exp3 = builderSvc.createAndQuery(assocTbl, exp1, exp2);
 			
-			HLDUpdate hldup = hldBuilder.buildAssocUpdateOther(builderAdapter, relinfo, exp3, pkval, newval, datIdMap, false);
+			//TODO: [1] SQL: UPDATE CustomerAddressDat1 as t1 SET t1.leftv = ?, t1.rightv = ? WHERE t1.rightv = ? AND t1.leftv = ?  -- ('57','100','55','100')
+			//TODO fix later. remove set leftv. we're only changing rightv
+			HLDUpdate hldup = hldBuilder.buildAssocUpdateOne(builderAdapter, relinfo, exp3, structType, pkval, newval, datIdMap);
 			AssocBundle bundle = new AssocBundle();
 			bundle.hldupdate = hldup;
 			bundleL.add(bundle);
