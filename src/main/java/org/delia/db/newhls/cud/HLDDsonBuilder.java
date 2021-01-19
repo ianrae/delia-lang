@@ -216,7 +216,7 @@ public class HLDDsonBuilder {
 		String fld2 = datIdMap.getAssocOtherField(relinfo);
 		
 		HLDInsert hldins = new HLDInsert(new TypeOrTable(assocTbl, true));
-		
+		hldins.assocRelInfo = relinfo;
 		ConversionResult cres = new ConversionResult();
 		cres.localET = new SimpleErrorTracker(log);
 

@@ -49,7 +49,7 @@ public class HLDEngineAssoc {
 		this.updateCrudAssoc = new HLDUpdateCrudAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
 	
-	public List<AssocBundle> xgenAssocField(HLDUpdate hld, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter, List<SimpleBase> moreL) {
+	public List<AssocBundle> xgenAssocField(HLDUpdate hld, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter, HLDDsonBuilder hldBuilder, List<SimpleBase> moreL) {
 		List<AssocBundle> bundleL = new ArrayList<>();
 		HLDQuery hldQuery = hld.hld;
 		
@@ -64,7 +64,7 @@ public class HLDEngineAssoc {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
 				if (relinfo.isManyToMany() || relinfo.isOneToMany()) {
 					if (updateCrudAssoc.isCrudAction(hld, relinfo.fieldName)) {
-						updateCrudAssoc.genAssocCrudZZ(hld, relinfo, moreL);
+						updateCrudAssoc.genAssocCrudZZ(hld, dval, pkval, relinfo, hldBuilder, moreL);
 					}
 				} else if (relinfo.isManyToMany()) {
 					for(DValue fkval: inner.asRelation().getMultipleKeys()) {

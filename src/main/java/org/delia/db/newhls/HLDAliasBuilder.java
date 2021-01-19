@@ -309,10 +309,12 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		return aliasMgr.createAlias();
 	}
 
+	@Override
 	public boolean isOutputAliases() {
 		return outputAliases;
 	}
 
+	@Override
 	public void setOutputAliases(boolean outputAliases) {
 		this.outputAliases = outputAliases;
 	}

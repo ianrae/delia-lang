@@ -19,4 +19,6 @@ public interface HLDAliasBuilderAdapter {
 	void pushAliasScope(String scope);
 	void popAliasScope();
 	String createAlias();
+	boolean isOutputAliases();
+	void setOutputAliases(boolean outputAliases);
 }

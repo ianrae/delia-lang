@@ -6,14 +6,21 @@ import java.util.List;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.db.newhls.cud.AssocBundle;
+import org.delia.db.newhls.cud.HLDDsonBuilder;
+import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.simple.SimpleBase;
+import org.delia.db.newhls.simple.SimpleInsert;
+import org.delia.db.newhls.simple.SimpleSqlBuilder;
+import org.delia.db.newhls.simple.SimpleUpdate;
 import org.delia.db.sql.fragment.UpdateStatementFragment;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
+import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -31,6 +38,7 @@ public class HLDUpdateCrudAssoc {
 	protected Log log;
 	protected SprigService sprigSvc;
 	protected VarEvaluator varEvaluator; //set after ctor
+	private SimpleSqlBuilder simpleBuilder;
 
 	public HLDUpdateCrudAssoc(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -38,6 +46,8 @@ public class HLDUpdateCrudAssoc {
 		this.datIdMap = datIdMap;
 		this.log = log;
 		this.sprigSvc = sprigSvc;
+		this.simpleBuilder = new SimpleSqlBuilder();
+
 	}
 	
 
@@ -47,13 +57,13 @@ public class HLDUpdateCrudAssoc {
 		}
 		return false;
 	}
-	public void genAssocCrudZZ(HLDUpdate hld, RelationInfo relinfo, List<SimpleBase> moreL) {
+	public void genAssocCrudZZ(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo, HLDDsonBuilder hldBuilder, List<SimpleBase> moreL) {
 		System.out.println("cedar");
 		String fieldName = relinfo.fieldName;
 		String assocAction = hld.cres.assocCrudMap.get(fieldName);
 		switch(assocAction) {
 		case "insert":
-			assocCrudInsert(hld, relinfo, moreL);
+			assocCrudInsert(hld, dval, pkval, relinfo, hldBuilder, moreL);
 			break;
 //		case "update":
 //			assocCrudUpdate(selectFrag, structType, mmMap, fieldName, info, selectFrag.whereL, selectFrag.tblFrag.alias, selectFrag.statement);
@@ -67,9 +77,14 @@ public class HLDUpdateCrudAssoc {
 	}
 
 
-	private Object assocCrudInsert(HLDUpdate hld, RelationInfo relinfo, List<SimpleBase> moreL) {
-		// TODO Auto-generated method stub
-		return null;
+	private void assocCrudInsert(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo, HLDDsonBuilder hldBuilder, List<SimpleBase> moreL) {
+		
+		DValue dd = dval.asStruct().getField(relinfo.fieldName);
+		DRelation drel = dd.asRelation();
+		DValue fkval = drel.getForeignKey(); //TODO can there ever be more than one?
+		HLDInsert hldins = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
+		SimpleInsert simple = simpleBuilder.buildFrom(hldins);
+		moreL.add(simple);
 	}
 	
 }

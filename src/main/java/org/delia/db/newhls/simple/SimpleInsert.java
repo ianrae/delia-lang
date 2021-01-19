@@ -14,15 +14,20 @@ import org.delia.db.newhls.cud.HLDInsert;
  */
 public class SimpleInsert extends SimpleBase {
 	public List<SqlColumn> fieldL = new ArrayList<>();
-	public HLDInsert hld; //for aliases
+	public HLDInsert hld; //for aliases and values
 	
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
+		boolean save = aliasBuilder.isOutputAliases();
+		aliasBuilder.setOutputAliases(false);
+		
 		aliasBuilder.assignAliases(hld);
 		for(SqlColumn column: fieldL) {
 			column.alias = hld.getMainAlias();
 		}
 		tblFrag.alias = hld.getMainAlias();
+		
+		aliasBuilder.setOutputAliases(save);
 	}
 
 }
