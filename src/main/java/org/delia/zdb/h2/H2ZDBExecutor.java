@@ -270,9 +270,25 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stgroup) {
+		if (stgroup.statementL.isEmpty()) {
+			return 0; //nothing to update
+		}
+
+		logStatementGroup(stgroup);
+		int updateCount = 0;
+		List<Integer > updateCountL = new ArrayList<>();
+		try {
+			ZDBExecuteContext dbctx = createContext();
+			for(SqlStatement statement: stgroup.statementL) {
+				int n = conn.executeCommandStatement(statement, dbctx);
+				updateCountL.add(n);
+			}
+			updateCount = findUpdateCount("update", updateCountL, stgroup);
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
+		return updateCount;
 	}
 
 	@Override
@@ -327,8 +343,20 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		}
 	}
 	@Override
-	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
-		//TODO
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stgroup) {
+		if (stgroup.statementL.isEmpty()) {
+			return; //nothing to delete
+		}
+
+		logStatementGroup(stgroup);
+		try {
+			ZDBExecuteContext dbctx = createContext();
+			for(SqlStatement statement: stgroup.statementL) {
+				conn.execStatement(statement, dbctx);
+			}
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
 	}
 
 	@Override
