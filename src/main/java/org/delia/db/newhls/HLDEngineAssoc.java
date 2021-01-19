@@ -30,7 +30,7 @@ import org.delia.util.DRuleHelper;
  * @author ian
  *
  */
-public class HLDEngineAssoc extends HLDServiceBase {
+public class HLDEngineAssoc extends HLDExtendedServiceBase {
 	protected VarEvaluator varEvaluator; //set after ctor
 	private HLDUpdateCrudAssoc updateCrudAssoc;
 
@@ -113,7 +113,7 @@ public class HLDEngineAssoc extends HLDServiceBase {
 //	    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //	    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 		
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDeleteAll(builderAdapter, queryExp, relinfo, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
@@ -131,7 +131,7 @@ public class HLDEngineAssoc extends HLDServiceBase {
 //		    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 //		    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();getHldBuilder();
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 
@@ -150,7 +150,7 @@ public class HLDEngineAssoc extends HLDServiceBase {
 //  	    WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1
 
 		//TODO write this!!!
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDeleteOther(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 

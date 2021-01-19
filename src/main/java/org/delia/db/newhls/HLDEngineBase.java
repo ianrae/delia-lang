@@ -19,7 +19,6 @@ import org.delia.db.newhls.simple.SimpleSelect;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.db.newhls.simple.SimpleUpdate;
 import org.delia.db.newhls.simple.SubSelectRenderer;
-import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -39,14 +38,13 @@ import org.delia.util.DValueHelper;
  * @author ian
  *
  */
-public abstract class HLDEngineBase extends HLDServiceBase {
+public abstract class HLDEngineBase extends HLDExtendedServiceBase {
 	protected QueryBuilderHelper queryBuilderHelper;
 	private SimpleSqlBuilder simpleBuilder;
 	protected VarEvaluator varEvaluator; //set after ctor
 
 	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
-		this.factorySvc = factorySvc;
 		this.queryBuilderHelper = new QueryBuilderHelper(registry, factorySvc);
 		this.simpleBuilder = new SimpleSqlBuilder();
 	}
@@ -95,7 +93,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 	}
 
 	protected HLDUpdate addFkUpdateStatement(RelationInfo relinfo, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 
 		DStructType targetType = relinfo.farType;
 		QueryExp queryExp = queryBuilderHelper.buildPKQueryExp(targetType, fkval); //queryBuilderSvc.createPrimaryKeyQuery(targetType.getName(), fkval);
@@ -109,7 +107,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 	}
 
 	protected void addFkUpdateChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, HLDQuery hldQuery2, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		if (hldQuery2.isPKQuery()) {
 			DStructType targetType = relinfo.farType;
 			QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
@@ -182,7 +180,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 	}
 
 	protected void addFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, DValue pkval, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 
 		DStructType targetType = relinfo.farType;
 		QueryExp queryExp = queryBuilderHelper.createEqQuery(targetType, relinfo.otherSide.fieldName, pkval);
@@ -195,7 +193,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		moreL.add(simple);
 	}
 	protected void xaddFkDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		DStructType targetType = relinfo.nearType;
 		HLDDelete hld = hldBuilder.buildSimpleDelete(targetType);
 		hld.hld = buildPKQuery(relinfo, false);
@@ -205,7 +203,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		attachSubSelect(hld.hld, hldquery2.originalQueryExp, relinfo.otherSide.fieldName);
 	}
 	protected void xxaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		DStructType targetType;
@@ -238,7 +236,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		ofc.customRenderer = new HavingOneSubSelectRenderer(factorySvc, registry, simpleSel, relinfo, flipped, isParent);
 	}
 	protected void mmaddFkDeleteChildForDeleteParentStatement(RelationInfo relinfo, HLDQuery hldquery2, DValue pkval, List<SimpleBase> moreL, HLDQueryBuilderAdapter builderAdapter) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 
 		boolean areSame = relinfo.nearType == hldquery2.fromType;
 		if (! areSame) {
@@ -315,8 +313,7 @@ public abstract class HLDEngineBase extends HLDServiceBase {
 		return insertL;
 	}
 	protected HLDInsert addAssocInsertStatement(RelationInfo relinfo, String pkFieldName, DValue pkval, DValue fkval) {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
-
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		HLDInsert hld = hldBuilder.buildAssocInsert(relinfo, pkval, fkval, datIdMap);
 		return hld;
 	}

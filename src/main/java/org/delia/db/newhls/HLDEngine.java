@@ -20,7 +20,6 @@ import org.delia.db.newhls.cud.HLDUpdate;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsert;
 import org.delia.db.newhls.simple.SimpleBase;
-import org.delia.log.Log;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -94,14 +93,8 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	
 	
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
-		HLDInsert hld = hldBuilder.buildInsert(insertExp);
+		HLDInsert hld = getHldBuilder().buildInsert(insertExp);
 		return hld;
-	}
-	private HLDDsonBuilder createDsonBuilder() {
-		HLDDsonBuilder hldBuilder = new HLDDsonBuilder(registry, factorySvc, sprigSvc, varEvaluator);
-		hldBuilder.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
-		return hldBuilder;
 	}
 
 	public void addParentUpdates(HLDInsert hld, List<SimpleBase> moreL) {
@@ -140,18 +133,18 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		DStructType structType = hld.getStructType();
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		DValue pkval = getUpdatePK(hld.hld); 
-		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
+		HLDDsonBuilder hldBuilder = getHldBuilder(); 
 		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld, queryExp, structType, hld.cres.dval, pkval, this, hldBuilder, moreL); 
 		return parentUpdates;
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
-		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
+		HLDDsonBuilder hldBuilder = getHldBuilder(); 
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp);
 		return doBuildUpdate(hld, updateExp.queryExp);
 	}
 	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
-		HLDDsonBuilder hldBuilder = createDsonBuilder(); 
+		HLDDsonBuilder hldBuilder = getHldBuilder(); 
 		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp);
 		doBuildUpdate(hld, upsertExp.queryExp);
 		

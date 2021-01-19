@@ -17,7 +17,6 @@ import org.delia.db.newhls.HLDQueryBuilderAdapter;
 import org.delia.db.newhls.HLDServiceBase;
 import org.delia.db.newhls.QueryBuilderHelper;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.ConversionResult;
 import org.delia.runner.DValueIterator;
