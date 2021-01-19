@@ -22,7 +22,7 @@ public class UpsertTests extends NewHLSTestBase {
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
 //		chkUpsertSql(hldupsert, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
-		chkUpsertSql(hldupsert, 1, "MERGE INTO Customer as t1 KEY(cid) VALUES(?, ?)", "45", "1");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test2() {
@@ -30,7 +30,8 @@ public class UpsertTests extends NewHLSTestBase {
 		String src = "upsert Address[100] { y: 45}";
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		chkUpsertSql(hldupsert, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+//		chkUpsertSql(hldupsert, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?)", "100", "45");
 	}
 	@Test
 	public void test2a() {
@@ -41,7 +42,7 @@ public class UpsertTests extends NewHLSTestBase {
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
 		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 1);
 		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "1");
+		chkUpsertSql(stmgrp, 0, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?, ?)", "1", "45", "55");
 	}
 	
 	// --- 1:N ---
@@ -51,7 +52,8 @@ public class UpsertTests extends NewHLSTestBase {
 		String src = "upsert Customer[1] {x: 45}";
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		chkUpsertSql(hldupsert, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+//		chkUpsertSql(hldupsert, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void test1N2() {
@@ -59,7 +61,8 @@ public class UpsertTests extends NewHLSTestBase {
 		String src = "upsert Address[100] {y: 45}";
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		chkUpsertSql(hldupsert, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+//		chkUpsertSql(hldupsert, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?)", "100", "45");
 	}
 	@Test
 	public void test1N2a() {
@@ -71,7 +74,8 @@ public class UpsertTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 1);
 		dumpGrp(stmgrp);
 		
-		chkUpsertSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "100");
+//		chkUpsertSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "100");
+		chkUpsertSql(stmgrp, 0, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?, ?)", "100", "45", "55");
 	}
 	@Test
 	public void test1NInsertParent() {
@@ -85,7 +89,7 @@ public class UpsertTests extends NewHLSTestBase {
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
 		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 3);
 		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
+		chkUpsertSql(stmgrp, 0, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "56", "66");
 		chkUpsertSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
 		chkUpsertSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
 	}
@@ -97,7 +101,7 @@ public class UpsertTests extends NewHLSTestBase {
 		String src = "upsert Customer[1] { x: 45}";
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		chkUpsertSql(hldupsert, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "1", "45");
 	}
 	
 	@Test
@@ -106,7 +110,7 @@ public class UpsertTests extends NewHLSTestBase {
 		String src = "upsert Address[1] { y: 45}";
 		
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
-		chkUpsertSql(hldupsert, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "1");
+		chkUpsertSql(hldupsert, 1, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?)", "1", "45");
 	}
 	@Test
 	public void testMNScenario1() {
@@ -117,7 +121,7 @@ public class UpsertTests extends NewHLSTestBase {
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
 		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 3);
 		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpsertSql(stmgrp, 0, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?)", "100", "45");
 		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
 		chkUpsertSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
 	}

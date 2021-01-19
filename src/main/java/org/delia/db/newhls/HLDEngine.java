@@ -128,12 +128,11 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp) {
 		HLDDsonBuilder hldBuilder = getHldBuilder(); 
 		HLDUpdate hld = hldBuilder.buildUpdate(updateExp, this);
-		return hld;// doBuildUpdate(hld, updateExp.queryExp);
+		return hld;
 	}
 	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
 		HLDDsonBuilder hldBuilder = getHldBuilder(); 
 		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp, this);
-		//doBuildUpdate(hld, upsertExp.queryExp);
 		
 		//the filter for upsert must not be [true].
 		//other filters are allowed as long as they result in only a single row

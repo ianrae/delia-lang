@@ -135,7 +135,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 			hld.cres.dval.asMap().put(pkpair.name, pkval);
 		}
 		
-		fillArraysForUpdate(hld);
+		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
 		return hld;
 	}
 	private HLDUpdate doBuildUpdate(HLDUpdate hld, QueryExp queryExp, HLDQueryBuilderAdapter builderAdapter) {

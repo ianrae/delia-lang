@@ -306,7 +306,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		
 		sc.o(" KEY(%s)", hld.mergeKey);
 		
-		sc.o(" VALUES ");
+		sc.o(" VALUES(");
 		int index = 0;
 		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
 		while(walker.hasNext()) {
@@ -318,6 +318,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			walker.addIfNotLast(sc, ", ");
 			index++;
 		}
+		sc.o(")");
 		
 		stm.sql = sc.toString();
 		return stm;
