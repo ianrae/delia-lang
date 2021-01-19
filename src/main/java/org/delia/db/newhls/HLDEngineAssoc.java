@@ -10,6 +10,8 @@ import org.delia.core.FactoryService;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.cud.AssocBundle;
 import org.delia.db.newhls.cud.HLDDsonBuilder;
+import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
@@ -19,7 +21,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
-import org.delia.util.DValueHelper;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -37,6 +38,7 @@ public class HLDEngineAssoc {
 	protected Log log;
 	protected SprigService sprigSvc;
 	protected VarEvaluator varEvaluator; //set after ctor
+	private HLDUpdateCrudAssoc updateCrudAssoc;
 
 	public HLDEngineAssoc(DTypeRegistry registry, FactoryService factorySvc, Log log, DatIdMap datIdMap, SprigService sprigSvc) {
 		this.registry = registry;
@@ -44,10 +46,12 @@ public class HLDEngineAssoc {
 		this.datIdMap = datIdMap;
 		this.log = log;
 		this.sprigSvc = sprigSvc;
+		this.updateCrudAssoc = new HLDUpdateCrudAssoc(registry, factorySvc, log, datIdMap, sprigSvc);
 	}
 	
-	public List<AssocBundle> xgenAssocField(HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter) {
+	public List<AssocBundle> xgenAssocField(HLDUpdate hld, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter, List<SimpleBase> moreL) {
 		List<AssocBundle> bundleL = new ArrayList<>();
+		HLDQuery hldQuery = hld.hld;
 		
 //		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
 		for(TypePair pair: structType.getAllFields()) {
@@ -58,7 +62,11 @@ public class HLDEngineAssoc {
 				}
 				
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.isManyToMany()) {
+				if (relinfo.isManyToMany() || relinfo.isOneToMany()) {
+					if (updateCrudAssoc.isCrudAction(hld, relinfo.fieldName)) {
+						updateCrudAssoc.genAssocCrudZZ(hld, relinfo, moreL);
+					}
+				} else if (relinfo.isManyToMany()) {
 					for(DValue fkval: inner.asRelation().getMultipleKeys()) {
 						List<AssocBundle> innerL = xdoAddAssocField(relinfo, hldQuery, queryExp, structType, dval, pkval, fkval, builderAdapter);
 //						insert.assocRelInfo = relinfo;
@@ -69,7 +77,7 @@ public class HLDEngineAssoc {
 		}
 		return bundleL;
 	}
-	public List<AssocBundle> xdoAddAssocField(RelationInfo relinfo, HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
+	private List<AssocBundle> xdoAddAssocField(RelationInfo relinfo, HLDQuery hldQuery, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, DValue fkval, HLDQueryBuilderAdapter builderAdapter) {
 		
 		//3 scenarios here:
 		// 1. updating all records in assoc table

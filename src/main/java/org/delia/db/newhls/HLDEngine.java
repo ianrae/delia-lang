@@ -136,11 +136,11 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		List<HLDInsert> parentUpdates = generateAssocInsertsIfNeeded(structType, hld.cres.dval, moreL);
 		return parentUpdates;
 	}
-	public List<AssocBundle> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp) {
+	public List<AssocBundle> addMoreAssoc(HLDUpdate hld, HLDEngineAssoc engineAssoc, QueryExp queryExp, List<SimpleBase> moreL) {
 		DStructType structType = hld.getStructType();
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		DValue pkval = getUpdatePK(hld.hld); 
-		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld.hld, queryExp, structType, hld.cres.dval, pkval, this); 
+		List<AssocBundle> parentUpdates = engineAssoc.xgenAssocField(hld, queryExp, structType, hld.cres.dval, pkval, this, moreL); 
 		return parentUpdates;
 	}
 

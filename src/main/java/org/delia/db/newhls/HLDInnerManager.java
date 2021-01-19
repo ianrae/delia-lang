@@ -81,7 +81,7 @@ private ConversionHelper conversionHelper;
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 //		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
-		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp);
+		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp, stmt.moreL);
 		engine.assignAliases(stmt);
 		return stmt;
 	}
@@ -94,7 +94,7 @@ private ConversionHelper conversionHelper;
 		stmt.hldupdate = engine.buildUpsert(upsertExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 //		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
-		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, upsertExp.queryExp);
+		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, upsertExp.queryExp, stmt.moreL);
 		engine.assignAliases(stmt);
 		return stmt;
 	}
