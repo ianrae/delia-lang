@@ -39,7 +39,7 @@ public class HLDEngineAssoc extends HLDExtendedServiceBase {
 		this.updateCrudAssoc = new HLDUpdateCrudAssoc(registry, factorySvc, datIdMap, sprigSvc);
 	}
 	
-	public List<AssocBundle> xgenAssocField(HLDUpdate hld, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter, HLDDsonBuilder hldBuilder, List<SimpleBase> moreL) {
+	public List<AssocBundle> xgenAssocField(HLDUpdate hld, QueryExp queryExp, DStructType structType, DValue dval, DValue pkval, HLDQueryBuilderAdapter builderAdapter, List<SimpleBase> moreL) {
 		List<AssocBundle> bundleL = new ArrayList<>();
 		HLDQuery hldQuery = hld.hld;
 		
@@ -55,7 +55,7 @@ public class HLDEngineAssoc extends HLDExtendedServiceBase {
 				
 				if (updateCrudAssoc.isCrudAction(hld, relinfo.fieldName)) {
 					if (relinfo.isManyToMany() || relinfo.isOneToMany()) {
-						updateCrudAssoc.genAssocCrudZZ(hld, dval, pkval, relinfo, hldBuilder, builderAdapter, bundleL, moreL);
+						updateCrudAssoc.genAssocCrudZZ(hld, dval, pkval, relinfo, builderAdapter, bundleL, moreL);
 					}		
 				} else if (relinfo.isManyToMany()) {
 					for(DValue fkval: inner.asRelation().getMultipleKeys()) {

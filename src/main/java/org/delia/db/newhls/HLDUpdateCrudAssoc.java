@@ -32,7 +32,7 @@ import org.delia.util.DeliaExceptionHelper;
  * @author ian
  *
  */
-public class HLDUpdateCrudAssoc extends HLDServiceBase {
+public class HLDUpdateCrudAssoc extends HLDExtendedServiceBase {
 	protected SprigService sprigSvc;
 	protected VarEvaluator varEvaluator; //set after ctor
 	private SimpleSqlBuilder simpleBuilder;
@@ -51,10 +51,11 @@ public class HLDUpdateCrudAssoc extends HLDServiceBase {
 		}
 		return false;
 	}
-	public void genAssocCrudZZ(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo, HLDDsonBuilder hldBuilder, HLDQueryBuilderAdapter builderAdapter, List<AssocBundle> bundleL, List<SimpleBase> moreL) {
+	public void genAssocCrudZZ(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo, HLDQueryBuilderAdapter builderAdapter, List<AssocBundle> bundleL, List<SimpleBase> moreL) {
 		System.out.println("cedar");
 		String fieldName = relinfo.fieldName;
 		String assocAction = hld.cres.assocCrudMap.get(fieldName);
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		switch(assocAction) {
 		case "insert":
 			assocCrudInsert(hld, dval, pkval, relinfo, hldBuilder, moreL);

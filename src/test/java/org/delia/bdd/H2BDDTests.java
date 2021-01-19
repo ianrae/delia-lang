@@ -320,7 +320,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 4;
+		testIndexToRun = 0;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -328,11 +328,10 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-		
-//		runR400File("t0-struct-key.txt", 9);
-//		runR800File("t0-delete.txt", 4);
-//		runR900File("t0-update.txt", 7);
-		runR950File("t0-crud-assoc-insert.txt", 6);
+		runR1000File("t0-upsert.txt", 4);
+//		runR1350File("t0-filter-op-relation.txt", 14);
+//		runR1400File("t0-filterfn-date.txt", 12);
+//		runR400File("t0-field-serial.txt", 7);
 	}
 	
 	//---
