@@ -114,8 +114,12 @@ public class HLDFieldBuilder {
 			RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(spec.structType, new TypePair(spec.fieldName, null));
 			//only get fk fields if is a join for it
 			JoinElement el = optJoin.orElse(null);
+			if (el == null) { //due to upgrade the fetchspec may have been cleared
+				el = findMatch(spec, hld.joinL);
+			}
+			
 			if (!relinfo.isManyToMany() || (el != null && el.usedForFK())) {
-				addField(hld.fieldL, reftype, pkpair).source = optJoin.get();
+				addField(hld.fieldL, reftype, pkpair).source = el;
 			}
 		} else {
 			for(TypePair pair: reftype.getAllFields()) {
@@ -139,6 +143,17 @@ public class HLDFieldBuilder {
 				}
 			}
 		}
+	}
+
+	private JoinElement findMatch(FetchSpec spec, List<JoinElement> joinL) {
+		for(JoinElement el: joinL) {
+			if (el.relationField.dtype == spec.structType) {
+				if (el.relationField.fieldName.equals(spec.fieldName)) {
+					return el;
+				}
+			}
+		}
+		return null;
 	}
 
 }

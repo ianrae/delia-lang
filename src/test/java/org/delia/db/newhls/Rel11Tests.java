@@ -24,7 +24,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Customer[addr < 111].fks()";
 
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t1.id < ?", "111");
 	}
 	
 	@Test

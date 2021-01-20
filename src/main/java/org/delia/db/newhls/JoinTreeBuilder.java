@@ -149,7 +149,7 @@ public class JoinTreeBuilder {
 				if (el.usedForFetch()) {  //full fetch?
 					optExisting.get().fetchSpec.isFK = false; //upgrade from fk to fetch
 				} else if (el.fetchSpec == null) {
-					optExisting.get().fetchSpec.isFK = false; //upgrade
+					optExisting.get().fetchSpec = null;//.isFK = false; //upgrade
 				}
 			}
 			return optExisting.get();
