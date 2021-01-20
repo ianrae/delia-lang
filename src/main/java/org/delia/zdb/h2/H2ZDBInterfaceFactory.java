@@ -82,4 +82,9 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 		execLog.setLevel(sqlLog.getLevel());
 		return new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 	}
+
+	@Override
+	public void setDBErrorConverter(DBErrorConverter errorConverter) {
+		this.errorConverter = errorConverter;
+	}
 }

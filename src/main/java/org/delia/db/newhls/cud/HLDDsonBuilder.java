@@ -58,11 +58,13 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		if (hldins.buildSuccessful()) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hldins.cres.dval.getType());
-			DValue pkval = hldins.cres.dval.asMap().get(pkpair.name);
-			if (pkval != null) {
-				DStructType structType = (DStructType) hldins.cres.dval.getType();
-				if (structType.fieldIsSerial(pkpair.name)) {
-					DeliaExceptionHelper.throwError("serial-value-cannot-be-provided", "Type %s, field %s - do not specify a value for a serial field", structType.getName(), pkpair.name);
+			if (pkpair != null) {
+				DValue pkval = hldins.cres.dval.asMap().get(pkpair.name);
+				if (pkval != null) {
+					DStructType structType = (DStructType) hldins.cres.dval.getType();
+					if (structType.fieldIsSerial(pkpair.name)) {
+						DeliaExceptionHelper.throwError("serial-value-cannot-be-provided", "Type %s, field %s - do not specify a value for a serial field", structType.getName(), pkpair.name);
+					}
 				}
 			}
 			
