@@ -34,14 +34,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	public static boolean useSqlGenFactory = true;
 
 
-//	private DTypeRegistry registry;
+	private DTypeRegistry registry;
 	private HLDSQLGenerator otherSqlGen;
 	private SimpleSqlGenerator simpleSqlGenerator;
 	private UpsertInnerSQLGenerator upsertSQLGen;
 
 	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
 		super(factorySvc);
-//		this.registry = registry;
+		this.registry = registry;
 		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 		this.upsertSQLGen = new UpsertInnerSQLGenerator(factorySvc);
@@ -144,7 +144,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	private SqlStatement genUpsertStatement(HLDUpsert hld) {
 		if (hld.noUpdateFlag) {
 			if (useSqlGenFactory) {
-				SqlGeneratorFactory genfact = new SqlGeneratorFactory();
+				SqlGeneratorFactory genfact = creatSqlGenFactory();
 				SqlMergeUsingStatement sqlMergeInto = genfact.createMergeUsing();
 				sqlMergeInto.init(hld);
 				return sqlMergeInto.render();
@@ -153,7 +153,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = new SqlGeneratorFactory();
+			SqlGeneratorFactory genfact = creatSqlGenFactory();
 			SqlMergeIntoStatement sqlMergeInto = genfact.createMergeInto();
 			sqlMergeInto.init(hld);
 			return sqlMergeInto.render();
@@ -180,7 +180,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	
 	private SqlStatement genInsertStatement(HLDInsert hldins) {
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = new SqlGeneratorFactory();
+			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
 			SqlInsertStatement sqlMergeInto = genfact.createInsert();
 			sqlMergeInto.init(hldins);
 			return sqlMergeInto.render();
@@ -222,6 +222,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return stm;
 	}
 	
+	private SqlGeneratorFactory creatSqlGenFactory() {
+		return new SqlGeneratorFactory(registry, factorySvc);
+	}
+
 	private DValue renderValue(DValue inner) {
 		if (inner != null && inner.getType().isRelationShape()) {
 			DRelation drel = inner.asRelation();

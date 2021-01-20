@@ -6,7 +6,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 public class SqlTableNameClause implements SqlClauseGenerator {
 	
 	private TypeOrTable typeOrTbl;
-	
+
 	public void init(TypeOrTable typeOrTbl) {
 		this.typeOrTbl = typeOrTbl;
 	}

@@ -1,6 +1,5 @@
 package org.delia.db.newhls.cud;
 
-import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 
 public class TypeOrTable {

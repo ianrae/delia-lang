@@ -13,6 +13,9 @@ import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlMergeUsingStatement;
+import org.delia.db.sqlgen.SqlSelectStatement;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -98,6 +101,16 @@ public class HLDInnerManager extends HLDServiceBase {
 		return sql;
 	}
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
+		if (InsertInnerSQLGenerator.useSqlGenFactory) {
+			SqlGeneratorFactory genfact = new SqlGeneratorFactory(registry, factorySvc);
+			SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
+			sqlMergeInto.init(hld.hldquery);
+			SqlStatement stm = sqlMergeInto.render();
+			SqlStatementGroup stgrp = new SqlStatementGroup();
+			stgrp.add(stm);
+			return stgrp;
+		}
+		
 		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
 		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
 		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
