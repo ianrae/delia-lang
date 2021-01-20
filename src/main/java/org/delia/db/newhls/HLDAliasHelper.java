@@ -46,7 +46,9 @@ public class HLDAliasHelper {
 		if (fieldType.isStructShape()) {
 			RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, new TypePair(fieldName, fieldType));
 			hack.relinfo = relinfo;
-			if (relinfo.isParent) {
+			if (relinfo.isManyToMany()) {
+				
+			} else if (relinfo.isParent) {
 				hack.isFlipped = true;
 				//Customer.addr doesn't exist in db. change to Address.id
 				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relinfo.farType);

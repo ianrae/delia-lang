@@ -3,6 +3,7 @@ package org.delia.db.newhls;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.hls.AliasInfo;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterVal;
@@ -22,6 +23,7 @@ import org.delia.type.DType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * Final step of creating HLDQuery is assigning aliases.
@@ -35,11 +37,13 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private boolean outputAliases = true; //used to disable aliases
 	private ConversionHelper conversionHelper;
 	private HLDAliasHelper aliasHelper;
+	private DatIdMap datIdMap;
 
-	public HLDAliasBuilder(HLDAliasManager aliasMgr, ConversionHelper helper) {
+	public HLDAliasBuilder(HLDAliasManager aliasMgr, ConversionHelper helper, DatIdMap datIdMap) {
 		this.aliasMgr = aliasMgr;
 		this.conversionHelper = helper;
 		this.aliasHelper = new HLDAliasHelper(aliasMgr);
+		this.datIdMap = datIdMap;
 	}
 	
 	@Override
@@ -120,6 +124,31 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			}
 		}
 	}
+	
+	private void adjustAssocFilter(HLDUpdate hld) {
+		RelationInfo relinfo = hld.assocRelInfo;
+		FilterCond filter = hld.hld.filter;
+		if (filter instanceof SingleFilterCond) {
+			SingleFilterCond sfc = (SingleFilterCond) filter;
+			if (sfc.val1.structField != null) {
+				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(sfc.val1.structField.dtype);
+				if (pkpair != null && pkpair.name.equals(sfc.val1.structField.fieldName)) {
+					String fld1 = datIdMap.getAssocFieldFor(relinfo);
+					//replace t0.cid with t1.leftv
+					sfc.val1.structField = new StructField(relinfo.nearType, fld1, pkpair.type); //TODO: nearType is wrong WRONG!
+					sfc.val1.alias = hld.typeOrTbl.getAlias();
+				}
+			}
+		} else if (filter instanceof OpFilterCond) {
+			DeliaExceptionHelper.throwNotImplementedError("arg");
+		} else if (filter instanceof OpAndOrFilter) {
+			DeliaExceptionHelper.throwNotImplementedError("arg");
+		} else if (filter instanceof InFilterCond) {
+			DeliaExceptionHelper.throwNotImplementedError("arg");
+		}
+		
+	}
+
 
 	private void doFieldList(List<HLDField> fieldL, DStructType fromType, AliasInfo info) {
 		for(HLDField rf: fieldL) {
@@ -253,6 +282,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFieldListAssoc(hld.fieldL, info);
 		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
+		adjustAssocFilter(hld);
 	}
 	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);

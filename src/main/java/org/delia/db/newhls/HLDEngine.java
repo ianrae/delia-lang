@@ -203,7 +203,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	private HLDAliasBuilder createAliasBuilder() {
 		ConversionHelper helper = new ConversionHelper(registry, factorySvc);
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr, helper);
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr, helper, datIdMap);
 		return aliasBuilder;
 	}
 
