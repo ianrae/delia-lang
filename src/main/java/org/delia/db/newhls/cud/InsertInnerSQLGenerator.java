@@ -15,6 +15,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.ListWalker;
+import org.delia.db.sqlgen.SqlDeleteStatement;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
 import org.delia.db.sqlgen.SqlInsertStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
@@ -385,6 +386,13 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 	//DELETE FROM table_name WHERE condition;
 	private SqlStatement genDeleteStatement(HLDDelete hld) {
+		if (useSqlGenFactory) {
+			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
+			SqlDeleteStatement delStmt = genfact.createDelete();
+			delStmt.init(hld);
+			return delStmt.render();
+		}
+		
 		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("DELETE FROM");

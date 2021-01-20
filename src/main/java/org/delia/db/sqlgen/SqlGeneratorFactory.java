@@ -29,6 +29,10 @@ public class SqlGeneratorFactory extends ServiceBase {
 		SqlWhereClause whereClause = new SqlWhereClause(registry, factorySvc);
 		return new SqlUpdateStatement(new SqlTableNameClause(), new SqlValueListClause(), whereClause);
 	}
+	public SqlDeleteStatement createDelete() {
+		SqlWhereClause whereClause = new SqlWhereClause(registry, factorySvc);
+		return new SqlDeleteStatement(new SqlTableNameClause(), whereClause);
+	}
 	
 	public SqlMergeIntoStatement createMergeInto() {
 		return new SqlMergeIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
