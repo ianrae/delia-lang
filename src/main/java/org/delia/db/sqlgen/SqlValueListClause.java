@@ -34,7 +34,7 @@ public class SqlValueListClause implements SqlClauseGenerator {
 		return sc.toString();
 	}
 
-	private DValue renderValue(DValue inner) {
+	public DValue renderValue(DValue inner) {
 		if (inner != null && inner.getType().isRelationShape()) {
 			DRelation drel = inner.asRelation();
 			return drel.getForeignKey(); //better only be one!
