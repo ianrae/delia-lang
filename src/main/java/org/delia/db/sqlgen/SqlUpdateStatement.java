@@ -13,17 +13,13 @@ public class SqlUpdateStatement implements SqlStatementGenerator {
 
 	private HLDUpdate hld;
 	private SqlTableNameClause tblClause;
-//	private SqlValueListClause valueClause;
-//	private SqlFieldListClause fieldClause;
 	private SqlWhereClause whereClause;
 	private SqlValueListClause valueClauseHelper;
 	
-	public SqlUpdateStatement(SqlTableNameClause tblClause, SqlFieldListClause fieldClause, SqlValueListClause valueClause, SqlWhereClause whereClause) {
+	public SqlUpdateStatement(SqlTableNameClause tblClause, SqlValueListClause valueClause, SqlWhereClause whereClause) {
 		this.tblClause = tblClause;
-//		this.fieldClause = fieldClause;
-//		this.valueClause = valueClause;
 		this.whereClause = whereClause;
-		this.valueClauseHelper = new SqlValueListClause();
+		this.valueClauseHelper = valueClause;
 	}
 	
 	public void init(HLDUpdate hld) {
