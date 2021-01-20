@@ -133,7 +133,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp) {
 		HLDDsonBuilder hldBuilder = getHldBuilder(); 
 		HLDUpsert hld = hldBuilder.buildUpsert(upsertExp, this);
-		
+		hld.noUpdateFlag = upsertExp.isNoUpdate();
 		//the filter for upsert must not be [true].
 		//other filters are allowed as long as they result in only a single row
 		//TODO: enforce single row in db layer
