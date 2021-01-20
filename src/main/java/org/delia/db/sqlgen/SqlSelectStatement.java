@@ -7,16 +7,13 @@ import java.util.stream.Collectors;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
-import org.delia.db.newhls.ConversionHelper;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.JoinElement;
 import org.delia.db.newhls.QueryFnSpec;
-import org.delia.db.newhls.SQLWhereGenerator;
 import org.delia.db.newhls.SqlColumn;
 import org.delia.db.newhls.SqlColumnBuilder;
 import org.delia.db.newhls.SqlParamGenerator;
-import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cud.TypeOrTable;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -28,20 +25,20 @@ import org.delia.util.DValueHelper;
 
 public class SqlSelectStatement implements SqlStatementGenerator {
 
-	private HLDQuery hld;
-	private SqlTableNameClause tblClause;
-	private ConversionHelper conversionHelper;
 	private DatIdMap datIdMap;
+	private SqlTableNameClause tblClause;
+	private SqlWhereClause whereClause;
 	private SqlColumnBuilder columnBuilder;
-	private SQLWhereGenerator sqlWhereGen;
 	private SqlParamGenerator paramGen;
+	
+	private HLDQuery hld;
 
-	public SqlSelectStatement(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SqlTableNameClause tblClause, ConversionHelper conversionHelper) {
+	public SqlSelectStatement(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SqlTableNameClause tblClause, SqlWhereClause whereClause) {
 		this.datIdMap = datIdMap;
 		this.tblClause = tblClause;
-		this.conversionHelper = conversionHelper;
+		this.whereClause = whereClause;
+		
 		this.columnBuilder = new SqlColumnBuilder(datIdMap);
-		this.sqlWhereGen = new SQLWhereGenerator(registry, factorySvc);
 		this.paramGen = new SqlParamGenerator(registry, factorySvc); 
 	}
 
@@ -50,6 +47,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		TypeOrTable typeOrTbl = new TypeOrTable(hld.fromType);
 		typeOrTbl.alias = hld.fromAlias;
 		tblClause.init(typeOrTbl);
+		whereClause.init(hld);
 	}
 	
 	@Override
@@ -64,7 +62,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
 
 		generateJoins(sc, hld, stm, paramGen);
-		generateWhere(sc, hld, stm, paramGen);
+		generateWhere(sc, stm);
 		generateOrderBy(sc, hld);
 		stm.sql = sc.toString();
 		return stm;
@@ -184,16 +182,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 	}
 
 
-	private void generateWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
-		String fragment = generateWhereClause(hld, stm, paramGen);
-		if (fragment != null) {
-			sc.o(" WHERE %s", fragment);
-		}
+	private void generateWhere(StrCreator sc, SqlStatement stm) {
+		sc.o(whereClause.render(stm));
 	}
-	private String generateWhereClause(HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
-		FilterCond filter = hld.filter;
-		String fragment = sqlWhereGen.doFilter(filter, paramGen, stm);
-		return fragment;
-	}
-
 }

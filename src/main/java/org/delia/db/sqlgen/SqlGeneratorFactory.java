@@ -3,7 +3,6 @@ package org.delia.db.sqlgen;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.newhls.ConversionHelper;
 import org.delia.type.DTypeRegistry;
 
 public class SqlGeneratorFactory extends ServiceBase {
@@ -17,8 +16,10 @@ public class SqlGeneratorFactory extends ServiceBase {
 	
 	
 	public SqlSelectStatement createSelect(DatIdMap datIdMap) {
-		ConversionHelper conversionHelper = new ConversionHelper(registry, factorySvc);
-		return new SqlSelectStatement(registry, factorySvc, datIdMap, new SqlTableNameClause(), conversionHelper);
+//		ConversionHelper conversionHelper = new ConversionHelper(registry, factorySvc);
+		SqlWhereClause whereClause = new SqlWhereClause(registry, factorySvc);
+
+		return new SqlSelectStatement(registry, factorySvc, datIdMap, new SqlTableNameClause(), whereClause);
 	}
 	
 	public SqlInsertStatement createInsert() {
