@@ -31,12 +31,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 //	private DTypeRegistry registry;
 	private HLDSQLGenerator otherSqlGen;
 	private SimpleSqlGenerator simpleSqlGenerator;
+	private UpsertInnerSQLGenerator upsertSQLGen;
 
 	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
 		super(factorySvc);
 //		this.registry = registry;
 		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
+		this.upsertSQLGen = new UpsertInnerSQLGenerator(factorySvc);
 	}
 
 	public SqlStatementGroup generate(HLDInsertStatement hldins) {
@@ -135,7 +137,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	
 	private SqlStatement genUpsertStatement(HLDUpsert hld) {
 		if (hld.noUpdateFlag) {
-			return genMergeAllIntoStatement(hld);
+			return upsertSQLGen.genMergeIntoNoUpdateStatement(hld);
 		}
 		return genMergeIntoStatement(hld);
 	}
