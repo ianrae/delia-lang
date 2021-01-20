@@ -194,7 +194,7 @@ public class DeliaImpl implements Delia {
 		
 		//replace error converter with a registry aware one (better at parsing errors)
 		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
-		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter);
+		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
 		dbInterface.setDBErrorConverter(radbec);
 	}
 
