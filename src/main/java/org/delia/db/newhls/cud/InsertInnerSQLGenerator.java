@@ -15,6 +15,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.ListWalker;
+import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
@@ -178,7 +179,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		//no null dvals (they wouldn't be in the list)
 		while(dvalwalker.hasNext()) {
 			DValue inner = dvalwalker.next();
-			stm.paramL.add(inner);
+			stm.paramL.add(renderValue(inner));
 			sc.o("?");
 			dvalwalker.addIfNotLast(sc, ", ");
 		}
@@ -188,6 +189,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return stm;
 	}
 	
+	private DValue renderValue(DValue inner) {
+		if (inner != null && inner.getType().isRelationShape()) {
+			DRelation drel = inner.asRelation();
+			return drel.getForeignKey(); //better only be one!
+		}
+		return inner;
+	}
+
 	private void outTblName(StrCreator sc, HLDBase hld) {
 		sc.o(hld.typeOrTbl.render());
 	}
@@ -210,7 +219,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		while(walker.hasNext()) {
 			HLDField ff = walker.next();
 			DValue inner = hld.valueL.get(index);
-			stm.paramL.add(inner);
+			stm.paramL.add(renderValue(inner));
 			
 			conditionStr = String.format("%s = %s", renderSetField(ff), "?");
 			sc.o(conditionStr);
@@ -312,7 +321,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		while(walker.hasNext()) {
 			HLDField ff = walker.next();
 			DValue inner = hld.valueL.get(index);
-			stm.paramL.add(inner);
+			stm.paramL.add(renderValue(inner));
 			
 			sc.o("?");
 			walker.addIfNotLast(sc, ", ");

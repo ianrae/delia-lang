@@ -140,7 +140,7 @@ public class UpsertTests extends NewHLSTestBase {
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
 		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 5);
 		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
+		chkUpsertSql(stmgrp, 0, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "56", "66");
 		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "100");
 		chkUpsertSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES ?, ?", "56", "100"); 
 		chkUpsertSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "101");
