@@ -15,6 +15,8 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.ListWalker;
+import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -27,6 +29,8 @@ import org.delia.type.DValue;
  *
  */
 public class InsertInnerSQLGenerator extends ServiceBase { 
+	public static boolean useSqlGenFactory = true;
+
 
 //	private DTypeRegistry registry;
 	private HLDSQLGenerator otherSqlGen;
@@ -139,6 +143,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		if (hld.noUpdateFlag) {
 			return upsertSQLGen.genMergeIntoNoUpdateStatement(hld);
 		}
+		
+		if (useSqlGenFactory) {
+			SqlGeneratorFactory genfact = new SqlGeneratorFactory();
+			SqlMergeIntoStatement sqlMergeInto = genfact.createMergeInto();
+			sqlMergeInto.init(hld);
+			return sqlMergeInto.render();
+		}
+		
 		return genMergeIntoStatement(hld);
 	}
 

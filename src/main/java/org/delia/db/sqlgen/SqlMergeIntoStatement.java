@@ -17,6 +17,8 @@ public class SqlMergeIntoStatement implements SqlStatementGenerator {
 	
 	public void init(HLDUpdate hld) {
 		this.hld = hld;
+		tblClause.init(hld.typeOrTbl);
+		valueClause.init(hld.valueL);
 	}
 	@Override
 	public SqlStatement render() {
