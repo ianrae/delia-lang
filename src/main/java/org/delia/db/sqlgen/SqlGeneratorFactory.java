@@ -40,6 +40,13 @@ public class SqlGeneratorFactory extends ServiceBase {
 	public SqlMergeUsingStatement createMergeUsing() {
 		return new SqlMergeUsingStatement(new SqlTableNameClause(), new SqlFieldListClause(), new SqlValueListClause());
 	}
+
+
+	public void useDeleteIn(SqlDeleteStatement delStmt) {
+		SqlWhereClause whereClause = new SqlWhereClause(registry, factorySvc);
+		SqlDeleteInClause deleteInClause = new SqlDeleteInClause(whereClause);
+		delStmt.useDeleteIn(deleteInClause);
+	}
 	
 	
 	

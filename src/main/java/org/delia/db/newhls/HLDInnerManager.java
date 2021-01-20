@@ -29,13 +29,13 @@ public class HLDInnerManager extends HLDServiceBase {
 	private HLDEngine engine;
 
 	private HLDEngineAssoc engineAssoc;
-	private ConversionHelper conversionHelper;
+//	private ConversionHelper conversionHelper;
 
 	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.engine = new HLDEngine(registry, factorySvc, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, datIdMap, sprigSvc);
-		this.conversionHelper = new ConversionHelper(registry, factorySvc);
+//		this.conversionHelper = new ConversionHelper(registry, factorySvc);
 	}
 
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, VarEvaluator varEvaluator) {
@@ -134,11 +134,6 @@ public class HLDInnerManager extends HLDServiceBase {
 		return null;
 	}
 
-
-	public HLDSQLGenerator createSQLGenerator() {
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		return sqlgen;
-	}
 
 	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
 		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);

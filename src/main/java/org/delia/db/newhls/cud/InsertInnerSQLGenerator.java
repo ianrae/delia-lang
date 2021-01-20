@@ -34,14 +34,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	public static boolean useSqlGenFactory = true;
 
 	private DTypeRegistry registry;
-	private HLDSQLGenerator otherSqlGen;
+//	private HLDSQLGenerator otherSqlGen;
 	private SimpleSqlGenerator simpleSqlGenerator;
 	private UpsertInnerSQLGenerator upsertSQLGen;
 
 	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
 		super(factorySvc);
 		this.registry = registry;
-		this.otherSqlGen = otherSqlGen;
+//		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 		this.upsertSQLGen = new UpsertInnerSQLGenerator(factorySvc);
 	}
@@ -392,27 +392,37 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	//          delete CustomerAddressAssoc where leftv <> 100 and rightv in (SELECT id FROM Address as a WHERE a.z > ?)
 	//delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
 	private SqlStatement genDeleteInStatement(HLDDelete hld) {
-		SqlStatement stm = new SqlStatement(hld);
-		StrCreator sc = new StrCreator();
-		sc.o("DELETE FROM");
-		outTblName(sc, hld);
-		String alias = hld.typeOrTbl.alias;
+		if (useSqlGenFactory) {
+			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
+			SqlDeleteStatement delStmt = genfact.createDelete();
+			genfact.useDeleteIn(delStmt);
+			delStmt.init(hld);
+			return delStmt.render();
+		}
 		
-		int n = stm.paramL.size();
-		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
-		DValue dval = hld.deleteInDVal;
-		DValue sav = stm.paramL.remove(n);
-		stm.paramL.add(dval);
-		stm.paramL.add(sav);
-		
-		whereStr = whereStr.replace(String.format("%s.", alias), "a.");
-		String s2 = String.format("%s.%s <> ?",  alias, hld.mergeOtherKey); //whereStr.substring(pos1 + 5);
-
-		String s = String.format(" %s AND %s.%s IN (SELECT %s FROM %s as a WHERE%s)", s2, alias, hld.mergeKey, hld.mergePKField, hld.mergeType, whereStr);
-		sc.o(" WHERE%s", s);
-
-		stm.sql = sc.toString();
-		return stm;
+//		
+//		SqlStatement stm = new SqlStatement(hld);
+//		StrCreator sc = new StrCreator();
+//		sc.o("DELETE FROM");
+//		outTblName(sc, hld);
+//		String alias = hld.typeOrTbl.alias;
+//		
+//		int n = stm.paramL.size();
+//		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
+//		DValue dval = hld.deleteInDVal;
+//		DValue sav = stm.paramL.remove(n);
+//		stm.paramL.add(dval);
+//		stm.paramL.add(sav);
+//		
+//		whereStr = whereStr.replace(String.format("%s.", alias), "a.");
+//		String s2 = String.format("%s.%s <> ?",  alias, hld.mergeOtherKey); //whereStr.substring(pos1 + 5);
+//
+//		String s = String.format(" %s AND %s.%s IN (SELECT %s FROM %s as a WHERE%s)", s2, alias, hld.mergeKey, hld.mergePKField, hld.mergeType, whereStr);
+//		sc.o(" WHERE%s", s);
+//
+//		stm.sql = sc.toString();
+//		return stm;
+		return null;
 	}
 
 //	private void addWhereIfNeeded(StrCreator sc, HLDQuery hld, SqlStatement stm) {
