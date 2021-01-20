@@ -16,6 +16,7 @@ import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlInsertStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.type.DRelation;
@@ -178,6 +179,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 	
 	private SqlStatement genInsertStatement(HLDInsert hldins) {
+		if (useSqlGenFactory) {
+			SqlGeneratorFactory genfact = new SqlGeneratorFactory();
+			SqlInsertStatement sqlMergeInto = genfact.createInsert();
+			sqlMergeInto.init(hldins);
+			return sqlMergeInto.render();
+		}
+		
+		
 		SqlStatement stm = new SqlStatement(hldins);
 		StrCreator sc = new StrCreator();
 		sc.o("INSERT INTO");
