@@ -111,8 +111,9 @@ public class HLDSQLGenerator extends HLDServiceBase {
 	}
 	private void doSimpleJoin(StrCreator sc, JoinElement el, String alias) {
 		//JOIN Address as t1 ON t0.id=t1.cust
+		//LEFT JOIN so get nulls
 		String tbl = el.relationField.fieldType.getName();
-		sc.o(" JOIN %s as %s", tbl, alias);
+		sc.o(" LEFT JOIN %s as %s", tbl, alias);
 		
 		if (el.relinfo.isParent) {
 			//need to reverse, since parent doesn't have child id

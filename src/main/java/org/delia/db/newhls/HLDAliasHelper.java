@@ -48,8 +48,9 @@ public class HLDAliasHelper {
 			hack.relinfo = relinfo;
 			if (relinfo.isParent) {
 				hack.isFlipped = true;
-				//TODO this is weird. are saying Address.cust/Customer
-				return new StructField(relinfo.farType, relinfo.otherSide.fieldName, relinfo.nearType);
+				//Customer.addr doesn't exist in db. change to Address.id
+				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(relinfo.farType);
+				return new StructField(relinfo.farType, pair.name, pair.type);
 			}
 		}
 		
