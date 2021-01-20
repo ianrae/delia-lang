@@ -168,10 +168,18 @@ public class SQLWhereGenerator {
 
 		//DATEPART(year, '2017/08/25')
 		if (allFns.contains(fn.fnName)) {
-			String fieldName = val1.exp.strValue();
-			String ss = val1.alias == null ? fieldName : renderTerm(val1.alias, fieldName);
-			String s = String.format("DATEPART(%s,%s)", fn.fnName, ss);
-			return s;
+			boolean useDatePart = false; //H2 not support DATEPART
+			if (useDatePart) {
+				String fieldName = val1.exp.strValue();
+				String ss = val1.alias == null ? fieldName : renderTerm(val1.alias, fieldName);
+				String s = String.format("DATEPART(%s,%s)", fn.fnName, ss);
+				return s;
+			} else { //SELECT EXTRACT(MONTH FROM "2017-06-15");
+				String fieldName = val1.exp.strValue();
+				String ss = val1.alias == null ? fieldName : renderTerm(val1.alias, fieldName);
+				String s = String.format("SELECT EXTRACT(%s FROM %s)", fn.fnName.toUpperCase(), ss);
+				return s;
+			}
 		} else {
 			DeliaExceptionHelper.throwNotImplementedError("unknown filter fn '%s'", fn.fnName);
 			return null;
