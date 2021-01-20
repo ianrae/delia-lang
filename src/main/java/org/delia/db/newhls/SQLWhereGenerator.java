@@ -177,7 +177,7 @@ public class SQLWhereGenerator {
 			} else { //SELECT EXTRACT(MONTH FROM "2017-06-15");
 				String fieldName = val1.exp.strValue();
 				String ss = val1.alias == null ? fieldName : renderTerm(val1.alias, fieldName);
-				String s = String.format("SELECT EXTRACT(%s FROM %s)", fn.fnName.toUpperCase(), ss);
+				String s = String.format("EXTRACT(%s FROM %s)", fn.fnName.toUpperCase(), ss);
 				return s;
 			}
 		} else {

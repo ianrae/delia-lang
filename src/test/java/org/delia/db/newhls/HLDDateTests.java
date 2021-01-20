@@ -69,7 +69,7 @@ public class HLDDateTests extends NewHLSTestBase {
 		assertEquals(31, stm.paramL.get(0).asInt());
 		log.log(stm.sql);
 		//not alias would normally be present on orderDate
-		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE DATEPART(%s,orderDate) = ?", fn);
+		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE EXTRACT(%s FROM orderDate) = ?", fn.toUpperCase());
 		assertEquals(s, stm.sql);
 	}
 	
@@ -119,7 +119,7 @@ public class HLDDateTests extends NewHLSTestBase {
 		String sql = mgr.generateRawSql(hld);
 		log.log(sql);
 		//not alias would normally be present on orderDate
-		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE DATEPART(%s,orderDate) = 31", fn);
+		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE EXTRACT(%s FROM orderDate) = 31", fn.toUpperCase());
 		assertEquals(s, sql);
 	}
 
