@@ -90,7 +90,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			}
 			if (bundle.hldupdate != null) {
 				if (bundle.hldupdate.isMergeInto) {
-					SqlStatement stmx = genMergeIntoStatement(bundle.hldupdate, false);
+					SqlStatement stmx = genMergeIntoStatement(bundle.hldupdate);
 					stmgrp.add(stmx);
 				} else if (bundle.hldupdate.isMergeAllInto) {
 					SqlStatement stmx = genMergeAllIntoStatement(bundle.hldupdate);
@@ -134,7 +134,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	
 	
 	private SqlStatement genUpsertStatement(HLDUpsert hld) {
-		return genMergeIntoStatement(hld, hld.noUpdateFlag);
+		if (hld.noUpdateFlag) {
+			return genMergeAllIntoStatement(hld);
+		}
+		return genMergeIntoStatement(hld);
 	}
 
 	public SqlStatementGroup generate(HLDDeleteStatement hld) {
@@ -307,7 +310,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 
 //  merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
-	private SqlStatement genMergeIntoStatement(HLDUpdate hld, boolean noUpdateFlag) {
+	private SqlStatement genMergeIntoStatement(HLDUpdate hld) {
 		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("MERGE INTO");

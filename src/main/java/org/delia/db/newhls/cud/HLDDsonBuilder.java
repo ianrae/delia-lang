@@ -145,6 +145,17 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		}
 		
 		fillArrays(hld.cres.dval, hld.fieldL, hld.valueL, true);
+		
+		
+		hld.noUpdateFlag = upsertExp.isNoUpdate();
+		if (hld.noUpdateFlag) {
+			hld.mergePKField = pkpair.name;
+//			hld.mergeType = dtype.getName();
+//			hld.isMergeAllInto = true;
+//			hld.mergeKey = pkpair.name;
+//			hld.mergeKeyOther = fld2;
+		}
+		
 		return hld;
 	}
 	private HLDUpdate doBuildUpdate(HLDUpdate hld, QueryExp queryExp, HLDQueryBuilderAdapter builderAdapter) {
