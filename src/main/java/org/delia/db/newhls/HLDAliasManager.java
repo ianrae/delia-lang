@@ -83,7 +83,18 @@ public class HLDAliasManager extends ServiceBase {
 		map.put(key, info);
 		return info;
 	}
-	
+
+	public AliasInfo createFieldAlias(RelationInfo relinfo) {
+		AliasInfo info1 = getFieldAlias(relinfo.nearType, relinfo.fieldName);
+		if (info1 != null) {
+			return info1;
+		}
+		AliasInfo info2 = getFieldAlias(relinfo.otherSide.nearType, relinfo.otherSide.fieldName);
+		if (info2 != null) {
+			return info2;
+		}
+		return createFieldAlias(relinfo.nearType, relinfo.fieldName);
+	}
 	//note. Customer.addr is an alias for Address (not Customer)
 	public AliasInfo createFieldAlias(DStructType structType, String fieldName) {
 		AliasInfo info = getFieldAlias(structType, fieldName);
