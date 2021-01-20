@@ -50,6 +50,11 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		whereClause.init(hld);
 	}
 	
+	public void disableSqlParameterGen() {
+		paramGen = null; 
+		whereClause.disableSqlParameterGen();
+	}
+	
 	@Override
 	public SqlStatement render() {
 		SqlStatement stm = new SqlStatement(hld);
@@ -181,8 +186,8 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		return columnBuilder.adjust(alias, structType, fieldName, el);
 	}
 
-
 	private void generateWhere(StrCreator sc, SqlStatement stm) {
-		sc.o(whereClause.render(stm));
+		//TODO sc.o fails if string has % in it. fix this in many places in these genrrators!!
+		sc.addStr(whereClause.render(stm));
 	}
 }

@@ -14,13 +14,11 @@ import org.delia.db.newhls.cud.InsertInnerSQLGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
-import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.db.sqlgen.SqlSelectStatement;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 
 /**
  * Main HLD class for building sql and HLDQuery objects
@@ -95,10 +93,18 @@ public class HLDInnerManager extends HLDServiceBase {
 
 	// -- sql generation --
 	public String generateRawSql(HLDQueryStatement hld) {
-		//TODO: can we use InsertInnerSQLGenerator here??
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		String sql = sqlgen.generateRawSql(hld.hldquery);
-		return sql;
+		if (InsertInnerSQLGenerator.useSqlGenFactory) {
+			SqlGeneratorFactory genfact = new SqlGeneratorFactory(registry, factorySvc);
+			SqlSelectStatement selStmt = genfact.createSelect(datIdMap);
+			selStmt.disableSqlParameterGen();
+			selStmt.init(hld.hldquery);
+			SqlStatement stm = selStmt.render();
+			return stm.sql;
+		}
+//		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+//		String sql = sqlgen.generateRawSql(hld.hldquery);
+//		return sql;
+		return null;
 	}
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
 		if (InsertInnerSQLGenerator.useSqlGenFactory) {
@@ -111,20 +117,21 @@ public class HLDInnerManager extends HLDServiceBase {
 			return stgrp;
 		}
 		
-		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
-		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
-
-		//convert strings to dates where needed
-		for(DValue dval: sql.paramL) {
-			if (dval != null) {
-				DValue xx = conversionHelper.convertDValToActual(dval.getType(), dval);
-			}
-		}
-
-		SqlStatementGroup stgrp = new SqlStatementGroup();
-		stgrp.add(sql);
-		return stgrp;
+//		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
+//		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+//		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
+//
+//		//convert strings to dates where needed
+//		for(DValue dval: sql.paramL) {
+//			if (dval != null) {
+//				DValue xx = conversionHelper.convertDValToActual(dval.getType(), dval);
+//			}
+//		}
+//
+//		SqlStatementGroup stgrp = new SqlStatementGroup();
+//		stgrp.add(sql);
+//		return stgrp;
+		return null;
 	}
 
 

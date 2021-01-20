@@ -23,6 +23,9 @@ public class SqlWhereClause implements SqlClauseGenerator {
 	public void init(HLDQuery hld) {
 		this.hld = hld;
 	}
+	public void disableSqlParameterGen() {
+		this.paramGen = null; 
+	}
 	
 	@Override
 	public String render(SqlStatement stm) {

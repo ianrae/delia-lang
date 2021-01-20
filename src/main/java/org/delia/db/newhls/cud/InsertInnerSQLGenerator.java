@@ -3,11 +3,9 @@ package org.delia.db.newhls.cud;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.newhls.HLDField;
-import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDSQLGenerator;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleSqlGenerator;
@@ -35,7 +33,6 @@ import org.delia.type.DValue;
 public class InsertInnerSQLGenerator extends ServiceBase { 
 	public static boolean useSqlGenFactory = true;
 
-
 	private DTypeRegistry registry;
 	private HLDSQLGenerator otherSqlGen;
 	private SimpleSqlGenerator simpleSqlGenerator;
@@ -55,20 +52,12 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		SqlStatement stm = genInsertStatement(hldins.hldinsert);
 		stmgrp.add(stm);
 		
-//		for(HLDUpdate hld: hldins.updateL) {
-//			SqlStatement stmx = genUpdateStatement(hld);
-//			stmgrp.add(stmx);
-//		}
 		for(SimpleBase simple: hldins.moreL) {
 			SqlStatement stmx = new SqlStatement(simple);
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
 		
-//		for(HLDInsert hld: hldins.assocInsertL) {
-//			SqlStatement stmx = genInsertStatement(hld);
-//			stmgrp.add(stmx);
-//		}
 		return stmgrp;
 	}
 	public SqlStatementGroup generate(HLDUpdateStatement hldupdate) {
@@ -77,16 +66,11 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		SqlStatement stm = genUpdateStatement(hldupdate.hldupdate);
 		stmgrp.add(stm);
 		
-//		for(HLDUpdate hld: hldupdate.updateL) {
-//			SqlStatement stmx = genUpdateStatement(hld);
-//			stmgrp.add(stmx);
-//		}
 		for(SimpleBase simple: hldupdate.moreL) {
 			SqlStatement stmx = new SqlStatement(simple);
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
-		
 		
 		for(AssocBundle bundle: hldupdate.assocBundleL) {
 			if (bundle.hlddelete != null) {
@@ -128,7 +112,6 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			stmgrp.add(stmx);
 		}
 		
-		
 		for(AssocBundle bundle: hldupsert.assocBundleL) {
 			if (bundle.hlddelete != null) {
 				SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
@@ -161,7 +144,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			return sqlMergeInto.render();
 		}
 		
-		return genMergeIntoStatement(hld);
+		return null; //genMergeIntoStatement(hld);
 	}
 
 	public SqlStatementGroup generate(HLDDeleteStatement hld) {
@@ -189,39 +172,40 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		
 		
-		SqlStatement stm = new SqlStatement(hldins);
-		StrCreator sc = new StrCreator();
-		sc.o("INSERT INTO");
-		outTblName(sc, hldins);
-		
-		if (hldins.fieldL.isEmpty()) {
-			sc.o(" DEFAULT VALUES");
-			stm.sql = sc.toString();
-			return stm;
-		}
-		
-		sc.o(" (");
-		ListWalker<HLDField> walker = new ListWalker<>(hldins.fieldL);
-		while(walker.hasNext()) {
-			HLDField ff = walker.next();
-			sc.o(ff.render());
-			walker.addIfNotLast(sc, ", ");
-		}
-		sc.o(")");
-
-		sc.o(" VALUES(");
-		ListWalker<DValue> dvalwalker = new ListWalker<>(hldins.valueL);
-		//no null dvals (they wouldn't be in the list)
-		while(dvalwalker.hasNext()) {
-			DValue inner = dvalwalker.next();
-			stm.paramL.add(renderValue(inner));
-			sc.o("?");
-			dvalwalker.addIfNotLast(sc, ", ");
-		}
-		sc.o(")");
-		
-		stm.sql = sc.toString();
-		return stm;
+//		SqlStatement stm = new SqlStatement(hldins);
+//		StrCreator sc = new StrCreator();
+//		sc.o("INSERT INTO");
+//		outTblName(sc, hldins);
+//		
+//		if (hldins.fieldL.isEmpty()) {
+//			sc.o(" DEFAULT VALUES");
+//			stm.sql = sc.toString();
+//			return stm;
+//		}
+//		
+//		sc.o(" (");
+//		ListWalker<HLDField> walker = new ListWalker<>(hldins.fieldL);
+//		while(walker.hasNext()) {
+//			HLDField ff = walker.next();
+//			sc.o(ff.render());
+//			walker.addIfNotLast(sc, ", ");
+//		}
+//		sc.o(")");
+//
+//		sc.o(" VALUES(");
+//		ListWalker<DValue> dvalwalker = new ListWalker<>(hldins.valueL);
+//		//no null dvals (they wouldn't be in the list)
+//		while(dvalwalker.hasNext()) {
+//			DValue inner = dvalwalker.next();
+//			stm.paramL.add(renderValue(inner));
+//			sc.o("?");
+//			dvalwalker.addIfNotLast(sc, ", ");
+//		}
+//		sc.o(")");
+//		
+//		stm.sql = sc.toString();
+//		return stm;
+		return null;
 	}
 	
 	private SqlGeneratorFactory creatSqlGenFactory() {
@@ -248,57 +232,58 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			return updateStmt.render();
 		}
 		
-		SqlStatement stm = new SqlStatement(hld);
-		StrCreator sc = new StrCreator();
-		sc.o("UPDATE");
-		outTblName(sc, hld);
-		
-		if (hld.fieldL.isEmpty()) {
-			stm.sql = sc.toString();
-			return stm;
-		}
-		
-		sc.o(" SET ");
-		int index = 0;
-		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
-		String conditionStr = null;
-		while(walker.hasNext()) {
-			HLDField ff = walker.next();
-			DValue inner = hld.valueL.get(index);
-			stm.paramL.add(renderValue(inner));
-			
-			conditionStr = String.format("%s = %s", renderSetField(ff), "?");
-			sc.o(conditionStr);
-			walker.addIfNotLast(sc, ", ");
-			index++;
-		}
-		
-		if (hld.isSubSelect) {
-			addSubSelectWhere(sc, hld.hld, stm, conditionStr);
-		} else {
-			addWhereIfNeeded(sc, hld.hld, stm);
-		}
-
-//		renderIfPresent(sc, orderByFrag);
-//		renderIfPresent(sc, limitFrag);  TODO is this needed?
-		
-		stm.sql = sc.toString();
-		return stm;
+//		SqlStatement stm = new SqlStatement(hld);
+//		StrCreator sc = new StrCreator();
+//		sc.o("UPDATE");
+//		outTblName(sc, hld);
+//		
+//		if (hld.fieldL.isEmpty()) {
+//			stm.sql = sc.toString();
+//			return stm;
+//		}
+//		
+//		sc.o(" SET ");
+//		int index = 0;
+//		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
+//		String conditionStr = null;
+//		while(walker.hasNext()) {
+//			HLDField ff = walker.next();
+//			DValue inner = hld.valueL.get(index);
+//			stm.paramL.add(renderValue(inner));
+//			
+//			conditionStr = String.format("%s = %s", renderSetField(ff), "?");
+//			sc.o(conditionStr);
+//			walker.addIfNotLast(sc, ", ");
+//			index++;
+//		}
+//		
+//		if (hld.isSubSelect) {
+//			addSubSelectWhere(sc, hld.hld, stm, conditionStr);
+//		} else {
+//			addWhereIfNeeded(sc, hld.hld, stm);
+//		}
+//
+////		renderIfPresent(sc, orderByFrag);
+////		renderIfPresent(sc, limitFrag);  TODO is this needed?
+//		
+//		stm.sql = sc.toString();
+//		return stm;
+		return null;
 	}
-	private void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
-//		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
-
-		conditionStr = StringUtils.substringBefore(conditionStr, "=").trim();
-		sc.o(" WHERE %s IN ", conditionStr);
-		String alias = "t9"; //TODO fix later
-		sc.o("(SELECT %s.cid FROM %s as %s WHERE", alias, hld.fromType.getName(), alias);
-		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
-
-		String s1 = "t9.";
-		String source = String.format("%s.", hld.fromAlias);
-		whereStr = whereStr.replace(source, s1);
-		sc.o("%s", whereStr);
-	}
+//	private void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
+////		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
+//
+//		conditionStr = StringUtils.substringBefore(conditionStr, "=").trim();
+//		sc.o(" WHERE %s IN ", conditionStr);
+//		String alias = "t9"; //TODO fix later
+//		sc.o("(SELECT %s.cid FROM %s as %s WHERE", alias, hld.fromType.getName(), alias);
+//		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
+//
+//		String s1 = "t9.";
+//		String source = String.format("%s.", hld.fromAlias);
+//		whereStr = whereStr.replace(source, s1);
+//		sc.o("%s", whereStr);
+//	}
 
 	
 //    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
@@ -379,10 +364,9 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return stm;
 	}
 	
-	
-	private String renderSetField(HLDField ff) {
-		return ff.render();
-	}
+//	private String renderSetField(HLDField ff) {
+//		return ff.render();
+//	}
 
 	//DELETE FROM table_name WHERE condition;
 	private SqlStatement genDeleteStatement(HLDDelete hld) {
@@ -393,15 +377,16 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 			return delStmt.render();
 		}
 		
-		SqlStatement stm = new SqlStatement(hld);
-		StrCreator sc = new StrCreator();
-		sc.o("DELETE FROM");
-		outTblName(sc, hld);
-		
-		addWhereIfNeeded(sc, hld.hld, stm);
-
-		stm.sql = sc.toString();
-		return stm;
+//		SqlStatement stm = new SqlStatement(hld);
+//		StrCreator sc = new StrCreator();
+//		sc.o("DELETE FROM");
+//		outTblName(sc, hld);
+//		
+//		addWhereIfNeeded(sc, hld.hld, stm);
+//
+//		stm.sql = sc.toString();
+//		return stm;
+		return null;
 	}
 	//DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv <> ? AND leftv IN (SELECT rightv FROM Customer as a WHERE  t1.rightv = ?) -- 999,55,55
 	//          delete CustomerAddressAssoc where leftv <> 100 and rightv in (SELECT id FROM Address as a WHERE a.z > ?)
@@ -430,10 +415,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return stm;
 	}
 
-	private void addWhereIfNeeded(StrCreator sc, HLDQuery hld, SqlStatement stm) {
-		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
-		if (whereStr != null) {
-			sc.o(" WHERE%s", whereStr);
-		}
-	}
+//	private void addWhereIfNeeded(StrCreator sc, HLDQuery hld, SqlStatement stm) {
+//		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
+//		if (whereStr != null) {
+//			sc.o(" WHERE%s", whereStr);
+//		}
+//	}
 }
