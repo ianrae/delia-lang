@@ -77,6 +77,11 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		
 		//and propogate alias to query fns
 		for(QueryFnSpec fnspec: hld.funcL) {
+			TypePair pair = DValueHelper.findField(fnspec.structField.dtype, fnspec.structField.fieldName);
+			if (pair == null) {
+				DeliaExceptionHelper.throwUnknownFieldError(fnspec.structField.dtype.getName(), fnspec.structField.fieldName);
+			}
+			
 			JoinElement el = findMatch(fnspec, hld);
 			if (el != null) {
 				if (el.relinfo.notContainsFK()) {
