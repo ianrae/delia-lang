@@ -35,6 +35,11 @@ public class UpsertInnerSQLGenerator extends ServiceBase {
 	}
 
 	
+	
+//  MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
+//  ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
+//  WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+	
 //	merge into Flight as t0 using (select id from Flight) as t1
 //	on t0.id=t1.id
 //	//when matched the update set t0.wid=? ...
@@ -49,7 +54,7 @@ public class UpsertInnerSQLGenerator extends ServiceBase {
 		String alias2 = "t9"; //TODO fix better
 		
 		sc.o(" USING (SELECT %s FROM %s) AS %s", hld.mergePKField, hld.typeOrTbl.getTblName(), alias2);
-		sc.o(" ON %s = %s", hld.mergePKField, alias2);
+		sc.o(" ON %s = %s.%s", hld.mergePKField, alias2, hld.mergePKField);
 		
 		sc.o(" WHEN NOT MATCHED THEN INSERT");
 		if (hld.fieldL.isEmpty()) {

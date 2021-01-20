@@ -193,21 +193,10 @@ public class UpdateStatementRunner extends ServiceBase {
 			}
 			ConfigureService configSvc = factorySvc.getConfigureService();
 
-			//upsert doesn't have primary key in field set, so temporarily add it
-			//so we can run validation 
-//			PrimaryKeyHelperService pkSvc = new PrimaryKeyHelperService(factorySvc, registry);
-//			QuerySpec spec = resolveFilterVars(exp.queryExp);
-//			boolean addedPK = pkSvc.addPrimaryKeyIfMissing(spec, cres.dval);
-
 			ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
 			if (! ruleRunner.validateDVal(cres.dval)) {
 				ruleRunner.propogateErrors(res);
 			}
-
-//			if (addedPK) {
-//				pkSvc.removePrimayKey(cres.dval);
-//			}
-
 
 			//				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
 			//					ruleRunner.propogateErrors(res);
@@ -232,6 +221,7 @@ public class UpdateStatementRunner extends ServiceBase {
 			int numRowsAffected;
 			if (hldManager != null) {
 				numRowsAffected = dbexecutor.executeUpsert(hldup, stmgrp, noUpdateFlag);
+				numRowsAffected = 1; //1 means success (not number of rows affected)
 			} else {
 				numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
 			}

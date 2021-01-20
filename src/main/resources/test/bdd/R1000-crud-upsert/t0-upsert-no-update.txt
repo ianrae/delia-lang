@@ -23,5 +23,5 @@ when:
   insert Flight {id:55, wid: 22}
   upsert -noUpdate Flight[55] {wid: 23}
 then:
-0
+1
 
