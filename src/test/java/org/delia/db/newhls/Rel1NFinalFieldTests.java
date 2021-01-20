@@ -22,7 +22,7 @@ public class Rel1NFinalFieldTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].addr";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t1.cust FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void testRelChild() {
@@ -40,7 +40,7 @@ public class Rel1NFinalFieldTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].addr.y";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t1.y FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t1.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
 	}
 //	@Test
 //	public void testTCRelParent() {
@@ -48,7 +48,7 @@ public class Rel1NFinalFieldTests extends NewHLSTestBase {
 //		String src = "let x = Customer[55].addr";
 //		
 //		HLDQuery hld = buildFromSrc(src, 1); 
-//		chkFullSql(hld, "SELECT t1.cust FROM Customer as t0 JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+//		chkFullSql(hld, "SELECT t1.cust FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
 //	}
 //	@Test
 //	public void testTCRelChild() {
