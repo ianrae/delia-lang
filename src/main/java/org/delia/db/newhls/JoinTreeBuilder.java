@@ -143,11 +143,14 @@ public class JoinTreeBuilder {
 		return el;
 	}
 	private JoinElement addElement(JoinElement el, List<JoinElement> resultL) {
-		String target = el.toString();
-		Optional<JoinElement> optExisting = resultL.stream().filter(x -> x.toString().equals(target)).findAny();
+		Optional<JoinElement> optExisting = resultL.stream().filter(x -> isRelMatch(x, el)).findAny();
 		if (optExisting.isPresent()) {
-			if (el.usedForFetch() && optExisting.get().usedForFK()) {
-				optExisting.get().fetchSpec.isFK = false; //upgrade from fk to fetch
+			if (optExisting.get().usedForFK()) {
+				if (el.usedForFetch()) {  //full fetch?
+					optExisting.get().fetchSpec.isFK = false; //upgrade from fk to fetch
+				} else if (el.fetchSpec == null) {
+					optExisting.get().fetchSpec.isFK = false; //upgrade
+				}
 			}
 			return optExisting.get();
 		}
