@@ -11,10 +11,8 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.ServiceBase;
-import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.AliasManager;
-import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.db.hls.manager.HLSPipelineStep;
 import org.delia.db.hls.manager.HLSStragey;
 import org.delia.db.hls.manager.InQueryStep;
@@ -26,7 +24,6 @@ import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DValueIterator;
-import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -52,7 +49,6 @@ public class HLDManager extends ServiceBase {
 	protected AliasManager aliasManager;
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
 	private SprigService sprigSvc; //set after ctor
-	private HLDQueryStatement mostRecentLetStatement;
 
 //	private DeliaSession session;
 //	private Delia delia;
@@ -68,20 +64,15 @@ public class HLDManager extends ServiceBase {
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
 
-	public HLSManagerResult execute(QuerySpec spec, QueryContext qtx, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public HLDQueryStatement buildQueryStatement(QuerySpec spec, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec, varEvaluator);
 		hld.querySpec = spec;
-		mostRecentLetStatement = hld;
-		
+		return hld;
+	}
+	public SqlStatementGroup generateSqlForQuery(HLDQueryStatement hld, ZDBExecutor zexec) {
 		HLDInnerManager mgr = createManager(zexec);
 		SqlStatementGroup stmgrp = mgr.generateSql(hld);
-		
-		QueryResponse qresp = zexec.executeHLDQuery(hld, stmgrp, qtx);
-
-		HLSManagerResult result = new HLSManagerResult();
-		result.qresp = qresp;
-		result.sql = stmgrp.statementL.get(0).sql;
-		return result;
+		return stmgrp;
 	}
 
 	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
@@ -160,9 +151,5 @@ public class HLDManager extends ServiceBase {
 
 	public void setSprigSvc(SprigService sprigSvc) {
 		this.sprigSvc = sprigSvc;
-	}
-
-	public HLDQueryStatement getMostRecentLetStatement() {
-		return mostRecentLetStatement;
 	}
 }

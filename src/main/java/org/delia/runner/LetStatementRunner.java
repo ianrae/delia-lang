@@ -22,6 +22,7 @@ import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.queryresponse.LetSpanEngine;
@@ -151,9 +152,17 @@ public class LetStatementRunner extends ServiceBase {
 		QueryResponse qresp;
 		if (flag1) {
 			spec.queryExp = queryExp;
-			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
-			mostRecentStatment = hldManager.getMostRecentLetStatement();
-			qresp = result.qresp;
+//			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
+			HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);
+			SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
+
+			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
+
+//			HLSManagerResult result = new HLSManagerResult();
+//			result.qresp = qresp;
+//			result.sql = stgroup.statementL.get(0).sql;
+
+			mostRecentStatment = hld;
 		} else if (flag2) {
 			spec.queryExp = queryExp;
 			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
