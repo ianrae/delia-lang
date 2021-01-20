@@ -6,7 +6,6 @@ import org.delia.db.newhls.HLDField;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
-import org.delia.type.DValue;
 
 public class SqlFieldListClause implements SqlClauseGenerator {
 
@@ -17,21 +16,22 @@ public class SqlFieldListClause implements SqlClauseGenerator {
 	}
 	@Override
 	public String render(SqlStatement stm) {
-		return null;
-//		StrCreator sc = new StrCreator();
-//		sc.o(" VALUES(");
-//		int index = 0;
-//		ListWalker<HLDField> walker = new ListWalker<>(fieldL);
-//		while(walker.hasNext()) {
-//			HLDField ff = walker.next();
-//			DValue inner = valueL.get(index);
-////			stm.paramL.add(renderValue(inner));
-//			
-//			sc.o("?");
-//			walker.addIfNotLast(sc, ", ");
-//			index++;
-//		}
-//		sc.o(")");
+		StrCreator sc = new StrCreator();
+		if (fieldL.isEmpty()) {
+			sc.o(" DEFAULT VALUES");
+			return sc.toString();
+		}
+		
+		sc.o(" (");
+		ListWalker<HLDField> walker = new ListWalker<>(fieldL);
+		while(walker.hasNext()) {
+			HLDField ff = walker.next();
+			ff.alias = null;
+			sc.o(ff.render());
+			walker.addIfNotLast(sc, ", ");
+		}
+		sc.o(")");
+		return sc.toString();
 	}
 
 }
