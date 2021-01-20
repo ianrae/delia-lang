@@ -18,7 +18,7 @@ public class SqlGeneratorFactory extends ServiceBase {
 	
 	public SqlSelectStatement createSelect(DatIdMap datIdMap) {
 		ConversionHelper conversionHelper = new ConversionHelper(registry, factorySvc);
-		return new SqlSelectStatement(datIdMap, new SqlTableNameClause(), conversionHelper);
+		return new SqlSelectStatement(registry, factorySvc, datIdMap, new SqlTableNameClause(), conversionHelper);
 	}
 	
 	public SqlInsertStatement createInsert() {
