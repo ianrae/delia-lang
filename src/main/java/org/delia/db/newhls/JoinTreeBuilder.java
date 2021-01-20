@@ -155,4 +155,12 @@ public class JoinTreeBuilder {
 		resultL.add(el);
 		return el;
 	}
+	private boolean isRelMatch(JoinElement x, JoinElement el) {
+		RelationField rf1 = x.relationField;
+		RelationField rf2 = el.relationField;
+		if (rf1.dtype == rf2.dtype && rf1.fieldName.equals(rf2.fieldName)) {
+			return true;
+		}
+		return false;
+	}
 }

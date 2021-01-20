@@ -21,6 +21,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 
 /**
@@ -167,22 +168,33 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		}
 		return null;
 	}
+	
+	private static class HackHack {
+		public boolean isFlipped = false;
+	}
 
 	private void doFilterVal(FilterVal val1, HLDQuery hld) {
 		if (val1.isSymbol()) {
 			//when DAT actions we've already filled in structType
+			HackHack hack = new HackHack();
 			if (val1.structField == null) {
 				String fieldName = val1.exp.strValue();
-				DType fieldType = DValueHelper.findFieldType(hld.fromType, fieldName);
-				val1.structField = new StructField(hld.fromType, fieldName, fieldType);
-//				convertIfNeeded(val1);
+				val1.structField = buildStructType(hld.fromType, fieldName, hack);
 			} 
-			val1.alias = assign(hld.fromAlias);
+			
+			String alias = hld.fromAlias;
+			if (hack.isFlipped) {
+				AliasInfo info = aliasMgr.createFieldAlias(val1.structField.dtype, val1.structField.fieldName);
+				alias = assign(info.alias);
+			}
+			
+			val1.alias = assign(alias);
 		} else if (val1.isSymbolChain()) {
 			String fieldName = val1.exp.strValue();
 			SymbolChain chain = val1.asSymbolChain();
-			DType fieldType = DValueHelper.findFieldType(chain.fromType, fieldName);
-			val1.structField = new StructField(chain.fromType, fieldName, fieldType);
+			
+			HackHack hack = new HackHack();
+			val1.structField = buildStructType(chain.fromType, fieldName, hack);
 			AliasInfo info = aliasMgr.createFieldAlias(chain.fromType, fieldName);
 			val1.alias = assign(info.alias);
 			JoinElement el = hld.findMatch(chain.fromType, fieldName, hld);
@@ -199,6 +211,20 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 //			convertIfNeeded(val1);
 		}
 	}
+	private StructField buildStructType(DStructType fromType, String fieldName, HackHack hack) {
+		DType fieldType = DValueHelper.findFieldType(fromType, fieldName);
+		if (fieldType.isStructShape()) {
+			RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, new TypePair(fieldName, fieldType));
+			if (relinfo.isParent) {
+				hack.isFlipped = true;
+				//TODO this is weird. are saying Address.cust/Customer
+				return new StructField(relinfo.farType, relinfo.otherSide.fieldName, relinfo.nearType);
+			}
+		}
+		
+		return new StructField(fromType, fieldName, fieldType);
+	}
+
 	private void doFilterPKVal(FilterVal val1, HLDQuery hld) {
 		if (val1.isBoolean()) {
 			return;
