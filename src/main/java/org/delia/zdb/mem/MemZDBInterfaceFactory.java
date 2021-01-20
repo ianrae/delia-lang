@@ -68,6 +68,10 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	}
 
 	@Override
+	public DBErrorConverter getDBErrorConverter() {
+		return null;
+	}
+	@Override
 	public void setDBErrorConverter(DBErrorConverter errorConverter) {
 		//not used this.errorConverter = errorConverter;
 	}

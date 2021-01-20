@@ -75,6 +75,10 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 	}
 
 	@Override
+	public DBErrorConverter getDBErrorConverter() {
+		return errorConverter;
+	}
+	@Override
 	public void setDBErrorConverter(DBErrorConverter errorConverter) {
 		this.errorConverter = errorConverter;
 	}

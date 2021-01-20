@@ -87,4 +87,9 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 		actualInterface.setDBErrorConverter(errorConverter);
 	}
 
+	@Override
+	public DBErrorConverter getDBErrorConverter() {
+		return actualInterface.getDBErrorConverter();
+	}
+
 }

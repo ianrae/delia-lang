@@ -8,6 +8,7 @@ public interface ZDBInterfaceFactory {
 	DBType getDBType();
 	DBCapabilties getCapabilities();
 	void setDBErrorConverter(DBErrorConverter errorConverter);
+	DBErrorConverter getDBErrorConverter();
 	
 	ZDBConnection openConnection();
 	ZDBExecutor createExecutor();

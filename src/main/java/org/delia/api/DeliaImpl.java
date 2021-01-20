@@ -8,6 +8,8 @@ import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.db.DBErrorConverter;
+import org.delia.db.RegistryAwareDBErrorConverter;
 import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.newhls.HLDManager;
 import org.delia.db.schema.MigrationPlan;
@@ -189,6 +191,11 @@ public class DeliaImpl implements Delia {
 			//something went wrong
 			throw new DeliaException(allErrors);
 		}
+		
+		//replace error converter with a registry aware one (better at parsing errors)
+		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
+		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter);
+		dbInterface.setDBErrorConverter(radbec);
 	}
 
 	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {
