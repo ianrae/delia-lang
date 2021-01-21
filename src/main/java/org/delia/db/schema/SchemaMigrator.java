@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
+import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -149,7 +150,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public String calcDBFingerprint() {
 		//TODO: query just single record (most recent);
-		FilterExp filter = null; //query all
+		FilterExp filter = new FilterExp(99, new BooleanExp(true)); //query all
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
 		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(zexec.getDbInterface(), registry);

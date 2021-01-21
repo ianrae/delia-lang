@@ -53,7 +53,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 	}
 
 	public HLDInsert buildInsert(InsertStatementExp insertExp) {
-		DStructType dtype = (DStructType) registry.getType(insertExp.typeName);
+		DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(insertExp.typeName);
 		HLDInsert hldins = new HLDInsert(new TypeOrTable(dtype));
 		hldins.cres = buildValue(true, dtype, insertExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		if (hldins.buildSuccessful()) {
@@ -125,7 +125,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 	}
 
 	public HLDUpdate buildUpdate(UpdateStatementExp updateExp, HLDQueryBuilderAdapter builderAdapter) {
-		DStructType dtype = (DStructType) registry.getType(updateExp.typeName);
+		DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(updateExp.typeName);
 		HLDUpdate hldupdate = new HLDUpdate(new TypeOrTable(dtype), null);//fill in later
 		doBuildUpdate(hldupdate, updateExp.queryExp, builderAdapter);
 		hldupdate.cres = buildValue(false, dtype, updateExp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
@@ -134,7 +134,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		return hldupdate;
 	}
 	public HLDUpsert buildUpsert(UpsertStatementExp upsertExp, HLDQueryBuilderAdapter builderAdapter) {
-		DStructType dtype = (DStructType) registry.getType(upsertExp.typeName);
+		DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(upsertExp.typeName);
 		HLDUpsert hld = new HLDUpsert(new TypeOrTable(dtype), null);//fill in later
 		doBuildUpdate(hld, upsertExp.queryExp, builderAdapter);
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(dtype);

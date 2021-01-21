@@ -333,8 +333,8 @@ public class H2BDDTests extends BDDBase {
 //		//LATER runR1350File("t0-filter-in-twitter.txt", 4);
 //		runR1500File("t0-queryfn-orderby.txt", 4);
 //		runR1800File("t0-dollardollar.txt", 2);
-		runR2100File("t0-migration3.txt", 2);
-//		runR2150File("t0-migrate-many-to-many2.txt", 2);
+//		runR2100File("t0-migration3.txt", 2);
+		runR2150File("t0-migrate-many-to-many2.txt", 2);
 	}
 	
 	//---

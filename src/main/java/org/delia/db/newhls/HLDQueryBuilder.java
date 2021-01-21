@@ -37,7 +37,7 @@ public class HLDQueryBuilder {
 	
 	public boolean canBuildStatement(QueryExp queryExp, DStructType structTypeEx, VarEvaluator varEvaluator) {
 		HLDQuery hld = new HLDQuery();
-		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
+		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.findTypeOrSchemaVersionType(queryExp.typeName);
 		if (hld.fromType == null) {
 			List<DValue> referencedVarValList = varEvaluator.lookupVar(queryExp.typeName);
 			DValue dval = referencedVarValList == null ? null : (referencedVarValList.isEmpty() ? null : referencedVarValList.get(0)); 
@@ -57,7 +57,7 @@ public class HLDQueryBuilder {
 	}
 	public HLDQuery build(QueryExp queryExp, DStructType structTypeEx, VarEvaluator varEvaluator) {
 		HLDQuery hld = new HLDQuery();
-		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
+		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.findTypeOrSchemaVersionType(queryExp.typeName);
 		if (hld.fromType == null) {
 			List<DValue> referencedVarValList = varEvaluator.lookupVar(queryExp.typeName);
 			DValue dval = referencedVarValList == null ? null : (referencedVarValList.isEmpty() ? null : referencedVarValList.get(0)); 
