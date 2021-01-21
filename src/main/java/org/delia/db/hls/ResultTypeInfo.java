@@ -27,9 +27,9 @@ public class ResultTypeInfo {
 	}
 
 	public DValue mapPhysicalToLogicalValue(DValue dval, ScalarValueBuilder builder) {
- 		//only one now is 
+ 		//only one now is exists
 		if (Shape.BOOLEAN.equals(logicalType.getShape())) {
-			long n = dval.asLong();
+			long n = dval == null ? 0L : dval.asLong();
 			return builder.buildBoolean(n != 0L);
 		}
 		DeliaExceptionHelper.throwError("unsupported-logical-to-physical-mapping", "don't support shape %s", logicalType.getShape().name());

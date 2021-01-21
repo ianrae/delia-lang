@@ -2,6 +2,7 @@ package org.delia.runner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.assoc.DatIdMap;
@@ -22,6 +23,7 @@ import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.newhls.QueryFnSpec;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
@@ -155,7 +157,7 @@ public class LetStatementRunner extends ServiceBase {
 			SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
 
 			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
-
+			doPostDBCallAdjustment(hld, qresp);
 //			HLSManagerResult result = new HLSManagerResult();
 //			result.qresp = qresp;
 //			result.sql = stgroup.statementL.get(0).sql;
@@ -173,6 +175,25 @@ public class LetStatementRunner extends ServiceBase {
 		}
 		return qresp;
 	}
+	private void doPostDBCallAdjustment(HLDQueryStatement hld, QueryResponse qresp) {
+		//TODO: this is not quite correct. can exists be present but not the last fn
+		Optional<QueryFnSpec> opt = hld.hldquery.funcL.stream().filter(x ->x.isFn("exists")).findAny();
+		if (opt.isPresent() && qresp.ok && !qresp.emptyResults()) {
+			boolean b = false; //if at least one is true then exists returns true
+			for(DValue dval: qresp.dvalList) {
+				if (dval.asBoolean()) {
+					qresp.dvalList.clear();
+					qresp.dvalList.add(dval);
+					return;
+				}
+			}
+		}
+		
+		
+		// TODO Auto-generated method stub
+		
+	}
+
 	private HLDQueryStatement buildHLDQuery(QuerySpec spec, QueryExp queryExp) {
 		spec.queryExp = queryExp;
 		HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);

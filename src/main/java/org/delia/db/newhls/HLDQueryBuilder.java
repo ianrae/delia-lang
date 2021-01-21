@@ -119,12 +119,19 @@ public class HLDQueryBuilder {
 
 
 	private void buildFns(QueryExp queryExp, HLDQuery hld, List<QScope> scopeL) {
-		DStructType currentScope = hld.fromType; //TODO implement scope changes when see .addr
+		DStructType currentScope = hld.fromType; 
 		String currentFieldName = null;
 		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
 			if (fnexp instanceof QueryFieldExp) {
-				currentFieldName = fnexp.funcName;
+				DType possibleType = registry.getType(fnexp.funcName);
+				if (possibleType != null) {
+					if (possibleType.isStructShape()) {
+						currentScope = (DStructType) registry.getType(fnexp.funcName);
+					}
+				} else {
+					currentFieldName = fnexp.funcName;
+				}
 				continue;
 			}
 			QScope scope = scopeL.stream().filter(x -> x.qfnexp == fnexp).findAny().get();
