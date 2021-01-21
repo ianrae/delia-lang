@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
+import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.hls.AliasManager;
@@ -50,14 +50,21 @@ public class HLDManager extends ServiceBase {
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
 	private SprigService sprigSvc; //set after ctor
 
-//	private DeliaSession session;
 //	private Delia delia;
 	
-	public HLDManager(Delia delia, DTypeRegistry registry, DeliaSession session, VarEvaluator varEvaluator) {
+	public HLDManager(Delia delia, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
-//		this.session = session;
 //		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
+		this.registry = registry;
+		this.varEvaluator = varEvaluator;
+		this.aliasManager = new AliasManager(factorySvc);
+		this.pipelineL.add(new InQueryStep(factorySvc));
+	}
+	public HLDManager(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+		super(factorySvc);
+//		this.session = session;
+		this.dbInterface= dbInterface;
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
 		this.aliasManager = new AliasManager(factorySvc);
