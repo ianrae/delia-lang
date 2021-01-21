@@ -41,7 +41,6 @@ import org.delia.util.DValueHelper;
 public abstract class HLDEngineBase extends HLDExtendedServiceBase {
 	protected QueryBuilderHelper queryBuilderHelper;
 	private SimpleSqlBuilder simpleBuilder;
-	protected VarEvaluator varEvaluator; //set after ctor
 
 	public HLDEngineBase(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(registry, factorySvc, datIdMap, sprigSvc);

@@ -106,9 +106,11 @@ public class HLDQueryBuilder {
 
 	private void buildFns(QueryExp queryExp, HLDQuery hld, List<QScope> scopeL) {
 		DStructType currentScope = hld.fromType; //TODO implement scope changes when see .addr
+		String currentFieldName = null;
 		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
 			if (fnexp instanceof QueryFieldExp) {
+				currentFieldName = fnexp.funcName;
 				continue;
 			}
 			QScope scope = scopeL.stream().filter(x -> x.qfnexp == fnexp).findAny().get();
@@ -119,7 +121,7 @@ public class HLDQueryBuilder {
 				addFetch(fnexp, currentScope, hld, scope);
 			} else {
 				QueryFnSpec spec = new QueryFnSpec();
-				spec.structField = new StructFieldOpt(currentScope, null, null); //?? correct?
+				spec.structField = new StructFieldOpt(currentScope, currentFieldName, null); //?? correct?
 				spec.filterFn = new FilterFunc();
 				spec.filterFn.fnName = fnexp.funcName;
 				addArgs(spec, fnexp);
