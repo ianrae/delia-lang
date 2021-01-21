@@ -328,10 +328,7 @@ public class LetStatementRunner extends ServiceBase {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
 				
-				//extract fields or invoke fns (optional)
-				
 				//resolve varref to parseable query
-//				if (queryExp.)
 				if (qresp.emptyResults()) {
 					if (queryExp.qfelist.size() > 0) {
 						String msg = String.format("var '%s' is null. cannot be evaluationed", varRef.varRef);
@@ -342,6 +339,25 @@ public class LetStatementRunner extends ServiceBase {
 					varRef.qresp = qresp.dvalList == null ? null : qresp;
 					return varRef;
 				} else {
+					//TODO: this feels wrong. should not be converting lists to scalar val i think
+					if (qresp.dvalList.size() > 1) {
+						if (!queryExp.qfelist.isEmpty()) {
+							String fieldName = queryExp.qfelist.get(0).funcName; //TODO support more fields or funcs later
+							
+							List<DValue> newlist = new ArrayList<>();
+							for(DValue listel: qresp.dvalList) {
+								DValue inner = listel.asStruct().getField(fieldName);
+								newlist.add(inner);
+							}
+							qresp.dvalList = newlist;
+							varRef.qresp = qresp;
+							return varRef;
+						}
+
+						varRef.qresp = qresp;
+						return varRef;
+					}
+					
 					DValue first = qresp.dvalList.get(0);
 					//if scalar then just return
 					if (first.getType().isScalarShape()) {
