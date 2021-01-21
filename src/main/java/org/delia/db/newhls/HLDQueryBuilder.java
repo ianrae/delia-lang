@@ -121,16 +121,18 @@ public class HLDQueryBuilder {
 	private void buildFns(QueryExp queryExp, HLDQuery hld, List<QScope> scopeL) {
 		DStructType currentScope = hld.fromType; 
 		String currentFieldName = null;
+		DType currentFieldType = null;
 		
 		for(QueryFuncExp fnexp: queryExp.qfelist) {
 			if (fnexp instanceof QueryFieldExp) {
-				DType possibleType = registry.getType(fnexp.funcName);
-				if (possibleType != null) {
-					if (possibleType.isStructShape()) {
-						currentScope = (DStructType) registry.getType(fnexp.funcName);
+				TypePair pair = DValueHelper.findField(currentScope, fnexp.funcName);
+				if (pair != null) {
+					if (pair.type.isStructShape()) {
+						currentScope = (DStructType) pair.type;
+					} else {
+						currentFieldType = pair.type;
 					}
-				} else {
-					currentFieldName = fnexp.funcName;
+					currentFieldName = pair.name;
 				}
 				continue;
 			}
@@ -142,7 +144,7 @@ public class HLDQueryBuilder {
 				addFetch(fnexp, currentScope, hld, scope);
 			} else {
 				QueryFnSpec spec = new QueryFnSpec();
-				spec.structField = new StructFieldOpt(currentScope, currentFieldName, null); //?? correct?
+				spec.structField = new StructFieldOpt(currentScope, currentFieldName, currentFieldType); //?? correct?
 				spec.filterFn = new FilterFunc();
 				spec.filterFn.fnName = fnexp.funcName;
 				addArgs(spec, fnexp);

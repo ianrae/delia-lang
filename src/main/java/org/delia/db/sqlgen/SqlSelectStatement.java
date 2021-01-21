@@ -14,6 +14,8 @@ import org.delia.db.newhls.QueryFnSpec;
 import org.delia.db.newhls.SqlColumn;
 import org.delia.db.newhls.SqlColumnBuilder;
 import org.delia.db.newhls.SqlParamGenerator;
+import org.delia.db.newhls.StructField;
+import org.delia.db.newhls.StructFieldOpt;
 import org.delia.db.newhls.cud.TypeOrTable;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
@@ -183,7 +185,15 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		StringJoiner joiner = new StringJoiner(",");
 		Optional<QueryFnSpec> optCountFn = hld.funcL.stream().filter(x -> x.filterFn.fnName.equals("count")).findAny();
 		if (optCountFn.isPresent()) {
-			joiner.add("count(*)");
+			QueryFnSpec qfn = optCountFn.get();
+			if (qfn.structField.fieldName == null) {
+				joiner.add("count(*)");
+			} else {
+				Optional<HLDField> opt = hld.fieldL.stream().filter(x -> isStructMatch(x,qfn.structField)).findAny();
+				String alias = opt.isPresent() ? opt.get().alias : "t99"; //TODO throw exception later
+				SqlColumn col = new SqlColumn(alias, qfn.structField.fieldName);
+				joiner.add(String.format("count(%s)", col.render()));
+			}
 			return joiner;
 		}
 		
@@ -199,6 +209,14 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		return joiner;
 	}
 
+	private boolean isStructMatch(HLDField ff, StructFieldOpt structField2) {
+		if (ff.structType == structField2.dtype) {
+			if (ff.fieldName.equals(structField2.fieldName)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private SqlColumn addFuncs(SqlColumn npair, HLDField ff, HLDQuery hld) {
 		Optional<QueryFnSpec> opt = hld.funcL.stream().filter(x ->x.isMatch(ff.structType, ff.fieldName)).findAny();
