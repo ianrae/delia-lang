@@ -3,11 +3,16 @@ package org.delia.db.newhls;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;
 import org.delia.db.newhls.simple.SimpleSqlBuilder;
 import org.delia.sprig.SprigService;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 /**
  * Base class for most of the HLD generators.
@@ -53,8 +58,36 @@ public abstract class HLDServiceBase extends ServiceBase {
 			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
 			DValue pkval = pgen.convert(sfc.val1);
 			return pkval;
+		} else if (hld.filter instanceof OpFilterCond) {
+			OpFilterCond ofc = (OpFilterCond) hld.filter;
+			FilterVal fval = findForPK(hld.fromType, ofc);
+			if (fval == null) {
+				return null;
+			}
+			if (ofc.val1.isScalar()) {
+				DValue pkval = pgen.convert(ofc.val1);
+				return pkval;
+			} else if (ofc.val2.isScalar()) {
+				DValue pkval = pgen.convert(ofc.val2);
+				return pkval;
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}
+	}
+
+	private FilterVal findForPK(DStructType fromType, OpFilterCond ofc) {
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(fromType);
+		if (pkpair != null) {
+			if (ofc.val1.isSymbol() && ofc.val1.asString().equals(pkpair.name)) {
+				return ofc.val1;
+			}
+			if (ofc.val2.isSymbol() && ofc.val2.asString().equals(pkpair.name)) {
+				return ofc.val2;
+			}
+		}
+		return null;
 	}
 }

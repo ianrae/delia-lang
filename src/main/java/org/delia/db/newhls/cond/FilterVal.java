@@ -77,6 +77,18 @@ public class FilterVal {
 	public boolean isFn() {
 		return valType.equals(ValType.FUNCTION);
 	}
+	public boolean isScalar() {
+		switch(valType) {
+		case BOOLEAN:
+		case INT:
+		case LONG:
+		case NUMBER:
+		case STRING:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	@Override
 	public String toString() {
