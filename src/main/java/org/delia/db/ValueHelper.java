@@ -282,10 +282,10 @@ public class ValueHelper extends ServiceBase {
 	public DValue readIndexedField(DType type, int rsIndex, ResultSet rs, DBAccessContext dbctx) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 
-		boolean b = rs.next(); //assume we're reading 1st record
-		if (!b) {
-			return null;
-		}
+//		boolean b = rs.next(); //assume we're reading 1st record
+//		if (!b) {
+//			return null;
+//		}
 		
 		switch(type.getShape()) {
 		case INTEGER:

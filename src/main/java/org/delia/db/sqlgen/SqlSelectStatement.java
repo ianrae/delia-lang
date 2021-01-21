@@ -61,7 +61,11 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");
-
+		Optional<QueryFnSpec> opt = hld.funcL.stream().filter(x ->x.isFn("distinct")).findAny();
+		if (opt.isPresent()) {
+			sc.addStr("DISTINCT ");
+		}
+		
 		StringJoiner joiner = generateFields(hld);
 		sc.o(joiner.toString());
 
@@ -184,7 +188,14 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		switch(qfn.getFnName()) {
 		case "min":
 		case "max":
+		case "count":
+		case "exists":
 			return addFunc(npair, qfn); 
+			
+		case "distinct": //handled at select level (entire statement)
+			return npair; 
+		default:
+			break;
 		}
 		
 		DeliaExceptionHelper.throwNotImplementedError("unknown fn: %s", qfn.getFnName());

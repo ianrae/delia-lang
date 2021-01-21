@@ -115,15 +115,18 @@ public class HLDResultSetConverterBase extends ServiceBase {
 	public List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details, DBAccessContext dbctx) {
 		List<DValue> list = new ArrayList<>();
 		try {
-			DValue dval = valueHelper.readIndexedField(selectResultType.physicalType, 1, rs, dbctx);
-			if (selectResultType.needPhysicalToLogicalMapping()) {
-				ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, dbctx.registry);
-				dval = selectResultType.mapPhysicalToLogicalValue(dval, builder);
+			while (rs.next()) {
+				DValue dval = valueHelper.readIndexedField(selectResultType.physicalType, 1, rs, dbctx);
+				if (selectResultType.needPhysicalToLogicalMapping()) {
+					ScalarValueBuilder builder = new ScalarValueBuilder(factorySvc, dbctx.registry);
+					dval = selectResultType.mapPhysicalToLogicalValue(dval, builder);
+				}
+				
+				if (dval != null) {
+					list.add(dval);
+				}
 			}
 			
-			if (dval != null) {
-				list.add(dval);
-			}
 		} catch (ValueException e) {
 			ValueException ve = (ValueException)e;
 			throw new DBException(ve.errL);
