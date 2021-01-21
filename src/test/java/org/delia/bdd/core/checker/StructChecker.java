@@ -90,6 +90,12 @@ public class StructChecker extends ValueCheckerBase {
 			}
 			index++;
 		}
+		
+		if (genL.size() != thenL.size()) {
+			String err = String.format("value-mismatch: genList has %d but thenL has %d", genL.size(), thenL.size());
+			log.logError(err);
+			return false;
+		}		
 		return true;
 	}
 

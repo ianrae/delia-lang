@@ -188,6 +188,9 @@ public class HLDQueryBuilder {
 						currentType = pair.type;
 					}
 				}
+			} else if (scope.thing instanceof FinalField) {
+				FinalField ff = (FinalField) scope.thing;
+				currentType = ff.structField.fieldType;
 			}
 		}
 		hld.resultType = currentType;
