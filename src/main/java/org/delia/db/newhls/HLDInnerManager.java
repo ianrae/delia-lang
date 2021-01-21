@@ -45,6 +45,10 @@ public class HLDInnerManager extends HLDServiceBase {
 		engine.assignAliases(stmt);
 		return stmt;
 	}
+	public boolean canBuildQuery(QueryExp queryExp, VarEvaluator varEvaluator) {
+		engine.setVarEvaluator(varEvaluator);
+		return engine.canBuildQuery(queryExp, null);
+	}
 	public HLDDeleteStatement fullBuildDelete(QueryExp queryExp) {
 		HLDDeleteStatement stmt = new HLDDeleteStatement();
 		stmt.hlddelete = engine.buildDelete(queryExp);

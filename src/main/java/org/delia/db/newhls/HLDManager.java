@@ -81,6 +81,10 @@ public class HLDManager extends ServiceBase {
 		log.log(hld.toString());
 		return hld;
 	}
+	public boolean canBuildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+		HLDInnerManager mgr = createManager(zexec);
+		return mgr.canBuildQuery(queryExp, varEvaluator);
+	}
 	public HLDDeleteStatement buildHLD(DeleteStatementExp deleteExp, ZDBExecutor zexec) {
 		QueryExp queryExp = deleteExp.queryExp;
 		

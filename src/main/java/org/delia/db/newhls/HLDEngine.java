@@ -76,6 +76,10 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		
 		return hld;
 	}
+	public boolean canBuildQuery(QueryExp queryExp, DStructType structType) {
+		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
+		return hldBuilder.canBuildStatement(queryExp, structType, varEvaluator);
+	}
 	
 	public HLDDelete buildDelete(QueryExp queryExp) {
 		HLDQuery hld = buildQuery(queryExp);

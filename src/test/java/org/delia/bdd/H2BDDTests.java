@@ -321,7 +321,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 0;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
@@ -331,10 +331,10 @@ public class H2BDDTests extends BDDBase {
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		//LATER runR1350File("t0-filter-in-twitter.txt", 4);
-//		runR1000File("t0-upsert-unique.txt", 4);
-//		runR1500File("t0-queryfn-count.txt", 2);
-//		runR1600File("t0-fetch-field.txt", 6);
-		runR1700File("t0-let-field-single.txt", 3);
+//		runR1500File("t0-queryfn-orderby.txt", 4);
+		runR1800File("t0-dollardollar.txt", 2);
+//		runR2100File("t0-migration3.txt", 2);
+//		runR2150File("t0-migrate-many-to-many2.txt", 2);
 	}
 	
 	//---

@@ -199,7 +199,8 @@ public class LetStatementRunner extends ServiceBase {
 		HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);
 		return hld;
 	}
-
+	
+	
 	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp) {
 		QueryContext qtx = new QueryContext();
 		qtx.existingQResp = existingQResp;
@@ -363,6 +364,11 @@ public class LetStatementRunner extends ServiceBase {
 					varRef.qresp = qresp.dvalList == null ? null : qresp;
 					return varRef;
 				} else {
+					if (! hldManager.canBuildHLD(queryExp, zexec, runner)) {
+						//usually means statement is scalar. let x = 5
+						return doVarRef(varRef, qresp, qresp.dvalList);
+					}
+
 					QuerySpec spec = resolveFilterVars(queryExp);
 					HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
 					//TODO: improve. this works for .wid but not .addr.wid.x.y
@@ -394,17 +400,20 @@ public class LetStatementRunner extends ServiceBase {
 			varRef.qresp = qresp;
 			return varRef;
 		} else {
-			if (newlist.isEmpty()) {
-				varRef.dval = null;
-				return varRef;
-			} else if (newlist.size() == 1) {
-				varRef.dval = newlist.get(0);
-				return varRef;
-			} else {
-				qresp.dvalList = newlist;
-				varRef.qresp = qresp;
-				return varRef;
-			}
+			return doVarRef(varRef, qresp, newlist);
+		}
+	}
+	private VarRef doVarRef(VarRef varRef, QueryResponse qresp, List<DValue> newlist) {
+		if (newlist.isEmpty()) {
+			varRef.dval = null;
+			return varRef;
+		} else if (newlist.size() == 1) {
+			varRef.dval = newlist.get(0);
+			return varRef;
+		} else {
+			qresp.dvalList = newlist;
+			varRef.qresp = qresp;
+			return varRef;
 		}
 	}
 

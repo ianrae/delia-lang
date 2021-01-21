@@ -34,6 +34,23 @@ public class HLDQueryBuilder {
 	public HLDQueryBuilder(DTypeRegistry registry) {
 		this.registry = registry;
 	}
+	
+	public boolean canBuildStatement(QueryExp queryExp, DStructType structTypeEx, VarEvaluator varEvaluator) {
+		HLDQuery hld = new HLDQuery();
+		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
+		if (hld.fromType == null) {
+			List<DValue> referencedVarValList = varEvaluator.lookupVar(queryExp.typeName);
+			DValue dval = referencedVarValList == null ? null : (referencedVarValList.isEmpty() ? null : referencedVarValList.get(0)); 
+			if (dval == null) { //was not a var ref
+				DeliaExceptionHelper.throwUnknownTypeError(queryExp.typeName);
+			}
+			
+			if (! dval.getType().isStructShape()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public HLDQuery build(QueryExp queryExp, VarEvaluator varEvaluator) {
 		return build(queryExp, null, varEvaluator);
@@ -133,6 +150,8 @@ public class HLDQueryBuilder {
 						currentFieldType = pair.type;
 					}
 					currentFieldName = pair.name;
+				} else {
+					DeliaExceptionHelper.throwUnknownFieldError(currentScope.getName(), fnexp.funcName);
 				}
 				continue;
 			}
@@ -147,16 +166,27 @@ public class HLDQueryBuilder {
 				spec.structField = new StructFieldOpt(currentScope, currentFieldName, currentFieldType); //?? correct?
 				spec.filterFn = new FilterFunc();
 				spec.filterFn.fnName = fnexp.funcName;
-				addArgs(spec, fnexp);
+				
+				addArgs(spec, fnexp, currentScope);
 				hld.funcL.add(spec);
 				scope.setDetails(currentScope, fnexp.funcName, spec);
 			}
 		}
 	}
 
-	private void addArgs(QueryFnSpec spec, QueryFuncExp fnexp) {
+	private void addArgs(QueryFnSpec spec, QueryFuncExp fnexp, DStructType currentScope) {
 		for(int i = 0; i < fnexp.argL.size(); i++) {
 			Exp exp = fnexp.argL.get(i);
+			
+			//fns that take fieldName as arg: orderByp 
+			//fns that don't: count, exists, min, max, distinct, orderBy, limit, offset, first,last,ith
+			if (spec.isFn("orderBy") && i == 0) {
+				TypePair pair = DValueHelper.findField(currentScope, exp.strValue());
+				if (pair == null) {
+					DeliaExceptionHelper.throwUnknownFieldError(currentScope.getName(), exp.strValue());
+				}
+			}
+			
 			FilterVal fval = FilterValHelper.createFromExp(exp); //new FilterVal(ValType.STRING, exp);
 			spec.filterFn.argL.add(fval);
 		}
