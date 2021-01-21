@@ -1,6 +1,7 @@
 package org.delia.db.newhls;
 
 import org.delia.db.newhls.cond.FilterFunc;
+import org.delia.type.DStructType;
 
 /**
  * A function such as orderBy,count,first,min,etc
@@ -13,6 +14,16 @@ public class QueryFnSpec {
 
 	public boolean isFn(String fnName) {
 		return filterFn.fnName.equals(fnName);
+	}
+	public String getFnName() {
+		return filterFn.fnName;
+	}
+	
+	public boolean isMatch(DStructType structType, String fieldName) {
+		if (structType == structField.dtype && fieldName.equals(structField.fieldName)) {
+			return true;
+		}
+		return false;
 	}
 	
 	@Override

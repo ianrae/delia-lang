@@ -22,6 +22,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 public class SqlSelectStatement implements SqlStatementGenerator {
 
@@ -160,21 +161,41 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 			return joiner;
 		}
 		
-		if (!hld.resultType.isStructShape()) {
-			//TODO: max(t0.id)
-		}
-
 		for(HLDField ff: hld.fieldL) {
 			SqlColumn npair = mapFieldIfNeeded(ff);
+			npair = addFuncs(npair, ff, hld);
 			if (ff.asStr != null) {
-				joiner.add(String.format("%s as %s", npair.toString(), ff.asStr));
+				joiner.add(String.format("%s as %s", npair.render(), ff.asStr));
 			} else {
-				joiner.add(String.format("%s", npair.toString()));
+				joiner.add(String.format("%s", npair.render()));
 			}
 		}
 		return joiner;
 	}
 
+
+	private SqlColumn addFuncs(SqlColumn npair, HLDField ff, HLDQuery hld) {
+		Optional<QueryFnSpec> opt = hld.funcL.stream().filter(x ->x.isMatch(ff.structType, ff.fieldName)).findAny();
+		if (! opt.isPresent()) {
+			return npair;
+		}
+		
+		QueryFnSpec qfn = opt.get();
+		switch(qfn.getFnName()) {
+		case "min":
+		case "max":
+			return addFunc(npair, qfn); 
+		}
+		
+		DeliaExceptionHelper.throwNotImplementedError("unknown fn: %s", qfn.getFnName());
+		return null;
+	}
+
+	private SqlColumn addFunc(SqlColumn npair, QueryFnSpec qfn) {
+		npair.name = String.format("%s(%s)", qfn.getFnName(), npair.render());
+		npair.alias = null;
+		return npair;
+	}
 
 	private SqlColumn mapFieldIfNeeded(HLDField rf) {
 		if (rf.source instanceof JoinElement) {
