@@ -79,7 +79,11 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		for(QueryFnSpec fnspec: hld.funcL) {
 			TypePair pair = DValueHelper.findField(fnspec.structField.dtype, fnspec.structField.fieldName);
 			if (pair == null) {
-				DeliaExceptionHelper.throwUnknownFieldError(fnspec.structField.dtype.getName(), fnspec.structField.fieldName);
+				//fns that only work with fields: min, max
+				//fns that work on types: count, exists, distinct, orderBy, limit, offset, first,last,ith
+				if (fnspec.isFn("min") || fnspec.isFn("max")) {
+					DeliaExceptionHelper.throwUnknownFieldError(fnspec.structField.dtype.getName(), fnspec.structField.fieldName);
+				}
 			}
 			
 			JoinElement el = findMatch(fnspec, hld);

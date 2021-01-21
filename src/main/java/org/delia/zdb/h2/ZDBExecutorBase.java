@@ -141,7 +141,11 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 	protected void logSql(SqlStatement statement) {
 		StringJoiner joiner = new StringJoiner(",");
 		for(DValue dval: statement.paramL) {
-			joiner.add(String.format("'%s'", dval.asString()));
+			if (dval == null) {
+				joiner.add("null");
+			} else {
+				joiner.add(String.format("'%s'", dval.asString()));
+			}
 		}
 
 		String s = String.format("%s  -- (%s)", statement.sql, joiner.toString());
