@@ -151,9 +151,7 @@ public class LetStatementRunner extends ServiceBase {
 		boolean flag2 = mgr != null;
 		QueryResponse qresp;
 		if (flag1) {
-			spec.queryExp = queryExp;
-//			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
-			HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);
+			HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
 			SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
 
 			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
@@ -174,6 +172,11 @@ public class LetStatementRunner extends ServiceBase {
 			qresp = mgrRes.qresp;
 		}
 		return qresp;
+	}
+	private HLDQueryStatement buildHLDQuery(QuerySpec spec, QueryExp queryExp) {
+		spec.queryExp = queryExp;
+		HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);
+		return hld;
 	}
 
 	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp) {
@@ -320,7 +323,7 @@ public class LetStatementRunner extends ServiceBase {
 
 		VarRef varRef = new VarRef();
 		varRef.varRef = queryExp.typeName;
-
+		
 		if (res.val instanceof DValue) {
 			varRef.dval = (DValue) res.val;
 			return varRef;
@@ -339,58 +342,22 @@ public class LetStatementRunner extends ServiceBase {
 					varRef.qresp = qresp.dvalList == null ? null : qresp;
 					return varRef;
 				} else {
-					//TODO: this feels wrong. should not be converting lists to scalar val i think
-					if (qresp.dvalList.size() > 1) {
-						if (!queryExp.qfelist.isEmpty()) {
-							String fieldName = queryExp.qfelist.get(0).funcName; //TODO support more fields or funcs later
-							
-							List<DValue> newlist = new ArrayList<>();
-							for(DValue listel: qresp.dvalList) {
-								DValue inner = listel.asStruct().getField(fieldName);
-								newlist.add(inner);
-							}
-							qresp.dvalList = newlist;
-							varRef.qresp = qresp;
-							return varRef;
+					QuerySpec spec = resolveFilterVars(queryExp);
+					HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
+					//TODO: improve. this works for .wid but not .addr.wid.x.y
+					if (hld.hldquery.finalField != null) {
+						String fieldName = hld.hldquery.finalField.structField.fieldName; 
+						
+						List<DValue> newlist = new ArrayList<>();
+						for(DValue listel: qresp.dvalList) {
+							DValue inner = listel.asStruct().getField(fieldName);
+							newlist.add(inner);
 						}
-
-						varRef.qresp = qresp;
-						return varRef;
+						
+						return properVarRef(varRef, hld, qresp, newlist);
+					} else {
+						return properVarRef(varRef, hld, qresp, qresp.dvalList);
 					}
-					
-					DValue first = qresp.dvalList.get(0);
-					//if scalar then just return
-					if (first.getType().isScalarShape()) {
-						varRef.qresp = qresp;
-						return varRef;
-					}
-					
-					queryExp.typeName = first.getType().getName();
-					//TODO add code to handle var refs deeper in statement. ex: let x = y.orderBy(z)
-					
-					if (!queryExp.qfelist.isEmpty()) {
-						String fieldName = queryExp.qfelist.get(0).funcName; //TODO support more fields or funcs later
-						DValue inner = first.asStruct().getField(fieldName);
-						//if scalar then just return
-						if (inner != null && inner.getType().isScalarShape()) {
-							varRef.qresp = null;
-							varRef.dval = inner;
-							return varRef;
-						}
-					}
-					
-				}
-				
-				
-				QueryResponse qresp2 = qresp; //TODO: why did we call db here? executeDBQuery(queryExp, qresp);
-				//TODO: propogate errors from qresp2.err
-				if (qresp2.ok) {
-					if (qresp2.dvalList == null) {
-						varRef.dval = null;
-						return varRef;
-					}
-					varRef.qresp = qresp2;
-					return varRef;
 				}
 			} else if (res.val == null) { //handle null values
 				varRef.dval = null;
@@ -400,6 +367,26 @@ public class LetStatementRunner extends ServiceBase {
 		}
 		return null;
 	}
+	private VarRef properVarRef(VarRef varRef, HLDQueryStatement hld, QueryResponse qresp, List<DValue> newlist) {
+		if (hld.hldquery.resultType.isStructShape()) {
+			qresp.dvalList = newlist;
+			varRef.qresp = qresp;
+			return varRef;
+		} else {
+			if (newlist.isEmpty()) {
+				varRef.dval = null;
+				return varRef;
+			} else if (newlist.size() == 1) {
+				varRef.dval = newlist.get(0);
+				return varRef;
+			} else {
+				qresp.dvalList = newlist;
+				varRef.qresp = qresp;
+				return varRef;
+			}
+		}
+	}
+
 //	private VarRef resolveVarReference(QueryExp queryExp) {
 //		ResultValue res = runner.varMap.get(queryExp.typeName);
 //		if (res == null) {

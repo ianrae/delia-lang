@@ -181,15 +181,19 @@ public class HLDQueryBuilder {
 				RelationField rf = (RelationField) scope.thing;
 				currentType = rf.fieldType;
 			} else if (scope.thing instanceof QueryFnSpec) {
+				//fns that take type of field: min, max
+				//fns that change type: count, exists
+				//fns that do nothing: distinc, orderBy, limit, offset, first,last,ith
 				QueryFnSpec qfn = (QueryFnSpec) scope.thing;
-				if (qfn.structField.fieldType == null) {
-					TypePair pair = DValueHelper.findField(qfn.structField.dtype, qfn.structField.fieldName);
-					if (pair != null) {
-						qfn.structField.fieldType = pair.type;
-						currentType = pair.type;
+				if (qfn.isFn("min") || qfn.isFn("max")) {
+					if (qfn.structField.fieldType == null) {
+						TypePair pair = DValueHelper.findField(qfn.structField.dtype, qfn.structField.fieldName);
+						if (pair != null) {
+							qfn.structField.fieldType = pair.type;
+							currentType = pair.type;
+						}
 					}
-				}
-				if (qfn.isFn("exists")) {
+				} else if (qfn.isFn("exists")) {
 					currentType = registry.getType(BuiltInTypes.BOOLEAN_SHAPE);
 				} else if (qfn.isFn("count")) {
 					currentType = registry.getType(BuiltInTypes.LONG_SHAPE);

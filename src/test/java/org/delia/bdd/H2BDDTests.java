@@ -330,10 +330,10 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		runR1350File("t0-filter-in-twitter.txt", 4);
-//		runR1000File("t0-upsert-mm-id.txt", 4);
+		runR1350File("t0-filter-in-twitter.txt", 4);
+		runR1000File("t0-upsert-mm-id.txt", 4);
 		runR1300File("t0-let-varref.txt", 5);
-//		runR1500File("t0-queryfn-orderby.txt", 4);
+		runR1500File("t0-queryfn-orderby.txt", 4);
 //		runR1550File("t0-queryfn-oneone-childa.txt", 7);
 //		runR1600File("t0-fetch-field.txt", 6);
 
