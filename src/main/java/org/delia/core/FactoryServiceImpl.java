@@ -3,6 +3,7 @@ package org.delia.core;
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
+import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
@@ -110,6 +111,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
 		return new HLSSimpleQueryService(this, dbInterface, registry);
+	}
+	@Override
+	public HLDSimpleQueryService createHLDSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
+		return new HLDSimpleQueryService(this, dbInterface, registry);
 	}
 
 }

@@ -2,6 +2,7 @@ package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
+import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
@@ -35,6 +36,7 @@ public interface FactoryService {
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
 	HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry);
+	HLDSimpleQueryService createHLDSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry);
 	SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
