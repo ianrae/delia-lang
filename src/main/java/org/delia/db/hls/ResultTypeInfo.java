@@ -1,6 +1,5 @@
 package org.delia.db.hls;
 
-import org.delia.db.DBAccessContext;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;

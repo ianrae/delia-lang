@@ -189,10 +189,19 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		case "min":
 		case "max":
 		case "count":
-		case "exists":
 			return addFunc(npair, qfn); 
 			
-		case "distinct": //handled at select level (entire statement)
+		case "exists":
+			return addFuncEx(npair, "count"); 
+			
+		//handled at select level (entire statement)
+		case "distinct": 
+		case "orderBy": 
+		case "limit": 
+		case "offset": 
+		case "first": 
+		case "last": 
+		case "ith": 
 			return npair; 
 		default:
 			break;
@@ -204,6 +213,11 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 
 	private SqlColumn addFunc(SqlColumn npair, QueryFnSpec qfn) {
 		npair.name = String.format("%s(%s)", qfn.getFnName(), npair.render());
+		npair.alias = null;
+		return npair;
+	}
+	private SqlColumn addFuncEx(SqlColumn npair, String str) {
+		npair.name = String.format("%s(%s)", str, npair.render());
 		npair.alias = null;
 		return npair;
 	}

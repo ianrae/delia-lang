@@ -13,6 +13,7 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.FilterValHelper;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.VarEvaluator;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -187,6 +188,11 @@ public class HLDQueryBuilder {
 						qfn.structField.fieldType = pair.type;
 						currentType = pair.type;
 					}
+				}
+				if (qfn.isFn("exists")) {
+					currentType = registry.getType(BuiltInTypes.BOOLEAN_SHAPE);
+				} else if (qfn.isFn("count")) {
+					currentType = registry.getType(BuiltInTypes.LONG_SHAPE);
 				}
 			} else if (scope.thing instanceof FinalField) {
 				FinalField ff = (FinalField) scope.thing;
