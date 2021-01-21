@@ -353,14 +353,21 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 	}
 	
 	private boolean isAFetchedColumn(DStructType dtype, TypePair pair, List<ColumnRun> columnRunL) {
-//		for(ColumnRun run: columnRunL) {
-//			if (run.fieldGroup != null && run.fieldGroup.el != null) {
-//				JTElement el = run.fieldGroup.el;
-//				if (el.dtype == dtype && el.fieldName.equals(pair.name)) {
-//					return el.usedForFetch;
-//				}
-//			}
-//		}
+		for(ColumnRun run: columnRunL) {
+			if (run.dtype != dtype) {
+				continue;
+			}
+			
+			for(HLDField fld: run.runList) {
+				if (fld.fieldName.equals(pair.name)) {
+					if (fld.source instanceof JoinElement) {
+						JoinElement el = (JoinElement) fld.source;
+						return el.usedForFetch();
+					}
+				}
+			}
+			
+		}
 		return false;
 	}
 //	private void chkObjects(List<DValue> list, String relField, String backField) {
