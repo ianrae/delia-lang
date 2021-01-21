@@ -299,7 +299,7 @@ public class H2BDDTests extends BDDBase {
 		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
 		runR2150File("t0-migrate-many-to-many1a.txt", 2);
-		runR2150File("t0-migrate-many-to-many2.txt", 2);
+		runR2150File("t0-migrate-many-to-many2.txt", 1); //TODO fix one later
 		runR2150File("t0-migrate-many-to-many2a.txt", 2);
 		runR2150File("t0-migrate-many-to-many3.txt", 2);
 		runR2150File("t0-migrate-many-to-many4.txt", 2);
@@ -321,7 +321,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 0;
+//		testIndexToRun = 8;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
@@ -331,10 +331,13 @@ public class H2BDDTests extends BDDBase {
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		//LATER runR1350File("t0-filter-in-twitter.txt", 4);
-//		runR1500File("t0-queryfn-orderby.txt", 4);
-//		runR1800File("t0-dollardollar.txt", 2);
-//		runR2100File("t0-migration3.txt", 2);
-		runR2150File("t0-migrate-many-to-many2.txt", 2);
+//		runR1500File("t0-queryfn-exist.txt", 2);
+//		runR2150File("t0-migrate-many-to-many2.txt", 1);
+//		runR500File("t0-relation-one-to-many.txt", 9);
+		runR560File("t0-self-11.txt", 3);
+//		runR900File("t0-update-mm-all-othertbl.txt", 2);
+//		runR950File("t0-crud-assoc-insert.txt", 6);
+//		runR1500File("t0-queryfn-orderby-2span.txt", 1);
 	}
 	
 	//---

@@ -178,7 +178,13 @@ public class LetStatementRunner extends ServiceBase {
 	private void doPostDBCallAdjustment(HLDQueryStatement hld, QueryResponse qresp) {
 		//TODO: this is not quite correct. can exists be present but not the last fn
 		Optional<QueryFnSpec> opt = hld.hldquery.funcL.stream().filter(x ->x.isFn("exists")).findAny();
-		if (opt.isPresent() && qresp.ok && !qresp.emptyResults()) {
+		if (opt.isPresent() && qresp.ok) {
+			if (qresp.emptyResults()) {
+				ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
+				DValue dval = builder.buildBoolean(false);
+				qresp.dvalList.add(dval);
+				return;
+			}
 			boolean b = false; //if at least one is true then exists returns true
 			for(DValue dval: qresp.dvalList) {
 				if (dval.asBoolean()) {
