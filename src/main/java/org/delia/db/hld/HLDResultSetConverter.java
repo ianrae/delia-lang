@@ -110,6 +110,9 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 			//do main type
 			ColumnRun mainRun = columnRunL.get(0);
 			DValue dval = readStructDValueX(mainRun, rsw, dbctx);
+			if (dval == null) {
+				DeliaExceptionHelper.throwError("unexpected-null-db-results", "%s: unexpected null dval", hld.hldquery.fromType.getName());
+			}
 			list.add(dval);
 			
 			//do remaining column runs

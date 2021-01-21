@@ -1,10 +1,13 @@
 package org.delia.db.newhls;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -29,6 +32,29 @@ public class HLDFieldBuilder {
 
 		for(FetchSpec spec: hld.fetchL) {
 			addFetchField(spec, hld);
+		}
+		
+		//remove duplicates
+		List<HLDField> doomedL = new ArrayList<>();
+		int index = 0;
+		for(HLDField fld: hld.fieldL) {
+			for(int k = index+1; k < hld.fieldL.size(); k++) {
+				HLDField inner = hld.fieldL.get(k); 
+				if (inner == fld) {
+					continue;
+				}
+				if (fld.structType == inner.structType) {
+					if (StringUtils.equals(fld.fieldName, inner.fieldName)) {
+						System.out.println("removing dup!!");
+						doomedL.add(inner);
+						break;
+					}
+				}
+			}
+			index++;
+		}
+		for(HLDField doomed: doomedL) {
+			hld.fieldL.remove(doomed);
 		}
 	}
 	
