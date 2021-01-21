@@ -61,8 +61,10 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");
-		Optional<QueryFnSpec> opt = hld.funcL.stream().filter(x ->x.isFn("distinct")).findAny();
-		if (opt.isPresent()) {
+		if (hld.hasFn("first") || hld.hasFn("last")) {
+			sc.addStr("TOP 1 ");
+		}
+		if (hld.hasFn("distinct")) {
 			sc.addStr("DISTINCT ");
 		}
 		
@@ -88,6 +90,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 	private void generateOrderBy(StrCreator sc, HLDQuery hld) {
 		List<QueryFnSpec> list = hld.funcL.stream().filter(x -> x.isFn("orderBy")).collect(Collectors.toList());
 		if (list.isEmpty()) {
+			addOrderByForLast(sc, hld, false);
 			return;
 		}
 
@@ -115,9 +118,28 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 				sc.o(" %s", asc);  
 			}
 		}
+		
+		addOrderByForLast(sc, hld, true);
 	}
 
-
+	private void addOrderByForLast(StrCreator sc, HLDQuery hld, boolean atLeastOne) {
+		if (!hld.hasFn("last")) return;
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
+		if (! atLeastOne) {
+			if (pkpair != null) {
+				SqlColumn col = new SqlColumn(hld.fromAlias, pkpair.name);
+				sc.o(" ORDER BY %s desc", col.render());
+			}
+			//else nothing to order by, so just do top 1...hmmm
+			//TODO: fix if no pkpair then TOP 1 will get first not last. oops. fix
+		} else {
+			SqlColumn col = new SqlColumn(hld.fromAlias, pkpair.name);
+			sc.o(", %s desc", col.render());  
+		}
+	}
+	
+	
 	private void generateJoins(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		for(JoinElement el: hld.joinL) {
 			if (el.relinfo.isManyToMany()) {
