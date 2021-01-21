@@ -104,6 +104,11 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 			} else {
 				sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
 			}
+			
+			if (fnspec.filterFn.argL.size() > 1) {
+				String asc = fnspec.filterFn.argL.get(1).asString();
+				sc.o(" %s", asc);  
+			}
 		}
 	}
 
