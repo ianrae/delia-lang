@@ -17,6 +17,7 @@ import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -41,13 +42,24 @@ public class HLDQueryBuilder {
 		HLDQuery hld = new HLDQuery();
 		hld.fromType = structTypeEx != null ? structTypeEx : (DStructType) registry.getType(queryExp.typeName);
 		if (hld.fromType == null) {
-			DeliaExceptionHelper.throwUnknownTypeError(queryExp.typeName);
+			List<DValue> referencedVarValList = varEvaluator.lookupVar(queryExp.typeName);
+			DValue dval = referencedVarValList == null ? null : (referencedVarValList.isEmpty() ? null : referencedVarValList.get(0)); 
+			if (dval == null) { //was not a var ref
+				DeliaExceptionHelper.throwUnknownTypeError(queryExp.typeName);
+			}
+			
+			if (! dval.getType().isStructShape()) {
+				DeliaExceptionHelper.throwError("unexpected-scalar-value", "%s: expected struct but got '%s'", queryExp.typeName, dval.getType().getName());
+			}
+			
+			hld.fromType = (DStructType) dval.getType();
+			hld.isVarRef = true;
 		}
 		hld.mainStructType = hld.fromType; 
 		hld.resultType = hld.fromType; //set at end in setResultAndMainType
 
 		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType, varEvaluator);
-		hld.filter = builder.build(queryExp);
+		hld.filter = builder.build(queryExp, hld.isVarRef);
 		
 		List<QScope> scopeL = prepareScopeList(queryExp);
 		buildFinalFieldAndThroughChain(queryExp, hld, scopeL); 

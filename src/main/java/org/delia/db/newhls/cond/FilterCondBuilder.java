@@ -39,6 +39,13 @@ public class FilterCondBuilder {
 	}
 	
 	public FilterCond build(QueryExp queryExp) {
+		return build(queryExp, false);
+	}
+	public FilterCond build(QueryExp queryExp, boolean isVarRef) {
+		if (isVarRef) {
+			return new BooleanFilterCond(new BooleanExp(true)); //not really true but we need a filter
+		}
+		
 		Exp cond = queryExp.filter.cond;
 		return doBuild(cond);
 	}

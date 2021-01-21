@@ -23,6 +23,7 @@ public class HLDQuery {
 	public String fromAlias;  //the type in FROM clause. i.e. the table that we are querying
 	public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
 	public DType resultType; //might be string if .firstName
+	public boolean isVarRef; //when do let x = x0;
 	public FilterCond filter;
 	public List<RelationField> throughChain = new ArrayList<>();
 	public FinalField finalField; //eg Customer.addr
