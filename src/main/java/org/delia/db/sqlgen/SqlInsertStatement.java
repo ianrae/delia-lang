@@ -31,7 +31,9 @@ public class SqlInsertStatement implements SqlStatementGenerator {
 		sc.o(tblClause.render(stm));
 		
 		sc.o(fieldClause.render(stm));
-		sc.o(valueClause.render(stm));
+		if (!hld.fieldL.isEmpty()) {
+			sc.o(valueClause.render(stm));
+		}
 		
 		stm.sql = sc.toString();
 		return stm;
