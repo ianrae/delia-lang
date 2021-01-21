@@ -20,7 +20,7 @@ import org.delia.type.DType;
  */
 public class HLDQuery {
 	public DStructType fromType;
-	public String fromAlias;
+	public String fromAlias;  //the type in FROM clause. i.e. the table that we are querying
 	public DStructType mainStructType; //C[].addr then fromType is A and mainStringType is C
 	public DType resultType; //might be string if .firstName
 	public FilterCond filter;

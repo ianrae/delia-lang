@@ -57,9 +57,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDAliasManager aliasMgr = new HLDAliasManager(factorySvc, datIdMap);
 		return buildQuery(queryExp, aliasMgr, true, structType);
 	}
-	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
-		return buildQuery(queryExp, aliasMgr, true, null);
-	}
+//	private HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr) {
+//		return buildQuery(queryExp, aliasMgr, true, null);
+//	}
 	public HLDQuery buildQuery(QueryExp queryExp, HLDAliasManager aliasMgr, boolean doEverything, DStructType structType) {
 		HLDQueryBuilder hldBuilder = new HLDQueryBuilder(registry);
 
@@ -71,10 +71,8 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 			HLDFieldBuilder fieldBuilder = new HLDFieldBuilder();
 			fieldBuilder.generateFields(hld);
-			
-//			HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr);
-//			aliasBuilder.assignAliases(hld);
 		}
+		hldBuilder.setResultAndMainType(hld);
 		
 		return hld;
 	}

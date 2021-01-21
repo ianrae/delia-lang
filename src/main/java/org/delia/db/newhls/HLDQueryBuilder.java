@@ -42,8 +42,8 @@ public class HLDQueryBuilder {
 		if (hld.fromType == null) {
 			DeliaExceptionHelper.throwUnknownTypeError(queryExp.typeName);
 		}
-		hld.mainStructType = hld.fromType; //TODO fix
-		hld.resultType = hld.fromType; //TODO fix
+		hld.mainStructType = hld.fromType; 
+		hld.resultType = hld.fromType; //set at end in setResultAndMainType
 
 		FilterCondBuilder builder = new FilterCondBuilder(registry, hld.fromType, varEvaluator);
 		hld.filter = builder.build(queryExp);
@@ -53,6 +53,7 @@ public class HLDQueryBuilder {
 		buildFns(queryExp, hld, scopeL);
 		hld.scopeL = scopeL;
 		hld.originalQueryExp = queryExp; //may be needed later
+		
 		return hld;
 	}
 
@@ -167,6 +168,31 @@ public class HLDQueryBuilder {
 			}
 		}
 	}
-	
+
+	//done at the end, once we have the fields
+	public void setResultAndMainType(HLDQuery hld) {
+		DType currentType = hld.fromType;
+		
+		for(QScope scope: hld.scopeL) {
+			if (scope.thing instanceof FetchSpec) {
+				
+			} else if (scope.thing instanceof RelationField) {
+				RelationField rf = (RelationField) scope.thing;
+				currentType = rf.fieldType;
+			} else if (scope.thing instanceof QueryFnSpec) {
+				QueryFnSpec qfn = (QueryFnSpec) scope.thing;
+				if (qfn.structField.fieldType == null) {
+					TypePair pair = DValueHelper.findField(qfn.structField.dtype, qfn.structField.fieldName);
+					if (pair != null) {
+						qfn.structField.fieldType = pair.type;
+						currentType = pair.type;
+					}
+				}
+			}
+		}
+		hld.resultType = currentType;
+	}
+
+
 	
 }
