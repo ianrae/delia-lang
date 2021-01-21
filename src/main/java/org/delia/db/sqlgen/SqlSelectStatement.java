@@ -159,11 +159,15 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 			joiner.add("count(*)");
 			return joiner;
 		}
+		
+		if (!hld.resultType.isStructShape()) {
+			//TODO: max(t0.id)
+		}
 
-		for(HLDField rf: hld.fieldL) {
-			SqlColumn npair = mapFieldIfNeeded(rf);
-			if (rf.asStr != null) {
-				joiner.add(String.format("%s as %s", npair.toString(), rf.asStr));
+		for(HLDField ff: hld.fieldL) {
+			SqlColumn npair = mapFieldIfNeeded(ff);
+			if (ff.asStr != null) {
+				joiner.add(String.format("%s as %s", npair.toString(), ff.asStr));
 			} else {
 				joiner.add(String.format("%s", npair.toString()));
 			}
