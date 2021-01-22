@@ -77,6 +77,10 @@ public class HLDQuery {
 		Optional<QueryFnSpec> opt = funcL.stream().filter(x ->x.isFn(fnName)).findAny();
 		return opt.isPresent();
 	}
+	public Optional<QueryFnSpec> findFn(String fnName) {
+		Optional<QueryFnSpec> opt = funcL.stream().filter(x ->x.isFn(fnName)).findAny();
+		return opt;
+	}
 	
 
 	@Override

@@ -78,12 +78,38 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		generateJoins(sc, hld, stm, paramGen);
 		generateWhere(sc, stm);
 		generateOrderBy(sc, hld);
+		
+		if (hld.hasFn("limit")) { //TODO what if more than one limit??
+			QueryFnSpec fn = hld.findFn("limit").get();
+			Integer n = getArgAsInt(fn, 0); 
+			sc.o(" LIMIT %s", n.toString());
+		}
+		if (hld.hasFn("offset")) { //TODO what if more than one offset??
+			QueryFnSpec fn = hld.findFn("offset").get();
+			Integer n = getArgAsInt(fn, 0); 
+			sc.o(" OFFSET %s", n.toString());
+		}
+		if (hld.hasFn("ith")) { //TODO what if more than one ith??
+			QueryFnSpec fn = hld.findFn("ith").get();
+			Integer n = getArgAsInt(fn, 0); 
+			sc.o(" LIMIT 1 OFFSET %s", n.toString());
+		}
+		
+		
 		stm.sql = sc.toString();
 		return stm;
 	}
 
 
 	////==
+
+	private Integer getArgAsInt(QueryFnSpec fn, int i) {
+		if (i >= fn.filterFn.argL.size()) {
+			DeliaExceptionHelper.throwError("queryfn-bad-index", "missing param in '%s'", fn.filterFn.fnName);
+		}
+		Integer n = fn.filterFn.argL.get(0).asInt();
+		return n;
+	}
 
 	//		public String generateSqlWhere(HLDQuery hld, SqlStatement stm) {
 	//			return sqlWhereGen.generateSqlWhere(hld, stm);
@@ -200,7 +226,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 
 	private StringJoiner generateFields(HLDQuery hld) {
 		StringJoiner joiner = new StringJoiner(",");
-		Optional<QueryFnSpec> optCountFn = hld.funcL.stream().filter(x -> x.filterFn.fnName.equals("count")).findAny();
+		Optional<QueryFnSpec> optCountFn = hld.findFn("count"); //stream().filter(x -> x.filterFn.fnName.equals("count")).findAny();
 		if (optCountFn.isPresent()) {
 			QueryFnSpec qfn = optCountFn.get();
 			if (qfn.structField.fieldName == null) {
