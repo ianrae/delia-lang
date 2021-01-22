@@ -308,6 +308,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 		boolean flipped = datIdMap.isFlipped(relinfo);
 		String fld1;
+		String fld2;
 		if (flipped) {
 			fld2 = datIdMap.getAssocFieldFor(relinfo);
 			fld1 = datIdMap.getAssocOtherField(relinfo);
