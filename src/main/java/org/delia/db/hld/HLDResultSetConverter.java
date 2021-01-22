@@ -3,6 +3,7 @@ package org.delia.db.hld;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
@@ -11,6 +12,7 @@ import org.delia.db.DBType;
 import org.delia.db.ResultSetWrapper;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
+import org.delia.db.newhls.FetchSpec;
 import org.delia.db.newhls.HLDField;
 import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.newhls.JoinElement;
@@ -237,14 +239,14 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		//setting dval's relation (fieldName) to have subDVal
 		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
 		
-//		RelationInfo relinfo = jel.relinfo;
 		if (jel.usedForFetch()) {
 			List<DValue> fetched = new ArrayList<>();
 			fetched.add(subDVal);
 			drel.setFetchedItems(fetched);
 		}
-//		String otherField = relinfo.otherSide.fieldName;
-		return drel; //getOrCreateRelation(subDVal, otherField, dval, dbctx);
+//		sortFKsIfNeeded(subDVal);
+		
+		return drel; 
 	}
 
 	private DRelation getOrCreateRelation(DValue dval, String relField, DValue subDVal, DBAccessContext dbctx) {
@@ -287,7 +289,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 				}
 			}
 			resultList.add(dval);
-			fillInFetchedItems(dval, pool, true, columnRunL);
+			fillInFetchedItems(dval, pool, true, columnRunL, hld);
 			sortFKsIfNeeded(dval);
 		}
 		
@@ -304,32 +306,42 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		if (fld.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) fld.source;
 			if (el.relinfo.isManyToMany() || el.relinfo.isOneToMany()) {
-//				if (columnRunL.size() > 2) {  //hack hack hack
-//					return false;
-//				}
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private void fillInFetchedItems(DValue dval, ObjectPool pool, boolean doInner, List<ColumnRun> columnRunL) {
+	private void fillInFetchedItems(DValue dval, ObjectPool pool, boolean doInner, List<ColumnRun> columnRunL, HLDQueryStatement hld) {
 		DStructType dtype = (DStructType) dval.getType();
 		for(TypePair pair: dtype.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				DValue inner = dval.asStruct().getField(pair.name);
 				if (inner != null) {
 					DRelation drel = inner.asRelation();
-					if (!isAFetchedColumn(dtype, pair, columnRunL)) {
+					
+					if (drel.haveFetched()) {
+						//TODO: this is expensive. should probably only be turned on in unit tests
+						for(DValue fetchedVal: drel.getFetchedItems()) {
+							this.sortFKsIfNeeded(fetchedVal);
+						}
+					}
+					
+//					if (!isAFetchedColumn(dtype, pair, columnRunL)) {
+//						continue;
+//					}
+					Optional<FetchSpec> opt = hld.hldquery.fetchL.stream().filter(x -> x.structType.equals(dtype) && x.fieldName.equals(pair.name)).findAny();
+					if (opt.isPresent() && opt.get().isFK) {
 						continue;
 					}
+					
 					
 					for(DValue pkval: drel.getMultipleKeys()) {
 						DValue foreignVal = pool.findMatch(pair.type, pkval);
 						if (foreignVal != null) { //can be null if only doing fks()
 							DRelationHelper.addToFetchedItems(drel, foreignVal);
 							if (doInner) {
-								fillInFetchedItems(foreignVal, pool, false, columnRunL); //** recursion **
+								fillInFetchedItems(foreignVal, pool, false, columnRunL, hld); //** recursion **
 							}
 						}
 					}
