@@ -1,4 +1,4 @@
-package org.delia.db.newhls;
+package org.delia.db.hld;
 
 
 import org.delia.db.hld.HLDQueryStatement;
@@ -9,11 +9,11 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class Rel11OtherWayTests extends NewHLSTestBase {
+public class Rel1NOtherWayTests extends NewHLSTestBase {
 	//one addr
 	@Test
 	public void testFKS11Parent() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[55].fks()";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
@@ -21,7 +21,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	}
 	@Test
 	public void testFKS11Child() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Address[100].fks()";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -30,7 +30,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	
 	@Test
 	public void testFetch11Parent() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -38,7 +38,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	}	
 	@Test
 	public void testFetch11Child() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Address[100].fetch('cust')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -93,7 +93,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	//implicit fetch
 	@Test
 	public void testImplicitOrderBy() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[55].orderBy('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
@@ -101,7 +101,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	}
 	@Test
 	public void testImplicitFilter() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[addr.y == 55]";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -110,7 +110,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	//then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
 	@Test
 	public void testImplicitFilter2() {
-		useCustomer11OtherWaySrc = true;
+		useCustomer1NOtherWaySrc = true;
 		String src = "let x = Customer[addr.y == 55].orderBy('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -124,7 +124,7 @@ public class Rel11OtherWayTests extends NewHLSTestBase {
 	protected String buildSrc() {
 		if (use11TwoAddr) {
 			String src = " type Customer struct {cid int unique, x int, relation addr1 Address 'a1' one optional , relation addr2 Address 'a2' one optional  } end";
-			src += "\n type Address struct {id int unique, y int, relation cust1 Customer 'a1' one optional parent, relation cust2 Customer 'a2' one optional parent } end";
+			src += "\n type Address struct {id int unique, y int, relation cust1 Customer 'a1' many optional, relation cust2 Customer 'a2' many optional } end";
 			return src;
 		} else {
 			return super.buildSrc();

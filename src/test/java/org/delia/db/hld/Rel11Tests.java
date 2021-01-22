@@ -1,4 +1,4 @@
-package org.delia.db.newhls;
+package org.delia.db.hld;
 
 
 import org.delia.db.hld.HLDQueryStatement;

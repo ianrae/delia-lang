@@ -1,4 +1,4 @@
-package org.delia.db.newhls;
+package org.delia.db.hld;
 
 
 import org.delia.db.hld.HLDQueryStatement;
@@ -8,10 +8,10 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class Rel11FinalFieldTests extends NewHLSTestBase {
+public class Rel1NFinalFieldTests extends NewHLSTestBase {
 	@Test
 	public void testScalar() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[55].x";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
@@ -19,7 +19,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 	}
 	@Test
 	public void testRelParent() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[55].addr";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -27,7 +27,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 	}
 	@Test
 	public void testRelChild() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Address[100].cust";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
@@ -37,7 +37,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 	//-- through chain
 	@Test
 	public void testTCScalar() {
-		useCustomer11Src = true;
+		useCustomer1NSrc = true;
 		String src = "let x = Customer[55].addr.y";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
@@ -45,7 +45,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 	}
 //	@Test
 //	public void testTCRelParent() {
-//		useCustomer11Src = true;
+//		useCustomer1NSrc = true;
 //		String src = "let x = Customer[55].addr";
 //		
 //		HLDQuery hld = buildFromSrc(src, 1); 
@@ -53,7 +53,7 @@ public class Rel11FinalFieldTests extends NewHLSTestBase {
 //	}
 //	@Test
 //	public void testTCRelChild() {
-//		useCustomer11Src = true;
+//		useCustomer1NSrc = true;
 //		String src = "let x = Address[100].cust";
 //		
 //		HLDQuery hld = buildFromSrc(src, 0); 

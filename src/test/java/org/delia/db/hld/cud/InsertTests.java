@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cud;
+package org.delia.db.hld.cud;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
+import org.delia.db.hld.NewHLSTestBase;
 import org.delia.db.hld.cud.HLDInsertStatement;
-import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DoNothingVarEvaluator;
