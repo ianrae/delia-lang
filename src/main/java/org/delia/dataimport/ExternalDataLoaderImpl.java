@@ -7,8 +7,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBHelper;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSSimpleQueryService;
-import org.delia.db.hls.manager.HLSManagerResult;
+import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.inputfunction.ExternalDataLoader;
@@ -36,14 +35,13 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 	@Override
 	public QueryResponse queryFKsExist(DRelation drel) {
 		QuerySpec spec = buildQuery(drel);
-		HLSSimpleQueryService querySvc = createQuerySvc(); 
+		HLDSimpleQueryService querySvc = createQuerySvc(); 
 		
 		QueryResponse qresp = null;
 		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
 			dbexecutor.init1(externalSession.getExecutionContext().registry);
 			dbexecutor.init2(externalSession.getDatIdMap(), varEvaluator);
-			HLSManagerResult result = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());
-			qresp = result.qresp;
+			qresp = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
@@ -51,22 +49,21 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		return qresp;
 	}
 
-	private HLSSimpleQueryService createQuerySvc() {
-		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(externalDBInterface, externalSession.getExecutionContext().registry);
+	private HLDSimpleQueryService createQuerySvc() {
+		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(externalDBInterface, externalSession.getExecutionContext().registry);
 		return querySvc;
 	}
 
 	@Override
 	public QueryResponse queryObjects(DRelation drel) {
 		QuerySpec spec = buildQuery(drel);
-		HLSSimpleQueryService querySvc = createQuerySvc(); 
+		HLDSimpleQueryService querySvc = createQuerySvc(); 
 
 		QueryResponse qresp = null;
 		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
 			dbexecutor.init1(externalSession.getExecutionContext().registry);
 			dbexecutor.init2(externalSession.getDatIdMap(), varEvaluator);
-			HLSManagerResult result = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());
-			qresp = result.qresp;
+			qresp = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
