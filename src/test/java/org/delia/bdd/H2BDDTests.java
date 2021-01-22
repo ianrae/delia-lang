@@ -322,7 +322,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 0;
+//		testIndexToRun = 0;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
