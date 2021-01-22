@@ -18,6 +18,7 @@ import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.sql.StrCreator;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
@@ -344,9 +345,9 @@ public class InputFunctionService extends ServiceBase {
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 			dval.asMap().remove(pair.name);
 			if (pair.type.isShape(Shape.STRING)) {
-				src = String.format("upsert %s['%s'] {}", typeName, primaryKeyVal.asString());
+				src = String.format("upsert %s['%s'] {%s}", typeName, primaryKeyVal.asString(), buildValueFields(dval));
 			} else { 
-				src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
+				src = String.format("upsert %s[%s] {%s}", typeName, primaryKeyVal.asString(), buildValueFields(dval));
 			}
 		} else {
 			src = String.format("insert %s {}", typeName);
@@ -368,6 +369,28 @@ public class InputFunctionService extends ServiceBase {
 		request.session.setRunnerIntiliazer(null);
 	}	
 	
+	private String buildValueFields(DValue dval) {
+		StrCreator sc = new StrCreator();
+		int index = 0;
+		for(String fieldName: dval.asMap().keySet()) {
+			DValue inner = dval.asMap().get(fieldName);
+			if (index > 0) {
+				sc.addStr(", ");
+			}
+			if (inner == null) {
+				sc.o("%s: null", fieldName);
+			} else if (inner.getType().isShape(Shape.STRING)) {
+				sc.o("%s: '%s'", fieldName, inner.asString());
+			} else if (inner.getType().isShape(Shape.DATE)) {
+				sc.o("%s: '%s'", fieldName, inner.asString());
+			} else {
+				sc.o("%s: %s", fieldName, inner.asString());
+			}
+			index++;
+		}
+		return sc.toString();
+	}
+
 	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {
 		DValueIterator iter = new DValueIterator(dval);
 		ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());
