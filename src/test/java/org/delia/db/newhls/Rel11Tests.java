@@ -42,7 +42,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.id,t1.y,t1.cust FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
 	}	
 	@Test
 	public void testFetch11Child() {
@@ -50,7 +50,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Address[100].fetch('cust')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t1.cust,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
 	}	
 	
 	//TODO Customer.addr1 and .addr2 and try fetching one or both
@@ -78,7 +78,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr1')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.id,t1.y,t1.cust1,t1.cust2 FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust1 WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust1,t1.cust2 FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust1 WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void testFetch11Parent2AddrB() {
@@ -86,7 +86,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr1', 'addr2')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 2); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t2.id,t1.id,t1.y,t1.cust1,t1.cust2,t2.id,t2.y,t2.cust1,t2.cust2 FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust1 LEFT JOIN Address as t2 ON t0.cid=t2.cust2 WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust1,t1.cust2,t2.id,t2.y,t2.cust1,t2.cust2 FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust1 LEFT JOIN Address as t2 ON t0.cid=t2.cust2 WHERE t0.cid=?", "55");
 	}
 	
 	@Test
@@ -95,7 +95,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Address[100].fetch('cust1')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust1,t0.cust2,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust1=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t1.cust1,t0.cust2,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust1=t1.cid WHERE t0.id=?", "100");
 	}	
 
 	//implicit fetch
