@@ -2,7 +2,9 @@ package org.delia.db.hld;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.delia.core.FactoryService;
@@ -281,6 +283,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		//build output list. keep same order
 		List<DValue> resultList = new ArrayList<>();
 		boolean usePoolInMerge = usePoolInMerge(columnRunL, hld);
+//		Map<DRelation,String> alreadyMap = new HashMap<>();
 		for(DValue dval: rawList) {
 			//don't always need this. pool has already removed duplicates
 			if (usePoolInMerge) {
@@ -322,9 +325,10 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 					
 					if (drel.haveFetched()) {
 						//TODO: this is expensive. should probably only be turned on in unit tests
-						for(DValue fetchedVal: drel.getFetchedItems()) {
-							this.sortFKsIfNeeded(fetchedVal);
-						}
+						//hmm. this was leading to a list of [55,56,57] becoming just [56].
+//						for(DValue fetchedVal: drel.getFetchedItems()) {
+//							sortFKsIfNeeded(fetchedVal);
+//						}
 					}
 					
 //					if (!isAFetchedColumn(dtype, pair, columnRunL)) {
@@ -335,8 +339,10 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 						continue;
 					}
 					
+					System.out.println(dval.toString());
 					
-					for(DValue pkval: drel.getMultipleKeys()) {
+					List<DValue> fkList = new ArrayList<>(drel.getMultipleKeys()); //avoid concurrent modification exception
+					for(DValue pkval: fkList) {
 						DValue foreignVal = pool.findMatch(pair.type, pkval);
 						if (foreignVal != null) { //can be null if only doing fks()
 							DRelationHelper.addToFetchedItems(drel, foreignVal);
@@ -345,6 +351,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 							}
 						}
 					}
+					
 				}
 			}
 		}
