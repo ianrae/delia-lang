@@ -5,9 +5,11 @@ import org.delia.db.newhls.cond.FilterVal;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 
 /**
  * @author ian
@@ -26,11 +28,25 @@ public class HLDAliasHelper {
 		public RelationInfo relinfo;
 	}
 
-	public String populateStructField(FilterVal val1, HLDQuery hld, DStructType fromType) {
+	public String populateStructField(FilterVal val1, HLDQuery hld, DStructType fromType, DTypeRegistry registry) {
 		//when DAT actions we've already filled in structType
 		HackHack hack = new HackHack();
 		if (val1.structField == null) {
 			String fieldName = val1.exp.strValue();
+			
+			TypePair pair = DValueHelper.findField(fromType, fieldName);
+			if (pair == null) {
+				//field must be of original queryexp
+				DStructType dtype = (DStructType) registry.getType(hld.originalQueryExp.typeName);
+				pair = DValueHelper.findField(dtype, fieldName);
+				if (pair != null) {
+					//this requires update with a join
+					DeliaExceptionHelper.throwNotImplementedError("updatewithjoin", hld.originalQueryExp.strValue());
+				}
+				
+			}
+			
+			
 			val1.structField = buildStructType(fromType, fieldName, hack);
 		} 
 

@@ -184,7 +184,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 //		}
 		for(AssocBundle bundle: stmt.assocBundleL) {
 			if (bundle.hlddelete != null) {
-				aliasBuilder.assignAliasesAssoc(bundle.hlddelete);
+				aliasBuilder.assignAliasesAssoc(bundle.hlddelete, registry);
 			}
 			if (bundle.hldupdate != null) {
 				aliasBuilder.assignAliasesAssoc(bundle.hldupdate);

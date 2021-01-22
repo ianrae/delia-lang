@@ -32,7 +32,8 @@ value:a:Customer {
 }
 
 ---
-title: update many-to-many
+#TODO: need update with join
+SKIP: update many-to-many
 thenType: int
 expectDVal:false
 when:
@@ -41,7 +42,8 @@ then:
 1
 
 ---
-title: update query back
+#TODO: need update with join
+SKIP: update query back
 when:
   update Customer[wid == 33] {wid: 333, addr: [100]}
   let x = Customer[55].fks()
