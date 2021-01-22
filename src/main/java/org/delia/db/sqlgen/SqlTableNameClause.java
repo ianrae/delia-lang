@@ -1,6 +1,6 @@
 package org.delia.db.sqlgen;
 
-import org.delia.db.newhls.cud.TypeOrTable;
+import org.delia.db.hld.cud.TypeOrTable;
 import org.delia.db.sql.prepared.SqlStatement;
 
 public class SqlTableNameClause implements SqlClauseGenerator {

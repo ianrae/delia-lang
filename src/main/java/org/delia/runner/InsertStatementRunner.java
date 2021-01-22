@@ -12,7 +12,7 @@ import org.delia.db.DBException;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.hld.HLDManager;
-import org.delia.db.newhls.cud.HLDInsertStatement;
+import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;

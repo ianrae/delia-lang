@@ -3,7 +3,7 @@ package org.delia.db.sql.fragment;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.db.newhls.cud.HLDWhereFragment;
+import org.delia.db.hld.cud.HLDWhereFragment;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;

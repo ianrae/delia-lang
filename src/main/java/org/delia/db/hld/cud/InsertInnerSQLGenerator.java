@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cud;
+package org.delia.db.hld.cud;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +7,8 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.hld.HLDField;
 import org.delia.db.hld.HLDSQLGenerator;
-import org.delia.db.newhls.simple.SimpleBase;
-import org.delia.db.newhls.simple.SimpleSqlGenerator;
+import org.delia.db.hld.simple.SimpleBase;
+import org.delia.db.hld.simple.SimpleSqlGenerator;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;

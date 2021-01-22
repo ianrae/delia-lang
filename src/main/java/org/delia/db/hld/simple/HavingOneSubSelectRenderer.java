@@ -1,4 +1,4 @@
-package org.delia.db.newhls.simple;
+package org.delia.db.hld.simple;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.core.FactoryService;

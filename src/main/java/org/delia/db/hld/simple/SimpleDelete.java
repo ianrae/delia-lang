@@ -1,8 +1,8 @@
-package org.delia.db.newhls.simple;
+package org.delia.db.hld.simple;
 
 import org.delia.db.hld.HLDAliasBuilderAdapter;
+import org.delia.db.hld.cud.HLDDelete;
 import org.delia.db.newhls.cond.FilterCond;
-import org.delia.db.newhls.cud.HLDDelete;
 
 /**
  * A simple DELETE statement.

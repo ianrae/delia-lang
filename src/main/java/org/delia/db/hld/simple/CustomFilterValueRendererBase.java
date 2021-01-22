@@ -1,4 +1,4 @@
-package org.delia.db.newhls.simple;
+package org.delia.db.hld.simple;
 
 import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.hld.StructField;

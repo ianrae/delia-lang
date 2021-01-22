@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.UpdateStatementExp;
+import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;

@@ -1,11 +1,11 @@
-package org.delia.db.newhls.simple;
+package org.delia.db.hld.simple;
 
 import org.delia.db.hld.HLDField;
 import org.delia.db.hld.HLDQuery;
 import org.delia.db.hld.SqlColumn;
-import org.delia.db.newhls.cud.HLDDelete;
-import org.delia.db.newhls.cud.HLDInsert;
-import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.hld.cud.HLDDelete;
+import org.delia.db.hld.cud.HLDInsert;
+import org.delia.db.hld.cud.HLDUpdate;
 
 /**
  * Converts HLD object into a simple SQL statement

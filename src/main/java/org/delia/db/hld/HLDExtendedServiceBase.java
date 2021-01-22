@@ -2,7 +2,7 @@ package org.delia.db.hld;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
-import org.delia.db.newhls.cud.HLDDsonBuilder;
+import org.delia.db.hld.cud.HLDDsonBuilder;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;

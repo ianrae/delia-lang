@@ -1,6 +1,6 @@
 package org.delia.db.sqlgen;
 
-import org.delia.db.newhls.cud.HLDDelete;
+import org.delia.db.hld.cud.HLDDelete;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DValue;

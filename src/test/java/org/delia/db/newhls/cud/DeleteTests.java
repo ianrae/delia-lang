@@ -3,6 +3,7 @@ package org.delia.db.newhls.cud;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.newhls.NewHLSTestBase;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;

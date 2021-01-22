@@ -16,7 +16,7 @@ import org.delia.db.hld.SqlColumnBuilder;
 import org.delia.db.hld.SqlParamGenerator;
 import org.delia.db.hld.StructField;
 import org.delia.db.hld.StructFieldOpt;
-import org.delia.db.newhls.cud.TypeOrTable;
+import org.delia.db.hld.cud.TypeOrTable;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DStructType;

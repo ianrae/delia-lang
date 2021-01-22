@@ -1,9 +1,9 @@
-package org.delia.db.newhls.cud;
+package org.delia.db.hld.cud;
 
 import java.util.*;
 
 import org.delia.db.hld.HLDStatement;
-import org.delia.db.newhls.simple.SimpleBase;
+import org.delia.db.hld.simple.SimpleBase;
 
 public class HLDInsertStatement extends HLDStatement {
 	public HLDInsert hldinsert;

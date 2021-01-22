@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cud;
+package org.delia.db.hld.cud;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;

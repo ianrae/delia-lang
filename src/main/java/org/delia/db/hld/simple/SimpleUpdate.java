@@ -1,12 +1,12 @@
-package org.delia.db.newhls.simple;
+package org.delia.db.hld.simple;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.hld.SqlColumn;
+import org.delia.db.hld.cud.HLDUpdate;
 import org.delia.db.newhls.cond.FilterCond;
-import org.delia.db.newhls.cud.HLDUpdate;
 
 /**
  * A simple UPDATE statement.

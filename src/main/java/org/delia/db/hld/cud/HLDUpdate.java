@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cud;
+package org.delia.db.hld.cud;
 
 import java.util.ArrayList;
 import java.util.List;

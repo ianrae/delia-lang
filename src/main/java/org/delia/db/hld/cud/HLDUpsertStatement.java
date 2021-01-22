@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cud;
+package org.delia.db.hld.cud;
 
 public class HLDUpsertStatement extends HLDUpdateStatement {
 

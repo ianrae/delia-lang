@@ -1,9 +1,9 @@
 package org.delia.db.hld;
 
-import org.delia.db.newhls.cud.HLDDelete;
-import org.delia.db.newhls.cud.HLDInsert;
-import org.delia.db.newhls.cud.HLDUpdate;
-import org.delia.db.newhls.simple.SimpleBase;
+import org.delia.db.hld.cud.HLDDelete;
+import org.delia.db.hld.cud.HLDInsert;
+import org.delia.db.hld.cud.HLDUpdate;
+import org.delia.db.hld.simple.SimpleBase;
 
 /**
  * @author ian

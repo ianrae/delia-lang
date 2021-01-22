@@ -3,7 +3,7 @@ package org.delia.db.sqlgen;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.db.hld.HLDField;
 import org.delia.db.hld.HLDQuery;
-import org.delia.db.newhls.cud.HLDUpdate;
+import org.delia.db.hld.cud.HLDUpdate;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
