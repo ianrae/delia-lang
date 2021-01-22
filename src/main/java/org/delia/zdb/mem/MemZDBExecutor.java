@@ -12,8 +12,8 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.db.hls.HLSQueryStatement;
-import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
@@ -47,7 +47,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
 	private DValueCompareService compareSvc;
-	private HLSSimpleQueryService querySvc;
+	private HLDSimpleQueryService querySvc;
 
 	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc, dbInterface);
@@ -70,7 +70,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		this.registry = registry;
-		this.querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
+		this.querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
 	}
 
 	@Override

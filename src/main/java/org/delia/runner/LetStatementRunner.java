@@ -32,6 +32,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
@@ -163,16 +164,21 @@ public class LetStatementRunner extends ServiceBase {
 //			result.sql = stgroup.statementL.get(0).sql;
 
 			mostRecentStatment = hld;
-		} else if (flag2) {
-			spec.queryExp = queryExp;
-			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
-			qresp = result.qresp;
 		} else {
-			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
-//			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
-			HLSManagerResult mgrRes = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
-			qresp = mgrRes.qresp;
+			DeliaExceptionHelper.throwNotImplementedError("flag2 must be set in letrunner");
+			return null;
 		}
+		
+//		} else if (flag2) {
+//			spec.queryExp = queryExp;
+//			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
+//			qresp = result.qresp;
+//		} else {
+//			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
+////			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
+//			HLSManagerResult mgrRes = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
+//			qresp = mgrRes.qresp;
+//		}
 		return qresp;
 	}
 	private void doPostDBCallAdjustment(HLDQueryStatement hld, QueryResponse qresp) {
