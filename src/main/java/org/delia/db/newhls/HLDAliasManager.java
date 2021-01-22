@@ -170,71 +170,22 @@ public class HLDAliasManager extends ServiceBase {
 		assocMap.put(key, info);
 		return info;
 	}
+	public AliasInfo findAssocAlias(RelationInfo relinfo, String assocTbl) {
+		AliasInfo info = getAssocAliasSimple(relinfo.nearType, relinfo.fieldName);
+		if (info != null) {
+			return info;
+		}
+		info = getAssocAliasSimple(relinfo.farType, relinfo.otherSide.fieldName);
+		if (info != null) {
+			return info;
+		}
+		return null;
+	}
 	
-//	public void buildAliases(HLSQuerySpan hlspan, DatIdMap datIdMap) {
-//		createMainTableAlias(hlspan.mtEl.structType);
-//		
-//		for(TypePair pair: hlspan.fromType.getAllFields()) {
-//			RelationOneRule oneRule = DRuleHelper.findOneRule(hlspan.fromType, pair.name);
-//			if (oneRule != null && (oneRule.relInfo.isParent || isFetched(hlspan, pair.name))) {
-//				createFieldAlias(hlspan.fromType, pair.name);
-//			} else {
-//				RelationManyRule manyRule = DRuleHelper.findManyRule(hlspan.fromType, pair.name);
-//				if (manyRule != null) {
-//					//many-to-one. many side is always the parent
-//					createFieldAlias(hlspan.fromType, pair.name);
-//					if (manyRule.relInfo.isManyToMany()) {
-//						String assocTbl = datIdMap.getAssocTblName(manyRule.relInfo.getDatId());
-//						createAssocAlias(hlspan.fromType, pair.name, assocTbl);
-//					}
-//				}
-//			}
-//		}
-//		
-//		for(JTElement el: hlspan.joinTreeL) {
-//			createFieldAlias(el.dtype, el.fieldName);
-//		}
-//	}
-	
-//	private boolean isFetched(HLSQuerySpan hlspan, String fieldName) {
-//		if (hlspan.subEl != null) {
-//			return hlspan.subEl.fetchL.contains(fieldName);
-//		}
-//		return false;
-//	}
-
 	private AliasInfo getMainTableAlias(DStructType structType) {
 		String key = makeMainTableKey(structType.getName());
 		return map.get(key);
 	}
-//	public AliasInfo findAlias(DStructType structType) {
-//		String key = String.format("%s", structType.getName());
-//		AliasInfo info = map.get(key);
-//		if (info != null) {
-//			return info;
-//		}
-//		
-//		//look for structType match first
-//		for(String x: map.keySet()) {
-//			info = map.get(x);
-//			if (info.fieldName != null) {
-//				if (info.structType == structType) {
-//					return info; //TODO: won't work if multiple joins to same table.
-//				}
-//			}
-//		}
-//
-//		//then tblType
-//		for(String x: map.keySet()) {
-//			info = map.get(x);
-//			if (info.fieldName != null) {
-//				if (info.tblType == structType) {
-//					return info; //TODO: won't work if multiple joins to same table.
-//				}
-//			}
-//		}
-//		return null; //oops!
-//	}
 	private AliasInfo getAssocAlias(DStructType structType, String fieldName, String assocTbl) {
 		String key = String.format("%s.%s", structType.getName(), fieldName);
 		AliasInfo info = assocMap.get(key);
@@ -257,23 +208,14 @@ public class HLDAliasManager extends ServiceBase {
 		}
 		return null;
 	}
-//	public String buildTblAlias(AliasInfo info) {
-//		String s = String.format("%s as %s", info.tblName, info.alias);
-//		return s;
-//	}
-//	public String buildFieldAlias(AliasInfo info, String fieldName) {
-//		String s = String.format("%s.%s", info.alias, fieldName);
-//		return s;
-//	}
-//	public String buildTblAlias(AliasInfo info, boolean isBackards) {
-//		if (isBackards) {
-//			String otherTbl = info.structType.getName();
-//			String s = String.format("%s as %s", otherTbl, info.alias);
-//			return s;
-//		} else {
-//			return buildTblAlias(info);
-//		}
-//	}
+	private AliasInfo getAssocAliasSimple(DStructType structType, String fieldName) {
+		String key = String.format("%s.%s", structType.getName(), fieldName);
+		AliasInfo info = assocMap.get(key);
+		if (info != null) {
+			return info;
+		}
+		return null;
+	}
 
 	public DatIdMap getDatIdMap() {
 		return datIdMap;

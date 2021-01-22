@@ -140,6 +140,9 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private void adjustAssocFilter(HLDUpdate hld) {
 		RelationInfo relinfo = hld.assocRelInfo;
 		FilterCond filter = hld.hld.filter;
+		doUpdateFilter(filter, hld, relinfo);
+	}
+	private void doUpdateFilter(FilterCond filter, HLDUpdate hld, RelationInfo relinfo) {
 		if (filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) filter;
 			if (sfc.val1.structField != null) {
@@ -152,15 +155,47 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 				}
 			}
 		} else if (filter instanceof OpFilterCond) {
-			DeliaExceptionHelper.throwNotImplementedError("arg");
+			OpFilterCond ofc = (OpFilterCond) filter;
+			if (ofc.val1.isSymbol()) {
+				doSpecialMMFieldVal(ofc.val1, hld, relinfo);
+			}
+			if (ofc.val2.isSymbol()) {
+				doSpecialMMFieldVal(ofc.val2, hld, relinfo);
+			}
 		} else if (filter instanceof OpAndOrFilter) {
-			DeliaExceptionHelper.throwNotImplementedError("arg");
+			OpAndOrFilter opfilter = (OpAndOrFilter) filter;
+			doOrThrow(opfilter.cond1, hld, relinfo);
+			doOrThrow(opfilter.cond2, hld, relinfo);
 		} else if (filter instanceof InFilterCond) {
 			DeliaExceptionHelper.throwNotImplementedError("arg");
 		}
-		
 	}
 
+	private void doSpecialMMFieldVal(FilterVal val1, HLDUpdate hld, RelationInfo relinfo) {
+		String fieldName = val1.asSymbol();
+		String fld1 = this.datIdMap.getAssocFieldFor(relinfo);
+		String fld2 = this.datIdMap.getAssocOtherField(relinfo);
+		String assocTbl = this.datIdMap.getAssocTblName(relinfo.getDatId());
+		if (fieldName.equals(fld1)) {
+			AliasInfo info = aliasMgr.findAssocAlias(relinfo, assocTbl);
+			if (info != null) {
+				val1.alias = info.alias;
+			}
+		} else if (fieldName.equals(fld2)) {
+			AliasInfo info = aliasMgr.findAssocAlias(relinfo, assocTbl);
+			if (info != null) {
+				val1.alias = info.alias;
+			}
+		}
+	}
+
+	private void doOrThrow(FilterCond cond1, HLDUpdate hld, RelationInfo relinfo) {
+		if (cond1 instanceof OpFilterCond) {
+			doUpdateFilter(cond1, hld, relinfo); //** recursion **
+		} else {
+			DeliaExceptionHelper.throwNotImplementedError("only ofc supported here.");
+		}
+	}
 
 	private void doFieldList(List<HLDField> fieldL, DStructType fromType, AliasInfo info) {
 		for(HLDField rf: fieldL) {
