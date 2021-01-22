@@ -1,6 +1,7 @@
 package org.delia.db.newhls;
 
 
+import org.delia.db.hld.HLDQueryStatement;
 import org.junit.Test;
 
 /**

@@ -3,9 +3,9 @@ package org.delia.db.newhls.simple;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.db.newhls.HLDAliasBuilderAdapter;
-import org.delia.db.newhls.HLDQuery;
-import org.delia.db.newhls.SqlColumn;
+import org.delia.db.hld.HLDAliasBuilderAdapter;
+import org.delia.db.hld.HLDQuery;
+import org.delia.db.hld.SqlColumn;
 import org.delia.db.newhls.cond.FilterCond;
 
 /**

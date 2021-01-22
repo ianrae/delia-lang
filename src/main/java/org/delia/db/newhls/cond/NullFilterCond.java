@@ -1,7 +1,7 @@
 package org.delia.db.newhls.cond;
 
 import org.delia.compiler.ast.NullExp;
-import org.delia.db.newhls.ValType;
+import org.delia.db.hld.ValType;
 
 public class NullFilterCond extends SingleFilterCond {
 	public NullFilterCond(NullExp exp) {

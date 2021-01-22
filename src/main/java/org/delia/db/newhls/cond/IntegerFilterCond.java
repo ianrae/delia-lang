@@ -1,7 +1,7 @@
 package org.delia.db.newhls.cond;
 
 import org.delia.compiler.ast.IntegerExp;
-import org.delia.db.newhls.ValType;
+import org.delia.db.hld.ValType;
 
 public class IntegerFilterCond extends SingleFilterCond  {
 	public IntegerFilterCond(IntegerExp exp) {

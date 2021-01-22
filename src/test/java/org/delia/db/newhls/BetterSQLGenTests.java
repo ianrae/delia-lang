@@ -2,6 +2,7 @@ package org.delia.db.newhls;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.db.hld.HLDQueryStatement;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.simple.SimpleDelete;

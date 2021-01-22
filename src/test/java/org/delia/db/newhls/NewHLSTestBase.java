@@ -23,6 +23,8 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
+import org.delia.db.hld.HLDInnerManager;
+import org.delia.db.hld.HLDQueryStatement;
 import org.delia.db.newhls.cud.HLDDeleteStatement;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsertStatement;

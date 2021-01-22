@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.DateFormatService;
+import org.delia.db.hld.HLDQueryStatement;
+import org.delia.db.hld.ValType;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;
 import org.delia.db.newhls.cond.FilterFunc;

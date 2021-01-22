@@ -1,8 +1,8 @@
 package org.delia.db.newhls.cond;
 
-import org.delia.db.newhls.HLDAliasBuilderAdapter;
-import org.delia.db.newhls.HLDQuery;
-import org.delia.db.newhls.SqlParamGenerator;
+import org.delia.db.hld.HLDAliasBuilderAdapter;
+import org.delia.db.hld.HLDQuery;
+import org.delia.db.hld.SqlParamGenerator;
 import org.delia.db.sql.prepared.SqlStatement;
 
 /**

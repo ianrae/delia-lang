@@ -1,6 +1,6 @@
 package org.delia.db.newhls.simple;
 
-import org.delia.db.newhls.HLDAliasBuilderAdapter;
+import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cud.HLDDelete;
 

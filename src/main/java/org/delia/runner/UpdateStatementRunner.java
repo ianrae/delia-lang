@@ -9,7 +9,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.HLDManager;
+import org.delia.db.hld.HLDManager;
 import org.delia.db.newhls.cud.HLDUpdateStatement;
 import org.delia.db.newhls.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;

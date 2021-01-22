@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.newhls.HLDField;
-import org.delia.db.newhls.HLDSQLGenerator;
+import org.delia.db.hld.HLDField;
+import org.delia.db.hld.HLDSQLGenerator;
 import org.delia.db.newhls.simple.SimpleBase;
 import org.delia.db.newhls.simple.SimpleSqlGenerator;
 import org.delia.db.sql.StrCreator;

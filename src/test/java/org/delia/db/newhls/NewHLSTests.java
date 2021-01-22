@@ -4,6 +4,11 @@ package org.delia.db.newhls;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.ast.QueryExp;
+import org.delia.db.hld.HLDQuery;
+import org.delia.db.hld.HLDQueryBuilder;
+import org.delia.db.hld.HLDQueryStatement;
+import org.delia.db.hld.JoinTreeBuilder;
+import org.delia.db.hld.ValType;
 import org.delia.db.newhls.cond.BooleanFilterCond;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.newhls.cond.FilterCondBuilder;

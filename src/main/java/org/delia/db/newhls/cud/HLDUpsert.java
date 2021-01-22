@@ -1,6 +1,6 @@
 package org.delia.db.newhls.cud;
 
-import org.delia.db.newhls.HLDQuery;
+import org.delia.db.hld.HLDQuery;
 
 public class HLDUpsert extends HLDUpdate {
 

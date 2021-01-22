@@ -1,7 +1,7 @@
 package org.delia.db.newhls.simple;
 
-import org.delia.db.newhls.HLDAliasBuilderAdapter;
-import org.delia.db.newhls.StructField;
+import org.delia.db.hld.HLDAliasBuilderAdapter;
+import org.delia.db.hld.StructField;
 import org.delia.db.newhls.cond.FilterVal;
 import org.delia.db.newhls.cond.OpFilterCond;
 import org.delia.db.newhls.cond.SingleFilterCond;

@@ -1,7 +1,7 @@
 package org.delia.db.newhls.simple;
 
-import org.delia.db.newhls.HLDAliasBuilderAdapter;
-import org.delia.db.newhls.SqlColumn;
+import org.delia.db.hld.HLDAliasBuilderAdapter;
+import org.delia.db.hld.SqlColumn;
 
 public abstract class SimpleBase {
 	public SqlColumn tblFrag;

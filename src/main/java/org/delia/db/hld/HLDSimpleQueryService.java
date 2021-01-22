@@ -6,8 +6,6 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.HLDManager;
-import org.delia.db.newhls.HLDQueryStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;

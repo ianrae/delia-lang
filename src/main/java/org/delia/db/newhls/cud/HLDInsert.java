@@ -3,7 +3,7 @@ package org.delia.db.newhls.cud;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.db.newhls.HLDField;
+import org.delia.db.hld.HLDField;
 import org.delia.runner.ConversionResult;
 import org.delia.type.DValue;
 

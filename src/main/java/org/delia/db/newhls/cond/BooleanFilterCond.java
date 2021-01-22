@@ -1,7 +1,7 @@
 package org.delia.db.newhls.cond;
 
 import org.delia.compiler.ast.BooleanExp;
-import org.delia.db.newhls.ValType;
+import org.delia.db.hld.ValType;
 
 public class BooleanFilterCond extends SingleFilterCond {
 	public BooleanFilterCond(BooleanExp exp) {

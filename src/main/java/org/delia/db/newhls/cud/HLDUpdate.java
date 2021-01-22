@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.HLDField;
-import org.delia.db.newhls.HLDQuery;
+import org.delia.db.hld.HLDField;
+import org.delia.db.hld.HLDQuery;
 import org.delia.runner.ConversionResult;
 import org.delia.type.DValue;
 

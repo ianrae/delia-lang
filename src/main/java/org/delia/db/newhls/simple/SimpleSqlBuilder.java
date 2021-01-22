@@ -1,8 +1,8 @@
 package org.delia.db.newhls.simple;
 
-import org.delia.db.newhls.HLDField;
-import org.delia.db.newhls.HLDQuery;
-import org.delia.db.newhls.SqlColumn;
+import org.delia.db.hld.HLDField;
+import org.delia.db.hld.HLDQuery;
+import org.delia.db.hld.SqlColumn;
 import org.delia.db.newhls.cud.HLDDelete;
 import org.delia.db.newhls.cud.HLDInsert;
 import org.delia.db.newhls.cud.HLDUpdate;

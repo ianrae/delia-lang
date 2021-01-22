@@ -2,7 +2,7 @@ package org.delia.db.newhls.cud;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.newhls.HLDField;
+import org.delia.db.hld.HLDField;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;

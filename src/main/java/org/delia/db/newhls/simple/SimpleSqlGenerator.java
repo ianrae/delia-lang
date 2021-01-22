@@ -1,9 +1,9 @@
 package org.delia.db.newhls.simple;
 
 import org.delia.core.FactoryService;
-import org.delia.db.newhls.SQLWhereGenerator;
-import org.delia.db.newhls.SqlColumn;
-import org.delia.db.newhls.SqlParamGenerator;
+import org.delia.db.hld.SQLWhereGenerator;
+import org.delia.db.hld.SqlColumn;
+import org.delia.db.hld.SqlParamGenerator;
 import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;

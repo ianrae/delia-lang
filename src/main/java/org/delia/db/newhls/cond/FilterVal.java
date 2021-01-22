@@ -7,8 +7,8 @@ import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFSingleExp;
-import org.delia.db.newhls.StructField;
-import org.delia.db.newhls.ValType;
+import org.delia.db.hld.StructField;
+import org.delia.db.hld.ValType;
 import org.delia.type.DValue;
 
 /**

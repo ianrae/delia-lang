@@ -8,7 +8,7 @@ import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.ast.StringExp;
-import org.delia.db.newhls.ValType;
+import org.delia.db.hld.ValType;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
 

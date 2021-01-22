@@ -1,7 +1,7 @@
 package org.delia.db.newhls.cond;
 
-import org.delia.db.newhls.HLDQuery;
-import org.delia.db.newhls.ValType;
+import org.delia.db.hld.HLDQuery;
+import org.delia.db.hld.ValType;
 
 /**
  * If filter is single value then is query on pk
