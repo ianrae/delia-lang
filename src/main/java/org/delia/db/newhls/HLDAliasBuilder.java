@@ -39,12 +39,14 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private ConversionHelper conversionHelper;
 	private HLDAliasHelper aliasHelper;
 	private DatIdMap datIdMap;
+	private DTypeRegistry registry;
 
-	public HLDAliasBuilder(HLDAliasManager aliasMgr, ConversionHelper helper, DatIdMap datIdMap) {
+	public HLDAliasBuilder(HLDAliasManager aliasMgr, ConversionHelper helper, DatIdMap datIdMap, DTypeRegistry registry) {
 		this.aliasMgr = aliasMgr;
 		this.conversionHelper = helper;
 		this.aliasHelper = new HLDAliasHelper(aliasMgr);
 		this.datIdMap = datIdMap;
+		this.registry = registry;
 	}
 	
 	@Override
@@ -59,7 +61,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFieldList(hld.fieldL, hld.fromType, info);
 
 		//now populate SYMBOL FilterdVal
-		doFilter(hld, null);
+		doFilter(hld);
 		
 		//now do any other implicit joins
 		for(JoinElement el: hld.joinL) {
@@ -106,7 +108,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		return outputAliases ? alias : null;
 	}
 
-	private void doFilter(HLDQuery hld, DTypeRegistry registry) {
+	private void doFilter(HLDQuery hld) {
 		doInnerFilter(hld.filter, hld, registry);
 	}
 	private void doInnerFilter(FilterCond filter, HLDQuery hld, DTypeRegistry registry) {
@@ -294,13 +296,13 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 		hld.hld.fromAlias = assign(info.alias);
-		doFilter(hld.hld, null);
+		doFilter(hld.hld);
 		adjustAssocFilter(hld);
 	}
-	public AliasInfo assignAliasesAssoc(HLDDelete hld, DTypeRegistry registry) {
+	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		hld.hld.fromAlias = assign(info.alias);
-		doFilter(hld.hld, registry);
+		doFilter(hld.hld);
 		return info;
 	}
 	private AliasInfo doAssignAliasesAssoc(HLDBase hld) {
@@ -319,20 +321,20 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 		
 		//now populate SYMBOL FilterdVal
-		doFilter(hld.hld, null);
+		doFilter(hld.hld);
 	}
 	@Override
 	public void assignAliases(HLDDelete hld) {
 		AliasInfo info;
 		if (hld.typeOrTbl.isAssocTbl) {
-			info = assignAliasesAssoc(hld, null);
+			info = assignAliasesAssoc(hld);
 		} else {
 			info = aliasMgr.createMainTableAlias(hld.getStructType());
 			hld.typeOrTbl.alias = assign(info.alias);
 			hld.hld.fromAlias = assign(info.alias);
 			
 			//now populate SYMBOL FilterdVal
-			doFilter(hld.hld, null);
+			doFilter(hld.hld);
 		}
 	}
 

@@ -330,7 +330,7 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-		runR560File("t0-self-NN.txt", 4);
+//		runR560File("t0-self-NN.txt", 4);
 	}
 	
 	//---

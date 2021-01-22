@@ -184,7 +184,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 //		}
 		for(AssocBundle bundle: stmt.assocBundleL) {
 			if (bundle.hlddelete != null) {
-				aliasBuilder.assignAliasesAssoc(bundle.hlddelete, registry);
+				aliasBuilder.assignAliasesAssoc(bundle.hlddelete);
 			}
 			if (bundle.hldupdate != null) {
 				aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
@@ -205,7 +205,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	private HLDAliasBuilder createAliasBuilder() {
 		ConversionHelper helper = new ConversionHelper(registry, factorySvc);
-		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr, helper, datIdMap);
+		HLDAliasBuilder aliasBuilder = new HLDAliasBuilder(aliasMgr, helper, datIdMap, registry);
 		return aliasBuilder;
 	}
 

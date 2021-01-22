@@ -39,7 +39,7 @@ public class HLDAliasHelper {
 				//field must be of original queryexp
 				DStructType dtype = (DStructType) registry.getType(hld.originalQueryExp.typeName);
 				pair = DValueHelper.findField(dtype, fieldName);
-				if (pair != null) {
+				if (pair == null) {
 					//this requires update with a join
 					DeliaExceptionHelper.throwNotImplementedError("updatewithjoin", hld.originalQueryExp.strValue());
 				}
