@@ -307,6 +307,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		//build output list. keep same order
 		List<DValue> resultList = new ArrayList<>();
 		for(DValue dval: rawList) {
+			//don't need this. pool has already removed duplicates
 			if (! pool.contains(dval)) {
 				continue;
 			}

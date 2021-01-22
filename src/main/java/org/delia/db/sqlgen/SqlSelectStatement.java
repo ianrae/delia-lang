@@ -95,9 +95,13 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 			addOrderByForLast(sc, hld, false);
 			return;
 		}
-
+		
+		String orderByLastFieldName = findOrderByForLast(hld);
+		String logicalFieldName = null;
+		
 		sc.o(" ORDER BY");
 		for(QueryFnSpec fnspec: list) {
+			logicalFieldName = fnspec.structField.fieldName;
 			JoinElement el = hld.findJoinByAlias(fnspec.structField.alias, hld);
 			if (el != null && el.relinfo.notContainsFK()) {
 				if (el.relinfo.isManyToMany()) {
@@ -115,8 +119,15 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 				sc.o(" %s.%s", fnspec.structField.alias, fnspec.structField.fieldName);
 			}
 			
-			if (fnspec.filterFn.argL.size() > 1) {
-				String asc = fnspec.filterFn.argL.get(1).asString();
+			String asc = null;
+			if (orderByLastFieldName != null && orderByLastFieldName.equals(logicalFieldName)) {
+				asc = "desc";
+			}
+			if (asc == null && fnspec.filterFn.argL.size() > 1) {
+				asc = fnspec.filterFn.argL.get(1).asString();
+			}
+			
+			if (asc != null) {
 				sc.o(" %s", asc);  
 			}
 		}
@@ -124,6 +135,12 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		addOrderByForLast(sc, hld, true);
 	}
 
+	private String findOrderByForLast(HLDQuery hld) {
+		if (!hld.hasFn("last")) return null;
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
+		return pkpair == null ? null : pkpair.name;
+	}
 	private void addOrderByForLast(StrCreator sc, HLDQuery hld, boolean atLeastOne) {
 		if (!hld.hasFn("last")) return;
 		
