@@ -413,9 +413,9 @@ public class LetStatementRunner extends ServiceBase {
 		if (newlist.isEmpty()) {
 			varRef.dval = null;
 			return varRef;
-		} else if (newlist.size() == 1) {
-			varRef.dval = newlist.get(0);
-			return varRef;
+//		} else if (newlist.size() == 1) {  no. leave lists as lists
+//			varRef.dval = newlist.get(0);
+//			return varRef;
 		} else {
 			qresp.dvalList = newlist;
 			varRef.qresp = qresp;
