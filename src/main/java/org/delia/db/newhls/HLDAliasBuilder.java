@@ -161,31 +161,30 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 
 	private void doFieldList(List<HLDField> fieldL, DStructType fromType, AliasInfo info) {
 		for(HLDField rf: fieldL) {
-			if (rf.structType == fromType) {
-				rf.alias = assign(info.alias);
-			} else {
-				if (rf.source instanceof JoinElement) {
-					JoinElement el = (JoinElement) rf.source;
-					if (el.aliasName == null) {
-						AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
-						el.aliasName = assign(info2.alias);
-						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
-						el.srcAlias = assign(info2.alias);
-						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
-						//need to determine which instance of Customer this is!!
-					}
-					
-					//need 2nd alias if M:M and a fetch
-					if (el.relinfo.isManyToMany() && el.usedForFetch()) {
-						AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
-						el.aliasNameAdditional = assign(infoAdd.alias);
-						rf.alias = assign(el.aliasNameAdditional);
-					} else {
-						rf.alias = assign(el.aliasName);
-					}
-
+			if (rf.source instanceof JoinElement) {
+				JoinElement el = (JoinElement) rf.source;
+				if (el.aliasName == null) {
+					AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
+					el.aliasName = assign(info2.alias);
+					info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
+					el.srcAlias = assign(info2.alias);
+					//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
+					//need to determine which instance of Customer this is!!
 				}
-				//TODO!!
+
+				//need 2nd alias if M:M and a fetch
+				if (el.relinfo.isManyToMany() && el.usedForFetch()) {
+					AliasInfo infoAdd = aliasMgr.createOrGetFieldAliasAdditional(el.relationField.dtype, el.relationField.fieldName);
+					el.aliasNameAdditional = assign(infoAdd.alias);
+					rf.alias = assign(el.aliasNameAdditional);
+				} else {
+					rf.alias = assign(el.aliasName);
+			 	}
+			} else {
+				if (rf.structType == fromType) {
+					rf.alias = assign(info.alias);
+				}
+				//TODO: error if else?
 			}
 		}
 	}

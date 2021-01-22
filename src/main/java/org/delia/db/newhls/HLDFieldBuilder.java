@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -23,7 +22,6 @@ import org.delia.util.DeliaExceptionHelper;
 public class HLDFieldBuilder {
 	
 	public void generateFields(HLDQuery hld) {
-		//TODO much more code needed here!
 		if (hld.finalField == null) {
 			addStructFields(hld, hld.fieldL);
 		} else {
@@ -45,8 +43,12 @@ public class HLDFieldBuilder {
 				}
 				if (fld.structType == inner.structType) {
 					if (StringUtils.equals(fld.fieldName, inner.fieldName)) {
-						System.out.println("removing dup!!");
-						doomedL.add(inner);
+//						System.out.println("removing dup!! " + inner.fieldName);
+//						if (inner.source == null && fld.source != null) {
+//							doomedL.add(inner);
+//						} else {
+//							doomedL.add(fld);
+//						}
 						break;
 					}
 				}
