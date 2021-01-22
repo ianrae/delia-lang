@@ -128,7 +128,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 			pool.add(dval);
 		}
 
-		list = mergeRows(list, pool, columnRunL);
+		list = mergeRows(list, pool, columnRunL, hld);
 		return list;
 	}
 	
@@ -268,16 +268,17 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 	 * the 'many' ids.
 	 * @param rawList list of dvalues to merge
 	 * @param columnRunL 
+	 * @param hld 
 	 * @param dtype 
 	 * @param dtype of values
 	 * @param details query details
 	 * @param dbctx 
 	 * @return merged rows
 	 */
-	private List<DValue> mergeRows(List<DValue> rawList, ObjectPool pool, List<ColumnRun> columnRunL) {
+	private List<DValue> mergeRows(List<DValue> rawList, ObjectPool pool, List<ColumnRun> columnRunL, HLDQueryStatement hld) {
 		//build output list. keep same order
 		List<DValue> resultList = new ArrayList<>();
-		boolean usePoolInMerge = usePoolInMerge(columnRunL);
+		boolean usePoolInMerge = usePoolInMerge(columnRunL, hld);
 		for(DValue dval: rawList) {
 			//don't always need this. pool has already removed duplicates
 			if (usePoolInMerge) {
@@ -292,7 +293,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		return resultList;
 	}
-	private boolean usePoolInMerge(List<ColumnRun> columnRunL) {
+	private boolean usePoolInMerge(List<ColumnRun> columnRunL, HLDQueryStatement hld) {
 		if (columnRunL.size() < 2) {
 			return false;
 		}
@@ -303,6 +304,9 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		if (fld.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) fld.source;
 			if (el.relinfo.isManyToMany() || el.relinfo.isOneToMany()) {
+//				if (columnRunL.size() > 2) {  //hack hack hack
+//					return false;
+//				}
 				return true;
 			}
 		}
