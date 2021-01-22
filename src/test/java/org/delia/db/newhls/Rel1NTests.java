@@ -33,7 +33,7 @@ public class Rel1NTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.id,t1.y,t1.cust FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.id,t1.y,t1.cust FROM Customer as t0 LEFT JOIN Address as t1 ON t0.cid=t1.cust WHERE t0.cid=?", "55");
 	}	
 	@Test
 	public void testFetch11Child() {

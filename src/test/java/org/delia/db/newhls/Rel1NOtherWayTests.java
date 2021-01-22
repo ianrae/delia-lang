@@ -33,7 +33,7 @@ public class Rel1NOtherWayTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.addr,t1.id,t1.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr=t1.id WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t0.addr,t1.id,t1.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr=t1.id WHERE t0.cid=?", "55");
 	}	
 	@Test
 	public void testFetch11Child() {
@@ -69,7 +69,7 @@ public class Rel1NOtherWayTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr1')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.addr1,t0.addr2,t1.id,t1.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr1=t1.id WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t0.addr1,t0.addr2,t1.id,t1.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr1=t1.id WHERE t0.cid=?", "55");
 	}
 	@Test
 	public void testFetch11Parent2AddrB() {
@@ -77,7 +77,7 @@ public class Rel1NOtherWayTests extends NewHLSTestBase {
 		String src = "let x = Customer[55].fetch('addr1', 'addr2')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 2); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.addr1,t2.addr2,t1.id,t1.y,t2.id,t2.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr1=t1.id LEFT JOIN Address as t2 ON t0.addr2=t2.id WHERE t0.cid=?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t0.addr1,t0.addr2,t1.id,t1.y,t2.id,t2.y FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr1=t1.id LEFT JOIN Address as t2 ON t0.addr2=t2.id WHERE t0.cid=?", "55");
 	}
 	
 	@Test
@@ -104,7 +104,7 @@ public class Rel1NOtherWayTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55]";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.addr FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr=t1.id WHERE t1.y = ?", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t0.addr FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr=t1.id WHERE t1.y = ?", "55");
 	}
 	//then do let x = Customer[addr.y == 55].orderBy('addr') and ensure not two joins!
 	@Test
@@ -113,7 +113,7 @@ public class Rel1NOtherWayTests extends NewHLSTestBase {
 		String src = "let x = Customer[addr.y == 55].orderBy('addr')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.cid,t0.x,t1.addr FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr=t1.id WHERE t1.y = ? ORDER BY t0.addr", "55");
+		chkFullSql(hld, "SELECT t0.cid,t0.x,t0.addr FROM Customer as t0 LEFT JOIN Address as t1 ON t0.addr=t1.id WHERE t1.y = ? ORDER BY t0.addr", "55");
 	}
 	
 	//-------------------------

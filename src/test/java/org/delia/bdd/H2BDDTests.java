@@ -223,7 +223,8 @@ public class H2BDDTests extends BDDBase {
 	
 	@Test
 	public void testR1600() {
-		runR1600File("t0-fetch.txt", 3);
+		runR1600File("t0-fetch.txt", 4);
+		runR1600File("t0-fetch-mm.txt", 4);
 		runR1600File("t0-fetch-field.txt", 6);
 		runR1600File("t0-fetch-fk.txt", 0);
 		runR1600File("t0-fetch-fks.txt", 4);
@@ -321,7 +322,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+		testIndexToRun = 0;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
@@ -331,7 +332,8 @@ public class H2BDDTests extends BDDBase {
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR560File("t0-self-NN.txt", 4);
-		runR1600File("t0-fetch.txt", 4);
+//		runR1600File("t0-fetch.txt", 4);
+		runR1600File("t0-fetch-mm.txt", 4);
 	}
 	
 	//---
