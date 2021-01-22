@@ -27,6 +27,8 @@ import org.delia.zdb.mem.hls.function.MemOffsetFunction;
 import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 
 /**
+ * Note. This now uses HLD layer (not HLS).
+ * 
  * Use HLS data to do MEM query
  * @author ian
  *

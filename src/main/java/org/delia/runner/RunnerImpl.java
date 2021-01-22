@@ -64,7 +64,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
 		private InsertStatementRunner insertStatementRunner;
-		private HLSManager mgr;
 		private HLDManager hldManager;
 		private DatIdMap datIdMap;
 		private UpdateStatementRunner updateStatementRunner;
@@ -301,7 +300,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return false;
 		}
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, hldManager, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldManager, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
@@ -378,10 +377,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse) {
 			this.prebuiltFetchRunnerToUse = prebuiltFetchRunnerToUse;
-		}
-		@Override
-		public void setHLSManager(HLSManager mgr) {
-			this.mgr = mgr;
 		}
 		@Override
 		public void setDatIdMap(DatIdMap datIdMap) {

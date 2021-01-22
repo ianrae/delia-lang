@@ -51,20 +51,18 @@ public class LetStatementRunner extends ServiceBase {
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
-	private HLSManager mgr;
 	private DatIdMap datIdMap;
 	private HLDManager hldManager;
 	private HLDQueryStatement mostRecentStatment;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLSManager mgr, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
+			FetchRunner fetchRunner, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
 		this.zexec = zexec;
-		this.mgr = mgr;
 		this.hldManager = hldManager;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 		this.datIdMap = datIdMap;
@@ -150,7 +148,6 @@ public class LetStatementRunner extends ServiceBase {
 		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
 		boolean flag1 = hldManager != null;
-		boolean flag2 = mgr != null;
 		QueryResponse qresp;
 		if (flag1) {
 			HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
@@ -163,17 +160,8 @@ public class LetStatementRunner extends ServiceBase {
 //			result.sql = stgroup.statementL.get(0).sql;
 
 			mostRecentStatment = hld;
-//		} else {
-//			DeliaExceptionHelper.throwNotImplementedError("flag2 must be set in letrunner");
-//			return null;
-//		}
-		
-		} else if (flag2) {
-			DeliaExceptionHelper.throwNotImplementedError("HLS mgr no longer suppoerte in letrunner");
-			return null;
-		} else {
+		} else { //mainly for legacy unit tests
 			HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
-//			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
 			qresp = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
 		}
 		return qresp;

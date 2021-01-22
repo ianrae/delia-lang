@@ -105,7 +105,6 @@ public interface Runner extends VarEvaluator {
 	
 	FetchRunner getPrebuiltFetchRunnerToUse();
 	void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse);
-	void setHLSManager(HLSManager mgr);
 
 	void setDatIdMap(DatIdMap datIdMap);
 
