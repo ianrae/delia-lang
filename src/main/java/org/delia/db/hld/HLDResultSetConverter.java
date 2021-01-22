@@ -171,13 +171,6 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		if (rff.structType != null) {
 			return rff.structType;
 		} else {
-//			//alias
-//			String fieldName = HLDFieldHelper.getAssocFieldName(rff);
-//			DType type = DValueHelper.findFieldType(currentType, fieldName);
-//			if (type != null) {
-//				return currentType;
-//			}
-//			return (DStructType)type; //is this right?
 			DeliaExceptionHelper.throwNotImplementedError("wtf!");
 			return null;
 		}
@@ -189,29 +182,6 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		PrimaryKey pk = dtype.getPrimaryKey();
 		
 		for(HLDField rff: columnRun.runList) {
-//			if (rff.pair.type == null) {
-//				String fld = HLDFieldHelper.getAssocFieldName(rff);
-//				DType ddd = DValueHelper.findFieldType(dtype, fld);
-//				if (! ddd.isStructShape()) {
-//					DeliaError err = new DeliaError("db-resultset-error-assoc", String.format("type %s has no relation field %s",  dtype.getName(), fld));
-//					throw new DBException(err);
-//				}
-//				HLDField copyrff = new HLDField(rff);
-//				copyrff.pair.name = fld;
-//				copyrff.pair.type = ddd;
-//				
-//				//FK only goes in child so it may not be here.
-//				//However if .fks() was used then it is
-//				String strValue = rsw.getString(rff.columnIndex);
-//				if (strValue == null) {
-//					structBuilder.addField(fld, null);
-//				} else {
-//					TypePair fieldPair = new TypePair(fld, ddd);
-//					DValue inner = createRelation(dtype, fieldPair, strValue, dbctx, copyrff);
-//					structBuilder.addField(fieldPair.name, inner);
-//				}
-//			} else {
-
 			TypePair pair = rff.getAsPair();
 			DValue inner = rsw.readFieldByColumnIndex(rff.getAsPair(), rff.columnIndex, dbctx);
 			if (inner == null && pair.name.equals(pk.getFieldName())) {
@@ -229,7 +199,6 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 			}
 			structBuilder.addField(pair.name, inner);
 		}
-//		}
 		
 		boolean b = structBuilder.finish();
 		if (! b) {
@@ -268,7 +237,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		//setting dval's relation (fieldName) to have subDVal
 		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
 		
-		RelationInfo relinfo = jel.relinfo;
+//		RelationInfo relinfo = jel.relinfo;
 		if (jel.usedForFetch()) {
 			List<DValue> fetched = new ArrayList<>();
 			fetched.add(subDVal);
@@ -308,10 +277,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 	private List<DValue> mergeRows(List<DValue> rawList, ObjectPool pool, List<ColumnRun> columnRunL) {
 		//build output list. keep same order
 		List<DValue> resultList = new ArrayList<>();
+		boolean usePoolInMerge = usePoolInMerge(columnRunL);
 		for(DValue dval: rawList) {
-			//don't need this. pool has already removed duplicates
-			if (! pool.contains(dval)) {
-				continue;
+			//don't always need this. pool has already removed duplicates
+			if (usePoolInMerge) {
+				if (! pool.contains(dval)) {
+					continue;
+				}
 			}
 			resultList.add(dval);
 			fillInFetchedItems(dval, pool, true, columnRunL);
@@ -319,6 +291,22 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		}
 		
 		return resultList;
+	}
+	private boolean usePoolInMerge(List<ColumnRun> columnRunL) {
+		if (columnRunL.size() < 2) {
+			return false;
+		}
+		
+		//TODO: improve. may be more than 2 runs!
+		ColumnRun run = columnRunL.get(1);
+		HLDField fld = run.runList.get(0);
+		if (fld.source instanceof JoinElement) {
+			JoinElement el = (JoinElement) fld.source;
+			if (el.relinfo.isManyToMany() || el.relinfo.isOneToMany()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void fillInFetchedItems(DValue dval, ObjectPool pool, boolean doInner, List<ColumnRun> columnRunL) {
@@ -376,40 +364,5 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		}
 		return false;
 	}
-//	private void chkObjects(List<DValue> list, String relField, String backField) {
-//		int id = 100;
-//		for(DValue dval: list) {
-//			DValueImpl impl = (DValueImpl) dval;
-//			if (impl.getPersistenceId() == null) {
-//				impl.setPersistenceId(id++);
-//			}
-//			log.log("%s: %d", dval.getType().getName(), dval.getPersistenceId());
-//
-//			id = chkSubObj(dval, relField, id, backField);
-//		}
-//	}
-//	private int chkSubObj(DValue dval, String relField, int id, String backField) {
-//		DValue inner = dval.asStruct().getField(relField);
-//		if (inner == null) {
-//			return -1;
-//		}
-//		DRelation rel = inner.asRelation();
-//		if (!rel.haveFetched()) {
-//			return -1;
-//		}
-//		for(DValue xx: rel.getFetchedItems()) {
-//			DValueImpl impl = (DValueImpl) xx;
-//			if (impl.getPersistenceId() == null) {
-//				impl.setPersistenceId(id++);
-//			}
-//			log.log("  %s: %d", impl.getType().getName(), impl.getPersistenceId());
-//			
-//			if (backField != null) {
-//				id = chkSubObj(xx, backField, id, null);
-//			}
-//		}
-//		return id;
-//	}
-	
 	
 }
