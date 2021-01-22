@@ -24,6 +24,8 @@ value:a:Customer {
 
 ---
 title: add worker,fks
+#Note. Because of self-join the subobject which should just be an fk, also has entire object. This is because we're using thame
+#same physical DValue obj for id 55.  It doesn't hurt anything to return more data than asked for.
 given:
   insert Customer {id: 56, name: 'bob', worker: 55 }
 when:
@@ -39,7 +41,14 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworker:{55}
+  vworker:{55:
+  {
+   vid:55
+   vname:'art'
+   vmanager:{56}
+   vworker:null
+   }
+ }
 }
 
 ---
@@ -59,5 +68,12 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworker:{55}
+  vworker:{55:
+  {
+   vid:55
+   vname:'art'
+   vmanager:null
+   vworker:null
+   }
+ }
 }

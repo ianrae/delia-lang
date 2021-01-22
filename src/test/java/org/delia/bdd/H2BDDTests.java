@@ -322,7 +322,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+//		testIndexToRun = 2;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
@@ -333,7 +333,8 @@ public class H2BDDTests extends BDDBase {
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR950File("t0-crud-assoc-insert.txt", 6);
 //		runR1500File("t0-queryfn-orderby-2span.txt", 0);
-		runR560File("t0-self-11.txt", 3);
+//		runR560File("t0-self-11.txt", 3);
+		runR560File("t0-self-N1.txt", 4);
 	}
 	
 	//---
