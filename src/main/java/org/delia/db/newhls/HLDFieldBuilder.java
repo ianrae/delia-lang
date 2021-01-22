@@ -106,7 +106,7 @@ public class HLDFieldBuilder {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(fromType, pair);
 				//only load fk fields if fks or fetch
 				JoinElement el = hld.findMatch(relinfo, hld);
-				if (relinfo.notContainsFK()) { //parent or MM
+				if (relinfo.notContainsFKOrIsManyToMany()) { //parent or MM
 					boolean fetchingThisField = el == null ? false : false; //el.usedForFetch();
 					if (fetchingThisField) {
 						addField(fieldL, fromType, pair).source = el;

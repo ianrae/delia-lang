@@ -91,7 +91,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			
 			JoinElement el = findMatch(fnspec, hld);
 			if (el != null) {
-				if (el.relinfo.notContainsFK()) {
+				if (el.relinfo.notContainsFKOrIsManyToMany()) {
 					fnspec.structField.alias = assign(el.aliasName);
 				} else if (el.relationField.dtype == hld.fromType) {
 					fnspec.structField.alias = assign(hld.fromAlias);
@@ -166,13 +166,20 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		for(HLDField rf: fieldL) {
 			if (rf.source instanceof JoinElement) {
 				JoinElement el = (JoinElement) rf.source;
+				String childAlias = null;
 				if (el.aliasName == null) {
-					AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
-					el.aliasName = assign(info2.alias);
-					info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
-					el.srcAlias = assign(info2.alias);
-					//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
-					//need to determine which instance of Customer this is!!
+					//if rf is scalar or is struct and is parent
+					if (rf.fieldType.isScalarShape() || ! el.relinfo.containsFK()) {
+						AliasInfo info2 = aliasMgr.createFieldAlias(el.relationField.dtype, el.relationField.fieldName);
+						el.aliasName = assign(info2.alias);
+						info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
+						el.srcAlias = assign(info2.alias);
+						//TODO:this needs to be smarter. self-joins,multiple addr fields, etc
+						//need to determine which instance of Customer this is!!
+					} else if (el.relinfo.containsFK()) {
+						AliasInfo info2 = aliasMgr.createMainTableAlias(el.relationField.dtype);
+						childAlias = assign(info2.alias);
+					}
 				}
 
 				//need 2nd alias if M:M and a fetch
@@ -181,7 +188,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 					el.aliasNameAdditional = assign(infoAdd.alias);
 					rf.alias = assign(el.aliasNameAdditional);
 				} else {
-					rf.alias = assign(el.aliasName);
+					rf.alias = childAlias != null ? childAlias : assign(el.aliasName);
 			 	}
 			} else {
 				if (rf.structType == fromType) {

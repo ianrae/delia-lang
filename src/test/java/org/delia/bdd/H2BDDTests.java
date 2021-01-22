@@ -321,7 +321,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 3;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
@@ -331,6 +331,7 @@ public class H2BDDTests extends BDDBase {
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR560File("t0-self-NN.txt", 4);
+		runR1600File("t0-fetch.txt", 4);
 	}
 	
 	//---

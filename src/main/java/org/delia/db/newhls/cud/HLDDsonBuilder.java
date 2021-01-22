@@ -76,7 +76,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 
 	private boolean shouldSkipField(DStructHelper helper, TypePair pair) {
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(helper.getType(), pair);
-		if (relinfo != null && relinfo.notContainsFK()) {
+		if (relinfo != null && relinfo.notContainsFKOrIsManyToMany()) {
 			return true; //parent doesn't have fk value.
 		}
 		return false;

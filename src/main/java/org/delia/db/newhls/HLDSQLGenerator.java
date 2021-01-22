@@ -70,7 +70,7 @@ public class HLDSQLGenerator extends HLDServiceBase {
 		sc.o(" ORDER BY");
 		for(QueryFnSpec fnspec: list) {
 			JoinElement el = hld.findJoinByAlias(fnspec.structField.alias, hld);
-			if (el != null && el.relinfo.notContainsFK()) {
+			if (el != null && el.relinfo.notContainsFKOrIsManyToMany()) {
 				if (el.relinfo.isManyToMany()) {
 					//passing null here ok because we know its M:M
 //					SqlColumn npair = doMapFieldIfNeeded(el.aliasName, null, fnspec.structField.dtype, el);

@@ -50,7 +50,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Address[100].fetch('cust')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t1.cust,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust=t1.cid WHERE t0.id=?", "100");
 	}	
 	
 	//TODO Customer.addr1 and .addr2 and try fetching one or both
@@ -95,7 +95,7 @@ public class Rel11Tests extends NewHLSTestBase {
 		String src = "let x = Address[100].fetch('cust1')";
 		
 		HLDQueryStatement hld = buildFromSrc(src, 1); 
-		chkFullSql(hld, "SELECT t0.id,t0.y,t1.cust1,t0.cust2,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust1=t1.cid WHERE t0.id=?", "100");
+		chkFullSql(hld, "SELECT t0.id,t0.y,t0.cust1,t0.cust2,t1.cid,t1.x FROM Address as t0 LEFT JOIN Customer as t1 ON t0.cust1=t1.cid WHERE t0.id=?", "100");
 	}	
 
 	//implicit fetch

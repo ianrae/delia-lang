@@ -211,7 +211,7 @@ public class HLDQueryBuilder {
 		for(TypePair pair: currentScope.getAllFields()) {
 			if (pair.type.isStructShape()) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(currentScope, pair);
-				if (relinfo.notContainsFK()) {
+				if (relinfo.notContainsFKOrIsManyToMany()) {
 					FetchSpec spec = new FetchSpec(currentScope, pair.name);
 					spec.isFK = true;
 					hld.fetchL.add(spec);

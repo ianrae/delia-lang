@@ -91,7 +91,7 @@ public class JoinTreeBuilder {
 			if (forceAdd) {
 				return addElement(el, resultL);
 			} else {
-				if (el.relinfo.notContainsFK()) {
+				if (el.relinfo.notContainsFKOrIsManyToMany()) {
 					return addElement(el, resultL);
 				}
 			}
@@ -107,7 +107,7 @@ public class JoinTreeBuilder {
 		if (pair != null && pair.type instanceof DStructType) {
 			//				addElement(structType, fieldName, (DStructType) pair.type, resultL);
 			JoinElement el = buildElement(structType, fieldName, (DStructType) pair.type);
-			if (el.relinfo.notContainsFK()) {
+			if (el.relinfo.notContainsFKOrIsManyToMany()) {
 				addElement(el, resultL);
 			}
 		}
@@ -118,7 +118,7 @@ public class JoinTreeBuilder {
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.type.isStructShape() && pair.name.equals(spec.fieldName)) {
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
-				if (relinfo.notContainsFK()) {
+				if (relinfo.notContainsFKOrIsManyToMany()) {
 					JoinElement el = buildElement(structType, pair.name, (DStructType) pair.type);
 					el.fetchSpec = spec;
 					addElement(el, resultL);
