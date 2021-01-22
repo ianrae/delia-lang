@@ -11,7 +11,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.RegistryAwareDBErrorConverter;
 import org.delia.db.hld.HLDManager;
-import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
@@ -36,7 +35,7 @@ public class DeliaImpl implements Delia {
 		public DatIdMap datIdMap;
 	}
 	
-	public static boolean useNewHLD = true;
+//	public static boolean useNewHLD = true;
 	
 	private Log log;
 	private ZDBInterfaceFactory dbInterface;
@@ -116,13 +115,13 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		
-		if (useNewHLD) {
-			HLDManager mgr = new HLDManager(this, runner.getRegistry(), runner);
-			runner.setHLDManager(mgr);
-		} else {
-			HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
-			runner.setHLSManager(mgr);
-		}
+//		if (useNewHLD) {
+		HLDManager mgr = new HLDManager(this, runner.getRegistry(), runner);
+		runner.setHLDManager(mgr);
+//		} else {
+//			HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
+//			runner.setHLSManager(mgr);
+//		}
 		return runner;
 	}
 

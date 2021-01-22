@@ -10,7 +10,7 @@ public class StandardHLSStragey implements HLSStragey {
 
 	@Override
 	public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, ZDBExecutor dbexecutor) {
-		QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
+		QueryResponse qresp = null;// dbexecutor.executeHLSQuery(hls, sql, qtx);
 		return qresp;
 	}
 }

@@ -19,7 +19,6 @@ import org.delia.db.hld.cud.HLDInsert;
 import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.hld.cud.HLDUpsertStatement;
-import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
@@ -275,10 +274,10 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		executeDelete(spec);
 	}
 
-	@Override
-	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		return this.doExecuteQuery(hls.querySpec, qtx);
-	}
+//	@Override
+//	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+//		return this.doExecuteQuery(hls.querySpec, qtx);
+//	}
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
 		QueryResponse qresp = doExecuteQuery(hld.querySpec, qtx);

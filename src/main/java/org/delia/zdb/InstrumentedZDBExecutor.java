@@ -11,7 +11,6 @@ import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.hld.cud.HLDUpsertStatement;
-import org.delia.db.hls.HLSQueryStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
@@ -127,10 +126,6 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		zexec.executeDelete(hld, stmgrp);
 	}
 
-	@Override
-	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		return zexec.executeHLSQuery(hls, sql, qtx);
-	}
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
 		return zexec.executeHLDQuery(hld, stmgrp, qtx);

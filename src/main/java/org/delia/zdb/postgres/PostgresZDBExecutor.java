@@ -1,6 +1,5 @@
 package org.delia.zdb.postgres;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
-import org.delia.db.QueryDetails;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
@@ -21,10 +19,6 @@ import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.hld.cud.HLDUpsertStatement;
-import org.delia.db.hls.HLSQuerySpan;
-import org.delia.db.hls.HLSQueryStatement;
-import org.delia.db.hls.HLSSelectHelper;
-import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
@@ -337,36 +331,36 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		//TODO
 	}
 
-	@Override
-	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		failIfNotInit2(); 
-		SqlStatement statement = createSqlStatement(sql);
-		for(HLSQuerySpan hlspan: hls.hlspanL) {
-			statement.paramL.addAll(hlspan.paramL);
-		}
-		logSql(statement);
-
-		ZDBExecuteContext dbctx = createContext();
-		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-		//TODO: do we need to catch and interpret execptions here??
-
-		QueryDetails details = hls.details;
-
-		QueryResponse qresp = new QueryResponse();
-		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
-		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
-		if (selectResultType.isScalarShape()) {
-			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
-			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-			qresp.ok = true;
-		} else {
-			String typeName = hls.querySpec.queryExp.getTypeName();
-			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-			qresp.dvalList = buildDValueList(rs, dtype, details, hls);
-			qresp.ok = true;
-		}
-		return qresp;
-	}
+//	@Override
+//	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+//		failIfNotInit2(); 
+//		SqlStatement statement = createSqlStatement(sql);
+//		for(HLSQuerySpan hlspan: hls.hlspanL) {
+//			statement.paramL.addAll(hlspan.paramL);
+//		}
+//		logSql(statement);
+//
+//		ZDBExecuteContext dbctx = createContext();
+//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
+//		//TODO: do we need to catch and interpret execptions here??
+//
+//		QueryDetails details = hls.details;
+//
+//		QueryResponse qresp = new QueryResponse();
+//		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
+//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
+//		if (selectResultType.isScalarShape()) {
+//			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
+//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
+//			qresp.ok = true;
+//		} else {
+//			String typeName = hls.querySpec.queryExp.getTypeName();
+//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
+//			qresp.dvalList = buildDValueList(rs, dtype, details, hls);
+//			qresp.ok = true;
+//		}
+//		return qresp;
+//	}
 
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
