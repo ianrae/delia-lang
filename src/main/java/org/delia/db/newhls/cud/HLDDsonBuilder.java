@@ -306,8 +306,16 @@ public class HLDDsonBuilder extends HLDServiceBase {
 
 	public HLDUpdate buildAssocUpdateAll(HLDQueryBuilderAdapter builderAdapter, RelationInfo relinfo, QueryExp queryExp, DValue dval1, DatIdMap datIdMap, boolean isMergeInto) {
 		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
-		String fld1 = datIdMap.getAssocFieldFor(relinfo);
-		String fld2 = datIdMap.getAssocOtherField(relinfo);
+		boolean flipped = datIdMap.isFlipped(relinfo);
+		String fld1;
+		if (flipped) {
+			fld2 = datIdMap.getAssocFieldFor(relinfo);
+			fld1 = datIdMap.getAssocOtherField(relinfo);
+		} else {
+			fld1 = datIdMap.getAssocFieldFor(relinfo);
+			fld2 = datIdMap.getAssocOtherField(relinfo);
+		}
+
 
 		HLDUpdate hld = new HLDUpdate(new TypeOrTable(assocTbl, true), null);
 		hld.cres = fillCResForUpdate(hld, fld1, fld2, assocTbl, dval1, null, relinfo, datIdMap);
@@ -317,7 +325,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		if (isMergeInto) {
 			hld.isMergeAllInto = true;
 			hld.mergeKey = fld1;
-			hld.mergeKeyOther = fld2;
+			hld.mergeKeyOther = (flipped) ? fld1 : fld2;
 			DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
 			hld.mergeType = entityType.getName();
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);

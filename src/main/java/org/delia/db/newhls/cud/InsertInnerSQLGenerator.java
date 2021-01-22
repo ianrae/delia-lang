@@ -305,11 +305,11 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		sc.o(" WHEN MATCHED THEN UPDATE SET %s.%s = ?", alias, hld.mergeKeyOther);
 		DValue inner = findFirstNonNullValue(hld.valueL); 
 		stm.paramL.add(inner);
-		stm.paramL.add(inner);
+//		stm.paramL.add(inner);
 		
-		//WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
-		sc.o(" WHEN NOT MATCHED THEN INSERT (leftv, rightv)", hld.mergeKey, hld.mergeKeyOther);
-		sc.o(" VALUES(s.%s, ?)", hld.mergePKField);
+//		//WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
+//		sc.o(" WHEN NOT MATCHED THEN INSERT (leftv, rightv)", hld.mergeKey, hld.mergeKeyOther);
+//		sc.o(" VALUES(s.%s, ?)", hld.mergePKField);
 		
 		stm.sql = sc.toString();
 		return stm;
