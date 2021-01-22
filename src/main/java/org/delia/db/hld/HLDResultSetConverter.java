@@ -269,11 +269,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
 		
 		RelationInfo relinfo = jel.relinfo;
-//		if (relinfo.isManyToMany()) {
-			//do the inverse. setting subDVal's relation to have dval
-			String otherField = relinfo.otherSide.fieldName;
-			return getOrCreateRelation(subDVal, otherField, dval, dbctx);
-//		}
+		if (jel.usedForFetch()) {
+			List<DValue> fetched = new ArrayList<>();
+			fetched.add(subDVal);
+			drel.setFetchedItems(fetched);
+		}
+//		String otherField = relinfo.otherSide.fieldName;
+		return drel; //getOrCreateRelation(subDVal, otherField, dval, dbctx);
 	}
 
 	private DRelation getOrCreateRelation(DValue dval, String relField, DValue subDVal, DBAccessContext dbctx) {
