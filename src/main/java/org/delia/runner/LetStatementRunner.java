@@ -22,7 +22,6 @@ import org.delia.db.hld.HLDQuery;
 import org.delia.db.hld.HLDQueryStatement;
 import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.db.hld.QueryFnSpec;
-import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
@@ -31,7 +30,6 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
@@ -155,9 +153,6 @@ public class LetStatementRunner extends ServiceBase {
 
 			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
 			doPostDBCallAdjustment(hld, qresp);
-//			HLSManagerResult result = new HLSManagerResult();
-//			result.qresp = qresp;
-//			result.sql = stgroup.statementL.get(0).sql;
 
 			mostRecentStatment = hld;
 		} else { //mainly for legacy unit tests

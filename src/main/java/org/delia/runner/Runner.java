@@ -6,7 +6,6 @@ import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.db.hld.HLDManager;
-import org.delia.db.hls.manager.HLSManager;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;

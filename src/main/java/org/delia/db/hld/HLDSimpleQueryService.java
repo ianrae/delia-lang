@@ -27,7 +27,6 @@ public class HLDSimpleQueryService {
 	public HLDSimpleQueryService(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
 //		this.factorySvc = factorySvc;
 		this.innerSvc = new QueryBuilderServiceImpl(factorySvc);
-//		this.hldManager = new HLSManagerBase(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
 		this.hldManager = new HLDManager(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
 		hldManager.setGenerateSQLforMemFlag(true); //TODO:is this only for unit test?
 	}

@@ -27,7 +27,6 @@ import org.delia.db.DBHelper;
 import org.delia.db.QuerySpec;
 import org.delia.db.hld.HLDManager;
 import org.delia.db.hld.cud.HLDDeleteStatement;
-import org.delia.db.hls.manager.HLSManager;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;
