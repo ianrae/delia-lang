@@ -30,6 +30,7 @@ import org.delia.runner.ResultValue;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -377,18 +378,27 @@ public class InputFunctionService extends ServiceBase {
 			if (index > 0) {
 				sc.addStr(", ");
 			}
-			if (inner == null) {
-				sc.o("%s: null", fieldName);
-			} else if (inner.getType().isShape(Shape.STRING)) {
-				sc.o("%s: '%s'", fieldName, inner.asString());
-			} else if (inner.getType().isShape(Shape.DATE)) {
-				sc.o("%s: '%s'", fieldName, inner.asString());
-			} else {
-				sc.o("%s: %s", fieldName, inner.asString());
-			}
+			
+			renderVal(sc, inner, fieldName);
 			index++;
 		}
 		return sc.toString();
+	}
+
+	private void renderVal(StrCreator sc, DValue inner, String fieldName) {
+		if (inner == null) {
+			sc.o("%s: null", fieldName);
+		} else if (inner.getType().isShape(Shape.STRING)) {
+			sc.o("%s: '%s'", fieldName, inner.asString());
+		} else if (inner.getType().isShape(Shape.DATE)) {
+			sc.o("%s: '%s'", fieldName, inner.asString());
+		} else if (inner.getType().isShape(Shape.RELATION)) {
+			DRelation drel = inner.asRelation();
+			DValue fkval = drel.getForeignKey(); //better be just one
+			renderVal(sc, fkval, fieldName); //** recursion **
+		} else {
+			sc.o("%s: %s", fieldName, inner.asString());
+		}
 	}
 
 	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {

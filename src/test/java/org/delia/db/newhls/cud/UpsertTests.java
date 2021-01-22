@@ -123,7 +123,7 @@ public class UpsertTests extends NewHLSTestBase {
 		dumpGrp(stmgrp);
 		chkUpsertSql(stmgrp, 0, "MERGE INTO Address as t0 KEY(id) VALUES(?, ?)", "100", "45");
 		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
-		chkUpsertSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES ?, ?", "55", "100");
+		chkUpsertSql(stmgrp, 2, "UPDATE CustomerAddressDat1 as t1 SET t1.leftv = ?, t1.rightv = ? WHERE t1.rightv=?", "55", "100", "100");
 	}
 	//scenario2 not support by upsert
 	//scenario3 not support by upsert
@@ -142,9 +142,9 @@ public class UpsertTests extends NewHLSTestBase {
 		dumpGrp(stmgrp);
 		chkUpsertSql(stmgrp, 0, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "56", "66");
 		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "100");
-		chkUpsertSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES ?, ?", "56", "100"); 
+		chkUpsertSql(stmgrp, 2, "UPDATE CustomerAddressDat1 as t1 SET t1.leftv = ?, t1.rightv = ? WHERE t1.leftv=?", "56", "100", "56"); 
 		chkUpsertSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "101");
-		chkUpsertSql(stmgrp, 4, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES ?, ?", "56", "101");
+		chkUpsertSql(stmgrp, 4, "UPDATE CustomerAddressDat1 as t1 SET t1.leftv = ?, t1.rightv = ? WHERE t1.leftv=?", "56", "101", "56");
 		//TODO: the above is correct but not efficient. only need a single:
 		//DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = 56
 	}
