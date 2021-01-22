@@ -17,9 +17,8 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSSimpleQueryService;
+import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.db.hls.manager.HLSManager;
-import org.delia.db.hls.manager.HLSManagerResult;
 import org.delia.db.newhls.HLDManager;
 import org.delia.db.newhls.HLDQuery;
 import org.delia.db.newhls.HLDQueryStatement;
@@ -164,21 +163,19 @@ public class LetStatementRunner extends ServiceBase {
 //			result.sql = stgroup.statementL.get(0).sql;
 
 			mostRecentStatment = hld;
-		} else {
-			DeliaExceptionHelper.throwNotImplementedError("flag2 must be set in letrunner");
-			return null;
-		}
-		
-//		} else if (flag2) {
-//			spec.queryExp = queryExp;
-//			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
-//			qresp = result.qresp;
 //		} else {
-//			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
-////			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
-//			HLSManagerResult mgrRes = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
-//			qresp = mgrRes.qresp;
+//			DeliaExceptionHelper.throwNotImplementedError("flag2 must be set in letrunner");
+//			return null;
 //		}
+		
+		} else if (flag2) {
+			DeliaExceptionHelper.throwNotImplementedError("HLS mgr no longer suppoerte in letrunner");
+			return null;
+		} else {
+			HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
+//			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
+			qresp = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
+		}
 		return qresp;
 	}
 	private void doPostDBCallAdjustment(HLDQueryStatement hld, QueryResponse qresp) {

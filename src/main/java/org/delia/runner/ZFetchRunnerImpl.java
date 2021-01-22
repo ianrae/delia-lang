@@ -11,7 +11,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSSimpleQueryService;
+import org.delia.db.hld.HLDSimpleQueryService;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -26,14 +26,14 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 	private DTypeRegistry registry;
 	private VarEvaluator varEvaluator;
 	private ZDBExecutor dbexecutor;
-	private HLSSimpleQueryService querySvc;
+	private HLDSimpleQueryService querySvc;
 
 	public ZFetchRunnerImpl(FactoryService factorySvc, ZDBExecutor dbexecutor, DTypeRegistry registry, VarEvaluator eval) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
 		this.varEvaluator = eval;
-		this.querySvc = new HLSSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), registry);
+		this.querySvc = new HLDSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), registry);
 	}
 	
 	@Override
@@ -44,7 +44,7 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 //		spec.queryExp = queryExp;
 //		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 //		spec.evaluator.init(spec.queryExp);
-		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator).qresp;
+		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator);
 		return qresp;
 	}
 
@@ -113,7 +113,7 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 //		spec.queryExp = queryExp;
 //		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 //		spec.evaluator.init(spec.queryExp);
-		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator).qresp;
+		QueryResponse qresp = querySvc.execQueryEx(queryExp, dbexecutor, varEvaluator);
 		return qresp;
 	}
 
