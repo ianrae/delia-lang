@@ -23,6 +23,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -55,7 +56,7 @@ public class InsertStatementRunner extends ServiceBase {
 			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
 
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
-		DType dtype = registry.getType(exp.getTypeName());
+		DType dtype = registry.findTypeOrSchemaVersionType(exp.getTypeName());
 		if (failIfNull(dtype, exp.typeName, res)) {
 			return;
 		} else if (failIfNotStruct(dtype, exp.typeName, res)) {
@@ -68,12 +69,15 @@ public class InsertStatementRunner extends ServiceBase {
 		if (hldManager != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
 			hldins = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
-			stmgrp = hldManager.generateSQL(hldins, dbexecutor);
+			if (hldins.hldinsert.cres.dval != null) {
+				stmgrp = hldManager.generateSQL(hldins, dbexecutor);
+			} else if (hldins.hldinsert.cres.localET.areNoErrors()) {
+				DeliaExceptionHelper.throwError("unknown-insert-error", "Type %s: unknown insert error. bad data?", dtype.getName());
+			}
 			cres = hldins.hldinsert.cres;
 		} else {
 			cres = buildValue((DStructType) dtype, exp.dsonExp, insertPrebuiltValueIterator, sprigSvc);
 		}
-		
 
 		//execute db insert
 		if (cres.dval == null) {

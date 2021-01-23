@@ -60,7 +60,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setSchemaVersionType(dtype);
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
-		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec);
+		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
 		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
 	}
 	
