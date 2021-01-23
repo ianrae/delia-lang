@@ -1,11 +1,8 @@
 package org.delia.zdb;
 
-import java.util.Map;
-
 import org.delia.assoc.DatIdMap;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
-import org.delia.db.QuerySpec;
 import org.delia.db.hld.HLDQueryStatement;
 import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.hld.cud.HLDInsertStatement;
@@ -66,11 +63,6 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.rawInsert(dval, ctx);
 	}
 
-//	@Override
-//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-//		return zexec.rawQuery(spec, qtx);
-//	}
-
 	@Override
 	public boolean rawTableDetect(String tableName) {
 		return zexec.rawTableDetect(tableName);
@@ -86,40 +78,20 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		zexec.rawCreateTable(tableName);
 	}
 
-//	@Override
-//	public DValue executeInsert(DValue dval, InsertContext ctx) {
-//		return zexec.executeInsert(dval, ctx);
-//	}
 	@Override
 	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
 		return zexec.executeInsert(hld, stmgrp, ctx);
 	}
-
-
-//	@Override
-//	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
-//		return zexec.executeUpdate(spec, dvalPartial, assocCrudMap);
-//	}
 
 	@Override
 	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
 		return zexec.executeUpdate(hld, stmgrp);
 	}
 
-//	@Override
-//	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
-//		return zexec.executeUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag);
-//	}
-
 	@Override
 	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
 		return zexec.executeUpsert(hld, stmgrp, noUpdateFlag);
 	}
-
-//	@Override
-//	public void executeDelete(QuerySpec spec) {
-//		zexec.executeDelete(spec);
-//	}
 
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {

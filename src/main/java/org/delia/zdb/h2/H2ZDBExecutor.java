@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
@@ -14,7 +13,6 @@ import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.QueryDetails;
-import org.delia.db.QuerySpec;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.ValueHelper;
 import org.delia.db.h2.DBListingType;
@@ -56,10 +54,10 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	private H2ZDBInterfaceFactory dbInterface;
 	private H2ZDBConnection conn;
 	private ZInsert zinsert;
-//	private ZQuery zquery;
-	private ZUpdate zupdate;
-	private ZUpsert zupsert;
-	private ZDelete zdelete;
+////	private ZQuery zquery;
+//	private ZUpdate zupdate;
+//	private ZUpsert zupsert;
+//	private ZDelete zdelete;
 	private H2DeliaSessionCache cache;
 	private CacheData cacheData;
 
@@ -91,9 +89,9 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		super.init1(registry);
 		this.zinsert = new ZInsert(factorySvc, registry);
 //		this.zquery = new ZQuery(factorySvc, registry);
-		this.zupdate = new ZUpdate(factorySvc, registry);
-		this.zupsert = new ZUpsert(factorySvc, registry, dbInterface);
-		this.zdelete = new ZDelete(factorySvc, registry);
+//		this.zupdate = new ZUpdate(factorySvc, registry);
+//		this.zupsert = new ZUpsert(factorySvc, registry, dbInterface);
+//		this.zdelete = new ZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
@@ -169,38 +167,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		super.convertAndRethrow(e, this);
 	}
 
-//	@Override
-//	private QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-//		failIfNotInit1(); 
-//		List<LetSpan> spanL = new ArrayList<>();
-//		QueryDetails details = new QueryDetails();
-//		ZTableCreator partialTableCreator = createPartialTableCreator();
-//		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
-//
-//		logSql(statement);
-//		ZDBExecuteContext dbctx = createContext();
-//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-//
-//		QueryResponse qresp = new QueryResponse();
-//		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
-//		SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-//		DType selectResultType = sfhelper.getSelectResultType(spec);
-//		if (selectResultType.isScalarShape()) {
-//			ResultTypeInfo rti = new ResultTypeInfo();
-//			rti.logicalType = selectResultType;
-//			rti.physicalType = selectResultType;
-//			qresp.dvalList = buildScalarResult(rs, rti, details);
-//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-//			qresp.ok = true;
-//		} else {
-//			String typeName = spec.queryExp.getTypeName();
-//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-//			qresp.dvalList = buildDValueList(rs, dtype, details, null);
-//			qresp.ok = true;
-//		}
-//		return qresp;
-//	}
-
 	@Override
 	public boolean rawTableDetect(String tableName) {
 		failIfNotInit1(); 
@@ -230,42 +196,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		execSqlStatement(sql);
 	}
 
-//	@Override
-//	public DValue executeInsert(DValue dval, InsertContext ctx) {
-//		failIfNotInit2(); 
-//		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator, cacheData, this);
-//
-//		if (ctx.extractGeneratedKeys) {
-//			return doInsert(stgroup, ctx);
-//		} else {
-//			doInsert(stgroup, ctx);
-//			return null;
-//		}
-//	}
-
-//	@Override
-//	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
-//		SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
-//		if (stgroup.statementL.isEmpty()) {
-//			return 0; //nothing to update
-//		}
-//
-//		logStatementGroup(stgroup);
-//		int updateCount = 0;
-//		List<Integer > updateCountL = new ArrayList<>();
-//		try {
-//			ZDBExecuteContext dbctx = createContext();
-//			for(SqlStatement statement: stgroup.statementL) {
-//				int n = conn.executeCommandStatement(statement, dbctx);
-//				updateCountL.add(n);
-//			}
-//			updateCount = findUpdateCount("update", updateCountL, stgroup);
-//		} catch (DBValidationException e) {
-//			convertAndRethrow(e);
-//		}
-//		return updateCount;
-//	}
-
 	@Override
 	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stgroup) {
 		if (stgroup.statementL.isEmpty()) {
@@ -293,34 +223,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		return updateCount;
 	}
 
-//	@Override
-//	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
-//			boolean noUpdateFlag) {
-//
-//		SqlStatementGroup stgroup = zupsert.generate(spec, dvalFull, assocCrudMap, noUpdateFlag, varEvaluator, tableCreator, this);
-//		if (stgroup == null) {
-//			return 0; //noupdate flag thing
-//		}
-//		if (stgroup.statementL.isEmpty()) {
-//			return 0; //nothing to update
-//		}
-//
-//		logStatementGroup(stgroup);
-//		int updateCount = 0;
-//		List<Integer > updateCountL = new ArrayList<>();
-//		try {
-//			ZDBExecuteContext dbctx = createContext();
-//			for(SqlStatement statement: stgroup.statementL) {
-//				int n = conn.executeCommandStatement(statement, dbctx);
-//				updateCountL.add(n);
-//			}
-//			updateCount = findUpdateCount("merge", updateCountL, stgroup);
-//		} catch (DBValidationException e) {
-//			convertAndRethrow(e);
-//		}
-//		return updateCount;
-//	}
-
 	@Override
 	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stgroup, boolean noUpdateFlag) {
 		if (stgroup == null) {
@@ -346,23 +248,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		return updateCount;
 	}
 
-//	@Override
-//	public void executeDelete(QuerySpec spec) {
-//		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
-//		if (stgroup.statementL.isEmpty()) {
-//			return; //nothing to delete
-//		}
-//
-//		logStatementGroup(stgroup);
-//		try {
-//			ZDBExecuteContext dbctx = createContext();
-//			for(SqlStatement statement: stgroup.statementL) {
-//				conn.execStatement(statement, dbctx);
-//			}
-//		} catch (DBValidationException e) {
-//			convertAndRethrow(e);
-//		}
-//	}
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stgroup) {
 		if (stgroup.statementL.isEmpty()) {
@@ -380,37 +265,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		}
 	}
 
-//	@Override
-//	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-//		failIfNotInit2(); 
-//		SqlStatement statement = createSqlStatement(sql);
-//		for(HLSQuerySpan hlspan: hls.hlspanL) {
-//			statement.paramL.addAll(hlspan.paramL);
-//		}
-//		logSql(statement);
-//
-//		ZDBExecuteContext dbctx = createContext();
-//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-//		//TODO: do we need to catch and interpret execptions here??
-//
-//		QueryDetails details = hls.details;
-//
-//		QueryResponse qresp = new QueryResponse();
-//		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
-//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
-//		if (selectResultType.isScalarShape()) {
-//			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
-//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-//			qresp.ok = true;
-//		} else {
-//			String typeName = hls.querySpec.queryExp.getTypeName();
-//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-//			qresp.dvalList = buildDValueList(rs, dtype, details, hls);
-//			qresp.ok = true;
-//		}
-//		return qresp;
-//	}
-
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
 		failIfNotInit2(); 
@@ -421,8 +275,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);   // *** call the DB ***
 		//TODO: do we need to catch and interpret exceptions here??
 
-//		QueryDetails details = hld.details;
-
 		QueryResponse qresp = new QueryResponse();
 		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
 		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
@@ -430,11 +282,6 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
 		if (selectResultType.isScalarShape()) {
 			QueryDetails details = new QueryDetails(); //TODO delete later
-//				return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
-//			protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, HLSQueryStatement hls) {
-//				DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-//				return resultSetConverter.buildDValueList(rs, dtype, details, dbctx, hls);
-//			}
 			qresp.dvalList = hldRSCconverter.buildScalarResult(rs, selectResultType, details, dbactx);
 			qresp.ok = true;
 		} else {

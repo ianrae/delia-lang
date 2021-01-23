@@ -45,9 +45,9 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	private PostgresZDBConnection conn;
 	private PostgresZInsert zinsert;
 //	private PostgresZQuery zquery;
-	private PostgresZUpdate zupdate;
-	private PostgresZUpsert zupsert;
-	private PostgresZDelete zdelete;
+//	private PostgresZUpdate zupdate;
+//	private PostgresZUpsert zupsert;
+//	private PostgresZDelete zdelete;
 	private PostgresDeliaSessionCache cache;
 	private CacheData cacheData;
 
@@ -79,9 +79,9 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		super.init1(registry);
 		this.zinsert = new PostgresZInsert(factorySvc, registry);
 //		this.zquery = new PostgresZQuery(factorySvc, registry);
-		this.zupdate = new PostgresZUpdate(factorySvc, registry);
-		this.zupsert = new PostgresZUpsert(factorySvc, registry, dbInterface);
-		this.zdelete = new PostgresZDelete(factorySvc, registry);
+//		this.zupdate = new PostgresZUpdate(factorySvc, registry);
+//		this.zupsert = new PostgresZUpsert(factorySvc, registry, dbInterface);
+//		this.zdelete = new PostgresZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
@@ -156,38 +156,6 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		super.convertAndRethrow(e, this);
 	}
 
-//	@Override
-//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-//		failIfNotInit1(); 
-//		List<LetSpan> spanL = new ArrayList<>();
-//		QueryDetails details = new QueryDetails();
-//		ZTableCreator partialTableCreator = createPartialTableCreator();
-//		SqlStatement statement = zquery.generate(spec, qtx, partialTableCreator, spanL, details, varEvaluator, this);
-//
-//		logSql(statement);
-//		ZDBExecuteContext dbctx = createContext();
-//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-//
-//		QueryResponse qresp = new QueryResponse();
-//		SpanHelper spanHelper = spanL == null ? null : new SpanHelper(spanL);
-//		SelectFuncHelper sfhelper = new SelectFuncHelper(factorySvc, registry, spanHelper);
-//		DType selectResultType = sfhelper.getSelectResultType(spec);
-//		if (selectResultType.isScalarShape()) {
-//			ResultTypeInfo rti = new ResultTypeInfo();
-//			rti.logicalType = selectResultType;
-//			rti.physicalType = selectResultType;
-//			qresp.dvalList = buildScalarResult(rs, rti, details);
-//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-//			qresp.ok = true;
-//		} else {
-//			String typeName = spec.queryExp.getTypeName();
-//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-//			qresp.dvalList = buildDValueList(rs, dtype, details, null);
-//			qresp.ok = true;
-//		}
-//		return qresp;
-//	}
-
 	@Override
 	public boolean rawTableDetect(String tableName) {
 		failIfNotInit1(); 
@@ -217,19 +185,6 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		execSqlStatement(sql);
 	}
 
-//	@Override
-//	public DValue executeInsert(DValue dval, InsertContext ctx) {
-//		failIfNotInit2(); 
-//		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator, cacheData, this);
-//
-//		if (ctx.extractGeneratedKeys) {
-//			return doInsert(stgroup, ctx);
-//		} else {
-//			doInsert(stgroup, ctx);
-//			return null;
-//		}
-//	}
-
 	@Override
 	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
 		failIfNotInit2(); 
@@ -242,62 +197,11 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		}
 	}
 
-//	@Override
-//	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
-//		SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
-//		if (stgroup.statementL.isEmpty()) {
-//			return 0; //nothing to update
-//		}
-//
-//		logStatementGroup(stgroup);
-//		int updateCount = 0;
-//		List<Integer > updateCountL = new ArrayList<>();
-//		try {
-//			ZDBExecuteContext dbctx = createContext();
-//			for(SqlStatement statement: stgroup.statementL) {
-//				int n = conn.executeCommandStatement(statement, dbctx);
-//				updateCountL.add(n);
-//			}
-//			updateCount = findUpdateCount("update", updateCountL, stgroup);
-//		} catch (DBValidationException e) {
-//			convertAndRethrow(e);
-//		}
-//		return updateCount;
-//	}
-
 	@Override
 	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-//	@Override
-//	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
-//			boolean noUpdateFlag) {
-//
-//		SqlStatementGroup stgroup = zupsert.generate(spec, dvalFull, assocCrudMap, noUpdateFlag, varEvaluator, tableCreator, this);
-//		if (stgroup == null) {
-//			return 0; //noupdate flag thing
-//		}
-//		if (stgroup.statementL.isEmpty()) {
-//			return 0; //nothing to update
-//		}
-//
-//		logStatementGroup(stgroup);
-//		int updateCount = 0;
-//		List<Integer > updateCountL = new ArrayList<>();
-//		try {
-//			ZDBExecuteContext dbctx = createContext();
-//			for(SqlStatement statement: stgroup.statementL) {
-//				int n = conn.executeCommandStatement(statement, dbctx);
-//				updateCountL.add(n);
-//			}
-//			updateCount = findUpdateCount("insert into", updateCountL, stgroup); //postgres uses 'insert into'
-//		} catch (DBValidationException e) {
-//			convertAndRethrow(e);
-//		}
-//		return updateCount;
-//	}
 
 	@Override
 	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
@@ -305,58 +209,11 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		return 0;
 	}
 
-//	@Override
-//	public void executeDelete(QuerySpec spec) {
-//		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
-//		if (stgroup.statementL.isEmpty()) {
-//			return; //nothing to delete
-//		}
-//
-//		logStatementGroup(stgroup);
-//		try {
-//			ZDBExecuteContext dbctx = createContext();
-//			for(SqlStatement statement: stgroup.statementL) {
-//				conn.execStatement(statement, dbctx);
-//			}
-//		} catch (DBValidationException e) {
-//			convertAndRethrow(e);
-//		}
-//	}
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
 		//TODO
 	}
 
-//	@Override
-//	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-//		failIfNotInit2(); 
-//		SqlStatement statement = createSqlStatement(sql);
-//		for(HLSQuerySpan hlspan: hls.hlspanL) {
-//			statement.paramL.addAll(hlspan.paramL);
-//		}
-//		logSql(statement);
-//
-//		ZDBExecuteContext dbctx = createContext();
-//		ResultSet rs = conn.execQueryStatement(statement, dbctx);
-//		//TODO: do we need to catch and interpret execptions here??
-//
-//		QueryDetails details = hls.details;
-//
-//		QueryResponse qresp = new QueryResponse();
-//		HLSSelectHelper selectHelper = new HLSSelectHelper(factorySvc, registry);
-//		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hls);
-//		if (selectResultType.isScalarShape()) {
-//			qresp.dvalList = buildScalarResult(rs, selectResultType, details);
-//			//				fixupForExist(spec, qresp.dvalList, sfhelper, dbctx);
-//			qresp.ok = true;
-//		} else {
-//			String typeName = hls.querySpec.queryExp.getTypeName();
-//			DStructType dtype = (DStructType) registry.findTypeOrSchemaVersionType(typeName);
-//			qresp.dvalList = buildDValueList(rs, dtype, details, hls);
-//			qresp.ok = true;
-//		}
-//		return qresp;
-//	}
 
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
