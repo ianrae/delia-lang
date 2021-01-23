@@ -54,8 +54,7 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public ResultValue execute(String src) {
-		DeliaCompiler compiler = createCompiler();
-		List<Exp> expL = compiler.parse(src);
+		List<Exp> expL = compileDeliaSource(src, true);
 
 		Runner runner = createRunner(null);
 		execTypes(runner, expL);
@@ -67,6 +66,7 @@ public class DeliaImpl implements Delia {
 
 		return doExecute(runner, expL, extraInfo.datIdMap);
 	}
+
 
 	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap) {
 		ResultValue res = null;
@@ -83,15 +83,6 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(errL);
 		}
 		return res;
-	}
-
-	@Override
-	public DeliaCompiler createCompiler()  {
-		return doCreateCompiler(null);
-	}
-	private DeliaCompiler doCreateCompiler(InternalCompileState execCtx)  {
-		DeliaCompiler compiler = new DeliaCompiler(factorySvc, execCtx);
-		return compiler;
 	}
 
 
@@ -130,9 +121,7 @@ public class DeliaImpl implements Delia {
 		return doBeginExecution(src, null);
 	}
 	private DeliaSession doBeginExecution(String src, MigrationPlan plan) {
-		DeliaCompiler compiler = createCompiler();
-		compiler.setDoPass3Flag(false);
-		List<Exp> expL = compiler.parse(src);
+		List<Exp> expL =  compileDeliaSource(src, false);
 
 		//1st pass
 		Runner mainRunner = createRunner(null);
@@ -209,11 +198,8 @@ public class DeliaImpl implements Delia {
 			}
 		}
 
-		DeliaCompiler compiler = doCreateCompiler(execCtx);
-		compiler.executePass3(src, extL);
-
-		//and do pass4
-		compiler.executePass4(src, extL, mainRunner.getRegistry());
+		CompilerHelper compilerHelper = createCompilerHelper();
+		compilerHelper.executePass3and4(execCtx, src, extL, mainRunner.getRegistry());
 		
 		//load or assign DAT ids. must do this even if don't do migration
 		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry(), mainRunner);
@@ -294,8 +280,8 @@ public class DeliaImpl implements Delia {
 			execCtx.delcaredVarMap.remove(RunnerImpl.VAR_SERIAL);
 		}
 
-		DeliaCompiler compiler = doCreateCompiler(execCtx);
-		List<Exp> expL = compiler.parse(src);
+		CompilerHelper compilerHelper = createCompilerHelper();
+		List<Exp> expL = compilerHelper.compileDeliaSource(src, execCtx);
 		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {
 				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
@@ -323,8 +309,8 @@ public class DeliaImpl implements Delia {
 			execCtx.delcaredVarMap.remove(RunnerImpl.VAR_SERIAL);
 		}
 
-		DeliaCompiler compiler = doCreateCompiler(execCtx);
-		List<Exp> expL = compiler.parse(src);
+		CompilerHelper compilerHelper = createCompilerHelper();
+		List<Exp> expL = compilerHelper.compileDeliaSource(src, execCtx);
 		for(Exp exp: expL) {
 			if (exp instanceof TypeStatementExp) {
 				String msg = String.format("'type' statements not allowed in continueExecution - %s", exp.strValue());
@@ -334,6 +320,26 @@ public class DeliaImpl implements Delia {
 		}
 		return expL;
 	}
+	
+	@Override
+	public DeliaCompiler createCompiler()  {
+		return doCreateCompiler(null);
+	}
+	private DeliaCompiler doCreateCompiler(InternalCompileState execCtx)  {
+		CompilerHelper helper = createCompilerHelper();
+		DeliaCompiler compiler = helper.createCompiler(execCtx);
+		return compiler;
+	}
+	
+	private List<Exp> compileDeliaSource(String src, boolean doPass3Flag) {
+		CompilerHelper helper = createCompilerHelper();
+		List<Exp> expL = helper.compileDeliaSource(src, doPass3Flag);
+		return expL;
+	}
+	private CompilerHelper createCompilerHelper() {
+		return new CompilerHelper(dbInterface, log, factorySvc, deliaOptions);
+	}
+	
 	
 
 	@Override
