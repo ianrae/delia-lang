@@ -13,7 +13,6 @@ import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryDetails;
 import org.delia.db.SqlExecuteContext;
-import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.ConnectionFactory;
@@ -42,11 +41,10 @@ public class HLDResultSetConverterBase extends ServiceBase {
 	}
 
 	protected ValueHelper valueHelper;
-	private DValueConverterService dvalConverter;
 
-	public HLDResultSetConverterBase(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
+	public HLDResultSetConverterBase(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
-		this.valueHelper = sqlhelperFactory.createValueHelper();
+		this.valueHelper =  new ValueHelper(factorySvc); //sqlhelperFactory.createValueHelper();
 	}
 	public HLDResultSetConverterBase(FactoryService factorySvc, ValueHelper valueHelper) {
 		super(factorySvc);
@@ -57,7 +55,6 @@ public class HLDResultSetConverterBase extends ServiceBase {
 		this.factorySvc = factorySvc;
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();
-		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 
 	/**

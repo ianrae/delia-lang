@@ -4,7 +4,6 @@ import org.delia.bdd.BDDBase;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
-import org.delia.db.ResultSetToDValConverter;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -323,7 +322,6 @@ public class PostgresBDDTests extends BDDBase {
 		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
-		ResultSetToDValConverter.logResultSetDetails = true;
 		
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR500File("t0-relation-many-to-many.txt", 11);

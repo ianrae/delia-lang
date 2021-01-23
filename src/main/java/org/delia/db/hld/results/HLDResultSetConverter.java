@@ -2,9 +2,7 @@ package org.delia.db.hld.results;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.delia.core.FactoryService;
@@ -12,7 +10,6 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.DBType;
 import org.delia.db.ResultSetWrapper;
-import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
 import org.delia.db.hld.FetchSpec;
 import org.delia.db.hld.HLDField;
@@ -21,7 +18,6 @@ import org.delia.db.hld.JoinElement;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.dval.DRelationHelper;
 import org.delia.error.DeliaError;
-import org.delia.relation.RelationInfo;
 import org.delia.runner.ValueException;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -56,8 +52,8 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 
 	private DTypeRegistry registry;
 	
-	public HLDResultSetConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory, SqlHelperFactory sqlhelperFactory) {
-		super(dbType, factorySvc, connFactory, sqlhelperFactory);
+	public HLDResultSetConverter(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory) {
+		super(dbType, factorySvc, connFactory);
 	}
 	public HLDResultSetConverter(FactoryService factorySvc, ValueHelper valueHelper, DTypeRegistry registry) {
 		super(factorySvc, valueHelper);
