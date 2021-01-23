@@ -38,7 +38,7 @@ public interface ZDBExecutor extends AutoCloseable {
 		
 		//these can ONLY be called after init2
 //		DValue executeInsert(DValue dval, InsertContext ctx);
-		int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
+//		int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
 		int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag); 
 		void executeDelete(QuerySpec spec);
 //		QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx);

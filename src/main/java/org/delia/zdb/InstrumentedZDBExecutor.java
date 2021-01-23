@@ -96,10 +96,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	}
 
 
-	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
-		return zexec.executeUpdate(spec, dvalPartial, assocCrudMap);
-	}
+//	@Override
+//	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
+//		return zexec.executeUpdate(spec, dvalPartial, assocCrudMap);
+//	}
 
 	@Override
 	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {

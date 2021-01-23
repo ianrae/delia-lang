@@ -243,28 +243,28 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 //		}
 //	}
 
-	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
-		SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
-		if (stgroup.statementL.isEmpty()) {
-			return 0; //nothing to update
-		}
-
-		logStatementGroup(stgroup);
-		int updateCount = 0;
-		List<Integer > updateCountL = new ArrayList<>();
-		try {
-			ZDBExecuteContext dbctx = createContext();
-			for(SqlStatement statement: stgroup.statementL) {
-				int n = conn.executeCommandStatement(statement, dbctx);
-				updateCountL.add(n);
-			}
-			updateCount = findUpdateCount("update", updateCountL, stgroup);
-		} catch (DBValidationException e) {
-			convertAndRethrow(e);
-		}
-		return updateCount;
-	}
+//	@Override
+//	public int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap) {
+//		SqlStatementGroup stgroup = zupdate.generate(spec, dvalPartial, assocCrudMap, varEvaluator, tableCreator, this);
+//		if (stgroup.statementL.isEmpty()) {
+//			return 0; //nothing to update
+//		}
+//
+//		logStatementGroup(stgroup);
+//		int updateCount = 0;
+//		List<Integer > updateCountL = new ArrayList<>();
+//		try {
+//			ZDBExecuteContext dbctx = createContext();
+//			for(SqlStatement statement: stgroup.statementL) {
+//				int n = conn.executeCommandStatement(statement, dbctx);
+//				updateCountL.add(n);
+//			}
+//			updateCount = findUpdateCount("update", updateCountL, stgroup);
+//		} catch (DBValidationException e) {
+//			convertAndRethrow(e);
+//		}
+//		return updateCount;
+//	}
 
 	@Override
 	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stgroup) {

@@ -119,13 +119,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		}
 
 		try {
-			QuerySpec spec = resolveFilterVars(exp.queryExp);
-			int numRowsAffected;
-			if (hldManager != null) {
-				numRowsAffected = dbexecutor.executeUpdate(hldup, stmgrp);
-			} else {
-				numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
-			}
+			int numRowsAffected = dbexecutor.executeUpdate(hldup, stmgrp);
 
 			res.ok = true;
 			res.shape = Shape.INTEGER;
