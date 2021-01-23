@@ -17,6 +17,9 @@ public class SqlStatement {
 	public String sql;
 	public List<DValue> paramL = new ArrayList<>();
 	
+	public SqlStatement() {
+		this.owner = null;
+	}
 	public SqlStatement(Object owner) {
 		this.owner = owner;
 	}
