@@ -45,6 +45,9 @@ public class DRelation {
 	}
 	
 	public DValue getForeignKey() {
+//		if (foreignKeyL.size() == 0) {
+//			return null; //TODO: is this ok?
+//		}
 		if (foreignKeyL.size() != 1) {
 			throw new IllegalArgumentException(String.format("DRelation has unexpected size %d", foreignKeyL.size()));
 		}
