@@ -1,3 +1,4 @@
+package org.delia.queryfunction.function;
 //package org.delia.queryresponse.function;
 //
 //import java.util.List;
@@ -5,13 +6,12 @@
 //import org.apache.commons.collections.CollectionUtils;
 //import org.delia.compiler.ast.QueryFuncExp;
 //import org.delia.queryresponse.QueryFuncContext;
-//import org.delia.queryresponse.ZQueryResponseFunctionBase;
 //import org.delia.runner.QueryResponse;
 //import org.delia.type.DTypeRegistry;
 //import org.delia.type.DValue;
 //
-//public class ZCountFunction extends ZQueryResponseFunctionBase {
-//	public ZCountFunction(DTypeRegistry registry) {
+//public class ZLimitFunction extends ZOffsetFunction {
+//	public ZLimitFunction(DTypeRegistry registry) {
 //		super(registry);
 //	}
 //
@@ -19,22 +19,14 @@
 //	public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
 //		List<DValue> dvalList = qresp.dvalList;
 //		if (CollectionUtils.isEmpty(dvalList)) {
-//			DValue dval = buildLongVal(0);
-//			setSingletonResult(qresp, dval);
-//			return qresp; //count of empty set is 0
+//			return qresp; //nothing to sort
 //		}
 //		
-//		//don't count null values
-//		int n = 0;
-//		for(DValue dval: dvalList) {
-//			if (dval == null) {
-//				continue;
-//			}
-//			n++;
-//		}
+//		int limit = getIntArg(qfe, ctx);
+//		ctx.currentPgSize = limit;
 //		
-//		DValue dval = buildLongVal(n);
-//		setSingletonResult(qresp, dval);
+//		ctx.offsetLimitDirtyFlag = true;
+//		doLimitAndOffset(ctx, qresp, dvalList);
 //		return qresp;
 //	}
 //}

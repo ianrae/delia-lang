@@ -8,7 +8,7 @@ import java.util.Map;
 import org.delia.db.hls.GElement;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.hld.QueryFnSpec;
-import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryfunction.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;

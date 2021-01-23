@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 
 import org.delia.db.QueryDetails;
 import org.delia.db.hls.join.JTElement;
-import org.delia.queryresponse.LetSpan;
+import org.delia.queryfunction.LetSpan;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;

@@ -8,7 +8,7 @@ import org.delia.db.hls.HLSQuerySpan;
 import org.delia.hld.QueryFnSpec;
 import org.delia.hld.StructFieldOpt;
 import org.delia.log.Log;
-import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryfunction.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DRelation;

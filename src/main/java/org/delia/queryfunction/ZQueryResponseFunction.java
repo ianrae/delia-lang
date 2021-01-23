@@ -1,3 +1,4 @@
+package org.delia.queryfunction;
 //package org.delia.queryresponse;
 //
 //import org.delia.compiler.ast.QueryFuncExp;

@@ -1,3 +1,4 @@
+package org.delia.queryfunction.function;
 //package org.delia.queryresponse.function;
 //
 //import java.util.ArrayList;

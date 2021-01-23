@@ -1,3 +1,4 @@
+package org.delia.queryfunction.function;
 //package org.delia.queryresponse.function;
 //
 //import java.util.List;
@@ -10,26 +11,31 @@
 //import org.delia.type.DTypeRegistry;
 //import org.delia.type.DValue;
 //
-//public class ZExistsFunction extends ZQueryResponseFunctionBase {
-//	public ZExistsFunction(DTypeRegistry registry) {
+//public class ZCountFunction extends ZQueryResponseFunctionBase {
+//	public ZCountFunction(DTypeRegistry registry) {
 //		super(registry);
 //	}
 //
 //	@Override
 //	public QueryResponse process(QueryFuncExp qfe, QueryResponse qresp, QueryFuncContext ctx) {
-//		boolean b = !isEmpty(qresp);
-//		DValue dval = buildBoolVal(b);
-//		setSingletonResult(qresp, dval);
-//		return qresp; 
-//	}
-//	
-//	private boolean isEmpty(QueryResponse qresp) {
 //		List<DValue> dvalList = qresp.dvalList;
-//		
 //		if (CollectionUtils.isEmpty(dvalList)) {
-//			return true;
+//			DValue dval = buildLongVal(0);
+//			setSingletonResult(qresp, dval);
+//			return qresp; //count of empty set is 0
 //		}
-//		return false;
+//		
+//		//don't count null values
+//		int n = 0;
+//		for(DValue dval: dvalList) {
+//			if (dval == null) {
+//				continue;
+//			}
+//			n++;
+//		}
+//		
+//		DValue dval = buildLongVal(n);
+//		setSingletonResult(qresp, dval);
+//		return qresp;
 //	}
-//
 //}

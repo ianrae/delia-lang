@@ -1,3 +1,4 @@
+package org.delia.queryfunction.function;
 //package org.delia.queryresponse.function;
 //
 //import java.time.Instant;
@@ -15,10 +16,10 @@
 //import org.delia.type.Shape;
 //import org.delia.util.DeliaExceptionHelper;
 //
-//public class ZMaxFunction extends ZQueryResponseFunctionBase {
+//public class ZMinFunction extends ZQueryResponseFunctionBase {
 //	private FactoryService factorySvc;
 //
-//	public ZMaxFunction(FactoryService factorySvc, DTypeRegistry registry) {
+//	public ZMinFunction(FactoryService factorySvc, DTypeRegistry registry) {
 //		super(registry);
 //		this.factorySvc = factorySvc;
 //	}
@@ -50,77 +51,77 @@
 //		case DATE:
 //			return processDate(qresp, dvalList);
 //		default:
-//			DeliaExceptionHelper.throwError("unsupported-max-type", "max() doesn't support type '%s'", shape);
+//			DeliaExceptionHelper.throwError("unsupported-min-type", "min() doesn't support type '%s'", shape);
 //		}
 //		return qresp;
 //	}
 //
 //	private QueryResponse processInt(QueryResponse qresp, List<DValue> dvalList) {
-//		int max = Integer.MIN_VALUE;
+//		int min = Integer.MAX_VALUE;
 //		for(DValue dval: dvalList) {
 //			if (dval == null) {
 //				continue;
 //			}
 //			int k = dval.asInt(); 
-//			if (k > max) {
-//				max = k;
+//			if (k < min) {
+//				min = k;
 //			}
 //		}
 //		
-//		DValue dval = buildIntVal(max);
+//		DValue dval = buildIntVal(min);
 //		setSingletonResult(qresp, dval);
 //		return qresp;
 //	}
 //	private QueryResponse processLong(QueryResponse qresp, List<DValue> dvalList) {
-//		long max = Integer.MIN_VALUE;
+//		long min = Long.MAX_VALUE;
 //		for(DValue dval: dvalList) {
 //			if (dval == null) {
 //				continue;
 //			}
-//			long k = dval.asLong(); 
-//			if (k > max) {
-//				max = k;
+//			long k = dval.asLong();
+//			if (k < min) {
+//				min = k;
 //			}
 //		}
 //		
-//		DValue dval = buildLongVal(max);
+//		DValue dval = buildLongVal(min);
 //		setSingletonResult(qresp, dval);
 //		return qresp;
 //	}
 //	private QueryResponse processNumber(QueryResponse qresp, List<DValue> dvalList) {
-//		double max = Double.MIN_VALUE;
+//		double min = Double.MAX_VALUE;
 //		for(DValue dval: dvalList) {
 //			if (dval == null) {
 //				continue;
 //			}
 //			double k = dval.asNumber();
-//			if (k > max) {
-//				max = k;
+//			if (k < min) {
+//				min = k;
 //			}
 //		}
 //		
-//		DValue dval = buildNumberVal(max);
+//		DValue dval = buildNumberVal(min);
 //		setSingletonResult(qresp, dval);
 //		return qresp;
 //	}
 //	private QueryResponse processBoolean(QueryResponse qresp, List<DValue> dvalList) {
-//		Boolean max = false;
+//		Boolean min = true;
 //		for(DValue dval: dvalList) {
 //			if (dval == null) {
 //				continue;
 //			}
-//			Boolean k = dval.asBoolean(); 
-//			if (k.compareTo(max) > 0) {
-//				max = k;
+//			Boolean k = dval.asBoolean();
+//			if (k.compareTo(min) < 0) {
+//				min = k;
 //			}
 //		}
 //		
-//		DValue dval = buildBoolVal(max);
+//		DValue dval = buildBoolVal(min);
 //		setSingletonResult(qresp, dval);
 //		return qresp;
 //	}
 //	private QueryResponse processString(QueryResponse qresp, List<DValue> dvalList) {
-//		String min = null; //min possible string
+//		String min = null; //max possible string
 //		for(DValue dval: dvalList) {
 //			if (dval == null) {
 //				continue;
@@ -129,7 +130,7 @@
 //			
 //			if (min == null) {
 //				min = k;
-//			} else if (k.compareTo(min) > 0) {
+//			} else if (k.compareTo(min) < 0) {
 //				min = k;
 //			}
 //		}
@@ -139,9 +140,8 @@
 //		return qresp;
 //	}
 //	private QueryResponse processDate(QueryResponse qresp, List<DValue> dvalList) {
-//		Instant min = Instant.MIN;
-//		ZonedDateTime maxZdt = null;
-//		
+//		Instant min = Instant.MAX;
+//		ZonedDateTime minZdt = null;
 //		for(DValue dval: dvalList) {
 //			if (dval == null) {
 //				continue;
@@ -150,14 +150,14 @@
 //			
 //			if (min == null) {
 //				min = zdt.toInstant();
-//				maxZdt = zdt;
-//			} else if (zdt.toInstant().compareTo(min) > 0) {
+//				minZdt = zdt;
+//			} else if (zdt.toInstant().compareTo(min) < 0) {
 //				min = zdt.toInstant();
-//				maxZdt = zdt;
+//				minZdt = zdt;
 //			}
 //		}
 //		
-//		DValue dval = buildDateVal(maxZdt, factorySvc);
+//		DValue dval = buildDateVal(minZdt, factorySvc);
 //		setSingletonResult(qresp, dval);
 //		return qresp;
 //	}

@@ -1,4 +1,4 @@
-package org.delia.queryresponse.function;
+package org.delia.queryfunction.function;
 
 import java.util.Arrays;
 import java.util.List;

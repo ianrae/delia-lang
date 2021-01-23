@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.delia.compiler.ast.QueryFieldExp;
 import org.delia.compiler.ast.QueryFuncExp;
-import org.delia.queryresponse.LetSpan;
+import org.delia.queryfunction.LetSpan;
 
 public class SpanHelper {
 
