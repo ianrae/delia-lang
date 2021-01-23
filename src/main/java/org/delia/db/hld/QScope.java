@@ -19,4 +19,13 @@ public class QScope {
 		this.fieldName = fieldName;
 		this.thing = thing;
 	}
+
+	@Override
+	public String toString() {
+		if (qfnexp != null) {
+			return String.format("%d: %s", index, qfnexp.funcName);
+		} else {
+			return String.format("%d: %s.%s", index, structType.getName(), fieldName);
+		}
+	}
 }

@@ -97,7 +97,7 @@ public class MemFunctionHelper extends ServiceBase {
 				if (ff.isScalarField()) {
 					int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
 					//re-order between i..k
-					reOrderPagingFns(i+1, iEndSpan, list, skipList, scopeL);
+					reOrderPagingFns(i+1, iEndSpan, list, skipList, scopeL, null);
 				}
 				list.add(scope);
 			} else if (obj instanceof RelationField) {
@@ -106,26 +106,34 @@ public class MemFunctionHelper extends ServiceBase {
 				}
 			} else if (! skipList.contains(scope)) {
 				int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
-				reOrderPagingFns(i, iEndSpan, list, skipList, scopeL);
 
-				list.add(scope);
+				reOrderPagingFns(i, iEndSpan, list, skipList, scopeL, scope);
+				addIf(scope, list, skipList);
 			}
 			i++;
 		}
 		return list;
 	}
 
-	private void reOrderPagingFns(int i, int iEndSpan, List<QScope> list, List<QScope> skipList, List<QScope> scopeL) {
-		QScope fnscope = findFn("orderBy", i+1, iEndSpan, scopeL);
+	private void reOrderPagingFns(int i, int iEndSpan, List<QScope> list, List<QScope> skipList, List<QScope> scopeL, QScope oneWeAreAdding) {
+		//must execute in this order: orderBy, offset, limit
+		QScope fnscope = findFn("orderBy", i+1, iEndSpan, scopeL, oneWeAreAdding);
 		addIf(fnscope, list, skipList);
-		fnscope = findFn("offset", i+1, iEndSpan, scopeL);
+		fnscope = findFn("offset", i+1, iEndSpan, scopeL, oneWeAreAdding);
 		addIf(fnscope, list, skipList);
-		fnscope = findFn("limit", i+1, iEndSpan, scopeL);
+		fnscope = findFn("limit", i+1, iEndSpan, scopeL, oneWeAreAdding);
 		addIf(fnscope, list, skipList);
 	}
 
-	private QScope findFn(String fnName, int iStart, int iEndSpan, List<QScope> scopeL) {
+	private QScope findFn(String fnName, int iStart, int iEndSpan, List<QScope> scopeL, QScope oneWeAreAdding) {
 		//re-order between i..k
+		if (oneWeAreAdding != null && oneWeAreAdding.thing instanceof QueryFnSpec) {
+			QueryFnSpec fnspec = (QueryFnSpec) oneWeAreAdding.thing;
+			if (fnspec.isFn(fnName)) {
+				return oneWeAreAdding;
+			}
+		}
+		
 		for(int k = iStart; k < iEndSpan; k++) {
 			QScope sc2 = scopeL.get(k);
 			
