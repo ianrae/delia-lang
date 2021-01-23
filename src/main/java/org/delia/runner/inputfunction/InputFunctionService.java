@@ -344,6 +344,9 @@ public class InputFunctionService extends ServiceBase {
 		if (useUpsert) {
 			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			if (pair == null) {
+				DeliaExceptionHelper.throwError("upsert-requires-pk", "Type: %s - does not have primary key. Cannout use upsert in InputFunctionService", dval.getType().getName());
+			}
 			dval.asMap().remove(pair.name);
 			if (pair.type.isShape(Shape.STRING)) {
 				src = String.format("upsert %s['%s'] {%s}", typeName, primaryKeyVal.asString(), buildValueFields(dval));
