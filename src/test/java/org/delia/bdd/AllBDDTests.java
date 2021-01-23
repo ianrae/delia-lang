@@ -330,14 +330,14 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 0;
+//		testIndexToRun = 3;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-		runR1500File("t0-queryfn-offset.txt", 5);
+//		runR1500File("t0-queryfn-offset.txt", 5);
 //		runR1600File("t0-fetch.txt", 4);
-//		runR560File("t0-self-11.txt", 3);
+		runR560File("t0-self-11.txt", 3);
 	}
 	
 	//---

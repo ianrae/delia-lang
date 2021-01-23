@@ -78,7 +78,8 @@ value:a:Address {
  vcust:{55:
   {
   vid:55
-  vaddr:null
+IF(MEM):vaddr:{100}
+ELSE:vaddr:null
   }
  }
 }

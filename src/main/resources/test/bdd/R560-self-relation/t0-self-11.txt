@@ -41,14 +41,15 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworker:{55:
-  {
-   vid:55
-   vname:'art'
-   vmanager:{56}
-   vworker:null
-   }
- }
+ IF(MEM):vworker:{55}
+ELSE:  vworker:{55:
+ELSE:  {
+ELSE:   vid:55
+ELSE:   vname:'art'
+ELSE:   vmanager:{56}
+ELSE:   vworker:null
+ELSE:   }
+ELSE: }
 }
 
 ---
@@ -68,12 +69,13 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
-  vworker:{55:
-  {
-   vid:55
-   vname:'art'
-   vmanager:null
-   vworker:null
-   }
- }
+ IF(MEM):vworker:{55}
+ ELSE:vworker:{55:
+ ELSE: {
+ ELSE:  vid:55
+ ELSE:  vname:'art'
+ELSE:   vmanager:null
+ELSE:   vworker:null
+ELSE:   }
+ELSE: }
 }
