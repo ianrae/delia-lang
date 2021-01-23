@@ -1,7 +1,5 @@
 package org.delia.zdb;
 
-import java.util.Map;
-
 import org.delia.assoc.DatIdMap;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
@@ -40,7 +38,7 @@ public interface ZDBExecutor extends AutoCloseable {
 //		DValue executeInsert(DValue dval, InsertContext ctx);
 //		int executeUpdate(QuerySpec spec, DValue dvalPartial, Map<String, String> assocCrudMap); 
 //		int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag); 
-		void executeDelete(QuerySpec spec);
+//		void executeDelete(QuerySpec spec);
 //		QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx);
 		QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx);
 		DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx);

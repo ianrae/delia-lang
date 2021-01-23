@@ -346,23 +346,23 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		return updateCount;
 	}
 
-	@Override
-	public void executeDelete(QuerySpec spec) {
-		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
-		if (stgroup.statementL.isEmpty()) {
-			return; //nothing to delete
-		}
-
-		logStatementGroup(stgroup);
-		try {
-			ZDBExecuteContext dbctx = createContext();
-			for(SqlStatement statement: stgroup.statementL) {
-				conn.execStatement(statement, dbctx);
-			}
-		} catch (DBValidationException e) {
-			convertAndRethrow(e);
-		}
-	}
+//	@Override
+//	public void executeDelete(QuerySpec spec) {
+//		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
+//		if (stgroup.statementL.isEmpty()) {
+//			return; //nothing to delete
+//		}
+//
+//		logStatementGroup(stgroup);
+//		try {
+//			ZDBExecuteContext dbctx = createContext();
+//			for(SqlStatement statement: stgroup.statementL) {
+//				conn.execStatement(statement, dbctx);
+//			}
+//		} catch (DBValidationException e) {
+//			convertAndRethrow(e);
+//		}
+//	}
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stgroup) {
 		if (stgroup.statementL.isEmpty()) {

@@ -116,10 +116,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.executeUpsert(hld, stmgrp, noUpdateFlag);
 	}
 
-	@Override
-	public void executeDelete(QuerySpec spec) {
-		zexec.executeDelete(spec);
-	}
+//	@Override
+//	public void executeDelete(QuerySpec spec) {
+//		zexec.executeDelete(spec);
+//	}
 
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {

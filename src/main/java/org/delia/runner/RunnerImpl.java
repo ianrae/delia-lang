@@ -261,7 +261,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					dbexecutor.executeDelete(hld, stmgrp);
 				} else {
 					QuerySpec spec = this.resolveFilterVars(exp.queryExp);
-					dbexecutor.executeDelete(spec);
+					DeliaExceptionHelper.throwNotImplementedError("sdf");
+//					dbexecutor.executeDelete(spec);
 				}
 			} catch (DBException e) {
 				res.errors.add(e.getLastError());

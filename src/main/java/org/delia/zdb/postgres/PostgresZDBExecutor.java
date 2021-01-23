@@ -1,9 +1,6 @@
 package org.delia.zdb.postgres;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
@@ -11,7 +8,6 @@ import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
-import org.delia.db.QuerySpec;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.hld.HLDQueryStatement;
@@ -309,23 +305,23 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		return 0;
 	}
 
-	@Override
-	public void executeDelete(QuerySpec spec) {
-		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
-		if (stgroup.statementL.isEmpty()) {
-			return; //nothing to delete
-		}
-
-		logStatementGroup(stgroup);
-		try {
-			ZDBExecuteContext dbctx = createContext();
-			for(SqlStatement statement: stgroup.statementL) {
-				conn.execStatement(statement, dbctx);
-			}
-		} catch (DBValidationException e) {
-			convertAndRethrow(e);
-		}
-	}
+//	@Override
+//	public void executeDelete(QuerySpec spec) {
+//		SqlStatementGroup stgroup = zdelete.generate(spec, varEvaluator, tableCreator, this);
+//		if (stgroup.statementL.isEmpty()) {
+//			return; //nothing to delete
+//		}
+//
+//		logStatementGroup(stgroup);
+//		try {
+//			ZDBExecuteContext dbctx = createContext();
+//			for(SqlStatement statement: stgroup.statementL) {
+//				conn.execStatement(statement, dbctx);
+//			}
+//		} catch (DBValidationException e) {
+//			convertAndRethrow(e);
+//		}
+//	}
 	@Override
 	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
 		//TODO

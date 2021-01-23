@@ -231,8 +231,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return executeUpsert(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, noUpdateFlag);
 	}
 
-	@Override
-	public void executeDelete(QuerySpec spec) {
+//	@Override
+	private void executeDelete(QuerySpec spec) {
 		QueryResponse qresp = new QueryResponse();
 		try {
 			qresp = doExecuteDelete(spec);
