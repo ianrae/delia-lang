@@ -8,13 +8,9 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.hls.join.JTElement;
 import org.delia.relation.RelationInfo;
-import org.delia.rule.rules.RelationManyRule;
-import org.delia.rule.rules.RelationOneRule;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
@@ -123,37 +119,37 @@ public class AliasManager extends ServiceBase {
 		assocMap.put(key, info);
 	}
 	
-	public void buildAliases(HLSQuerySpan hlspan, DatIdMap datIdMap) {
-		createMainTableAlias(hlspan.mtEl.structType);
-		
-		for(TypePair pair: hlspan.fromType.getAllFields()) {
-			RelationOneRule oneRule = DRuleHelper.findOneRule(hlspan.fromType, pair.name);
-			if (oneRule != null && (oneRule.relInfo.isParent || isFetched(hlspan, pair.name))) {
-				createFieldAlias(hlspan.fromType, pair.name);
-			} else {
-				RelationManyRule manyRule = DRuleHelper.findManyRule(hlspan.fromType, pair.name);
-				if (manyRule != null) {
-					//many-to-one. many side is always the parent
-					createFieldAlias(hlspan.fromType, pair.name);
-					if (manyRule.relInfo.isManyToMany()) {
-						String assocTbl = datIdMap.getAssocTblName(manyRule.relInfo.getDatId());
-						createAssocAlias(hlspan.fromType, pair.name, assocTbl);
-					}
-				}
-			}
-		}
-		
-		for(JTElement el: hlspan.joinTreeL) {
-			createFieldAlias(el.dtype, el.fieldName);
-		}
-	}
-	
-	private boolean isFetched(HLSQuerySpan hlspan, String fieldName) {
-		if (hlspan.subEl != null) {
-			return hlspan.subEl.fetchL.contains(fieldName);
-		}
-		return false;
-	}
+//	public void buildAliases(HLSQuerySpan hlspan, DatIdMap datIdMap) {
+//		createMainTableAlias(hlspan.mtEl.structType);
+//		
+//		for(TypePair pair: hlspan.fromType.getAllFields()) {
+//			RelationOneRule oneRule = DRuleHelper.findOneRule(hlspan.fromType, pair.name);
+//			if (oneRule != null && (oneRule.relInfo.isParent || isFetched(hlspan, pair.name))) {
+//				createFieldAlias(hlspan.fromType, pair.name);
+//			} else {
+//				RelationManyRule manyRule = DRuleHelper.findManyRule(hlspan.fromType, pair.name);
+//				if (manyRule != null) {
+//					//many-to-one. many side is always the parent
+//					createFieldAlias(hlspan.fromType, pair.name);
+//					if (manyRule.relInfo.isManyToMany()) {
+//						String assocTbl = datIdMap.getAssocTblName(manyRule.relInfo.getDatId());
+//						createAssocAlias(hlspan.fromType, pair.name, assocTbl);
+//					}
+//				}
+//			}
+//		}
+//		
+//		for(JTElement el: hlspan.joinTreeL) {
+//			createFieldAlias(el.dtype, el.fieldName);
+//		}
+//	}
+//	
+//	private boolean isFetched(HLSQuerySpan hlspan, String fieldName) {
+//		if (hlspan.subEl != null) {
+//			return hlspan.subEl.fetchL.contains(fieldName);
+//		}
+//		return false;
+//	}
 
 	public AliasInfo getMainTableAlias(DStructType structType) {
 		String key = String.format("%s", structType.getName());

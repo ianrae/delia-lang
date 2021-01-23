@@ -9,12 +9,14 @@ import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.SqlExecuteContext;
+import org.delia.db.ValueHelper;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.hld.HLDQueryStatement;
 import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.hld.cud.HLDUpsertStatement;
+import org.delia.db.hld.results.HLDResultSetConverter;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.RawStatementGenerator;
@@ -140,7 +142,8 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 			try {
 				SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
 				sqlctx.genKeysL = dbctxMain.genKeysL;
-				genVal = resultSetConverter.extractGeneratedKey(ctx, sqlctx);
+				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+				genVal = hldRSCconverter.extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {
 				DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
 			}

@@ -9,24 +9,16 @@ import java.util.StringJoiner;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBAccessContext;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
-import org.delia.db.QueryDetails;
-import org.delia.db.ResultSetConverter;
-import org.delia.db.ValueHelper;
-import org.delia.db.hls.HLSQueryStatement;
-import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.log.Log;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
-import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
@@ -46,17 +38,12 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 	protected DBType dbType;
 	protected DBErrorConverter errorConverter;
 	protected ZTableCreator tableCreator;
-//	protected ResultSetToDValConverter resultSetConverter;
-	protected ResultSetConverter resultSetConverter;
 	protected Random random = new Random();
 
 	public ZDBExecutorBase(FactoryService factorySvc, Log sqlLog, DBErrorConverter errorConverter) {
 		super(factorySvc);
 		this.sqlLog = sqlLog;
 		this.errorConverter = errorConverter;
-//		this.resultSetConverter = new ResultSetToDValConverter(factorySvc, new ValueHelper(factorySvc));
-		this.resultSetConverter = new ResultSetConverter(factorySvc, new ValueHelper(factorySvc));
-		resultSetConverter.init(factorySvc);
 	}
 
 	public void init1(DTypeRegistry registry) {
@@ -176,15 +163,6 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 			index++;
 		}
 		return foundResult;
-	}
-
-	protected List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details) {
-		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		return resultSetConverter.buildScalarResult(rs, selectResultType, details, dbctx);
-	}
-	protected List<DValue> buildDValueList(ResultSet rs, DStructType dtype, QueryDetails details, HLSQueryStatement hls) {
-		DBAccessContext dbctx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		return resultSetConverter.buildDValueList(rs, dtype, details, dbctx, hls);
 	}
 
 	protected void execSqlStatement(ZDBConnection conn, String sql) {

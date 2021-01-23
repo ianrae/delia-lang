@@ -1,6 +1,7 @@
 package org.delia.db.hld.results;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,9 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBException;
 import org.delia.db.DBType;
+import org.delia.db.InsertContext;
 import org.delia.db.QueryDetails;
+import org.delia.db.SqlExecuteContext;
 import org.delia.db.SqlHelperFactory;
 import org.delia.db.ValueHelper;
 import org.delia.db.hls.ResultTypeInfo;
@@ -57,24 +60,23 @@ public class HLDResultSetConverterBase extends ServiceBase {
 		this.dvalConverter = new DValueConverterService(factorySvc);
 	}
 
-	//	/**
-	//	 * we can only have generated one key even if did several inserts because
-	//	 * the additional inserts are just the assoc table.
-	//	 * @param ctx
-	//	 * @param sqlctx
-	//	 * @return
-	//	 * @throws SQLException
-	//	 */
-	//	public DValue extractGeneratedKey(InsertContext ctx, SqlExecuteContext sqlctx) throws SQLException {
-	//		for(ResultSet rs: sqlctx.genKeysL) {
-	//			DValue genVal = valueHelper.extractGeneratedKey(rs, ctx.genKeytype.getShape(), sqlctx.registry);
-	//			if (genVal != null) {
-	//				return genVal;
-	//			}
-	//		}
-	//		return null;
-	//	}
-
+	/**
+	 * we can only have generated one key even if did several inserts because
+	 * the additional inserts are just the assoc table.
+	 * @param ctx
+	 * @param sqlctx
+	 * @return
+	 * @throws SQLException
+	 */
+	public DValue extractGeneratedKey(InsertContext ctx, SqlExecuteContext sqlctx) throws SQLException {
+		for(ResultSet rs: sqlctx.genKeysL) {
+			DValue genVal = valueHelper.extractGeneratedKey(rs, ctx.genKeytype.getShape(), sqlctx.registry);
+			if (genVal != null) {
+				return genVal;
+			}
+		}
+		return null;
+	}
 
 	public List<DValue> buildScalarResult(ResultSet rs, ResultTypeInfo selectResultType, QueryDetails details, DBAccessContext dbctx) {
 		List<DValue> list = new ArrayList<>();

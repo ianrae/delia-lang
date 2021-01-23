@@ -149,7 +149,8 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 			try {
 				SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
 				sqlctx.genKeysL = dbctxMain.genKeysL;
-				genVal = resultSetConverter.extractGeneratedKey(ctx, sqlctx);
+				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+				genVal = hldRSCconverter.extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {
 				DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
 			}
