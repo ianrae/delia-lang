@@ -293,33 +293,33 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		return updateCount;
 	}
 
-	@Override
-	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
-			boolean noUpdateFlag) {
-
-		SqlStatementGroup stgroup = zupsert.generate(spec, dvalFull, assocCrudMap, noUpdateFlag, varEvaluator, tableCreator, this);
-		if (stgroup == null) {
-			return 0; //noupdate flag thing
-		}
-		if (stgroup.statementL.isEmpty()) {
-			return 0; //nothing to update
-		}
-
-		logStatementGroup(stgroup);
-		int updateCount = 0;
-		List<Integer > updateCountL = new ArrayList<>();
-		try {
-			ZDBExecuteContext dbctx = createContext();
-			for(SqlStatement statement: stgroup.statementL) {
-				int n = conn.executeCommandStatement(statement, dbctx);
-				updateCountL.add(n);
-			}
-			updateCount = findUpdateCount("merge", updateCountL, stgroup);
-		} catch (DBValidationException e) {
-			convertAndRethrow(e);
-		}
-		return updateCount;
-	}
+//	@Override
+//	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
+//			boolean noUpdateFlag) {
+//
+//		SqlStatementGroup stgroup = zupsert.generate(spec, dvalFull, assocCrudMap, noUpdateFlag, varEvaluator, tableCreator, this);
+//		if (stgroup == null) {
+//			return 0; //noupdate flag thing
+//		}
+//		if (stgroup.statementL.isEmpty()) {
+//			return 0; //nothing to update
+//		}
+//
+//		logStatementGroup(stgroup);
+//		int updateCount = 0;
+//		List<Integer > updateCountL = new ArrayList<>();
+//		try {
+//			ZDBExecuteContext dbctx = createContext();
+//			for(SqlStatement statement: stgroup.statementL) {
+//				int n = conn.executeCommandStatement(statement, dbctx);
+//				updateCountL.add(n);
+//			}
+//			updateCount = findUpdateCount("merge", updateCountL, stgroup);
+//		} catch (DBValidationException e) {
+//			convertAndRethrow(e);
+//		}
+//		return updateCount;
+//	}
 
 	@Override
 	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stgroup, boolean noUpdateFlag) {

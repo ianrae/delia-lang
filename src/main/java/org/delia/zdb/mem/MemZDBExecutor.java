@@ -196,8 +196,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return memUpdate.doExecuteUpdate(spec, dvalUpdate, assocCrudMap, selector, this);
 	}
 
-	@Override
-	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
+//	@Override
+	private int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
 			boolean noUpdateFlag) {
 		int numRowsAffected = 0;
 

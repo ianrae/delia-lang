@@ -23,6 +23,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
@@ -210,15 +211,9 @@ public class UpdateStatementRunner extends ServiceBase {
 		}
 
 		try {
-			QuerySpec spec = resolveFilterVars(exp.queryExp);
 			boolean noUpdateFlag = exp.optionExp != null;
-			int numRowsAffected;
-			if (hldManager != null) {
-				numRowsAffected = dbexecutor.executeUpsert(hldup, stmgrp, noUpdateFlag);
-				numRowsAffected = 1; //1 means success (not number of rows affected)
-			} else {
-				numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
-			}
+			int numRowsAffected = dbexecutor.executeUpsert(hldup, stmgrp, noUpdateFlag);
+			numRowsAffected = 1; //1 means success (not number of rows affected)
 
 			res.ok = true;
 			res.shape = Shape.INTEGER;

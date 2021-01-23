@@ -106,10 +106,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.executeUpdate(hld, stmgrp);
 	}
 
-	@Override
-	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
-		return zexec.executeUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag);
-	}
+//	@Override
+//	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
+//		return zexec.executeUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag);
+//	}
 
 	@Override
 	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
