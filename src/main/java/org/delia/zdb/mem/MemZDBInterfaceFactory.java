@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
+import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.SerialProvider.SerialGenerator;
@@ -17,7 +18,6 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
-	
 
 	public MemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
@@ -65,6 +65,15 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	
 	public Map<String, SerialGenerator> getSerialMap() {
 		return serialMap;
+	}
+
+	@Override
+	public DBErrorConverter getDBErrorConverter() {
+		return null;
+	}
+	@Override
+	public void setDBErrorConverter(DBErrorConverter errorConverter) {
+		//not used this.errorConverter = errorConverter;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.StringJoiner;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
+import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryExp;
@@ -15,7 +16,7 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSSimpleQueryService;
+import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.sort.topo.DeliaTypeSorter;
@@ -59,7 +60,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setSchemaVersionType(dtype);
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
-		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec);
+		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
 		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
 	}
 	
@@ -149,10 +150,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 
 	public String calcDBFingerprint() {
 		//TODO: query just single record (most recent);
-		FilterExp filter = null; //query all
+		FilterExp filter = new FilterExp(99, new BooleanExp(true)); //query all
 		QuerySpec spec = new QuerySpec();
 		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
-		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(zexec.getDbInterface(), registry);
+		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(zexec.getDbInterface(), registry);
 		QueryResponse qresp = querySvc.execQuery(spec.queryExp, zexec);
 		//TODO: should specify orderby id!!
 		
@@ -385,7 +386,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 				if (doLowRiskChecks && ! f1.flagStr.contains("O") && ! isMemDB()) { //mandatory field?
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(st.typeName);
-					HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(zexec.getDbInterface(), registry);
+					HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(zexec.getDbInterface(), registry);
 					QueryResponse qresp = querySvc.execQuery(exp, zexec);
 					DValue dval = qresp.getOne();
 					long numRecords = dval.asLong();

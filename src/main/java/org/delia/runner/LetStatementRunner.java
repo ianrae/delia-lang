@@ -2,6 +2,7 @@ package org.delia.runner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.delia.assoc.DatIdMap;
@@ -16,15 +17,15 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSSimpleQueryService;
-import org.delia.db.hls.manager.HLSManager;
-import org.delia.db.hls.manager.HLSManagerResult;
-import org.delia.db.newhls.HLDManager;
-import org.delia.db.newhls.HLDQuery;
-import org.delia.db.newhls.HLDQueryStatement;
+import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.queryresponse.LetSpanEngine;
+import org.delia.hld.FetchSpec;
+import org.delia.hld.HLDManager;
+import org.delia.hld.HLDQuery;
+import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.HLDSimpleQueryService;
+import org.delia.hld.QueryFnSpec;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -44,24 +45,21 @@ public class LetStatementRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ZDBInterfaceFactory dbInterface;
 	private ZDBExecutor zexec;
-	private LetSpanEngine letSpanEngine;
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
-	private HLSManager mgr;
 	private DatIdMap datIdMap;
 	private HLDManager hldManager;
 	private HLDQueryStatement mostRecentStatment;
 
 	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLSManager mgr, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
+			FetchRunner fetchRunner, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
 		this.zexec = zexec;
-		this.mgr = mgr;
 		this.hldManager = hldManager;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 		this.datIdMap = datIdMap;
@@ -78,7 +76,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	public ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-		this.letSpanEngine = new LetSpanEngine(factorySvc, registry);
 		
 		if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
 			return invokeUserFunc(exp, res);
@@ -144,34 +141,62 @@ public class LetStatementRunner extends ServiceBase {
 	}
 	private QueryResponse executeDBQuery(QueryExp queryExp, QueryResponse existingQResp) {
 		QuerySpec spec = resolveFilterVars(queryExp);
-		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
 		boolean flag1 = hldManager != null;
-		boolean flag2 = mgr != null;
 		QueryResponse qresp;
 		if (flag1) {
-			spec.queryExp = queryExp;
-			HLSManagerResult result = hldManager.execute(spec, qtx, zexec, runner);
-			mostRecentStatment = hldManager.getMostRecentLetStatement();
-			qresp = result.qresp;
-		} else if (flag2) {
-			spec.queryExp = queryExp;
-			HLSManagerResult result = mgr.execute(spec, qtx, zexec);
-			qresp = result.qresp;
-		} else {
-			HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
-//			DeliaExceptionHelper.throwError("rawquery-not-supported", "rawQuery no longer suppored!");
-			HLSManagerResult mgrRes = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
-			qresp = mgrRes.qresp;
+			HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
+			SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
+
+			QueryContext qtx = buildQueryContext(spec, existingQResp, hld);
+			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
+			doPostDBCallAdjustment(hld, qresp);
+
+			mostRecentStatment = hld;
+		} else { //mainly for legacy unit tests
+			HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
+			qresp = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
 		}
 		return qresp;
 	}
+	private void doPostDBCallAdjustment(HLDQueryStatement hld, QueryResponse qresp) {
+		//TODO: this is not quite correct. can exists be present but not the last fn
+		Optional<QueryFnSpec> opt = hld.hldquery.funcL.stream().filter(x ->x.isFn("exists")).findAny();
+		if (opt.isPresent() && qresp.ok) {
+			if (qresp.emptyResults()) {
+				ScalarValueBuilder builder = factorySvc.createScalarValueBuilder(registry);
+				DValue dval = builder.buildBoolean(false);
+				qresp.dvalList.add(dval);
+				return;
+			}
+			boolean b = false; //if at least one is true then exists returns true
+			for(DValue dval: qresp.dvalList) {
+				if (dval.asBoolean()) {
+					qresp.dvalList.clear();
+					qresp.dvalList.add(dval);
+					return;
+				}
+			}
+		}
+		
+		
+		// TODO Auto-generated method stub
+		
+	}
 
-	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp) {
+	private HLDQueryStatement buildHLDQuery(QuerySpec spec, QueryExp queryExp) {
+		spec.queryExp = queryExp;
+		HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);
+		return hld;
+	}
+	
+	
+	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp, HLDQueryStatement hld) {
 		QueryContext qtx = new QueryContext();
 		qtx.existingQResp = existingQResp;
-		qtx.letSpanEngine = letSpanEngine;
-		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
+		
+		Optional<FetchSpec> opt = hld.hldquery.fetchL.stream().filter(x -> x.isFK).findAny();
+		qtx.loadFKs = opt.isPresent(); //this.letSpanEngine.containsFKs(spec.queryExp);
 		if (!qtx.loadFKs) {
 			ConfigureService configSvc = factorySvc.getConfigureService();
 			qtx.loadFKs = configSvc.isPopulateFKsFlag();
@@ -311,7 +336,7 @@ public class LetStatementRunner extends ServiceBase {
 
 		VarRef varRef = new VarRef();
 		varRef.varRef = queryExp.typeName;
-
+		
 		if (res.val instanceof DValue) {
 			varRef.dval = (DValue) res.val;
 			return varRef;
@@ -319,10 +344,7 @@ public class LetStatementRunner extends ServiceBase {
 			if (res.val instanceof QueryResponse) {
 				QueryResponse qresp = (QueryResponse) res.val;
 				
-				//extract fields or invoke fns (optional)
-				
 				//resolve varref to parseable query
-//				if (queryExp.)
 				if (qresp.emptyResults()) {
 					if (queryExp.qfelist.size() > 0) {
 						String msg = String.format("var '%s' is null. cannot be evaluationed", varRef.varRef);
@@ -333,39 +355,27 @@ public class LetStatementRunner extends ServiceBase {
 					varRef.qresp = qresp.dvalList == null ? null : qresp;
 					return varRef;
 				} else {
-					DValue first = qresp.dvalList.get(0);
-					//if scalar then just return
-					if (first.getType().isScalarShape()) {
-						varRef.qresp = qresp;
-						return varRef;
+					if (! hldManager.canBuildHLD(queryExp, zexec, runner)) {
+						//usually means statement is scalar. let x = 5
+						return doVarRef(varRef, qresp, qresp.dvalList);
 					}
-					
-					queryExp.typeName = first.getType().getName();
-					//TODO add code to handle var refs deeper in statement. ex: let x = y.orderBy(z)
-					
-					if (!queryExp.qfelist.isEmpty()) {
-						String fieldName = queryExp.qfelist.get(0).funcName; //TODO support more fields or funcs later
-						DValue inner = first.asStruct().getField(fieldName);
-						//if scalar then just return
-						if (inner != null && inner.getType().isScalarShape()) {
-							varRef.qresp = null;
-							varRef.dval = inner;
-							return varRef;
+
+					QuerySpec spec = resolveFilterVars(queryExp);
+					HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
+					//TODO: improve. this works for .wid but not .addr.wid.x.y
+					if (hld.hldquery.finalField != null) {
+						String fieldName = hld.hldquery.finalField.structField.fieldName; 
+						
+						List<DValue> newlist = new ArrayList<>();
+						for(DValue listel: qresp.dvalList) {
+							DValue inner = listel.asStruct().getField(fieldName);
+							newlist.add(inner);
 						}
+						
+						return properVarRef(varRef, hld, qresp, newlist);
+					} else {
+						return properVarRef(varRef, hld, qresp, qresp.dvalList);
 					}
-					
-				}
-				
-				
-				QueryResponse qresp2 = qresp; //TODO: why did we call db here? executeDBQuery(queryExp, qresp);
-				//TODO: propogate errors from qresp2.err
-				if (qresp2.ok) {
-					if (qresp2.dvalList == null) {
-						varRef.dval = null;
-						return varRef;
-					}
-					varRef.qresp = qresp2;
-					return varRef;
 				}
 			} else if (res.val == null) { //handle null values
 				varRef.dval = null;
@@ -375,6 +385,29 @@ public class LetStatementRunner extends ServiceBase {
 		}
 		return null;
 	}
+	private VarRef properVarRef(VarRef varRef, HLDQueryStatement hld, QueryResponse qresp, List<DValue> newlist) {
+		if (hld.hldquery.resultType.isStructShape()) {
+			qresp.dvalList = newlist;
+			varRef.qresp = qresp;
+			return varRef;
+		} else {
+			return doVarRef(varRef, qresp, newlist);
+		}
+	}
+	private VarRef doVarRef(VarRef varRef, QueryResponse qresp, List<DValue> newlist) {
+		if (newlist.isEmpty()) {
+			varRef.dval = null;
+			return varRef;
+//		} else if (newlist.size() == 1) {  no. leave lists as lists
+//			varRef.dval = newlist.get(0);
+//			return varRef;
+		} else {
+			qresp.dvalList = newlist;
+			varRef.qresp = qresp;
+			return varRef;
+		}
+	}
+
 //	private VarRef resolveVarReference(QueryExp queryExp) {
 //		ResultValue res = runner.varMap.get(queryExp.typeName);
 //		if (res == null) {

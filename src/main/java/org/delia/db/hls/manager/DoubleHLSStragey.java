@@ -46,7 +46,7 @@ public class DoubleHLSStragey implements HLSStragey {
 	public QueryResponse execute(HLSQueryStatement hls, String sql, QueryContext qtx, ZDBExecutor dbexecutor) {
 		HLSQuerySpan hlspan1 = hls.hlspanL.get(1); //Address
 		HLSQuerySpan hlspan2 = hls.hlspanL.get(0); //Customer
-		QueryResponse qresp = dbexecutor.executeHLSQuery(hls, sql, qtx);
+		QueryResponse qresp = null; //dbexecutor.executeHLSQuery(hls, sql, qtx);
 
 		//and again with span1
 		//{Address->Address,MT:Address,[cust in [55,56],()}
@@ -60,7 +60,7 @@ public class DoubleHLSStragey implements HLSStragey {
 		clone.queryExp = (QueryExp) exp.value;
 		clone.querySpec = new QuerySpec();
 		clone.querySpec.queryExp = clone.queryExp;
-		QueryResponse qresp2 = dbexecutor.executeHLSQuery(clone, sql, qtx);
+		QueryResponse qresp2 = null; //dbexecutor.executeHLSQuery(clone, sql, qtx);
 		log.log("%b", qresp2.ok);
 
 		//actually MEM already has address.cust as DRelation

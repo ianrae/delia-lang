@@ -62,4 +62,7 @@ public class ResultValue {
 	public DeliaError getLastError() {
 		return errors.isEmpty() ? null : errors.get(errors.size() - 1);
 	}
+	public boolean isSuccess() {
+		return errors.isEmpty();
+	}
 }

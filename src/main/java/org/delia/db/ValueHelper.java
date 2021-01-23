@@ -19,7 +19,6 @@ import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.core.TimeZoneService;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.dval.DValueConverterService;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -105,7 +104,7 @@ public class ValueHelper extends ServiceBase {
 		return index;
 	}
 	
-	protected DValue extractGeneratedKey(ResultSet rs, Shape keyShape, DTypeRegistry registry) throws SQLException {
+	public DValue extractGeneratedKey(ResultSet rs, Shape keyShape, DTypeRegistry registry) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(registry);
 
 		DValue genVal = null;
@@ -282,10 +281,10 @@ public class ValueHelper extends ServiceBase {
 	public DValue readIndexedField(DType type, int rsIndex, ResultSet rs, DBAccessContext dbctx) throws SQLException {
 		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(dbctx.registry);
 
-		boolean b = rs.next(); //assume we're reading 1st record
-		if (!b) {
-			return null;
-		}
+//		boolean b = rs.next(); //assume we're reading 1st record
+//		if (!b) {
+//			return null;
+//		}
 		
 		switch(type.getShape()) {
 		case INTEGER:

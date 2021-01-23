@@ -2,10 +2,10 @@ package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.hls.HLSSimpleQueryService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
+import org.delia.hld.HLDSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
 import org.delia.runner.FetchRunner;
@@ -34,7 +34,8 @@ public interface FactoryService {
 	LogFactory getLogFactory(); //may return null if not set in DeliaBuilder
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
-	HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry);
+//	HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry);
+	HLDSimpleQueryService createHLDSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry);
 	SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();

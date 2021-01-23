@@ -56,17 +56,17 @@ public class StructValueBuilder extends DValueBuilder {
 		}
 		
 		if (this.map.containsKey(fieldName)) {
-			addDuplicateFieldError(String.format("already added field '%s'", fieldName), fieldName);
+			addDuplicateFieldError(String.format("Type '%s': already added field '%s'", structType.getName(), fieldName), fieldName);
 			return;
 		}
 		else if (! isValidFieldName(fieldName)) {
-			addUnknownFieldError(String.format("fieldName not allowed: '%s'", fieldName));
+			addUnknownFieldError(String.format("Type '%s': fieldName not allowed: '%s'", structType.getName(), fieldName));
 			return;
 		}
 		
 		TypePair pair = fieldExists(fieldName);
 		if (pair == null) {
-			addUnknownFieldError(String.format("unknown field '%s'", fieldName));
+			addUnknownFieldError(String.format("Type '%s': unknown field '%s'", structType.getName(), fieldName));
 			return;
 		}
 		

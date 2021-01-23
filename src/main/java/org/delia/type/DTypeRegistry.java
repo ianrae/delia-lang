@@ -109,7 +109,13 @@ public class DTypeRegistry {
 		if (datType != null && datType.getName().equals(typeName)) {
 			return datType;
 		}
-		return (DStructType) getType(typeName);
+		
+		DType dtype = getType(typeName);
+		if (dtype != null && dtype.isStructShape()) {
+			return (DStructType) dtype;
+		} else {
+			return null; //TODO: is this a problem??
+		}
 	}
 	
 	public Set<String> getAllCustomTypes() {

@@ -1,6 +1,5 @@
 package org.delia.db;
 
-import org.delia.queryresponse.LetSpanEngine;
 import org.delia.runner.QueryResponse;
 
 /**
@@ -12,6 +11,6 @@ import org.delia.runner.QueryResponse;
 public class QueryContext { 
 	public boolean loadFKs;
 	public boolean pruneParentRelationFlag; //MEM only
-	public LetSpanEngine letSpanEngine;
+//	public LetSpanEngine letSpanEngine; //still needed apparently
 	public QueryResponse existingQResp; //normally null. used when doing x=y.field1.min()
 }

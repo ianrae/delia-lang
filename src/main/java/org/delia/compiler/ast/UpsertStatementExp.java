@@ -17,6 +17,9 @@ public class UpsertStatementExp extends CrudExp {
 	public String getTypeName() {
 		return typeName;
 	}
+	public boolean isNoUpdate() {
+		return optionExp != null && optionExp.strValue().equals("noUpdate");
+	}
 	
 	@Override
 	public String strValue() {

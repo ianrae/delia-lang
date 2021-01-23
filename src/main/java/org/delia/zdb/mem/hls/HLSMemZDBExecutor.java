@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.delia.core.FactoryService;
-import org.delia.db.QueryContext;
 import org.delia.db.hls.GElement;
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.db.hls.HLSQueryStatement;
-import org.delia.queryresponse.FuncScope;
-import org.delia.queryresponse.QueryFuncContext;
+import org.delia.queryfunction.FuncScope;
+import org.delia.queryfunction.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
@@ -28,6 +27,8 @@ import org.delia.zdb.mem.hls.function.MemOffsetFunction;
 import org.delia.zdb.mem.hls.function.MemOrderByFunction;
 
 /**
+ * Note. This now uses HLD layer (not HLS).
+ * 
  * Use HLS data to do MEM query
  * @author ian
  *
@@ -38,30 +39,30 @@ public class HLSMemZDBExecutor extends MemZDBExecutor {
 		super(factorySvc, dbInterface);
 	}
 
-	@Override
-	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		log.logDebug("ziggy!");
-		qtx.pruneParentRelationFlag = false;
-		qtx.loadFKs = findAnyFKs(hls);
-		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx); //do main filter
-		
-		pruneParentsIfNeeded(hls, qresp);
-		
-		//do all spans after first
-		for(int i = 0; i < hls.hlspanL.size(); i++) {
-			HLSQuerySpan hlspan = hls.hlspanL.get(i);
-			
-			boolean beginsWithScopeChange = (i == 0 ) && !(hlspan.fromType.getName().equals(hls.queryExp.typeName));
-			List<MemFunction> actionL = buildActionsInOrder(hlspan, hls, beginsWithScopeChange);
-			boolean isFirstFn = true;
-			for(MemFunction fn: actionL) {
-				qresp = runFn(hlspan, qresp, fn, i, isFirstFn);
-				isFirstFn = false;
-			}
-		}
-		
-		return qresp;
-	}
+//	@Override
+//	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+//		log.logDebug("ziggy!");
+//		qtx.pruneParentRelationFlag = false;
+//		qtx.loadFKs = findAnyFKs(hls);
+//		QueryResponse qresp = doExecuteQuery(hls.querySpec, qtx); //do main filter
+//		
+//		pruneParentsIfNeeded(hls, qresp);
+//		
+//		//do all spans after first
+//		for(int i = 0; i < hls.hlspanL.size(); i++) {
+//			HLSQuerySpan hlspan = hls.hlspanL.get(i);
+//			
+//			boolean beginsWithScopeChange = (i == 0 ) && !(hlspan.fromType.getName().equals(hls.queryExp.typeName));
+//			List<MemFunction> actionL = buildActionsInOrder(hlspan, hls, beginsWithScopeChange);
+//			boolean isFirstFn = true;
+//			for(MemFunction fn: actionL) {
+//				qresp = runFn(hlspan, qresp, fn, i, isFirstFn);
+//				isFirstFn = false;
+//			}
+//		}
+//		
+//		return qresp;
+//	}
 
 	private boolean findAnyFKs(HLSQueryStatement hls) {
 		//TODO this finds any fks. TODO later need to distinguish among multiple

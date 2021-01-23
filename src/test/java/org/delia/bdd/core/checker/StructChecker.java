@@ -2,9 +2,11 @@ package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.bdd.core.ThenValue;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
@@ -42,17 +44,11 @@ public class StructChecker extends ValueCheckerBase {
 		List<String> thenL = generateFromThen(thenVal);
 
 		boolean pass = compareStringLists(genL, thenL, log);
-//		if (! pass) {
-//			log.log("**** DVAL values ==>");
-//			for(String ss: genL) {
-//				log.log(ss);
-//			}
-//			log.log("***** DVAL values end");
-//		}
 		return pass;
 	}
 	
 	private boolean compareStringLists(List<String> genL, List<String> thenL, Log log) {
+		thenL = adjustForDBType(thenL);
 		int index = 0;
 		for (String actualLine : genL) {
 			if (index >= thenL.size()) {
@@ -90,7 +86,47 @@ public class StructChecker extends ValueCheckerBase {
 			}
 			index++;
 		}
+		
+		if (genL.size() != thenL.size()) {
+			String err = String.format("value-mismatch: resultList has %d but thenL has %d", genL.size(), thenL.size());
+			log.logError(err);
+			return false;
+		}		
 		return true;
+	}
+
+	/**
+	 * Some DBTypes return a bit extra information. This is not wrong data, just a bit more than you asked for.
+	 * So in a bdd "then:" clause you can specify dbtype-specific text
+	 *  IF(MEM):vworker:{55}
+	 *  ELSE:  vworker:{55:
+	 *  ELSE:  {
+	 * etc.
+	 * @param thenL
+	 * @return
+	 */
+	private List<String> adjustForDBType(List<String> thenL) {
+		String dbtype = this.sess.getDelia().getDBInterface().getDBType().name();
+		
+		List<String> resultL = new ArrayList<>();
+		boolean ignoreElse = false;
+		for(String line: thenL) {
+			String target = String.format("IF(%s):", dbtype);
+			if (line.startsWith(target)) {
+				line = StringUtils.substringAfter(line, target);
+				ignoreElse = true;
+			}
+			
+			target = "ELSE:";
+			if (line.startsWith(target)) {
+				line = ignoreElse ? null : StringUtils.substringAfter(line, target);
+			}
+			
+			if (line != null) {
+				resultL.add(line);
+			}
+		}
+		return resultL;
 	}
 
 	private List<String> generateFromThen(ThenValue thenVal) {

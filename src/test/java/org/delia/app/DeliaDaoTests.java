@@ -141,7 +141,8 @@ public class DeliaDaoTests extends DaoTestBase {
 		assertEquals(2, n);
 	}
 
-	@Test
+	//TODO: run this test once we have updatewithjoin
+//	@Test
 	public void testErr2() {
 		String src = buildSrc();
 		DeliaGenericDao dao = createDao(); 

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.delia.db.newhls.RelationSpec;
+import org.delia.hld.RelationSpec;
 import org.delia.relation.RelationInfo;
 import org.delia.util.DeliaExceptionHelper;
 

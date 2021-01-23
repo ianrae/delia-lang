@@ -73,4 +73,13 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		execLog.setLevel(log.getLevel());
 		return new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 	}
+
+	@Override
+	public DBErrorConverter getDBErrorConverter() {
+		return errorConverter;
+	}
+	@Override
+	public void setDBErrorConverter(DBErrorConverter errorConverter) {
+		this.errorConverter = errorConverter;
+	}
 }

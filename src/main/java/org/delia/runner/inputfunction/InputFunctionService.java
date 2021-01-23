@@ -18,6 +18,7 @@ import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.sql.StrCreator;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
@@ -29,6 +30,7 @@ import org.delia.runner.ResultValue;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
 import org.delia.tlang.runner.TLangVarEvaluator;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -342,11 +344,14 @@ public class InputFunctionService extends ServiceBase {
 		if (useUpsert) {
 			DValue primaryKeyVal = DValueHelper.findPrimaryKeyValue(dval);
 			TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
+			if (pair == null) {
+				DeliaExceptionHelper.throwError("upsert-requires-pk", "Type: %s - does not have primary key. Cannout use upsert in InputFunctionService", dval.getType().getName());
+			}
 			dval.asMap().remove(pair.name);
 			if (pair.type.isShape(Shape.STRING)) {
-				src = String.format("upsert %s['%s'] {}", typeName, primaryKeyVal.asString());
+				src = String.format("upsert %s['%s'] {%s}", typeName, primaryKeyVal.asString(), buildValueFields(dval));
 			} else { 
-				src = String.format("upsert %s[%s] {}", typeName, primaryKeyVal.asString());
+				src = String.format("upsert %s[%s] {%s}", typeName, primaryKeyVal.asString(), buildValueFields(dval));
 			}
 		} else {
 			src = String.format("insert %s {}", typeName);
@@ -368,6 +373,49 @@ public class InputFunctionService extends ServiceBase {
 		request.session.setRunnerIntiliazer(null);
 	}	
 	
+	private String buildValueFields(DValue dval) {
+		StrCreator sc = new StrCreator();
+		int index = 0;
+		for(String fieldName: dval.asMap().keySet()) {
+			DValue inner = dval.asMap().get(fieldName);
+			if (index > 0) {
+				sc.addStr(", ");
+			}
+			
+			renderVal(sc, inner, fieldName);
+			index++;
+		}
+		return sc.toString();
+	}
+
+	private void renderVal(StrCreator sc, DValue inner, String fieldName) {
+		if (inner == null) {
+			sc.o("%s: null", fieldName);
+		} else if (inner.getType().isShape(Shape.STRING)) {
+			//handle quoting.
+			//TODO: this is a bit slow, searching every string for '. can we speed this up?
+			String s = inner.asString();
+			int pos = s.indexOf('\'');
+			if (pos >= 0) {
+				pos = s.indexOf('"');
+				if (pos >= 0) {
+					DeliaExceptionHelper.throwNotImplementedError("Strings with both ' and \" not yet supported in InputFunctionService", s);
+				}
+				sc.o("%s: \"%s\"", fieldName, inner.asString()); //use double quote
+			} else {
+				sc.o("%s: '%s'", fieldName, inner.asString()); //use single quote
+			}
+		} else if (inner.getType().isShape(Shape.DATE)) {
+			sc.o("%s: '%s'", fieldName, inner.asString());
+		} else if (inner.getType().isShape(Shape.RELATION)) {
+			DRelation drel = inner.asRelation();
+			DValue fkval = drel.getForeignKey(); //better be just one
+			renderVal(sc, fkval, fieldName); //** recursion **
+		} else {
+			sc.o("%s: %s", fieldName, inner.asString());
+		}
+	}
+
 	private void addRunnerInitializer(InputFunctionRequest request, DValue dval) {
 		DValueIterator iter = new DValueIterator(dval);
 		ImportSpec ispec = findImportSpec(request, (DStructType) dval.getType());

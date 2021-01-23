@@ -25,11 +25,10 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.DBHelper;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.manager.HLSManager;
-import org.delia.db.newhls.HLDManager;
-import org.delia.db.newhls.cud.HLDDeleteStatement;
-import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
+import org.delia.hld.HLDManager;
+import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
@@ -64,7 +63,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
 		private InsertStatementRunner insertStatementRunner;
-		private HLSManager mgr;
 		private HLDManager hldManager;
 		private DatIdMap datIdMap;
 		private UpdateStatementRunner updateStatementRunner;
@@ -263,7 +261,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 					dbexecutor.executeDelete(hld, stmgrp);
 				} else {
 					QuerySpec spec = this.resolveFilterVars(exp.queryExp);
-					dbexecutor.executeDelete(spec);
+					DeliaExceptionHelper.throwNotImplementedError("sdf");
+//					dbexecutor.executeDelete(spec);
 				}
 			} catch (DBException e) {
 				res.errors.add(e.getLastError());
@@ -301,7 +300,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return false;
 		}
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, mgr, hldManager, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldManager, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
@@ -378,10 +377,6 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		@Override
 		public void setPrebuiltFetchRunnerToUse(FetchRunner prebuiltFetchRunnerToUse) {
 			this.prebuiltFetchRunnerToUse = prebuiltFetchRunnerToUse;
-		}
-		@Override
-		public void setHLSManager(HLSManager mgr) {
-			this.mgr = mgr;
 		}
 		@Override
 		public void setDatIdMap(DatIdMap datIdMap) {

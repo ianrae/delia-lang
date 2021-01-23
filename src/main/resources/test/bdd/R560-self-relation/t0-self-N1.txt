@@ -32,8 +32,16 @@ then:
 value:a:Customer {
  vid:55
  vname:'art'
- vmanager:{56}
- vworkers:null
+IF(MEM):  vmanager:{56}
+ELSE:  vmanager:{56:
+ELSE:{
+ELSE:   vid:56
+ELSE:	vname:'bob'
+ELSE:    vmanager:null
+ELSE:    vworkers:{55}
+ELSE: } 
+ ELSE:}
+  vworkers:null
 }
 value:a:Customer {
  vid:56
@@ -52,8 +60,16 @@ then:
 value:a:Customer {
  vid:55
  vname:'art'
- vmanager:{56}
- vworkers:null
+IF(MEM): vmanager:{56}
+ELSE: vmanager:{56:
+ELSE:{
+ELSE:   vid:56
+ELSE:   vname:'bob'
+ELSE:   vmanager:null
+ELSE:    vworkers:null
+ELSE:}
+ELSE:} 
+vworkers:null
 }
 value:a:Customer {
  vid:56
@@ -78,6 +94,14 @@ value:a:Customer {
 value:a:Customer {
  vid:56
  vname:'bob'
- vmanager:{55}
-  vworkers:null
+IF(MEM): vmanager:{55}
+ELSE: vmanager:{55:
+ELSE:	{
+ELSE:	vid:55
+ELSE:	vname:'art'
+ELSE:	vmanager:null
+ELSE:	vworkers:null
+ELSE:	}
+ELSE:}
+vworkers:null
 }

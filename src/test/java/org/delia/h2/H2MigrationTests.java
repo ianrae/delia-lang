@@ -8,12 +8,12 @@ import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBAccessContext;
 import org.delia.db.DBType;
+import org.delia.db.RawStatementGenerator;
+import org.delia.db.SqlStatement;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
-import org.delia.db.sql.prepared.RawStatementGenerator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
@@ -188,7 +188,7 @@ public class H2MigrationTests extends TopoTestBase {
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2);
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 //			zexec.getDBConnection().execStatement(statement, null);
 			ZDBExecuteContext dbctx = new ZDBExecuteContext();

@@ -13,11 +13,11 @@ import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;
+import org.delia.db.RawStatementGenerator;
+import org.delia.db.SqlStatement;
 import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
-import org.delia.db.sql.prepared.RawStatementGenerator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -51,7 +51,7 @@ public class H2Tests {
 		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Mercedes', 57127);");       
 
 		log.log("and query..");
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = "SELECT count(*) from cars;";
 		ResultSet rs = conn.execQueryStatement(statement, null);
 		if (rs.next()) {
@@ -68,7 +68,7 @@ public class H2Tests {
 	
 	private void dumpSchema(H2ZDBConnection conn) throws SQLException {
 		log.log("dump schema: TABLES...");
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = "SELECT * from information_schema.tables where TABLE_SCHEMA='PUBLIC';";
 		ResultSet rs = conn.execQueryStatement(statement, null);
 		while (rs.next()) {
@@ -76,7 +76,7 @@ public class H2Tests {
 		}        
 		log.log("CARS columns...");
 
-		statement = new SqlStatement();
+		statement = new SqlStatement(null);
 		statement.sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS where table_name = 'CARS';";
 		rs = conn.execQueryStatement(statement, null);
 		while (rs.next()) {
@@ -100,7 +100,7 @@ public class H2Tests {
 		execStatement(conn, "CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
 
 		log.log("and query..");
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = "SELECT count(*) from cars;";
 		ResultSet rs = conn.execQueryStatement(statement, null);
 		if (rs.next()) {
@@ -138,13 +138,13 @@ public class H2Tests {
 	}
 	
 	private void execStatement(H2ZDBConnection conn, String sql) {
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
 		conn.execStatement(statement, null);
 	}
 	private boolean doTableDetect(H2ZDBConnection conn, String tblName) throws SQLException {
 		RawStatementGenerator gen = new RawStatementGenerator(factorySvc, DBType.H2);
-		SqlStatement statement = new SqlStatement();
+		SqlStatement statement = new SqlStatement(null);
 		statement.sql = gen.generateTableDetect(tblName.toUpperCase());
 		ResultSet rs = conn.execQueryStatement(statement, null);
 		boolean tblExists = false;

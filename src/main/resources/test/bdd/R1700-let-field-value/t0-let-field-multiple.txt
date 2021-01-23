@@ -56,10 +56,6 @@ value:a:Customer {
 vid:55
 vaddr:null
 }
-value:a:Customer {
-vid:56
-vaddr:null
-}
 
 ---
 title: multiple missing

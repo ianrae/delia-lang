@@ -152,5 +152,5 @@ value:a:Customer {
  vaddr:{100}
 }
 
-//Note. we don't support one-side relations with 1:N
+#Note. we don't support one-side relations with 1:N
 

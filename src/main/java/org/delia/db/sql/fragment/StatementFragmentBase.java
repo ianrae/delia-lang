@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.db.SqlStatement;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 
 public abstract class StatementFragmentBase implements SqlFragment {
-	public SqlStatement statement = new SqlStatement();
+	public SqlStatement statement = new SqlStatement(null);
 	public Map<String,TableFragment> aliasMap = new HashMap<>();
 	
 	public List<SqlFragment> earlyL = new ArrayList<>();

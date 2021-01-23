@@ -4,23 +4,25 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.InsertContext;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.ZDBInterfaceFactory;
 
 public class MigrationRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private ZDBExecutor dbexecutor;
+	private MigrateInsertRunner insertRunner;
 
-	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, ZDBExecutor dbexecutor) {
+	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, ZDBExecutor dbexecutor, ZDBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
+		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface);
 	}
 
 	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {
@@ -69,18 +71,14 @@ public class MigrationRunner extends ServiceBase {
 			return false;
 		}
 
-		InsertContext ictx = new InsertContext();
-		dbexecutor.executeInsert(dval, ictx);
+//		InsertContext ictx = new InsertContext();
+//		dbexecutor.executeInsert(dval, ictx);
+		insertRunner.doInsert(dval);
 
 		return true;
 	}
 	
-//	private SchemaContext createSchemaContext() {
-//		SchemaContext ctx = new SchemaContext();
-//		ctx.datIdMap = datIdMap;
-//		return ctx;
-//	}
-
+	
 	private void doSoftDelete(String typeName) {
 //		SchemaContext ctx = createSchemaContext();
 		String backupName = String.format("%s__BAK", typeName);

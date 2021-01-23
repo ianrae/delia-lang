@@ -12,21 +12,21 @@ import org.delia.db.InternalException;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.db.hls.HLSQueryStatement;
-import org.delia.db.hls.HLSSimpleQueryService;
+import org.delia.db.SqlStatement;
+import org.delia.db.SqlStatementGroup;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
-import org.delia.db.newhls.HLDQueryStatement;
-import org.delia.db.newhls.cud.HLDDeleteStatement;
-import org.delia.db.newhls.cud.HLDInsert;
-import org.delia.db.newhls.cud.HLDInsertStatement;
-import org.delia.db.newhls.cud.HLDUpdateStatement;
-import org.delia.db.newhls.cud.HLDUpsertStatement;
-import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
+import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.HLDSimpleQueryService;
+import org.delia.hld.cud.HLDDeleteStatement;
+import org.delia.hld.cud.HLDInsert;
+import org.delia.hld.cud.HLDInsertStatement;
+import org.delia.hld.cud.HLDUpdateStatement;
+import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.FilterEvaluator;
@@ -47,7 +47,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
 	private DValueCompareService compareSvc;
-	private HLSSimpleQueryService querySvc;
+	private HLDSimpleQueryService querySvc;
 
 	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc, dbInterface);
@@ -70,7 +70,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		this.registry = registry;
-		this.querySvc = factorySvc.createSimpleQueryService(dbInterface, registry);
+		this.querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
 	}
 
 	@Override
@@ -78,25 +78,6 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		this.datIdMap = datIdMap;
 		this.varEvaluator = varEvaluator;
 	}
-
-	@Override
-	public DValue rawInsert(DValue dval, InsertContext ctx) {
-		return executeInsert(dval, ctx);
-	}
-
-//	@Override
-//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-//		QueryResponse qresp = new QueryResponse();
-//
-//		try {
-//			qresp = doExecuteQuery(spec, qtx);
-//		} catch (InternalException e) {
-//			qresp.ok = false;
-//			qresp.err = e.getLastError();
-//		}
-//
-//		return qresp;
-//	}
 
 	@Override
 	public FetchRunner createFetchRunner() {
@@ -138,9 +119,16 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public void rawCreateTable(String tableName) {
 		this.createTable(tableName);
 	}
+	
 
 	@Override
-	public DValue executeInsert(DValue dval, InsertContext ctx) {
+	public DValue rawInsert(SqlStatement stm, InsertContext ctx) {
+		return executeInsert(ctx.actualDValForRawInsert, ctx);
+	}
+	
+
+//	@Override
+	private DValue executeInsert(DValue dval, InsertContext ctx) {
 		String typeName = dval.getType().getName();
 		MemDBTable tbl = tableMap.get(typeName);
 		if (tbl == null) {
@@ -168,8 +156,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return memInsert.doExecuteInsert(tbl, dval, ctx, this, stuff);
 	}
 
-	@Override
-	public int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
+//	@Override
+	private int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
 		int numRowsAffected = 0;
 
 		try {
@@ -197,8 +185,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return memUpdate.doExecuteUpdate(spec, dvalUpdate, assocCrudMap, selector, this);
 	}
 
-	@Override
-	public int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
+//	@Override
+	private int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
 			boolean noUpdateFlag) {
 		int numRowsAffected = 0;
 
@@ -232,8 +220,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		return executeUpsert(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, noUpdateFlag);
 	}
 
-	@Override
-	public void executeDelete(QuerySpec spec) {
+//	@Override
+	private void executeDelete(QuerySpec spec) {
 		QueryResponse qresp = new QueryResponse();
 		try {
 			qresp = doExecuteDelete(spec);
@@ -275,12 +263,12 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		executeDelete(spec);
 	}
 
+//	@Override
+//	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
+//		return this.doExecuteQuery(hls.querySpec, qtx);
+//	}
 	@Override
-	public QueryResponse executeHLSQuery(HLSQueryStatement hls, String sql, QueryContext qtx) {
-		return this.doExecuteQuery(hls.querySpec, qtx);
-	}
-	@Override
-	public QueryResponse executeHLDQuery(HLDQueryStatement hld, String sql, QueryContext qtx) {
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
 		QueryResponse qresp = doExecuteQuery(hld.querySpec, qtx);
 		
 		MemFunctionHelper helper = new MemFunctionHelper(factorySvc, dbInterface, registry, createFetchRunner());

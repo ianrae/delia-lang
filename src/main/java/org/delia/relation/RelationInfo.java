@@ -33,8 +33,18 @@ public class RelationInfo {
 	 * Used to determine if a join is needed (generally if this fn returns true then yes)
 	 * @return true if the near side of this relation does NOT hold the fk
 	 */
-	public boolean notContainsFK() {
+	public boolean notContainsFKOrIsManyToMany() {
 		if (isManyToMany() || isParent) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Used to determine if table has FK as a column.
+	 * @return true nearSide table has column for fk.
+	 */
+	public boolean containsFK() {
+		if (!isManyToMany() && !isParent) {
 			return true;
 		}
 		return false;

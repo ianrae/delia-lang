@@ -5,16 +5,16 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.newhls.FetchSpec;
-import org.delia.db.newhls.FinalField;
-import org.delia.db.newhls.HLDQueryStatement;
-import org.delia.db.newhls.QScope;
-import org.delia.db.newhls.QueryFnSpec;
-import org.delia.db.newhls.RelationField;
-import org.delia.db.newhls.StructFieldOpt;
-import org.delia.db.newhls.cond.FilterFunc;
-import org.delia.queryresponse.FuncScope;
-import org.delia.queryresponse.QueryFuncContext;
+import org.delia.hld.FetchSpec;
+import org.delia.hld.FinalField;
+import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.QScope;
+import org.delia.hld.QueryFnSpec;
+import org.delia.hld.RelationField;
+import org.delia.hld.StructFieldOpt;
+import org.delia.hld.cond.FilterFunc;
+import org.delia.queryfunction.FuncScope;
+import org.delia.queryfunction.QueryFuncContext;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
@@ -97,31 +97,43 @@ public class MemFunctionHelper extends ServiceBase {
 				if (ff.isScalarField()) {
 					int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
 					//re-order between i..k
-					reOrderPagingFns(i+1, iEndSpan, list, skipList, scopeL);
+					reOrderPagingFns(i+1, iEndSpan, list, skipList, scopeL, null);
 				}
 				list.add(scope);
+			} else if (obj instanceof RelationField) {
+				if (! skipList.contains(scope)) {
+					list.add(scope);
+				}
 			} else if (! skipList.contains(scope)) {
 				int iEndSpan = findNextFieldOrEnd(scopeL, i+1);
-				reOrderPagingFns(i, iEndSpan, list, skipList, scopeL);
 
-				list.add(scope);
+				reOrderPagingFns(i, iEndSpan, list, skipList, scopeL, scope);
+				addIf(scope, list, skipList);
 			}
 			i++;
 		}
 		return list;
 	}
 
-	private void reOrderPagingFns(int i, int iEndSpan, List<QScope> list, List<QScope> skipList, List<QScope> scopeL) {
-		QScope fnscope = findFn("orderBy", i+1, iEndSpan, scopeL);
+	private void reOrderPagingFns(int i, int iEndSpan, List<QScope> list, List<QScope> skipList, List<QScope> scopeL, QScope oneWeAreAdding) {
+		//must execute in this order: orderBy, offset, limit
+		QScope fnscope = findFn("orderBy", i+1, iEndSpan, scopeL, oneWeAreAdding);
 		addIf(fnscope, list, skipList);
-		fnscope = findFn("offset", i+1, iEndSpan, scopeL);
+		fnscope = findFn("offset", i+1, iEndSpan, scopeL, oneWeAreAdding);
 		addIf(fnscope, list, skipList);
-		fnscope = findFn("limit", i+1, iEndSpan, scopeL);
+		fnscope = findFn("limit", i+1, iEndSpan, scopeL, oneWeAreAdding);
 		addIf(fnscope, list, skipList);
 	}
 
-	private QScope findFn(String fnName, int iStart, int iEndSpan, List<QScope> scopeL) {
+	private QScope findFn(String fnName, int iStart, int iEndSpan, List<QScope> scopeL, QScope oneWeAreAdding) {
 		//re-order between i..k
+		if (oneWeAreAdding != null && oneWeAreAdding.thing instanceof QueryFnSpec) {
+			QueryFnSpec fnspec = (QueryFnSpec) oneWeAreAdding.thing;
+			if (fnspec.isFn(fnName)) {
+				return oneWeAreAdding;
+			}
+		}
+		
 		for(int k = iStart; k < iEndSpan; k++) {
 			QScope sc2 = scopeL.get(k);
 			

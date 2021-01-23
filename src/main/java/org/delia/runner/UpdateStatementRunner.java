@@ -9,13 +9,13 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.QuerySpec;
-import org.delia.db.newhls.HLDManager;
-import org.delia.db.newhls.cud.HLDUpdateStatement;
-import org.delia.db.newhls.cud.HLDUpsertStatement;
-import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.SqlStatementGroup;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.HLDManager;
+import org.delia.hld.cud.HLDUpdateStatement;
+import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigVarEvaluator;
 import org.delia.type.DStructType;
@@ -23,6 +23,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.ZDBExecutor;
@@ -81,6 +82,12 @@ public class UpdateStatementRunner extends ServiceBase {
 		if (hldManager != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
 			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			if (hldup.isEmpty()) {
+				res.ok = true;
+				res.shape = Shape.INTEGER;
+				res.val = 0;
+				return;
+			}
 			stmgrp = hldManager.generateSQL(hldup, dbexecutor);
 			cres = hldup.hldupdate.cres;
 		} else {
@@ -113,13 +120,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		}
 
 		try {
-			QuerySpec spec = resolveFilterVars(exp.queryExp);
-			int numRowsAffected;
-			if (hldManager != null) {
-				numRowsAffected = dbexecutor.executeUpdate(hldup, stmgrp);
-			} else {
-				numRowsAffected = dbexecutor.executeUpdate(spec, cres.dval, cres.assocCrudMap);
-			}
+			int numRowsAffected = dbexecutor.executeUpdate(hldup, stmgrp);
 
 			res.ok = true;
 			res.shape = Shape.INTEGER;
@@ -155,6 +156,13 @@ public class UpdateStatementRunner extends ServiceBase {
 		if (hldManager != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
 			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			if (hldup.isEmpty()) {
+				res.ok = true;
+				res.shape = Shape.INTEGER;
+				res.val = 0;
+				return;
+			}
+
 			stmgrp = hldManager.generateSQL(hldup, dbexecutor);
 			cres = hldup.hldupdate.cres;
 		} else {
@@ -180,21 +188,10 @@ public class UpdateStatementRunner extends ServiceBase {
 			}
 			ConfigureService configSvc = factorySvc.getConfigureService();
 
-			//upsert doesn't have primary key in field set, so temporarily add it
-			//so we can run validation 
-//			PrimaryKeyHelperService pkSvc = new PrimaryKeyHelperService(factorySvc, registry);
-//			QuerySpec spec = resolveFilterVars(exp.queryExp);
-//			boolean addedPK = pkSvc.addPrimaryKeyIfMissing(spec, cres.dval);
-
 			ruleRunner.setPopulateFKsFlag(configSvc.isPopulateFKsFlag());
 			if (! ruleRunner.validateDVal(cres.dval)) {
 				ruleRunner.propogateErrors(res);
 			}
-
-//			if (addedPK) {
-//				pkSvc.removePrimayKey(cres.dval);
-//			}
-
 
 			//				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
 			//					ruleRunner.propogateErrors(res);
@@ -214,14 +211,9 @@ public class UpdateStatementRunner extends ServiceBase {
 		}
 
 		try {
-			QuerySpec spec = resolveFilterVars(exp.queryExp);
 			boolean noUpdateFlag = exp.optionExp != null;
-			int numRowsAffected;
-			if (hldManager != null) {
-				numRowsAffected = dbexecutor.executeUpsert(hldup, stmgrp, noUpdateFlag);
-			} else {
-				numRowsAffected = dbexecutor.executeUpsert(spec, cres.dval, cres.assocCrudMap, noUpdateFlag);
-			}
+			int numRowsAffected = dbexecutor.executeUpsert(hldup, stmgrp, noUpdateFlag);
+			numRowsAffected = 1; //1 means success (not number of rows affected)
 
 			res.ok = true;
 			res.shape = Shape.INTEGER;

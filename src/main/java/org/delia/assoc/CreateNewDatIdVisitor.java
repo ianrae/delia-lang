@@ -3,9 +3,16 @@ package org.delia.assoc;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.hls.HLSSimpleQueryService;
+import org.delia.db.SqlStatement;
+import org.delia.hld.HLDSimpleQueryService;
+import org.delia.hld.SqlColumn;
+import org.delia.hld.cud.HLDInsert;
+import org.delia.hld.cud.TypeOrTable;
+import org.delia.hld.simple.SimpleInsert;
+import org.delia.hld.simple.SimpleSqlGenerator;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;
@@ -58,10 +65,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			return;
 		}
 
-		InsertContext ictx = new InsertContext();
-		ictx.extractGeneratedKeys = true;
-		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		DValue newDatIdValue = dbexecutor.rawInsert(dval, ictx);
+		DValue newDatIdValue = doRawInsert(dval); 
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();
@@ -76,6 +80,38 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		}
 	}
 	
+	private DValue doRawInsert(DValue dval) {
+		InsertContext ictx = new InsertContext();
+		ictx.extractGeneratedKeys = true;
+		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+		
+		DValue newDatIdValue = null;
+		if (dbexecutor.getDbInterface().getDBType().equals(DBType.MEM)) {
+			ictx.actualDValForRawInsert = dval;
+			newDatIdValue = dbexecutor.rawInsert(null, ictx);
+		} else {
+			//must build
+			SimpleSqlGenerator sqlgen = new SimpleSqlGenerator(registry, factorySvc);
+			SimpleInsert simple = new SimpleInsert();
+			String tblName = dval.getType().getName();
+			simple.tblFrag = new SqlColumn(null, tblName);
+			simple.hld = new HLDInsert(new TypeOrTable(tblName, true));
+			for(String fieldName: dval.asMap().keySet()) {
+				DValue inner = dval.asMap().get(fieldName);
+				SqlColumn col = new SqlColumn(null, fieldName);
+				simple.fieldL.add(col);
+				
+				simple.hld.valueL.add(inner);
+			}
+			
+			SqlStatement stm = new SqlStatement(null);
+			stm.sql = sqlgen.gen(simple, stm);
+			newDatIdValue = dbexecutor.rawInsert(stm, ictx);
+		}
+		
+		return newDatIdValue;
+	}
+
 	public void initTableNameCreatorIfNeeded() {
 		if (haveInitTableNameCreator) {
 			return; //only do this once
@@ -89,7 +125,9 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		
 		DStructType datType = registry.getDATType();
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
-		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbexecutor.getDbInterface(), registry);
+//		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbexecutor.getDbInterface(), registry);
+//		QueryResponse qresp = querySvc.execQuery(exp, dbexecutor);
+		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbexecutor.getDbInterface(), registry);
 		QueryResponse qresp = querySvc.execQuery(exp, dbexecutor);
 		
 		int maxDatId = loadDATRows(qresp);

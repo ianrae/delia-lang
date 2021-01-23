@@ -7,7 +7,7 @@ background:
 thenType: struct
 
 ---
-title: upsert
+title: upsert does insert
 thenType: int
 expectDVal:false
 when:
@@ -16,12 +16,12 @@ then:
 1
 
 ---
-title: upsert
+title: upsert does update
 thenType: int
 expectDVal:false
 when:
   insert Flight {id:55, wid: 22}
   upsert -noUpdate Flight[55] {wid: 23}
 then:
-0
+1
 

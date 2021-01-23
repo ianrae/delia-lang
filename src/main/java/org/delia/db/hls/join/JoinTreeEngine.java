@@ -13,7 +13,7 @@ import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.queryresponse.LetSpan;
+import org.delia.queryfunction.LetSpan;
 import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;

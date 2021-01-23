@@ -18,6 +18,7 @@ public class DaoTestBase extends MemBDDBase {
 	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
+		delia.getOptions().logSourceBeforeCompile = true; //we want to see all src in log
 		return new DeliaGenericDao(delia);
 	}
 

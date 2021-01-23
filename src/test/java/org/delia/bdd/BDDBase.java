@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -15,8 +16,12 @@ import org.delia.bdd.core.BDDParser;
 import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.DBInterfaceCreator;
+import org.delia.core.DateFormatService;
+import org.delia.core.DateFormatServiceImpl;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
+import org.delia.core.TimeZoneService;
+import org.delia.core.TimeZoneServiceImpl;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;
@@ -253,5 +258,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		return new FactoryServiceImpl(log, new SimpleErrorTracker(log));
 	}
 
-
+	protected Date createDateFromStr(String dateStr) {
+		TimeZoneService tzSvc = new TimeZoneServiceImpl();
+		DateFormatService fmtSvc = new DateFormatServiceImpl(tzSvc);
+		return fmtSvc.parseLegacy(dateStr);
+	}
 }

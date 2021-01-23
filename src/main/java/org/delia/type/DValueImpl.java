@@ -4,6 +4,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
+import org.delia.util.DValueHelper;
+
 
 public class DValueImpl implements DValue, DValueInternal {
     private DType type;
@@ -137,7 +139,12 @@ public class DValueImpl implements DValue, DValueInternal {
 	@Override
 	public String toString() {
 		String s = "";
-		if (object != null && type.isNumericShape()) {
+		if (object != null && type.isStructShape()) {
+			DValue pkval = DValueHelper.findPrimaryKeyValue(this);
+			if (pkval != null) {
+				s = "." + pkval.toString();
+			}
+		} else if (object != null && type.isNumericShape()) {
 			s = ": " + object.toString();
 		}
 		return type.toString() + s ;

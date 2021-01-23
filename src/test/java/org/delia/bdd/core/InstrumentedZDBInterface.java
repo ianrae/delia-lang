@@ -3,6 +3,7 @@ package org.delia.bdd.core;
 import org.delia.api.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.db.DBCapabilties;
+import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
@@ -79,6 +80,16 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	@Override
 	public void enableSQLLogging(boolean b) {
 		actualInterface.enableSQLLogging(b);
+	}
+
+	@Override
+	public void setDBErrorConverter(DBErrorConverter errorConverter) {
+		actualInterface.setDBErrorConverter(errorConverter);
+	}
+
+	@Override
+	public DBErrorConverter getDBErrorConverter() {
+		return actualInterface.getDBErrorConverter();
 	}
 
 }

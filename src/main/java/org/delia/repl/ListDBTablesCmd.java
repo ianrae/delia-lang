@@ -2,9 +2,9 @@ package org.delia.repl;
 
 import org.delia.api.Delia;
 import org.delia.db.DBType;
+import org.delia.db.RawStatementGenerator;
+import org.delia.db.SqlStatement;
 import org.delia.db.h2.DBListingType;
-import org.delia.db.sql.prepared.RawStatementGenerator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -35,7 +35,7 @@ public class ListDBTablesCmd extends CmdBase {
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType());
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
 		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			zexec.getDBConnection().execStatement(statement, null);
 		} catch (Exception e) {

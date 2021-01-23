@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.delia.core.FactoryService;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.zdb.ZDBExecutor;
@@ -91,7 +90,7 @@ public class DBTableRemover {
 		String sql = String.format("SELECT CONSTRAINT_NAME FROM information_schema.constraints WHERE  table_schema = 'PUBLIC' and table_name = '%s'", tblName);
 		if (executor instanceof H2ZDBExecutor) {
 			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			ResultSet rs = h2exec.getDBConnection().execQueryStatement(statement, null);
 			while(rs.next()) {
@@ -102,14 +101,14 @@ public class DBTableRemover {
 				
 				log.logDebug("\n%s: ndropping CONSTRAINT: %s", tblName, s);
 				sql = String.format("ALTER TABLE %s DROP constraint %s", tblName, s);
-				SqlStatement statement2 = new SqlStatement();
+				SqlStatement statement2 = new SqlStatement(null);
 				statement2.sql = sql;
 				h2exec.getDBConnection().execStatement(statement2, null);
 		    }
 			
 			sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			log.logDebug(sql);
-			statement = new SqlStatement();
+			statement = new SqlStatement(null);
 			statement.sql = sql;
 			h2exec.getDBConnection().execStatement(statement, null);
 		}
@@ -119,7 +118,7 @@ public class DBTableRemover {
 			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			h2exec.getDBConnection().execStatement(statement, null);
 			return true;
@@ -132,7 +131,7 @@ public class DBTableRemover {
 			PostgresZDBExecutor h2exec = (PostgresZDBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
-			SqlStatement statement = new SqlStatement();
+			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			h2exec.getDBConnection().execStatement(statement, null);
 			return true;

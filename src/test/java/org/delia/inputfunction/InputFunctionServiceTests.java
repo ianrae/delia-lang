@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -26,8 +24,6 @@ import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.runner.inputfunction.LineObjIteratorImpl;
 import org.delia.runner.inputfunction.ProgramSet;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,7 +31,7 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 
 	@Test
 	public void test1() {
-		createDelia(false);
+		createDelia();
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
@@ -69,7 +65,7 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 
 	@Test
 	public void test2() {
-		createDelia(false);
+		createDelia();
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
@@ -102,7 +98,7 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 
 	@Test
 	public void test3Rule() {
-		createDelia(true);
+		createDelia(buildSrc(true));
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
@@ -132,7 +128,7 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 	}
 	@Test
 	public void test4BadLineObj() {
-		createDelia(true);
+		createDelia(buildSrc(true));
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
 		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
 		assertEquals(3, progset.fieldMap.size());
@@ -167,6 +163,23 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 		String src = buildSrcBadInputFunc(false);
 		this.session = delia.beginSession(src);
 	}
+	
+	@Test(expected=DeliaException.class)
+	public void testTypeNoFields() {
+		createDelia(buildEmptyCustomerSrc());
+		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());
+		ProgramSet progset = inputFnSvc.buildProgram("foo", session);
+		assertEquals(0, progset.fieldMap.size());
+		addImportSpec(progset);
+
+		LineObjIterator lineObjIter = createIter(2,true);
+		InputFunctionRequest request = new InputFunctionRequest();
+		request.delia = delia;
+		request.progset = progset;
+		request.session = session;
+		InputFunctionResult result = inputFnSvc.process(request, lineObjIter);
+	}
+	
 
 	// --
 
@@ -175,8 +188,11 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 		DeliaGenericDao dao = this.createDao();
 		this.delia = dao.getDelia();
 	}
-	private void createDelia(boolean withRules) {
-		String src = buildSrc(withRules);
+	private void createDelia() {
+		createDelia(null);
+	}
+	private void createDelia(String src) {
+		src = src == null ? buildSrc(false) : src;
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		this.session = delia.beginSession(src);
@@ -192,6 +208,12 @@ public class InputFunctionServiceTests extends InputFunctionTestBase {
 		String rules = withRules ? "name.len() > 4" : "";
 		String src = String.format(" type Customer struct {id int primaryKey, wid int, name string } %s end", rules);
 		src += " input function foo(Customer c) { ID -> c.xid, WID -> c.wid, NAME -> c.name}";
+
+		return src;
+	}
+	private String buildEmptyCustomerSrc() {
+		String src = String.format(" type Customer struct { } end");
+		src += " input function foo(Customer c) { }";
 
 		return src;
 	}
