@@ -28,9 +28,7 @@ public interface ZDBExecutor extends AutoCloseable {
 	DatIdMap getDatIdMap();
 
 	//these can be called after init1
-//	DValue rawInsert(DValue dval, InsertContext ctx);
 	DValue rawInsert(SqlStatement stm, InsertContext ctx);
-	//		QueryResponse rawQuery(QuerySpec spec, QueryContext qtx);
 	boolean rawTableDetect(String tableName);
 	boolean rawFieldDetect(String tableName, String fieldName);
 	void rawCreateTable(String tableName);

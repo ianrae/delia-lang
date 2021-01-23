@@ -42,7 +42,6 @@ import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZInsert;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
@@ -50,7 +49,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 
 	private H2ZDBInterfaceFactory dbInterface;
 	private H2ZDBConnection conn;
-	private ZInsert zinsert;
+//	private ZInsert zinsert;
 ////	private ZQuery zquery;
 //	private ZUpdate zupdate;
 //	private ZUpsert zupsert;
@@ -84,7 +83,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		super.init1(registry);
-		this.zinsert = new ZInsert(factorySvc, registry);
+//		this.zinsert = new ZInsert(factorySvc, registry);
 //		this.zquery = new ZQuery(factorySvc, registry);
 //		this.zupdate = new ZUpdate(factorySvc, registry);
 //		this.zupsert = new ZUpsert(factorySvc, registry, dbInterface);
