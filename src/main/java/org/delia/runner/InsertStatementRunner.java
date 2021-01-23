@@ -163,6 +163,11 @@ public class InsertStatementRunner extends ServiceBase {
 	}
 	private boolean failIfNull(DType dtype, String typeName, ResultValue res) {
 		if (dtype == null) {
+			if (registry.getType(typeName) != null) {
+				//typeName exists but is not a struct
+				addError(res, "type.not.struct", String.format("cannot insert a scalar type '%s'", typeName));
+				return true;
+			}
 			addError(res, "type.not.found", String.format("can't find type '%s'", typeName));
 			return true;
 		}

@@ -1,26 +1,12 @@
 package org.delia.db.schema;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.InsertContext;
-import org.delia.db.hld.HLDManager;
-import org.delia.error.DeliaError;
-import org.delia.runner.DoNothingVarEvaluator;
-import org.delia.runner.FetchRunner;
-import org.delia.runner.InsertStatementRunner;
-import org.delia.runner.ResultValue;
-import org.delia.runner.RunnerForMigrateInsert;
-import org.delia.runner.ZFetchRunnerImpl;
-import org.delia.sprig.SprigService;
-import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.ZDBExecutor;
@@ -30,13 +16,13 @@ public class MigrationRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
 	private ZDBExecutor dbexecutor;
-	private ZDBInterfaceFactory dbInterface;
+	private MigrateInsertRunner insertRunner;
 
 	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, ZDBExecutor dbexecutor, ZDBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
-		this.dbInterface = dbInterface;
+		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface);
 	}
 
 	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {
@@ -87,35 +73,12 @@ public class MigrationRunner extends ServiceBase {
 
 //		InsertContext ictx = new InsertContext();
 //		dbexecutor.executeInsert(dval, ictx);
-		doInsert(dval); 
+		insertRunner.doInsert(dval);
 
 		return true;
 	}
 	
 	
-	private void doInsert(DValue dval) {
-		RunnerForMigrateInsert runner = new RunnerForMigrateInsert();
-		Map<String,ResultValue> varMap = new HashMap<>();
-		InsertStatementRunner insertRunner = new InsertStatementRunner(factorySvc, dbInterface, runner, registry, varMap);
-		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
-		InsertStatementExp exp = new InsertStatementExp(99, new IdentExp(dval.getType().getName()), null);
-		ResultValue res = new ResultValue();
-		FetchRunner fetchRunner = new ZFetchRunnerImpl(factorySvc, dbexecutor, registry, new DoNothingVarEvaluator());
-		HLDManager hldManager = new  HLDManager(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
-
-		insertRunner.executeInsertStatement(exp, res, hldManager, dbexecutor, fetchRunner, null, sprigSvc);
-		if (!res.isSuccess()) {
-			DeliaError err = res.getLastError();
-			DeliaExceptionHelper.throwError(err);
-		}
-	}
-
-//	private SchemaContext createSchemaContext() {
-//		SchemaContext ctx = new SchemaContext();
-//		ctx.datIdMap = datIdMap;
-//		return ctx;
-//	}
-
 	private void doSoftDelete(String typeName) {
 //		SchemaContext ctx = createSchemaContext();
 		String backupName = String.format("%s__BAK", typeName);
