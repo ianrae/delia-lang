@@ -31,8 +31,8 @@ public class CompilerHelper {
 	}
 	public List<Exp> compileDeliaSource(String src, InternalCompileState execCtx) {
 		DeliaCompiler compiler = createCompiler(execCtx);
-		if (deliaOptions.logCompileSrc) {
-			log.log("SRC: %s", src);
+		if (deliaOptions.logSourceBeforeCompile) {
+			log.log("delia-src: %s", src);
 		}
 		compiler.setDoPass3Flag(false);
 		List<Exp> expL = compiler.parse(src);

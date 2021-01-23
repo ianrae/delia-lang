@@ -94,6 +94,7 @@ public class DataImportGroupTests extends InputFunctionTestBase {
 		}
 		this.delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
+		delia.getOptions().logSourceBeforeCompile = true;
 		this.session = delia.beginSession(src);
 	}
 	private String buildSrc(boolean inOrder) {

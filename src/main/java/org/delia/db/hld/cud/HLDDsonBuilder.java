@@ -42,7 +42,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 
 	private QueryBuilderHelper queryBuilderHelper;
 	private VarEvaluator varEvaluator;
-	private DValueIterator insertPrebuiltValueIterator = null;
+	private DValueIterator insertPrebuiltValueIterator = null; 
 	private ConversionHelper conversionHelper;
 
 	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, SprigService sprigSvc, VarEvaluator varEvaluator) {

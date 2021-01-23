@@ -25,7 +25,6 @@ import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -148,6 +147,14 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		
 		return hld;
 	}
+	
+	@Override
+	public HLDDsonBuilder getHldBuilder() {
+		HLDDsonBuilder builder = super.getHldBuilder();
+		builder.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		return builder;
+	}
+	
 	
 	private boolean isPKQueryOrUniqueQuery(HLDUpsert hld) {
 		if (hld.hld.filter instanceof SingleFilterCond) {
