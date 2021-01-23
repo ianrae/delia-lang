@@ -147,11 +147,7 @@ public class InsertStatementRunner extends ServiceBase {
 	}
 	private DValue doDBInsert(HLDInsertStatement hldins, SqlStatementGroup stmgrp, ConversionResult cres,
 			InsertContext ctx, ZDBExecutor dbexecutor) {
-		if (hldins != null) {
-			return dbexecutor.executeInsert(hldins, stmgrp, ctx);
-		} else {
-			return dbexecutor.executeInsert(cres.dval, ctx);
-		}
+		return dbexecutor.executeInsert(hldins, stmgrp, ctx);
 	}
 
 	private boolean failIfNotStruct(DType dtype, String typeName, ResultValue res) {

@@ -138,8 +138,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 		this.createTable(tableName);
 	}
 
-	@Override
-	public DValue executeInsert(DValue dval, InsertContext ctx) {
+//	@Override
+	private DValue executeInsert(DValue dval, InsertContext ctx) {
 		String typeName = dval.getType().getName();
 		MemDBTable tbl = tableMap.get(typeName);
 		if (tbl == null) {

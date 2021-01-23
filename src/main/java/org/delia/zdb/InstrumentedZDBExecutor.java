@@ -86,10 +86,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		zexec.rawCreateTable(tableName);
 	}
 
-	@Override
-	public DValue executeInsert(DValue dval, InsertContext ctx) {
-		return zexec.executeInsert(dval, ctx);
-	}
+//	@Override
+//	public DValue executeInsert(DValue dval, InsertContext ctx) {
+//		return zexec.executeInsert(dval, ctx);
+//	}
 	@Override
 	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
 		return zexec.executeInsert(hld, stmgrp, ctx);

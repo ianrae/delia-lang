@@ -221,18 +221,18 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		execSqlStatement(sql);
 	}
 
-	@Override
-	public DValue executeInsert(DValue dval, InsertContext ctx) {
-		failIfNotInit2(); 
-		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator, cacheData, this);
-
-		if (ctx.extractGeneratedKeys) {
-			return doInsert(stgroup, ctx);
-		} else {
-			doInsert(stgroup, ctx);
-			return null;
-		}
-	}
+//	@Override
+//	public DValue executeInsert(DValue dval, InsertContext ctx) {
+//		failIfNotInit2(); 
+//		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, tableCreator, cacheData, this);
+//
+//		if (ctx.extractGeneratedKeys) {
+//			return doInsert(stgroup, ctx);
+//		} else {
+//			doInsert(stgroup, ctx);
+//			return null;
+//		}
+//	}
 
 	@Override
 	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
