@@ -65,4 +65,10 @@ public class DRelation {
 	public boolean haveFetched() {
 		return fetchL != null;
 	}
+	@Override
+	public String toString() {
+		String key = foreignKeyL.isEmpty() ? "" : foreignKeyL.get(0).asString();
+		String s = String.format("%s %s (%d keys)", typeName, key, foreignKeyL.size());
+		return s;
+	}
 }
