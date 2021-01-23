@@ -19,7 +19,6 @@ import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.core.TimeZoneService;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.dval.DValueConverterService;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;

@@ -1,4 +1,4 @@
-package org.delia.db.sql.prepared;
+package org.delia.db;
 
 import java.util.ArrayList;
 import java.util.List;

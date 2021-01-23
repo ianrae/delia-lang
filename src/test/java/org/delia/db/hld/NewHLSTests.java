@@ -4,8 +4,8 @@ package org.delia.db.hld;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.SqlStatement;
+import org.delia.db.SqlStatementGroup;
 import org.delia.hld.HLDQuery;
 import org.delia.hld.HLDQueryBuilder;
 import org.delia.hld.HLDQueryStatement;

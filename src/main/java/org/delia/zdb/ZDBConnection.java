@@ -2,7 +2,7 @@ package org.delia.zdb;
 
 import java.sql.ResultSet;
 
-import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.SqlStatement;
 import org.delia.type.DType;
 
 //low level access to db. execute statements

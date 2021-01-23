@@ -6,7 +6,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
-import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.SqlStatement;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.hld.SqlColumn;
 import org.delia.hld.cud.HLDInsert;

@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.delia.core.FactoryService;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.zdb.ZDBExecutor;

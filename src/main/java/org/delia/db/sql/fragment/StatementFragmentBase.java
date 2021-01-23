@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.delia.db.SqlStatement;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 
 public abstract class StatementFragmentBase implements SqlFragment {

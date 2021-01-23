@@ -9,7 +9,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.QuerySpec;
-import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.SqlStatementGroup;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;

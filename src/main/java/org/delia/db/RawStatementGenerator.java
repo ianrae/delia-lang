@@ -1,8 +1,7 @@
-package org.delia.db.sql.prepared;
+package org.delia.db;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.DBType;
 import org.delia.db.h2.DBListingType;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;

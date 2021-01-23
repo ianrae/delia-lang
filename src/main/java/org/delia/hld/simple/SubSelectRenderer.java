@@ -1,7 +1,7 @@
 package org.delia.hld.simple;
 
 import org.delia.core.FactoryService;
-import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.db.SqlStatement;
 import org.delia.hld.HLDAliasBuilderAdapter;
 import org.delia.hld.HLDQuery;
 import org.delia.hld.SqlParamGenerator;

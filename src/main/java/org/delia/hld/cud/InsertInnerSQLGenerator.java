@@ -5,9 +5,9 @@ import java.util.Optional;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.SqlStatement;
+import org.delia.db.SqlStatementGroup;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.prepared.SqlStatement;
-import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sqlgen.SqlDeleteStatement;
 import org.delia.db.sqlgen.SqlGeneratorFactory;

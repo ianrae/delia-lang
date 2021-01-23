@@ -2,8 +2,8 @@ package org.delia.db.sqlgen;
 
 import java.util.List;
 
+import org.delia.db.SqlStatement;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;

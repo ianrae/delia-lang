@@ -11,7 +11,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBException;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
-import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.HLDManager;

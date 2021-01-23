@@ -2,9 +2,9 @@ package org.delia.repl;
 
 import org.delia.api.Delia;
 import org.delia.db.DBType;
+import org.delia.db.RawStatementGenerator;
+import org.delia.db.SqlStatement;
 import org.delia.db.h2.DBListingType;
-import org.delia.db.sql.prepared.RawStatementGenerator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;

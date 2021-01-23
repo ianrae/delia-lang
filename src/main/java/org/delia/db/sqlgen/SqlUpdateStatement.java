@@ -1,8 +1,8 @@
 package org.delia.db.sqlgen;
 
 import org.apache.commons.lang3.StringUtils;
+import org.delia.db.SqlStatement;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.hld.HLDField;
 import org.delia.hld.HLDQuery;
