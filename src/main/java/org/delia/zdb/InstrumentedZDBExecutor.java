@@ -8,6 +8,7 @@ import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.hld.cud.HLDUpsertStatement;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
@@ -56,11 +57,6 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	@Override
 	public DatIdMap getDatIdMap() {
 		return zexec.getDatIdMap();
-	}
-
-	@Override
-	public DValue rawInsert(DValue dval, InsertContext ctx) {
-		return zexec.rawInsert(dval, ctx);
 	}
 
 	@Override
@@ -156,5 +152,10 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	@Override
 	public ZDBInterfaceFactory getDbInterface() {
 		return zexec.getDbInterface();
+	}
+
+	@Override
+	public DValue rawInsert(SqlStatement stm, InsertContext ctx) {
+		return zexec.rawInsert(stm, ctx);
 	}
 }

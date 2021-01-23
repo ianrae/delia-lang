@@ -42,11 +42,8 @@ import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.ZDelete;
 import org.delia.zdb.ZInsert;
 import org.delia.zdb.ZTableCreator;
-import org.delia.zdb.ZUpdate;
-import org.delia.zdb.ZUpsert;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
 public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
@@ -110,11 +107,8 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public DValue rawInsert(DValue dval, InsertContext ctx) {
-		failIfNotInit1();
-		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, partialTableCreator, cacheData, this);
-
+	public DValue rawInsert(SqlStatement stm, InsertContext ctx) {
+		SqlStatementGroup stgroup = new SqlStatementGroup(stm);
 		if (ctx.extractGeneratedKeys) {
 			return doInsert(stgroup, ctx);
 		} else {
@@ -122,6 +116,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 			return null;
 		}
 	}
+	
 	@Override
 	public DValue executeInsert(HLDInsertStatement hld, SqlStatementGroup stmgrp, InsertContext ctx) {
 		failIfNotInit1();

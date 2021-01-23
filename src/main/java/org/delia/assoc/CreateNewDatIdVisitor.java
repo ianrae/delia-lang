@@ -61,7 +61,8 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		InsertContext ictx = new InsertContext();
 		ictx.extractGeneratedKeys = true;
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		DValue newDatIdValue = dbexecutor.rawInsert(dval, ictx);
+		ictx.actualDValForRawInsert = dval;
+		DValue newDatIdValue = dbexecutor.rawInsert(null, ictx);
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();

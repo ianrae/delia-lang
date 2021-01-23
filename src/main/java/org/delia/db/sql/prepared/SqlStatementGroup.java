@@ -16,6 +16,11 @@ public class SqlStatementGroup {
 	
 	public List<SqlStatement> statementL = new ArrayList<>();
 
+	public SqlStatementGroup() {
+	}
+	public SqlStatementGroup(SqlStatement stm) {
+		statementL.add(stm);
+	}
 	public void add(SqlStatement statement) {
 		statementL.add(statement);
 	}

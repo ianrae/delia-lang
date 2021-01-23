@@ -109,11 +109,8 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	@Override
-	public DValue rawInsert(DValue dval, InsertContext ctx) {
-		failIfNotInit1();
-		ZTableCreator partialTableCreator = createPartialTableCreator();
-		SqlStatementGroup stgroup = zinsert.generate(dval, ctx, partialTableCreator, cacheData, this);
-
+	public DValue rawInsert(SqlStatement stm, InsertContext ctx) {
+		SqlStatementGroup stgroup = new SqlStatementGroup(stm);
 		if (ctx.extractGeneratedKeys) {
 			return doInsert(stgroup, ctx);
 		} else {
@@ -123,7 +120,6 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	private DValue doInsert(SqlStatementGroup stgroup, InsertContext ctx) {
-
 		logStatementGroup(stgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;

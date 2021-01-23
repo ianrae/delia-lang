@@ -81,7 +81,8 @@ public class ZDBTests  extends BDDBase {
 		InsertContext ictx = new InsertContext();
 		ictx.extractGeneratedKeys = true;
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		DValue newDatIdValue = dbexec.rawInsert(dval, ictx);
+		ictx.actualDValForRawInsert = dval;
+		DValue newDatIdValue = dbexec.rawInsert(null, ictx); //null ok for MEM
 		assertEquals(1, newDatIdValue.asInt());
 		dbexec.close();
 	}

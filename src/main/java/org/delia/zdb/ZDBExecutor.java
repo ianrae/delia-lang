@@ -8,6 +8,7 @@ import org.delia.db.hld.cud.HLDDeleteStatement;
 import org.delia.db.hld.cud.HLDInsertStatement;
 import org.delia.db.hld.cud.HLDUpdateStatement;
 import org.delia.db.hld.cud.HLDUpsertStatement;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
@@ -27,7 +28,8 @@ public interface ZDBExecutor extends AutoCloseable {
 	DatIdMap getDatIdMap();
 
 	//these can be called after init1
-	DValue rawInsert(DValue dval, InsertContext ctx);
+//	DValue rawInsert(DValue dval, InsertContext ctx);
+	DValue rawInsert(SqlStatement stm, InsertContext ctx);
 	//		QueryResponse rawQuery(QuerySpec spec, QueryContext qtx);
 	boolean rawTableDetect(String tableName);
 	boolean rawFieldDetect(String tableName, String fieldName);

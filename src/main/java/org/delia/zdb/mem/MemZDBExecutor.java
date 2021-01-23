@@ -22,6 +22,7 @@ import org.delia.db.hld.cud.HLDUpsertStatement;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
@@ -79,25 +80,6 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public DValue rawInsert(DValue dval, InsertContext ctx) {
-		return executeInsert(dval, ctx);
-	}
-
-//	@Override
-//	public QueryResponse rawQuery(QuerySpec spec, QueryContext qtx) {
-//		QueryResponse qresp = new QueryResponse();
-//
-//		try {
-//			qresp = doExecuteQuery(spec, qtx);
-//		} catch (InternalException e) {
-//			qresp.ok = false;
-//			qresp.err = e.getLastError();
-//		}
-//
-//		return qresp;
-//	}
-
-	@Override
 	public FetchRunner createFetchRunner() {
 		return doCreateFetchRunner();
 	}
@@ -137,6 +119,13 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	public void rawCreateTable(String tableName) {
 		this.createTable(tableName);
 	}
+	
+
+	@Override
+	public DValue rawInsert(SqlStatement stm, InsertContext ctx) {
+		return executeInsert(ctx.actualDValForRawInsert, ctx);
+	}
+	
 
 //	@Override
 	private DValue executeInsert(DValue dval, InsertContext ctx) {
