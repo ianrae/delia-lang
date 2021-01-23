@@ -12,7 +12,7 @@ import org.delia.db.hld.QScope;
 import org.delia.db.hld.QueryFnSpec;
 import org.delia.db.hld.RelationField;
 import org.delia.db.hld.StructFieldOpt;
-import org.delia.db.newhls.cond.FilterFunc;
+import org.delia.db.hld.cond.FilterFunc;
 import org.delia.queryresponse.FuncScope;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;

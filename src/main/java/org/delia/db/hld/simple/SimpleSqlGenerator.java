@@ -4,7 +4,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.hld.SQLWhereGenerator;
 import org.delia.db.hld.SqlColumn;
 import org.delia.db.hld.SqlParamGenerator;
-import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.hld.cond.FilterCond;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.table.ListWalker;

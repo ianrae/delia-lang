@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cond;
+package org.delia.db.hld.cond;
 
 /**
  * One of the six operations. eg size > 10

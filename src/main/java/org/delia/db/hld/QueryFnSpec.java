@@ -1,6 +1,6 @@
 package org.delia.db.hld;
 
-import org.delia.db.newhls.cond.FilterFunc;
+import org.delia.db.hld.cond.FilterFunc;
 import org.delia.type.DStructType;
 
 /**

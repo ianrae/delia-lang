@@ -1,23 +1,19 @@
-package org.delia.db.newhls.cond;
+package org.delia.db.hld.cond;
 
 /**
- * A filter of the form: value1 op value2
- * or: !(value1 op value2)
+ * A filter of the form: opfilter and/or opfilter
  * @author ian
  *
  */
-public class OpFilterCond implements FilterCond {
-	//[not] val op val
-	public boolean isNot;
-	public FilterVal val1;
-	public FilterOp op;
-	public FilterVal val2;
-	public CustomFilterValueRenderer customRenderer; //higher-level. renders entire a op b
+public class OpAndOrFilter implements FilterCond {
+	public boolean isAnd;
+	public FilterCond cond1;
+	public FilterCond cond2;
 
 	@Override
 	public String toString() {
-		String fn = isNot ? "!" : "";
-		String s = String.format("%s%s %s %s", fn, val1.toString(), op.toString(), val2.toString());
+		String fn = isAnd ? "AND" : "OR";
+		String s = String.format("%s %s %s", cond1.toString(), fn, cond2.toString());
 		return s;
 	}
 }

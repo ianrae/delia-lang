@@ -1,7 +1,7 @@
 package org.delia.db.hld;
 
 import org.delia.core.FactoryService;
-import org.delia.db.newhls.cond.FilterVal;
+import org.delia.db.hld.cond.FilterVal;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;

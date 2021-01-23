@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cond;
+package org.delia.db.hld.cond;
 
 import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.hld.HLDQuery;

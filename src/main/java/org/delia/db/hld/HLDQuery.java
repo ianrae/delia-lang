@@ -6,8 +6,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.delia.compiler.ast.QueryExp;
-import org.delia.db.newhls.cond.FilterCond;
-import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.hld.cond.FilterCond;
+import org.delia.db.hld.cond.SingleFilterCond;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;

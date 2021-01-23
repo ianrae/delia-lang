@@ -1,7 +1,7 @@
 package org.delia.db.hld;
 
+import org.delia.db.hld.cond.FilterVal;
 import org.delia.db.hls.AliasInfo;
-import org.delia.db.newhls.cond.FilterVal;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;

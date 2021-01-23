@@ -2,9 +2,9 @@ package org.delia.db.hld.simple;
 
 import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.hld.StructField;
-import org.delia.db.newhls.cond.FilterVal;
-import org.delia.db.newhls.cond.OpFilterCond;
-import org.delia.db.newhls.cond.SingleFilterCond;
+import org.delia.db.hld.cond.FilterVal;
+import org.delia.db.hld.cond.OpFilterCond;
+import org.delia.db.hld.cond.SingleFilterCond;
 
 public class CustomFilterValueRendererBase {
 

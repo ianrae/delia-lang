@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.hld.SqlColumn;
+import org.delia.db.hld.cond.FilterCond;
 import org.delia.db.hld.cud.HLDUpdate;
-import org.delia.db.newhls.cond.FilterCond;
 
 /**
  * A simple UPDATE statement.

@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cond;
+package org.delia.db.hld.cond;
 
 import org.delia.compiler.ast.LongExp;
 import org.delia.db.hld.ValType;

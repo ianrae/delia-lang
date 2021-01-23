@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cond;
+package org.delia.db.hld.cond;
 
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;

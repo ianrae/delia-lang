@@ -3,10 +3,10 @@ package org.delia.db.hld;
 import java.util.List;
 import java.util.Optional;
 
-import org.delia.db.newhls.cond.FilterFunc;
-import org.delia.db.newhls.cond.FilterVal;
-import org.delia.db.newhls.cond.OpFilterCond;
-import org.delia.db.newhls.cond.SymbolChain;
+import org.delia.db.hld.cond.FilterFunc;
+import org.delia.db.hld.cond.FilterVal;
+import org.delia.db.hld.cond.OpFilterCond;
+import org.delia.db.hld.cond.SymbolChain;
 import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.TypePair;

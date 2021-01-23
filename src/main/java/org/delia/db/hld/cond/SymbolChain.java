@@ -1,4 +1,4 @@
-package org.delia.db.newhls.cond;
+package org.delia.db.hld.cond;
 
 import java.util.ArrayList;
 import java.util.List;

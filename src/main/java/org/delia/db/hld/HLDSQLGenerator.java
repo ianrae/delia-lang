@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.db.hld.cond.FilterCond;
 import org.delia.db.hld.cud.HLDDeleteStatement;
-import org.delia.db.newhls.cond.FilterCond;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.type.DStructType;

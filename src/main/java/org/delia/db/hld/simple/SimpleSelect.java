@@ -6,7 +6,7 @@ import java.util.List;
 import org.delia.db.hld.HLDAliasBuilderAdapter;
 import org.delia.db.hld.HLDQuery;
 import org.delia.db.hld.SqlColumn;
-import org.delia.db.newhls.cond.FilterCond;
+import org.delia.db.hld.cond.FilterCond;
 
 /**
  * A simple SELECT statement (no joins, order by, etc)
