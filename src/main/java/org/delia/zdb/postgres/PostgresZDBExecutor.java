@@ -1,19 +1,25 @@
 package org.delia.zdb.postgres;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.db.DBAccessContext;
 import org.delia.db.DBType;
 import org.delia.db.DBValidationException;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
+import org.delia.db.QueryDetails;
 import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.ValueHelper;
 import org.delia.db.h2.DBListingType;
+import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.FieldGenFactory;
@@ -23,7 +29,9 @@ import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.hld.results.HLDResultSetConverter;
+import org.delia.hld.results.HLDSelectHelper;
 import org.delia.log.Log;
+import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -197,27 +205,99 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	@Override
-	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stmgrp) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int executeUpdate(HLDUpdateStatement hld, SqlStatementGroup stgroup) {
+		if (stgroup.statementL.isEmpty()) {
+			return 0; //nothing to update
+		}
+
+		logStatementGroup(stgroup);
+		int updateCount = 0;
+		List<Integer > updateCountL = new ArrayList<>();
+		try {
+			ZDBExecuteContext dbctx = createContext();
+			for(SqlStatement statement: stgroup.statementL) {
+				//ignore empty statements. 
+				if (statement.owner == hld.hldupdate && hld.hldupdate.isEmpty()) {
+					continue;
+				}
+				
+				int n = conn.executeCommandStatement(statement, dbctx);
+				updateCountL.add(n);
+			}
+			updateCount = findUpdateCount("update", updateCountL, stgroup);
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
+		return updateCount;
 	}
 
 	@Override
-	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stmgrp, boolean noUpdateFlag) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int executeUpsert(HLDUpsertStatement hld, SqlStatementGroup stgroup, boolean noUpdateFlag) {
+		if (stgroup == null) {
+			return 0; //noupdate flag thing
+		}
+		if (stgroup.statementL.isEmpty()) {
+			return 0; //nothing to update
+		}
+
+		logStatementGroup(stgroup);
+		int updateCount = 0;
+		List<Integer > updateCountL = new ArrayList<>();
+		try {
+			ZDBExecuteContext dbctx = createContext();
+			for(SqlStatement statement: stgroup.statementL) {
+				int n = conn.executeCommandStatement(statement, dbctx);
+				updateCountL.add(n);
+			}
+			updateCount = findUpdateCount("merge", updateCountL, stgroup);
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
+		return updateCount;
 	}
 
 	@Override
-	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stmgrp) {
-		//TODO
+	public void executeDelete(HLDDeleteStatement hld, SqlStatementGroup stgroup) {
+		if (stgroup.statementL.isEmpty()) {
+			return; //nothing to delete
+		}
+
+		logStatementGroup(stgroup);
+		try {
+			ZDBExecuteContext dbctx = createContext();
+			for(SqlStatement statement: stgroup.statementL) {
+				conn.execStatement(statement, dbctx);
+			}
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
 	}
 
 
 	@Override
-	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
-		// TODO Auto-generated method stub
-		return null;
+	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
+		failIfNotInit2(); 
+		SqlStatement statement = stmgrp.statementL.get(0);
+		logSql(statement);
+
+		ZDBExecuteContext dbctx = createContext();
+		ResultSet rs = conn.execQueryStatement(statement, dbctx);   // *** call the DB ***
+		//TODO: do we need to catch and interpret exceptions here??
+
+		QueryResponse qresp = new QueryResponse();
+		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
+		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
+		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
+		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+		if (selectResultType.isScalarShape()) {
+			QueryDetails details = new QueryDetails(); //TODO delete later
+			qresp.dvalList = hldRSCconverter.buildScalarResult(rs, selectResultType, details, dbactx);
+			qresp.ok = true;
+		} else {
+			qresp.dvalList = hldRSCconverter.buildDValueList(rs, dbactx, hld);
+			qresp.ok = true;
+		}
+		return qresp;
 	}
 
 	@Override

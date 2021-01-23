@@ -1,6 +1,5 @@
 package org.delia.bdd;
 
-import org.delia.api.DeliaImpl;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
