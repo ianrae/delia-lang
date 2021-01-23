@@ -3,9 +3,9 @@ package org.delia.db.hld.cud;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.db.hld.NewHLSTestBase;
-import org.delia.db.hld.cud.HLDUpsertStatement;
 import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.db.sql.prepared.SqlStatementGroup;
+import org.delia.hld.cud.HLDUpsertStatement;
 import org.junit.Test;
 
 /**

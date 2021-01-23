@@ -1,8 +1,8 @@
 package org.delia.db.sqlgen;
 
-import org.delia.db.hld.cud.HLDUpdate;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.hld.cud.HLDUpdate;
 
 public class SqlMergeUsingStatement implements SqlStatementGenerator {
 

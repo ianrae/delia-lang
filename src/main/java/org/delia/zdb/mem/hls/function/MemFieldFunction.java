@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.delia.db.hld.QueryFnSpec;
-import org.delia.db.hld.StructFieldOpt;
 import org.delia.db.hls.HLSQuerySpan;
+import org.delia.hld.QueryFnSpec;
+import org.delia.hld.StructFieldOpt;
 import org.delia.log.Log;
 import org.delia.queryresponse.QueryFuncContext;
 import org.delia.runner.FetchRunner;

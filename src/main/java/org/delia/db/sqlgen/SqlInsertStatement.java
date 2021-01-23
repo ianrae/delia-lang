@@ -1,8 +1,8 @@
 package org.delia.db.sqlgen;
 
-import org.delia.db.hld.cud.HLDInsert;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.hld.cud.HLDInsert;
 
 public class SqlInsertStatement implements SqlStatementGenerator {
 

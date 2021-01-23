@@ -1,12 +1,12 @@
 package org.delia.db.sqlgen;
 
 import org.delia.core.FactoryService;
-import org.delia.db.hld.HLDQuery;
-import org.delia.db.hld.SQLWhereGenerator;
-import org.delia.db.hld.SqlParamGenerator;
-import org.delia.db.hld.cond.FilterCond;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.hld.HLDQuery;
+import org.delia.hld.SQLWhereGenerator;
+import org.delia.hld.SqlParamGenerator;
+import org.delia.hld.cond.FilterCond;
 import org.delia.type.DTypeRegistry;
 
 public class SqlWhereClause implements SqlClauseGenerator {

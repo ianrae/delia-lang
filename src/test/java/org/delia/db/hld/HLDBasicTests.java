@@ -3,8 +3,8 @@ package org.delia.db.hld;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.db.hld.HLDQueryStatement;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.hld.HLDQueryStatement;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;

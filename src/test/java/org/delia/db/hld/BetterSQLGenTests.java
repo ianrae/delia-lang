@@ -2,15 +2,15 @@ package org.delia.db.hld;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.db.hld.HLDQueryStatement;
-import org.delia.db.hld.cud.HLDDeleteStatement;
-import org.delia.db.hld.cud.HLDUpdateStatement;
-import org.delia.db.hld.simple.SimpleDelete;
-import org.delia.db.hld.simple.SimpleSelect;
-import org.delia.db.hld.simple.SimpleSqlBuilder;
-import org.delia.db.hld.simple.SimpleSqlGenerator;
-import org.delia.db.hld.simple.SimpleUpdate;
 import org.delia.db.sql.prepared.SqlStatement;
+import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.cud.HLDDeleteStatement;
+import org.delia.hld.cud.HLDUpdateStatement;
+import org.delia.hld.simple.SimpleDelete;
+import org.delia.hld.simple.SimpleSelect;
+import org.delia.hld.simple.SimpleSqlBuilder;
+import org.delia.hld.simple.SimpleSqlGenerator;
+import org.delia.hld.simple.SimpleUpdate;
 import org.junit.Test;
 
 public class BetterSQLGenTests extends NewHLSTestBase {

@@ -1,7 +1,7 @@
 package org.delia.db.hld;
 
 
-import org.delia.db.hld.HLDQueryStatement;
+import org.delia.hld.HLDQueryStatement;
 import org.junit.Test;
 
 /**

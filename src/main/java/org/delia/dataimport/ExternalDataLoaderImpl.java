@@ -7,7 +7,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBHelper;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.db.hld.HLDSimpleQueryService;
+import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.inputfunction.ExternalDataLoader;

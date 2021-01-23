@@ -4,7 +4,7 @@ import org.delia.api.DeliaImpl;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
-import org.delia.db.hld.results.HLDResultSetConverterBase;
+import org.delia.hld.results.HLDResultSetConverterBase;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
