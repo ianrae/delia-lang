@@ -296,13 +296,6 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doConvertValueIfNeeded(val1, pkpair.type);
 	}
 	
-//	private void convertIfNeeded(FilterVal val1) {
-//		if (val1.structField.fieldType != null) {
-//			if (val1.structField.fieldType.isShape(Shape.DATE)) {
-//				System.out.println("sunny..");
-//			}
-//		}
-//	}
 	private void convertValueIfNeeded(FilterVal val1, FilterVal val2) {
 		//TODO. if we ever support defining date values as long, then add LONG support here
 		if (val1.isSymbol()) {
@@ -314,7 +307,6 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private void doConvertValueIfNeeded(FilterVal val2, DType fieldType) {
 		//TODO. if we ever support defining date values as long, then add LONG support here
 		if (val2.valType.equals(ValType.STRING)) {
-			System.out.println("sunny2..");
 			val2.actualDateVal = conversionHelper.convertDValToActual(fieldType, val2.asString());
 		}
 	}

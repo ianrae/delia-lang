@@ -180,7 +180,7 @@ public class MemFieldFunction extends MemFunctionBase {
 					DRelation drel = inner.asRelation();
 					List<DValue> fetchedL = drel.getFetchedItems();
 					if (fetchedL == null) {
-						System.out.println("sdfsdfd");
+//						System.out.println("sdfsdfd");
 					} else {
 						newList.addAll(fetchedL);
 					}

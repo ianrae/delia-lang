@@ -335,7 +335,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 						continue;
 					}
 					
-					System.out.println(dval.toString());
+//					System.out.println(dval.toString());
 					
 					List<DValue> fkList = new ArrayList<>(drel.getMultipleKeys()); //avoid concurrent modification exception
 					for(DValue pkval: fkList) {
