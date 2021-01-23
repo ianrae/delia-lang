@@ -46,8 +46,12 @@ public class RelationPruner extends ServiceBase {
 		for(String fieldName: dvalFull.asMap().keySet()) {
 			TypePair pair = DValueHelper.findField(dtype, fieldName);
 			if (pair.type.isStructShape()) {
-				DRelation updateRelation = dvalFull.asMap().get(fieldName).asRelation();
 				
+				DValue possible = dvalFull.asMap().get(fieldName);
+				if (possible == null) {
+					continue;
+				}
+				DRelation updateRelation = possible.asRelation();
 				
 				//get list of all addresses whose .cust points to tmp (55)
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) tmp.getType(), pair);
@@ -70,7 +74,7 @@ public class RelationPruner extends ServiceBase {
 				//and remove any fks that are no longer correct.
 				DRelation drel = inner.asRelation(); 
 				
-				//now see if updateRel contains otherval. If it does then leave this object alone
+				//now see if updateRel contains otherpkval. If it does then leave this object alone
 				//if it doesn't then prune
 				List<DValue> newFKList = updateRelation.getMultipleKeys().stream().filter(x -> isMatchByStr(x, otherpkval)).collect(Collectors.toList());
 				boolean needToPrune = newFKList.isEmpty();
@@ -83,8 +87,6 @@ public class RelationPruner extends ServiceBase {
 							break;
 						}
 					}
-//					drel.getMultipleKeys().clear();
-//					drel.getMultipleKeys().addAll(newFKList);
 					
 					//and remove from fetched items too
 					if (drel.haveFetched()) {
