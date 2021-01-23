@@ -22,6 +22,7 @@ import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
+import org.delia.log.LogLevel;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -83,8 +84,13 @@ public class HLDManager extends ServiceBase {
 	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
 		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp, varEvaluator);
-		log.log(hld.toString());
+		logDebug(hld);
 		return hld;
+	}
+	private void logDebug(HLDStatement hld) {
+		if (log.isLevelEnabled(LogLevel.DEBUG)) {
+			log.logDebug(hld.toString()); //only do toString if log is enabled
+		}
 	}
 	public boolean canBuildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
@@ -95,25 +101,25 @@ public class HLDManager extends ServiceBase {
 		
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDDeleteStatement hlddel = mgr.fullBuildDelete(queryExp);
-		log.log(hlddel.toString());
+		logDebug(hlddel);
 		return hlddel;
 	}
 	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator);
-		log.log(hldupdate.toString());
+		logDebug(hldupdate);
 		return hldupdate;
 	}
 	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, ZDBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator);
-		log.log(upsertExp.toString());
+		logDebug(hldupsert);
 		return hldupsert;
 	}
 	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator);
-		log.log(hldins.toString());
+		logDebug(hldins);
 		return hldins;
 	}
 	public SqlStatementGroup generateSQL(HLDInsertStatement hldins, ZDBExecutor zexec) {
