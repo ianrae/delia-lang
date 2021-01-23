@@ -3,9 +3,16 @@ package org.delia.assoc;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
+import org.delia.db.DBType;
 import org.delia.db.InsertContext;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.hld.HLDSimpleQueryService;
+import org.delia.db.hld.SqlColumn;
+import org.delia.db.hld.cud.HLDInsert;
+import org.delia.db.hld.cud.TypeOrTable;
+import org.delia.db.hld.simple.SimpleInsert;
+import org.delia.db.hld.simple.SimpleSqlGenerator;
+import org.delia.db.sql.prepared.SqlStatement;
 import org.delia.log.Log;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationRuleBase;
@@ -58,11 +65,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			return;
 		}
 
-		InsertContext ictx = new InsertContext();
-		ictx.extractGeneratedKeys = true;
-		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
-		ictx.actualDValForRawInsert = dval;
-		DValue newDatIdValue = dbexecutor.rawInsert(null, ictx);
+		DValue newDatIdValue = doRawInsert(dval, tblName); 
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();
@@ -77,6 +80,37 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		}
 	}
 	
+	private DValue doRawInsert(DValue dval, String tblName) {
+		InsertContext ictx = new InsertContext();
+		ictx.extractGeneratedKeys = true;
+		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
+		
+		DValue newDatIdValue = null;
+		if (dbexecutor.getDbInterface().getDBType().equals(DBType.MEM)) {
+			ictx.actualDValForRawInsert = dval;
+			newDatIdValue = dbexecutor.rawInsert(null, ictx);
+		} else {
+			//must build
+			SimpleSqlGenerator sqlgen = new SimpleSqlGenerator(registry, factorySvc);
+			SimpleInsert simple = new SimpleInsert();
+			simple.tblFrag = new SqlColumn(null, tblName);
+			simple.hld = new HLDInsert(new TypeOrTable(tblName, true));
+			for(String fieldName: dval.asMap().keySet()) {
+				DValue inner = dval.asMap().get(fieldName);
+				SqlColumn col = new SqlColumn(null, fieldName);
+				simple.fieldL.add(col);
+				
+				simple.hld.valueL.add(inner);
+			}
+			
+			SqlStatement stm = new SqlStatement(null);
+			stm.sql = sqlgen.gen(simple, stm);
+			newDatIdValue = dbexecutor.rawInsert(stm, ictx);
+		}
+		
+		return newDatIdValue;
+	}
+
 	public void initTableNameCreatorIfNeeded() {
 		if (haveInitTableNameCreator) {
 			return; //only do this once

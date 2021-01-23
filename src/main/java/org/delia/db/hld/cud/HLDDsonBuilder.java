@@ -14,7 +14,6 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
 import org.delia.db.hld.ConversionHelper;
 import org.delia.db.hld.HLDField;
-import org.delia.db.hld.HLDQuery;
 import org.delia.db.hld.HLDQueryBuilderAdapter;
 import org.delia.db.hld.HLDServiceBase;
 import org.delia.db.hld.QueryBuilderHelper;
