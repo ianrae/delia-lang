@@ -65,7 +65,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			return;
 		}
 
-		DValue newDatIdValue = doRawInsert(dval, tblName); 
+		DValue newDatIdValue = doRawInsert(dval); 
 		
 		if (newDatIdValue != null) {  
 			int datId = newDatIdValue.asInt();
@@ -80,7 +80,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		}
 	}
 	
-	private DValue doRawInsert(DValue dval, String tblName) {
+	private DValue doRawInsert(DValue dval) {
 		InsertContext ictx = new InsertContext();
 		ictx.extractGeneratedKeys = true;
 		ictx.genKeytype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
@@ -93,6 +93,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 			//must build
 			SimpleSqlGenerator sqlgen = new SimpleSqlGenerator(registry, factorySvc);
 			SimpleInsert simple = new SimpleInsert();
+			String tblName = dval.getType().getName();
 			simple.tblFrag = new SqlColumn(null, tblName);
 			simple.hld = new HLDInsert(new TypeOrTable(tblName, true));
 			for(String fieldName: dval.asMap().keySet()) {
