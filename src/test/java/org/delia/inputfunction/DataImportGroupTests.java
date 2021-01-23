@@ -17,6 +17,7 @@ import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
 import org.delia.db.DBType;
+import org.delia.error.DeliaError;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.GroupPair;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -92,7 +93,7 @@ public class DataImportGroupTests extends InputFunctionTestBase {
 		} else {
 			src = buildSrcProduct();
 		}
-		this.delia.getLog().setLevel(LogLevel.DEBUG);
+		delia.getLog().setLevel(LogLevel.DEBUG);
 		delia.getLog().log(src);
 		delia.getOptions().logSourceBeforeCompile = true;
 		this.session = delia.beginSession(src);
@@ -137,10 +138,17 @@ public class DataImportGroupTests extends InputFunctionTestBase {
 		List<InputFunctionResult> resultL = groupSvc.run(delia, session, stopAfterErrorThreshold);
 		assertEquals(1, resultL.size());
 		InputFunctionResult result = resultL.get(0);
+		dumpErrors(result.errors);
 		assertEquals(0, result.errors.size());
 		assertEquals(expectedRows, result.numRowsProcessed);
 		assertEquals(expectedRows, result.numRowsInserted);
 		return result;
+	}
+	private void dumpErrors(List<DeliaError> errors) {
+		log.log("%d errors", errors.size());
+		for(DeliaError err: errors) {
+			log.log(" %s", err.toString());
+		}
 	}
 
 	

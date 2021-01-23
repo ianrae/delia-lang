@@ -389,7 +389,19 @@ public class InputFunctionService extends ServiceBase {
 		if (inner == null) {
 			sc.o("%s: null", fieldName);
 		} else if (inner.getType().isShape(Shape.STRING)) {
-			sc.o("%s: '%s'", fieldName, inner.asString());
+			//handle quoting.
+			//TODO: this is a bit slow, searching every string for '. can we speed this up?
+			String s = inner.asString();
+			int pos = s.indexOf('\'');
+			if (pos >= 0) {
+				pos = s.indexOf('"');
+				if (pos >= 0) {
+					DeliaExceptionHelper.throwNotImplementedError("Strings with both ' and \" not yet supported in InputFunctionService", s);
+				}
+				sc.o("%s: \"%s\"", fieldName, inner.asString()); //use double quote
+			} else {
+				sc.o("%s: '%s'", fieldName, inner.asString()); //use single quote
+			}
 		} else if (inner.getType().isShape(Shape.DATE)) {
 			sc.o("%s: '%s'", fieldName, inner.asString());
 		} else if (inner.getType().isShape(Shape.RELATION)) {

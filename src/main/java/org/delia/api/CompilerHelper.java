@@ -24,7 +24,9 @@ public class CompilerHelper {
 	
 	public List<Exp> compileDeliaSource(String src, boolean doPass3Flag) {
 		DeliaCompiler compiler = createCompiler();
-		log.log("SRC: %s", src);
+		if (deliaOptions.logSourceBeforeCompile) {
+			log.log("delia-src: %s", src);
+		}
 		compiler.setDoPass3Flag(doPass3Flag);
 		List<Exp> expL = compiler.parse(src);
 		return expL;
