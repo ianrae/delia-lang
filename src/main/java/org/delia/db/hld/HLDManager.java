@@ -21,7 +21,6 @@ import org.delia.db.hls.manager.HLSPipelineStep;
 import org.delia.db.hls.manager.HLSStragey;
 import org.delia.db.hls.manager.InQueryStep;
 import org.delia.db.hls.manager.StandardHLSStragey;
-import org.delia.db.sql.fragment.MiniSelectFragmentParser;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
@@ -45,7 +44,6 @@ public class HLDManager extends ServiceBase {
 	protected HLSStragey defaultStrategy = new StandardHLSStragey();
 	protected boolean generateSQLforMemFlag;
 	protected VarEvaluator varEvaluator;
-	protected MiniSelectFragmentParser miniSelectParser;
 	protected AliasManager aliasManager;
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
 	private SprigService sprigSvc; //set after ctor
