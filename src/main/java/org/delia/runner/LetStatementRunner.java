@@ -20,12 +20,12 @@ import org.delia.db.QuerySpec;
 import org.delia.db.sql.prepared.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.FetchSpec;
 import org.delia.hld.HLDManager;
 import org.delia.hld.HLDQuery;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.hld.QueryFnSpec;
-import org.delia.queryresponse.LetSpanEngine;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -45,7 +45,6 @@ public class LetStatementRunner extends ServiceBase {
 	private DTypeRegistry registry;
 	private ZDBInterfaceFactory dbInterface;
 	private ZDBExecutor zexec;
-	private LetSpanEngine letSpanEngine;
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
@@ -77,7 +76,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	public ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-		this.letSpanEngine = new LetSpanEngine(factorySvc, registry);
 		
 		if (exp.isType(LetStatementExp.USER_FUNC_TYPE)) {
 			return invokeUserFunc(exp, res);
@@ -143,7 +141,6 @@ public class LetStatementRunner extends ServiceBase {
 	}
 	private QueryResponse executeDBQuery(QueryExp queryExp, QueryResponse existingQResp) {
 		QuerySpec spec = resolveFilterVars(queryExp);
-		QueryContext qtx = buildQueryContext(spec, existingQResp);
 		
 		boolean flag1 = hldManager != null;
 		QueryResponse qresp;
@@ -151,6 +148,7 @@ public class LetStatementRunner extends ServiceBase {
 			HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
 			SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
 
+			QueryContext qtx = buildQueryContext(spec, existingQResp, hld);
 			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
 			doPostDBCallAdjustment(hld, qresp);
 
@@ -193,11 +191,12 @@ public class LetStatementRunner extends ServiceBase {
 	}
 	
 	
-	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp) {
+	private QueryContext buildQueryContext(QuerySpec spec, QueryResponse existingQResp, HLDQueryStatement hld) {
 		QueryContext qtx = new QueryContext();
 		qtx.existingQResp = existingQResp;
-		qtx.letSpanEngine = letSpanEngine;
-		qtx.loadFKs = this.letSpanEngine.containsFKs(spec.queryExp);
+		
+		Optional<FetchSpec> opt = hld.hldquery.fetchL.stream().filter(x -> x.isFK).findAny();
+		qtx.loadFKs = opt.isPresent(); //this.letSpanEngine.containsFKs(spec.queryExp);
 		if (!qtx.loadFKs) {
 			ConfigureService configSvc = factorySvc.getConfigureService();
 			qtx.loadFKs = configSvc.isPopulateFKsFlag();

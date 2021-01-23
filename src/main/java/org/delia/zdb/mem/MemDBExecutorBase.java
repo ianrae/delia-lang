@@ -91,11 +91,11 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			}
 
 			//add fks if needed
-			if (qtx.loadFKs) {
+//			if (qtx.loadFKs) {
 //				for(DValue dval: dvalList) {
 //					addAnyFKs(dval);
 //				}
-			} else if (qtx.pruneParentRelationFlag) {
+			if (qtx.pruneParentRelationFlag) {
 				dvalList = removeParentSideRelations(dvalList);
 			}
 
