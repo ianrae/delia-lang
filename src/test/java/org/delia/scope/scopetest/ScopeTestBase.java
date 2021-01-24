@@ -28,7 +28,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.ValidationState;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 
 public class ScopeTestBase {
 	protected static final double DELTA = 0.000001;

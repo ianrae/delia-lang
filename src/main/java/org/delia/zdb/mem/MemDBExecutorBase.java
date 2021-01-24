@@ -36,17 +36,17 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.zdb.DBExecutor;
 
-public abstract class MemDBExecutorBase extends ServiceBase implements ZDBInternal {
+public abstract class MemDBExecutorBase extends ServiceBase implements DBInternal {
 
 	protected DTypeRegistry registry;
 	protected Map<String,MemDBTable> tableMap;
-	protected ZStuff stuff; //created lazily
+	protected DBStuff stuff; //created lazily
 	DateFormatService fmtSvc;
 	public boolean createTablesAsNeededFlag = true;
-	protected MemZDBInterfaceFactory dbInterface;
+	protected MemDBInterfaceFactory dbInterface;
 	private PreSpecService preSpecSvc;
 
-	public MemDBExecutorBase(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
+	public MemDBExecutorBase(FactoryService factorySvc, MemDBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.tableMap = dbInterface.createSingleMemDB();
@@ -167,7 +167,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			tbl = handleUnknownTable(typeName);
 		}
 
-		ZStuff stuff = findOrCreateStuff();
+		DBStuff stuff = findOrCreateStuff();
 		RowSelector selector;
 		QueryType queryType = stuff.queryDetectorSvc.detectQueryType(spec);
 		switch(queryType) {
@@ -249,9 +249,9 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 	 * @param ctx db context
 	 * @return stuff
 	 */
-	protected ZStuff findOrCreateStuff() {
+	protected DBStuff findOrCreateStuff() {
 		if (stuff == null) {
-			stuff = new ZStuff();
+			stuff = new DBStuff();
 			stuff.init(factorySvc, registry, dbInterface.getSerialMap());
 		}
 		return stuff;

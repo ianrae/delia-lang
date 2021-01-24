@@ -11,15 +11,15 @@ import org.delia.type.DStructType;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 
-public class ZMemInsert extends ServiceBase {
+public class MemInsertService extends ServiceBase {
 	DateFormatService fmtSvc;
 
-	public ZMemInsert(FactoryService factorySvc) {
+	public MemInsertService(FactoryService factorySvc) {
 		super(factorySvc);
 		this.fmtSvc = factorySvc.getDateFormatService();
 	}
 
-	public DValue doExecuteInsert(MemDBTable tbl, DValue dval, InsertContext ctx, MemZDBExecutor executor, ZStuff stuff) {
+	public DValue doExecuteInsert(MemDBTable tbl, DValue dval, InsertContext ctx, MemDBExecutor executor, DBStuff stuff) {
 		String typeName = dval.getType().getName();
 
 		DValue generatedId = addSerialValuesIfNeeded(dval, tbl, stuff);
@@ -29,7 +29,7 @@ public class ZMemInsert extends ServiceBase {
 		return generatedId;
 	}
 
-	private DValue addSerialValuesIfNeeded(DValue dval, MemDBTable tbl, ZStuff stuff) {
+	private DValue addSerialValuesIfNeeded(DValue dval, MemDBTable tbl, DBStuff stuff) {
 		if (!dval.getType().isStructShape()) {
 			return null;
 		}

@@ -14,7 +14,7 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.h2.H2DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
 public class InstrumentedZDBInterface implements DBInterfaceFactory {
@@ -30,7 +30,7 @@ public class InstrumentedZDBInterface implements DBInterfaceFactory {
 		switch(dbType) {
 		case MEM:
 			//actualInterface = new MemZDBInterfaceFactory(factorySvc);
-			actualInterface = new MemZDBInterfaceFactory(factorySvc);
+			actualInterface = new MemDBInterfaceFactory(factorySvc);
 			break;
 		case H2:
 		{

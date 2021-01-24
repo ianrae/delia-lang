@@ -36,9 +36,9 @@ import org.delia.zdb.mem.hld.function.MemOrderByFunction;
 public class MemFunctionHelper extends ServiceBase {
 	private DTypeRegistry registry;
 	private FetchRunner fetchRunner;
-	private MemZDBInterfaceFactory dbInterface;
+	private MemDBInterfaceFactory dbInterface;
 
-	public MemFunctionHelper(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner) {
+	public MemFunctionHelper(FactoryService factorySvc, MemDBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.registry = registry;

@@ -22,20 +22,20 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
 
 //========
-public class ZMemUpdate extends ServiceBase {
+public class MemUpdateService extends ServiceBase {
 
 	DateFormatService fmtSvc;
 	private DTypeRegistry registry;
 	private RelationPruner relationPruner;
 
-	public ZMemUpdate(FactoryService factorySvc, DTypeRegistry registry) {
+	public MemUpdateService(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fmtSvc = factorySvc.getDateFormatService();
 		this.relationPruner = new RelationPruner(factorySvc);
 	}
 
-	public int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, RowSelector selector, MemZDBExecutor memDBInterface) {
+	public int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, RowSelector selector, MemDBExecutor memDBInterface) {
 		MemDBTable tbl = selector.getTbl();
 		List<DValue> dvalList = selector.match(tbl.rowL);
 		String typeName = spec.queryExp.getTypeName();

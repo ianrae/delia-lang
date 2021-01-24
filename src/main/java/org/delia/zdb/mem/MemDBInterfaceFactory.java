@@ -15,13 +15,13 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
-public class MemZDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
+public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
 	protected DBObserverFactory observerFactory;
 
-	public MemZDBInterfaceFactory(FactoryService factorySvc) {
+	public MemDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(false, false, false, false);
 	}
@@ -61,7 +61,7 @@ public class MemZDBInterfaceFactory extends ServiceBase implements DBInterfaceFa
 	
 	@Override
 	public DBExecutor createExecutor() {
-		DBExecutor exec = new MemZDBExecutor(factorySvc, this);
+		DBExecutor exec = new MemDBExecutor(factorySvc, this);
 		
 		if (observerFactory != null) {
 			DBExecutor observer = observerFactory.createObserver(exec);

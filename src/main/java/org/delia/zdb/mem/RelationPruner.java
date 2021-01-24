@@ -29,7 +29,7 @@ public class RelationPruner extends ServiceBase {
 		super(factorySvc);
 	}
 
-	public void pruneOtherSide(DValue tmp, DValue dvalFull, MemZDBExecutor memDBInterface) {
+	public void pruneOtherSide(DValue tmp, DValue dvalFull, MemDBExecutor memDBInterface) {
 		adjustOtherSide(tmp, dvalFull, memDBInterface);
 	}
 	
@@ -40,7 +40,7 @@ public class RelationPruner extends ServiceBase {
 	// so inner.getType().isRelation is true
 	//Summary: with types its a STRUCT and with values its a RELATION
 
-	private void adjustOtherSide(DValue tmp, DValue dvalFull, MemZDBExecutor memDBInterface) {
+	private void adjustOtherSide(DValue tmp, DValue dvalFull, MemDBExecutor memDBInterface) {
 		DStructType dtype = dvalFull.asStruct().getType();
 		DValue pkval = DValueHelper.findPrimaryKeyValue(tmp);
 		for(String fieldName: dvalFull.asMap().keySet()) {
@@ -112,7 +112,7 @@ public class RelationPruner extends ServiceBase {
 	}
 
 	//TODO: this is very inefficient. improve!
-	private List<DValue> findOthers(TypePair pair, MemZDBExecutor memDBInterface, RelationInfo relinfo, DValue pkval) {
+	private List<DValue> findOthers(TypePair pair, MemDBExecutor memDBInterface, RelationInfo relinfo, DValue pkval) {
 		List<DValue> allFoundL = new ArrayList<>();
 		MemDBTable tbl = memDBInterface.getTbl(pair.type.getName());
 		if (tbl == null && relinfo.otherSide == null) {

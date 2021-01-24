@@ -9,7 +9,7 @@ import org.delia.db.sql.QueryTypeDetector;
 import org.delia.type.DTypeRegistry;
 
 //per database stuff
-public class ZStuff {
+public class DBStuff {
 	public SerialProvider serialProvider;
 	public QueryTypeDetector queryDetectorSvc;
 

@@ -26,8 +26,8 @@ import org.delia.zdb.h2.H2DeliaSessionCache;
 import org.delia.zdb.h2.H2DBConnection;
 import org.delia.zdb.h2.H2DBExecutor;
 import org.delia.zdb.h2.H2DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBExecutor;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBExecutor;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,8 +35,8 @@ public class ZDBTests  extends BDDBase {
 
 	@Test
 	public void testMEM() {
-		MemZDBInterfaceFactory dbFactory = new MemZDBInterfaceFactory(factorySvc);
-		MemZDBExecutor dbexec = new MemZDBExecutor(factorySvc, dbFactory);
+		MemDBInterfaceFactory dbFactory = new MemDBInterfaceFactory(factorySvc);
+		MemDBExecutor dbexec = new MemDBExecutor(factorySvc, dbFactory);
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();

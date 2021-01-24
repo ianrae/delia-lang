@@ -37,7 +37,7 @@ import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.After;
 
 /**
@@ -197,7 +197,7 @@ public class NewHLSTestBase extends BDDBase {
 	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
-		MemZDBInterfaceFactory memDBinterface = (MemZDBInterfaceFactory) delia.getDBInterface();
+		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;
 		

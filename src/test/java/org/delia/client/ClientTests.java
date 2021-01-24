@@ -25,7 +25,7 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 

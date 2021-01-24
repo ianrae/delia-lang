@@ -10,7 +10,7 @@ import org.delia.log.Log;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.h2.H2DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
 /**
@@ -34,7 +34,7 @@ public class DeliaFactory {
 		DBInterfaceFactory dbInterface = null;
 		switch(dbType) {
 		case MEM:
-			dbInterface = new MemZDBInterfaceFactory(factorySvc);
+			dbInterface = new MemDBInterfaceFactory(factorySvc);
 			break;
 		case H2:
 			dbInterface = new H2DBInterfaceFactory(factorySvc, connFactory);

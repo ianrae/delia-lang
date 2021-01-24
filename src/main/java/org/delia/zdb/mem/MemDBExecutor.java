@@ -42,14 +42,14 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
-public class MemZDBExecutor extends MemDBExecutorBase implements DBExecutor {
+public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
 	private DValueCompareService compareSvc;
 	private HLDSimpleQueryService querySvc;
 
-	public MemZDBExecutor(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
+	public MemDBExecutor(FactoryService factorySvc, MemDBInterfaceFactory dbInterface) {
 		super(factorySvc, dbInterface);
 		this.compareSvc = new DValueCompareService(factorySvc);
 	}
@@ -135,8 +135,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements DBExecutor {
 			tbl = handleUnknownTable(typeName);
 		}
 
-		ZStuff stuff = findOrCreateStuff();
-		ZMemInsert memInsert = new ZMemInsert(this.factorySvc);
+		DBStuff stuff = findOrCreateStuff();
+		MemInsertService memInsert = new MemInsertService(this.factorySvc);
 		return memInsert.doExecuteInsert(tbl, dval, ctx, this, stuff);
 	}
 
@@ -151,8 +151,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements DBExecutor {
 			tbl = handleUnknownTable(typeName);
 		}
 
-		ZStuff stuff = findOrCreateStuff();
-		ZMemInsert memInsert = new ZMemInsert(this.factorySvc);
+		DBStuff stuff = findOrCreateStuff();
+		MemInsertService memInsert = new MemInsertService(this.factorySvc);
 		return memInsert.doExecuteInsert(tbl, dval, ctx, this, stuff);
 	}
 
@@ -181,7 +181,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements DBExecutor {
 
 	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
 		RowSelector selector = createSelector(spec); //may throw
-		ZMemUpdate memUpdate = new ZMemUpdate(factorySvc, registry);
+		MemUpdateService memUpdate = new MemUpdateService(factorySvc, registry);
 		return memUpdate.doExecuteUpdate(spec, dvalUpdate, assocCrudMap, selector, this);
 	}
 
@@ -204,8 +204,8 @@ public class MemZDBExecutor extends MemDBExecutorBase implements DBExecutor {
 			throw new DBException(err);
 		}
 
-		ZMemUpsert memUpsert = new ZMemUpsert(factorySvc, registry);
-		ZStuff stuff = findOrCreateStuff();
+		MemUpsertService memUpsert = new MemUpsertService(factorySvc, registry);
+		DBStuff stuff = findOrCreateStuff();
 		return memUpsert.doExecuteUpsert(spec, dvalUpdate, assocCrudMap, noUpdateFlag, selector, this, stuff);
 	}
 

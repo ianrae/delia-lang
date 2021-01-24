@@ -28,7 +28,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.valuebuilder.IntegerValueBuilder;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 
 public class BDDTesterEx {
 	private static class NumberChecker extends ValueCheckerBase {
@@ -78,8 +78,8 @@ public class BDDTesterEx {
 		}
 		client = new DeliaClient(dbInterface);
 		
-		if (dbInterface instanceof MemZDBInterfaceFactory) {
-			MemZDBInterfaceFactory memdb = (MemZDBInterfaceFactory) dbInterface;
+		if (dbInterface instanceof MemDBInterfaceFactory) {
+			MemDBInterfaceFactory memdb = (MemDBInterfaceFactory) dbInterface;
 			//memdb.createTablesAsNeededFlag = true;
 		}
 		

@@ -22,20 +22,20 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
-public class ZMemUpsert extends ServiceBase {
+public class MemUpsertService extends ServiceBase {
 
 	DateFormatService fmtSvc;
 	private DTypeRegistry registry;
 	private RelationPruner relationPruner;
 
-	public ZMemUpsert(FactoryService factorySvc, DTypeRegistry registry) {
+	public MemUpsertService(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 		this.relationPruner = new RelationPruner(factorySvc);
 	}
 
 	public int doExecuteUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap, boolean noUpdateFlag, RowSelector selector, 
-			MemZDBExecutor memDBInterface, ZStuff stuff) {
+			MemDBExecutor memDBInterface, DBStuff stuff) {
 		MemDBTable tbl = selector.getTbl();
 		List<DValue> dvalList = selector.match(tbl.rowL);
 		String typeName = spec.queryExp.getTypeName();
@@ -55,7 +55,7 @@ public class ZMemUpsert extends ServiceBase {
 			//add primary key to dvalFull
 			addPrimaryKey(spec, dvalFull, selector);
 
-			ZMemInsert memInsert = new ZMemInsert(factorySvc);
+			MemInsertService memInsert = new MemInsertService(factorySvc);
 			InsertContext ctx = new InsertContext(); //upsert not supported for serial primaryKey
 			memInsert.doExecuteInsert(tbl, dvalFull, ctx, memDBInterface, stuff);
 			return 1;

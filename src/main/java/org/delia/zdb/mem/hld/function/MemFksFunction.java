@@ -9,15 +9,15 @@ import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.validation.ValidationRunner;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.delia.zdb.mem.hld.MemFunctionBase;
 
 public class MemFksFunction extends MemFunctionBase {
 	private FetchRunner fetchRunner;
 	private FactoryService factorySvc;
-	private MemZDBInterfaceFactory dbInterface;
+	private MemDBInterfaceFactory dbInterface;
 	
-	public MemFksFunction(DTypeRegistry registry, FactoryService factorySvc, FetchRunner fetchRunner, MemZDBInterfaceFactory dbInterface) {
+	public MemFksFunction(DTypeRegistry registry, FactoryService factorySvc, FetchRunner fetchRunner, MemDBInterfaceFactory dbInterface) {
 		super(registry);
 		this.factorySvc = factorySvc;
 		this.fetchRunner = fetchRunner;

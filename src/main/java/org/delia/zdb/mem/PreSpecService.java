@@ -31,7 +31,7 @@ public class PreSpecService extends ServiceBase {
 //	private MemZDBInterfaceFactory dbInterface;
 	private DValueConverterService dvalConverterSvc;
 
-	public PreSpecService(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
+	public PreSpecService(FactoryService factorySvc, MemDBInterfaceFactory dbInterface) {
 		super(factorySvc);
 //		this.dbInterface = dbInterface;
 		this.log = factorySvc.getLog();
