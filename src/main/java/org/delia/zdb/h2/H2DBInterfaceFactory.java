@@ -12,6 +12,7 @@ import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBConnectionObserverAdapter;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
@@ -79,13 +80,19 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 
 	@Override
 	public DBExecutor createExecutor() {
-		H2DBConnection conn = (H2DBConnection) openConnection();
+		DBConnection conn = (H2DBConnection) openConnection();
 		Log execLog = createNewLog();
 		execLog.setLevel(sqlLog.getLevel());
-		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		
+		DBConnectionObserverAdapter connAdapter = null;
 		if (observerFactory != null) {
-			DBExecutor observer = observerFactory.createObserver(exec);
+			connAdapter = new DBConnectionObserverAdapter(conn);
+			conn = connAdapter;
+		}
+		
+		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		if (observerFactory != null) {
+			DBExecutor observer = observerFactory.createObserver(exec, null);
 			return observer;
 		}
 		return exec;

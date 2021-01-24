@@ -52,17 +52,12 @@ import org.delia.zdb.h2.DBExecutorBase;
 public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 
 	private PostgresDBInterfaceFactory dbInterface;
-	private PostgresDBConnection conn;
-//	private PostgresZInsert zinsert;
-//	private PostgresZQuery zquery;
-//	private PostgresZUpdate zupdate;
-//	private PostgresZUpsert zupsert;
-//	private PostgresZDelete zdelete;
+	private DBConnection conn;
 	private PostgresDeliaSessionCache cache;
 	private CacheData cacheData;
 
 	public PostgresDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresDBInterfaceFactory dbInterface, 
-			PostgresDBConnection conn, PostgresDeliaSessionCache sessionCache) {
+			DBConnection conn, PostgresDeliaSessionCache sessionCache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;
@@ -87,11 +82,6 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		super.init1(registry);
-//		this.zinsert = new PostgresZInsert(factorySvc, registry);
-//		this.zquery = new PostgresZQuery(factorySvc, registry);
-//		this.zupdate = new PostgresZUpdate(factorySvc, registry);
-//		this.zupsert = new PostgresZUpsert(factorySvc, registry, dbInterface);
-//		this.zdelete = new PostgresZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 

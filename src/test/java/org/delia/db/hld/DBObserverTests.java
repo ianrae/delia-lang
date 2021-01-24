@@ -18,6 +18,7 @@ import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.CollectingObserverFactory;
+import org.delia.zdb.DBConnectionObserverAdapter;
 import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBExecutor;
@@ -36,7 +37,7 @@ public class DBObserverTests extends BDDBase {
 		public DBObserverAdapter observer;
 
 		@Override
-		public DBExecutor createObserver(DBExecutor actual) {
+		public DBExecutor createObserver(DBExecutor actual, DBConnectionObserverAdapter connAdapter) {
 			observer = new DBObserverAdapter(actual);
 			return observer;
 		}

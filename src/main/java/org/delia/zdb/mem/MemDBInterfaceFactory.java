@@ -12,6 +12,7 @@ import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.SerialProvider.SerialGenerator;
 import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBConnectionObserverAdapter;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
@@ -63,8 +64,9 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	public DBExecutor createExecutor() {
 		DBExecutor exec = new MemDBExecutor(factorySvc, this);
 		
+		//there is no dbconnection for MEM
 		if (observerFactory != null) {
-			DBExecutor observer = observerFactory.createObserver(exec);
+			DBExecutor observer = observerFactory.createObserver(exec, null);
 			return observer;
 		}
 		return exec;

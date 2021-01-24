@@ -48,17 +48,12 @@ import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 
 	private H2DBInterfaceFactory dbInterface;
-	private H2DBConnection conn;
-//	private ZInsert zinsert;
-////	private ZQuery zquery;
-//	private ZUpdate zupdate;
-//	private ZUpsert zupsert;
-//	private ZDelete zdelete;
+	private DBConnection conn;
 	private H2DeliaSessionCache cache;
 	private CacheData cacheData;
 
 	public H2DBExecutor(FactoryService factorySvc, Log sqlLog, H2DBInterfaceFactory dbInterface, 
-			H2DBConnection conn, H2DeliaSessionCache cache) {
+			DBConnection conn, H2DeliaSessionCache cache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;
@@ -83,11 +78,6 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		super.init1(registry);
-//		this.zinsert = new ZInsert(factorySvc, registry);
-//		this.zquery = new ZQuery(factorySvc, registry);
-//		this.zupdate = new ZUpdate(factorySvc, registry);
-//		this.zupsert = new ZUpsert(factorySvc, registry, dbInterface);
-//		this.zdelete = new ZDelete(factorySvc, registry);
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
