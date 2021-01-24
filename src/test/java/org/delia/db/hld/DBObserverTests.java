@@ -12,6 +12,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
+import org.delia.zdb.CollectingObserverFactory;
 import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.ZDBExecutor;
@@ -53,6 +54,21 @@ public class DBObserverTests extends BDDBase {
 		factory.dump();
 	}	
 
+	@Test
+	public void test2() {
+		String src = buildSrc(" insert Customer {id: 5, wid: 33, name:'bob'}");
+		CollectingObserverFactory factory = new CollectingObserverFactory();
+		delia.getOptions().dbObserverFactory = factory;
+		session = delia.beginSession(src);
+		
+		assertEquals(1, factory.getObserver().statements.size());
+		
+		src = " insert Customer {id: 6, wid: 33, name:'sie'}";
+		delia.continueExecution(src, session);
+		
+		assertEquals(1, factory.getObserver().statements.size());
+		
+	}	
 
 
 	//-------------------------
