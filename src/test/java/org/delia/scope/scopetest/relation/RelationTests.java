@@ -16,7 +16,7 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -224,7 +224,7 @@ public class RelationTests { //extends IntegerTestBase {
 	private Delia delia;
 	private DeliaSession sess = null;
 	private boolean addIdFlag;
-	private ZDBInterfaceFactory dbInterface ;
+	private DBInterfaceFactory dbInterface ;
 	private int nextVarNumn = 1;
 	
 	@Before

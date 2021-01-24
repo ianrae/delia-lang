@@ -15,7 +15,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.validation.ValidationRuleRunnerImpl;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class FactoryServiceImpl implements FactoryService {
 	protected Log log;
@@ -75,7 +75,7 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, registry, varEvaluator, datIdMap);
 		return migrator;
 	}
@@ -104,7 +104,7 @@ public class FactoryServiceImpl implements FactoryService {
 		return logFactory;
 	}
 	@Override
-	public ValidationRunner createValidationRunner(ZDBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
+	public ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
 		return new ValidationRuleRunnerImpl(this, dbInterface.getCapabilities(), fetchRunner);
 	}
 //	@Override
@@ -112,7 +112,7 @@ public class FactoryServiceImpl implements FactoryService {
 //		return new HLSSimpleQueryService(this, dbInterface, registry);
 //	}
 	@Override
-	public HLDSimpleQueryService createHLDSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
+	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry) {
 		return new HLDSimpleQueryService(this, dbInterface, registry);
 	}
 

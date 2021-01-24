@@ -23,9 +23,9 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBObserverAdapter;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecuteContext;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecuteContext;
+import org.delia.zdb.DBExecutor;
 import org.delia.zdb.ZTableCreator;
 
 public abstract class ZDBExecutorBase extends ServiceBase {
@@ -52,13 +52,13 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		this.registry = registry;
 	}
 
-	protected ZTableCreator createPartialTableCreator(ZDBExecutor zexec) {
+	protected ZTableCreator createPartialTableCreator(DBExecutor zexec) {
 		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
 		FieldGenFactory fieldGenFactory = createFieldGenFactory();
 		return createZTableCreator(fieldGenFactory, nameFormatter, null, zexec);
 	}
 
-	public void init2(DatIdMap datIdMap, VarEvaluator varEvaluator, ZDBExecutor zexec) {
+	public void init2(DatIdMap datIdMap, VarEvaluator varEvaluator, DBExecutor zexec) {
 		this.init2HasBeenDone = true;
 		this.datIdMap = datIdMap;
 		this.varEvaluator = varEvaluator;
@@ -68,7 +68,7 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		this.tableCreator = createZTableCreator(fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	
-	protected ZTableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, ZDBExecutor zexec) {
+	protected ZTableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		return  new ZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	
@@ -87,7 +87,7 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		}
 	}
 
-	protected void convertAndRethrow(DBValidationException e, ZDBExecutor zexec) {
+	protected void convertAndRethrow(DBValidationException e, DBExecutor zexec) {
 		ZTableCreator tmp = tableCreator == null ? createPartialTableCreator(zexec) : tableCreator;
 		errorConverter.convertAndRethrow(e, tmp.alreadyCreatedL);
 	}
@@ -97,16 +97,16 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		statement.sql = sql;
 		return statement;
 	}
-	protected ZDBExecuteContext createContext() {
-		ZDBExecuteContext dbctx = new ZDBExecuteContext();
+	protected DBExecuteContext createContext() {
+		DBExecuteContext dbctx = new DBExecuteContext();
 		dbctx.logToUse = log;
 		return dbctx;
 	}
 
-	protected boolean execResultBoolean(ZDBConnection conn, SqlStatement statement) {
+	protected boolean execResultBoolean(DBConnection conn, SqlStatement statement) {
 		logSql(statement);
 
-		ZDBExecuteContext dbctx = createContext();
+		DBExecuteContext dbctx = createContext();
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);
 
 		boolean tblExists = false;
@@ -166,10 +166,10 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 		return foundResult;
 	}
 
-	protected void execSqlStatement(ZDBConnection conn, String sql) {
+	protected void execSqlStatement(DBConnection conn, String sql) {
 		logSql(sql);
 		SqlStatement statement = createSqlStatement(sql); 
-		ZDBExecuteContext dbctx = createContext();
+		DBExecuteContext dbctx = createContext();
 		conn.execStatement(statement, dbctx);
 	}
 

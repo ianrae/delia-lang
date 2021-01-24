@@ -21,7 +21,7 @@ import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.type.DValue;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -160,8 +160,8 @@ public class FilmAndActor2Tests  extends BDDBase {
 	}
 	
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 }

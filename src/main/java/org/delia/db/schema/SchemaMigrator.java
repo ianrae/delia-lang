@@ -25,8 +25,8 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.util.StringUtil;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
@@ -36,11 +36,11 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private SchemaFingerprintGenerator fingerprintGenerator;
 	private String currentFingerprint;
 	private String dbFingerprint;
-	private ZDBExecutor zexec;
+	private DBExecutor zexec;
 	private MigrationRunner migrationRunner;
 	private MigrationOptimizer optimizer;
 
-	public SchemaMigrator(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
@@ -443,7 +443,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 //	public RawDBExecutor getRawExecutor() {
 //		return rawExecutor;
 //	}
-	public ZDBExecutor getZDBExecutor() {
+	public DBExecutor getZDBExecutor() {
 		return zexec;
 	}
 

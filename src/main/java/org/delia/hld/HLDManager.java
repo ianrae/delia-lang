@@ -27,8 +27,8 @@ import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * Facade between Delia Runner and the db. Allows us to have different strategies
@@ -40,7 +40,7 @@ import org.delia.zdb.ZDBInterfaceFactory;
  *
  */
 public class HLDManager extends ServiceBase {
-	protected ZDBInterfaceFactory dbInterface;
+	protected DBInterfaceFactory dbInterface;
 	protected DTypeRegistry registry;
 	protected HLSStragey defaultStrategy = new StandardHLSStragey();
 	protected boolean generateSQLforMemFlag;
@@ -60,7 +60,7 @@ public class HLDManager extends ServiceBase {
 		this.aliasManager = new AliasManager(factorySvc);
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
-	public HLDManager(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public HLDManager(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 //		this.session = session;
 		this.dbInterface= dbInterface;
@@ -70,18 +70,18 @@ public class HLDManager extends ServiceBase {
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
 
-	public HLDQueryStatement buildQueryStatement(QuerySpec spec, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public HLDQueryStatement buildQueryStatement(QuerySpec spec, DBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDQueryStatement hld = buildHLD(spec.queryExp, zexec, varEvaluator);
 		hld.querySpec = spec;
 		return hld;
 	}
-	public SqlStatementGroup generateSqlForQuery(HLDQueryStatement hld, ZDBExecutor zexec) {
+	public SqlStatementGroup generateSqlForQuery(HLDQueryStatement hld, DBExecutor zexec) {
 		HLDInnerManager mgr = createManager(zexec);
 		SqlStatementGroup stmgrp = mgr.generateSql(hld);
 		return stmgrp;
 	}
 
-	public HLDQueryStatement buildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public HLDQueryStatement buildHLD(QueryExp queryExp, DBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
 		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp, varEvaluator);
 		logDebug(hld);
@@ -92,11 +92,11 @@ public class HLDManager extends ServiceBase {
 			log.logDebug(hld.toString()); //only do toString if log is enabled
 		}
 	}
-	public boolean canBuildHLD(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public boolean canBuildHLD(QueryExp queryExp, DBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.canBuildQuery(queryExp, varEvaluator);
 	}
-	public HLDDeleteStatement buildHLD(DeleteStatementExp deleteExp, ZDBExecutor zexec) {
+	public HLDDeleteStatement buildHLD(DeleteStatementExp deleteExp, DBExecutor zexec) {
 		QueryExp queryExp = deleteExp.queryExp;
 		
 		HLDInnerManager mgr = createManager(zexec); 
@@ -104,42 +104,42 @@ public class HLDManager extends ServiceBase {
 		logDebug(hlddel);
 		return hlddel;
 	}
-	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, ZDBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator);
 		logDebug(hldupdate);
 		return hldupdate;
 	}
-	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, ZDBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator);
 		logDebug(hldupsert);
 		return hldupsert;
 	}
-	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, ZDBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator) {
+	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator) {
 		HLDInnerManager mgr = createManager(zexec); 
 		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator);
 		logDebug(hldins);
 		return hldins;
 	}
-	public SqlStatementGroup generateSQL(HLDInsertStatement hldins, ZDBExecutor zexec) {
+	public SqlStatementGroup generateSQL(HLDInsertStatement hldins, DBExecutor zexec) {
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldins);
 	}
-	public SqlStatementGroup generateSQL(HLDDeleteStatement hlddel, ZDBExecutor zexec) {
+	public SqlStatementGroup generateSQL(HLDDeleteStatement hlddel, DBExecutor zexec) {
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hlddel);
 	}
-	public SqlStatementGroup generateSQL(HLDUpdateStatement hldupd, ZDBExecutor zexec) {
+	public SqlStatementGroup generateSQL(HLDUpdateStatement hldupd, DBExecutor zexec) {
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldupd);
 	}
-	public SqlStatementGroup generateSQL(HLDUpsertStatement hldupd, ZDBExecutor zexec) {
+	public SqlStatementGroup generateSQL(HLDUpsertStatement hldupd, DBExecutor zexec) {
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldupd);
 	}
 	
-	protected HLDInnerManager createManager(ZDBExecutor zexec) {
+	protected HLDInnerManager createManager(DBExecutor zexec) {
 		return new HLDInnerManager(registry, factorySvc, zexec.getDatIdMap(), sprigSvc);
 	}
 

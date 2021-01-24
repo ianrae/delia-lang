@@ -20,13 +20,13 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
-public class DBObserverAdapter implements ZDBExecutor {
+public class DBObserverAdapter implements DBExecutor {
 	
 	public List<SqlStatement> statements = new ArrayList<>();
-	private ZDBExecutor inner;
+	private DBExecutor inner;
 	private boolean ignoreSimpleSvcSql = true; //ignore delia's internal db queries
 	
-	public DBObserverAdapter(ZDBExecutor inner) {
+	public DBObserverAdapter(DBExecutor inner) {
 		this.inner = inner;
 	}
 
@@ -36,7 +36,7 @@ public class DBObserverAdapter implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBConnection getDBConnection() {
+	public DBConnection getDBConnection() {
 		return inner.getDBConnection();
 	}
 
@@ -178,11 +178,11 @@ public class DBObserverAdapter implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return inner.getDbInterface();
 	}
 
-	public void setInner(ZDBExecutor inner) {
+	public void setInner(DBExecutor inner) {
 		this.inner = inner;
 	}
 

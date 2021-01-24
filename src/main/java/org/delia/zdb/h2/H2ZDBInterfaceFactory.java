@@ -12,11 +12,11 @@ import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
-public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
+public class H2ZDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	private DBCapabilties capabilities;
 	private Log sqlLog;
 	private ConnectionFactory connFactory;
@@ -53,7 +53,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	}
 
 	@Override
-	public ZDBConnection openConnection() {
+	public DBConnection openConnection() {
 		H2ZDBConnection conn;
 		conn = new H2ZDBConnection(factorySvc, connFactory, errorConverter);
 		conn.openDB();
@@ -79,14 +79,14 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	}
 
 	@Override
-	public ZDBExecutor createExecutor() {
+	public DBExecutor createExecutor() {
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
 		Log execLog = createNewLog();
 		execLog.setLevel(sqlLog.getLevel());
-		ZDBExecutor exec = new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		DBExecutor exec = new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		
 		if (observerFactory != null) {
-			ZDBExecutor observer = observerFactory.createObserver(exec);
+			DBExecutor observer = observerFactory.createObserver(exec);
 			return observer;
 		}
 		return exec;

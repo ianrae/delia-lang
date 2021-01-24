@@ -4,7 +4,7 @@ import org.delia.bdd.BDDBase;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -357,7 +357,7 @@ public class PostgresBDDTests extends BDDBase {
 	}
 	
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
 		dbInterfaceToUse = db;

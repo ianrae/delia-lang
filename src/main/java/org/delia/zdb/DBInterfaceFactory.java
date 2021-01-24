@@ -4,14 +4,14 @@ import org.delia.db.DBCapabilties;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 
-public interface ZDBInterfaceFactory {
+public interface DBInterfaceFactory {
 	DBType getDBType();
 	DBCapabilties getCapabilities();
 	void setDBErrorConverter(DBErrorConverter errorConverter);
 	DBErrorConverter getDBErrorConverter();
 	
-	ZDBConnection openConnection();
-	ZDBExecutor createExecutor();
+	DBConnection openConnection();
+	DBExecutor createExecutor();
 	
 	boolean isSQLLoggingEnabled();
 	void enableSQLLogging(boolean b);

@@ -11,7 +11,7 @@ import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObjIterator;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class InputFunctionTestBase  extends BDDBase {
 
@@ -35,8 +35,8 @@ public class InputFunctionTestBase  extends BDDBase {
 	}
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

@@ -5,13 +5,13 @@ import java.util.StringJoiner;
 
 import org.delia.base.UnitTestLog;
 import org.delia.log.Log;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class BDDTestRunner {
 	private Log log = new UnitTestLog();
 	private int testIndexToRun = -1;
 	public int numSkippedTests;
-	private ZDBInterfaceFactory retainedDBinterface;
+	private DBInterfaceFactory retainedDBinterface;
 	private DBInterfaceCreator creator;
 	public String diagnosticFilter = "";
 	
@@ -19,7 +19,7 @@ public class BDDTestRunner {
 		this.creator = creator;
 	}
 
-	public int runTests(List<BDDTest> tests, ZDBInterfaceFactory dbInterface) {
+	public int runTests(List<BDDTest> tests, DBInterfaceFactory dbInterface) {
 		int numPass = 0;
 		BDDFeature currentFeature = null;
 		int index = 0;

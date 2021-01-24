@@ -15,8 +15,8 @@ import org.delia.db.SqlStatement;
 import org.delia.zdb.CollectingObserverFactory;
 import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class DBObserverTests extends BDDBase {
 		public DBObserverAdapter observer;
 
 		@Override
-		public ZDBExecutor createObserver(ZDBExecutor actual) {
+		public DBExecutor createObserver(DBExecutor actual) {
 			observer = new DBObserverAdapter(actual);
 			return observer;
 		}
@@ -93,7 +93,7 @@ public class DBObserverTests extends BDDBase {
 		return src;
 	}
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -34,7 +34,7 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecutor;
 
 public abstract class MemDBExecutorBase extends ServiceBase implements ZDBInternal {
 

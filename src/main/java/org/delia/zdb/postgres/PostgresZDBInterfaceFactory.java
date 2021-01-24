@@ -11,11 +11,11 @@ import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
-public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
+public class PostgresZDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	private DBCapabilties capabilities;
 	private SimpleLog sqlLog;
 	private ConnectionFactory connFactory;
@@ -44,7 +44,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 	}
 
 	@Override
-	public ZDBConnection openConnection() {
+	public DBConnection openConnection() {
 		PostgresZDBConnection conn = new PostgresZDBConnection(factorySvc, connFactory, errorConverter);
 		conn.openDB();
 		return conn;
@@ -69,14 +69,14 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 	}
 
 	@Override
-	public ZDBExecutor createExecutor() {
+	public DBExecutor createExecutor() {
 		PostgresZDBConnection conn = (PostgresZDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
-		ZDBExecutor exec = new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		DBExecutor exec = new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		
 		if (observerFactory != null) {
-			ZDBExecutor observer = observerFactory.createObserver(exec);
+			DBExecutor observer = observerFactory.createObserver(exec);
 			return observer;
 		}
 		return exec;

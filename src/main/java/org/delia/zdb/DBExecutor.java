@@ -17,8 +17,8 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
-public interface ZDBExecutor extends AutoCloseable {
-	ZDBConnection getDBConnection(); //for raw db access
+public interface DBExecutor extends AutoCloseable {
+	DBConnection getDBConnection(); //for raw db access
 	Log getLog();
 
 	//executor holds session data regarding db
@@ -52,6 +52,6 @@ public interface ZDBExecutor extends AutoCloseable {
 	void alterFieldType(String typeName, String fieldName, String newFieldType);
 	void alterField(String typeName, String fieldName, String deltaFlags);
 
-	ZDBInterfaceFactory getDbInterface();
+	DBInterfaceFactory getDbInterface();
 	
 }

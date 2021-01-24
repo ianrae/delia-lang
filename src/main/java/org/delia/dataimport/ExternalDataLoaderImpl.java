@@ -14,14 +14,14 @@ import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.type.DRelation;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataLoader {
 
 	private DeliaSession externalSession;
 	private DTypeRegistry externalRegistry;
-	private ZDBInterfaceFactory externalDBInterface;
+	private DBInterfaceFactory externalDBInterface;
 	private DoNothingVarEvaluator varEvaluator;
 
 	public ExternalDataLoaderImpl(FactoryService factorySvc, DeliaSession externalSession) {
@@ -38,7 +38,7 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		HLDSimpleQueryService querySvc = createQuerySvc(); 
 		
 		QueryResponse qresp = null;
-		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+		try(DBExecutor dbexecutor = externalDBInterface.createExecutor()) {
 			dbexecutor.init1(externalSession.getExecutionContext().registry);
 			dbexecutor.init2(externalSession.getDatIdMap(), varEvaluator);
 			qresp = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());
@@ -60,7 +60,7 @@ public class ExternalDataLoaderImpl extends ServiceBase implements ExternalDataL
 		HLDSimpleQueryService querySvc = createQuerySvc(); 
 
 		QueryResponse qresp = null;
-		try(ZDBExecutor dbexecutor = externalDBInterface.createExecutor()) {
+		try(DBExecutor dbexecutor = externalDBInterface.createExecutor()) {
 			dbexecutor.init1(externalSession.getExecutionContext().registry);
 			dbexecutor.init2(externalSession.getDatIdMap(), varEvaluator);
 			qresp = querySvc.execQueryEx(spec.queryExp, dbexecutor, new DoNothingVarEvaluator());

@@ -34,7 +34,7 @@ public class ZTableCreator extends ServiceBase {
 	public DatIdMap datIdMap;
 	
 	public ZTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, DatIdMap datIdMap, ZDBExecutor zexec) {
+				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;

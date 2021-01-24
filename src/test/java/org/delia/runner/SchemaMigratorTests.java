@@ -14,7 +14,7 @@ import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Test;
 
 /**
@@ -71,7 +71,7 @@ public class SchemaMigratorTests {
 
 	// --
 	//private Runner runner;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private SchemaMigrator migrator;
 	private RunnerHelper helper = new RunnerHelper();
 

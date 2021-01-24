@@ -38,8 +38,8 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DTypeRegistryBuilder;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -51,8 +51,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		public static final String VAR_SERIAL = "_serial";
 		Map<String,ResultValue> varMap = new HashMap<>(); //ok for thread-safety
 		protected DTypeRegistry registry;
-		private ZDBInterfaceFactory dbInterface;
-		private ZDBExecutor dbexecutor;
+		private DBInterfaceFactory dbInterface;
+		private DBExecutor dbexecutor;
 //		private ZDBExecutor zexec;
 		protected FetchRunner fetchRunner;
 		Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //ok for thread-safety
@@ -67,7 +67,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private DatIdMap datIdMap;
 		private UpdateStatementRunner updateStatementRunner;
 		
-		public RunnerImpl(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
+		public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
 		}

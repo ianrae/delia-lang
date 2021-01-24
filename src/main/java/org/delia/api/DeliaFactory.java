@@ -8,7 +8,7 @@ import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
@@ -31,7 +31,7 @@ public class DeliaFactory {
 	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc) {
 		ConnectionFactory connFactory = new ConnectionFactoryImpl(connectionString, log);
 		
-		ZDBInterfaceFactory dbInterface = null;
+		DBInterfaceFactory dbInterface = null;
 		switch(dbType) {
 		case MEM:
 			dbInterface = new MemZDBInterfaceFactory(factorySvc);
@@ -49,7 +49,7 @@ public class DeliaFactory {
 		return create(dbInterface, log, factorySvc);
 	}
 	
-	public static Delia create(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
+	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		return new DeliaImpl(dbInterface, log, factorySvc);
 	}
 }

@@ -21,8 +21,8 @@ import org.delia.sort.topo.TopoTestBase;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBExecuteContext;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecuteContext;
+import org.delia.zdb.DBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -187,11 +187,11 @@ public class H2MigrationTests extends TopoTestBase {
 	private void doEnumAllTables() {
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2);
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
-		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+		try(DBExecutor zexec = dbInterface.createExecutor()) {
 			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 //			zexec.getDBConnection().execStatement(statement, null);
-			ZDBExecuteContext dbctx = new ZDBExecuteContext();
+			DBExecuteContext dbctx = new DBExecuteContext();
 			dbctx.logToUse = log;
 
 			zexec.getDBConnection().enumerateDBSchema(sql, "all tables", dbctx);
@@ -263,7 +263,7 @@ public class H2MigrationTests extends TopoTestBase {
 	}
 	private void chkTblExists(String tableName, boolean expected) {
 		DBAccessContext dbctx = new DBAccessContext(sess.getExecutionContext().registry, new DoNothingVarEvaluator());
-		try(ZDBExecutor dbexecutor = dbInterface.createExecutor()) {
+		try(DBExecutor dbexecutor = dbInterface.createExecutor()) {
 			boolean b = dbexecutor.rawTableDetect(tableName);
 			assertEquals(expected, b);
 		} catch (Exception e) {

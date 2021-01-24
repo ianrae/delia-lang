@@ -15,13 +15,13 @@ import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecutor;
 import org.delia.zdb.ZTableCreator;
 
 public class PostgresZTableCreator extends ZTableCreator {
 	
 	public PostgresZTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, DatIdMap datIdMap, ZDBExecutor zexec) {
+				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec);
 	}
 

@@ -11,7 +11,7 @@ import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class TypeDao {
 	private DeliaGenericDao innerDao;
@@ -68,7 +68,7 @@ public class TypeDao {
 		return innerDao.getDelia();
 	}
 
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return innerDao.getDbInterface();
 	}
 

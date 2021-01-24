@@ -38,11 +38,11 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
-public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
+public class MemZDBExecutor extends MemDBExecutorBase implements DBExecutor {
 
 	private DatIdMap datIdMap;
 	private VarEvaluator varEvaluator;
@@ -55,7 +55,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBConnection getDBConnection() {
+	public DBConnection getDBConnection() {
 		return null; //none for MEM
 	}
 	
@@ -400,7 +400,7 @@ public class MemZDBExecutor extends MemDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return dbInterface;
 	}
 	@Override

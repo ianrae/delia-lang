@@ -1,7 +1,7 @@
 package org.delia.bdd.core;
 
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public interface DBInterfaceCreator {
-	ZDBInterfaceFactory createForTest();
+	DBInterfaceFactory createForTest();
 }

@@ -3,7 +3,7 @@ package org.delia.bdd;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.log.LogLevel;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -354,7 +354,7 @@ public class AllBDDTests extends BDDBase {
 	}
 	
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		MemZDBInterfaceFactory db;
 		db = new MemZDBInterfaceFactory(createFactorySvc());
 		

@@ -16,7 +16,7 @@ import org.delia.log.Log;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * Represents delia access to a single database through its Delia types.
@@ -28,7 +28,7 @@ import org.delia.zdb.ZDBInterfaceFactory;
  */
 public class DeliaGenericDao  {
 	private Delia delia;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 	private FactoryService factorySvc;
 	
@@ -134,7 +134,7 @@ public class DeliaGenericDao  {
 		return delia;
 	}
 
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return dbInterface;
 	}
 

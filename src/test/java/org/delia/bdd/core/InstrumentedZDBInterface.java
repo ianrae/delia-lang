@@ -10,17 +10,17 @@ import org.delia.h2.H2ConnectionHelper;
 import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
-public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
+public class InstrumentedZDBInterface implements DBInterfaceFactory {
 	
 	protected DBType dbType;
-	protected ZDBInterfaceFactory actualInterface;
+	protected DBInterfaceFactory actualInterface;
 	
 	public InstrumentedZDBInterface(DBType dbType) {
 		this.dbType = dbType;
@@ -48,7 +48,7 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 			DeliaExceptionHelper.throwError("db not yet supported", "DBType %s not supported", dbType.name());
 		}
 	}
-	public void init(ZDBInterfaceFactory actual) {
+	public void init(DBInterfaceFactory actual) {
 		actualInterface = actual;
 	}
 
@@ -63,12 +63,12 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	}
 
 	@Override
-	public ZDBConnection openConnection() {
+	public DBConnection openConnection() {
 		return actualInterface.openConnection();
 	}
 
 	@Override
-	public ZDBExecutor createExecutor() {
+	public DBExecutor createExecutor() {
 		return actualInterface.createExecutor();
 	}
 

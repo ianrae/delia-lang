@@ -11,7 +11,7 @@ import org.delia.bdd.core.BDDTest;
 import org.delia.bdd.core.BDDTestRunner;
 import org.delia.bdd.core.BDDTester;
 import org.delia.util.TextFileReader;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -54,7 +54,7 @@ public class NewBDDTests extends BDDBase {
 		chkTestWhen(tests, 0, "let x int = 5");
 		
 		BDDTestRunner runner = new BDDTestRunner(this);
-		ZDBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
+		DBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		assertEquals(1, passes);
 	}
@@ -71,7 +71,7 @@ public class NewBDDTests extends BDDBase {
 		chkTestWhen(tests, 0, "let x int = z");
 		
 		BDDTestRunner runner = new BDDTestRunner(this);
-		ZDBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
+		DBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		assertEquals(1, passes);
 	}
@@ -88,7 +88,7 @@ public class NewBDDTests extends BDDBase {
 		chkTestWhen(tests, 0, "let x int = z");
 		
 		BDDTestRunner runner = new BDDTestRunner(this);
-		ZDBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
+		DBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		assertEquals(0, passes);
 	}
@@ -103,7 +103,7 @@ public class NewBDDTests extends BDDBase {
 		
 		List<BDDTest> tests = parser.parse(lines);
 		BDDTestRunner runner = new BDDTestRunner(this);
-		ZDBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
+		DBInterfaceFactory dbInterface = DBTestHelper.createMEMDb(createFactorySvc());
 		int passes = runner.runTests(tests, dbInterface);
 		
 		int numTests = 10;
@@ -153,7 +153,7 @@ public class NewBDDTests extends BDDBase {
 	}
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		return DBTestHelper.createMEMDb(createFactorySvc());
 	}
 

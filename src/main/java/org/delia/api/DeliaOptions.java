@@ -1,7 +1,7 @@
 package org.delia.api;
 
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecutor;
 
 /**
  * Options that can be changed during the lifetime of a Delia object.

@@ -11,7 +11,7 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -201,8 +201,8 @@ public class ReplRunnerTests extends BDDBase {
 	}
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

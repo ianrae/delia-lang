@@ -16,7 +16,7 @@ import org.delia.runner.InternalCompileState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class NewLegacyRunner {
 	private Delia delia;
@@ -64,7 +64,7 @@ public class NewLegacyRunner {
 	public Delia getDelia() {
 		return delia;
 	}
-	public void forceDBInterface(ZDBInterfaceFactory dbInter) {
+	public void forceDBInterface(DBInterfaceFactory dbInter) {
 		DeliaImpl deliaimpl = (DeliaImpl) delia;
 		deliaimpl.setDbInterface(dbInter);
 	}

@@ -41,15 +41,15 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecuteContext;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecuteContext;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 import org.delia.zdb.h2.ZDBExecutorBase;
 
-public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
+public class PostgresZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 
 	private PostgresZDBInterfaceFactory dbInterface;
 	private PostgresZDBConnection conn;
@@ -71,7 +71,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	@Override
-	public ZDBConnection getDBConnection() {
+	public DBConnection getDBConnection() {
 		return conn;
 	}
 
@@ -100,7 +100,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 	
 	@Override
-	protected ZTableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, ZDBExecutor zexec) {
+	protected ZTableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		return  new PostgresZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	@Override
@@ -133,9 +133,9 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		logStatementGroup(stgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;
-		ZDBExecuteContext dbctxMain = null; //only one statement is allowed to generate keys
+		DBExecuteContext dbctxMain = null; //only one statement is allowed to generate keys
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				int n = conn.executeCommandStatementGenKey(statement, keyType, dbctx);
 				nTotal += n;
@@ -214,7 +214,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		int updateCount = 0;
 		List<Integer > updateCountL = new ArrayList<>();
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				//ignore empty statements. 
 				if (statement.owner == hld.hldupdate && hld.hldupdate.isEmpty()) {
@@ -244,7 +244,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		int updateCount = 0;
 		List<Integer > updateCountL = new ArrayList<>();
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				int n = conn.executeCommandStatement(statement, dbctx);
 				updateCountL.add(n);
@@ -264,7 +264,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 
 		logStatementGroup(stgroup);
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				conn.execStatement(statement, dbctx);
 			}
@@ -280,7 +280,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 		SqlStatement statement = stmgrp.statementL.get(0);
 		logSql(statement);
 
-		ZDBExecuteContext dbctx = createContext();
+		DBExecuteContext dbctx = createContext();
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);   // *** call the DB ***
 		//TODO: do we need to catch and interpret exceptions here??
 
@@ -322,7 +322,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	private void execSqlStatement(String sql) {
 		logSql(sql);
 		SqlStatement statement = createSqlStatement(sql); 
-		ZDBExecuteContext dbctx = createContext();
+		DBExecuteContext dbctx = createContext();
 		conn.execStatement(statement, dbctx);
 	}
 
@@ -387,7 +387,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements ZDBExecutor 
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return dbInterface;
 	}
 	@Override

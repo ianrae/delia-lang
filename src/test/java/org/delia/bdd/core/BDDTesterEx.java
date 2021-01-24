@@ -27,7 +27,7 @@ import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.valuebuilder.IntegerValueBuilder;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 
 public class BDDTesterEx {
@@ -56,11 +56,11 @@ public class BDDTesterEx {
 	private Log log = new UnitTestLog();
 
 	private DeliaClient client;
-	ZDBInterfaceFactory dbInterface;
+	DBInterfaceFactory dbInterface;
 	private String diagnosticFilter;
 	private BDDTest currentTest;
 
-	BDDTesterEx(ZDBInterfaceFactory retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables, String diagnosticFilter) {
+	BDDTesterEx(DBInterfaceFactory retainedDBInterface, DBInterfaceCreator creator, BDDTest test, String cleanTables, String diagnosticFilter) {
 		this.currentTest = test;
 		this.diagnosticFilter = diagnosticFilter;
 		if (retainedDBInterface == null) {

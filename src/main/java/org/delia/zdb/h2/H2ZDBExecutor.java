@@ -38,14 +38,14 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecuteContext;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecuteContext;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.ZTableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
-public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
+public class H2ZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 
 	private H2ZDBInterfaceFactory dbInterface;
 	private H2ZDBConnection conn;
@@ -67,7 +67,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBConnection getDBConnection() {
+	public DBConnection getDBConnection() {
 		return conn;
 	}
 
@@ -132,9 +132,9 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		logStatementGroup(stmgroup);
 		DType keyType = ctx.genKeytype;
 		int nTotal = 0;
-		ZDBExecuteContext dbctxMain = null; //can only be one statement that generates keys
+		DBExecuteContext dbctxMain = null; //can only be one statement that generates keys
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stmgroup.statementL) {
 				int n = conn.executeCommandStatementGenKey(statement, keyType, dbctx);
 				nTotal += n;
@@ -201,7 +201,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		int updateCount = 0;
 		List<Integer > updateCountL = new ArrayList<>();
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				//ignore empty statements. 
 				if (statement.owner == hld.hldupdate && hld.hldupdate.isEmpty()) {
@@ -231,7 +231,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		int updateCount = 0;
 		List<Integer > updateCountL = new ArrayList<>();
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				int n = conn.executeCommandStatement(statement, dbctx);
 				updateCountL.add(n);
@@ -251,7 +251,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 
 		logStatementGroup(stgroup);
 		try {
-			ZDBExecuteContext dbctx = createContext();
+			DBExecuteContext dbctx = createContext();
 			for(SqlStatement statement: stgroup.statementL) {
 				conn.execStatement(statement, dbctx);
 			}
@@ -266,7 +266,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 		SqlStatement statement = stmgrp.statementL.get(0);
 		logSql(statement);
 
-		ZDBExecuteContext dbctx = createContext();
+		DBExecuteContext dbctx = createContext();
 		ResultSet rs = conn.execQueryStatement(statement, dbctx);   // *** call the DB ***
 		//TODO: do we need to catch and interpret exceptions here??
 
@@ -308,7 +308,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	private void execSqlStatement(String sql) {
 		logSql(sql);
 		SqlStatement statement = createSqlStatement(sql); 
-		ZDBExecuteContext dbctx = createContext();
+		DBExecuteContext dbctx = createContext();
 		conn.execStatement(statement, dbctx);
 	}
 
@@ -373,7 +373,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return dbInterface;
 	}
 	@Override

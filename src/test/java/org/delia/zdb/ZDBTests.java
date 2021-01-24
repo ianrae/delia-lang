@@ -62,7 +62,7 @@ public class ZDBTests  extends BDDBase {
 		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(factorySvc, connFact);
 		
 		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
-		ZDBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
+		DBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();
@@ -109,8 +109,8 @@ public class ZDBTests  extends BDDBase {
 	}
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

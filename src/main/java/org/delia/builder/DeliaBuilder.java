@@ -11,7 +11,7 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
 import org.delia.log.SimpleLog;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * Main builder for creating your application's Delia object.
@@ -71,7 +71,7 @@ public class DeliaBuilder {
 	 * @param dbInterface
 	 * @return
 	 */
-	public Delia buildEx(ZDBInterfaceFactory dbInterface, FactoryService factorySvc) {
+	public Delia buildEx(DBInterfaceFactory dbInterface, FactoryService factorySvc) {
 		Delia delia = DeliaFactory.create(dbInterface, log, factorySvc);
 		return delia;
 	}

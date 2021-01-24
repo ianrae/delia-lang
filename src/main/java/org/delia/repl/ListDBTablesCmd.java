@@ -6,8 +6,8 @@ import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlStatement;
 import org.delia.db.h2.DBListingType;
 import org.delia.runner.ResultValue;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class ListDBTablesCmd extends CmdBase {
 	public ListDBTablesCmd() {
@@ -30,11 +30,11 @@ public class ListDBTablesCmd extends CmdBase {
 	@Override
 	public ResultValue runCmd(Cmd cmd, ReplRunner runner) {
 		Delia delia = runner.getDelia();
-		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
+		DBInterfaceFactory dbInterface = delia.getDBInterface();
 		
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType());
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
-		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+		try(DBExecutor zexec = dbInterface.createExecutor()) {
 			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			zexec.getDBConnection().execStatement(statement, null);

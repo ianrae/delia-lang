@@ -25,7 +25,7 @@ import org.delia.core.TimeZoneServiceImpl;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public abstract class BDDBase implements DBInterfaceCreator {
 	
@@ -75,7 +75,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	protected FileHelper fileHelper = new FileHelper();
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
-	protected ZDBInterfaceFactory dbInterfaceToUse;
+	protected DBInterfaceFactory dbInterfaceToUse;
 	protected String diagnosticFilter = "";
 	
 	protected List<String> filesExecutedL = new ArrayList<>();
@@ -252,7 +252,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		assertEquals(0, missedL.size());
 	}
 
-	public abstract ZDBInterfaceFactory createForTest();
+	public abstract DBInterfaceFactory createForTest();
 	
 	protected FactoryService createFactorySvc() {
 		return new FactoryServiceImpl(log, new SimpleErrorTracker(log));

@@ -9,16 +9,16 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class MigrationRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
-	private ZDBExecutor dbexecutor;
+	private DBExecutor dbexecutor;
 	private MigrateInsertRunner insertRunner;
 
-	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, ZDBExecutor dbexecutor, ZDBInterfaceFactory dbInterface) {
+	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;

@@ -7,7 +7,7 @@ import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.db.DBType;
 import org.delia.h2.H2ConnectionHelper;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class ReplTests extends BDDBase {
 	public void init() {
 	}
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		return null;
 	}
 

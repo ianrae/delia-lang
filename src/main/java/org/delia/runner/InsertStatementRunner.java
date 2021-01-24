@@ -25,8 +25,8 @@ import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * @author Ian Rae
@@ -35,11 +35,11 @@ import org.delia.zdb.ZDBInterfaceFactory;
 public class InsertStatementRunner extends ServiceBase {
 	Map<String,ResultValue> varMap;
 	private DTypeRegistry registry;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private Runner runner;
 	private DValueIterator insertPrebuiltValueIterator;
 
-	public InsertStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, Runner runner, 
+	public InsertStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, Runner runner, 
 			DTypeRegistry registry, Map<String,ResultValue> varMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
@@ -52,7 +52,7 @@ public class InsertStatementRunner extends ServiceBase {
 		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
-	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDManager hldManager, ZDBExecutor dbexecutor, FetchRunner fetchRunner, 
+	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDManager hldManager, DBExecutor dbexecutor, FetchRunner fetchRunner, 
 			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
 
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
@@ -146,7 +146,7 @@ public class InsertStatementRunner extends ServiceBase {
 		res.val = null;
 	}
 	private DValue doDBInsert(HLDInsertStatement hldins, SqlStatementGroup stmgrp, ConversionResult cres,
-			InsertContext ctx, ZDBExecutor dbexecutor) {
+			InsertContext ctx, DBExecutor dbexecutor) {
 		return dbexecutor.executeInsert(hldins, stmgrp, ctx);
 	}
 

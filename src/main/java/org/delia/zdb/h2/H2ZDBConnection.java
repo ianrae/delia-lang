@@ -15,10 +15,10 @@ import org.delia.db.SqlStatement;
 import org.delia.db.ValueHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.type.DType;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecuteContext;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecuteContext;
 
-public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
+public class H2ZDBConnection extends ServiceBase implements DBConnection {
 	protected Connection conn;
 	protected ConnectionFactory connectionFactory;
 	protected ValueHelper valueHelper;
@@ -50,7 +50,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	}
 
 	@Override
-	public ResultSet execQueryStatement(SqlStatement statement, ZDBExecuteContext dbctx) {
+	public ResultSet execQueryStatement(SqlStatement statement, DBExecuteContext dbctx) {
 		ResultSet rs = null;
 		try {
 			PreparedStatement stm = createPrepStatement(statement);
@@ -69,7 +69,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	}
 
 	@Override
-	public void execStatement(SqlStatement statement, ZDBExecuteContext sqlctx) {
+	public void execStatement(SqlStatement statement, DBExecuteContext sqlctx) {
 		boolean b = false;
 		try {
 			PreparedStatement stm = createPrepStatement(statement);
@@ -80,7 +80,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	}
 
 	@Override
-	public int executeCommandStatement(SqlStatement statement, ZDBExecuteContext sqlctx) {
+	public int executeCommandStatement(SqlStatement statement, DBExecuteContext sqlctx) {
 		boolean b = false;
 		int affectedRows = 0;
 		try {
@@ -94,7 +94,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	}
 
 	@Override
-	public int executeCommandStatementGenKey(SqlStatement statement, DType keyType, ZDBExecuteContext sqlctx) {
+	public int executeCommandStatementGenKey(SqlStatement statement, DType keyType, DBExecuteContext sqlctx) {
 		boolean b = false;
 		int affectedRows = 0;
 		try {
@@ -111,7 +111,7 @@ public class H2ZDBConnection extends ServiceBase implements ZDBConnection {
 	}
 
 	@Override
-	public void enumerateDBSchema(String sql, String title, ZDBExecuteContext dbctx) {
+	public void enumerateDBSchema(String sql, String title, DBExecuteContext dbctx) {
 		ResultSet rs = null;
 		try {
 			//String sql = String.format("SELECT count(*) from %s;", tableName);

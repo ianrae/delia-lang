@@ -17,11 +17,11 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 
-public class InstrumentedZDBExecutor implements ZDBExecutor {
+public class InstrumentedDBExecutor implements DBExecutor {
 
-	private ZDBExecutor zexec;
+	private DBExecutor zexec;
 
-	public InstrumentedZDBExecutor(ZDBExecutor zexec) {
+	public InstrumentedDBExecutor(DBExecutor zexec) {
 		this.zexec = zexec;
 	}
 
@@ -35,7 +35,7 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBConnection getDBConnection() {
+	public DBConnection getDBConnection() {
 		return zexec.getDBConnection();
 	}
 
@@ -150,7 +150,7 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDbInterface() {
+	public DBInterfaceFactory getDbInterface() {
 		return zexec.getDbInterface();
 	}
 

@@ -11,11 +11,11 @@ import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.SerialProvider.SerialGenerator;
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.ZDBConnection;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
-public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFactory {
+public class MemZDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
@@ -45,7 +45,7 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	}
 
 	@Override
-	public ZDBConnection openConnection() {
+	public DBConnection openConnection() {
 		return null; //no connection for MEM
 	}
 
@@ -60,11 +60,11 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	}
 	
 	@Override
-	public ZDBExecutor createExecutor() {
-		ZDBExecutor exec = new MemZDBExecutor(factorySvc, this);
+	public DBExecutor createExecutor() {
+		DBExecutor exec = new MemZDBExecutor(factorySvc, this);
 		
 		if (observerFactory != null) {
-			ZDBExecutor observer = observerFactory.createObserver(exec);
+			DBExecutor observer = observerFactory.createObserver(exec);
 			return observer;
 		}
 		return exec;

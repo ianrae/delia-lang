@@ -5,7 +5,7 @@ public class CollectingObserverFactory implements DBObserverFactory {
 	private DBObserverAdapter observer;
 
 	@Override
-	public ZDBExecutor createObserver(ZDBExecutor actual) {
+	public DBExecutor createObserver(DBExecutor actual) {
 		if (observer == null) {
 			observer = new DBObserverAdapter(actual);
 		} else {

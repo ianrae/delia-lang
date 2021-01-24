@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.delia.log.Log;
 
-public class ZDBExecuteContext  {
+public class DBExecuteContext  {
 	public Log logToUse; //can be null
 	
 	//only for executeCommandStatementGenKey

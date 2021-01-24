@@ -19,16 +19,16 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecutor;
 
 public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 
 	private DTypeRegistry registry;
 	private VarEvaluator varEvaluator;
-	private ZDBExecutor dbexecutor;
+	private DBExecutor dbexecutor;
 	private HLDSimpleQueryService querySvc;
 
-	public ZFetchRunnerImpl(FactoryService factorySvc, ZDBExecutor dbexecutor, DTypeRegistry registry, VarEvaluator eval) {
+	public ZFetchRunnerImpl(FactoryService factorySvc, DBExecutor dbexecutor, DTypeRegistry registry, VarEvaluator eval) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;

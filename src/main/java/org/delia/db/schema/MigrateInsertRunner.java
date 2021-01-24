@@ -21,8 +21,8 @@ import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * Perform INSERT statements using HLD.
@@ -33,10 +33,10 @@ import org.delia.zdb.ZDBInterfaceFactory;
 public class MigrateInsertRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
-	private ZDBExecutor dbexecutor;
-	private ZDBInterfaceFactory dbInterface;
+	private DBExecutor dbexecutor;
+	private DBInterfaceFactory dbInterface;
 
-	public MigrateInsertRunner(FactoryService factorySvc, DTypeRegistry registry, ZDBExecutor dbexecutor, ZDBInterfaceFactory dbInterface) {
+	public MigrateInsertRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;

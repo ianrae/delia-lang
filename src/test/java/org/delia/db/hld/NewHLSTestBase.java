@@ -36,7 +36,7 @@ import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.After;
 
@@ -314,7 +314,7 @@ public class NewHLSTestBase extends BDDBase {
 	
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		return null;
 //		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
 //		db.createSingleMemDB();

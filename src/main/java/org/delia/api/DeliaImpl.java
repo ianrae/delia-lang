@@ -28,7 +28,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.typebuilder.TypePreRunner;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class DeliaImpl implements Delia {
 	private static class MigrationExtraInfo {
@@ -38,13 +38,13 @@ public class DeliaImpl implements Delia {
 //	public static boolean useNewHLD = true;
 	
 	private Log log;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
 	private ErrorAdjuster errorAdjuster;
 	
-	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
+	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
@@ -358,11 +358,11 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDBInterface() {
+	public DBInterfaceFactory getDBInterface() {
 		return dbInterface;
 	}
 	//for internal use only - unit tests
-	public void setDbInterface(ZDBInterfaceFactory dbInterface) {
+	public void setDbInterface(DBInterfaceFactory dbInterface) {
 		this.dbInterface = dbInterface;
 	}
 }

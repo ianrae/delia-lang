@@ -8,7 +8,7 @@ import org.delia.core.FactoryService;
 import org.delia.log.Log;
 import org.delia.runner.InternalCompileState;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class CompilerHelper {
 	
@@ -16,7 +16,7 @@ public class CompilerHelper {
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions;
 	
-	public CompilerHelper(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc, DeliaOptions options) {
+	public CompilerHelper(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc, DeliaOptions options) {
 		this.log = log;
 		this.factorySvc = factorySvc;
 		this.deliaOptions = options;
