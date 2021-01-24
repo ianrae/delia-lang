@@ -93,7 +93,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 		
 		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		if (observerFactory != null) {
-			DBExecutor observer = observerFactory.createObserver(exec, null, ignoreSimpleSvcSql);
+			DBExecutor observer = observerFactory.createObserver(exec, connAdapter, ignoreSimpleSvcSql);
 			return observer;
 		}
 		return exec;
