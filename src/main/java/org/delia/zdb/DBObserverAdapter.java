@@ -22,13 +22,17 @@ import org.delia.type.DValue;
 
 public class DBObserverAdapter implements DBExecutor {
 	
-	public List<SqlStatement> statements = new ArrayList<>();
+	private List<SqlStatement> statements = new ArrayList<>();
 	private DBExecutor inner;
 	private boolean ignoreSimpleSvcSql = true; //ignore delia's internal db queries
 	
 	public DBObserverAdapter(DBExecutor inner, boolean ignoreSimpleSvcSql) {
 		this.inner = inner;
 		this.ignoreSimpleSvcSql = ignoreSimpleSvcSql;
+	}
+	
+	public List<SqlStatement> getStatementList() {
+		return statements;
 	}
 
 	@Override

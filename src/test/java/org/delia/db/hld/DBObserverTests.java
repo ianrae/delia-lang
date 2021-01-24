@@ -43,7 +43,7 @@ public class DBObserverTests extends BDDBase {
 		}
 		
 		public void dump() {
-			for(SqlStatement sql: observer.statements) {
+			for(SqlStatement sql: observer.getStatementList()) {
 				System.out.println(sql.sql);
 			}
 		}
@@ -57,7 +57,7 @@ public class DBObserverTests extends BDDBase {
 		delia.getFactoryService().setEnableMEMSqlGenerationFlag(true);
 		session = delia.beginSession(src);
 		
-		assertEquals(1, factory.observer.statements.size());
+		assertEquals(1, factory.observer.getStatementList().size());
 		factory.dump();
 	}	
 
@@ -70,13 +70,13 @@ public class DBObserverTests extends BDDBase {
 		session = delia.beginSession(src);
 		
 		dump(factory.getObserver());
-		assertEquals(1, factory.getObserver().statements.size());
+		assertEquals(1, factory.getObserver().getStatementList().size());
 		
 		src = " insert Customer {id: 6, wid: 33, name:'sie'}";
 		delia.continueExecution(src, session);
 		log.log("..2..");
 		dump(factory.getObserver());
-		assertEquals(2, factory.getObserver().statements.size());
+		assertEquals(2, factory.getObserver().getStatementList().size());
 	}	
 
 	@Test
@@ -100,13 +100,13 @@ public class DBObserverTests extends BDDBase {
 		session = delia.beginSession(src);
 		
 		dump(factory.getObserver());
-		assertEquals(7, factory.getObserver().statements.size());
+		assertEquals(7, factory.getObserver().getStatementList().size());
 		
 		src = " insert Customer {id: 6, wid: 33, name:'sie'}";
 		delia.continueExecution(src, session);
 		log.log("..2..");
 		dump(factory.getObserver());
-		assertEquals(2, factory.getObserver().statements.size());
+		assertEquals(2, factory.getObserver().getStatementList().size());
 	}	
 
 	//-------------------------
@@ -135,7 +135,7 @@ public class DBObserverTests extends BDDBase {
 		return null;
 	}
 	public void dump(DBObserverAdapter adapter) {
-		for(SqlStatement sql: adapter.statements) {
+		for(SqlStatement sql: adapter.getStatementList()) {
 			System.out.println(sql.sql);
 		}
 	}

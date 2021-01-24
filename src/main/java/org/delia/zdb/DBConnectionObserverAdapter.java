@@ -76,5 +76,8 @@ public class DBConnectionObserverAdapter implements DBConnection {
 	public void setEnableObserver(boolean enableObserver) {
 		this.enableObserver = enableObserver;
 	}
+	public void setStatementList(List<SqlStatement> statementList) {
+		this.statements = statementList;
+	}
 
 }

@@ -14,6 +14,7 @@ public class CollectingObserverFactory implements DBObserverFactory {
 		
 		if (ignoreSimpleSvcSql) {
 			connAdapter.setEnableObserver(true);
+			connAdapter.setStatementList(observer.getStatementList());
 		}
 		
 		return observer;
