@@ -19,7 +19,7 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
-	private DBObserverFactory observerFactory;
+	protected DBObserverFactory observerFactory;
 
 	public MemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
