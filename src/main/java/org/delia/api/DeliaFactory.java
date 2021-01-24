@@ -11,7 +11,7 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.h2.H2DBInterfaceFactory;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
-import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
+import org.delia.zdb.postgres.PostgresDBInterfaceFactory;
 
 /**
  * Factory for creating Delia objects.
@@ -40,7 +40,7 @@ public class DeliaFactory {
 			dbInterface = new H2DBInterfaceFactory(factorySvc, connFactory);
 			break;
 		case POSTGRES:  
-			dbInterface = new PostgresZDBInterfaceFactory(factorySvc, connFactory);
+			dbInterface = new PostgresDBInterfaceFactory(factorySvc, connFactory);
 			break;
 		default:
 			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", dbType == null ? "null" : dbType.name());

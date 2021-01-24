@@ -18,9 +18,9 @@ import org.delia.util.DValueHelper;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.TableCreator;
 
-public class PostgresZTableCreator extends TableCreator {
+public class PostgresTableCreator extends TableCreator {
 	
-	public PostgresZTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
+	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
 				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec);
 	}

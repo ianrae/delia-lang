@@ -10,7 +10,7 @@ import org.delia.log.LogLevel;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.h2.H2DBExecutor;
-import org.delia.zdb.postgres.PostgresZDBExecutor;
+import org.delia.zdb.postgres.PostgresDBExecutor;
 
 public class DBTableRemover {
 	
@@ -66,7 +66,7 @@ public class DBTableRemover {
 					executor.deleteTable(tblName);
 				}
 //				deleteContraintsForTable(executor, tblName);
-			} else if (executor instanceof PostgresZDBExecutor) {
+			} else if (executor instanceof PostgresDBExecutor) {
 				if (!deletePGTableCascade(executor, tblName)) {
 					executor.deleteTable(tblName);
 				}
@@ -127,8 +127,8 @@ public class DBTableRemover {
 		}
 	}
 	protected boolean deletePGTableCascade(DBExecutor executor, String tblName) throws SQLException {
-		if (executor instanceof PostgresZDBExecutor) {
-			PostgresZDBExecutor h2exec = (PostgresZDBExecutor) executor;
+		if (executor instanceof PostgresDBExecutor) {
+			PostgresDBExecutor h2exec = (PostgresDBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
 			SqlStatement statement = new SqlStatement(null);

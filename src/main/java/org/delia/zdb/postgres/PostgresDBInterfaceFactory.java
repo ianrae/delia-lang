@@ -15,7 +15,7 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
-public class PostgresZDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
+public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	private DBCapabilties capabilities;
 	private SimpleLog sqlLog;
 	private ConnectionFactory connFactory;
@@ -23,7 +23,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements DBInterf
 	private PostgresDeliaSessionCache sessionCache;
 	private DBObserverFactory observerFactory;
 
-	public PostgresZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
+	public PostgresDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(true, true, true, true);
 		this.sqlLog = new SimpleLog();
@@ -45,7 +45,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements DBInterf
 
 	@Override
 	public DBConnection openConnection() {
-		PostgresZDBConnection conn = new PostgresZDBConnection(factorySvc, connFactory, errorConverter);
+		PostgresDBConnection conn = new PostgresDBConnection(factorySvc, connFactory, errorConverter);
 		conn.openDB();
 		return conn;
 	}
@@ -70,10 +70,10 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements DBInterf
 
 	@Override
 	public DBExecutor createExecutor() {
-		PostgresZDBConnection conn = (PostgresZDBConnection) openConnection();
+		PostgresDBConnection conn = (PostgresDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
-		DBExecutor exec = new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		DBExecutor exec = new PostgresDBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		
 		if (observerFactory != null) {
 			DBExecutor observer = observerFactory.createObserver(exec);

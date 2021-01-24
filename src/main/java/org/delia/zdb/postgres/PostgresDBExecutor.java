@@ -49,10 +49,10 @@ import org.delia.zdb.TableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 import org.delia.zdb.h2.DBExecutorBase;
 
-public class PostgresZDBExecutor extends DBExecutorBase implements DBExecutor {
+public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 
-	private PostgresZDBInterfaceFactory dbInterface;
-	private PostgresZDBConnection conn;
+	private PostgresDBInterfaceFactory dbInterface;
+	private PostgresDBConnection conn;
 //	private PostgresZInsert zinsert;
 //	private PostgresZQuery zquery;
 //	private PostgresZUpdate zupdate;
@@ -61,8 +61,8 @@ public class PostgresZDBExecutor extends DBExecutorBase implements DBExecutor {
 	private PostgresDeliaSessionCache cache;
 	private CacheData cacheData;
 
-	public PostgresZDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresZDBInterfaceFactory dbInterface, 
-			PostgresZDBConnection conn, PostgresDeliaSessionCache sessionCache) {
+	public PostgresDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresDBInterfaceFactory dbInterface, 
+			PostgresDBConnection conn, PostgresDeliaSessionCache sessionCache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;
@@ -101,7 +101,7 @@ public class PostgresZDBExecutor extends DBExecutorBase implements DBExecutor {
 	
 	@Override
 	protected TableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
-		return  new PostgresZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
+		return  new PostgresTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	@Override
 	protected FieldGenFactory createFieldGenFactory() {
