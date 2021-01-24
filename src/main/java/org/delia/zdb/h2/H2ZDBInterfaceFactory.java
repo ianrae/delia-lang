@@ -10,6 +10,8 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.zdb.DBObserverAdapter;
+import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -20,6 +22,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	private ConnectionFactory connFactory;
 	private DBErrorConverter errorConverter;
 	private H2DeliaSessionCache sessionCache;
+	private DBObserverFactory observerFactory;
 
 	public H2ZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
@@ -80,7 +83,13 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
 		Log execLog = createNewLog();
 		execLog.setLevel(sqlLog.getLevel());
-		return new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		ZDBExecutor exec = new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		
+		if (observerFactory != null) {
+			ZDBExecutor observer = observerFactory.createObserver(exec);
+			return observer;
+		}
+		return exec;
 	}
 
 	@Override
@@ -91,4 +100,15 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceFa
 	public void setDBErrorConverter(DBErrorConverter errorConverter) {
 		this.errorConverter = errorConverter;
 	}
+
+	@Override
+	public void setObserverFactory(DBObserverFactory observerFactory) {
+		this.observerFactory = observerFactory;
+	}
+
+	@Override
+	public DBObserverFactory getObserverFactory() {
+		return observerFactory;
+	}
+
 }

@@ -176,25 +176,4 @@ public class DBObserverAdapter implements ZDBExecutor {
 	public ZDBInterfaceFactory getDbInterface() {
 		return inner.getDbInterface();
 	}
-
-	@Override
-	public void setObserver(DBObserver observer) {
-		inner.setObserver(observer);
-	}
-
-	@Override
-	public DBObserver getObserver() {
-		return inner.getObserver();
-	}
-
-	@Override
-	public void setObserverAdapter(ZDBExecutor observerAdapter) {
-		inner.setObserverAdapter(observerAdapter);
-	}
-
-	@Override
-	public ZDBExecutor getObserverAdapter() {
-		return inner.getObserverAdapter();
-	}
-
 }

@@ -10,6 +10,7 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
+import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -20,6 +21,7 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 	private ConnectionFactory connFactory;
 	private DBErrorConverter errorConverter;
 	private PostgresDeliaSessionCache sessionCache;
+	private DBObserverFactory observerFactory;
 
 	public PostgresZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
@@ -71,7 +73,13 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 		PostgresZDBConnection conn = (PostgresZDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
-		return new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		ZDBExecutor exec = new PostgresZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		
+		if (observerFactory != null) {
+			ZDBExecutor observer = observerFactory.createObserver(exec);
+			return observer;
+		}
+		return exec;
 	}
 
 	@Override
@@ -81,5 +89,15 @@ public class PostgresZDBInterfaceFactory extends ServiceBase implements ZDBInter
 	@Override
 	public void setDBErrorConverter(DBErrorConverter errorConverter) {
 		this.errorConverter = errorConverter;
+	}
+
+	@Override
+	public void setObserverFactory(DBObserverFactory observerFactory) {
+		this.observerFactory = observerFactory;
+	}
+
+	@Override
+	public DBObserverFactory getObserverFactory() {
+		return observerFactory;
 	}
 }

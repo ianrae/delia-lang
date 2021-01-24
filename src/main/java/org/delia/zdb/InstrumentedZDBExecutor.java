@@ -159,23 +159,4 @@ public class InstrumentedZDBExecutor implements ZDBExecutor {
 		return zexec.rawInsert(stm, ctx);
 	}
 
-	@Override
-	public void setObserver(DBObserver observer) {
-		zexec.setObserver(observer);
-	}
-
-	@Override
-	public DBObserver getObserver() {
-		return zexec.getObserver();
-	}
-
-	@Override
-	public void setObserverAdapter(ZDBExecutor observerAdapter) {
-		zexec.setObserverAdapter(observerAdapter);
-	}
-
-	@Override
-	public ZDBExecutor getObserverAdapter() {
-		return zexec.getObserverAdapter();
-	}
 }

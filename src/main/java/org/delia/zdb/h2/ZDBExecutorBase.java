@@ -22,7 +22,6 @@ import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.DBObserver;
 import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
@@ -41,8 +40,6 @@ public abstract class ZDBExecutorBase extends ServiceBase {
 	protected DBErrorConverter errorConverter;
 	protected ZTableCreator tableCreator;
 	protected Random random = new Random();
-	protected DBObserver observer;
-	protected ZDBExecutor observerAdapter;
 
 	public ZDBExecutorBase(FactoryService factorySvc, Log sqlLog, DBErrorConverter errorConverter) {
 		super(factorySvc);

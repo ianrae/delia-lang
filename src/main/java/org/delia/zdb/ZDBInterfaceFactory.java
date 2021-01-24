@@ -15,4 +15,6 @@ public interface ZDBInterfaceFactory {
 	
 	boolean isSQLLoggingEnabled();
 	void enableSQLLogging(boolean b);
+	void setObserverFactory(DBObserverFactory observerFactory);
+	DBObserverFactory getObserverFactory();
 }

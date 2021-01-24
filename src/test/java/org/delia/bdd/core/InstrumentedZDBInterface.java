@@ -10,6 +10,7 @@ import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
 import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -90,6 +91,16 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 	@Override
 	public DBErrorConverter getDBErrorConverter() {
 		return actualInterface.getDBErrorConverter();
+	}
+
+	@Override
+	public void setObserverFactory(DBObserverFactory observerFactory) {
+		actualInterface.setObserverFactory(observerFactory);
+	}
+
+	@Override
+	public DBObserverFactory getObserverFactory() {
+		return actualInterface.getObserverFactory();
 	}
 
 }

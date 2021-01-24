@@ -10,6 +10,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.SerialProvider.SerialGenerator;
+import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
@@ -18,6 +19,7 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
+	private DBObserverFactory observerFactory;
 
 	public MemZDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
@@ -59,7 +61,13 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	
 	@Override
 	public ZDBExecutor createExecutor() {
-		return new MemZDBExecutor(factorySvc, this);
+		ZDBExecutor exec = new MemZDBExecutor(factorySvc, this);
+		
+		if (observerFactory != null) {
+			ZDBExecutor observer = observerFactory.createObserver(exec);
+			return observer;
+		}
+		return exec;
 	}
 	
 	
@@ -74,6 +82,16 @@ public class MemZDBInterfaceFactory extends ServiceBase implements ZDBInterfaceF
 	@Override
 	public void setDBErrorConverter(DBErrorConverter errorConverter) {
 		//not used this.errorConverter = errorConverter;
+	}
+
+	@Override
+	public void setObserverFactory(DBObserverFactory observerFactory) {
+		this.observerFactory = observerFactory;
+	}
+
+	@Override
+	public DBObserverFactory getObserverFactory() {
+		return observerFactory;
 	}
 
 }
