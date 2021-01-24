@@ -1,4 +1,4 @@
-package org.delia.zdb.mem.hls.function;
+package org.delia.zdb.mem.hld.function;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.mem.hls.MemFunctionBase;
+import org.delia.zdb.mem.hld.MemFunctionBase;
 
 public class MemFieldFunction extends MemFunctionBase {
 	private Log log;

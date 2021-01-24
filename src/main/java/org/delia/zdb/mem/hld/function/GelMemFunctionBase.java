@@ -1,8 +1,8 @@
-package org.delia.zdb.mem.hls.function;
+package org.delia.zdb.mem.hld.function;
 
 import org.delia.db.hls.GElement;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.mem.hls.MemFunctionBase;
+import org.delia.zdb.mem.hld.MemFunctionBase;
 
 public abstract class GelMemFunctionBase extends MemFunctionBase {
 

@@ -1,4 +1,4 @@
-package org.delia.zdb.mem.hls;
+package org.delia.zdb.mem.hld;
 
 import org.delia.db.hls.HLSQuerySpan;
 import org.delia.hld.QueryFnSpec;

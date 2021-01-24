@@ -1,4 +1,4 @@
-package org.delia.zdb.mem.hls.function;
+package org.delia.zdb.mem.hld.function;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -16,10 +16,10 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
 
-public class MemMinFunction extends GelMemFunctionBase {
+public class MemMaxFunction extends GelMemFunctionBase {
 	private FactoryService factorySvc;
 	
-	public MemMinFunction(FactoryService factorySvc, DTypeRegistry registry, GElement op) {
+	public MemMaxFunction(FactoryService factorySvc, DTypeRegistry registry, GElement op) {
 		super(registry, op);
 		this.factorySvc = factorySvc;
 	}
@@ -51,77 +51,77 @@ public class MemMinFunction extends GelMemFunctionBase {
 		case DATE:
 			return processDate(qresp, dvalList);
 		default:
-			DeliaExceptionHelper.throwError("unsupported-min-type", "min() doesn't support type '%s'", shape);
+			DeliaExceptionHelper.throwError("unsupported-max-type", "max() doesn't support type '%s'", shape);
 		}
 		return qresp;
 	}
 
 	private QueryResponse processInt(QueryResponse qresp, List<DValue> dvalList) {
-		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
 			int k = dval.asInt(); 
-			if (k < min) {
-				min = k;
+			if (k > max) {
+				max = k;
 			}
 		}
 		
-		DValue dval = buildIntVal(min);
+		DValue dval = buildIntVal(max);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processLong(QueryResponse qresp, List<DValue> dvalList) {
-		long min = Long.MAX_VALUE;
+		long max = Integer.MIN_VALUE;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
-			long k = dval.asLong();
-			if (k < min) {
-				min = k;
+			long k = dval.asLong(); 
+			if (k > max) {
+				max = k;
 			}
 		}
 		
-		DValue dval = buildLongVal(min);
+		DValue dval = buildLongVal(max);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processNumber(QueryResponse qresp, List<DValue> dvalList) {
-		double min = Double.MAX_VALUE;
+		double max = Double.MIN_VALUE;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
 			double k = dval.asNumber();
-			if (k < min) {
-				min = k;
+			if (k > max) {
+				max = k;
 			}
 		}
 		
-		DValue dval = buildNumberVal(min);
+		DValue dval = buildNumberVal(max);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processBoolean(QueryResponse qresp, List<DValue> dvalList) {
-		Boolean min = true;
+		Boolean max = false;
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
 			}
-			Boolean k = dval.asBoolean();
-			if (k.compareTo(min) < 0) {
-				min = k;
+			Boolean k = dval.asBoolean(); 
+			if (k.compareTo(max) > 0) {
+				max = k;
 			}
 		}
 		
-		DValue dval = buildBoolVal(min);
+		DValue dval = buildBoolVal(max);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
 	private QueryResponse processString(QueryResponse qresp, List<DValue> dvalList) {
-		String min = null; //max possible string
+		String min = null; //min possible string
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
@@ -130,7 +130,7 @@ public class MemMinFunction extends GelMemFunctionBase {
 			
 			if (min == null) {
 				min = k;
-			} else if (k.compareTo(min) < 0) {
+			} else if (k.compareTo(min) > 0) {
 				min = k;
 			}
 		}
@@ -140,8 +140,9 @@ public class MemMinFunction extends GelMemFunctionBase {
 		return qresp;
 	}
 	private QueryResponse processDate(QueryResponse qresp, List<DValue> dvalList) {
-		Instant min = Instant.MAX;
-		ZonedDateTime minZdt = null;
+		Instant min = Instant.MIN;
+		ZonedDateTime maxZdt = null;
+		
 		for(DValue dval: dvalList) {
 			if (dval == null) {
 				continue;
@@ -150,14 +151,14 @@ public class MemMinFunction extends GelMemFunctionBase {
 			
 			if (min == null) {
 				min = zdt.toInstant();
-				minZdt = zdt;
-			} else if (zdt.toInstant().compareTo(min) < 0) {
+				maxZdt = zdt;
+			} else if (zdt.toInstant().compareTo(min) > 0) {
 				min = zdt.toInstant();
-				minZdt = zdt;
+				maxZdt = zdt;
 			}
 		}
 		
-		DValue dval = buildDateVal(minZdt, factorySvc);
+		DValue dval = buildDateVal(maxZdt, factorySvc);
 		setSingletonResult(qresp, dval);
 		return qresp;
 	}
@@ -175,7 +176,6 @@ public class MemMinFunction extends GelMemFunctionBase {
 		}
 		return null;
 	}
-	
 	@Override
 	public QueryResponse process(QueryFnSpec hlspan, QueryResponse qresp, QueryFuncContext ctx) {
 		HLSQuerySpan jj = null;

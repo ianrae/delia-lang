@@ -1,4 +1,4 @@
-package org.delia.zdb.mem.hls.function;
+package org.delia.zdb.mem.hld.function;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
-import org.delia.zdb.mem.hls.MemFunctionBase;
+import org.delia.zdb.mem.hld.MemFunctionBase;
 
 public class MemFetchFunction extends MemFunctionBase {
 	private FetchRunner fetchRunner;

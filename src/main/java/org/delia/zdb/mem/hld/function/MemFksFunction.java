@@ -1,4 +1,4 @@
-package org.delia.zdb.mem.hls.function;
+package org.delia.zdb.mem.hld.function;
 
 import org.delia.core.FactoryService;
 import org.delia.db.hls.HLSQuerySpan;
@@ -10,7 +10,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.validation.ValidationRunner;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
-import org.delia.zdb.mem.hls.MemFunctionBase;
+import org.delia.zdb.mem.hld.MemFunctionBase;
 
 public class MemFksFunction extends MemFunctionBase {
 	private FetchRunner fetchRunner;

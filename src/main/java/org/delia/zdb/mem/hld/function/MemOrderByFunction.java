@@ -1,4 +1,4 @@
-package org.delia.zdb.mem.hls.function;
+package org.delia.zdb.mem.hld.function;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import org.delia.queryfunction.QueryFuncContext;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.zdb.mem.hls.MemFunctionBase;
+import org.delia.zdb.mem.hld.MemFunctionBase;
 
 public class MemOrderByFunction extends MemFunctionBase {
 	public MemOrderByFunction(DTypeRegistry registry) {
