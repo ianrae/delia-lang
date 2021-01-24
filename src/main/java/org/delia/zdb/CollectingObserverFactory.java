@@ -5,9 +5,9 @@ public class CollectingObserverFactory implements DBObserverFactory {
 	private DBObserverAdapter observer;
 
 	@Override
-	public DBExecutor createObserver(DBExecutor actual, DBConnectionObserverAdapter connAdapter) {
+	public DBExecutor createObserver(DBExecutor actual, DBConnectionObserverAdapter connAdapter, boolean ignoreSimpleSvcSql) {
 		if (observer == null) {
-			observer = new DBObserverAdapter(actual);
+			observer = new DBObserverAdapter(actual, ignoreSimpleSvcSql);
 		} else {
 			observer.setInner(actual);
 		}

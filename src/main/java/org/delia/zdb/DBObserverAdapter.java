@@ -26,8 +26,9 @@ public class DBObserverAdapter implements DBExecutor {
 	private DBExecutor inner;
 	private boolean ignoreSimpleSvcSql = true; //ignore delia's internal db queries
 	
-	public DBObserverAdapter(DBExecutor inner) {
+	public DBObserverAdapter(DBExecutor inner, boolean ignoreSimpleSvcSql) {
 		this.inner = inner;
+		this.ignoreSimpleSvcSql = ignoreSimpleSvcSql;
 	}
 
 	@Override

@@ -17,4 +17,5 @@ public interface DBInterfaceFactory {
 	void enableSQLLogging(boolean b);
 	void setObserverFactory(DBObserverFactory observerFactory);
 	DBObserverFactory getObserverFactory();
+	void setIgnoreSimpleSvcSql(boolean flag);
 }

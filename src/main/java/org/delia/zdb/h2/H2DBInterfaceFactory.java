@@ -23,6 +23,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 	private DBErrorConverter errorConverter;
 	private H2DeliaSessionCache sessionCache;
 	private DBObserverFactory observerFactory;
+	private boolean ignoreSimpleSvcSql;
 
 	public H2DBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
@@ -92,7 +93,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 		
 		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		if (observerFactory != null) {
-			DBExecutor observer = observerFactory.createObserver(exec, null);
+			DBExecutor observer = observerFactory.createObserver(exec, null, ignoreSimpleSvcSql);
 			return observer;
 		}
 		return exec;
@@ -115,6 +116,11 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 	@Override
 	public DBObserverFactory getObserverFactory() {
 		return observerFactory;
+	}
+
+	@Override
+	public void setIgnoreSimpleSvcSql(boolean flag) {
+		this.ignoreSimpleSvcSql = flag;
 	}
 
 }

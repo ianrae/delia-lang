@@ -21,6 +21,7 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
 	protected DBObserverFactory observerFactory;
+	private boolean ignoreSimpleSvcSql;
 
 	public MemDBInterfaceFactory(FactoryService factorySvc) {
 		super(factorySvc);
@@ -66,7 +67,7 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 		
 		//there is no dbconnection for MEM
 		if (observerFactory != null) {
-			DBExecutor observer = observerFactory.createObserver(exec, null);
+			DBExecutor observer = observerFactory.createObserver(exec, null, ignoreSimpleSvcSql);
 			return observer;
 		}
 		return exec;
@@ -94,6 +95,11 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	@Override
 	public DBObserverFactory getObserverFactory() {
 		return observerFactory;
+	}
+
+	@Override
+	public void setIgnoreSimpleSvcSql(boolean flag) {
+		this.ignoreSimpleSvcSql = flag;
 	}
 
 }

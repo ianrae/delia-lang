@@ -23,6 +23,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 	private DBErrorConverter errorConverter;
 	private PostgresDeliaSessionCache sessionCache;
 	private DBObserverFactory observerFactory;
+	private boolean ignoreSimpleSvcSql;
 
 	public PostgresDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
@@ -83,7 +84,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 		}
 		
 		if (observerFactory != null) {
-			DBExecutor observer = observerFactory.createObserver(exec, connAdapter);
+			DBExecutor observer = observerFactory.createObserver(exec, connAdapter, ignoreSimpleSvcSql);
 			return observer;
 		}
 		return exec;
@@ -106,5 +107,10 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 	@Override
 	public DBObserverFactory getObserverFactory() {
 		return observerFactory;
+	}
+
+	@Override
+	public void setIgnoreSimpleSvcSql(boolean flag) {
+		this.ignoreSimpleSvcSql = flag;
 	}
 }
