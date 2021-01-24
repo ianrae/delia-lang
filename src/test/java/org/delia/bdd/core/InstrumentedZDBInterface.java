@@ -1,6 +1,5 @@
 package org.delia.bdd.core;
 
-import org.delia.api.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.db.DBCapabilties;
 import org.delia.db.DBErrorConverter;
@@ -15,7 +14,7 @@ import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecutor;
 import org.delia.zdb.ZDBInterfaceFactory;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
-import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
 public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
@@ -31,7 +30,7 @@ public class InstrumentedZDBInterface implements ZDBInterfaceFactory {
 		switch(dbType) {
 		case MEM:
 			//actualInterface = new MemZDBInterfaceFactory(factorySvc);
-			actualInterface = new HLSMemZDBInterfaceFactory(factorySvc);
+			actualInterface = new MemZDBInterfaceFactory(factorySvc);
 			break;
 		case H2:
 		{

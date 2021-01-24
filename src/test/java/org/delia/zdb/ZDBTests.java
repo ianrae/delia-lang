@@ -13,11 +13,9 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.InsertContext;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
-import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -29,7 +27,7 @@ import org.delia.zdb.h2.H2ZDBConnection;
 import org.delia.zdb.h2.H2ZDBExecutor;
 import org.delia.zdb.h2.H2ZDBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBExecutor;
-import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
+import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +35,7 @@ public class ZDBTests  extends BDDBase {
 
 	@Test
 	public void testMEM() {
-		HLSMemZDBInterfaceFactory dbFactory = new HLSMemZDBInterfaceFactory(factorySvc);
+		MemZDBInterfaceFactory dbFactory = new MemZDBInterfaceFactory(factorySvc);
 		MemZDBExecutor dbexec = new MemZDBExecutor(factorySvc, dbFactory);
 		dbexec.init1(registry);
 
