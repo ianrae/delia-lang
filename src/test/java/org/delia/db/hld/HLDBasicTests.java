@@ -1,11 +1,7 @@
 package org.delia.db.hld;
 
 
-import static org.junit.Assert.assertEquals;
-
-import org.delia.db.SqlStatement;
 import org.delia.hld.HLDQueryStatement;
-import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 

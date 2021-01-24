@@ -106,13 +106,13 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		
-//		if (useNewHLD) {
 		HLDManager mgr = new HLDManager(this, runner.getRegistry(), runner);
 		runner.setHLDManager(mgr);
-//		} else {
-//			HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
-//			runner.setHLSManager(mgr);
-//		}
+
+		if (deliaOptions.dbObserverFactory != null) {
+			dbInterface.setObserverFactory(deliaOptions.dbObserverFactory);
+		}
+		
 		return runner;
 	}
 
