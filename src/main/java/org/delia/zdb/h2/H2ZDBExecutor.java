@@ -38,6 +38,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.DBObserver;
 import org.delia.zdb.ZDBConnection;
 import org.delia.zdb.ZDBExecuteContext;
 import org.delia.zdb.ZDBExecutor;
@@ -379,5 +380,25 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements ZDBExecutor {
 	@Override
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
+	}
+
+	@Override
+	public void setObserver(DBObserver observerParam) {
+		this.observer = observerParam;
+	}
+
+	@Override
+	public DBObserver getObserver() {
+		return observer;
+	}
+
+	@Override
+	public void setObserverAdapter(ZDBExecutor observerAdapterParam) {
+		this.observerAdapter = observerAdapterParam;
+	}
+
+	@Override
+	public ZDBExecutor getObserverAdapter() {
+		return observerAdapter;
 	}
 }

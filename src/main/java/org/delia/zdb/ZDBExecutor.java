@@ -53,4 +53,9 @@ public interface ZDBExecutor extends AutoCloseable {
 	void alterField(String typeName, String fieldName, String deltaFlags);
 
 	ZDBInterfaceFactory getDbInterface();
+	void setObserver(DBObserver observer);
+	DBObserver getObserver();
+	void setObserverAdapter(ZDBExecutor observerAdapter);
+	ZDBExecutor getObserverAdapter();
+	
 }

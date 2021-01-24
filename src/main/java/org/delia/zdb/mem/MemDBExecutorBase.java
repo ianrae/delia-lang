@@ -34,6 +34,8 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
+import org.delia.zdb.DBObserver;
+import org.delia.zdb.ZDBExecutor;
 
 public abstract class MemDBExecutorBase extends ServiceBase implements ZDBInternal {
 
@@ -44,6 +46,8 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 	public boolean createTablesAsNeededFlag = true;
 	protected MemZDBInterfaceFactory dbInterface;
 	private PreSpecService preSpecSvc;
+	protected DBObserver observer;
+	protected ZDBExecutor observerAdapter;
 
 	public MemDBExecutorBase(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
 		super(factorySvc);
