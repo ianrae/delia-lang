@@ -96,17 +96,18 @@ public class DBObserverTests extends BDDBase {
 		String src = buildSrc(" insert Customer {id: 5, wid: 33, name:'bob'}");
 		CollectingObserverFactory factory = new CollectingObserverFactory();
 		delia.getOptions().dbObserverFactory = factory;
+		delia.getOptions().observeHLDSQLOnly = false;
 		delia.getFactoryService().setEnableMEMSqlGenerationFlag(true);
 		session = delia.beginSession(src);
 		
 		dump(factory.getObserver());
-		assertEquals(7, factory.getObserver().getStatementList().size());
+		assertEquals(3, factory.getObserver().getStatementList().size());
 		
 		src = " insert Customer {id: 6, wid: 33, name:'sie'}";
 		delia.continueExecution(src, session);
 		log.log("..2..");
 		dump(factory.getObserver());
-		assertEquals(2, factory.getObserver().getStatementList().size());
+		assertEquals(4, factory.getObserver().getStatementList().size());
 	}	
 
 	//-------------------------

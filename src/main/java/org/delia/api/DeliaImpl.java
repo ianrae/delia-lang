@@ -113,6 +113,7 @@ public class DeliaImpl implements Delia {
 
 		if (deliaOptions.dbObserverFactory != null) {
 			dbInterface.setObserverFactory(deliaOptions.dbObserverFactory);
+			dbInterface.setIgnoreSimpleSvcSql(deliaOptions.observeHLDSQLOnly);
 		}
 		
 		return runner;

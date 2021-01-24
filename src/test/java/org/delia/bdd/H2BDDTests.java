@@ -334,6 +334,7 @@ public class H2BDDTests extends BDDBase {
 //		runR1500File("t0-queryfn-orderby-2span.txt", 0);
 //		runR560File("t0-self-11.txt", 3);
 //		runR560File("t0-self-N1.txt", 4);
+		
 		runR560File("t0-self-11.txt", 3);
 	}
 	

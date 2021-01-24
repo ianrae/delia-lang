@@ -37,10 +37,11 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 	
 	private Log createNewLog() {
 		if (factorySvc != null) {
-			return factorySvc.getLogFactory().create("sqlH2");
-		} else {
-			return new SimpleLog();
+			if (factorySvc.getLogFactory() != null) {
+				return factorySvc.getLogFactory().create("sqlH2");
+			}
 		}
+		return new SimpleLog();
 	}
 
 	@Override

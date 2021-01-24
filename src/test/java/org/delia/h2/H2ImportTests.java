@@ -15,12 +15,13 @@ import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.db.DBType;
+import org.delia.db.SqlStatement;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
+import org.delia.zdb.CollectingObserverFactory;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,6 +54,7 @@ public class H2ImportTests  extends BDDBase {
 		options.logDetails = true;
 		List<InputFunctionResult> resultL = csvSvc.dryRunLevel3(groupList, deliaSrc, externalLoader, options);
 		csvSvc.dumpReports(resultL);
+		dumpObserver();
 	}
 	
 	private ExternalDataLoader createExternalLoader() {
@@ -113,7 +115,10 @@ public class H2ImportTests  extends BDDBase {
 	private Delia createDelia() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB()).build();
 		Delia delia = DeliaBuilder.withConnection(info).build();
-		
+		this.observerFactory = new CollectingObserverFactory();
+		delia.getOptions().dbObserverFactory = observerFactory;
+		delia.getOptions().observeHLDSQLOnly = false;
+
 		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
 		cleaner.deleteContraintsForTable("CATEGORY");
@@ -122,6 +127,7 @@ public class H2ImportTests  extends BDDBase {
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
 	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	private CollectingObserverFactory observerFactory;
 
 	@Before
 	public void init() {
@@ -134,4 +140,12 @@ public class H2ImportTests  extends BDDBase {
 		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
+	
+	private void dumpObserver() {
+		for(SqlStatement stm: observerFactory.getObserver().getStatementList()) {
+			log.log("stm: " + stm.sql);
+		}
+	}
+
+	
 }

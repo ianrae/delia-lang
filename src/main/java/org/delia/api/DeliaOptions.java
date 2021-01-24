@@ -1,7 +1,6 @@
 package org.delia.api;
 
 import org.delia.zdb.DBObserverFactory;
-import org.delia.zdb.DBExecutor;
 
 /**
  * Options that can be changed during the lifetime of a Delia object.
@@ -18,4 +17,5 @@ public class DeliaOptions {
 	public boolean saveParseExpObjectsInSession = true; //can be helpful for troubleshooting. not needed by Delia
 	public boolean logSourceBeforeCompile; //log all delia source before it is compiled
 	public DBObserverFactory dbObserverFactory;
+	public boolean observeHLDSQLOnly = true;
 }
