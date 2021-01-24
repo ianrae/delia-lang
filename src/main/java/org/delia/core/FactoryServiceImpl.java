@@ -28,6 +28,7 @@ public class FactoryServiceImpl implements FactoryService {
 	private DValueCompareService compareSvc;
 	private DiagnosticServiceImpl diagnosticSvc;
 	private LogFactory logFactory;
+	private boolean enableMEMSqlGenerationFlag; //normally false. no need with MEM. unless client code wants to see what sql would be
 	
 	public FactoryServiceImpl(Log log, ErrorTracker et) {
 		this(log, et, null);
@@ -114,6 +115,14 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry) {
 		return new HLDSimpleQueryService(this, dbInterface, registry);
+	}
+	@Override
+	public boolean getEnableMEMSqlGenerationFlag() {
+		return enableMEMSqlGenerationFlag;
+	}
+	@Override
+	public void setEnableMEMSqlGenerationFlag(boolean flag) {
+		enableMEMSqlGenerationFlag = flag;
 	}
 
 }

@@ -34,7 +34,6 @@ public interface FactoryService {
 	LogFactory getLogFactory(); //may return null if not set in DeliaBuilder
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
-//	HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry);
 	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry);
 	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
@@ -42,4 +41,6 @@ public interface FactoryService {
 	DValueCompareService getDValueCompareService();
 	DiagnosticService getDiagnosticService();
 	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner);
+	boolean getEnableMEMSqlGenerationFlag();
+	void setEnableMEMSqlGenerationFlag(boolean flag);
 }

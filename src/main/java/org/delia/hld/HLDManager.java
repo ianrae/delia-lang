@@ -11,6 +11,7 @@ import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBType;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.hls.AliasManager;
@@ -75,11 +76,6 @@ public class HLDManager extends ServiceBase {
 		hld.querySpec = spec;
 		return hld;
 	}
-	public SqlStatementGroup generateSqlForQuery(HLDQueryStatement hld, DBExecutor zexec) {
-		HLDInnerManager mgr = createManager(zexec);
-		SqlStatementGroup stmgrp = mgr.generateSql(hld);
-		return stmgrp;
-	}
 
 	public HLDQueryStatement buildHLD(QueryExp queryExp, DBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDInnerManager mgr = createManager(zexec);
@@ -122,19 +118,48 @@ public class HLDManager extends ServiceBase {
 		logDebug(hldins);
 		return hldins;
 	}
+	
+	
+	public SqlStatementGroup generateSqlForQuery(HLDQueryStatement hld, DBExecutor zexec) {
+		if (! shouldGenerateSql()) {
+			return new SqlStatementGroup();
+		}
+
+		HLDInnerManager mgr = createManager(zexec);
+		SqlStatementGroup stmgrp = mgr.generateSql(hld);
+		return stmgrp;
+	}
 	public SqlStatementGroup generateSQL(HLDInsertStatement hldins, DBExecutor zexec) {
+		if (! shouldGenerateSql()) {
+			return new SqlStatementGroup();
+		}
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldins);
 	}
+	private boolean shouldGenerateSql() {
+		if (dbInterface.getDBType().equals(DBType.MEM)) {
+			return factorySvc.getEnableMEMSqlGenerationFlag();
+		}
+		return true;
+	}
 	public SqlStatementGroup generateSQL(HLDDeleteStatement hlddel, DBExecutor zexec) {
+		if (! shouldGenerateSql()) {
+			return new SqlStatementGroup();
+		}
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hlddel);
 	}
 	public SqlStatementGroup generateSQL(HLDUpdateStatement hldupd, DBExecutor zexec) {
+		if (! shouldGenerateSql()) {
+			return new SqlStatementGroup();
+		}
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldupd);
 	}
 	public SqlStatementGroup generateSQL(HLDUpsertStatement hldupd, DBExecutor zexec) {
+		if (! shouldGenerateSql()) {
+			return new SqlStatementGroup();
+		}
 		HLDInnerManager mgr = createManager(zexec);
 		return mgr.generateSql(hldupd);
 	}
