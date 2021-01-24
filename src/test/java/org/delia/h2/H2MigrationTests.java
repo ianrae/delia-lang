@@ -23,7 +23,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.zdb.DBExecuteContext;
 import org.delia.zdb.DBExecutor;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -211,7 +211,7 @@ public class H2MigrationTests extends TopoTestBase {
 		this.factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
 		log("here we go2..");
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		dbInterface = new H2ZDBInterfaceFactory(factorySvc, connFact);
+		dbInterface = new H2DBInterfaceFactory(factorySvc, connFact);
 		dbInterface.enableSQLLogging(true);
 		delia = DeliaFactory.create(dbInterface, log, factorySvc);
 		delia.getOptions().disableSQLLoggingDuringSchemaMigration = false;

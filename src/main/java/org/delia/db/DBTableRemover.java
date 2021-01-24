@@ -9,7 +9,7 @@ import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.h2.H2ZDBExecutor;
+import org.delia.zdb.h2.H2DBExecutor;
 import org.delia.zdb.postgres.PostgresZDBExecutor;
 
 public class DBTableRemover {
@@ -61,7 +61,7 @@ public class DBTableRemover {
 	public void safeDeleteTable(DBExecutor executor, String tblName) {
 		tblName = adjustTblName(tblName);
 		try {
-			if (executor instanceof H2ZDBExecutor) {
+			if (executor instanceof H2DBExecutor) {
 				if (!deleteH2TableCascade(executor, tblName)) {
 					executor.deleteTable(tblName);
 				}
@@ -88,8 +88,8 @@ public class DBTableRemover {
 	
 	public void deleteContraintsForTable(DBExecutor executor, String tblName) throws SQLException {
 		String sql = String.format("SELECT CONSTRAINT_NAME FROM information_schema.constraints WHERE  table_schema = 'PUBLIC' and table_name = '%s'", tblName);
-		if (executor instanceof H2ZDBExecutor) {
-			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
+		if (executor instanceof H2DBExecutor) {
+			H2DBExecutor h2exec = (H2DBExecutor) executor;
 			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			ResultSet rs = h2exec.getDBConnection().execQueryStatement(statement, null);
@@ -114,8 +114,8 @@ public class DBTableRemover {
 		}
 	}
 	protected boolean deleteH2TableCascade(DBExecutor executor, String tblName) throws SQLException {
-		if (executor instanceof H2ZDBExecutor) {
-			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
+		if (executor instanceof H2DBExecutor) {
+			H2DBExecutor h2exec = (H2DBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
 			SqlStatement statement = new SqlStatement(null);

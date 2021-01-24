@@ -25,7 +25,7 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
-public class ZTableCreator extends ServiceBase {
+public class TableCreator extends ServiceBase {
 	protected DTypeRegistry registry;
 	public List<TableInfo> alreadyCreatedL = new ArrayList<>();
 	protected FieldGenFactory fieldgenFactory;
@@ -33,7 +33,7 @@ public class ZTableCreator extends ServiceBase {
 	private AssocTableCreator assocTblCreator;
 	public DatIdMap datIdMap;
 	
-	public ZTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
+	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
 				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		super(factorySvc);
 		this.registry = registry;

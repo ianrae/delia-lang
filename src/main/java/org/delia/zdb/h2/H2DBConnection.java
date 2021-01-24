@@ -18,13 +18,13 @@ import org.delia.type.DType;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecuteContext;
 
-public class H2ZDBConnection extends ServiceBase implements DBConnection {
+public class H2DBConnection extends ServiceBase implements DBConnection {
 	protected Connection conn;
 	protected ConnectionFactory connectionFactory;
 	protected ValueHelper valueHelper;
 	protected DBErrorConverter errorConverter;
 
-	public H2ZDBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
+	public H2DBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
 		super(factorySvc);
 		this.connectionFactory = connectionFactory;
 		this.valueHelper = new ValueHelper(factorySvc);

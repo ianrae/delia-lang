@@ -24,7 +24,7 @@ import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
-import org.delia.zdb.h2.H2ZDBConnection;
+import org.delia.zdb.h2.H2DBConnection;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class H2Tests {
 	@Test
 	public void test2() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, new H2ErrorConverter());
+		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
 		log.log("here we go..");
 		conn.openDB();
 		
@@ -66,7 +66,7 @@ public class H2Tests {
 		log.log("end.");
 	}
 	
-	private void dumpSchema(H2ZDBConnection conn) throws SQLException {
+	private void dumpSchema(H2DBConnection conn) throws SQLException {
 		log.log("dump schema: TABLES...");
 		SqlStatement statement = new SqlStatement(null);
 		statement.sql = "SELECT * from information_schema.tables where TABLE_SCHEMA='PUBLIC';";
@@ -91,7 +91,7 @@ public class H2Tests {
 	@Test
 	public void testDetectTblManual() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, new H2ErrorConverter());
+		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
 		log.log("here we gox..");
 		conn.openDB();
 		
@@ -117,7 +117,7 @@ public class H2Tests {
 	@Test
 	public void testDetectTbl() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2ZDBConnection conn = new H2ZDBConnection(factorySvc, connFact, new H2ErrorConverter());
+		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
 		log.log("here we gox..");
 		conn.openDB();
 		
@@ -137,12 +137,12 @@ public class H2Tests {
 		log.log("end.");
 	}
 	
-	private void execStatement(H2ZDBConnection conn, String sql) {
+	private void execStatement(H2DBConnection conn, String sql) {
 		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
 		conn.execStatement(statement, null);
 	}
-	private boolean doTableDetect(H2ZDBConnection conn, String tblName) throws SQLException {
+	private boolean doTableDetect(H2DBConnection conn, String tblName) throws SQLException {
 		RawStatementGenerator gen = new RawStatementGenerator(factorySvc, DBType.H2);
 		SqlStatement statement = new SqlStatement(null);
 		statement.sql = gen.generateTableDetect(tblName.toUpperCase());

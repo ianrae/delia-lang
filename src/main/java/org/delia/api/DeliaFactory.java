@@ -9,7 +9,7 @@ import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2DBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
@@ -37,7 +37,7 @@ public class DeliaFactory {
 			dbInterface = new MemZDBInterfaceFactory(factorySvc);
 			break;
 		case H2:
-			dbInterface = new H2ZDBInterfaceFactory(factorySvc, connFactory);
+			dbInterface = new H2DBInterfaceFactory(factorySvc, connFactory);
 			break;
 		case POSTGRES:  
 			dbInterface = new PostgresZDBInterfaceFactory(factorySvc, connFactory);

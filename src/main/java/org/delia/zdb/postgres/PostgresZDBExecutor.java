@@ -45,11 +45,11 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecuteContext;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.ZTableCreator;
+import org.delia.zdb.TableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
-import org.delia.zdb.h2.ZDBExecutorBase;
+import org.delia.zdb.h2.DBExecutorBase;
 
-public class PostgresZDBExecutor extends ZDBExecutorBase implements DBExecutor {
+public class PostgresZDBExecutor extends DBExecutorBase implements DBExecutor {
 
 	private PostgresZDBInterfaceFactory dbInterface;
 	private PostgresZDBConnection conn;
@@ -95,12 +95,12 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
-	private ZTableCreator createPartialTableCreator() {
+	private TableCreator createPartialTableCreator() {
 		return super.createPartialTableCreator(this);
 	}
 	
 	@Override
-	protected ZTableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
+	protected TableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		return  new PostgresZTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	@Override
@@ -186,7 +186,7 @@ public class PostgresZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 	@Override
 	public void rawCreateTable(String tableName) {
 		failIfNotInit1(); 
-		ZTableCreator partialTableCreator = this.createPartialTableCreator();
+		TableCreator partialTableCreator = this.createPartialTableCreator();
 		DStructType dtype = registry.findTypeOrSchemaVersionType(tableName);
 		String sql = partialTableCreator.generateCreateTable(tableName, dtype);
 		execSqlStatement(sql);

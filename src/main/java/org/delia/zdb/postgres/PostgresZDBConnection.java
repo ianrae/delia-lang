@@ -8,9 +8,9 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.ResultSetHelper;
 import org.delia.db.sql.ConnectionFactory;
-import org.delia.zdb.h2.H2ZDBConnection;
+import org.delia.zdb.h2.H2DBConnection;
 
-public class PostgresZDBConnection extends H2ZDBConnection {
+public class PostgresZDBConnection extends H2DBConnection {
 
 	public PostgresZDBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
 		super(factorySvc, connectionFactory, errorConverter);

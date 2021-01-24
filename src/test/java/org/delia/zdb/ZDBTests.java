@@ -23,9 +23,9 @@ import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.h2.H2DeliaSessionCache;
-import org.delia.zdb.h2.H2ZDBConnection;
-import org.delia.zdb.h2.H2ZDBExecutor;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2DBConnection;
+import org.delia.zdb.h2.H2DBExecutor;
+import org.delia.zdb.h2.H2DBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBExecutor;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.junit.Before;
@@ -59,10 +59,10 @@ public class ZDBTests  extends BDDBase {
 	@Test
 	public void testH2() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(factorySvc, connFact);
+		H2DBInterfaceFactory dbFactory = new H2DBInterfaceFactory(factorySvc, connFact);
 		
-		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
-		DBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
+		H2DBConnection conn = (H2DBConnection) dbFactory.openConnection();
+		DBExecutor dbexec = new H2DBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();

@@ -13,7 +13,7 @@ import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.h2.H2DBInterfaceFactory;
 import org.delia.zdb.mem.MemZDBInterfaceFactory;
 import org.delia.zdb.postgres.PostgresZDBInterfaceFactory;
 
@@ -35,7 +35,7 @@ public class InstrumentedZDBInterface implements DBInterfaceFactory {
 		case H2:
 		{
 			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), factorySvc.getLog());
-			actualInterface = new H2ZDBInterfaceFactory(factorySvc, connFact);
+			actualInterface = new H2DBInterfaceFactory(factorySvc, connFact);
 		}
 			break;
 		case POSTGRES:

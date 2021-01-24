@@ -10,13 +10,12 @@ import org.delia.db.sql.ConnectionFactory;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
-import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
-public class H2ZDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
+public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	private DBCapabilties capabilities;
 	private Log sqlLog;
 	private ConnectionFactory connFactory;
@@ -24,7 +23,7 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	private H2DeliaSessionCache sessionCache;
 	private DBObserverFactory observerFactory;
 
-	public H2ZDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
+	public H2DBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(true, true, true, true);
 		this.sqlLog = createNewLog();
@@ -54,8 +53,8 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 
 	@Override
 	public DBConnection openConnection() {
-		H2ZDBConnection conn;
-		conn = new H2ZDBConnection(factorySvc, connFactory, errorConverter);
+		H2DBConnection conn;
+		conn = new H2DBConnection(factorySvc, connFactory, errorConverter);
 		conn.openDB();
 		return conn;
 	}
@@ -80,10 +79,10 @@ public class H2ZDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 
 	@Override
 	public DBExecutor createExecutor() {
-		H2ZDBConnection conn = (H2ZDBConnection) openConnection();
+		H2DBConnection conn = (H2DBConnection) openConnection();
 		Log execLog = createNewLog();
 		execLog.setLevel(sqlLog.getLevel());
-		DBExecutor exec = new H2ZDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, conn, sessionCache);
 		
 		if (observerFactory != null) {
 			DBExecutor observer = observerFactory.createObserver(exec);

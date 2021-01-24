@@ -42,13 +42,13 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecuteContext;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.ZTableCreator;
+import org.delia.zdb.TableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
-public class H2ZDBExecutor extends ZDBExecutorBase implements DBExecutor {
+public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 
-	private H2ZDBInterfaceFactory dbInterface;
-	private H2ZDBConnection conn;
+	private H2DBInterfaceFactory dbInterface;
+	private H2DBConnection conn;
 //	private ZInsert zinsert;
 ////	private ZQuery zquery;
 //	private ZUpdate zupdate;
@@ -57,8 +57,8 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 	private H2DeliaSessionCache cache;
 	private CacheData cacheData;
 
-	public H2ZDBExecutor(FactoryService factorySvc, Log sqlLog, H2ZDBInterfaceFactory dbInterface, 
-			H2ZDBConnection conn, H2DeliaSessionCache cache) {
+	public H2DBExecutor(FactoryService factorySvc, Log sqlLog, H2DBInterfaceFactory dbInterface, 
+			H2DBConnection conn, H2DeliaSessionCache cache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
 		this.conn = conn;
@@ -91,7 +91,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 		this.cacheData = cache.findOrCreate(registry); //registry persists across a DeliaSession
 	}
 
-	private ZTableCreator createPartialTableCreator() {
+	private TableCreator createPartialTableCreator() {
 		return super.createPartialTableCreator(this);
 	}
 
@@ -185,7 +185,7 @@ public class H2ZDBExecutor extends ZDBExecutorBase implements DBExecutor {
 	@Override
 	public void rawCreateTable(String tableName) {
 		failIfNotInit1(); 
-		ZTableCreator partialTableCreator = this.createPartialTableCreator();
+		TableCreator partialTableCreator = this.createPartialTableCreator();
 		DStructType dtype = registry.findTypeOrSchemaVersionType(tableName);
 		String sql = partialTableCreator.generateCreateTable(tableName, dtype);
 		execSqlStatement(sql);
