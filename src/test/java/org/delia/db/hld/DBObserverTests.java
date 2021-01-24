@@ -37,8 +37,8 @@ public class DBObserverTests extends BDDBase {
 		public DBObserverAdapter observer;
 
 		@Override
-		public DBExecutor createObserver(DBExecutor actual, DBConnectionObserverAdapter connAdapter) {
-			observer = new DBObserverAdapter(actual);
+		public DBExecutor createObserver(DBExecutor actual, DBConnectionObserverAdapter connAdapter, boolean ignoreSimpleSvcSql) {
+			observer = new DBObserverAdapter(actual, ignoreSimpleSvcSql);
 			return observer;
 		}
 		

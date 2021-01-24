@@ -102,4 +102,9 @@ public class InstrumentedZDBInterface implements DBInterfaceFactory {
 		return actualInterface.getObserverFactory();
 	}
 
+	@Override
+	public void setIgnoreSimpleSvcSql(boolean flag) {
+		actualInterface.setIgnoreSimpleSvcSql(flag);
+	}
+
 }
