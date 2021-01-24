@@ -3,6 +3,10 @@ package org.delia.db.hld;
 
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.delia.api.Delia;
 import org.delia.api.DeliaSession;
 import org.delia.bdd.BDDBase;
@@ -12,6 +16,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
+import org.delia.type.DTypeRegistry;
 import org.delia.zdb.CollectingObserverFactory;
 import org.delia.zdb.DBObserverAdapter;
 import org.delia.zdb.DBObserverFactory;
@@ -48,6 +53,7 @@ public class DBObserverTests extends BDDBase {
 		String src = buildSrc(" insert Customer {id: 5, wid: 33, name:'bob'}");
 		MyObsFactory factory = new MyObsFactory();
 		delia.getOptions().dbObserverFactory = factory;
+		delia.getFactoryService().setEnableMEMSqlGenerationFlag(true);
 		session = delia.beginSession(src);
 		
 		assertEquals(1, factory.observer.statements.size());
@@ -59,6 +65,7 @@ public class DBObserverTests extends BDDBase {
 		String src = buildSrc(" insert Customer {id: 5, wid: 33, name:'bob'}");
 		CollectingObserverFactory factory = new CollectingObserverFactory();
 		delia.getOptions().dbObserverFactory = factory;
+		delia.getFactoryService().setEnableMEMSqlGenerationFlag(true);
 		session = delia.beginSession(src);
 		
 		dump(factory.getObserver());
@@ -71,6 +78,16 @@ public class DBObserverTests extends BDDBase {
 		assertEquals(2, factory.getObserver().statements.size());
 	}	
 
+	@Test
+	public void testBufferedReader() {
+		String resourcePath = "test/northwind/northwind-small.txt";
+		InputStream in = this.getClass().getClassLoader().getResourceAsStream(resourcePath);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		session = delia.beginSession(reader);
+		DTypeRegistry registry = session.getExecutionContext().registry;
+		assertEquals(true, registry.existsType("Category"));
+	}	
 
 	//-------------------------
 	protected Delia delia;
