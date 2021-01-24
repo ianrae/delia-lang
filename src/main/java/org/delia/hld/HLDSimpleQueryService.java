@@ -48,6 +48,7 @@ public class HLDSimpleQueryService {
 		QuerySpec querySpec = innerSvc.buildSpec(queryExp, new DoNothingVarEvaluator());
 		
 		QueryContext qtx = new QueryContext();
+		qtx.isSimpleSvc = true;
 		querySpec.queryExp = queryExp;
 		HLDQueryStatement hld = hldManager.buildQueryStatement(querySpec, zexec, new DoNothingVarEvaluator());
 		SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);

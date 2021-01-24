@@ -24,6 +24,7 @@ public class DBObserverAdapter implements ZDBExecutor {
 	
 	public List<SqlStatement> statements = new ArrayList<>();
 	private ZDBExecutor inner;
+	private boolean ignoreSimpleSvcSql = true; //ignore delia's internal db queries
 	
 	public DBObserverAdapter(ZDBExecutor inner) {
 		this.inner = inner;
@@ -66,7 +67,9 @@ public class DBObserverAdapter implements ZDBExecutor {
 
 	@Override
 	public DValue rawInsert(SqlStatement stm, InsertContext ctx) {
-		statements.add(stm);
+		if (!ignoreSimpleSvcSql) {
+			statements.add(stm);
+		}
 		return inner.rawInsert(stm, ctx);
 	}
 
@@ -88,7 +91,9 @@ public class DBObserverAdapter implements ZDBExecutor {
 
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stmgrp, QueryContext qtx) {
-		add(stmgrp);
+		if (!qtx.isSimpleSvc || !ignoreSimpleSvcSql) {
+			add(stmgrp);
+		}
 		return inner.executeHLDQuery(hld, stmgrp, qtx);
 	}
 
@@ -175,5 +180,17 @@ public class DBObserverAdapter implements ZDBExecutor {
 	@Override
 	public ZDBInterfaceFactory getDbInterface() {
 		return inner.getDbInterface();
+	}
+
+	public void setInner(ZDBExecutor inner) {
+		this.inner = inner;
+	}
+
+	public boolean isIgnoreSimpleSvcSql() {
+		return ignoreSimpleSvcSql;
+	}
+
+	public void setIgnoreSimpleSvcSql(boolean ignoreSimpleSvcSql) {
+		this.ignoreSimpleSvcSql = ignoreSimpleSvcSql;
 	}
 }

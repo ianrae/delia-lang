@@ -61,13 +61,14 @@ public class DBObserverTests extends BDDBase {
 		delia.getOptions().dbObserverFactory = factory;
 		session = delia.beginSession(src);
 		
+		dump(factory.getObserver());
 		assertEquals(1, factory.getObserver().statements.size());
 		
 		src = " insert Customer {id: 6, wid: 33, name:'sie'}";
 		delia.continueExecution(src, session);
-		
-		assertEquals(1, factory.getObserver().statements.size());
-		
+		log.log("..2..");
+		dump(factory.getObserver());
+		assertEquals(2, factory.getObserver().statements.size());
 	}	
 
 
@@ -95,6 +96,11 @@ public class DBObserverTests extends BDDBase {
 	public ZDBInterfaceFactory createForTest() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	public void dump(DBObserverAdapter adapter) {
+		for(SqlStatement sql: adapter.statements) {
+			System.out.println(sql.sql);
+		}
 	}
 
 }

@@ -6,7 +6,11 @@ public class CollectingObserverFactory implements DBObserverFactory {
 
 	@Override
 	public ZDBExecutor createObserver(ZDBExecutor actual) {
-		observer = new DBObserverAdapter(actual);
+		if (observer == null) {
+			observer = new DBObserverAdapter(actual);
+		} else {
+			observer.setInner(actual);
+		}
 		return observer;
 	}
 
