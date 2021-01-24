@@ -1,5 +1,7 @@
 package org.delia.api;
 
+import java.io.BufferedReader;
+
 import org.delia.compiler.DeliaCompiler;
 import org.delia.core.FactoryService;
 import org.delia.db.schema.MigrationPlan;
@@ -28,4 +30,9 @@ public interface Delia {
 	DeliaCompiler createCompiler();
 	DeliaOptions getOptions();
 	DBInterfaceFactory getDBInterface();
+	
+	ResultValue execute(BufferedReader reader);
+	DeliaSession beginSession(BufferedReader reader);
+	ResultValue continueExecution(BufferedReader reader, DeliaSession dbsess);
+	DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan);
 }

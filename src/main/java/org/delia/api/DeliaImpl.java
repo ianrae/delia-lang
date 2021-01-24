@@ -1,7 +1,9 @@
 package org.delia.api;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.DeliaCompiler;
@@ -364,5 +366,34 @@ public class DeliaImpl implements Delia {
 	//for internal use only - unit tests
 	public void setDbInterface(DBInterfaceFactory dbInterface) {
 		this.dbInterface = dbInterface;
+	}
+	
+	private String readAllText(BufferedReader reader) {
+		 return reader.lines()
+			      .collect(Collectors.joining(System.lineSeparator()));
+	}
+
+	@Override
+	public ResultValue execute(BufferedReader reader) {
+		String src = readAllText(reader);
+		return this.execute(src);
+	}
+
+	@Override
+	public DeliaSession beginSession(BufferedReader reader) {
+		String src = readAllText(reader);
+		return this.beginSession(src);
+	}
+
+	@Override
+	public ResultValue continueExecution(BufferedReader reader, DeliaSession dbsess) {
+		String src = readAllText(reader);
+		return this.continueExecution(src, dbsess);
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan) {
+		String src = readAllText(reader);
+		return this.executeMigrationPlan(reader, plan);
 	}
 }
