@@ -17,6 +17,7 @@ import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.db.sqlgen.SqlUpdateStatement;
 import org.delia.hld.HLDField;
 import org.delia.hld.HLDSQLGenerator;
+import org.delia.hld.SqlColumn;
 import org.delia.hld.simple.SimpleBase;
 import org.delia.hld.simple.SimpleSqlGenerator;
 import org.delia.type.DRelation;
@@ -296,13 +297,15 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		sc.o("MERGE INTO");
 		outTblName(sc, hld);
 		String alias = hld.typeOrTbl.alias;
+		SqlColumn col = new SqlColumn(alias, hld.mergeKey);
 		
 		//USING (SELECT id FROM CUSTOMER) AS S ON T.leftv = s.id
 		sc.o(" USING (SELECT %s FROM %s) AS S", hld.mergePKField, hld.mergeType);
-		sc.o(" ON %s.%s = s.%s", alias, hld.mergeKey, hld.mergePKField);
+		sc.o(" ON %s = s.%s", col.render(), hld.mergePKField);
 		
 		//WHEN MATCHED THEN UPDATE SET T.rightv = ?
-		sc.o(" WHEN MATCHED THEN UPDATE SET %s.%s = ?", alias, hld.mergeKeyOther);
+		col = new SqlColumn(alias, hld.mergeKeyOther);
+		sc.o(" WHEN MATCHED THEN UPDATE SET %s = ?", col.render());
 		DValue inner = findFirstNonNullValue(hld.valueL); 
 		stm.paramL.add(inner);
 //		stm.paramL.add(inner);
