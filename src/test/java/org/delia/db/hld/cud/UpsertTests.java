@@ -141,10 +141,10 @@ public class UpsertTests extends NewHLSTestBase {
 		HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0); 
 		SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 5);
 		dumpGrp(stmgrp);
-		chkUpsertSql(stmgrp, 0, "MERGE INTO Customer as t0 KEY(cid) VALUES(?, ?)", "56", "66");
-		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? AND rightv <> ?", "56", "100");
+		chkUpsertSql(stmgrp, 0, "MERGE INTO Customer KEY(cid) VALUES(?, ?)", "56", "66");
+		chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "100");
 		chkUpsertSql(stmgrp, 2, "UPDATE CustomerAddressDat1 SET leftv = ?, rightv = ? WHERE leftv=?", "56", "100", "56"); 
-		chkUpsertSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 WHERE leftv = ? AND rightv <> ?", "56", "101");
+		chkUpsertSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "101");
 		chkUpsertSql(stmgrp, 4, "UPDATE CustomerAddressDat1 SET leftv = ?, rightv = ? WHERE leftv=?", "56", "101", "56");
 		//TODO: the above is correct but not efficient. only need a single:
 		//DELETE FROM CustomerAddressDat1 WHERE leftv = 56

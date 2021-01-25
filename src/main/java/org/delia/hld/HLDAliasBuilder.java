@@ -150,7 +150,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 					String fld1 = datIdMap.getAssocFieldFor(relinfo);
 					//replace t0.cid with t1.leftv
 					sfc.val1.structField = new StructField(relinfo.nearType, fld1, pkpair.type); //TODO: nearType is wrong WRONG!
-					sfc.val1.alias = hld.typeOrTbl.getAlias();
+					sfc.val1.alias = assign(hld.typeOrTbl.getAlias());
 				}
 			}
 		} else if (filter instanceof OpFilterCond) {
@@ -178,12 +178,12 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		if (fieldName.equals(fld1)) {
 			AliasInfo info = aliasMgr.findAssocAlias(relinfo, assocTbl);
 			if (info != null) {
-				val1.alias = info.alias;
+				val1.alias = assign(info.alias);
 			}
 		} else if (fieldName.equals(fld2)) {
 			AliasInfo info = aliasMgr.findAssocAlias(relinfo, assocTbl);
 			if (info != null) {
-				val1.alias = info.alias;
+				val1.alias = assign(info.alias);
 			}
 		}
 	}

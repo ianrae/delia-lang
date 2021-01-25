@@ -181,10 +181,10 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder();
 		aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		aliasBuilder.assignAliases(stmt.hldupdate);
-		aliasBuilder.setOutputAliases(true); //reset
 //		for(HLDUpdate hld: stmt.updateL) {
 //			aliasBuilder.assignAliases(hld);
 //		}
+		aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		for(SimpleBase simple: stmt.moreL) {
 			aliasBuilder.assignAliases(simple);
 		}
@@ -193,12 +193,15 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 //		}
 		for(AssocBundle bundle: stmt.assocBundleL) {
 			if (bundle.hlddelete != null) {
+				aliasBuilder.setOutputAliases(true);
 				aliasBuilder.assignAliasesAssoc(bundle.hlddelete);
 			}
 			if (bundle.hldupdate != null) {
+				aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 				aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
 			}
 		}
+		aliasBuilder.setOutputAliases(true); //reset
 	}
 	public void assignAliases(HLDQueryStatement stmt) {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder();
