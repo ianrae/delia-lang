@@ -12,7 +12,7 @@ public class CollectingObserverFactory implements DBObserverFactory {
 			observer.setInner(actual);
 		}
 		
-		if (ignoreSimpleSvcSql) {
+		if (ignoreSimpleSvcSql && connAdapter != null) {
 			connAdapter.setEnableObserver(true);
 			connAdapter.setStatementList(observer.getStatementList());
 		}

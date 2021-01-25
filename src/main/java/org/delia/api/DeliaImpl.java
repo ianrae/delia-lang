@@ -184,9 +184,11 @@ public class DeliaImpl implements Delia {
 		
 		//replace error converter with a registry aware one (better at parsing errors)
 		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
+		if (errorConverter != null) {
 //		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
 //		dbInterface.setDBErrorConverter(radbec);
-		errorConverter.setRegistry(registry);
+			errorConverter.setRegistry(registry);
+		}
 	}
 
 	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {

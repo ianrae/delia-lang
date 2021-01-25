@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.delia.bdd.core.ThenValue;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
+import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.type.DValue;
 
@@ -115,10 +116,12 @@ public class StructChecker extends ValueCheckerBase {
 			if (line.startsWith(target)) {
 				line = StringUtils.substringAfter(line, target);
 				ignoreElse = true;
+			} else if (lineMatchesOtherDBType(line, dbtype)) {
+				line = null; //
 			}
 			
 			target = "ELSE:";
-			if (line.startsWith(target)) {
+			if (line != null && line.startsWith(target)) {
 				line = ignoreElse ? null : StringUtils.substringAfter(line, target);
 			}
 			
@@ -127,6 +130,20 @@ public class StructChecker extends ValueCheckerBase {
 			}
 		}
 		return resultL;
+	}
+
+	private boolean lineMatchesOtherDBType(String line, String currentDBType) {
+
+		for(DBType dbtype: DBType.values()) {
+			if (!dbtype.name().equals(currentDBType)) {
+				String target = String.format("IF(%s):", dbtype);
+				if (line.startsWith(target)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	private List<String> generateFromThen(ThenValue thenVal) {

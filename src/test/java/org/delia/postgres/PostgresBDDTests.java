@@ -327,7 +327,8 @@ public class PostgresBDDTests extends BDDBase {
 		enableSQLLogging = true;
 		
 //		runR500File("t0-relation-one-to-one.txt", 9);
-		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR500File("t0-relation-many-to-many.txt", 11);
+		runR900File("t0-update.txt", 7);
 	}
 	
 	//---

@@ -60,7 +60,7 @@ public class BetterSQLGenTests extends NewHLSTestBase {
 		SqlStatement stm = new SqlStatement(null);
 		String sql = gen.gen(sel, stm);
 		log.log(sql);
-		assertEquals("UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", sql);
+		assertEquals("UPDATE Customer SET x = ? WHERE cid=?", sql);
 	}
 	
 }

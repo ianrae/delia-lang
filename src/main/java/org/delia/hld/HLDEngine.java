@@ -179,6 +179,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	}
 	public void assignAliases(HLDUpdateStatement stmt) {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder();
+		aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		aliasBuilder.assignAliases(stmt.hldupdate);
 //		for(HLDUpdate hld: stmt.updateL) {
 //			aliasBuilder.assignAliases(hld);
