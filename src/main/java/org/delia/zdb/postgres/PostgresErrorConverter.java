@@ -47,17 +47,22 @@ public class PostgresErrorConverter extends DBErrorConverterBase {
 		String msg = e.getMessage();
 		//if we can't handle an exception here, just return and convertAndRethrow will handle it
 		
-		if (msg.contains("Referential integrity constraint violation")) {
-			//TODO: we need to parse the error more to figure out which field(s) has the failure.
+		
+		//rg.postgresql.util.PSQLException: ERROR: insert or update on table "customeraddressdat1" violates foreign key constraint "customeraddressdat1_leftv_fkey"
+		//Detail: Key (leftv)=(44) is not present in table "customer".
+		
+		if (msg.contains("violates foreign key constraint")) {
 			
-//			//Referential integrity constraint violation: "CONSTRAINT_D: PUBLIC.CUSTOMERADDRESSDAT1 FOREIGN KEY(LEFTV) REFERENCES PUBLIC.CUSTOMER(ID) (44)"; SQL statement:
-//			String type = StringUtils.substringAfter(msg, "PUBLIC.");
-//			type = StringUtils.substringBefore(type, " ");
-//			
-//			boolean isManyRule = findTypeOfType(type);
-//			String errId = isManyRule ? "rule-relationMany" : "rule-relationOne";
-//			DeliaError err = new DeliaError(errId, e.getLastError().getMsg());
-//			throw new DBValidationException(err);
+			//Referential integrity constraint violation: "CONSTRAINT_D: PUBLIC.CUSTOMERADDRESSDAT1 FOREIGN KEY(LEFTV) REFERENCES PUBLIC.CUSTOMER(ID) (44)"; SQL statement:
+			String type = StringUtils.substringAfter(msg, "on table \"");
+			type = StringUtils.substringBefore(type, "\"");
+			
+			boolean b = msg.contains("_leftv") || msg.contains("_rightv");
+			
+			boolean isManyRule = b; //findTypeOfType(type);
+			String errId = isManyRule ? "rule-relationMany" : "rule-relationOne";
+			DeliaError err = new DeliaError(errId, msg);
+			throw new DBValidationException(err);
 		}
 	}
 	
@@ -79,19 +84,20 @@ public class PostgresErrorConverter extends DBErrorConverterBase {
 	@Override
 	public void convertAndRethrow(DBValidationException e, List<TableInfo> tblinfoL) {
 		String msg = e.getMessage();
-		if (msg.contains("Unique index or primary key violation")) {
-			//TODO: we need to parse the error more to figure out which field(s) has the failure.
-			DeliaError err = new DeliaError("duplicate-unique-value", e.getLastError().getMsg());
-			throw new DBValidationException(err);
-		} else if (msg.contains("violates foreign key constraint") || isRelationError(msg)) {
-			//TODO: we need to parse the error more to figure out which field(s) has the failure.
-			boolean isManyRule = findTypeOfViolation(e.getMessage(), tblinfoL);
-			String errId = isManyRule ? "rule-relationMany" : "rule-relationOne";
-			DeliaError err = new DeliaError(errId, e.getLastError().getMsg());
-			throw new DBValidationException(err);
-		} else {
-			throw e;
-		}
+		throw e;
+//		if (msg.contains("Unique index or primary key violation")) {
+//			//TODO: we need to parse the error more to figure out which field(s) has the failure.
+//			DeliaError err = new DeliaError("duplicate-unique-value", e.getLastError().getMsg());
+//			throw new DBValidationException(err);
+//		} else if (msg.contains("violates foreign key constraint") || isRelationError(msg)) {
+//			//TODO: we need to parse the error more to figure out which field(s) has the failure.
+//			boolean isManyRule = findTypeOfViolation(e.getMessage(), tblinfoL);
+//			String errId = isManyRule ? "rule-relationMany" : "rule-relationOne";
+//			DeliaError err = new DeliaError(errId, e.getLastError().getMsg());
+//			throw new DBValidationException(err);
+//		} else {
+//			throw e;
+//		}
 	}
 
 	//org.postgresql.util.PSQLException: ERROR: insert or update on table "addresscustomerassoc" violates foreign key constraint "addresscustomerassoc_rightv_fkey"
