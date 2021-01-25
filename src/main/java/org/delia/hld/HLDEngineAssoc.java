@@ -131,7 +131,7 @@ public class HLDEngineAssoc extends HLDExtendedServiceBase {
 //		    delete CustomerAddressAssoc where leftv=55 and rightv <> 100
 //		    merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 
-		HLDDsonBuilder hldBuilder = getHldBuilder();getHldBuilder();
+		HLDDsonBuilder hldBuilder = getHldBuilder();
 		AssocBundle bundle = new AssocBundle();
 		bundle.hlddelete = hldBuilder.buildAssocDelete(builderAdapter, queryExp, relinfo, pkval, fkval, datIdMap);
 		bundle.hlddelete.assocRelInfo = relinfo; 

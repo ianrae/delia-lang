@@ -22,7 +22,6 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -327,11 +326,14 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFieldListAssoc(hld.fieldL, info);
 	}
 	public void assignAliasesAssoc(HLDUpdate hld) {
+		boolean sav = outputAliases;
+		setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
 		adjustAssocFilter(hld);
+		setOutputAliases(sav);
 	}
 	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
 		AliasInfo info = doAssignAliasesAssoc(hld);
