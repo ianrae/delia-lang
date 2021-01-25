@@ -314,7 +314,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 
 	@Override
 	public void assignAliases(HLDInsert hld) {
-		this.outputAliases = true;
+		this.outputAliases = false;
 		if (hld.typeOrTbl.isAssocTbl) {
 			assignAliasesAssoc(hld);
 			return;

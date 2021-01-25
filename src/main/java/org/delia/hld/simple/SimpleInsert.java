@@ -18,7 +18,7 @@ public class SimpleInsert extends SimpleBase {
 	
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
-		this.outputAliases = true;
+		this.outputAliases = false;
 //		boolean save = aliasBuilder.isOutputAliases();
 //		aliasBuilder.setOutputAliases(false);
 		

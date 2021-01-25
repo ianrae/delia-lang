@@ -172,7 +172,6 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public void assignAliases(HLDInsertStatement stmt) {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder();
 		//H2 doesn't like tbl alias so we won't use any aliases for INSERT
-		aliasBuilder.setOutputAliases(false);
 		aliasBuilder.assignAliases(stmt.hldinsert);
 		for(SimpleBase simple: stmt.moreL) {
 			aliasBuilder.assignAliases(simple);
@@ -180,12 +179,10 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	}
 	public void assignAliases(HLDUpdateStatement stmt) {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder();
-		aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		aliasBuilder.assignAliases(stmt.hldupdate);
 //		for(HLDUpdate hld: stmt.updateL) {
 //			aliasBuilder.assignAliases(hld);
 //		}
-		aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		for(SimpleBase simple: stmt.moreL) {
 			aliasBuilder.assignAliases(simple);
 		}
@@ -194,15 +191,12 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 //		}
 		for(AssocBundle bundle: stmt.assocBundleL) {
 			if (bundle.hlddelete != null) {
-				aliasBuilder.setOutputAliases(true);
 				aliasBuilder.assignAliasesAssoc(bundle.hlddelete);
 			}
 			if (bundle.hldupdate != null) {
-				aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
 				aliasBuilder.assignAliasesAssoc(bundle.hldupdate);
 			}
 		}
-		aliasBuilder.setOutputAliases(true); //reset
 	}
 	public void assignAliases(HLDQueryStatement stmt) {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder();
@@ -212,11 +206,6 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder(); 
 		aliasBuilder.assignAliases(stmt.hlddelete);
 		for(SimpleBase simple: stmt.moreL) {
-			if (simple instanceof SimpleUpdate) {
-				aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
-			} else {
-				aliasBuilder.setOutputAliases(true);
-			}
 			aliasBuilder.assignAliases(simple);
 		}
 	}

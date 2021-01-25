@@ -30,7 +30,7 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer SET x = ? WHERE cid=?", "45", "1");
 	}
 	@Test
 	public void test2() {
@@ -38,7 +38,7 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		String src = "update Address[100] { y: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address SET y = ? WHERE id=?", "45", "100");
 	}
 	@Test
 	public void test2a() {
@@ -49,8 +49,8 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "1");
-		chkUpdateSql(stmgrp, 1, "UPDATE Customer as t1 SET t1.addr = ? WHERE t1.cid=?", "1", "55");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ? WHERE id=?", "45", "1");
+		chkUpdateSql(stmgrp, 1, "UPDATE Customer SET addr = ? WHERE cid=?", "1", "55");
 	}
 	
 	// --- 1:N ---
@@ -60,7 +60,7 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer SET x = ? WHERE cid=?", "45", "1");
 	}
 	@Test
 	public void test1N2() {
@@ -68,7 +68,7 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		String src = "update Address[100] {y: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address SET y = ? WHERE id=?", "45", "100");
 	}
 	@Test
 	public void test1N2a() {
@@ -80,8 +80,8 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 2);
 		dumpGrp(stmgrp);
 		
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
-		chkUpdateSql(stmgrp, 1, "UPDATE Customer as t1 SET t1.addr = ? WHERE t1.cid=?", "100", "55");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ? WHERE id=?", "45", "100");
+		chkUpdateSql(stmgrp, 1, "UPDATE Customer SET addr = ? WHERE cid=?", "100", "55");
 	}
 //TODO:fix	
 //	@Test
