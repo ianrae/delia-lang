@@ -24,7 +24,8 @@ public class SubSelectRenderer extends CustomFilterValueRendererBase implements 
 	public String render(Object obj, SqlParamGenerator paramGen, SqlStatement stm) {
 		////			WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
 		OpFilterCond ofc = (OpFilterCond) obj;
-		String s1 = String.format("%s.%s", ofc.val1.alias, ofc.val1.structField.fieldName);
+		String alias = ofc.val1.alias == null ? "" : ofc.val1.alias + ".";
+		String s1 = String.format("%s%s", alias, ofc.val1.structField.fieldName);
 		String s2 = sqlgen.genAny(simple, stm);
 		String sql = String.format("%s IN (%s)", s1, s2);
 
