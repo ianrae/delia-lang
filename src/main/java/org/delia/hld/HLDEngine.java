@@ -19,6 +19,7 @@ import org.delia.hld.cud.HLDUpdate;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsert;
 import org.delia.hld.simple.SimpleBase;
+import org.delia.hld.simple.SimpleUpdate;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -211,6 +212,11 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		HLDAliasBuilder aliasBuilder = createAliasBuilder(); 
 		aliasBuilder.assignAliases(stmt.hlddelete);
 		for(SimpleBase simple: stmt.moreL) {
+			if (simple instanceof SimpleUpdate) {
+				aliasBuilder.setOutputAliases(false); //Postgres doesn't like aliases on update statement
+			} else {
+				aliasBuilder.setOutputAliases(true);
+			}
 			aliasBuilder.assignAliases(simple);
 		}
 	}
