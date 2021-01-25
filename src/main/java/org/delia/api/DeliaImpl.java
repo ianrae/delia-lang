@@ -11,7 +11,6 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
-import org.delia.db.RegistryAwareDBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
@@ -185,8 +184,9 @@ public class DeliaImpl implements Delia {
 		
 		//replace error converter with a registry aware one (better at parsing errors)
 		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
-		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
-		dbInterface.setDBErrorConverter(radbec);
+//		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
+//		dbInterface.setDBErrorConverter(radbec);
+		errorConverter.setRegistry(registry);
 	}
 
 	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {

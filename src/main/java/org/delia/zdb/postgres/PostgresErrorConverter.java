@@ -1,8 +1,9 @@
-package org.delia.db.postgres;
+package org.delia.zdb.postgres;
 
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.db.DBErrorConverterBase;
 import org.delia.db.DBException;
 import org.delia.db.DBValidationException;
@@ -23,6 +24,11 @@ public class PostgresErrorConverter extends DBErrorConverterBase {
 	@Override
 	public void convertAndRethrowException(SQLException e) {
 		printStackTraceIfEnabled(e);
+		
+		if (registry != null) {
+			doRegistryAwareConvertAndRethrow(e);
+		}
+		
 		if (isPSQLExceptionWith(e, "duplicate key value violates unique")) {
 			throw new DBValidationException(makeError("duplicate-unique-value", e));
 		} else 		if (isPSQLExceptionWith(e, "violates foreign key constraint")) {
@@ -36,6 +42,25 @@ public class PostgresErrorConverter extends DBErrorConverterBase {
 			throw new DBException(err);
 		}
 	}
+	
+	private void doRegistryAwareConvertAndRethrow(SQLException e) {
+		String msg = e.getMessage();
+		//if we can't handle an exception here, just return and convertAndRethrow will handle it
+		
+		if (msg.contains("Referential integrity constraint violation")) {
+			//TODO: we need to parse the error more to figure out which field(s) has the failure.
+			
+//			//Referential integrity constraint violation: "CONSTRAINT_D: PUBLIC.CUSTOMERADDRESSDAT1 FOREIGN KEY(LEFTV) REFERENCES PUBLIC.CUSTOMER(ID) (44)"; SQL statement:
+//			String type = StringUtils.substringAfter(msg, "PUBLIC.");
+//			type = StringUtils.substringBefore(type, " ");
+//			
+//			boolean isManyRule = findTypeOfType(type);
+//			String errId = isManyRule ? "rule-relationMany" : "rule-relationOne";
+//			DeliaError err = new DeliaError(errId, e.getLastError().getMsg());
+//			throw new DBValidationException(err);
+		}
+	}
+	
 	
 	private DeliaError makeError(String id, Exception e) {
 		DeliaError err = new DeliaError(id, e.getMessage());
