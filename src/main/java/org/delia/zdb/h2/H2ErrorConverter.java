@@ -1,4 +1,4 @@
-package org.delia.db.h2;
+package org.delia.zdb.h2;
 
 import java.sql.SQLException;
 import java.util.List;

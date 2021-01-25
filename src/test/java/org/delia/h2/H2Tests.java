@@ -15,7 +15,6 @@ import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;
 import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlStatement;
-import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.error.ErrorTracker;
@@ -25,6 +24,7 @@ import org.delia.runner.CompilerHelper;
 import org.delia.runner.Runner;
 import org.delia.runner.RunnerHelper;
 import org.delia.zdb.h2.H2DBConnection;
+import org.delia.zdb.h2.H2ErrorConverter;
 import org.junit.Before;
 import org.junit.Test;
 

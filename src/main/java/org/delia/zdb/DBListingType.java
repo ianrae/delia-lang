@@ -1,4 +1,4 @@
-package org.delia.db.h2;
+package org.delia.zdb;
 
 public enum DBListingType {
 	ALL_TABLES,

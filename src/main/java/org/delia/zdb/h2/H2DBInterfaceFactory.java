@@ -5,7 +5,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
-import org.delia.db.h2.H2ErrorConverter;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;

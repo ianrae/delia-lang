@@ -18,7 +18,6 @@ import org.delia.db.SqlExecuteContext;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.ValueHelper;
-import org.delia.db.h2.DBListingType;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
@@ -42,6 +41,7 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecuteContext;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBListingType;
 import org.delia.zdb.TableCreator;
 import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
