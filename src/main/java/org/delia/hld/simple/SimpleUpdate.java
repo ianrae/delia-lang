@@ -17,7 +17,6 @@ public class SimpleUpdate extends SimpleBase {
 	public List<SqlColumn> fieldL = new ArrayList<>();
 	public FilterCond filter;
 	public HLDUpdate hld; //for aliases
-	private boolean outputAliases;
 	
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
@@ -28,10 +27,4 @@ public class SimpleUpdate extends SimpleBase {
 		}
 		tblFrag.alias = assign(hld.getMainAlias());
 	}
-	
-	
-	protected String assign(String alias) {
-		return outputAliases ? alias : null;
-	}
-
 }

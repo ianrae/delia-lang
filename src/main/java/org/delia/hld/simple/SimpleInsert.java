@@ -18,16 +18,17 @@ public class SimpleInsert extends SimpleBase {
 	
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
-		boolean save = aliasBuilder.isOutputAliases();
-		aliasBuilder.setOutputAliases(false);
+		this.outputAliases = true;
+//		boolean save = aliasBuilder.isOutputAliases();
+//		aliasBuilder.setOutputAliases(false);
 		
 		aliasBuilder.assignAliases(hld);
 		for(SqlColumn column: fieldL) {
-			column.alias = hld.getMainAlias();
+			column.alias = assign(hld.getMainAlias());
 		}
-		tblFrag.alias = hld.getMainAlias();
+		tblFrag.alias = assign(hld.getMainAlias());
 		
-		aliasBuilder.setOutputAliases(save);
+//		aliasBuilder.setOutputAliases(save);
 	}
 
 }

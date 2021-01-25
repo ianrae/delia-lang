@@ -55,6 +55,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 
 	@Override
 	public void assignAliases(HLDQuery hld) {
+		this.outputAliases = true;
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
 		hld.fromAlias = assign(info.alias);
 		doFieldList(hld.fieldL, hld.fromType, info);
@@ -313,6 +314,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 
 	@Override
 	public void assignAliases(HLDInsert hld) {
+		this.outputAliases = true;
 		if (hld.typeOrTbl.isAssocTbl) {
 			assignAliasesAssoc(hld);
 			return;
@@ -322,20 +324,23 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 	}
 	public void assignAliasesAssoc(HLDInsert hld) {
+		this.outputAliases = true;
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 	}
 	public void assignAliasesAssoc(HLDUpdate hld) {
-		boolean sav = outputAliases;
-		setOutputAliases(false); //Postgres doesn't like aliases on update statement
+		this.outputAliases = false;
+//		boolean sav = outputAliases;
+//		setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
 		adjustAssocFilter(hld);
-		setOutputAliases(sav);
+//		setOutputAliases(sav);
 	}
 	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
+		this.outputAliases = true;
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
@@ -351,6 +356,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	
 	@Override
 	public void assignAliases(HLDUpdate hld) {
+		this.outputAliases = false;
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = assign(info.alias);
 		hld.hld.fromAlias = assign(info.alias);
@@ -361,6 +367,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	}
 	@Override
 	public void assignAliases(HLDDelete hld) {
+		this.outputAliases = true;
 		AliasInfo info;
 		if (hld.typeOrTbl.isAssocTbl) {
 			info = assignAliasesAssoc(hld);
