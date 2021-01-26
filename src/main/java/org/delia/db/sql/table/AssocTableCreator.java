@@ -18,12 +18,12 @@ import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
 public class AssocTableCreator extends ServiceBase {
-	private DTypeRegistry registry;
+	protected DTypeRegistry registry;
 	public List<TableInfo> alreadyCreatedL;
-	private FieldGenFactory fieldgenFactory;
-	private SqlNameFormatter nameFormatter;
-	private TableExistenceService existSvc;
-	private DatIdMap datIdMap;
+	protected FieldGenFactory fieldgenFactory;
+	protected SqlNameFormatter nameFormatter;
+	protected TableExistenceService existSvc;
+	protected DatIdMap datIdMap;
 	
 	public AssocTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
 				SqlNameFormatter nameFormatter, TableExistenceService existSvc, List<TableInfo> alreadyCreatedL, DatIdMap datIdMap) {
@@ -114,6 +114,10 @@ public class AssocTableCreator extends ServiceBase {
 		if (constraint != null) {
 			fieldL.add(constraint);
 		}
+		constraint = addAdditionalPKConstraint("leftv", "rightv");
+		if (constraint != null) {
+			fieldL.add(constraint);
+		}
 		
 		int index = 0;
 		for(SqlElement xfield: fieldL) {
@@ -132,6 +136,10 @@ public class AssocTableCreator extends ServiceBase {
 		sc.o(");");
 		sc.nl();
 		
+	}
+
+	protected ConstraintGen addAdditionalPKConstraint(String string, String string2) {
+		return null;
 	}
 
 

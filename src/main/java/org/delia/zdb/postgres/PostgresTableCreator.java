@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
+import org.delia.db.TableExistenceService;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
+import org.delia.db.sql.table.AssocTableCreator;
 import org.delia.db.sql.table.ConstraintGen;
 import org.delia.db.sql.table.FieldGen;
 import org.delia.db.sql.table.FieldGenFactory;
@@ -24,6 +26,12 @@ public class PostgresTableCreator extends TableCreator {
 				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
 		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec);
 	}
+	
+	@Override
+	protected AssocTableCreator createAssocTblCreator(TableExistenceService existSvc) {
+		return new PostgresAssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
+	}
+	
 
 	@Override
 	public String generateRenameField(String tableName, String fieldName, String newName) {

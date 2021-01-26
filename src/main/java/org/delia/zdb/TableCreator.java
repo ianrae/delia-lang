@@ -39,10 +39,14 @@ public class TableCreator extends ServiceBase {
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
+		this.datIdMap = datIdMap;
 		
 		TableExistenceService existSvc = new ZTableExistenceService();
-		this.assocTblCreator = new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
-		this.datIdMap = datIdMap;
+		this.assocTblCreator = createAssocTblCreator(existSvc); 
+	}
+
+	protected AssocTableCreator createAssocTblCreator(TableExistenceService existSvc) {
+		return new AssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
 	}
 
 	public String generateCreateTable(String typeName, DStructType dtype) {
