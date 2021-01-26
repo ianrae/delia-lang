@@ -6,6 +6,7 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
 import org.delia.compiler.ast.UpsertStatementExp;
 import org.delia.core.FactoryService;
+import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
@@ -31,11 +32,14 @@ public class HLDInnerManager extends HLDServiceBase {
 	private HLDEngineAssoc engineAssoc;
 //	private ConversionHelper conversionHelper;
 
-	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
+	private DBType dbType;
+
+	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc, DBType dbType) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.engine = new HLDEngine(registry, factorySvc, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, datIdMap, sprigSvc);
 //		this.conversionHelper = new ConversionHelper(registry, factorySvc);
+		this.dbType = dbType;
 	}
 
 	public HLDQueryStatement fullBuildQuery(QueryExp queryExp, VarEvaluator varEvaluator) {
@@ -98,7 +102,7 @@ public class HLDInnerManager extends HLDServiceBase {
 	// -- sql generation --
 	public String generateRawSql(HLDQueryStatement hld) {
 		if (InsertInnerSQLGenerator.useSqlGenFactory) {
-			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(registry);
+			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
 			SqlSelectStatement selStmt = genfact.createSelect(datIdMap);
 			selStmt.disableSqlParameterGen();
 			selStmt.init(hld.hldquery);
@@ -112,7 +116,7 @@ public class HLDInnerManager extends HLDServiceBase {
 	}
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
 		if (InsertInnerSQLGenerator.useSqlGenFactory) {
-			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(registry);
+			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
 			SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
 			sqlMergeInto.init(hld.hldquery);
 			SqlStatement stm = sqlMergeInto.render();
@@ -140,31 +144,33 @@ public class HLDInnerManager extends HLDServiceBase {
 
 
 	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
-		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hlddel);
 		return stmgrp;
 	}
 
 	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
-		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldins);
 		return stmgrp;
 	}
 
 	public SqlStatementGroup generateSql(HLDUpdateStatement hldupdate) {
-		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
 		return stmgrp;
 	}
 
 	public SqlStatementGroup generateSql(HLDUpsertStatement hldupsert) {
-		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen);
+		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupsert);
 		return stmgrp;
+	}
+
+	private InsertInnerSQLGenerator createInnerSqlGenerator() {
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen, dbType);
+		return sqlgen;
 	}
 
 

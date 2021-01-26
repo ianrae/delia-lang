@@ -165,7 +165,7 @@ public class HLDManager extends ServiceBase {
 	}
 	
 	protected HLDInnerManager createManager(DBExecutor zexec) {
-		return new HLDInnerManager(registry, factorySvc, zexec.getDatIdMap(), sprigSvc);
+		return new HLDInnerManager(registry, factorySvc, zexec.getDatIdMap(), sprigSvc, dbInterface.getDBType());
 	}
 
 

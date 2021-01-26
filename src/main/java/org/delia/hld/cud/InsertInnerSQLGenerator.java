@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.sql.StrCreator;
@@ -42,13 +43,13 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 	private SqlGeneratorFactory sqlFactory;
 
-	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
+	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen, DBType dbType) {
 		super(factorySvc);
 		this.registry = registry;
 //		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 		this.upsertSQLGen = new UpsertInnerSQLGenerator(factorySvc);
-		this.sqlFactory = factorySvc.createSqlFactory(registry);
+		this.sqlFactory = factorySvc.createSqlFactory(dbType, registry);
 	}
 
 	public SqlStatementGroup generate(HLDInsertStatement hldins) {

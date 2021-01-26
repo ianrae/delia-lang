@@ -1,6 +1,7 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
@@ -127,7 +128,7 @@ public class FactoryServiceImpl implements FactoryService {
 		enableMEMSqlGenerationFlag = flag;
 	}
 	@Override
-	public SqlGeneratorFactory createSqlFactory(DTypeRegistry registry) {
+	public SqlGeneratorFactory createSqlFactory(DBType dbtype, DTypeRegistry registry) {
 		return new SqlGeneratorFactoryImpl(registry, this);
 	}
 
