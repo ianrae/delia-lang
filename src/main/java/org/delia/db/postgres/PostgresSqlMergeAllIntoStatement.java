@@ -44,11 +44,13 @@ public class PostgresSqlMergeAllIntoStatement extends SqlMergeAllIntoStatement {
 		sc.o("INSERT INTO");
 		sc.o(tblClause.render(stm));
 		
+		DValue first = valueClause.getValueL().remove(0);
+		valueClause.getValueL().clear();
+		valueClause.getValueL().add(first);
 		sc.o(valueClause.render(stm));
 
 		sc.o(" ON CONFLICT");
-//		sc.addStr(fieldListClause.render(stm));
-		sc.o("(%s)", hld.mergeKeyOther);
+		sc.o("(%s,%s)", hld.mergeKey,hld.mergeKeyOther);
 		sc.o(" DO UPDATE");
 		sc.o(" SET ");
 		int index = 0;

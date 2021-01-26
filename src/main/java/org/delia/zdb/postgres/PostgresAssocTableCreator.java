@@ -11,7 +11,9 @@ import org.delia.db.sql.table.ConstraintGen;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.db.sql.table.PKConstraintGen;
 import org.delia.db.sql.table.TableInfo;
+import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.TypePair;
 
 public class PostgresAssocTableCreator extends AssocTableCreator {
 	
@@ -22,8 +24,9 @@ public class PostgresAssocTableCreator extends AssocTableCreator {
 	
 
 	@Override
-	protected ConstraintGen addAdditionalPKConstraint(String string, String string2) {
-		return new PKConstraintGen(factorySvc, registry, null, null, false);
+	protected ConstraintGen addAdditionalPKConstraint(String string, String string2, DStructType leftType, DStructType rightType, String assocTableName) {
+		TypePair pair = new TypePair(assocTableName, leftType); //hacky
+		return new PKConstraintGen(factorySvc, registry, pair, null, false);
 	}
 
 

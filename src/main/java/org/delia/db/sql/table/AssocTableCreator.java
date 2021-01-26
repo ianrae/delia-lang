@@ -114,7 +114,7 @@ public class AssocTableCreator extends ServiceBase {
 		if (constraint != null) {
 			fieldL.add(constraint);
 		}
-		constraint = addAdditionalPKConstraint("leftv", "rightv");
+		constraint = addAdditionalPKConstraint("leftv", "rightv", leftType, rightType, assocTableName);
 		if (constraint != null) {
 			fieldL.add(constraint);
 		}
@@ -138,7 +138,7 @@ public class AssocTableCreator extends ServiceBase {
 		
 	}
 
-	protected ConstraintGen addAdditionalPKConstraint(String string, String string2) {
+	protected ConstraintGen addAdditionalPKConstraint(String string, String string2, DStructType leftType, DStructType rightType, String assocTableName) {
 		return null;
 	}
 

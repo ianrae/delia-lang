@@ -42,4 +42,8 @@ public class SqlValueListClause implements SqlClauseGenerator {
 		return inner;
 	}
 
+	public List<DValue> getValueL() {
+		return valueL;
+	}
+
 }
