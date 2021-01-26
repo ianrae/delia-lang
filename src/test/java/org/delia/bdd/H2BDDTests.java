@@ -335,7 +335,8 @@ public class H2BDDTests extends BDDBase {
 //		runR560File("t0-self-11.txt", 3);
 //		runR560File("t0-self-N1.txt", 4);
 		
-		runR560File("t0-self-11.txt", 3);
+//		runR560File("t0-self-11.txt", 3);
+		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	
 	//---

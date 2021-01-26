@@ -2,6 +2,7 @@ package org.delia.db.postgres;
 
 import org.delia.core.FactoryService;
 import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
+import org.delia.db.sqlgen.SqlMergeAllIntoStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.db.sqlgen.SqlTableNameClause;
 import org.delia.db.sqlgen.SqlValueListClause;
@@ -12,10 +13,15 @@ public class PostgresSqlGeneratorFactory extends SqlGeneratorFactoryImpl {
 	public PostgresSqlGeneratorFactory(DTypeRegistry registry, FactoryService factorySvc) {
 		super(registry, factorySvc);
 	}
-	
+
 	@Override
-	public SqlMergeIntoStatement createMergeInto() {
-		return new PostgresSqlMergeIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
+	public SqlMergeAllIntoStatement createMergeAllInto() {
+		return new PostgresSqlMergeAllIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
 	}
+	
+//	@Override
+//	public SqlMergeIntoStatement createMergeInto() {
+//		return new PostgresSqlMergeIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
+//	}
 	
 }

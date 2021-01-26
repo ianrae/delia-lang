@@ -14,6 +14,7 @@ import org.delia.db.sqlgen.SqlDeleteStatement;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
 import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.db.sqlgen.SqlInsertStatement;
+import org.delia.db.sqlgen.SqlMergeAllIntoStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.db.sqlgen.SqlUpdateStatement;
@@ -289,34 +290,9 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 //    ON T.leftv = s.id WHEN MATCHED THEN UPDATE SET T.rightv = ?
 //    WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
 	private SqlStatement genMergeAllIntoStatement(HLDUpdate hld) {
-		SqlStatement stm = new SqlStatement(hld);
-		StrCreator sc = new StrCreator();
-		sc.o("MERGE INTO");
-		outTblName(sc, hld);
-		String alias = hld.typeOrTbl.alias;
-		SqlColumn col = new SqlColumn(alias, hld.mergeKey);
-		
-		//USING (SELECT id FROM CUSTOMER) AS S ON T.leftv = s.id
-		sc.o(" USING (SELECT %s FROM %s) AS S", hld.mergePKField, hld.mergeType);
-		sc.o(" ON %s = s.%s", col.render(), hld.mergePKField);
-		
-		//WHEN MATCHED THEN UPDATE SET T.rightv = ?
-		col = new SqlColumn(alias, hld.mergeKeyOther);
-		sc.o(" WHEN MATCHED THEN UPDATE SET %s = ?", col.render());
-		DValue inner = findFirstNonNullValue(hld.valueL); 
-		stm.paramL.add(inner);
-//		stm.paramL.add(inner);
-		
-//		//WHEN NOT MATCHED THEN INSERT (leftv, rightv) VALUES(s.id, ?)
-//		sc.o(" WHEN NOT MATCHED THEN INSERT (leftv, rightv)", hld.mergeKey, hld.mergeKeyOther);
-//		sc.o(" VALUES(s.%s, ?)", hld.mergePKField);
-		
-		stm.sql = sc.toString();
-		return stm;
-	}
-	private DValue findFirstNonNullValue(List<DValue> valueL) {
-		Optional<DValue> opt = valueL.stream().filter(x -> x != null).findFirst();
-		return opt.orElse(null);
+		SqlMergeAllIntoStatement updateStmt = sqlFactory.createMergeAllInto();
+		updateStmt.init(hld);
+		return updateStmt.render();
 	}
 
 //  WITH cte1 AS (SELECT ? as leftv, id as rightv FROM Customer) INSERT INTO AddressCustomerAssoc as t SELECT * from cte1

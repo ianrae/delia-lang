@@ -13,7 +13,7 @@ public interface SqlGeneratorFactory {
 	SqlDeleteStatement createDelete();
 
 	SqlMergeIntoStatement createMergeInto();
-
+	SqlMergeAllIntoStatement createMergeAllInto();
 	SqlMergeUsingStatement createMergeUsing();
 	void useDeleteIn(SqlDeleteStatement delStmt);
 

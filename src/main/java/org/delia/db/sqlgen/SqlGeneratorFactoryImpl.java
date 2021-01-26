@@ -72,6 +72,12 @@ public class SqlGeneratorFactoryImpl extends ServiceBase implements SqlGenerator
 		SqlDeleteInClause deleteInClause = new SqlDeleteInClause(whereClause);
 		delStmt.useDeleteIn(deleteInClause);
 	}
+
+
+	@Override
+	public SqlMergeAllIntoStatement createMergeAllInto() {
+		return new SqlMergeAllIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
+	}
 	
 	
 	
