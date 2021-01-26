@@ -19,7 +19,6 @@ import org.delia.hld.cud.HLDUpdate;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsert;
 import org.delia.hld.simple.SimpleBase;
-import org.delia.hld.simple.SimpleUpdate;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;

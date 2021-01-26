@@ -11,6 +11,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sqlgen.SqlDeleteStatement;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.db.sqlgen.SqlInsertStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.db.sqlgen.SqlMergeUsingStatement;
@@ -39,12 +40,15 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	private SimpleSqlGenerator simpleSqlGenerator;
 	private UpsertInnerSQLGenerator upsertSQLGen;
 
+	private SqlGeneratorFactory sqlFactory;
+
 	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen) {
 		super(factorySvc);
 		this.registry = registry;
 //		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 		this.upsertSQLGen = new UpsertInnerSQLGenerator(factorySvc);
+		this.sqlFactory = factorySvc.createSqlFactory(registry);
 	}
 
 	public SqlStatementGroup generate(HLDInsertStatement hldins) {
@@ -130,8 +134,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	private SqlStatement genUpsertStatement(HLDUpsert hld) {
 		if (hld.noUpdateFlag) {
 			if (useSqlGenFactory) {
-				SqlGeneratorFactory genfact = creatSqlGenFactory();
-				SqlMergeUsingStatement sqlMergeInto = genfact.createMergeUsing();
+				SqlMergeUsingStatement sqlMergeInto = sqlFactory.createMergeUsing();
 				sqlMergeInto.init(hld);
 				return sqlMergeInto.render();
 			}
@@ -139,8 +142,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = creatSqlGenFactory();
-			SqlMergeIntoStatement sqlMergeInto = genfact.createMergeInto();
+			SqlMergeIntoStatement sqlMergeInto = sqlFactory.createMergeInto();
 			sqlMergeInto.init(hld);
 			return sqlMergeInto.render();
 		}
@@ -167,8 +169,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	
 	private SqlStatement genInsertStatement(HLDInsert hldins) {
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
-			SqlInsertStatement sqlMergeInto = genfact.createInsert();
+			SqlInsertStatement sqlMergeInto = sqlFactory.createInsert();
 			sqlMergeInto.init(hldins);
 			return sqlMergeInto.render();
 		}
@@ -210,10 +211,6 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return null;
 	}
 	
-	private SqlGeneratorFactory creatSqlGenFactory() {
-		return new SqlGeneratorFactory(registry, factorySvc);
-	}
-
 	private DValue renderValue(DValue inner) {
 		if (inner != null && inner.getType().isRelationShape()) {
 			DRelation drel = inner.asRelation();
@@ -228,8 +225,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 	private SqlStatement genUpdateStatement(HLDUpdate hld) {
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
-			SqlUpdateStatement updateStmt = genfact.createUpdate();
+			SqlUpdateStatement updateStmt = sqlFactory.createUpdate();
 			updateStmt.init(hld);
 			return updateStmt.render();
 		}
@@ -375,8 +371,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	//DELETE FROM table_name WHERE condition;
 	private SqlStatement genDeleteStatement(HLDDelete hld) {
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
-			SqlDeleteStatement delStmt = genfact.createDelete();
+			SqlDeleteStatement delStmt = sqlFactory.createDelete();
 			delStmt.init(hld);
 			return delStmt.render();
 		}
@@ -397,9 +392,8 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	//delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
 	private SqlStatement genDeleteInStatement(HLDDelete hld) {
 		if (useSqlGenFactory) {
-			SqlGeneratorFactory genfact = creatSqlGenFactory(); //new SqlGeneratorFactory(registry, factorySvc, dataIdMap);
-			SqlDeleteStatement delStmt = genfact.createDelete();
-			genfact.useDeleteIn(delStmt);
+			SqlDeleteStatement delStmt = sqlFactory.createDelete();
+			sqlFactory.useDeleteIn(delStmt);
 			delStmt.init(hld);
 			return delStmt.render();
 		}

@@ -98,7 +98,7 @@ public class HLDInnerManager extends HLDServiceBase {
 	// -- sql generation --
 	public String generateRawSql(HLDQueryStatement hld) {
 		if (InsertInnerSQLGenerator.useSqlGenFactory) {
-			SqlGeneratorFactory genfact = new SqlGeneratorFactory(registry, factorySvc);
+			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(registry);
 			SqlSelectStatement selStmt = genfact.createSelect(datIdMap);
 			selStmt.disableSqlParameterGen();
 			selStmt.init(hld.hldquery);
@@ -112,7 +112,7 @@ public class HLDInnerManager extends HLDServiceBase {
 	}
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
 		if (InsertInnerSQLGenerator.useSqlGenFactory) {
-			SqlGeneratorFactory genfact = new SqlGeneratorFactory(registry, factorySvc);
+			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(registry);
 			SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
 			sqlMergeInto.init(hld.hldquery);
 			SqlStatement stm = sqlMergeInto.render();

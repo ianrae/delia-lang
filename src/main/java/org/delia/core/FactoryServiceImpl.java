@@ -4,6 +4,8 @@ import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.hld.HLDSimpleQueryService;
@@ -123,6 +125,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public void setEnableMEMSqlGenerationFlag(boolean flag) {
 		enableMEMSqlGenerationFlag = flag;
+	}
+	@Override
+	public SqlGeneratorFactory createSqlFactory(DTypeRegistry registry) {
+		return new SqlGeneratorFactoryImpl(registry, this);
 	}
 
 }
