@@ -4,6 +4,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
+import org.delia.db.postgres.PostgresSqlGeneratorFactory;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
 import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
@@ -129,6 +130,9 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 	@Override
 	public SqlGeneratorFactory createSqlFactory(DBType dbtype, DTypeRegistry registry) {
+		if (DBType.POSTGRES.equals(dbtype)) {
+			return new PostgresSqlGeneratorFactory(registry, this);
+		}
 		return new SqlGeneratorFactoryImpl(registry, this);
 	}
 

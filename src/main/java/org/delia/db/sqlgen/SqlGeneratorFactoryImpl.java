@@ -7,7 +7,7 @@ import org.delia.type.DTypeRegistry;
 
 public class SqlGeneratorFactoryImpl extends ServiceBase implements SqlGeneratorFactory {
 	
-	private DTypeRegistry registry;
+	protected DTypeRegistry registry;
 	
 	public SqlGeneratorFactoryImpl(DTypeRegistry registry, FactoryService factorySvc) {
 		super(factorySvc);
