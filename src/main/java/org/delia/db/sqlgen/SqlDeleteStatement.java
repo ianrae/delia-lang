@@ -6,11 +6,11 @@ import org.delia.hld.cud.HLDDelete;
 
 public class SqlDeleteStatement implements SqlStatementGenerator {
 
-	private SqlTableNameClause tblClause;
-	private SqlWhereClause whereClause;
+	protected SqlTableNameClause tblClause;
+	protected SqlWhereClause whereClause;
 	
-	private HLDDelete hld;
-	private SqlDeleteInClause deleteInClause;
+	protected HLDDelete hld;
+	protected SqlDeleteInClause deleteInClause;
 
 	public SqlDeleteStatement(SqlTableNameClause tblClause, SqlWhereClause whereClause) {
 		this.tblClause = tblClause;

@@ -11,10 +11,10 @@ import org.delia.type.DValue;
 
 public class SqlUpdateStatement implements SqlStatementGenerator {
 
-	private HLDUpdate hld;
-	private SqlTableNameClause tblClause;
-	private SqlWhereClause whereClause;
-	private SqlValueListClause valueClauseHelper;
+	protected HLDUpdate hld;
+	protected SqlTableNameClause tblClause;
+	protected SqlWhereClause whereClause;
+	protected SqlValueListClause valueClauseHelper;
 	
 	public SqlUpdateStatement(SqlTableNameClause tblClause, SqlValueListClause valueClause, SqlWhereClause whereClause) {
 		this.tblClause = tblClause;
@@ -70,7 +70,7 @@ public class SqlUpdateStatement implements SqlStatementGenerator {
 	}
 	
 	//TODO: should we use a SqlSelectStatement here??
-	private void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
+	protected void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
 //		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
 
 		conditionStr = StringUtils.substringBefore(conditionStr, "=").trim();

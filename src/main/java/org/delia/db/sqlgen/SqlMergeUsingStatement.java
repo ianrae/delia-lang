@@ -6,10 +6,10 @@ import org.delia.hld.cud.HLDUpdate;
 
 public class SqlMergeUsingStatement implements SqlStatementGenerator {
 
-	private HLDUpdate hld;
-	private SqlTableNameClause tblClause;
-	private SqlValueListClause valueClause;
-	private SqlFieldListClause fieldClause;
+	protected HLDUpdate hld;
+	protected SqlTableNameClause tblClause;
+	protected SqlValueListClause valueClause;
+	protected SqlFieldListClause fieldClause;
 	
 	public SqlMergeUsingStatement(SqlTableNameClause tblClause, SqlFieldListClause fieldClause, SqlValueListClause valueClause) {
 		this.tblClause = tblClause;
