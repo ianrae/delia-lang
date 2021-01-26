@@ -321,7 +321,7 @@ public class PostgresBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 2;
+//		testIndexToRun = 3;
 		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -329,7 +329,9 @@ public class PostgresBDDTests extends BDDBase {
 //		runR500File("t0-relation-one-to-one.txt", 9);
 //		runR500File("t0-relation-many-to-many.txt", 11);
 //		runR900File("t0-update.txt", 7);
-		runR900File("t0-update-mm-all.txt", 3); //TODO fix one
+//		runR900File("t0-update-mm-all.txt", 3); //TODO fix one
+//		runR900File("t0-update-mm-all-othertbl.txt", 1); //TODO fix one
+		runR900File("t0-update-mm-id.txt", 4);
 	}
 	
 	//---

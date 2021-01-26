@@ -1,8 +1,5 @@
 package org.delia.hld.cud;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
@@ -12,7 +9,6 @@ import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sqlgen.SqlDeleteStatement;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
-import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.db.sqlgen.SqlInsertStatement;
 import org.delia.db.sqlgen.SqlMergeAllIntoStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
@@ -20,7 +16,6 @@ import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.db.sqlgen.SqlUpdateStatement;
 import org.delia.hld.HLDField;
 import org.delia.hld.HLDSQLGenerator;
-import org.delia.hld.SqlColumn;
 import org.delia.hld.simple.SimpleBase;
 import org.delia.hld.simple.SimpleSqlGenerator;
 import org.delia.type.DRelation;
@@ -316,29 +311,9 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 //  merge into CustomerAddressAssoc key(leftv) values(55,100) //only works if 1 record updated/inserted
 	private SqlStatement genMergeIntoStatement(HLDUpdate hld) {
-		SqlStatement stm = new SqlStatement(hld);
-		StrCreator sc = new StrCreator();
-		sc.o("MERGE INTO");
-		outTblName(sc, hld);
-		
-		sc.o(" KEY(%s)", hld.mergeKey);
-		
-		sc.o(" VALUES(");
-		int index = 0;
-		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
-		while(walker.hasNext()) {
-			HLDField ff = walker.next();
-			DValue inner = hld.valueL.get(index);
-			stm.paramL.add(renderValue(inner));
-			
-			sc.o("?");
-			walker.addIfNotLast(sc, ", ");
-			index++;
-		}
-		sc.o(")");
-		
-		stm.sql = sc.toString();
-		return stm;
+		SqlMergeIntoStatement updateStmt = sqlFactory.createMergeInto();
+		updateStmt.init(hld);
+		return updateStmt.render();
 	}
 	
 //	private String renderSetField(HLDField ff) {

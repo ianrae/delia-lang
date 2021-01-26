@@ -24,6 +24,7 @@ public class HLDUpdate extends HLDBase {
 	public boolean isMergeCTE;
 	public DValue dvalCTE;
 	public boolean isSubSelect;
+	public boolean isFlipped;
 
 	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {
 		super(typeOrTbl);

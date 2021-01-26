@@ -19,9 +19,9 @@ public class PostgresSqlGeneratorFactory extends SqlGeneratorFactoryImpl {
 		return new PostgresSqlMergeAllIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
 	}
 	
-//	@Override
-//	public SqlMergeIntoStatement createMergeInto() {
-//		return new PostgresSqlMergeIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
-//	}
+	@Override
+	public SqlMergeIntoStatement createMergeInto() {
+		return new PostgresSqlMergeIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
+	}
 	
 }

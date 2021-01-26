@@ -45,7 +45,11 @@ public class PostgresSqlMergeAllIntoStatement extends SqlMergeAllIntoStatement {
 		stm.paramL.add(valueClause.renderValue(first));
 		String tblName = hld.assocRelInfo.nearType.getName();
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.assocRelInfo.nearType);
-		sc.o(" SELECT %s,? from %s", pkpair.name, tblName);
+		if (hld.isFlipped) {
+			sc.o(" SELECT ?,%s from %s", pkpair.name, tblName);
+		} else {
+			sc.o(" SELECT %s,? from %s", pkpair.name, tblName);
+		}
 		
 		stm.sql = sc.toString();
 		return stm;
