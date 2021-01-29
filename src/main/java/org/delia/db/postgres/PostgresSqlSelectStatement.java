@@ -26,6 +26,9 @@ public class PostgresSqlSelectStatement extends SqlSelectStatement {
 		if (hld.hasFn("first")) { //TODO what if first and limit??/
 			Integer n = 1; 
 			sc.o(" LIMIT %s", n.toString());
+		} else if (hld.hasFn("last")) { //TODO what if first and limit??/
+			Integer n = 1; 
+			sc.o(" LIMIT %s", n.toString());
 		}
 		stm.sql = sc.toString();
 		return stm;

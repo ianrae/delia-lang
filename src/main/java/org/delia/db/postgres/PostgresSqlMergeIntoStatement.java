@@ -57,7 +57,7 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 		List<HLDField> conflictL = new ArrayList<>();
 		for(HLDField field: hld.fieldL) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(field.structType);
-			String fld1 = calcIfFieldIsPKOrRelationField(field, pkpair);
+			String fld1 = calcIfFieldIsPKOrRelationField(field, pkpair, false);
 			if (fld1 != null) {
 				conflictL.add(field);
 			}
@@ -103,10 +103,10 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 		sc.o(" ON CONFLICT");
 		HLDField field = hld.fieldL.get(0);
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(field.structType);
-		String fld1 = calcIfFieldIsPKOrRelationField(field, pkpair);
+		String fld1 = calcIfFieldIsPKOrRelationField(field, pkpair, true);
 
 		field = hld.fieldL.get(1);
-		String fld2 = calcIfFieldIsPKOrRelationField(field, pkpair);
+		String fld2 = calcIfFieldIsPKOrRelationField(field, pkpair, true);
 
 		if (fld1 == null && fld2 != null) {
 			sc.o("(%s)", fld2);
@@ -140,10 +140,12 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 		return stm;
 	}
 
-	private String calcIfFieldIsPKOrRelationField(HLDField field, TypePair pkpair) {
-		if (pkpair.name.equals(field.fieldName)) {
+	private String calcIfFieldIsPKOrRelationField(HLDField field, TypePair pkpair, boolean isAssoc) {
+		if (pkpair != null && pkpair.name.equals(field.fieldName)) {
 			return field.fieldName;
 		} else if (field.fieldType.isStructShape()) {
+			return field.fieldName;
+		} else if (isAssoc && (field.fieldName.equals("leftv") || field.fieldName.equals("rightv"))) {
 			return field.fieldName;
 		}
 		return null;

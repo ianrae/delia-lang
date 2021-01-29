@@ -321,16 +321,13 @@ public class PostgresBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+//		testIndexToRun = 2;
 		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		
-//		runR1000File("t0-upsert.txt", 4);
-//		runR1000File("t0-upsert-no-update.txt", 2);
-//		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
-//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
-		runR1500File("t0-queryfn-first.txt", 2);
+//		runR900File("t0-update-mm-id.txt", 4);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
 	}
 	
 	//---
