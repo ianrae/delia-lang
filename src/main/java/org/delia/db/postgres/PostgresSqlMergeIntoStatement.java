@@ -1,7 +1,6 @@
 package org.delia.db.postgres;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.delia.db.SqlStatement;
 import org.delia.db.sql.StrCreator;

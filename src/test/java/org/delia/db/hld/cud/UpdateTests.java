@@ -142,7 +142,7 @@ public class UpdateTests extends NewHLSTestBase {
 		dumpGrp(stmgrp);
 		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ?", "45");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
-		String s = "MERGE INTO CustomerAddressDat1 USING (SELECT cid FROM Customer) AS S ON leftv = s.cid WHEN MATCHED THEN UPDATE SET leftv = ?";
+		String s = "MERGE INTO CustomerAddressDat1 USING (SELECT cid FROM Customer) AS S ON leftv = s.cid WHEN MATCHED THEN UPDATE SET rightv = ?";
 		chkUpdateSql(stmgrp, 2, s, "55");
 	}
 	

@@ -22,6 +22,7 @@ public class FullParser {
 				TypeParser.typeStatement(),
 				UserFnParser.userFunction(),
 				ConfigureParser.configAssignment(),
+				LogParser.logStatement(),
 				InputFunctionParser.inputFunction());
 	}
 	public static Exp parseOne(String input){
