@@ -165,7 +165,7 @@ public class HLDFacade extends ServiceBase {
 	}
 	
 	protected HLDBuildService createManager(DBExecutor zexec) {
-		return new HLDBuildService(registry, factorySvc, zexec.getDatIdMap(), sprigSvc, dbInterface.getDBType());
+		return new HLDBuildServiceImpl(registry, factorySvc, zexec.getDatIdMap(), sprigSvc, dbInterface.getDBType());
 	}
 
 
