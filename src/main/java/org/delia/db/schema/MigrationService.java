@@ -5,7 +5,6 @@ import org.delia.assoc.AssocServiceImpl;
 import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.hld.HLDFactory;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
@@ -14,12 +13,10 @@ import org.delia.zdb.DBInterfaceFactory;
 public class MigrationService extends ServiceBase {
 	private DBInterfaceFactory dbInterface;
 	private MigrationPolicy policy;
-	private HLDFactory hldFactory;
 
-	public MigrationService(DBInterfaceFactory dbInterface, HLDFactory hldFactory, FactoryService factorySvc) {
+	public MigrationService(DBInterfaceFactory dbInterface, FactoryService factorySvc) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
-		this.hldFactory = hldFactory;
 		this.factorySvc = factorySvc;
 		this.policy = new SafeMigrationPolicy();
 	}

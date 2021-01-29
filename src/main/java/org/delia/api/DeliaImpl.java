@@ -47,13 +47,13 @@ public class DeliaImpl implements Delia {
 	private ErrorAdjuster errorAdjuster;
 	private HLDFactory hldFactory;
 	
-	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
+	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		this.migrationSvc = new MigrationService(dbInterface, hldFactory, factorySvc);
+		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
-		this.hldFactory = hldFactory;
+		this.hldFactory = dbInterface.getHLDFactory();
 	}
 
 	@Override

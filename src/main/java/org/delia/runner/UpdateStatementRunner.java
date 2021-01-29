@@ -47,10 +47,10 @@ public class UpdateStatementRunner extends ServiceBase {
 	private DValueConverterService dvalConverterSvc;
 	private HLDFactory hldFactory;
 
-	public UpdateStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, Runner runner, DTypeRegistry registry) {
+	public UpdateStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, Runner runner, DTypeRegistry registry) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
-		this.hldFactory = hldFactory;
+		this.hldFactory = dbInterface.getHLDFactory();
 		this.runner = runner;
 		this.varEvaluator = runner;
 		this.registry = registry;

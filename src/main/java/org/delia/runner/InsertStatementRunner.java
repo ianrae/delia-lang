@@ -41,11 +41,11 @@ public class InsertStatementRunner extends ServiceBase {
 	private DValueIterator insertPrebuiltValueIterator;
 	private HLDFactory hldFactory;
 
-	public InsertStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, Runner runner, 
+	public InsertStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, Runner runner, 
 			DTypeRegistry registry, Map<String,ResultValue> varMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
-		this.hldFactory = hldFactory;
+		this.hldFactory = dbInterface.getHLDFactory();
 		this.runner = runner;
 		this.registry = registry;
 		this.varMap = varMap;

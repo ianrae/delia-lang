@@ -38,19 +38,18 @@ public class MigrateInsertRunner extends ServiceBase {
 	private DBInterfaceFactory dbInterface;
 	private HLDFactory hldFactory;
 
-	public MigrateInsertRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface, HLDFactory hldFactory) {
+	public MigrateInsertRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
 		this.dbInterface = dbInterface;
-		this.hldFactory = hldFactory;
 	}
 
 	
 	public void doInsert(DValue dval) {
 		RunnerForMigrateInsert runner = new RunnerForMigrateInsert();
 		Map<String,ResultValue> varMap = new HashMap<>();
-		InsertStatementRunner insertRunner = new InsertStatementRunner(factorySvc, dbInterface, hldFactory, runner, registry, varMap);
+		InsertStatementRunner insertRunner = new InsertStatementRunner(factorySvc, dbInterface, runner, registry, varMap);
 		SprigService sprigSvc = new SprigServiceImpl(factorySvc, registry);
 		InsertStatementExp exp = new InsertStatementExp(99, new IdentExp(dval.getType().getName()), null);
 		ResultValue res = new ResultValue();

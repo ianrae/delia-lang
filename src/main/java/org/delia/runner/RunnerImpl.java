@@ -134,8 +134,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				this.inputFnMap = ctx.inputFnMap;
 				this.sprigSvc = ctx.sprigSvc;
 			}
-			this.insertStatementRunner = new InsertStatementRunner(factorySvc, dbInterface, hldFactory, this, registry, varMap);
-			this.updateStatementRunner = new UpdateStatementRunner(factorySvc, dbInterface, hldFactory, this, registry);
+			this.insertStatementRunner = new InsertStatementRunner(factorySvc, dbInterface, this, registry, varMap);
+			this.updateStatementRunner = new UpdateStatementRunner(factorySvc, dbInterface, this, registry);
 
 			return true;
 		}
@@ -303,7 +303,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return false;
 		}
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, hldFactory, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		

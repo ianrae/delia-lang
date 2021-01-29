@@ -24,7 +24,7 @@ public class HLDSimpleQueryService {
 	private HLDFacade hldFacade;
 //	private FactoryService factorySvc;
 	
-	public HLDSimpleQueryService(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry) {
+	public HLDSimpleQueryService(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry) {
 //		this.factorySvc = factorySvc;
 		this.innerSvc = new QueryBuilderServiceImpl(factorySvc);
 		this.hldFacade = new HLDFacade(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());

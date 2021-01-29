@@ -30,10 +30,6 @@ public class DeliaFactory {
 		return create(connectionString, dbType, log, factorySvc, new HLDFactoryImpl());
 	}
 	
-	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
-		return create(dbInterface, log, factorySvc, new HLDFactoryImpl());
-	}
-
 	//and now same methods with HLDFactory
 	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
 		ConnectionString connectionString = new ConnectionString();
@@ -60,10 +56,10 @@ public class DeliaFactory {
 			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", dbType == null ? "null" : dbType.name());
 			break;
 		}
-		return create(dbInterface, log, factorySvc, hldFactory);
+		return create(dbInterface, log, factorySvc);
 	}
 	
-	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
-		return new DeliaImpl(dbInterface, log, factorySvc, hldFactory);
+	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
+		return new DeliaImpl(dbInterface, log, factorySvc);
 	}
 }

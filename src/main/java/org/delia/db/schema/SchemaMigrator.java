@@ -41,7 +41,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private MigrationRunner migrationRunner;
 	private MigrationOptimizer optimizer;
 
-	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
@@ -61,7 +61,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setSchemaVersionType(dtype);
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
-		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface, hldFactory);
+		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
 		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
 	}
 	

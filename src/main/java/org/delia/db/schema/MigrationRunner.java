@@ -19,11 +19,11 @@ public class MigrationRunner extends ServiceBase {
 	private DBExecutor dbexecutor;
 	private MigrateInsertRunner insertRunner;
 
-	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface, HLDFactory hldFactory) {
+	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
-		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface, hldFactory);
+		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface);
 	}
 
 	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {

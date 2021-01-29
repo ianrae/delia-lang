@@ -34,7 +34,7 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
 		this.varEvaluator = eval;
-		this.querySvc = new HLDSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), dbexecutor.getHLDFactory(), registry);
+		this.querySvc = new HLDSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), registry);
 	}
 	
 	@Override

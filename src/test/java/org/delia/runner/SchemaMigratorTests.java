@@ -86,8 +86,7 @@ public class SchemaMigratorTests {
 
 		LegacyRunner runner = helper.create(factorySvc, dbInterface);
 
-		HLDFactory hldFactory = new HLDFactoryImpl();
-		migrator = new SchemaMigrator(factorySvc, dbInterface, hldFactory, runner.getRegistry(), runner.innerRunner, null);
+		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner.innerRunner, null);
 		return runner.innerRunner;
 	}
 

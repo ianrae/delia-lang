@@ -54,11 +54,11 @@ public class LetStatementRunner extends ServiceBase {
 	private HLDQueryStatement mostRecentStatment;
 	private HLDFactory hldFactory;
 
-	public LetStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DBExecutor zexec, DTypeRegistry registry, 
+	public LetStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, DBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLDFacade hldFacade, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
-		this.hldFactory = hldFactory;
+		this.hldFactory = dbInterface.getHLDFactory();
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
