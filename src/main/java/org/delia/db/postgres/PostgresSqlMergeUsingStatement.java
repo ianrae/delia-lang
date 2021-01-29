@@ -13,7 +13,7 @@ public class PostgresSqlMergeUsingStatement extends SqlMergeUsingStatement {
 	
 	public PostgresSqlMergeUsingStatement(SqlTableNameClause tblClause, SqlFieldListClause fieldClause, SqlValueListClause valueClause) {
 		super(tblClause, fieldClause, valueClause);
-		this.innerGen = new PostgresSqlMergeIntoStatement(tblClause, valueClause);
+		this.innerGen = new PostgresSqlMergeIntoStatement(tblClause, fieldClause, valueClause);
 	}
 	
 	public void init(HLDUpdate hld) {
