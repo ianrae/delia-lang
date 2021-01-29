@@ -23,6 +23,7 @@ then:
 title: update query back
 when:
   upsert Address[100] {x:13, y:14, z: 7, cust:55}
+  log 'and..'
   let x = Address[100].fks()
 then:
 value:a:Address {

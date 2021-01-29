@@ -12,6 +12,7 @@ import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
+import org.delia.compiler.ast.LogStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -204,11 +205,20 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				executeConfigureStatement((ConfigureStatementExp)exp, res);
 			} else if (exp instanceof InputFunctionDefStatementExp) {
 				executeInputFuncDefStatement((InputFunctionDefStatementExp)exp, res);
+			} else if (exp instanceof LogStatementExp) {
+				executeLogStatement((LogStatementExp)exp, res);
+			} else {
+				DeliaExceptionHelper.throwError("unknown-statement-type", "Unknown Delia statement: '%s'", exp.getClass());
 			}
 			
 			return res;
 		}
 		
+		private void executeLogStatement(LogStatementExp exp, ResultValue res) {
+			String s = exp.strValue();
+			log.log("log: %s", s);
+			res.ok = true;
+		}
 		private void executeConfigureStatement(ConfigureStatementExp exp, ResultValue res) {
 			ConfigureService configSvc = factorySvc.getConfigureService();
 			try {
