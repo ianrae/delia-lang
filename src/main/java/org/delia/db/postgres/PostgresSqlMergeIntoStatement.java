@@ -11,6 +11,8 @@ import org.delia.db.sqlgen.SqlTableNameClause;
 import org.delia.db.sqlgen.SqlValueListClause;
 import org.delia.hld.HLDField;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 
 public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 
@@ -33,9 +35,20 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 		sc.o(valueClause.render(stm));
 
 		sc.o(" ON CONFLICT");
-		String fld1 = hld.fieldL.get(0).fieldName;
-		String fld2 = hld.fieldL.get(1).fieldName;
-		sc.o("(%s,%s)", fld1, fld2);
+		HLDField field = hld.fieldL.get(0);
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(field.structType);
+		String fld1 = calcIfFieldIsPKOrRelationField(field, pkpair);
+
+		field = hld.fieldL.get(1);
+		String fld2 = calcIfFieldIsPKOrRelationField(field, pkpair);
+
+		if (fld1 == null && fld2 != null) {
+			sc.o("(%s)", fld2);
+		} else if (fld1 != null && fld2 == null) {
+			sc.o("(%s)", fld1);
+		} else {
+			sc.o("(%s,%s)", fld1, fld2);
+		}
 		sc.o(" DO UPDATE");
 		sc.o(" SET ");
 		
@@ -59,6 +72,15 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 		
 		stm.sql = sc.toString();
 		return stm;
+	}
+
+	private String calcIfFieldIsPKOrRelationField(HLDField field, TypePair pkpair) {
+		if (pkpair.name.equals(field.fieldName)) {
+			return field.fieldName;
+		} else if (field.fieldType.isStructShape()) {
+			return field.fieldName;
+		}
+		return null;
 	}
 
 	private int findTarget(List<HLDField> fieldL, String mergeKey) {
