@@ -16,7 +16,7 @@ import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.InternalCompileState;
@@ -107,8 +107,8 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		
-		HLDManager mgr = new HLDManager(this, runner.getRegistry(), runner);
-		runner.setHLDManager(mgr);
+		HLDFacade hldFacade = new HLDFacade(this, runner.getRegistry(), runner);
+		runner.setHLDFacade(hldFacade);
 
 		if (deliaOptions.dbObserverFactory != null) {
 			dbInterface.setObserverFactory(deliaOptions.dbObserverFactory);

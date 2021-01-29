@@ -27,7 +27,7 @@ import org.delia.db.DBHelper;
 import org.delia.db.QuerySpec;
 import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
@@ -63,7 +63,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private FetchRunner prebuiltFetchRunnerToUse;
 		private LetStatementRunner letStatementRunner;
 		private InsertStatementRunner insertStatementRunner;
-		private HLDManager hldManager;
+		private HLDFacade hldFacade;
 		private DatIdMap datIdMap;
 		private UpdateStatementRunner updateStatementRunner;
 		
@@ -234,10 +234,10 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeUpdateStatement(UpdateStatementExp exp, ResultValue res) {
-			updateStatementRunner.executeUpdateStatement(exp, res, hldManager, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			updateStatementRunner.executeUpdateStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private void executeUpsertStatement(UpsertStatementExp exp, ResultValue res) {
-			updateStatementRunner.executeUpsertStatement(exp, res, hldManager, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			updateStatementRunner.executeUpsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private void executeDeleteStatement(DeleteStatementExp exp, ResultValue res) {
 			//find DType for typename Actor
@@ -254,9 +254,9 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			}
 			
 			try {
-				if (hldManager != null) {
-					HLDDeleteStatement hld = hldManager.buildHLD(exp, dbexecutor);
-					SqlStatementGroup stmgrp = hldManager.generateSQL(hld, dbexecutor);
+				if (hldFacade != null) {
+					HLDDeleteStatement hld = hldFacade.buildHLD(exp, dbexecutor);
+					SqlStatementGroup stmgrp = hldFacade.generateSQL(hld, dbexecutor);
 					
 					dbexecutor.executeDelete(hld, stmgrp);
 				} else {
@@ -283,7 +283,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeInsertStatement(InsertStatementExp exp, ResultValue res) {
-			insertStatementRunner.executeInsertStatement(exp, res, hldManager, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			insertStatementRunner.executeInsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
 		}
 		private boolean failIfNotStruct(DType dtype, String typeName, ResultValue res) {
 			if (! dtype.isStructShape()) {
@@ -300,7 +300,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return false;
 		}
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldManager, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		
@@ -383,8 +383,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			this.datIdMap = datIdMap;
 		}
 		@Override
-		public void setHLDManager(HLDManager mgr) {
-			this.hldManager = mgr;
-			hldManager.setSprigSvc(sprigSvc);
+		public void setHLDFacade(HLDFacade mgr) {
+			this.hldFacade = mgr;
+			hldFacade.setSprigSvc(sprigSvc);
 		}
 	}

@@ -14,7 +14,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
 import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigVarEvaluator;
@@ -52,7 +52,7 @@ public class InsertStatementRunner extends ServiceBase {
 		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
-	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDManager hldManager, DBExecutor dbexecutor, FetchRunner fetchRunner, 
+	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner, 
 			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
 
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
@@ -66,11 +66,11 @@ public class InsertStatementRunner extends ServiceBase {
 		ConversionResult cres = null;
 		HLDInsertStatement hldins = null;
 		SqlStatementGroup stmgrp = null;
-		if (hldManager != null) {
+		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldins = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldins = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
 			if (hldins.hldinsert.cres.dval != null) {
-				stmgrp = hldManager.generateSQL(hldins, dbexecutor);
+				stmgrp = hldFacade.generateSQL(hldins, dbexecutor);
 			} else if (hldins.hldinsert.cres.localET.areNoErrors()) {
 				DeliaExceptionHelper.throwError("unknown-insert-error", "Type %s: unknown insert error. bad data?", dtype.getName());
 			}

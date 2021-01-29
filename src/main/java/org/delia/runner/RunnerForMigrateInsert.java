@@ -5,7 +5,7 @@ import java.util.List;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.generate.DeliaGeneratePhase;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
 import org.delia.type.DTypeRegistry;
@@ -107,7 +107,7 @@ public class RunnerForMigrateInsert implements Runner {
 	}
 
 	@Override
-	public void setHLDManager(HLDManager mgr) {
+	public void setHLDFacade(HLDFacade mgr) {
 	}
 
 }

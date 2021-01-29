@@ -8,7 +8,7 @@ import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
@@ -52,10 +52,10 @@ public class MigrateInsertRunner extends ServiceBase {
 		InsertStatementExp exp = new InsertStatementExp(99, new IdentExp(dval.getType().getName()), null);
 		ResultValue res = new ResultValue();
 		FetchRunner fetchRunner = new ZFetchRunnerImpl(factorySvc, dbexecutor, registry, new DoNothingVarEvaluator());
-		HLDManager hldManager = new  HLDManager(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
+		HLDFacade hldFacade = new  HLDFacade(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
 		DValueIterator dvalIter = new DValueIterator(dval);
 		
-		insertRunner.executeInsertStatement(exp, res, hldManager, dbexecutor, fetchRunner, dvalIter, sprigSvc);
+		insertRunner.executeInsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, dvalIter, sprigSvc);
 		if (!res.isSuccess()) {
 			DeliaError err = res.getLastError();
 			DeliaExceptionHelper.throwError(err);

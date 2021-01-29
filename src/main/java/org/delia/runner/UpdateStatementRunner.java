@@ -13,7 +13,7 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.sprig.SprigService;
@@ -41,7 +41,7 @@ public class UpdateStatementRunner extends ServiceBase {
 	private SprigService sprigSvc;
 	private DValueIterator insertPrebuiltValueIterator;
 	private VarEvaluator varEvaluator;
-	private HLDManager hldManager;
+	private HLDFacade hldFacade;
 	private Runner runner;
 	private DValueConverterService dvalConverterSvc;
 
@@ -58,8 +58,8 @@ public class UpdateStatementRunner extends ServiceBase {
 		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
-	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDManager hldManager, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
-		this.hldManager = hldManager;
+	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+		this.hldFacade = hldFacade;
 		this.fetchRunner = fetchRunner2;
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 		this.sprigSvc = sprigSvc2;
@@ -79,16 +79,16 @@ public class UpdateStatementRunner extends ServiceBase {
 		ConversionResult cres = null;
 		HLDUpdateStatement hldup = null;
 		SqlStatementGroup stmgrp = null;
-		if (hldManager != null) {
+		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
 			if (hldup.isEmpty()) {
 				res.ok = true;
 				res.shape = Shape.INTEGER;
 				res.val = 0;
 				return;
 			}
-			stmgrp = hldManager.generateSQL(hldup, dbexecutor);
+			stmgrp = hldFacade.generateSQL(hldup, dbexecutor);
 			cres = hldup.hldupdate.cres;
 		} else {
 			cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
@@ -131,8 +131,8 @@ public class UpdateStatementRunner extends ServiceBase {
 			return;
 		}
 	}
-	public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDManager hldManager2, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
-		this.hldManager = hldManager2;
+	public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDFacade hldFacade2, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+		this.hldFacade = hldFacade2;
 		this.fetchRunner = fetchRunner2;
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 		this.sprigSvc = sprigSvc2;
@@ -153,9 +153,9 @@ public class UpdateStatementRunner extends ServiceBase {
 		ConversionResult cres = null;
 		HLDUpsertStatement hldup = null;
 		SqlStatementGroup stmgrp = null;
-		if (hldManager != null) {
+		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldManager.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
 			if (hldup.isEmpty()) {
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -163,7 +163,7 @@ public class UpdateStatementRunner extends ServiceBase {
 				return;
 			}
 
-			stmgrp = hldManager.generateSQL(hldup, dbexecutor);
+			stmgrp = hldFacade.generateSQL(hldup, dbexecutor);
 			cres = hldup.hldupdate.cres;
 		} else {
 			cres = buildPartialValue((DStructType) dtype, exp.dsonExp);
@@ -181,7 +181,7 @@ public class UpdateStatementRunner extends ServiceBase {
 			ValidationRunner ruleRunner = createValidationRunner();
 			ruleRunner.enableRelationModifier(true);
 			ruleRunner.enableUpsertFlag(true);
-			if (hldManager != null) {
+			if (hldFacade != null) {
 				ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 				DValue keyval = dvalConverterSvc.createDValueFrom(hldup.hldupdate.hld.filter, scalarBuilder, true);
 				ruleRunner.setUpsertPKVal(keyval);

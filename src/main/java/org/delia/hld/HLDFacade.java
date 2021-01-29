@@ -40,7 +40,7 @@ import org.delia.zdb.DBInterfaceFactory;
  * @author Ian Rae
  *
  */
-public class HLDManager extends ServiceBase {
+public class HLDFacade extends ServiceBase {
 	protected DBInterfaceFactory dbInterface;
 	protected DTypeRegistry registry;
 	protected HLSStragey defaultStrategy = new StandardHLSStragey();
@@ -52,7 +52,7 @@ public class HLDManager extends ServiceBase {
 
 //	private Delia delia;
 	
-	public HLDManager(Delia delia, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public HLDFacade(Delia delia, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(delia.getFactoryService());
 //		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
@@ -61,7 +61,7 @@ public class HLDManager extends ServiceBase {
 		this.aliasManager = new AliasManager(factorySvc);
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
-	public HLDManager(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public HLDFacade(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 //		this.session = session;
 		this.dbInterface= dbInterface;
