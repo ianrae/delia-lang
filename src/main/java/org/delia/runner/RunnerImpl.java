@@ -28,6 +28,7 @@ import org.delia.db.QuerySpec;
 import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.log.Log;
 import org.delia.sprig.SprigService;
@@ -66,10 +67,12 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private HLDFacade hldFacade;
 		private DatIdMap datIdMap;
 		private UpdateStatementRunner updateStatementRunner;
+		private HLDFactory hldFactory;
 		
-		public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface) {
+		public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
+			this.hldFactory = hldFactory;
 		}
 		@Override
 		public Log getLog() {
@@ -131,8 +134,8 @@ public class RunnerImpl extends ServiceBase implements Runner {
 				this.inputFnMap = ctx.inputFnMap;
 				this.sprigSvc = ctx.sprigSvc;
 			}
-			this.insertStatementRunner = new InsertStatementRunner(factorySvc, dbInterface, this, registry, varMap);
-			this.updateStatementRunner = new UpdateStatementRunner(factorySvc, dbInterface, this, registry);
+			this.insertStatementRunner = new InsertStatementRunner(factorySvc, dbInterface, hldFactory, this, registry, varMap);
+			this.updateStatementRunner = new UpdateStatementRunner(factorySvc, dbInterface, hldFactory, this, registry);
 
 			return true;
 		}
@@ -300,7 +303,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return false;
 		}
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, hldFactory, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.hld.HLDFactory;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -18,11 +19,11 @@ public class MigrationRunner extends ServiceBase {
 	private DBExecutor dbexecutor;
 	private MigrateInsertRunner insertRunner;
 
-	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface) {
+	public MigrationRunner(FactoryService factorySvc, DTypeRegistry registry, DBExecutor dbexecutor, DBInterfaceFactory dbInterface, HLDFactory hldFactory) {
 		super(factorySvc);
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
-		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface);
+		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface, hldFactory);
 	}
 
 	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {

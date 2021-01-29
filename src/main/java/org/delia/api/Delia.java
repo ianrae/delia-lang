@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.core.FactoryService;
 import org.delia.db.schema.MigrationPlan;
+import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.DBInterfaceFactory;
@@ -30,6 +31,7 @@ public interface Delia {
 	DeliaCompiler createCompiler();
 	DeliaOptions getOptions();
 	DBInterfaceFactory getDBInterface();
+	HLDFactory getHLDFactory();
 	
 	ResultValue execute(BufferedReader reader);
 	DeliaSession beginSession(BufferedReader reader);

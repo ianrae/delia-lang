@@ -14,6 +14,8 @@ import org.delia.assoc.PopulateDatIdVisitor;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -73,7 +75,7 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
 		DatIdMap datIdMap = null; //TODO is this ok?
-		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator(), datIdMap);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), delia.getHLDFactory(), registry, new DoNothingVarEvaluator(), datIdMap);
 //		schemaMigrator.dbNeedsMigration();
 		String fingerprint = schemaMigrator.calcDBFingerprint();
 		log(fingerprint);
@@ -109,8 +111,9 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		
 		DTypeRegistry registry = sess.getExecutionContext().registry;
 		DatIdMap datIdMap = null; //TODO is this ok?
+		HLDFactory hldFactory = new HLDFactoryImpl();
 
-		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator(), datIdMap)) {
+		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, hldFactory, registry, new DoNothingVarEvaluator(), datIdMap)) {
 			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);

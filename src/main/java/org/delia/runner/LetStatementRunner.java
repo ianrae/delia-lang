@@ -22,6 +22,7 @@ import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.FetchSpec;
 import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQuery;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.HLDSimpleQueryService;
@@ -51,11 +52,13 @@ public class LetStatementRunner extends ServiceBase {
 	private DatIdMap datIdMap;
 	private HLDFacade hldFacade;
 	private HLDQueryStatement mostRecentStatment;
+	private HLDFactory hldFactory;
 
-	public LetStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, DBExecutor zexec, DTypeRegistry registry, 
+	public LetStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DBExecutor zexec, DTypeRegistry registry, 
 			FetchRunner fetchRunner, HLDFacade hldFacade, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
@@ -216,7 +219,7 @@ public class LetStatementRunner extends ServiceBase {
 		return spec;
 	}
 	private ResultValue invokeUserFunc(LetStatementExp exp, ResultValue resParam) {
-		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface);
+		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
 		ExecutionState execState = runner.getExecutionState();
 		execState.varMap.clear(); //user fn has its own variables
 

@@ -6,6 +6,8 @@ import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.db.sql.ConnectionString;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.Log;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBInterfaceFactory;
@@ -20,15 +22,27 @@ import org.delia.zdb.postgres.PostgresDBInterfaceFactory;
  *
  */
 public class DeliaFactory {
-	
+	//normally you don't need to provide a customer HLDFactory
 	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc) {
+		return create(info, log, factorySvc, new HLDFactoryImpl());
+	}
+	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc) {
+		return create(connectionString, dbType, log, factorySvc, new HLDFactoryImpl());
+	}
+	
+	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
+		return create(dbInterface, log, factorySvc, new HLDFactoryImpl());
+	}
+
+	//and now same methods with HLDFactory
+	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
 		ConnectionString connectionString = new ConnectionString();
 		connectionString.jdbcUrl = info.jdbcUrl;
 		connectionString.pwd = info.password;
 		connectionString.userName = info.userName;
-		return create(connectionString, info.dbType, log, factorySvc);
+		return create(connectionString, info.dbType, log, factorySvc, hldFactory);
 	}
-	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc) {
+	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
 		ConnectionFactory connFactory = new ConnectionFactoryImpl(connectionString, log);
 		
 		DBInterfaceFactory dbInterface = null;
@@ -46,10 +60,10 @@ public class DeliaFactory {
 			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", dbType == null ? "null" : dbType.name());
 			break;
 		}
-		return create(dbInterface, log, factorySvc);
+		return create(dbInterface, log, factorySvc, hldFactory);
 	}
 	
-	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
-		return new DeliaImpl(dbInterface, log, factorySvc);
+	public static Delia create(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
+		return new DeliaImpl(dbInterface, log, factorySvc, hldFactory);
 	}
 }

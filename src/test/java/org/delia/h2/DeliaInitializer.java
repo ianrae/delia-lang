@@ -13,6 +13,8 @@ import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -77,7 +79,8 @@ public class DeliaInitializer {
 	}
 	
 	public SchemaMigrator createSchemaMigrator() {
-		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), new DoNothingVarEvaluator(), new DatIdMap());
+		HLDFactory hldFactory = new HLDFactoryImpl();
+		SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, hldFactory, runner.getRegistry(), new DoNothingVarEvaluator(), new DatIdMap());
 		return migrator;
 	}
 }

@@ -10,6 +10,7 @@ import org.delia.db.sqlgen.SqlGeneratorFactory;
 import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
@@ -80,8 +81,8 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
-		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, registry, varEvaluator, datIdMap);
+	public SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, hldFactory, registry, varEvaluator, datIdMap);
 		return migrator;
 	}
 

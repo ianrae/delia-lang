@@ -17,6 +17,7 @@ import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.InternalCompileState;
@@ -44,13 +45,15 @@ public class DeliaImpl implements Delia {
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
 	private ErrorAdjuster errorAdjuster;
+	private HLDFactory hldFactory;
 	
-	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
+	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
+		this.migrationSvc = new MigrationService(dbInterface, hldFactory, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
+		this.hldFactory = hldFactory;
 	}
 
 	@Override
@@ -90,7 +93,7 @@ public class DeliaImpl implements Delia {
 	//only public for unit tests
 	public Runner createRunner(DeliaSession dbsess) {
 		ErrorTracker et = new SimpleErrorTracker(log);
-		Runner runner = new RunnerImpl(factorySvc, dbInterface);
+		Runner runner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
@@ -398,5 +401,10 @@ public class DeliaImpl implements Delia {
 	public DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan) {
 		String src = readAllText(reader);
 		return this.executeMigrationPlan(reader, plan);
+	}
+
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
 	}
 }

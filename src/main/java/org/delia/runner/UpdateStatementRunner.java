@@ -14,6 +14,7 @@ import org.delia.dval.DValueConverterService;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.sprig.SprigService;
@@ -44,10 +45,12 @@ public class UpdateStatementRunner extends ServiceBase {
 	private HLDFacade hldFacade;
 	private Runner runner;
 	private DValueConverterService dvalConverterSvc;
+	private HLDFactory hldFactory;
 
-	public UpdateStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, Runner runner, DTypeRegistry registry) {
+	public UpdateStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, Runner runner, DTypeRegistry registry) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.runner = runner;
 		this.varEvaluator = runner;
 		this.registry = registry;

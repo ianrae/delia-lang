@@ -16,6 +16,7 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -40,7 +41,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private MigrationRunner migrationRunner;
 	private MigrationOptimizer optimizer;
 
-	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.zexec = dbInterface.createExecutor();
 		this.registry = registry;
@@ -60,7 +61,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setSchemaVersionType(dtype);
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
-		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
+		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface, hldFactory);
 		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
 	}
 	

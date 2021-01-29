@@ -15,6 +15,7 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigVarEvaluator;
@@ -38,11 +39,13 @@ public class InsertStatementRunner extends ServiceBase {
 	private DBInterfaceFactory dbInterface;
 	private Runner runner;
 	private DValueIterator insertPrebuiltValueIterator;
+	private HLDFactory hldFactory;
 
-	public InsertStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, Runner runner, 
+	public InsertStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, Runner runner, 
 			DTypeRegistry registry, Map<String,ResultValue> varMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.runner = runner;
 		this.registry = registry;
 		this.varMap = varMap;

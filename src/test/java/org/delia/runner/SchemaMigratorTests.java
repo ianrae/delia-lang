@@ -12,6 +12,8 @@ import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
 import org.delia.zdb.DBInterfaceFactory;
@@ -84,7 +86,8 @@ public class SchemaMigratorTests {
 
 		LegacyRunner runner = helper.create(factorySvc, dbInterface);
 
-		migrator = new SchemaMigrator(factorySvc, dbInterface, runner.getRegistry(), runner.innerRunner, null);
+		HLDFactory hldFactory = new HLDFactoryImpl();
+		migrator = new SchemaMigrator(factorySvc, dbInterface, hldFactory, runner.getRegistry(), runner.innerRunner, null);
 		return runner.innerRunner;
 	}
 
