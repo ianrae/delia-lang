@@ -152,7 +152,7 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 	private int findTarget(List<HLDField> fieldL, String mergeKey) {
 		for(int i = 0; i < fieldL.size(); i++) {
 			HLDField fld = fieldL.get(i);
-			if (!fld.fieldName.equals(mergeKey)) {
+			if (fld.fieldName.equals(mergeKey)) {
 				return i;
 			}
 		}
