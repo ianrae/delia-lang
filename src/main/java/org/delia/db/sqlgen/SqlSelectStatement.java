@@ -18,6 +18,7 @@ import org.delia.hld.SqlColumnBuilder;
 import org.delia.hld.SqlParamGenerator;
 import org.delia.hld.StructFieldOpt;
 import org.delia.hld.cud.TypeOrTable;
+import org.delia.log.Log;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -34,14 +35,18 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 	protected SqlParamGenerator paramGen;
 	
 	protected HLDQuery hld;
+	protected Log log;
+	protected boolean supportsTop;
 
 	public SqlSelectStatement(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SqlTableNameClause tblClause, SqlWhereClause whereClause) {
 		this.datIdMap = datIdMap;
 		this.tblClause = tblClause;
 		this.whereClause = whereClause;
+		this.log = factorySvc.getLog();
 		
 		this.columnBuilder = new SqlColumnBuilder(datIdMap);
 		this.paramGen = new SqlParamGenerator(registry, factorySvc); 
+		this.supportsTop = true;
 	}
 
 	public void init(HLDQuery hld) {
@@ -62,7 +67,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");
-		if (hld.hasFn("first") || hld.hasFn("last")) {
+		if (supportsTop && (hld.hasFn("first") || hld.hasFn("last"))) {
 			sc.addStr("TOP 1 ");
 		}
 		if (hld.hasFn("distinct")) {

@@ -328,7 +328,9 @@ public class PostgresBDDTests extends BDDBase {
 		
 //		runR1000File("t0-upsert.txt", 4);
 //		runR1000File("t0-upsert-no-update.txt", 2);
-		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
+//		runR1000File("t0-upsert-mm-id-othertbl.txt", 2);
+//		runR1500File("t0-queryfn-distinct-relation.txt", 2);
+		runR1500File("t0-queryfn-first.txt", 2);
 	}
 	
 	//---

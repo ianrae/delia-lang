@@ -15,7 +15,7 @@ thenType: struct
 title: without distinct
 when:
   update Customer[true] {wid: 333}
-  let x = Customer[true].fks().addr.id
+  let x = Customer[true].orderBy('id').fks().addr.id
 then:
 value:a:int:100
 value:a:int:101
@@ -29,7 +29,10 @@ when:
   update Customer[true] {wid: 333}
   let x = Customer[true].fks().addr.id.distinct()
 then:
-value:a:int:100
-value:a:int:101
-value:a:int:102
+IF(POSTGRES):value:a:int:101
+IF(POSTGRES):value:a:int:102
+IF(POSTGRES):value:a:int:100
+ELSE:value:a:int:100
+ELSE:value:a:int:101
+ELSE:value:a:int:102
 
