@@ -178,6 +178,11 @@ public class BDDTesterEx {
 			bddres.ok = true;
 		} catch (DeliaException e) {
 			String expectedErr = findExpectedError(thenVal);
+			if (e.getErrorCount() == 0) {
+				log.logError("EXCEPTION(%s): %s", "NoDeliaError", e.getMessage());
+				throw new RuntimeException("Exception occured, and can't find ERROR: value!");
+			}
+			
 			String id = e.getFirstError() == null ? "?" : e.getFirstError().getId();
 			if (expectedErr == null) {
 				log.logError("EXCEPTION(%s): %s", id, e.getMessage());

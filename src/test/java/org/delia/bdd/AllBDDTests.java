@@ -325,6 +325,10 @@ public class AllBDDTests extends BDDBase {
 	public void testR2300() {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
+	@Test
+	public void testR2400() {
+		runR2400File("t0-log.txt", 0);
+	}
 
 	
 	@Test

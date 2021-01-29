@@ -59,7 +59,8 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R2100_migration,
 		R2150_migration_relations,
 		R2200_security,
-		R2300_multi_relation
+		R2300_multi_relation, 
+		R2400_log
 	}
 	public static class FileHelper {
 		
@@ -189,6 +190,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR2300File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2300_multi_relation, filename, numTests);
+	}
+	protected int runR2400File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2400_log, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("********* FILE: %s *********************", filename);
