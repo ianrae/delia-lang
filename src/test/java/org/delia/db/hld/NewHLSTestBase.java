@@ -25,7 +25,7 @@ import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
-import org.delia.hld.HLDInnerManager;
+import org.delia.hld.HLDBuildService;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
@@ -48,7 +48,7 @@ import org.junit.After;
  */
 public class NewHLSTestBase extends BDDBase {
 	
-	protected HLDInnerManager mgr;
+	protected HLDBuildService mgr;
 	
 	
 	protected String addSrc(String src0, String src) {
@@ -93,9 +93,9 @@ public class NewHLSTestBase extends BDDBase {
 		return hld;
 	}
 
-	protected HLDInnerManager createManager() {
+	protected HLDBuildService createManager() {
 		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		return new HLDInnerManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc, DBType.MEM);
+		return new HLDBuildService(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc, DBType.MEM);
 	}
 	
 	protected void chkRawSql(HLDQueryStatement hld, String expected) {

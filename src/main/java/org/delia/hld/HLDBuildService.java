@@ -26,7 +26,7 @@ import org.delia.type.DTypeRegistry;
  * @author ian
  *
  */
-public class HLDInnerManager extends HLDServiceBase {
+public class HLDBuildService extends HLDServiceBase {
 	private HLDEngine engine;
 
 	private HLDEngineAssoc engineAssoc;
@@ -34,7 +34,7 @@ public class HLDInnerManager extends HLDServiceBase {
 
 	private DBType dbType;
 
-	public HLDInnerManager(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc, DBType dbType) {
+	public HLDBuildService(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc, DBType dbType) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.engine = new HLDEngine(registry, factorySvc, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, datIdMap, sprigSvc);
