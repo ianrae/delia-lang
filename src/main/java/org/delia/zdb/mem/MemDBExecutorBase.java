@@ -18,6 +18,7 @@ import org.delia.db.memdb.PrimaryKeyRowSelector;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
+import org.delia.hld.HLDFactory;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
@@ -45,10 +46,12 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 	public boolean createTablesAsNeededFlag = true;
 	protected MemDBInterfaceFactory dbInterface;
 	private PreSpecService preSpecSvc;
+	protected HLDFactory hldFactory;
 
-	public MemDBExecutorBase(FactoryService factorySvc, MemDBInterfaceFactory dbInterface) {
+	public MemDBExecutorBase(FactoryService factorySvc, MemDBInterfaceFactory dbInterface, HLDFactory hldFactory) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.tableMap = dbInterface.createSingleMemDB();
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();

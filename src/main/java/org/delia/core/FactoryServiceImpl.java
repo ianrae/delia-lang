@@ -118,8 +118,8 @@ public class FactoryServiceImpl implements FactoryService {
 //		return new HLSSimpleQueryService(this, dbInterface, registry);
 //	}
 	@Override
-	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry) {
-		return new HLDSimpleQueryService(this, dbInterface, registry);
+	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry) {
+		return new HLDSimpleQueryService(this, dbInterface, hldFactory, registry);
 	}
 	@Override
 	public boolean getEnableMEMSqlGenerationFlag() {

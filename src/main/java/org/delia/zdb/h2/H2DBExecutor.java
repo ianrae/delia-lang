@@ -19,6 +19,7 @@ import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.ValueHelper;
 import org.delia.db.hls.ResultTypeInfo;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDInsertStatement;
@@ -51,11 +52,13 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	private DBConnection conn;
 	private H2DeliaSessionCache cache;
 	private CacheData cacheData;
+	private HLDFactory hldFactory;
 
-	public H2DBExecutor(FactoryService factorySvc, Log sqlLog, H2DBInterfaceFactory dbInterface, 
+	public H2DBExecutor(FactoryService factorySvc, Log sqlLog, H2DBInterfaceFactory dbInterface, HLDFactory hldFactory,
 			DBConnection conn, H2DeliaSessionCache cache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.conn = conn;
 		this.dbType = DBType.H2;
 		this.cache = cache;
@@ -369,6 +372,11 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
+	}
+
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
 	}
 
 }

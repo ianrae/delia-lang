@@ -10,6 +10,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.SerialProvider.SerialGenerator;
+import org.delia.hld.HLDFactory;
 import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBConnectionObserverAdapter;
@@ -22,10 +23,12 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
 	protected DBObserverFactory observerFactory;
 	private boolean ignoreSimpleSvcSql;
+	private HLDFactory hldFactory;
 
-	public MemDBInterfaceFactory(FactoryService factorySvc) {
+	public MemDBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(false, false, false, false);
+		this.hldFactory = hldFactory;
 	}
 	
 	public Map<String,MemDBTable> createSingleMemDB() {
@@ -63,7 +66,7 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	
 	@Override
 	public DBExecutor createExecutor() {
-		DBExecutor exec = new MemDBExecutor(factorySvc, this);
+		DBExecutor exec = new MemDBExecutor(factorySvc, this, hldFactory);
 		
 		//there is no dbconnection for MEM
 		if (observerFactory != null) {

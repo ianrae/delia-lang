@@ -48,13 +48,13 @@ public class DeliaFactory {
 		DBInterfaceFactory dbInterface = null;
 		switch(dbType) {
 		case MEM:
-			dbInterface = new MemDBInterfaceFactory(factorySvc);
+			dbInterface = new MemDBInterfaceFactory(factorySvc, hldFactory);
 			break;
 		case H2:
-			dbInterface = new H2DBInterfaceFactory(factorySvc, connFactory);
+			dbInterface = new H2DBInterfaceFactory(factorySvc, hldFactory, connFactory);
 			break;
 		case POSTGRES:  
-			dbInterface = new PostgresDBInterfaceFactory(factorySvc, connFactory);
+			dbInterface = new PostgresDBInterfaceFactory(factorySvc, hldFactory, connFactory);
 			break;
 		default:
 			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", dbType == null ? "null" : dbType.name());

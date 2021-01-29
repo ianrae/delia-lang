@@ -49,6 +49,7 @@ public class HLDFacade extends ServiceBase {
 	protected AliasManager aliasManager;
 	protected List<HLSPipelineStep> pipelineL = new ArrayList<>();
 	private SprigService sprigSvc; //set after ctor
+	private HLDFactory hldFactory;
 
 //	private Delia delia;
 	
@@ -56,15 +57,17 @@ public class HLDFacade extends ServiceBase {
 		super(delia.getFactoryService());
 //		this.delia = delia;
 		this.dbInterface= delia.getDBInterface();
+		this.hldFactory = delia.getHLDFactory();
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
 		this.aliasManager = new AliasManager(factorySvc);
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
-	public HLDFacade(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public HLDFacade(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 //		this.session = session;
 		this.dbInterface= dbInterface;
+		this.hldFactory = hldFactory;
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
 		this.aliasManager = new AliasManager(factorySvc);
@@ -165,7 +168,8 @@ public class HLDFacade extends ServiceBase {
 	}
 	
 	protected HLDBuildService createManager(DBExecutor zexec) {
-		return new HLDBuildServiceImpl(registry, factorySvc, zexec.getDatIdMap(), sprigSvc, dbInterface.getDBType());
+		HLDBuildService svc = hldFactory.createHLDBuilderService(registry, factorySvc, zexec.getDatIdMap(), sprigSvc, dbInterface.getDBType());
+		return svc;
 	}
 
 

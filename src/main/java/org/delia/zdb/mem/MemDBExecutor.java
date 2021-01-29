@@ -20,6 +20,7 @@ import org.delia.db.memdb.RowSelector;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.hld.cud.HLDDeleteStatement;
@@ -49,8 +50,8 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	private DValueCompareService compareSvc;
 	private HLDSimpleQueryService querySvc;
 
-	public MemDBExecutor(FactoryService factorySvc, MemDBInterfaceFactory dbInterface) {
-		super(factorySvc, dbInterface);
+	public MemDBExecutor(FactoryService factorySvc, MemDBInterfaceFactory dbInterface, HLDFactory hldFactory) {
+		super(factorySvc, dbInterface, hldFactory);
 		this.compareSvc = new DValueCompareService(factorySvc);
 	}
 
@@ -70,7 +71,7 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		this.registry = registry;
-		this.querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
+		this.querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, hldFactory, registry);
 	}
 
 	@Override
@@ -406,6 +407,10 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	@Override
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
+	}
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
 	}
 
 }

@@ -7,6 +7,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.SimpleSqlNameFormatter;
+import org.delia.hld.HLDFactory;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
 import org.delia.zdb.DBObserverFactory;
@@ -23,8 +24,9 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 	private PostgresDeliaSessionCache sessionCache;
 	private DBObserverFactory observerFactory;
 	private boolean ignoreSimpleSvcSql;
+	private HLDFactory hldFactory;
 
-	public PostgresDBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
+	public PostgresDBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory, ConnectionFactory connFactory) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(true, true, true, true);
 		this.sqlLog = new SimpleLog();
@@ -32,6 +34,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 		this.errorConverter = new PostgresErrorConverter(new SimpleSqlNameFormatter(true));
 		this.connFactory.setErrorConverter(errorConverter);
 		this.sessionCache = new PostgresDeliaSessionCache();
+		this.hldFactory = hldFactory;
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 		DBConnection conn = (PostgresDBConnection) openConnection();
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
-		DBExecutor exec = new PostgresDBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		DBExecutor exec = new PostgresDBExecutor(factorySvc, execLog, this, hldFactory, conn, sessionCache);
 		
 		DBConnectionObserverAdapter connAdapter = null;
 		if (observerFactory != null) {

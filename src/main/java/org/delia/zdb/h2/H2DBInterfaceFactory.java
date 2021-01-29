@@ -6,6 +6,7 @@ import org.delia.db.DBCapabilties;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
+import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
 import org.delia.log.SimpleLog;
@@ -23,8 +24,9 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 	private H2DeliaSessionCache sessionCache;
 	private DBObserverFactory observerFactory;
 	private boolean ignoreSimpleSvcSql;
+	private HLDFactory hldFactory;
 
-	public H2DBInterfaceFactory(FactoryService factorySvc, ConnectionFactory connFactory) {
+	public H2DBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory, ConnectionFactory connFactory) {
 		super(factorySvc);
 		this.capabilities = new DBCapabilties(true, true, true, true);
 		this.sqlLog = createNewLog();
@@ -32,6 +34,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 		this.errorConverter = new H2ErrorConverter();
 		this.connFactory.setErrorConverter(errorConverter);
 		this.sessionCache = new H2DeliaSessionCache();
+		this.hldFactory = hldFactory;
 	}
 	
 	private Log createNewLog() {
@@ -91,7 +94,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 			conn = connAdapter;
 		}
 		
-		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, conn, sessionCache);
+		DBExecutor exec = new H2DBExecutor(factorySvc, execLog, this, hldFactory, conn, sessionCache);
 		if (observerFactory != null) {
 			DBExecutor observer = observerFactory.createObserver(exec, connAdapter, ignoreSimpleSvcSql);
 			return observer;

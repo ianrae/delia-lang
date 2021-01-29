@@ -22,6 +22,7 @@ import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.FieldGenFactory;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDInsertStatement;
@@ -55,11 +56,13 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	private DBConnection conn;
 	private PostgresDeliaSessionCache cache;
 	private CacheData cacheData;
+	private HLDFactory hldFactory;
 
-	public PostgresDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresDBInterfaceFactory dbInterface, 
+	public PostgresDBExecutor(FactoryService factorySvc, Log sqlLog, PostgresDBInterfaceFactory dbInterface, HLDFactory hldFactory,
 			DBConnection conn, PostgresDeliaSessionCache sessionCache) {
 		super(factorySvc, sqlLog, dbInterface.getErrorConverter());
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.conn = conn;
 		this.dbType = DBType.POSTGRES;
 		this.cache = sessionCache;
@@ -384,4 +387,9 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	public DatIdMap getDatIdMap() {
 		return datIdMap;
 	}
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
+	}
+	
 }

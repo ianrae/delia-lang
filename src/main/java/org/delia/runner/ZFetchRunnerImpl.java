@@ -11,6 +11,7 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
@@ -33,7 +34,7 @@ public class ZFetchRunnerImpl extends ServiceBase implements FetchRunner {
 		this.dbexecutor = dbexecutor;
 		this.registry = registry;
 		this.varEvaluator = eval;
-		this.querySvc = new HLDSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), registry);
+		this.querySvc = new HLDSimpleQueryService(factorySvc, dbexecutor.getDbInterface(), dbexecutor.getHLDFactory(), registry);
 	}
 	
 	@Override
