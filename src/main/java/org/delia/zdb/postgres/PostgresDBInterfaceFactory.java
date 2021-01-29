@@ -115,4 +115,8 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 	public void setIgnoreSimpleSvcSql(boolean flag) {
 		this.ignoreSimpleSvcSql = flag;
 	}
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
+	}
 }

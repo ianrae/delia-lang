@@ -157,7 +157,7 @@ public class LetStatementRunner extends ServiceBase {
 
 			mostRecentStatment = hld;
 		} else { //mainly for legacy unit tests
-			HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, hldFactory, registry);
+			HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
 			qresp = querySvc.execQueryEx(queryExp, zexec, spec.evaluator.getVarEvaluator());
 		}
 		return qresp;

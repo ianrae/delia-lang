@@ -37,8 +37,8 @@ public interface FactoryService {
 	LogFactory getLogFactory(); //may return null if not set in DeliaBuilder
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
-	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry);
-	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
+	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry);
+	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();

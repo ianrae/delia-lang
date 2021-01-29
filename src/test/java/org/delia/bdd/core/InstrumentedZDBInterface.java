@@ -7,6 +7,8 @@ import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBObserverFactory;
@@ -21,6 +23,7 @@ public class InstrumentedZDBInterface implements DBInterfaceFactory {
 	
 	protected DBType dbType;
 	protected DBInterfaceFactory actualInterface;
+	protected HLDFactory hldFactory = new HLDFactoryImpl();
 	
 	public InstrumentedZDBInterface(DBType dbType) {
 		this.dbType = dbType;
@@ -30,18 +33,18 @@ public class InstrumentedZDBInterface implements DBInterfaceFactory {
 		switch(dbType) {
 		case MEM:
 			//actualInterface = new MemZDBInterfaceFactory(factorySvc);
-			actualInterface = new MemDBInterfaceFactory(factorySvc);
+			actualInterface = new MemDBInterfaceFactory(factorySvc, hldFactory);
 			break;
 		case H2:
 		{
 			ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), factorySvc.getLog());
-			actualInterface = new H2DBInterfaceFactory(factorySvc, connFact);
+			actualInterface = new H2DBInterfaceFactory(factorySvc, hldFactory, connFact);
 		}
 			break;
 		case POSTGRES:
 		{
 			ConnectionFactory connFact = new ConnectionFactoryImpl(PostgresConnectionHelper.getTestDB(), factorySvc.getLog());
-			actualInterface = new PostgresDBInterfaceFactory(factorySvc, connFact);
+			actualInterface = new PostgresDBInterfaceFactory(factorySvc, hldFactory, connFact);
 		}
 			break;
 		default:
@@ -105,6 +108,11 @@ public class InstrumentedZDBInterface implements DBInterfaceFactory {
 	@Override
 	public void setIgnoreSimpleSvcSql(boolean flag) {
 		actualInterface.setIgnoreSimpleSvcSql(flag);
+	}
+
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
 	}
 
 }

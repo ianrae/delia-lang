@@ -2,6 +2,7 @@ package org.delia.bdd;
 
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTesterEx;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.LogLevel;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
@@ -356,7 +357,7 @@ public class AllBDDTests extends BDDBase {
 	@Override
 	public DBInterfaceFactory createForTest() {
 		MemDBInterfaceFactory db;
-		db = new MemDBInterfaceFactory(createFactorySvc());
+		db = new MemDBInterfaceFactory(createFactorySvc(), new HLDFactoryImpl());
 		
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);

@@ -127,7 +127,7 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 		QueryExp exp = queryBuilder.createAllRowsQuery(datType.getName());
 //		HLSSimpleQueryService querySvc = factorySvc.createSimpleQueryService(dbexecutor.getDbInterface(), registry);
 //		QueryResponse qresp = querySvc.execQuery(exp, dbexecutor);
-		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbexecutor.getDbInterface(), dbexecutor.getHLDFactory(), registry);
+		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(dbexecutor.getDbInterface(), registry);
 		QueryResponse qresp = querySvc.execQuery(exp, dbexecutor);
 		
 		int maxDatId = loadDATRows(qresp);

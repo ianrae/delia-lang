@@ -14,6 +14,7 @@ import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
 import org.delia.sort.topo.TopoTestBase;
@@ -211,7 +212,7 @@ public class H2MigrationTests extends TopoTestBase {
 		this.factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
 		log("here we go2..");
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		dbInterface = new H2DBInterfaceFactory(factorySvc, connFact);
+		dbInterface = new H2DBInterfaceFactory(factorySvc, new HLDFactoryImpl(), connFact);
 		dbInterface.enableSQLLogging(true);
 		delia = DeliaFactory.create(dbInterface, log, factorySvc);
 		delia.getOptions().disableSQLLoggingDuringSchemaMigration = false;

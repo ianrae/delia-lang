@@ -104,5 +104,9 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	public void setIgnoreSimpleSvcSql(boolean flag) {
 		this.ignoreSimpleSvcSql = flag;
 	}
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
+	}
 
 }

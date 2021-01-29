@@ -71,7 +71,7 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	@Override
 	public void init1(DTypeRegistry registry) {
 		this.registry = registry;
-		this.querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, hldFactory, registry);
+		this.querySvc = factorySvc.createHLDSimpleQueryService(dbInterface, registry);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.delia.base;
 
 import org.delia.core.FactoryService;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
 
@@ -17,7 +18,7 @@ public class DBTestHelper {
 	}
 	
 	public static DBInterfaceFactory createMEMDb(FactoryService factorySvc) {
-		DBInterfaceFactory db = new MemDBInterfaceFactory(factorySvc);
+		DBInterfaceFactory db = new MemDBInterfaceFactory(factorySvc, new HLDFactoryImpl());
 		return db;
 	}
 	

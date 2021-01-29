@@ -63,11 +63,11 @@ public class HLDFacade extends ServiceBase {
 		this.aliasManager = new AliasManager(factorySvc);
 		this.pipelineL.add(new InQueryStep(factorySvc));
 	}
-	public HLDFacade(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public HLDFacade(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator) {
 		super(factorySvc);
 //		this.session = session;
 		this.dbInterface= dbInterface;
-		this.hldFactory = hldFactory;
+		this.hldFactory = dbInterface.getHLDFactory();
 		this.registry = registry;
 		this.varEvaluator = varEvaluator;
 		this.aliasManager = new AliasManager(factorySvc);

@@ -126,4 +126,9 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 		this.ignoreSimpleSvcSql = flag;
 	}
 
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
+	}
+
 }

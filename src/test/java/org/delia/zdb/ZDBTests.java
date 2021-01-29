@@ -16,6 +16,8 @@ import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -35,8 +37,9 @@ public class ZDBTests  extends BDDBase {
 
 	@Test
 	public void testMEM() {
-		MemDBInterfaceFactory dbFactory = new MemDBInterfaceFactory(factorySvc);
-		MemDBExecutor dbexec = new MemDBExecutor(factorySvc, dbFactory);
+		HLDFactory hldFactory = new HLDFactoryImpl();
+		MemDBInterfaceFactory dbFactory = new MemDBInterfaceFactory(factorySvc, hldFactory);
+		MemDBExecutor dbexec = new MemDBExecutor(factorySvc, dbFactory, hldFactory);
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();
@@ -59,10 +62,11 @@ public class ZDBTests  extends BDDBase {
 	@Test
 	public void testH2() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2DBInterfaceFactory dbFactory = new H2DBInterfaceFactory(factorySvc, connFact);
+		HLDFactory hldFactory = new HLDFactoryImpl();
+		H2DBInterfaceFactory dbFactory = new H2DBInterfaceFactory(factorySvc, hldFactory, connFact);
 		
 		H2DBConnection conn = (H2DBConnection) dbFactory.openConnection();
-		DBExecutor dbexec = new H2DBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
+		DBExecutor dbexec = new H2DBExecutor(factorySvc, log, dbFactory, hldFactory, conn, new H2DeliaSessionCache());
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();

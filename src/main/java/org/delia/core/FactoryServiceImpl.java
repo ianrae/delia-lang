@@ -81,8 +81,8 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
-		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, hldFactory, registry, varEvaluator, datIdMap);
+	public SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, dbInterface.getHLDFactory(), registry, varEvaluator, datIdMap);
 		return migrator;
 	}
 
@@ -118,8 +118,8 @@ public class FactoryServiceImpl implements FactoryService {
 //		return new HLSSimpleQueryService(this, dbInterface, registry);
 //	}
 	@Override
-	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, HLDFactory hldFactory, DTypeRegistry registry) {
-		return new HLDSimpleQueryService(this, dbInterface, hldFactory, registry);
+	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry) {
+		return new HLDSimpleQueryService(this, dbInterface, dbInterface.getHLDFactory(), registry);
 	}
 	@Override
 	public boolean getEnableMEMSqlGenerationFlag() {
