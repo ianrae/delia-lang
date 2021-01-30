@@ -1,4 +1,4 @@
-package org.delia.typebuilder;
+package org.delia.rule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +19,6 @@ import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.rule.AlwaysRuleGuard;
-import org.delia.rule.DRule;
-import org.delia.rule.NotNullGuard;
-import org.delia.rule.RuleGuard;
-import org.delia.rule.RuleOperand;
-import org.delia.rule.RuleRuleOperand;
-import org.delia.rule.ScalarRuleOperand;
-import org.delia.rule.StructDValueRuleOperand;
 import org.delia.rule.rules.CompareOpRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;

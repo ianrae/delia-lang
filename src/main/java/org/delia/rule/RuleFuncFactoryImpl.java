@@ -1,4 +1,4 @@
-package org.delia.typebuilder;
+package org.delia.rule;
 
 import java.util.List;
 
@@ -8,13 +8,6 @@ import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
-import org.delia.rule.AlwaysRuleGuard;
-import org.delia.rule.DRule;
-import org.delia.rule.DValueRuleOperand;
-import org.delia.rule.NotNullGuard;
-import org.delia.rule.RuleGuard;
-import org.delia.rule.RuleOperand;
-import org.delia.rule.StructDValueRuleOperand;
 import org.delia.rule.fns.DateMakeFnRule;
 import org.delia.rule.fns.DateYearFnRule;
 import org.delia.rule.fns.LenFnRule;

@@ -1,7 +1,6 @@
-package org.delia.typebuilder;
+package org.delia.rule;
 
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.rule.DRule;
 import org.delia.type.DType;
 
 public interface RuleFunctionFactory {

@@ -8,6 +8,7 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.error.ErrorTracker;
+import org.delia.rule.RuleBuilder;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
