@@ -32,6 +32,12 @@ public class SchemaType {
 	public boolean isFieldAlterType() {
 		return (action.equals("AT") && field != null);
 	}
+	public boolean isFieldAlterSizeInt() {
+		return (action.equals("ASN") && field != null);
+	}
+	public boolean isFieldAlterSizeString() {
+		return (action.equals("ASZ") && field != null);
+	}
 	
 	public String getSummary() {
 		String ss = field == null ? "" : "." + field;
