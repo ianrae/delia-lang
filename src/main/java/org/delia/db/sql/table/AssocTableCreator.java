@@ -76,18 +76,18 @@ public class AssocTableCreator extends ServiceBase {
 			tblinfo.tbl2 = tbl2;
 			tblinfo.fieldName = xpair.name;
 			TypePair relpair = new TypePair(xpair.name, relinfo.nearType);
-			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.nearType, relinfo.farType, relpair);
+			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.nearType, relinfo.farType, relpair, relinfo);
 		} else {
 			tblinfo.tbl1 = tbl2;
 			tblinfo.tbl2 = tbl1;
 			tblinfo.fieldName = xpair.name;
 			TypePair relpair = new TypePair(xpair.name, relinfo.nearType);
-			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType, relpair);
+			doGenerateAssocTable(sc, assocTableName, xpair, relinfo.farType, relinfo.nearType, relpair, relinfo);
 		}
 		return assocTableName;
 	}
 
-	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType, TypePair relpair) {
+	private void doGenerateAssocTable(StrCreator sc, String assocTableName, TypePair xpair, DStructType leftType, DStructType rightType, TypePair relpair, RelationInfo relinfo) {
 		sc.o("CREATE TABLE %s (", assocTableName);
 		sc.nl();
 		List<SqlElement> fieldL = new ArrayList<>();
@@ -114,9 +114,15 @@ public class AssocTableCreator extends ServiceBase {
 		if (constraint != null) {
 			fieldL.add(constraint);
 		}
-		constraint = addAdditionalPKConstraint("leftv", "rightv", leftType, rightType, assocTableName);
-		if (constraint != null) {
-			fieldL.add(constraint);
+		
+		boolean mandatory1 = relinfo.nearType.fieldIsOptional(relinfo.fieldName);
+		boolean mandatory2 = relinfo.farType.fieldIsOptional(relinfo.otherSide.fieldName);
+		
+		if (mandatory1 && mandatory2) {
+			constraint = addAdditionalPKConstraint("leftv", "rightv", leftType, rightType, assocTableName);
+			if (constraint != null) {
+				fieldL.add(constraint);
+			}
 		}
 		
 		int index = 0;
