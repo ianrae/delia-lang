@@ -28,7 +28,9 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.hld.HLDBuildService;
 import org.delia.hld.HLDBuildServiceImpl;
 import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.HLDSQLGenerator;
 import org.delia.hld.cud.HLDDeleteStatement;
+import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -96,7 +98,11 @@ public class NewHLSTestBase extends BDDBase {
 
 	protected HLDBuildService createManager() {
 		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		return new HLDBuildServiceImpl(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc, DBType.MEM);
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(session.getExecutionContext().registry, delia.getFactoryService(), session.getDatIdMap());
+		HLDToSQLConverter converter = delia.getDBInterface().getHLDFactory().createConverter(delia.getFactoryService(), session.getExecutionContext().registry, otherSqlGen, DBType.MEM);
+		
+		
+		return new HLDBuildServiceImpl(session.getExecutionContext().registry, delia.getFactoryService(), session.getDatIdMap(), sprigSvc, DBType.MEM, converter);
 	}
 	
 	protected void chkRawSql(HLDQueryStatement hld, String expected) {

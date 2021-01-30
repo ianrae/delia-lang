@@ -13,9 +13,10 @@ import org.delia.db.sqlgen.SqlGeneratorFactory;
 import org.delia.db.sqlgen.SqlSelectStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDInsertStatement;
+import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
-import org.delia.hld.cud.HLDToSQLConverterImpl;
+import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -30,16 +31,19 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	private HLDEngine engine;
 
 	private HLDEngineAssoc engineAssoc;
-//	private ConversionHelper conversionHelper;
+	//	private ConversionHelper conversionHelper;
 
 	private DBType dbType;
 
-	public HLDBuildServiceImpl(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc, DBType dbType) {
+	private HLDToSQLConverter hldToSqlConverter;
+
+	public HLDBuildServiceImpl(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc, DBType dbType, HLDToSQLConverter converter) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
 		this.engine = new HLDEngine(registry, factorySvc, datIdMap, sprigSvc);
 		this.engineAssoc = new HLDEngineAssoc(registry, factorySvc, datIdMap, sprigSvc);
-//		this.conversionHelper = new ConversionHelper(registry, factorySvc);
+		//		this.conversionHelper = new ConversionHelper(registry, factorySvc);
 		this.dbType = dbType;
+		this.hldToSqlConverter = converter;
 	}
 
 	/* (non-Javadoc)
@@ -156,7 +160,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
-		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverter sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hlddel);
 		return stmgrp;
 	}
@@ -166,7 +170,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
-		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverter sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldins);
 		return stmgrp;
 	}
@@ -176,7 +180,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDUpdateStatement hldupdate) {
-		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverter sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
 		return stmgrp;
 	}
@@ -186,15 +190,13 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDUpsertStatement hldupsert) {
-		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverter sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupsert);
 		return stmgrp;
 	}
 
-	private HLDToSQLConverterImpl createInnerSqlGenerator() {
-		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		HLDToSQLConverterImpl sqlgen = new HLDToSQLConverterImpl(factorySvc, registry, otherSqlGen, dbType);
-		return sqlgen;
+	private HLDToSQLConverter createInnerSqlGenerator() {
+		return hldToSqlConverter;
 	}
 
 

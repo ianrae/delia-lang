@@ -13,7 +13,10 @@ public class HLDFactoryImpl implements HLDFactory {
 	@Override
 	public HLDBuildService createHLDBuilderService(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap,
 			SprigService sprigSvc, DBType dbType) {
-		return new HLDBuildServiceImpl(registry, factorySvc, datIdMap, sprigSvc, dbType);
+		
+		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
+		HLDToSQLConverter converter = this.createConverter(factorySvc, registry, otherSqlGen, dbType);
+		return new HLDBuildServiceImpl(registry, factorySvc, datIdMap, sprigSvc, dbType, converter);
 	}
 
 	@Override
