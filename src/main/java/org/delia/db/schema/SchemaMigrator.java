@@ -297,6 +297,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			st.line = st2.line;
 			st.action = "I";
 			st.field = f2.name;
+			st.sizeof = f2.sizeof;
 			diffList.add(st);
 		}
 	}

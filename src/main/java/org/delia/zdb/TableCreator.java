@@ -165,7 +165,7 @@ public class TableCreator extends ServiceBase {
 		return assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}

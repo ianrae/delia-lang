@@ -126,8 +126,8 @@ public class InstrumentedDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
-		zexec.createField(typeName, field);
+	public void createField(String typeName, String field, int sizeof) {
+		zexec.createField(typeName, field, sizeof);
 	}
 
 	@Override

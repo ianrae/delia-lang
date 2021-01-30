@@ -7,6 +7,7 @@ import org.delia.core.ServiceBase;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.DBExecutor;
@@ -35,7 +36,7 @@ public class MigrationRunner extends ServiceBase {
 						dbexecutor.createTable(st.typeName);
 					} else if (st.isFieldInsert()) {
 						log.log("  add-field: %s", st);
-						dbexecutor.createField(st.typeName, st.field);
+						dbexecutor.createField(st.typeName, st.field, st.sizeof);
 					} else if (st.isFieldRename()) {
 						log.log("  rename-field: %s %s", st, st.newName);
 						dbexecutor.renameField(st.typeName, st.field, st.newName);
@@ -45,6 +46,10 @@ public class MigrationRunner extends ServiceBase {
 					} else if (st.isFieldAlter()) {
 						log.log("  alter-field: %s '%s'", st, st.newName);
 						dbexecutor.alterField(st.typeName, st.field, st.newName);
+					} else if (st.isFieldAlterSizeInt()) {
+						DeliaExceptionHelper.throwNotImplementedError("argn");
+					} else if (st.isFieldAlterSizeString()) {
+						DeliaExceptionHelper.throwNotImplementedError("argstr");
 					}
 				}
 			}

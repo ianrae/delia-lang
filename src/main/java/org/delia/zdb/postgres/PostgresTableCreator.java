@@ -56,7 +56,7 @@ public class PostgresTableCreator extends TableCreator {
 	}
 
 	@Override
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}
