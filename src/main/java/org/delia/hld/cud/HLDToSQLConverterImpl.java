@@ -31,10 +31,10 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 
 	private SqlGeneratorFactory sqlFactory;
 
-	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, DBType dbType) {
+	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, DBType dbType, SqlGeneratorFactory sqlgen) {
 		super(factorySvc);
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
-		this.sqlFactory = factorySvc.createSqlFactory(dbType, registry);
+		this.sqlFactory = sqlgen;
 	}
 
 	/* (non-Javadoc)
@@ -228,6 +228,11 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 		sqlFactory.useDeleteIn(delStmt);
 		delStmt.init(hld);
 		return delStmt.render();
+	}
+
+	@Override
+	public SqlGeneratorFactory getSqlGeneratorFactory() {
+		return this.sqlFactory;
 	}
 
 }

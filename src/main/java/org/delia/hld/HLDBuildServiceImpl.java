@@ -133,7 +133,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public String generateRawSql(HLDQueryStatement hld) {
-		SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
+		SqlGeneratorFactory genfact = hldToSqlConverter.getSqlGeneratorFactory();
 		SqlSelectStatement selStmt = genfact.createSelect(datIdMap);
 		selStmt.disableSqlParameterGen();
 		selStmt.init(hld.hldquery);
@@ -145,7 +145,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
-		SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
+		SqlGeneratorFactory genfact = hldToSqlConverter.getSqlGeneratorFactory();
 		SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
 		sqlMergeInto.init(hld.hldquery);
 		SqlStatement stm = sqlMergeInto.render();

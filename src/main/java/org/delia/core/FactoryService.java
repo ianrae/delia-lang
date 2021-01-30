@@ -46,5 +46,4 @@ public interface FactoryService {
 	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner);
 	boolean getEnableMEMSqlGenerationFlag();
 	void setEnableMEMSqlGenerationFlag(boolean flag);
-	SqlGeneratorFactory createSqlFactory(DBType dbtype, DTypeRegistry registry);
 }

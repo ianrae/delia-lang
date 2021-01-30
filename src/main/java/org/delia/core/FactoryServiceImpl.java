@@ -129,12 +129,5 @@ public class FactoryServiceImpl implements FactoryService {
 	public void setEnableMEMSqlGenerationFlag(boolean flag) {
 		enableMEMSqlGenerationFlag = flag;
 	}
-	@Override
-	public SqlGeneratorFactory createSqlFactory(DBType dbtype, DTypeRegistry registry) {
-		if (DBType.POSTGRES.equals(dbtype)) {
-			return new PostgresSqlGeneratorFactory(registry, this);
-		}
-		return new SqlGeneratorFactoryImpl(registry, this);
-	}
 
 }
