@@ -324,12 +324,12 @@ public class H2BDDTests extends BDDBase {
 	@Test
 	public void testR2600() {
 		runR2600Sizeof("t0-sizeof-int.txt", 1);
-		runR2600Sizeof("t0-sizeof-string.txt", 1);
+		runR2600Sizeof("t0-sizeof-string.txt", 2);
 	}
 
 	@Test
 	public void testDebug() {
-		testIndexToRun = 1;
+//		testIndexToRun = 1;
 //		DeliaImpl.useNewHLD = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
@@ -345,7 +345,8 @@ public class H2BDDTests extends BDDBase {
 		
 //		runR560File("t0-self-11.txt", 3);
 //		runR500File("t0-relation-many-to-many.txt", 11);
-		runR2600Sizeof("t0-sizeof-string.txt", 2);
+//		runR2600Sizeof("t0-sizeof-string.txt", 2);
+		runR2600Sizeof("t0-sizeof-int.txt", 1);
 	}
 	
 	//---

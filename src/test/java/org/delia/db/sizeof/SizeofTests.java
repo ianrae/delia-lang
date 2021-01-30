@@ -25,14 +25,14 @@ public class SizeofTests extends DeliaTestBase {
 
 	@Test
 	public void testSizeof8() {
-		chkIt("field2.sizeof(8)", "-256", true);
+		chkIt("field2.sizeof(8)", "-128", true);
 		chkIt("field2.sizeof(8)", "0", true);
-		chkIt("field2.sizeof(8)", "255", true);
+		chkIt("field2.sizeof(8)", "127", true);
 	}	
 	@Test
 	public void testSizeof8Fail() {
-		chkIt("field2.sizeof(8)", "-257", false);
-		chkIt("field2.sizeof(8)", "256", false);
+		chkIt("field2.sizeof(8)", "-129", false);
+		chkIt("field2.sizeof(8)", "128", false);
 	}	
 
 	@Test

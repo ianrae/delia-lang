@@ -42,8 +42,8 @@ public class SizeofRule extends DRuleBase {
 		
 		switch(sizeofAmount) {
 		case 8:
-			min = -256;
-			max = 255;
+			min = -128;
+			max = 127;
 			return checkInt(dval, min, max, ctx);
 		case 16:
 			min = -32768;

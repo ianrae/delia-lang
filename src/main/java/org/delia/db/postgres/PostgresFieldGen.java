@@ -39,7 +39,7 @@ public class PostgresFieldGen extends FieldGen {
 	public String deliaToSql(TypePair pair) {
 		switch(pair.type.getShape()) {
 		case INTEGER:
-			return "Int";
+			return calcIntColumnType();
 		case LONG:
 			return "BIGINT";
 		case NUMBER:
@@ -61,6 +61,26 @@ public class PostgresFieldGen extends FieldGen {
 		default:
 			return null;
 		}
+	}
+	
+	private String calcIntColumnType() {
+		String type;
+		switch(sizeof) {
+		case 8:
+		case 16:
+			type = "SMALLINT";
+			break;
+		case 32:
+			type = "INTEGER";
+			break;
+		case 64:
+			type = "BIGINT";
+			break;
+		default:
+			type = "INT";
+			break;
+		}
+		return type;
 	}
 
 }

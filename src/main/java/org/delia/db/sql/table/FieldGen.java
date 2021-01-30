@@ -58,9 +58,9 @@ public class FieldGen extends SqlElement {
 	public String deliaToSql(TypePair pair) {
 		switch(pair.type.getShape()) {
 		case INTEGER:
-			return "Int"; //TODO use sizeof
+			return calcIntColumnType(); 
 		case LONG:
-			return "BIGINT"; //TODO use sizeof
+			return "BIGINT"; 
 		case NUMBER:
 			return "DOUBLE";
 		case DATE:
@@ -82,6 +82,28 @@ public class FieldGen extends SqlElement {
 		}
 	}
 	
+	private String calcIntColumnType() {
+		String type;
+		switch(sizeof) {
+		case 8:
+			type = "TINYINT";
+			break;
+		case 16:
+			type = "SMALLINT";
+			break;
+		case 32:
+			type = "INT";
+			break;
+		case 64:
+			type = "BIGINT";
+			break;
+		default:
+			type = "INT";
+			break;
+		}
+		return type;
+	}
+
 	public void visitConstraints(List<ConstraintGen> constraints) {
 		for(ConstraintGen constraint: constraints) {
 			if ( constraint.pair.name.equals(this.pair.name)) {
