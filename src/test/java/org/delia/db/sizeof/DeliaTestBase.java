@@ -44,6 +44,7 @@ public abstract class DeliaTestBase  {
 
 		Delia delia = dao.getDelia();
 		this.session = dao.getMostRecentSession();
+		log.log("src: %s", src);
 		ResultValue res = delia.continueExecution(src, session);
 		
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;

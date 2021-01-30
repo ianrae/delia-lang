@@ -18,7 +18,10 @@ public class SizeofRule extends DRuleBase {
 	}
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
-		switch (dval.getType().getShape()) {
+		String fieldName = oper1.getSubject();
+		DValue inner = dval.asStruct().getField(fieldName);
+		
+		switch (inner.getType().getShape()) {
 		case INTEGER:
 			return validateInt(dval, ctx);
 		case STRING:
@@ -45,8 +48,8 @@ public class SizeofRule extends DRuleBase {
 			max = 32767;
 			return checkInt(dval, min, max, ctx);
 		case 32:
-			min = -32768;
-			max = 32767;
+			min = Integer.MIN_VALUE; //-2147483648
+			max = Integer.MAX_VALUE; //2147483647
 			return checkInt(dval, min, max, ctx);
 		case 64:
 			return checkLong(dval, ctx);
@@ -64,7 +67,7 @@ public class SizeofRule extends DRuleBase {
 	private boolean checkInt(DValue dval, int min, int max, DRuleContext ctx) {
 		int n = oper1.asInt(dval);
 
-		if (n > max) {
+		if (n < min) {
 			String msg = String.format("int value %d smaller than sizeof(%d) allows.", n, sizeofAmount);
 			ctx.addError(this, msg, oper1);
 			return false;

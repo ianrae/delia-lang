@@ -1,8 +1,5 @@
 package org.delia.db.sizeof;
 
-import static org.junit.Assert.assertEquals;
-
-import org.delia.runner.DeliaException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,16 +24,54 @@ public class SizeofTests extends DeliaTestBase {
 	}	
 
 	@Test
-	public void testFailSizeof() {
-		sizeofStr = "field2.sizeof(8)";
-		String src = "insert Flight {field1: 3, field2: 256 }";
-		executeFail(src, "rule-sizeof");
+	public void testSizeof8() {
+		chkIt("field2.sizeof(8)", "-256", true);
+		chkIt("field2.sizeof(8)", "0", true);
+		chkIt("field2.sizeof(8)", "255", true);
+	}	
+	@Test
+	public void testSizeof8Fail() {
+		chkIt("field2.sizeof(8)", "-257", false);
+		chkIt("field2.sizeof(8)", "256", false);
 	}	
 
+	@Test
+	public void testSizeof16() {
+		chkIt("field2.sizeof(16)", "-32768", true);
+		chkIt("field2.sizeof(16)", "0", true);
+		chkIt("field2.sizeof(16)", "32767", true);
+	}	
+	@Test
+	public void testSizeof16Fail() {
+		chkIt("field2.sizeof(16)", "-32769", false);
+		chkIt("field2.sizeof(16)", "32768", false);
+	}	
+	
+	@Test
+	public void testSizeof32() {
+		chkIt("field2.sizeof(32)", "-2147483648", true);
+		chkIt("field2.sizeof(32)", "0", true);
+		chkIt("field2.sizeof(32)", "2147483647", true);
+	}	
+	@Test
+	public void testSizeof32Fail() {
+		expectedRuleFail = "value-builder-failed";
+		chkIt("field2.sizeof(32)", "-2147483649", false);
+		chkIt("field2.sizeof(32)", "2147483648", false);
+	}	
+
+	@Test
+	public void testSizeof64() {
+		chkIt("field2.sizeof(64)", "-9223372036854775808", true);
+		chkIt("field2.sizeof(64)", "0", true);
+		chkIt("field2.sizeof(64)", "9223372036854775807", true);
+	}	
+	//there are no failing tests for long because that's the biggest physical size delia uses
 
 	//-------------------------
 	private boolean addSizeof = true;
 	private String sizeofStr = "field2.sizeof(8)";
+	private String expectedRuleFail = "rule-sizeof";
 
 	@Before
 	public void init() {
@@ -52,5 +87,15 @@ public class SizeofTests extends DeliaTestBase {
 		src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
 		return src;
 	}
+	private void chkIt(String rule, String s, boolean b) {
+		sizeofStr = rule;
+		String src = String.format("insert Flight {field1: 3, field2: %s }", s);
+		if (b) {
+			execute(src);
+		} else {
+			executeFail(src, expectedRuleFail);
+		}
+	}
+
 
 }
