@@ -14,9 +14,12 @@ public class FieldGen extends SqlElement {
 	public boolean makeFieldUnique;
 	protected boolean isAssocTblField;
 	protected boolean isAssocTblFieldOptional;
+	protected int sizeof;
 
-	public FieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
+	public FieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, 
+			boolean isAlter, int sizeof) {
 		super(factorySvc, registry, pair, dtype, isAlter);
+		this.sizeof = sizeof;
 	}
 	
 	public void setIsAssocTblField() {
@@ -55,15 +58,18 @@ public class FieldGen extends SqlElement {
 	public String deliaToSql(TypePair pair) {
 		switch(pair.type.getShape()) {
 		case INTEGER:
-			return "Int";
+			return "Int"; //TODO use sizeof
 		case LONG:
-			return "BIGINT";
+			return "BIGINT"; //TODO use sizeof
 		case NUMBER:
 			return "DOUBLE";
 		case DATE:
 			return "TIMESTAMP";
 		case STRING:
-			return "VARCHAR(65536)"; //FUTURE: should be this bigger? or configurable?
+		{
+			int n = sizeof == 0 ? 65536 : sizeof; 
+			return String.format("VARCHAR(%d)", n); 
+		}
 		case BOOLEAN:
 			return "BOOLEAN";
 		case STRUCT:

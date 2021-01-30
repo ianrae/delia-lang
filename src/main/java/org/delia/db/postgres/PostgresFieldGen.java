@@ -10,8 +10,9 @@ import org.delia.util.DValueHelper;
 
 public class PostgresFieldGen extends FieldGen {
 
-	public PostgresFieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
-		super(factorySvc, registry, pair, dtype, isAlter);
+	public PostgresFieldGen(FactoryService factorySvc, DTypeRegistry registry, TypePair pair, DStructType dtype, 
+			boolean isAlter, int sizeof) {
+		super(factorySvc, registry, pair, dtype, isAlter, sizeof);
 	}
 	
 	public void generateField(StrCreator sc) {
@@ -46,7 +47,10 @@ public class PostgresFieldGen extends FieldGen {
 		case DATE:
 			return "TIMESTAMP";
 		case STRING:
-			return "VARCHAR(65536)"; //TODO: should be this bigger? or configurable?
+		{
+			int n = sizeof == 0 ? 65536 : sizeof; 
+			return String.format("VARCHAR(%d)", n); 
+		}
 		case BOOLEAN:
 			return "BOOLEAN";
 		case STRUCT:

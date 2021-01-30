@@ -12,8 +12,8 @@ public class FieldGenFactory extends ServiceBase {
 		super(factorySvc);
 	}
 
-	public FieldGen createFieldGen(DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {
-		return new FieldGen(factorySvc, registry, pair, dtype, isAlter);
+	public FieldGen createFieldGen(DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter, int sizeof) {
+		return new FieldGen(factorySvc, registry, pair, dtype, isAlter, sizeof);
 	}
 	
 	public ConstraintGen generateFKConstraint(DTypeRegistry registry, TypePair pair, DStructType dtype, boolean isAlter) {

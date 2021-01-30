@@ -8,6 +8,7 @@ import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
+import org.delia.rule.rules.SizeofRule;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -216,6 +217,17 @@ public class DRuleHelper {
 			return info;
 		}
 		return null;
+	}
+	public static int getSizeofField(DStructType dtype, String fieldName) {
+		for(DRule rule: dtype.getRawRules()) {
+			if (rule instanceof SizeofRule) {
+				SizeofRule szrule = (SizeofRule) rule;
+				if (szrule.getSubject().equals(fieldName)) {
+					return szrule.getSizeofAmount();
+				}
+			}
+		}
+		return 0;
 	}
 
 

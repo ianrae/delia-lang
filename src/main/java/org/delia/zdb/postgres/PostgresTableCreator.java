@@ -71,7 +71,7 @@ public class PostgresTableCreator extends TableCreator {
 		if (isManyToManyRelation(pair, dtype)) {
 			manyToManyFieldCount++;
 		} else {
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true, sizeof);
 			fieldL.add(field);
 		}
 

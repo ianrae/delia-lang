@@ -4,10 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
-import org.delia.rule.rules.SizeofRule;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -103,12 +101,9 @@ public class SchemaFingerprintGenerator {
 		return s;
 	}
 	private String calcSizeofStr(DStructType dtype, TypePair pair) {
-		for(DRule rule: dtype.getRawRules()) {
-			if (rule instanceof SizeofRule) {
-				SizeofRule szrule = (SizeofRule) rule;
-				int n = szrule.getSizeofAmount();
-				return String.format("(%d)", n);
-			}
+		int n = DRuleHelper.getSizeofField(dtype, pair.name);
+		if (n != 0) {
+			return String.format("(%d)", n);
 		}
 		return "";
 	}
