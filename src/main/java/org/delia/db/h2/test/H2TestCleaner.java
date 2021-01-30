@@ -40,6 +40,7 @@ public class H2TestCleaner {
 		tableL.add("CustomerAddressDat2");
 		tableL.add("CustomerCustomerDat1");
 		tableL.add("Customer__BAK");
+		tableL.add("Address__BAK");
 		tableL.add("Other");
 		tableL.add("CustomerOtherDat1");
 		tableL.add("Other__BAK");

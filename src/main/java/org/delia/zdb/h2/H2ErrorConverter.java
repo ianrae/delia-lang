@@ -80,11 +80,4 @@ public class H2ErrorConverter extends DBErrorConverterBase {
 		return false;
 	}
 
-
-	@Override
-	public void setRegistry(DTypeRegistry registry) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

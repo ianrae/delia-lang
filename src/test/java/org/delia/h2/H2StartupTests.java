@@ -8,12 +8,12 @@ import org.junit.Test;
 
 public class H2StartupTests extends StartupTestBase {
 
-	@Test
-	public void testDB() throws Exception {
-		DBTestHelper.throwIfNoSlowTests();
-
-		DeliaInitializer initter = new DeliaInitializer();
-		LegacyRunner runner = initter.init(DBType.H2);
-		basicTest(initter, runner.innerRunner);
-	}
+//	@Test
+//	public void testDB() throws Exception {
+//		DBTestHelper.throwIfNoSlowTests();
+//
+//		DeliaInitializer initter = new DeliaInitializer();
+//		LegacyRunner runner = initter.init(DBType.H2);
+//		basicTest(initter, runner.innerRunner);
+//	}
 }

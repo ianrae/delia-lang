@@ -36,35 +36,35 @@ public class H2Tests {
 		openDB();
 	}
 
-	@Test
-	public void test2() throws Exception {
-		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
-		log.log("here we go..");
-		conn.openDB();
-		
-		log.log("and..");
-		execStatement(conn, "DROP TABLE IF EXISTS cars;");
-		execStatement(conn, "CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
-
-		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Audi', 52642);");
-		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Mercedes', 57127);");       
-
-		log.log("and query..");
-		SqlStatement statement = new SqlStatement(null);
-		statement.sql = "SELECT count(*) from cars;";
-		ResultSet rs = conn.execQueryStatement(statement, null);
-		if (rs.next()) {
-			System.out.println(rs.getInt(1));
-			System.out.println(rs.getString(2));
-			System.out.println(rs.getInt(3));
-		}        
-		
-		dumpSchema(conn);
-
-		conn.close();
-		log.log("end.");
-	}
+//	@Test
+//	public void test2() throws Exception {
+//		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
+//		H2DBConnection conn = new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
+//		log.log("here we go..");
+//		conn.openDB();
+//		
+//		log.log("and..");
+//		execStatement(conn, "DROP TABLE IF EXISTS cars;");
+//		execStatement(conn, "CREATE TABLE cars(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), price INT);");
+//
+//		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Audi', 52642);");
+//		execStatement(conn, "INSERT INTO cars(name, price) VALUES('Mercedes', 57127);");       
+//
+//		log.log("and query..");
+//		SqlStatement statement = new SqlStatement(null);
+//		statement.sql = "SELECT count(*) from cars;";
+//		ResultSet rs = conn.execQueryStatement(statement, null);
+//		if (rs.next()) {
+//			System.out.println(rs.getInt(1));
+//			System.out.println(rs.getString(2));
+//			System.out.println(rs.getInt(3));
+//		}        
+//		
+//		dumpSchema(conn);
+//
+//		conn.close();
+//		log.log("end.");
+//	}
 	
 	private void dumpSchema(H2DBConnection conn) throws SQLException {
 		log.log("dump schema: TABLES...");
