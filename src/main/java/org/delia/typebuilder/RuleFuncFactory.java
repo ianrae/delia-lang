@@ -21,6 +21,9 @@ import org.delia.rule.fns.LenFnRule;
 import org.delia.rule.rules.ContainsRule;
 import org.delia.rule.rules.MaxLenRule;
 import org.delia.rule.rules.SizeofRule;
+import org.delia.type.DStructType;
+import org.delia.type.DType;
+import org.delia.util.DeliaExceptionHelper;
 
 public class RuleFuncFactory {
 	private FactoryService factorySvc;
@@ -29,7 +32,7 @@ public class RuleFuncFactory {
 		this.factorySvc = factorySvc;
 	}
 
-	public DRule createRule(XNAFMultiExp rfe, int index) {
+	public DRule createRule(XNAFMultiExp rfe, int index, DType dtype) {
 		//only one func. TODO: fix later!!
 		XNAFSingleExp qfe0 = rfe.qfeL.get(index);
 		XNAFSingleExp qfe = qfe0;
@@ -50,7 +53,7 @@ public class RuleFuncFactory {
 		case "contains":
 		{
 			StringExp arg = (StringExp) qfe.argL.get(0);
-			RuleOperand oper = createOperand(fieldName);
+			RuleOperand oper = createOperand(fieldName, dtype, qfe.funcName);
 			guard = adjustGuard(oper, guard);
 			rule = new ContainsRule(guard, oper, arg.strValue());
 			break;
@@ -58,7 +61,7 @@ public class RuleFuncFactory {
 		case "maxlen":
 		{
 			IntegerExp arg = (IntegerExp) qfe.argL.get(0);
-			RuleOperand oper = createOperand(fieldName);
+			RuleOperand oper = createOperand(fieldName, dtype, qfe.funcName);
 			guard = adjustGuard(oper, guard);
 			rule = new MaxLenRule(guard, oper, arg.val);
 			break;
@@ -66,7 +69,7 @@ public class RuleFuncFactory {
 		case "sizeof":
 		{
 			IntegerExp arg = (IntegerExp) qfe.argL.get(0);
-			RuleOperand oper = createOperand(fieldName);
+			RuleOperand oper = createOperand(fieldName, dtype, qfe.funcName);
 			guard = adjustGuard(oper, guard);
 			rule = new SizeofRule(guard, oper, arg.val);
 			break;
@@ -93,7 +96,7 @@ public class RuleFuncFactory {
 			break;
 		}
 		default:
-			//err!!
+			//error handled at higher level
 			break;
 		}
 		
@@ -111,10 +114,21 @@ public class RuleFuncFactory {
 		return guard;
 	}
 
-	private RuleOperand createOperand(String fieldName) {
+	private RuleOperand createOperand(String fieldName, DType dtype, String ruleName) {
 		if (fieldName == null) {
 			return new DValueRuleOperand();
 		} else {
+			if (! dtype.isStructShape()) {
+				DeliaExceptionHelper.throwError("rule-not-allowed", 
+						"Type %s: scalar types not allowed to use rule '%s' on field '%s'", 
+						dtype.getName(), ruleName, fieldName);
+			}
+			DStructType structType = (DStructType) dtype;
+			if (!structType.hasField(fieldName)) {
+				DeliaExceptionHelper.throwError("rule-on-unknown-field", 
+						"Type %s: rule '%s' on unknown field '%s'", 
+						dtype.getName(), ruleName, fieldName);
+			}
 			return new StructDValueRuleOperand(fieldName);
 		}
 	}

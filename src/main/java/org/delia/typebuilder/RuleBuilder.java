@@ -51,15 +51,15 @@ public class RuleBuilder extends ServiceBase {
 		for(RuleExp ruleExp: typeStatementExp.ruleSetExp.ruleL) {
 			if (ruleExp.opExpr instanceof FilterOpExp) {
 				FilterOpExp foe = (FilterOpExp) ruleExp.opExpr;
-				RuleOperand oper1 = createOperand(foe.op1);
-				RuleOperand oper2 = createOperand(foe.op2);
+				RuleOperand oper1 = createOperand(foe.op1, dtype);
+				RuleOperand oper2 = createOperand(foe.op2, dtype);
 				RuleGuard guard = createGuard(oper1, oper2); //new AlwaysRuleGuard();
 				DateFormatService fmtSvc = this.factorySvc.getDateFormatService();
 				CompareOpRule rule = new CompareOpRule(guard, oper1, foe.op, oper2, fmtSvc);
 				dtype.getRawRules().add(rule);
 			} else if (ruleExp.opExpr instanceof XNAFMultiExp) {
 				XNAFMultiExp rfe = (XNAFMultiExp) ruleExp.opExpr;
-				DRule rule = ruleFactory.createRule(rfe, 0);
+				DRule rule = ruleFactory.createRule(rfe, 0, dtype);
 				if (rule != null) {
 					dtype.getRawRules().add(rule);
 				} else {
@@ -88,7 +88,7 @@ public class RuleBuilder extends ServiceBase {
 		}
 	}
 
-	private RuleOperand createOperand(Exp op1) {
+	private RuleOperand createOperand(Exp op1, DType dtype) {
 		if (op1 instanceof XNAFMultiExp) {
 			XNAFMultiExp rfe = (XNAFMultiExp) op1;
 			List<XNAFSingleExp> qfeL = rfe.qfeL;
@@ -96,7 +96,7 @@ public class RuleBuilder extends ServiceBase {
 				XNAFSingleExp qfe = qfeL.get(0);
 				if (qfe.isRuleFn) {
 					//add args later!!
-					DRule rule = ruleFactory.createRule(rfe, 0);
+					DRule rule = ruleFactory.createRule(rfe, 0, dtype);
 					RuleRuleOperand rro = new RuleRuleOperand(qfe.funcName, rule, null);
 					return rro;
 				} else if (qfe.argL.size() == 0) {
@@ -108,7 +108,7 @@ public class RuleBuilder extends ServiceBase {
 				XNAFSingleExp qfe1 = qfeL.get(0);
 				XNAFSingleExp qfe2 = qfeL.get(1);
 				//add args later!!
-				DRule rule = ruleFactory.createRule(rfe, 1);
+				DRule rule = ruleFactory.createRule(rfe, 1, dtype);
 				RuleRuleOperand rro = new RuleRuleOperand(qfe2.funcName, rule, qfe1.funcName);
 				return rro;
 			}
