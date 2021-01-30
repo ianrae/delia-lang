@@ -34,6 +34,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
+import org.delia.util.DeliaExceptionHelper;
 
 public class RuleBuilder extends ServiceBase {
 	
@@ -61,6 +62,8 @@ public class RuleBuilder extends ServiceBase {
 				DRule rule = ruleFactory.createRule(rfe, 0);
 				if (rule != null) {
 					dtype.getRawRules().add(rule);
+				} else {
+					DeliaExceptionHelper.throwError("unknown-rule", "Type %s: unknown rule '%s'", dtype.getName(), ruleExp.strValue());
 				}
 			}
 		}

@@ -20,6 +20,7 @@ import org.delia.rule.fns.DateYearFnRule;
 import org.delia.rule.fns.LenFnRule;
 import org.delia.rule.rules.ContainsRule;
 import org.delia.rule.rules.MaxLenRule;
+import org.delia.rule.rules.SizeofRule;
 
 public class RuleFuncFactory {
 	private FactoryService factorySvc;
@@ -60,6 +61,14 @@ public class RuleFuncFactory {
 			RuleOperand oper = createOperand(fieldName);
 			guard = adjustGuard(oper, guard);
 			rule = new MaxLenRule(guard, oper, arg.val);
+			break;
+		}
+		case "sizeof":
+		{
+			IntegerExp arg = (IntegerExp) qfe.argL.get(0);
+			RuleOperand oper = createOperand(fieldName);
+			guard = adjustGuard(oper, guard);
+			rule = new SizeofRule(guard, oper, arg.val);
 			break;
 		}
 		case "len":
