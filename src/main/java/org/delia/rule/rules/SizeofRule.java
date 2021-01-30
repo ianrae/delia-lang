@@ -24,6 +24,8 @@ public class SizeofRule extends DRuleBase {
 		switch (inner.getType().getShape()) {
 		case INTEGER:
 			return validateInt(dval, ctx);
+		case LONG:
+			return checkLong(dval, ctx);
 		case STRING:
 			return validateString(dval, ctx);
 			default:

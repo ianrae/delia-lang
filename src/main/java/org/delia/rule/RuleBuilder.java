@@ -29,6 +29,10 @@ import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 
 public class RuleBuilder extends ServiceBase {
+	private static class RuleDefPair {
+		public XNAFSingleExp exp;
+		public String fieldName;
+	}
 	
 	private DTypeRegistry registry;
 	private RuleFunctionFactory ruleFactory;
@@ -59,6 +63,48 @@ public class RuleBuilder extends ServiceBase {
 				}
 			}
 		}
+	}
+	
+	public List<String> findSizeofUpgrades(TypeStatementExp typeStatementExp) {
+		List<String> fieldNameL = new ArrayList<>();
+		for(RuleExp ruleExp: typeStatementExp.ruleSetExp.ruleL) {
+			if (ruleExp.opExpr instanceof XNAFMultiExp) {
+				XNAFMultiExp rfe = (XNAFMultiExp) ruleExp.opExpr;
+				RuleDefPair pair = findSizeOfRule(rfe);
+				if (pair == null) {
+					continue;
+				}
+				
+				IntegerExp arg = (IntegerExp) pair.exp.argL.get(0);
+				if (arg.val.intValue() == 64) {
+					fieldNameL.add(pair.fieldName);
+				}
+			}
+		}
+		return fieldNameL;
+	}
+	
+	private RuleDefPair findSizeOfRule(XNAFMultiExp rfe) {
+		//only one func. TODO: fix later!!
+		XNAFSingleExp qfe0 = rfe.qfeL.get(0);
+		XNAFSingleExp qfe = qfe0;
+
+		String fieldName = null;
+		if (rfe.qfeL.size() == 2) {
+			XNAFSingleExp qfe1 = rfe.qfeL.get(1);
+			if (!qfe0.isRuleFn && qfe1.isRuleFn) {
+				fieldName = qfe0.funcName;
+				qfe = qfe1;
+			}
+		}
+
+		if (qfe.funcName.equals("sizeof")) {
+			RuleDefPair pair = new RuleDefPair();
+			pair.exp = qfe;
+			pair.fieldName = fieldName;
+			return pair;
+		}
+		return null;
 	}
 
 	private RuleGuard createGuard(RuleOperand oper1, RuleOperand oper2) {

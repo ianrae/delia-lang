@@ -41,11 +41,22 @@ public class TypeBuilder extends ServiceBase {
 			return createScalarType(typeStatementExp);
 		}
 		
+		//first detect any int with sizeof(64) (need to be upgraded to long)
+		List<String> upgradeFieldL = ruleBuilder.findSizeofUpgrades(typeStatementExp);
+		
 		//build struct type
 		OrderedMap omap = new OrderedMap();
 		for(StructFieldExp fieldExp: typeStatementExp.structExp.argL) {
+			String fieldName = fieldExp.getFieldName();
 			DType fieldType = getTypeForField(fieldExp);
-			omap.add(fieldExp.getFieldName(), fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial);
+			if (fieldType.isShape(Shape.INTEGER)) {
+				if (upgradeFieldL.contains(fieldName)) {
+					//TODO: this probably break inheritance since we're making the child of an int into a long. fix lateer
+					fieldType = registry.getType(BuiltInTypes.LONG_SHAPE);
+					System.out.println("llllllllllllllllllllll " + fieldName);
+				}
+			}
+			omap.add(fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial);
 		}
 		
 		DType baseType = null;
