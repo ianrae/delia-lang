@@ -1,8 +1,22 @@
 package org.delia.db.sizeof;
 
 
-import org.delia.db.hld.NewHLSTestBase;
-import org.delia.hld.HLDQueryStatement;
+import static org.junit.Assert.assertEquals;
+
+import org.delia.api.Delia;
+import org.delia.api.DeliaSession;
+import org.delia.api.DeliaSessionImpl;
+import org.delia.assoc.CreateNewDatIdVisitor;
+import org.delia.base.UnitTestLog;
+import org.delia.builder.ConnectionBuilder;
+import org.delia.builder.ConnectionInfo;
+import org.delia.builder.DeliaBuilder;
+import org.delia.dao.DeliaGenericDao;
+import org.delia.db.DBType;
+import org.delia.log.Log;
+import org.delia.runner.DeliaException;
+import org.delia.runner.ResultValue;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,29 +25,33 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class SizeofTests extends NewHLSTestBase {
+public class SizeofTests  { 
 	
 	@Test
-	public void test() {
+	public void testOK() {
 		String src = "let x = Flight[15]";
-		HLDQueryStatement hld = buildFromSrc(src, 0); 
-		chkRawSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=15");
-		chkFullSql(hld, "SELECT t0.field1,t0.field2 FROM Flight as t0 WHERE t0.field1=?", "15");
+		execute(src);
 	}	
 
+	@Test(expected=DeliaException.class)
+	public void testFail() {
+		String src = "insert Flight {field1: 3, field2: 256 }";
+		execute(src);
+	}	
 	
 
 
 	//-------------------------
 	private boolean addSizeof = true;
 //	private boolean srcSimpleTypes;
+	protected Delia delia;
+	protected DeliaSession session;
+	protected Log log = new UnitTestLog();
 
 	@Before
 	public void init() {
-		//createDao();
 	}
 
-	@Override
 	protected String buildSrc() {
 		String s = addSizeof ? "wid.sizeof(8)" : "";
 		String src = String.format("type Flight struct {field1 int primaryKey, field2 int } %s end", s);
@@ -44,5 +62,41 @@ public class SizeofTests extends NewHLSTestBase {
 		return src;
 	}
 
+//	private void createNewDelia() {
+//		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+//		this.delia = DeliaBuilder.withConnection(info).build();
+//	}
+	
+	protected DeliaSessionImpl execute(String src) {
+		String initialSrc = buildSrc();
+		log.log("initial: " + initialSrc);
+		
+		DeliaGenericDao dao = createDao(); 
+		boolean b = dao.initialize(initialSrc);
+		assertEquals(true, b);
+
+		Delia delia = dao.getDelia();
+		this.session = dao.getMostRecentSession();
+		ResultValue res = delia.continueExecution(src, session);
+		
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		return sessimpl;
+	}
+	
+	protected DeliaGenericDao createDao() {
+		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
+		this.delia = DeliaBuilder.withConnection(info).build();
+		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
+		memDBinterface.createSingleMemDB();
+		CreateNewDatIdVisitor.hackFlag = true;
+		
+//		if (flipAssocTbl) {
+//			createTable(memDBinterface, "AddressCustomerDat1");
+//		} else {
+//			createTable(memDBinterface, "CustomerAddressDat1");
+//		}
+		
+		return new DeliaGenericDao(delia);
+	}
 
 }
