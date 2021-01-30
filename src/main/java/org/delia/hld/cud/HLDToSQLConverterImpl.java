@@ -25,7 +25,7 @@ import org.delia.type.DTypeRegistry;
  * @author ian
  *
  */
-public class InsertInnerSQLGenerator extends ServiceBase { 
+public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConverter { 
 //	public static boolean useSqlGenFactory = true;
 
 	private DTypeRegistry registry;
@@ -35,7 +35,7 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 
 	private SqlGeneratorFactory sqlFactory;
 
-	public InsertInnerSQLGenerator(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen, DBType dbType) {
+	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen, DBType dbType) {
 		super(factorySvc);
 		this.registry = registry;
 //		this.otherSqlGen = otherSqlGen;
@@ -44,6 +44,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		this.sqlFactory = factorySvc.createSqlFactory(dbType, registry);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.delia.hld.cud.HLDSQLGenerator#generate(org.delia.hld.cud.HLDInsertStatement)
+	 */
+	@Override
 	public SqlStatementGroup generate(HLDInsertStatement hldins) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		
@@ -58,6 +62,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		
 		return stmgrp;
 	}
+	/* (non-Javadoc)
+	 * @see org.delia.hld.cud.HLDSQLGenerator#generate(org.delia.hld.cud.HLDUpdateStatement)
+	 */
+	@Override
 	public SqlStatementGroup generate(HLDUpdateStatement hldupdate) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		
@@ -98,6 +106,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		}
 		return stmgrp;
 	}
+	/* (non-Javadoc)
+	 * @see org.delia.hld.cud.HLDSQLGenerator#generate(org.delia.hld.cud.HLDUpsertStatement)
+	 */
+	@Override
 	public SqlStatementGroup generate(HLDUpsertStatement hldupsert) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		
@@ -136,6 +148,10 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return sqlMergeInto.render();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.delia.hld.cud.HLDSQLGenerator#generate(org.delia.hld.cud.HLDDeleteStatement)
+	 */
+	@Override
 	public SqlStatementGroup generate(HLDDeleteStatement hld) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
 		

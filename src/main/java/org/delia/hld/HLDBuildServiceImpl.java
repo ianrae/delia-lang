@@ -15,7 +15,7 @@ import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
-import org.delia.hld.cud.InsertInnerSQLGenerator;
+import org.delia.hld.cud.HLDToSQLConverterImpl;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -156,7 +156,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDDeleteStatement hlddel) {
-		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hlddel);
 		return stmgrp;
 	}
@@ -166,7 +166,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDInsertStatement hldins) {
-		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldins);
 		return stmgrp;
 	}
@@ -176,7 +176,7 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDUpdateStatement hldupdate) {
-		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupdate);
 		return stmgrp;
 	}
@@ -186,14 +186,14 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDUpsertStatement hldupsert) {
-		InsertInnerSQLGenerator sqlgen = createInnerSqlGenerator(); 
+		HLDToSQLConverterImpl sqlgen = createInnerSqlGenerator(); 
 		SqlStatementGroup stmgrp = sqlgen.generate(hldupsert);
 		return stmgrp;
 	}
 
-	private InsertInnerSQLGenerator createInnerSqlGenerator() {
+	private HLDToSQLConverterImpl createInnerSqlGenerator() {
 		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-		InsertInnerSQLGenerator sqlgen = new InsertInnerSQLGenerator(factorySvc, registry, otherSqlGen, dbType);
+		HLDToSQLConverterImpl sqlgen = new HLDToSQLConverterImpl(factorySvc, registry, otherSqlGen, dbType);
 		return sqlgen;
 	}
 
