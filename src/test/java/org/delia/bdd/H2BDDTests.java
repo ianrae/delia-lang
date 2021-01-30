@@ -318,10 +318,17 @@ public class H2BDDTests extends BDDBase {
 	public void testR2300() {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
+	
+	//R2400 tests not needed (only in mem tests)
+	
+	@Test
+	public void testR2600() {
+		runR2600Sizeof("t0-sizeof-int.txt", 1);
+	}
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 6;
+		testIndexToRun = 6;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;

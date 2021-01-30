@@ -101,4 +101,7 @@ public class SizeofRule extends DRuleBase {
 	public String getSubject() {
 		return oper1.getSubject();
 	}
+	public int getSizeofAmount() {
+		return sizeofAmount;
+	}
 }
