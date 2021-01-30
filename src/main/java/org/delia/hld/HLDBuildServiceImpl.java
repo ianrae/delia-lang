@@ -129,49 +129,25 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 */
 	@Override
 	public String generateRawSql(HLDQueryStatement hld) {
-		if (InsertInnerSQLGenerator.useSqlGenFactory) {
-			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
-			SqlSelectStatement selStmt = genfact.createSelect(datIdMap);
-			selStmt.disableSqlParameterGen();
-			selStmt.init(hld.hldquery);
-			SqlStatement stm = selStmt.render();
-			return stm.sql;
-		}
-//		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-//		String sql = sqlgen.generateRawSql(hld.hldquery);
-//		return sql;
-		return null;
+		SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
+		SqlSelectStatement selStmt = genfact.createSelect(datIdMap);
+		selStmt.disableSqlParameterGen();
+		selStmt.init(hld.hldquery);
+		SqlStatement stm = selStmt.render();
+		return stm.sql;
 	}
 	/* (non-Javadoc)
 	 * @see org.delia.hld.HLDBuildService#generateSql(org.delia.hld.HLDQueryStatement)
 	 */
 	@Override
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
-		if (InsertInnerSQLGenerator.useSqlGenFactory) {
-			SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
-			SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
-			sqlMergeInto.init(hld.hldquery);
-			SqlStatement stm = sqlMergeInto.render();
-			SqlStatementGroup stgrp = new SqlStatementGroup();
-			stgrp.add(stm);
-			return stgrp;
-		}
-		
-//		//TODO: arg we need to implement select with InsertInnerSQLGenerator!!
-//		HLDSQLGenerator sqlgen = new HLDSQLGenerator(registry, factorySvc, datIdMap);
-//		SqlStatement sql = sqlgen.generateSqlStatement(hld.hldquery);
-//
-//		//convert strings to dates where needed
-//		for(DValue dval: sql.paramL) {
-//			if (dval != null) {
-//				DValue xx = conversionHelper.convertDValToActual(dval.getType(), dval);
-//			}
-//		}
-//
-//		SqlStatementGroup stgrp = new SqlStatementGroup();
-//		stgrp.add(sql);
-//		return stgrp;
-		return null;
+		SqlGeneratorFactory genfact = factorySvc.createSqlFactory(dbType, registry);
+		SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
+		sqlMergeInto.init(hld.hldquery);
+		SqlStatement stm = sqlMergeInto.render();
+		SqlStatementGroup stgrp = new SqlStatementGroup();
+		stgrp.add(stm);
+		return stgrp;
 	}
 
 

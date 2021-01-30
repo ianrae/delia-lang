@@ -6,7 +6,6 @@ import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sql.table.ListWalker;
 import org.delia.db.sqlgen.SqlDeleteStatement;
 import org.delia.db.sqlgen.SqlGeneratorFactory;
 import org.delia.db.sqlgen.SqlInsertStatement;
@@ -14,13 +13,10 @@ import org.delia.db.sqlgen.SqlMergeAllIntoStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.db.sqlgen.SqlUpdateStatement;
-import org.delia.hld.HLDField;
 import org.delia.hld.HLDSQLGenerator;
 import org.delia.hld.simple.SimpleBase;
 import org.delia.hld.simple.SimpleSqlGenerator;
-import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
 
 /**
  * 
@@ -30,7 +26,7 @@ import org.delia.type.DValue;
  *
  */
 public class InsertInnerSQLGenerator extends ServiceBase { 
-	public static boolean useSqlGenFactory = true;
+//	public static boolean useSqlGenFactory = true;
 
 	private DTypeRegistry registry;
 //	private HLDSQLGenerator otherSqlGen;
@@ -130,21 +126,14 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	
 	private SqlStatement genUpsertStatement(HLDUpsert hld) {
 		if (hld.noUpdateFlag) {
-			if (useSqlGenFactory) {
-				SqlMergeUsingStatement sqlMergeInto = sqlFactory.createMergeUsing();
-				sqlMergeInto.init(hld);
-				return sqlMergeInto.render();
-			}
-			return upsertSQLGen.genMergeIntoNoUpdateStatement(hld);
-		}
-		
-		if (useSqlGenFactory) {
-			SqlMergeIntoStatement sqlMergeInto = sqlFactory.createMergeInto();
+			SqlMergeUsingStatement sqlMergeInto = sqlFactory.createMergeUsing();
 			sqlMergeInto.init(hld);
 			return sqlMergeInto.render();
 		}
 		
-		return null; //genMergeIntoStatement(hld);
+		SqlMergeIntoStatement sqlMergeInto = sqlFactory.createMergeInto();
+		sqlMergeInto.init(hld);
+		return sqlMergeInto.render();
 	}
 
 	public SqlStatementGroup generate(HLDDeleteStatement hld) {
@@ -165,120 +154,20 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 	}
 	
 	private SqlStatement genInsertStatement(HLDInsert hldins) {
-		if (useSqlGenFactory) {
-			SqlInsertStatement sqlMergeInto = sqlFactory.createInsert();
-			sqlMergeInto.init(hldins);
-			return sqlMergeInto.render();
-		}
-		
-		
-//		SqlStatement stm = new SqlStatement(hldins);
-//		StrCreator sc = new StrCreator();
-//		sc.o("INSERT INTO");
-//		outTblName(sc, hldins);
-//		
-//		if (hldins.fieldL.isEmpty()) {
-//			sc.o(" DEFAULT VALUES");
-//			stm.sql = sc.toString();
-//			return stm;
-//		}
-//		
-//		sc.o(" (");
-//		ListWalker<HLDField> walker = new ListWalker<>(hldins.fieldL);
-//		while(walker.hasNext()) {
-//			HLDField ff = walker.next();
-//			sc.o(ff.render());
-//			walker.addIfNotLast(sc, ", ");
-//		}
-//		sc.o(")");
-//
-//		sc.o(" VALUES(");
-//		ListWalker<DValue> dvalwalker = new ListWalker<>(hldins.valueL);
-//		//no null dvals (they wouldn't be in the list)
-//		while(dvalwalker.hasNext()) {
-//			DValue inner = dvalwalker.next();
-//			stm.paramL.add(renderValue(inner));
-//			sc.o("?");
-//			dvalwalker.addIfNotLast(sc, ", ");
-//		}
-//		sc.o(")");
-//		
-//		stm.sql = sc.toString();
-//		return stm;
-		return null;
+		SqlInsertStatement sqlMergeInto = sqlFactory.createInsert();
+		sqlMergeInto.init(hldins);
+		return sqlMergeInto.render();
 	}
 	
-	private DValue renderValue(DValue inner) {
-		if (inner != null && inner.getType().isRelationShape()) {
-			DRelation drel = inner.asRelation();
-			return drel.getForeignKey(); //better only be one!
-		}
-		return inner;
-	}
-
 	private void outTblName(StrCreator sc, HLDBase hld) {
 		sc.o(hld.typeOrTbl.render());
 	}
 
 	private SqlStatement genUpdateStatement(HLDUpdate hld) {
-		if (useSqlGenFactory) {
-			SqlUpdateStatement updateStmt = sqlFactory.createUpdate();
-			updateStmt.init(hld);
-			return updateStmt.render();
-		}
-		
-//		SqlStatement stm = new SqlStatement(hld);
-//		StrCreator sc = new StrCreator();
-//		sc.o("UPDATE");
-//		outTblName(sc, hld);
-//		
-//		if (hld.fieldL.isEmpty()) {
-//			stm.sql = sc.toString();
-//			return stm;
-//		}
-//		
-//		sc.o(" SET ");
-//		int index = 0;
-//		ListWalker<HLDField> walker = new ListWalker<>(hld.fieldL);
-//		String conditionStr = null;
-//		while(walker.hasNext()) {
-//			HLDField ff = walker.next();
-//			DValue inner = hld.valueL.get(index);
-//			stm.paramL.add(renderValue(inner));
-//			
-//			conditionStr = String.format("%s = %s", renderSetField(ff), "?");
-//			sc.o(conditionStr);
-//			walker.addIfNotLast(sc, ", ");
-//			index++;
-//		}
-//		
-//		if (hld.isSubSelect) {
-//			addSubSelectWhere(sc, hld.hld, stm, conditionStr);
-//		} else {
-//			addWhereIfNeeded(sc, hld.hld, stm);
-//		}
-//
-////		renderIfPresent(sc, orderByFrag);
-////		renderIfPresent(sc, limitFrag);  TODO is this needed?
-//		
-//		stm.sql = sc.toString();
-//		return stm;
-		return null;
+		SqlUpdateStatement updateStmt = sqlFactory.createUpdate();
+		updateStmt.init(hld);
+		return updateStmt.render();
 	}
-//	private void addSubSelectWhere(StrCreator sc, HLDQuery hld, SqlStatement stm, String conditionStr) {
-////		WHERE t1.cust IN (SELECT t2.cid FROM Customer as t2 WHERE t2.x > ?", "10");
-//
-//		conditionStr = StringUtils.substringBefore(conditionStr, "=").trim();
-//		sc.o(" WHERE %s IN ", conditionStr);
-//		String alias = "t9"; //TODO fix later
-//		sc.o("(SELECT %s.cid FROM %s as %s WHERE", alias, hld.fromType.getName(), alias);
-//		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
-//
-//		String s1 = "t9.";
-//		String source = String.format("%s.", hld.fromAlias);
-//		whereStr = whereStr.replace(source, s1);
-//		sc.o("%s", whereStr);
-//	}
 
 	
 //    MERGE INTO CustomerAddressAssoc as T USING (SELECT id FROM CUSTOMER) AS S
@@ -316,69 +205,20 @@ public class InsertInnerSQLGenerator extends ServiceBase {
 		return updateStmt.render();
 	}
 	
-//	private String renderSetField(HLDField ff) {
-//		return ff.render();
-//	}
-
 	//DELETE FROM table_name WHERE condition;
 	private SqlStatement genDeleteStatement(HLDDelete hld) {
-		if (useSqlGenFactory) {
-			SqlDeleteStatement delStmt = sqlFactory.createDelete();
-			delStmt.init(hld);
-			return delStmt.render();
-		}
-		
-//		SqlStatement stm = new SqlStatement(hld);
-//		StrCreator sc = new StrCreator();
-//		sc.o("DELETE FROM");
-//		outTblName(sc, hld);
-//		
-//		addWhereIfNeeded(sc, hld.hld, stm);
-//
-//		stm.sql = sc.toString();
-//		return stm;
-		return null;
+		SqlDeleteStatement delStmt = sqlFactory.createDelete();
+		delStmt.init(hld);
+		return delStmt.render();
 	}
 	//DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv <> ? AND leftv IN (SELECT rightv FROM Customer as a WHERE  t1.rightv = ?) -- 999,55,55
 	//          delete CustomerAddressAssoc where leftv <> 100 and rightv in (SELECT id FROM Address as a WHERE a.z > ?)
 	//delete CustomerAddressAssoc where rightv <> 100 and leftv in (SELECT id FROM Address as a WHERE a.z > ?)
 	private SqlStatement genDeleteInStatement(HLDDelete hld) {
-		if (useSqlGenFactory) {
-			SqlDeleteStatement delStmt = sqlFactory.createDelete();
-			sqlFactory.useDeleteIn(delStmt);
-			delStmt.init(hld);
-			return delStmt.render();
-		}
-		
-//		
-//		SqlStatement stm = new SqlStatement(hld);
-//		StrCreator sc = new StrCreator();
-//		sc.o("DELETE FROM");
-//		outTblName(sc, hld);
-//		String alias = hld.typeOrTbl.alias;
-//		
-//		int n = stm.paramL.size();
-//		String whereStr = otherSqlGen.generateSqlWhere(hld.hld, stm);
-//		DValue dval = hld.deleteInDVal;
-//		DValue sav = stm.paramL.remove(n);
-//		stm.paramL.add(dval);
-//		stm.paramL.add(sav);
-//		
-//		whereStr = whereStr.replace(String.format("%s.", alias), "a.");
-//		String s2 = String.format("%s.%s <> ?",  alias, hld.mergeOtherKey); //whereStr.substring(pos1 + 5);
-//
-//		String s = String.format(" %s AND %s.%s IN (SELECT %s FROM %s as a WHERE%s)", s2, alias, hld.mergeKey, hld.mergePKField, hld.mergeType, whereStr);
-//		sc.o(" WHERE%s", s);
-//
-//		stm.sql = sc.toString();
-//		return stm;
-		return null;
+		SqlDeleteStatement delStmt = sqlFactory.createDelete();
+		sqlFactory.useDeleteIn(delStmt);
+		delStmt.init(hld);
+		return delStmt.render();
 	}
 
-//	private void addWhereIfNeeded(StrCreator sc, HLDQuery hld, SqlStatement stm) {
-//		String whereStr = otherSqlGen.generateSqlWhere(hld, stm);
-//		if (whereStr != null) {
-//			sc.o(" WHERE%s", whereStr);
-//		}
-//	}
 }

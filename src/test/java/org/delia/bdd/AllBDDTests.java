@@ -327,7 +327,7 @@ public class AllBDDTests extends BDDBase {
 	}
 	@Test
 	public void testR2400() {
-		runR2400File("t0-log.txt", 0);
+		runR2400File("t0-log.txt", 1);
 	}
 
 	
