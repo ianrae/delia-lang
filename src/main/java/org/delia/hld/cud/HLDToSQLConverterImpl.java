@@ -13,7 +13,6 @@ import org.delia.db.sqlgen.SqlMergeAllIntoStatement;
 import org.delia.db.sqlgen.SqlMergeIntoStatement;
 import org.delia.db.sqlgen.SqlMergeUsingStatement;
 import org.delia.db.sqlgen.SqlUpdateStatement;
-import org.delia.hld.HLDSQLGenerator;
 import org.delia.hld.simple.SimpleBase;
 import org.delia.hld.simple.SimpleSqlGenerator;
 import org.delia.type.DTypeRegistry;
@@ -26,21 +25,15 @@ import org.delia.type.DTypeRegistry;
  *
  */
 public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConverter { 
-//	public static boolean useSqlGenFactory = true;
 
-	private DTypeRegistry registry;
-//	private HLDSQLGenerator otherSqlGen;
+//	private DTypeRegistry registry;
 	private SimpleSqlGenerator simpleSqlGenerator;
-	private UpsertInnerSQLGenerator upsertSQLGen;
 
 	private SqlGeneratorFactory sqlFactory;
 
-	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen, DBType dbType) {
+	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, DBType dbType) {
 		super(factorySvc);
-		this.registry = registry;
-//		this.otherSqlGen = otherSqlGen;
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
-		this.upsertSQLGen = new UpsertInnerSQLGenerator(factorySvc);
 		this.sqlFactory = factorySvc.createSqlFactory(dbType, registry);
 	}
 

@@ -98,8 +98,7 @@ public class NewHLSTestBase extends BDDBase {
 
 	protected HLDBuildService createManager() {
 		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		HLDSQLGenerator otherSqlGen = new HLDSQLGenerator(session.getExecutionContext().registry, delia.getFactoryService(), session.getDatIdMap());
-		HLDToSQLConverter converter = delia.getDBInterface().getHLDFactory().createConverter(delia.getFactoryService(), session.getExecutionContext().registry, otherSqlGen, DBType.MEM);
+		HLDToSQLConverter converter = delia.getDBInterface().getHLDFactory().createConverter(delia.getFactoryService(), session.getExecutionContext().registry, DBType.MEM);
 		
 		
 		return new HLDBuildServiceImpl(session.getExecutionContext().registry, delia.getFactoryService(), session.getDatIdMap(), sprigSvc, DBType.MEM, converter);

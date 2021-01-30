@@ -14,5 +14,5 @@ import org.delia.type.DTypeRegistry;
  */
 public interface HLDFactory {
 	HLDBuildService createHLDBuilderService(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc, DBType dbType);
-	HLDToSQLConverter createConverter(FactoryService factorySvc, DTypeRegistry registry, HLDSQLGenerator otherSqlGen, DBType dbType);
+	HLDToSQLConverter createConverter(FactoryService factorySvc, DTypeRegistry registry, DBType dbType);
 }
