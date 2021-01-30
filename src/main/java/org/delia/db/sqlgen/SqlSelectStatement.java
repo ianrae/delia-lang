@@ -16,9 +16,9 @@ import org.delia.hld.QueryFnSpec;
 import org.delia.hld.SqlColumn;
 import org.delia.hld.SqlColumnBuilder;
 import org.delia.hld.SqlParamGenerator;
-import org.delia.hld.StructField;
 import org.delia.hld.StructFieldOpt;
 import org.delia.hld.cud.TypeOrTable;
+import org.delia.log.Log;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -28,21 +28,25 @@ import org.delia.util.DeliaExceptionHelper;
 
 public class SqlSelectStatement implements SqlStatementGenerator {
 
-	private DatIdMap datIdMap;
-	private SqlTableNameClause tblClause;
-	private SqlWhereClause whereClause;
-	private SqlColumnBuilder columnBuilder;
-	private SqlParamGenerator paramGen;
+	protected DatIdMap datIdMap;
+	protected SqlTableNameClause tblClause;
+	protected SqlWhereClause whereClause;
+	protected SqlColumnBuilder columnBuilder;
+	protected SqlParamGenerator paramGen;
 	
-	private HLDQuery hld;
+	protected HLDQuery hld;
+	protected Log log;
+	protected boolean supportsTop;
 
 	public SqlSelectStatement(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SqlTableNameClause tblClause, SqlWhereClause whereClause) {
 		this.datIdMap = datIdMap;
 		this.tblClause = tblClause;
 		this.whereClause = whereClause;
+		this.log = factorySvc.getLog();
 		
 		this.columnBuilder = new SqlColumnBuilder(datIdMap);
 		this.paramGen = new SqlParamGenerator(registry, factorySvc); 
+		this.supportsTop = true;
 	}
 
 	public void init(HLDQuery hld) {
@@ -63,7 +67,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		SqlStatement stm = new SqlStatement(hld);
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT ");
-		if (hld.hasFn("first") || hld.hasFn("last")) {
+		if (supportsTop && (hld.hasFn("first") || hld.hasFn("last"))) {
 			sc.addStr("TOP 1 ");
 		}
 		if (hld.hasFn("distinct")) {
@@ -103,7 +107,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 
 	////==
 
-	private Integer getArgAsInt(QueryFnSpec fn, int i) {
+	protected Integer getArgAsInt(QueryFnSpec fn, int i) {
 		if (i >= fn.filterFn.argL.size()) {
 			DeliaExceptionHelper.throwError("queryfn-bad-index", "missing param in '%s'", fn.filterFn.fnName);
 		}
@@ -115,7 +119,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 	//			return sqlWhereGen.generateSqlWhere(hld, stm);
 	//		}
 	//		
-	private void generateOrderBy(StrCreator sc, HLDQuery hld) {
+	protected void generateOrderBy(StrCreator sc, HLDQuery hld) {
 		List<QueryFnSpec> list = hld.funcL.stream().filter(x -> x.isFn("orderBy")).collect(Collectors.toList());
 		if (list.isEmpty()) {
 			addOrderByForLast(sc, hld, false);
@@ -161,13 +165,13 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		addOrderByForLast(sc, hld, true);
 	}
 
-	private String findOrderByForLast(HLDQuery hld) {
+	protected String findOrderByForLast(HLDQuery hld) {
 		if (!hld.hasFn("last")) return null;
 		
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
 		return pkpair == null ? null : pkpair.name;
 	}
-	private void addOrderByForLast(StrCreator sc, HLDQuery hld, boolean atLeastOne) {
+	protected void addOrderByForLast(StrCreator sc, HLDQuery hld, boolean atLeastOne) {
 		if (!hld.hasFn("last")) return;
 		
 		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
@@ -185,7 +189,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 	}
 	
 	
-	private void generateJoins(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
+	protected void generateJoins(StrCreator sc, HLDQuery hld, SqlStatement stm, SqlParamGenerator paramGen) {
 		for(JoinElement el: hld.joinL) {
 			if (el.relinfo.isManyToMany()) {
 				//select t0.cid,t0.x,t1.leftv,t1.rightv from Customers as t0 join cat on t1 as t0.cid=cat.leftv where t0.cid=?
@@ -205,7 +209,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 			}
 		}
 	}
-	private void doSimpleJoin(StrCreator sc, JoinElement el, String alias) {
+	protected void doSimpleJoin(StrCreator sc, JoinElement el, String alias) {
 		//JOIN Address as t1 ON t0.id=t1.cust
 		//LEFT JOIN so get nulls
 		String tbl = el.relationField.fieldType.getName();
@@ -224,7 +228,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 	}
 
 
-	private StringJoiner generateFields(HLDQuery hld) {
+	protected StringJoiner generateFields(HLDQuery hld) {
 		StringJoiner joiner = new StringJoiner(",");
 		Optional<QueryFnSpec> optCountFn = hld.findFn("count"); //stream().filter(x -> x.filterFn.fnName.equals("count")).findAny();
 		if (optCountFn.isPresent()) {
@@ -252,7 +256,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		return joiner;
 	}
 
-	private boolean isStructMatch(HLDField ff, StructFieldOpt structField2) {
+	protected boolean isStructMatch(HLDField ff, StructFieldOpt structField2) {
 		if (ff.structType == structField2.dtype) {
 			if (ff.fieldName.equals(structField2.fieldName)) {
 				return true;
@@ -261,7 +265,7 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		return false;
 	}
 
-	private SqlColumn addFuncs(SqlColumn npair, HLDField ff, HLDQuery hld) {
+	protected SqlColumn addFuncs(SqlColumn npair, HLDField ff, HLDQuery hld) {
 		Optional<QueryFnSpec> opt = hld.funcL.stream().filter(x ->x.isMatch(ff.structType, ff.fieldName)).findAny();
 		if (! opt.isPresent()) {
 			return npair;
@@ -294,18 +298,18 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		return null;
 	}
 
-	private SqlColumn addFunc(SqlColumn npair, QueryFnSpec qfn) {
+	protected SqlColumn addFunc(SqlColumn npair, QueryFnSpec qfn) {
 		npair.name = String.format("%s(%s)", qfn.getFnName(), npair.render());
 		npair.alias = null;
 		return npair;
 	}
-	private SqlColumn addFuncEx(SqlColumn npair, String str) {
+	protected SqlColumn addFuncEx(SqlColumn npair, String str) {
 		npair.name = String.format("%s(%s)", str, npair.render());
 		npair.alias = null;
 		return npair;
 	}
 
-	private SqlColumn mapFieldIfNeeded(HLDField rf) {
+	protected SqlColumn mapFieldIfNeeded(HLDField rf) {
 		if (rf.source instanceof JoinElement) {
 			JoinElement el = (JoinElement) rf.source;
 			return doMapFieldScalarOrRef(rf.fieldType, rf.alias, rf.fieldName, rf.structType, el);
@@ -313,18 +317,18 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 			return new SqlColumn(rf.alias, rf.fieldName);
 		}
 	}
-	private SqlColumn doMapFieldScalarOrRef(DType fieldType, String alias, String fieldName, DStructType structType, JoinElement el) {
+	protected SqlColumn doMapFieldScalarOrRef(DType fieldType, String alias, String fieldName, DStructType structType, JoinElement el) {
 		if (fieldType.isStructShape()) {
 			return doMapFieldIfNeeded(alias, fieldName, structType, el);
 		} else {
 			return columnBuilder.adjustScalar(alias, fieldName, structType, el);
 		}
 	}
-	private SqlColumn doMapFieldIfNeeded(String alias, String fieldName, DStructType structType, JoinElement el) {
+	protected SqlColumn doMapFieldIfNeeded(String alias, String fieldName, DStructType structType, JoinElement el) {
 		return columnBuilder.adjust(alias, structType, fieldName, el);
 	}
 
-	private void generateWhere(StrCreator sc, SqlStatement stm) {
+	protected void generateWhere(StrCreator sc, SqlStatement stm) {
 		//TODO sc.o fails if string has % in it. fix this in many places in these genrrators!!
 		sc.addStr(whereClause.render(stm));
 	}

@@ -15,7 +15,7 @@ import org.delia.db.sql.NewLegacyRunner;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 
 public class RunnerTestBase {
@@ -23,7 +23,7 @@ public class RunnerTestBase {
 
 	// --
 	//private Runner runner;
-	protected ZDBInterfaceFactory dbInterface;
+	protected DBInterfaceFactory dbInterface;
 	protected RunnerHelper helper = new RunnerHelper();
 	protected CompilerHelper chelper;
 	protected NewLegacyRunner runner;

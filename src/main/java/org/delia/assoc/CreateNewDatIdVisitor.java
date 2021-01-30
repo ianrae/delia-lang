@@ -23,7 +23,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecutor;
 
 public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	public static boolean hackFlag = false; //for unit tests
@@ -36,10 +36,10 @@ public class CreateNewDatIdVisitor implements ManyToManyVisitor {
 	private boolean haveInitTableNameCreator = false;
 	private int nextAssocNameInt;
 	private DatIdMap datIdMap;
-	private ZDBExecutor dbexecutor;
+	private DBExecutor dbexecutor;
 	private boolean flippedByHackFlag; //for unit tests only
 
-	public CreateNewDatIdVisitor(FactoryService factorySvc, ZDBExecutor zdbExecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
+	public CreateNewDatIdVisitor(FactoryService factorySvc, DBExecutor zdbExecutor, DTypeRegistry registry, Log log, DatIdMap datIdMap) {
 		this.factorySvc = factorySvc;
 		this.dbexecutor = zdbExecutor;
 		this.registry = registry;

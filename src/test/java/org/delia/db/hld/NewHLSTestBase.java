@@ -25,9 +25,12 @@ import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
-import org.delia.hld.HLDInnerManager;
+import org.delia.hld.HLDBuildService;
+import org.delia.hld.HLDBuildServiceImpl;
 import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.HLDSQLGenerator;
 import org.delia.hld.cud.HLDDeleteStatement;
+import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -36,8 +39,8 @@ import org.delia.sprig.SprigService;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.After;
 
 /**
@@ -48,7 +51,7 @@ import org.junit.After;
  */
 public class NewHLSTestBase extends BDDBase {
 	
-	protected HLDInnerManager mgr;
+	protected HLDBuildService mgr;
 	
 	
 	protected String addSrc(String src0, String src) {
@@ -93,9 +96,12 @@ public class NewHLSTestBase extends BDDBase {
 		return hld;
 	}
 
-	protected HLDInnerManager createManager() {
+	protected HLDBuildService createManager() {
 		SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
-		return new HLDInnerManager(this.session.getExecutionContext().registry, delia.getFactoryService(), this.session.getDatIdMap(), sprigSvc);
+		HLDToSQLConverter converter = delia.getDBInterface().getHLDFactory().createConverter(delia.getFactoryService(), session.getExecutionContext().registry, DBType.MEM);
+		
+		
+		return new HLDBuildServiceImpl(session.getExecutionContext().registry, delia.getFactoryService(), session.getDatIdMap(), sprigSvc, DBType.MEM, converter);
 	}
 	
 	protected void chkRawSql(HLDQueryStatement hld, String expected) {
@@ -197,7 +203,7 @@ public class NewHLSTestBase extends BDDBase {
 	protected DeliaGenericDao createDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		this.delia = DeliaBuilder.withConnection(info).build();
-		MemZDBInterfaceFactory memDBinterface = (MemZDBInterfaceFactory) delia.getDBInterface();
+		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;
 		
@@ -314,7 +320,7 @@ public class NewHLSTestBase extends BDDBase {
 	
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		return null;
 //		MemZDBInterfaceFactory db = new MemZDBInterfaceFactory(createFactorySvc());
 //		db.createSingleMemDB();

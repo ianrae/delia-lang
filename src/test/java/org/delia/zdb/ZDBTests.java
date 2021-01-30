@@ -13,11 +13,11 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.InsertContext;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.h2.H2ConnectionHelper;
-import org.delia.type.BuiltInTypes;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -25,11 +25,11 @@ import org.delia.typebuilder.InternalTypeCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.h2.H2DeliaSessionCache;
-import org.delia.zdb.h2.H2ZDBConnection;
-import org.delia.zdb.h2.H2ZDBExecutor;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBExecutor;
-import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
+import org.delia.zdb.h2.H2DBConnection;
+import org.delia.zdb.h2.H2DBExecutor;
+import org.delia.zdb.h2.H2DBInterfaceFactory;
+import org.delia.zdb.mem.MemDBExecutor;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,8 +37,9 @@ public class ZDBTests  extends BDDBase {
 
 	@Test
 	public void testMEM() {
-		HLSMemZDBInterfaceFactory dbFactory = new HLSMemZDBInterfaceFactory(factorySvc);
-		MemZDBExecutor dbexec = new MemZDBExecutor(factorySvc, dbFactory);
+		HLDFactory hldFactory = new HLDFactoryImpl();
+		MemDBInterfaceFactory dbFactory = new MemDBInterfaceFactory(factorySvc, hldFactory);
+		MemDBExecutor dbexec = new MemDBExecutor(factorySvc, dbFactory, hldFactory);
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();
@@ -61,10 +62,11 @@ public class ZDBTests  extends BDDBase {
 	@Test
 	public void testH2() throws Exception {
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		H2ZDBInterfaceFactory dbFactory = new H2ZDBInterfaceFactory(factorySvc, connFact);
+		HLDFactory hldFactory = new HLDFactoryImpl();
+		H2DBInterfaceFactory dbFactory = new H2DBInterfaceFactory(factorySvc, hldFactory, connFact);
 		
-		H2ZDBConnection conn = (H2ZDBConnection) dbFactory.openConnection();
-		ZDBExecutor dbexec = new H2ZDBExecutor(factorySvc, log, dbFactory, conn, new H2DeliaSessionCache());
+		H2DBConnection conn = (H2DBConnection) dbFactory.openConnection();
+		DBExecutor dbexec = new H2DBExecutor(factorySvc, log, dbFactory, hldFactory, conn, new H2DeliaSessionCache());
 		dbexec.init1(registry);
 
 		InternalTypeCreator typeCreator = new InternalTypeCreator();
@@ -111,8 +113,8 @@ public class ZDBTests  extends BDDBase {
 	}
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

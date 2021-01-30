@@ -109,5 +109,9 @@ public class StandardLog implements Log {
 			//ex.printStackTrace();
 		}
 	}
+	@Override
+	public boolean isLevelEnabled(LogLevel level) {
+		return exceeds(level);
+	}
 
 }

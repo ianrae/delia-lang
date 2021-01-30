@@ -2,10 +2,10 @@ package org.delia.db;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.h2.DBListingType;
 import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
+import org.delia.zdb.DBListingType;
 
 public class RawStatementGenerator extends ServiceBase {
 	private SqlNameFormatter nameFormatter;

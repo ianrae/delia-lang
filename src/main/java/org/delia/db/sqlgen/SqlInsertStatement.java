@@ -6,10 +6,10 @@ import org.delia.hld.cud.HLDInsert;
 
 public class SqlInsertStatement implements SqlStatementGenerator {
 
-	private HLDInsert hld;
-	private SqlTableNameClause tblClause;
-	private SqlValueListClause valueClause;
-	private SqlFieldListClause fieldClause;
+	protected HLDInsert hld;
+	protected SqlTableNameClause tblClause;
+	protected SqlValueListClause valueClause;
+	protected SqlFieldListClause fieldClause;
 	
 	public SqlInsertStatement(SqlTableNameClause tblClause, SqlFieldListClause fieldClause, SqlValueListClause valueClause) {
 		this.tblClause = tblClause;

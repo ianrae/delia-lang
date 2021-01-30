@@ -7,15 +7,15 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.log.Log;
 import org.delia.log.LogLevel;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.h2.H2ZDBExecutor;
-import org.delia.zdb.postgres.PostgresZDBExecutor;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.h2.H2DBExecutor;
+import org.delia.zdb.postgres.PostgresDBExecutor;
 
 public class DBTableRemover {
 	
 	protected DBType dbType;
-	protected ZDBInterfaceFactory dbInterface;
+	protected DBInterfaceFactory dbInterface;
 	protected Log log;
 
 	public DBTableRemover(DBType dbType) {
@@ -23,12 +23,12 @@ public class DBTableRemover {
 	}
 
 	//h2 persists tables across runs, so cleanup first
-	public void deleteKnownTables(FactoryService factorySvc, ZDBInterfaceFactory innerInterface, List<String> tableL) {
+	public void deleteKnownTables(FactoryService factorySvc, DBInterfaceFactory innerInterface, List<String> tableL) {
 		this.dbInterface = innerInterface;
 		this.log = factorySvc.getLog();
 		boolean b = innerInterface.isSQLLoggingEnabled();
 		
-		try(ZDBExecutor executor = innerInterface.createExecutor()) {
+		try(DBExecutor executor = innerInterface.createExecutor()) {
 			innerInterface.enableSQLLogging(false);
 			LogLevel saveLevel = executor.getLog().getLevel();
 			executor.getLog().setLevel(LogLevel.OFF);
@@ -58,15 +58,15 @@ public class DBTableRemover {
 		}
 	}
 
-	public void safeDeleteTable(ZDBExecutor executor, String tblName) {
+	public void safeDeleteTable(DBExecutor executor, String tblName) {
 		tblName = adjustTblName(tblName);
 		try {
-			if (executor instanceof H2ZDBExecutor) {
+			if (executor instanceof H2DBExecutor) {
 				if (!deleteH2TableCascade(executor, tblName)) {
 					executor.deleteTable(tblName);
 				}
 //				deleteContraintsForTable(executor, tblName);
-			} else if (executor instanceof PostgresZDBExecutor) {
+			} else if (executor instanceof PostgresDBExecutor) {
 				if (!deletePGTableCascade(executor, tblName)) {
 					executor.deleteTable(tblName);
 				}
@@ -79,17 +79,17 @@ public class DBTableRemover {
 	}
 
 	public void deleteContraintsForTable(String tblName) {
-		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+		try(DBExecutor zexec = dbInterface.createExecutor()) {
 			deleteContraintsForTable(zexec, tblName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}	
 	
-	public void deleteContraintsForTable(ZDBExecutor executor, String tblName) throws SQLException {
+	public void deleteContraintsForTable(DBExecutor executor, String tblName) throws SQLException {
 		String sql = String.format("SELECT CONSTRAINT_NAME FROM information_schema.constraints WHERE  table_schema = 'PUBLIC' and table_name = '%s'", tblName);
-		if (executor instanceof H2ZDBExecutor) {
-			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
+		if (executor instanceof H2DBExecutor) {
+			H2DBExecutor h2exec = (H2DBExecutor) executor;
 			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 			ResultSet rs = h2exec.getDBConnection().execQueryStatement(statement, null);
@@ -113,9 +113,9 @@ public class DBTableRemover {
 			h2exec.getDBConnection().execStatement(statement, null);
 		}
 	}
-	protected boolean deleteH2TableCascade(ZDBExecutor executor, String tblName) throws SQLException {
-		if (executor instanceof H2ZDBExecutor) {
-			H2ZDBExecutor h2exec = (H2ZDBExecutor) executor;
+	protected boolean deleteH2TableCascade(DBExecutor executor, String tblName) throws SQLException {
+		if (executor instanceof H2DBExecutor) {
+			H2DBExecutor h2exec = (H2DBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
 			SqlStatement statement = new SqlStatement(null);
@@ -126,9 +126,9 @@ public class DBTableRemover {
 			return false;
 		}
 	}
-	protected boolean deletePGTableCascade(ZDBExecutor executor, String tblName) throws SQLException {
-		if (executor instanceof PostgresZDBExecutor) {
-			PostgresZDBExecutor h2exec = (PostgresZDBExecutor) executor;
+	protected boolean deletePGTableCascade(DBExecutor executor, String tblName) throws SQLException {
+		if (executor instanceof PostgresDBExecutor) {
+			PostgresDBExecutor h2exec = (PostgresDBExecutor) executor;
 			String sql = String.format("DROP TABLE if exists %s cascade;", tblName);
 			//log.log(sql);
 			SqlStatement statement = new SqlStatement(null);

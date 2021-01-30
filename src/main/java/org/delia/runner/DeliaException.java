@@ -26,4 +26,7 @@ public class DeliaException extends RuntimeException {
 	public DeliaError getLastError() {
 		return errorL.get(errorL.size() - 1);
 	}
+	public int getErrorCount() {
+		return errorL.size();
+	}
 }

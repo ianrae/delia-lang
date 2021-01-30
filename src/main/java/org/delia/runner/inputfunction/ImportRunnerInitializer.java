@@ -8,7 +8,7 @@ import org.delia.db.DBHelper;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.Runner;
-import org.delia.zdb.ZDBExecutor;
+import org.delia.zdb.DBExecutor;
 
 public class ImportRunnerInitializer implements RunnerInitializer {
 
@@ -33,7 +33,7 @@ public class ImportRunnerInitializer implements RunnerInitializer {
 		runner.setInsertPrebuiltValueIterator(iter);
 		
 		DBAccessContext dbctx = new DBAccessContext(session.getExecutionContext().registry, runner);
-		ZDBExecutor tmpExecutor = session.getDelia().getDBInterface().createExecutor();
+		DBExecutor tmpExecutor = session.getDelia().getDBInterface().createExecutor();
 		tmpExecutor.init1(session.getExecutionContext().registry);
 		tmpExecutor.init2(session.getDatIdMap(), runner);
 		FetchRunner fr = tmpExecutor.createFetchRunner();

@@ -22,7 +22,6 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
-import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
@@ -56,6 +55,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 
 	@Override
 	public void assignAliases(HLDQuery hld) {
+		this.outputAliases = true;
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.fromType);
 		hld.fromAlias = assign(info.alias);
 		doFieldList(hld.fieldL, hld.fromType, info);
@@ -151,7 +151,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 					String fld1 = datIdMap.getAssocFieldFor(relinfo);
 					//replace t0.cid with t1.leftv
 					sfc.val1.structField = new StructField(relinfo.nearType, fld1, pkpair.type); //TODO: nearType is wrong WRONG!
-					sfc.val1.alias = hld.typeOrTbl.getAlias();
+					sfc.val1.alias = assign(hld.typeOrTbl.getAlias());
 				}
 			}
 		} else if (filter instanceof OpFilterCond) {
@@ -179,12 +179,12 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		if (fieldName.equals(fld1)) {
 			AliasInfo info = aliasMgr.findAssocAlias(relinfo, assocTbl);
 			if (info != null) {
-				val1.alias = info.alias;
+				val1.alias = assign(info.alias);
 			}
 		} else if (fieldName.equals(fld2)) {
 			AliasInfo info = aliasMgr.findAssocAlias(relinfo, assocTbl);
 			if (info != null) {
-				val1.alias = info.alias;
+				val1.alias = assign(info.alias);
 			}
 		}
 	}
@@ -296,13 +296,6 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doConvertValueIfNeeded(val1, pkpair.type);
 	}
 	
-//	private void convertIfNeeded(FilterVal val1) {
-//		if (val1.structField.fieldType != null) {
-//			if (val1.structField.fieldType.isShape(Shape.DATE)) {
-//				System.out.println("sunny..");
-//			}
-//		}
-//	}
 	private void convertValueIfNeeded(FilterVal val1, FilterVal val2) {
 		//TODO. if we ever support defining date values as long, then add LONG support here
 		if (val1.isSymbol()) {
@@ -314,7 +307,6 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	private void doConvertValueIfNeeded(FilterVal val2, DType fieldType) {
 		//TODO. if we ever support defining date values as long, then add LONG support here
 		if (val2.valType.equals(ValType.STRING)) {
-			System.out.println("sunny2..");
 			val2.actualDateVal = conversionHelper.convertDValToActual(fieldType, val2.asString());
 		}
 	}
@@ -322,6 +314,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 
 	@Override
 	public void assignAliases(HLDInsert hld) {
+		this.outputAliases = false;
 		if (hld.typeOrTbl.isAssocTbl) {
 			assignAliasesAssoc(hld);
 			return;
@@ -331,17 +324,23 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		doFieldList(hld.fieldL, hld.getStructType(), info);
 	}
 	public void assignAliasesAssoc(HLDInsert hld) {
+		this.outputAliases = true;
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 	}
 	public void assignAliasesAssoc(HLDUpdate hld) {
+		this.outputAliases = false;
+//		boolean sav = outputAliases;
+//		setOutputAliases(false); //Postgres doesn't like aliases on update statement
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		doFieldListAssoc(hld.fieldL, info);
 		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
 		adjustAssocFilter(hld);
+//		setOutputAliases(sav);
 	}
 	public AliasInfo assignAliasesAssoc(HLDDelete hld) {
+		this.outputAliases = true;
 		AliasInfo info = doAssignAliasesAssoc(hld);
 		hld.hld.fromAlias = assign(info.alias);
 		doFilter(hld.hld);
@@ -357,6 +356,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	
 	@Override
 	public void assignAliases(HLDUpdate hld) {
+		this.outputAliases = false;
 		AliasInfo info = aliasMgr.createMainTableAlias(hld.getStructType());
 		hld.typeOrTbl.alias = assign(info.alias);
 		hld.hld.fromAlias = assign(info.alias);
@@ -367,6 +367,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 	}
 	@Override
 	public void assignAliases(HLDDelete hld) {
+		this.outputAliases = true;
 		AliasInfo info;
 		if (hld.typeOrTbl.isAssocTbl) {
 			info = assignAliasesAssoc(hld);

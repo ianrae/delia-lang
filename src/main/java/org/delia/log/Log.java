@@ -15,4 +15,5 @@ public interface Log {
 	void logDebug(String fmt, Object... args);
 	void logError(String fmt, Object... args);
 	void logException(LogLevel level, String message, Throwable ex);
+	boolean isLevelEnabled(LogLevel level); //true if that level or more
 }

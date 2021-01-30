@@ -29,7 +29,7 @@ public class RelationPruner extends ServiceBase {
 		super(factorySvc);
 	}
 
-	public void pruneOtherSide(DValue tmp, DValue dvalFull, MemZDBExecutor memDBInterface) {
+	public void pruneOtherSide(DValue tmp, DValue dvalFull, MemDBExecutor memDBInterface) {
 		adjustOtherSide(tmp, dvalFull, memDBInterface);
 	}
 	
@@ -38,46 +38,62 @@ public class RelationPruner extends ServiceBase {
 	// so pair.type.isStructType is true
 	//but when you get the value Customer.addr the field DValue is DRelation,
 	// so inner.getType().isRelation is true
+	//Summary: with types its a STRUCT and with values its a RELATION
 
-	private void adjustOtherSide(DValue tmp, DValue dvalFull, MemZDBExecutor memDBInterface) {
+	private void adjustOtherSide(DValue tmp, DValue dvalFull, MemDBExecutor memDBInterface) {
 		DStructType dtype = dvalFull.asStruct().getType();
+		DValue pkval = DValueHelper.findPrimaryKeyValue(tmp);
 		for(String fieldName: dvalFull.asMap().keySet()) {
 			TypePair pair = DValueHelper.findField(dtype, fieldName);
 			if (pair.type.isStructShape()) {
-//				DValue existing = tmp.asStruct().getField(fieldName);
-//				DRelation drel1 = existing == null ? null : existing.asRelation();
 				
-//				DValue newval = dvalFull.asStruct().getField(fieldName);
-//				DRelation drel2 = newval.asRelation();
+				DValue possible = dvalFull.asMap().get(fieldName);
+				if (possible == null) {
+					continue;
+				}
+				DRelation updateRelation = possible.asRelation();
 				
 				//get list of all addresses whose .cust points to tmp (55)
-				DValue pkval = DValueHelper.findPrimaryKeyValue(tmp);
 				RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo((DStructType) tmp.getType(), pair);
 				List<DValue> allOthers = findOthers(pair, memDBInterface, relinfo, pkval);
-				pruneRelations(allOthers, pair, relinfo, pkval);
+				pruneRelations(allOthers, pair, relinfo, pkval, updateRelation);
 			}
 		}
 	}
 
-	private void pruneRelations(List<DValue> allOthers, TypePair pair, RelationInfo relinfo, DValue pkval) {
+	private void pruneRelations(List<DValue> allOthers, TypePair pair, RelationInfo relinfo, DValue pkval, DRelation updateRelation) {
 		if (relinfo.otherSide == null) {
 			return;
 		}
 		String fieldName = relinfo.otherSide.fieldName;
 		for(DValue dval: allOthers) {
+			DValue otherpkval = DValueHelper.findPrimaryKeyValue(dval);
 			DValue inner = dval.asStruct().getField(fieldName);
 			if (inner != null) {
+				//the idea here is that if we update Customer, then we need to check the far end (Address)
+				//and remove any fks that are no longer correct.
 				DRelation drel = inner.asRelation(); 
-				List<DValue> newFKList = drel.getMultipleKeys().stream().filter(x -> !isMatchByStr(x, pkval)).collect(Collectors.toList());
-				if (newFKList.size() != drel.getMultipleKeys().size()) {
-					drel.getMultipleKeys().clear();
-					drel.getMultipleKeys().addAll(newFKList);
+				
+				//now see if updateRel contains otherpkval. If it does then leave this object alone
+				//if it doesn't then prune
+				List<DValue> newFKList = updateRelation.getMultipleKeys().stream().filter(x -> isMatchByStr(x, otherpkval)).collect(Collectors.toList());
+				boolean needToPrune = newFKList.isEmpty();
+				
+//old				List<DValue> newFKList = drel.getMultipleKeys().stream().filter(x -> !isMatchByStr(x, pkval)).collect(Collectors.toList());
+				if (needToPrune) {
+					for(DValue fkval: drel.getMultipleKeys()) {
+						if (isMatchByStr(fkval, pkval)) {
+							drel.getMultipleKeys().remove(fkval);
+							break;
+						}
+					}
 					
 					//and remove from fetched items too
 					if (drel.haveFetched()) {
 						List<DValue> newfetchL = new ArrayList<>();
 						for(DValue ff: drel.getFetchedItems()) {
-							if (!isMatchByStr(ff, pkval)) {
+							DValue ffpk = DValueHelper.findPrimaryKeyValue(ff);
+							if (!isMatchByStr(ffpk, pkval)) {
 								newfetchL.add(ff);
 							}
 						}
@@ -96,7 +112,7 @@ public class RelationPruner extends ServiceBase {
 	}
 
 	//TODO: this is very inefficient. improve!
-	private List<DValue> findOthers(TypePair pair, MemZDBExecutor memDBInterface, RelationInfo relinfo, DValue pkval) {
+	private List<DValue> findOthers(TypePair pair, MemDBExecutor memDBInterface, RelationInfo relinfo, DValue pkval) {
 		List<DValue> allFoundL = new ArrayList<>();
 		MemDBTable tbl = memDBInterface.getTbl(pair.type.getName());
 		if (tbl == null && relinfo.otherSide == null) {

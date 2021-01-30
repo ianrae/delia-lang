@@ -1,13 +1,13 @@
 package org.delia.bdd;
 
 import org.delia.base.DBTestHelper;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public abstract class MemBDDBase extends BDDBase {
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

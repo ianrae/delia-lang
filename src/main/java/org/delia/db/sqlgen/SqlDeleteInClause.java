@@ -7,13 +7,13 @@ import org.delia.type.DValue;
 
 public class SqlDeleteInClause implements SqlClauseGenerator {
 
-	private SqlWhereClause whereClause;
-	private DValue deleteInDVal;
-	private String alias;
-	private String mergeOtherKey;
-	private String mergeKey;
-	private String mergePKField;
-	private String mergeType;
+	protected SqlWhereClause whereClause;
+	protected DValue deleteInDVal;
+	protected String alias;
+	protected String mergeOtherKey;
+	protected String mergeKey;
+	protected String mergePKField;
+	protected String mergeType;
 	
 	public SqlDeleteInClause(SqlWhereClause whereClause) {
 		this.whereClause = whereClause;

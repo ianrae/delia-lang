@@ -22,7 +22,7 @@ public class TerminalParser {
 			"=")
 		.words(DeliaLexer.IDENTIFIER)
 		.keywords("let", "type", "end", "struct", "map", "enum", "list", "or", "and", "false", "true", 
-				"in", "like", "configure",
+				"in", "like", "configure", "log",
 		        "function", "package", "import", "null", "optional", "unique", "primaryKey",
 		        "relation", "one", "many", "parent", "serial",
 		        "insert", "update", "upsert", "delete", "input",

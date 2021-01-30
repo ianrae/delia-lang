@@ -25,7 +25,7 @@ import org.delia.core.TimeZoneServiceImpl;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.util.TextFileReader;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public abstract class BDDBase implements DBInterfaceCreator {
 	
@@ -59,7 +59,8 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R2100_migration,
 		R2150_migration_relations,
 		R2200_security,
-		R2300_multi_relation
+		R2300_multi_relation, 
+		R2400_log
 	}
 	public static class FileHelper {
 		
@@ -75,7 +76,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	protected FileHelper fileHelper = new FileHelper();
 	protected Log log = new UnitTestLog();
 	protected int testIndexToRun = -1;
-	protected ZDBInterfaceFactory dbInterfaceToUse;
+	protected DBInterfaceFactory dbInterfaceToUse;
 	protected String diagnosticFilter = "";
 	
 	protected List<String> filesExecutedL = new ArrayList<>();
@@ -190,6 +191,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	protected int runR2300File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2300_multi_relation, filename, numTests);
 	}
+	protected int runR2400File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2400_log, filename, numTests);
+	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("********* FILE: %s *********************", filename);
 		currentGroup = group;
@@ -252,7 +256,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		assertEquals(0, missedL.size());
 	}
 
-	public abstract ZDBInterfaceFactory createForTest();
+	public abstract DBInterfaceFactory createForTest();
 	
 	protected FactoryService createFactorySvc() {
 		return new FactoryServiceImpl(log, new SimpleErrorTracker(log));

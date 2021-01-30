@@ -1,7 +1,9 @@
 package org.delia.api;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.DeliaCompiler;
@@ -9,13 +11,13 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
-import org.delia.db.RegistryAwareDBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.InternalCompileState;
@@ -28,7 +30,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.typebuilder.FutureDeclError;
 import org.delia.typebuilder.TypePreRunner;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class DeliaImpl implements Delia {
 	private static class MigrationExtraInfo {
@@ -38,18 +40,20 @@ public class DeliaImpl implements Delia {
 //	public static boolean useNewHLD = true;
 	
 	private Log log;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
 	private ErrorAdjuster errorAdjuster;
+	private HLDFactory hldFactory;
 	
-	public DeliaImpl(ZDBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
+	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
 		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
+		this.hldFactory = dbInterface.getHLDFactory();
 	}
 
 	@Override
@@ -89,7 +93,7 @@ public class DeliaImpl implements Delia {
 	//only public for unit tests
 	public Runner createRunner(DeliaSession dbsess) {
 		ErrorTracker et = new SimpleErrorTracker(log);
-		Runner runner = new RunnerImpl(factorySvc, dbInterface);
+		Runner runner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
@@ -106,13 +110,14 @@ public class DeliaImpl implements Delia {
 			throw new DeliaException(err);
 		}
 		
-//		if (useNewHLD) {
-		HLDManager mgr = new HLDManager(this, runner.getRegistry(), runner);
-		runner.setHLDManager(mgr);
-//		} else {
-//			HLSManager mgr = new HLSManager(this, runner.getRegistry(), dbsess, runner);
-//			runner.setHLSManager(mgr);
-//		}
+		HLDFacade hldFacade = new HLDFacade(this, runner.getRegistry(), runner);
+		runner.setHLDFacade(hldFacade);
+
+		if (deliaOptions.dbObserverFactory != null) {
+			dbInterface.setObserverFactory(deliaOptions.dbObserverFactory);
+			dbInterface.setIgnoreSimpleSvcSql(deliaOptions.observeHLDSQLOnly);
+		}
+		
 		return runner;
 	}
 
@@ -182,8 +187,11 @@ public class DeliaImpl implements Delia {
 		
 		//replace error converter with a registry aware one (better at parsing errors)
 		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
-		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
-		dbInterface.setDBErrorConverter(radbec);
+		if (errorConverter != null) {
+//		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
+//		dbInterface.setDBErrorConverter(radbec);
+			errorConverter.setRegistry(registry);
+		}
 	}
 
 	private ResultValue doPass3AndDBMigration(String src, List<Exp> extL, Runner mainRunner, MigrationPlan plan, MigrationExtraInfo extraInfo) {
@@ -358,11 +366,45 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ZDBInterfaceFactory getDBInterface() {
+	public DBInterfaceFactory getDBInterface() {
 		return dbInterface;
 	}
 	//for internal use only - unit tests
-	public void setDbInterface(ZDBInterfaceFactory dbInterface) {
+	public void setDbInterface(DBInterfaceFactory dbInterface) {
 		this.dbInterface = dbInterface;
+	}
+	
+	private String readAllText(BufferedReader reader) {
+		 return reader.lines()
+			      .collect(Collectors.joining(System.lineSeparator()));
+	}
+
+	@Override
+	public ResultValue execute(BufferedReader reader) {
+		String src = readAllText(reader);
+		return this.execute(src);
+	}
+
+	@Override
+	public DeliaSession beginSession(BufferedReader reader) {
+		String src = readAllText(reader);
+		return this.beginSession(src);
+	}
+
+	@Override
+	public ResultValue continueExecution(BufferedReader reader, DeliaSession dbsess) {
+		String src = readAllText(reader);
+		return this.continueExecution(src, dbsess);
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan) {
+		String src = readAllText(reader);
+		return this.executeMigrationPlan(reader, plan);
+	}
+
+	@Override
+	public HLDFactory getHLDFactory() {
+		return hldFactory;
 	}
 }

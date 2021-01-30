@@ -20,11 +20,11 @@ public class SimpleUpdate extends SimpleBase {
 	
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
+		this.outputAliases = false; //postgres doesn't like alias on UPDATE aliasBuilder.isOutputAliases();
 		aliasBuilder.assignAliases(hld);
 		for(SqlColumn column: fieldL) {
-			column.alias = hld.getMainAlias();
+			column.alias = assign(hld.getMainAlias());
 		}
-		tblFrag.alias = hld.getMainAlias();
+		tblFrag.alias = assign(hld.getMainAlias());
 	}
-
 }

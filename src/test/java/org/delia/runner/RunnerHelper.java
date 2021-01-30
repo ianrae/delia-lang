@@ -12,14 +12,14 @@ import org.delia.log.Log;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 
 
 public class RunnerHelper {
 	private Runner currentRunner;
 	
-	public LegacyRunner create(FactoryService factorySvc, ZDBInterfaceFactory dbInterface) {
+	public LegacyRunner create(FactoryService factorySvc, DBInterfaceFactory dbInterface) {
 //		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
 		DeliaBuilder builder = new DeliaBuilder();
 		Delia delia = builder.buildEx(dbInterface, factorySvc);

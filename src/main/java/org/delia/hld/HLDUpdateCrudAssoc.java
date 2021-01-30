@@ -52,7 +52,6 @@ public class HLDUpdateCrudAssoc extends HLDExtendedServiceBase {
 		return false;
 	}
 	public void genAssocCrudZZ(HLDUpdate hld, DValue dval, DValue pkval, RelationInfo relinfo, HLDQueryBuilderAdapter builderAdapter, List<AssocBundle> bundleL, List<SimpleBase> moreL) {
-		System.out.println("cedar");
 		String fieldName = relinfo.fieldName;
 		String assocAction = hld.cres.assocCrudMap.get(fieldName);
 		HLDDsonBuilder hldBuilder = getHldBuilder();

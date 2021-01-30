@@ -2,7 +2,7 @@ package org.delia.repl;
 
 import org.delia.api.Delia;
 import org.delia.runner.ResultValue;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class DBLoggingCmd extends CmdBase {
 	public DBLoggingCmd() {
@@ -25,7 +25,7 @@ public class DBLoggingCmd extends CmdBase {
 	@Override
 	public ResultValue runCmd(Cmd cmd, ReplRunner runner) {
 		Delia delia = runner.getDelia();
-		ZDBInterfaceFactory dbInterface = delia.getDBInterface();
+		DBInterfaceFactory dbInterface = delia.getDBInterface();
 		
 		boolean b = false;
 		if (cmd.arg1.equalsIgnoreCase("on")) {

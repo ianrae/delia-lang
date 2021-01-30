@@ -20,11 +20,12 @@ public class SimpleSelect extends SimpleBase {
 	
 	@Override
 	public void assignAliases(HLDAliasBuilderAdapter aliasBuilder) {
+		this.outputAliases = true;
 		aliasBuilder.assignAliases(hld);
 		for(SqlColumn column: fieldL) {
-			column.alias = hld.fromAlias;
+			column.alias = assign(hld.fromAlias);
 		}
-		tblFrag.alias = hld.fromAlias;
+		tblFrag.alias = assign(hld.fromAlias);
 	}
 	
 }

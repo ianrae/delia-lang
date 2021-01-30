@@ -1,11 +1,10 @@
 package org.delia.bdd;
 
-import org.delia.api.DeliaImpl;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
 import org.delia.hld.results.HLDResultSetConverterBase;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -322,7 +321,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 2;
+//		testIndexToRun = 6;
 //		DeliaImpl.useNewHLD = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 		enableAllFileCheck = false;
@@ -334,7 +333,10 @@ public class H2BDDTests extends BDDBase {
 //		runR950File("t0-crud-assoc-insert.txt", 6);
 //		runR1500File("t0-queryfn-orderby-2span.txt", 0);
 //		runR560File("t0-self-11.txt", 3);
-		runR560File("t0-self-N1.txt", 4);
+//		runR560File("t0-self-N1.txt", 4);
+		
+//		runR560File("t0-self-11.txt", 3);
+		runR500File("t0-relation-many-to-many.txt", 11);
 	}
 	
 	//---
@@ -366,7 +368,7 @@ public class H2BDDTests extends BDDBase {
 	}
 	
 	@Override
-	public ZDBInterfaceFactory createForTest() {
+	public DBInterfaceFactory createForTest() {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
 		dbInterfaceToUse = db;

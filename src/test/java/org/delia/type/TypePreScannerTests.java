@@ -20,7 +20,7 @@ import org.delia.db.DBType;
 import org.delia.error.DeliaError;
 import org.delia.typebuilder.PreTypeRegistry;
 import org.delia.typebuilder.TypePreRunner;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -134,8 +134,8 @@ public class TypePreScannerTests extends BDDBase {
 	
 
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		ZDBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		DBInterfaceFactory db = DBTestHelper.createMEMDb(createFactorySvc());
 		return db;
 	}
 

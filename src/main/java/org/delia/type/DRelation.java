@@ -45,6 +45,9 @@ public class DRelation {
 	}
 	
 	public DValue getForeignKey() {
+//		if (foreignKeyL.size() == 0) {
+//			return null; //TODO: is this ok?
+//		}
 		if (foreignKeyL.size() != 1) {
 			throw new IllegalArgumentException(String.format("DRelation has unexpected size %d", foreignKeyL.size()));
 		}
@@ -64,5 +67,11 @@ public class DRelation {
 	
 	public boolean haveFetched() {
 		return fetchL != null;
+	}
+	@Override
+	public String toString() {
+		String key = foreignKeyL.isEmpty() ? "" : foreignKeyL.get(0).asString();
+		String s = String.format("%s %s (%d keys)", typeName, key, foreignKeyL.size());
+		return s;
 	}
 }

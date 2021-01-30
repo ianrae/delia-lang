@@ -68,4 +68,9 @@ public class SimpleLog implements Log {
 		}
 	}
 
+	@Override
+	public boolean isLevelEnabled(LogLevel level) {
+		return exceeds(level);
+	}
+
 }

@@ -14,7 +14,7 @@ import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class DeliaClientTestBase { 
 	
@@ -22,7 +22,7 @@ public class DeliaClientTestBase {
 	protected Delia delia;
 	protected DeliaSession sess = null;
 	protected boolean addIdFlag;
-	protected ZDBInterfaceFactory dbInterface ;
+	protected DBInterfaceFactory dbInterface ;
 	protected int nextVarNum = 1;
 	protected Log log = new UnitTestLog();
 	protected FactoryServiceImpl factorySvc;

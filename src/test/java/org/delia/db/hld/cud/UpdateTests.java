@@ -22,7 +22,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer SET x = ? WHERE cid=?", "45", "1");
 	}
 	@Test
 	public void test1Empty() {
@@ -31,7 +31,7 @@ public class UpdateTests extends NewHLSTestBase {
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		assertEquals(true, hldupdate.isEmpty());
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer");
 	}
 	@Test
 	public void test2() {
@@ -39,7 +39,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Address[100] { y: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address SET y = ? WHERE id=?", "45", "100");
 	}
 	@Test
 	public void test2a() {
@@ -50,7 +50,7 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "1");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ?, cust = ? WHERE id=?", "45", "55", "1");
 	}
 	
 	// --- 1:N ---
@@ -60,7 +60,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Customer[1] {x: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer SET x = ? WHERE cid=?", "45", "1");
 	}
 	@Test
 	public void test1N2() {
@@ -68,7 +68,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Address[100] {y: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address SET y = ? WHERE id=?", "45", "100");
 	}
 	@Test
 	public void test1N2a() {
@@ -80,7 +80,7 @@ public class UpdateTests extends NewHLSTestBase {
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 1);
 		dumpGrp(stmgrp);
 		
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?, t0.cust = ? WHERE t0.id=?", "45", "55", "100");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ?, cust = ? WHERE id=?", "45", "55", "100");
 	}
 	@Test
 	public void test1NInsertParent() {
@@ -94,9 +94,9 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
-		chkUpdateSql(stmgrp, 1, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "100");
-		chkUpdateSql(stmgrp, 2, "UPDATE Address as t1 SET t1.cust = ? WHERE t1.id=?", "56", "101");
+		chkUpdateSql(stmgrp, 0, "UPDATE Customer SET x = ? WHERE cid=?", "66", "56");
+		chkUpdateSql(stmgrp, 1, "UPDATE Address SET cust = ? WHERE id=?", "56", "100");
+		chkUpdateSql(stmgrp, 2, "UPDATE Address SET cust = ? WHERE id=?", "56", "101");
 	}
 	
 	// --- M:N ---
@@ -106,7 +106,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Customer[1] { x: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "45", "1");
+		chkUpdateSql(hldupdate, 1, "UPDATE Customer SET x = ? WHERE cid=?", "45", "1");
 	}
 	
 	@Test
@@ -115,7 +115,7 @@ public class UpdateTests extends NewHLSTestBase {
 		String src = "update Address[1] { y: 45}";
 		
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
-		chkUpdateSql(hldupdate, 1, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "1");
+		chkUpdateSql(hldupdate, 1, "UPDATE Address SET y = ? WHERE id=?", "45", "1");
 	}
 	@Test
 	public void testMNScenario1() {
@@ -126,9 +126,9 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ? WHERE t0.id=?", "45", "100");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ? WHERE id=?", "45", "100");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
-		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(rightv) VALUES(?, ?)", "55", "100");
+		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 KEY(rightv) VALUES(?, ?)", "55", "100");
 	}
 	@Test
 	public void testMNScenario2() {
@@ -140,9 +140,9 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 3);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Address as t0 SET t0.y = ?", "45");
+		chkUpdateSql(stmgrp, 0, "UPDATE Address SET y = ?", "45");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1");
-		String s = "MERGE INTO CustomerAddressDat1 as t1 USING (SELECT cid FROM Customer) AS S ON t1.leftv = s.cid WHEN MATCHED THEN UPDATE SET t1.leftv = ?";
+		String s = "MERGE INTO CustomerAddressDat1 USING (SELECT cid FROM Customer) AS S ON leftv = s.cid WHEN MATCHED THEN UPDATE SET rightv = ?";
 		chkUpdateSql(stmgrp, 2, s, "55");
 	}
 	
@@ -176,11 +176,11 @@ public class UpdateTests extends NewHLSTestBase {
 		HLDUpdateStatement hldupdate = buildFromSrcUpdate(src, 0); 
 		SqlStatementGroup stmgrp = genUpdateSql(hldupdate, 5);
 		dumpGrp(stmgrp);
-		chkUpdateSql(stmgrp, 0, "UPDATE Customer as t0 SET t0.x = ? WHERE t0.cid=?", "66", "56");
+		chkUpdateSql(stmgrp, 0, "UPDATE Customer SET x = ? WHERE cid=?", "66", "56");
 		chkUpdateSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "100");
-		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES(?, ?)", "56", "100"); 
+		chkUpdateSql(stmgrp, 2, "MERGE INTO CustomerAddressDat1 KEY(leftv) VALUES(?, ?)", "56", "100"); 
 		chkUpdateSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "101");
-		chkUpdateSql(stmgrp, 4, "MERGE INTO CustomerAddressDat1 as t1 KEY(leftv) VALUES(?, ?)", "56", "101");
+		chkUpdateSql(stmgrp, 4, "MERGE INTO CustomerAddressDat1 KEY(leftv) VALUES(?, ?)", "56", "101");
 		//TODO: the above is correct but not efficient. only need a single:
 		//DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = 56
 	}

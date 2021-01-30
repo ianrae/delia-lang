@@ -24,7 +24,7 @@ value:a:Customer {
 }
 
 ---
-title: MtoN-1 - rename child side 
+title: MtoN-1 - optional child side 
 chainNextTest:true
 given:
  type Customer struct {id int primaryKey, wid int, relation addr Address optional many  } end

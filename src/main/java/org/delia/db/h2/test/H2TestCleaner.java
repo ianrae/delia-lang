@@ -9,8 +9,8 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBTableRemover;
 import org.delia.db.DBType;
 import org.delia.db.schema.SchemaMigrator;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class H2TestCleaner {
 	private DBTableRemover tblRemover;
@@ -20,7 +20,7 @@ public class H2TestCleaner {
 	}
 
 	//h2 persists tables across runs, so cleanup first
-	public void deleteKnownTables(FactoryService factorySvc, ZDBInterfaceFactory innerInterface) {
+	public void deleteKnownTables(FactoryService factorySvc, DBInterfaceFactory innerInterface) {
 		List<String> tableL = new ArrayList<>();
 		tableL.add("cars");
 		tableL.add("CustomerAddressAssoc");
@@ -40,6 +40,7 @@ public class H2TestCleaner {
 		tableL.add("CustomerAddressDat2");
 		tableL.add("CustomerCustomerDat1");
 		tableL.add("Customer__BAK");
+		tableL.add("Address__BAK");
 		tableL.add("Other");
 		tableL.add("CustomerOtherDat1");
 		tableL.add("Other__BAK");
@@ -60,7 +61,7 @@ public class H2TestCleaner {
 		tblRemover.deleteKnownTables(factorySvc, innerInterface, tableL);
 	}
 
-	public void deleteTables(FactoryService factorySvc, ZDBInterfaceFactory innerInterface, String tables) {
+	public void deleteTables(FactoryService factorySvc, DBInterfaceFactory innerInterface, String tables) {
 		String[] ar = tables.split(",");
 		List<String> tableL = Arrays.asList(ar);
 		tblRemover.deleteKnownTables(factorySvc, innerInterface, tableL);
@@ -70,7 +71,7 @@ public class H2TestCleaner {
 		tblRemover.deleteContraintsForTable(tblName);
 	}	
 
-	public void deleteContraintsForTable(ZDBExecutor executor, String tblName) throws SQLException {
+	public void deleteContraintsForTable(DBExecutor executor, String tblName) throws SQLException {
 		tblRemover.deleteContraintsForTable(executor, tblName);
 	}
 }

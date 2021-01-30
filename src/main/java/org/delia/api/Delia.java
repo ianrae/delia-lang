@@ -1,11 +1,14 @@
 package org.delia.api;
 
+import java.io.BufferedReader;
+
 import org.delia.compiler.DeliaCompiler;
 import org.delia.core.FactoryService;
 import org.delia.db.schema.MigrationPlan;
+import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * An instance of the Delia compiler and runtime.
@@ -27,5 +30,11 @@ public interface Delia {
 	FactoryService getFactoryService();
 	DeliaCompiler createCompiler();
 	DeliaOptions getOptions();
-	ZDBInterfaceFactory getDBInterface();
+	DBInterfaceFactory getDBInterface();
+	HLDFactory getHLDFactory();
+	
+	ResultValue execute(BufferedReader reader);
+	DeliaSession beginSession(BufferedReader reader);
+	ResultValue continueExecution(BufferedReader reader, DeliaSession dbsess);
+	DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan);
 }

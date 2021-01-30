@@ -1,12 +1,11 @@
 package org.delia.bdd;
 
-import org.delia.api.DeliaImpl;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTesterEx;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.LogLevel;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
-import org.delia.zdb.mem.hls.HLSMemZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -326,6 +325,10 @@ public class AllBDDTests extends BDDBase {
 	public void testR2300() {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
+	@Test
+	public void testR2400() {
+		runR2400File("t0-log.txt", 1);
+	}
 
 	
 	@Test
@@ -338,7 +341,8 @@ public class AllBDDTests extends BDDBase {
 //		runR1500File("t0-queryfn-offset.txt", 5);
 //		runR1600File("t0-fetch.txt", 4);
 //		runR560File("t0-self-11.txt", 3);
-		runR560File("t0-self-N1.txt", 4);
+//		runR560File("t0-self-N1.txt", 4);
+		runR1000File("t0-upsert-mm-id.txt", 4);
 	}
 	
 	//---
@@ -355,9 +359,9 @@ public class AllBDDTests extends BDDBase {
 	}
 	
 	@Override
-	public ZDBInterfaceFactory createForTest() {
-		MemZDBInterfaceFactory db;
-		db = new HLSMemZDBInterfaceFactory(createFactorySvc());
+	public DBInterfaceFactory createForTest() {
+		MemDBInterfaceFactory db;
+		db = new MemDBInterfaceFactory(createFactorySvc(), new HLDFactoryImpl());
 		
 		if (enableMigration) {
 			db.getCapabilities().setRequiresSchemaMigration(true);

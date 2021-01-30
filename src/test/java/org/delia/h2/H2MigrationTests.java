@@ -10,20 +10,21 @@ import org.delia.db.DBAccessContext;
 import org.delia.db.DBType;
 import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlStatement;
-import org.delia.db.h2.DBListingType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.ResultValue;
 import org.delia.sort.topo.TopoTestBase;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.zdb.ZDBExecuteContext;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.h2.H2ZDBInterfaceFactory;
+import org.delia.zdb.DBExecuteContext;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBListingType;
+import org.delia.zdb.h2.H2DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -187,11 +188,11 @@ public class H2MigrationTests extends TopoTestBase {
 	private void doEnumAllTables() {
 		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2);
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
-		try(ZDBExecutor zexec = dbInterface.createExecutor()) {
+		try(DBExecutor zexec = dbInterface.createExecutor()) {
 			SqlStatement statement = new SqlStatement(null);
 			statement.sql = sql;
 //			zexec.getDBConnection().execStatement(statement, null);
-			ZDBExecuteContext dbctx = new ZDBExecuteContext();
+			DBExecuteContext dbctx = new DBExecuteContext();
 			dbctx.logToUse = log;
 
 			zexec.getDBConnection().enumerateDBSchema(sql, "all tables", dbctx);
@@ -211,7 +212,7 @@ public class H2MigrationTests extends TopoTestBase {
 		this.factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
 		log("here we go2..");
 		ConnectionFactory connFact = new ConnectionFactoryImpl(H2ConnectionHelper.getTestDB(), log);
-		dbInterface = new H2ZDBInterfaceFactory(factorySvc, connFact);
+		dbInterface = new H2DBInterfaceFactory(factorySvc, new HLDFactoryImpl(), connFact);
 		dbInterface.enableSQLLogging(true);
 		delia = DeliaFactory.create(dbInterface, log, factorySvc);
 		delia.getOptions().disableSQLLoggingDuringSchemaMigration = false;
@@ -263,7 +264,7 @@ public class H2MigrationTests extends TopoTestBase {
 	}
 	private void chkTblExists(String tableName, boolean expected) {
 		DBAccessContext dbctx = new DBAccessContext(sess.getExecutionContext().registry, new DoNothingVarEvaluator());
-		try(ZDBExecutor dbexecutor = dbInterface.createExecutor()) {
+		try(DBExecutor dbexecutor = dbInterface.createExecutor()) {
 			boolean b = dbexecutor.rawTableDetect(tableName);
 			assertEquals(expected, b);
 		} catch (Exception e) {

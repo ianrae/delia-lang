@@ -11,8 +11,8 @@ import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * Alternative to QueryBuilderService, that executes using HLD
@@ -21,36 +21,37 @@ import org.delia.zdb.ZDBInterfaceFactory;
  */
 public class HLDSimpleQueryService { 
 	private QueryBuilderService innerSvc;
-	private HLDManager hldManager;
+	private HLDFacade hldFacade;
 //	private FactoryService factorySvc;
 	
-	public HLDSimpleQueryService(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
+	public HLDSimpleQueryService(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry) {
 //		this.factorySvc = factorySvc;
 		this.innerSvc = new QueryBuilderServiceImpl(factorySvc);
-		this.hldManager = new HLDManager(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
-		hldManager.setGenerateSQLforMemFlag(true); //TODO:is this only for unit test?
+		this.hldFacade = new HLDFacade(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
+		hldFacade.setGenerateSQLforMemFlag(true); //TODO:is this only for unit test?
 	}
 
-	public QueryResponse execQueryEx(QueryExp queryExp, ZDBExecutor zexec, VarEvaluator varEvaluator) {
+	public QueryResponse execQueryEx(QueryExp queryExp, DBExecutor zexec, VarEvaluator varEvaluator) {
 		QuerySpec querySpec = innerSvc.buildSpec(queryExp, varEvaluator);
 		
 		QueryContext qtx = new QueryContext();
-		hldManager.setVarEvaluator(varEvaluator);
+		hldFacade.setVarEvaluator(varEvaluator);
 		
 		querySpec.queryExp = queryExp;
-		HLDQueryStatement hld = hldManager.buildQueryStatement(querySpec, zexec, varEvaluator);
-		SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
+		HLDQueryStatement hld = hldFacade.buildQueryStatement(querySpec, zexec, varEvaluator);
+		SqlStatementGroup stgroup = hldFacade.generateSqlForQuery(hld, zexec);
 
 		QueryResponse qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
 		return qresp;
 	}
-	public QueryResponse execQuery(QueryExp queryExp, ZDBExecutor zexec) {
+	public QueryResponse execQuery(QueryExp queryExp, DBExecutor zexec) {
 		QuerySpec querySpec = innerSvc.buildSpec(queryExp, new DoNothingVarEvaluator());
 		
 		QueryContext qtx = new QueryContext();
+		qtx.isSimpleSvc = true;
 		querySpec.queryExp = queryExp;
-		HLDQueryStatement hld = hldManager.buildQueryStatement(querySpec, zexec, new DoNothingVarEvaluator());
-		SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
+		HLDQueryStatement hld = hldFacade.buildQueryStatement(querySpec, zexec, new DoNothingVarEvaluator());
+		SqlStatementGroup stgroup = hldFacade.generateSqlForQuery(hld, zexec);
 
 		QueryResponse qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
 		return qresp;

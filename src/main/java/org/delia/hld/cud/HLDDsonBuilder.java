@@ -324,8 +324,9 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		hld.hld = builderAdapter.buildQuery(queryExp);
 		if (isMergeInto) {
 			hld.isMergeAllInto = true;
+			hld.isFlipped = flipped;
 			hld.mergeKey = fld1;
-			hld.mergeKeyOther = (flipped) ? fld1 : fld2;
+			hld.mergeKeyOther = fld2; //TODO fix this on H2 (flipped) ? fld1 : fld2;
 			DStructType entityType = datIdMap.isFlipped(relinfo) ? relinfo.farType : relinfo.nearType;
 			hld.mergeType = entityType.getName();
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(entityType);

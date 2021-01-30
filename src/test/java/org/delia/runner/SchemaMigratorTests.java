@@ -12,9 +12,11 @@ import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
+import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Test;
 
 /**
@@ -71,7 +73,7 @@ public class SchemaMigratorTests {
 
 	// --
 	//private Runner runner;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private SchemaMigrator migrator;
 	private RunnerHelper helper = new RunnerHelper();
 

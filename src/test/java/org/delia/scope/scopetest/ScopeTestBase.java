@@ -27,8 +27,8 @@ import org.delia.runner.RunnerHelper;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.ValidationState;
-import org.delia.zdb.ZDBInterfaceFactory;
-import org.delia.zdb.mem.MemZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.mem.MemDBInterfaceFactory;
 
 public class ScopeTestBase {
 	protected static final double DELTA = 0.000001;
@@ -43,7 +43,7 @@ public class ScopeTestBase {
 	protected FactoryService factorySvc = new FactoryServiceImpl(log, et);
 
 	protected NewLegacyRunner initRunner()  {
-		ZDBInterfaceFactory mockInterface = DBTestHelper.createMEMDb(factorySvc);
+		DBInterfaceFactory mockInterface = DBTestHelper.createMEMDb(factorySvc);
 		dbInterface = new InstrumentedZDBInterface(DBType.MEM);
 		dbInterface.init(mockInterface);
 //		DBHelper.createTable(dbInterface, "Flight"); //!! fake schema

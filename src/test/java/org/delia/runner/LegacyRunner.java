@@ -12,7 +12,7 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.typebuilder.PreTypeRegistry;
 import org.delia.typebuilder.TypeBuilder;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * For unit tests only.

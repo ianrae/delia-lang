@@ -43,12 +43,6 @@ public class HLDFieldBuilder {
 				}
 				if (fld.structType == inner.structType) {
 					if (StringUtils.equals(fld.fieldName, inner.fieldName)) {
-//						System.out.println("removing dup!! " + inner.fieldName);
-//						if (inner.source == null && fld.source != null) {
-//							doomedL.add(inner);
-//						} else {
-//							doomedL.add(fld);
-//						}
 						break;
 					}
 				}

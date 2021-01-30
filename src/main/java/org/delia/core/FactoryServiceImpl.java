@@ -1,11 +1,16 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
+import org.delia.db.postgres.PostgresSqlGeneratorFactory;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
@@ -15,7 +20,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.validation.ValidationRuleRunnerImpl;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class FactoryServiceImpl implements FactoryService {
 	protected Log log;
@@ -28,6 +33,7 @@ public class FactoryServiceImpl implements FactoryService {
 	private DValueCompareService compareSvc;
 	private DiagnosticServiceImpl diagnosticSvc;
 	private LogFactory logFactory;
+	private boolean enableMEMSqlGenerationFlag; //normally false. no need with MEM. unless client code wants to see what sql would be
 	
 	public FactoryServiceImpl(Log log, ErrorTracker et) {
 		this(log, et, null);
@@ -75,7 +81,7 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 
 	@Override
-	public SchemaMigrator createSchemaMigrator(ZDBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		SchemaMigrator migrator = new SchemaMigrator(this, dbInterface, registry, varEvaluator, datIdMap);
 		return migrator;
 	}
@@ -104,7 +110,7 @@ public class FactoryServiceImpl implements FactoryService {
 		return logFactory;
 	}
 	@Override
-	public ValidationRunner createValidationRunner(ZDBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
+	public ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
 		return new ValidationRuleRunnerImpl(this, dbInterface.getCapabilities(), fetchRunner);
 	}
 //	@Override
@@ -112,8 +118,16 @@ public class FactoryServiceImpl implements FactoryService {
 //		return new HLSSimpleQueryService(this, dbInterface, registry);
 //	}
 	@Override
-	public HLDSimpleQueryService createHLDSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
+	public HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry) {
 		return new HLDSimpleQueryService(this, dbInterface, registry);
+	}
+	@Override
+	public boolean getEnableMEMSqlGenerationFlag() {
+		return enableMEMSqlGenerationFlag;
+	}
+	@Override
+	public void setEnableMEMSqlGenerationFlag(boolean flag) {
+		enableMEMSqlGenerationFlag = flag;
 	}
 
 }

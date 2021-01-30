@@ -18,6 +18,7 @@ import org.delia.db.memdb.PrimaryKeyRowSelector;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
+import org.delia.hld.HLDFactory;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
@@ -34,20 +35,23 @@ import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
+import org.delia.zdb.DBExecutor;
 
-public abstract class MemDBExecutorBase extends ServiceBase implements ZDBInternal {
+public abstract class MemDBExecutorBase extends ServiceBase implements DBInternal {
 
 	protected DTypeRegistry registry;
 	protected Map<String,MemDBTable> tableMap;
-	protected ZStuff stuff; //created lazily
+	protected DBStuff stuff; //created lazily
 	DateFormatService fmtSvc;
 	public boolean createTablesAsNeededFlag = true;
-	protected MemZDBInterfaceFactory dbInterface;
+	protected MemDBInterfaceFactory dbInterface;
 	private PreSpecService preSpecSvc;
+	protected HLDFactory hldFactory;
 
-	public MemDBExecutorBase(FactoryService factorySvc, MemZDBInterfaceFactory dbInterface) {
+	public MemDBExecutorBase(FactoryService factorySvc, MemDBInterfaceFactory dbInterface, HLDFactory hldFactory) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.hldFactory = hldFactory;
 		this.tableMap = dbInterface.createSingleMemDB();
 		this.log = factorySvc.getLog();
 		this.et = factorySvc.getErrorTracker();
@@ -166,7 +170,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 			tbl = handleUnknownTable(typeName);
 		}
 
-		ZStuff stuff = findOrCreateStuff();
+		DBStuff stuff = findOrCreateStuff();
 		RowSelector selector;
 		QueryType queryType = stuff.queryDetectorSvc.detectQueryType(spec);
 		switch(queryType) {
@@ -248,9 +252,9 @@ public abstract class MemDBExecutorBase extends ServiceBase implements ZDBIntern
 	 * @param ctx db context
 	 * @return stuff
 	 */
-	protected ZStuff findOrCreateStuff() {
+	protected DBStuff findOrCreateStuff() {
 		if (stuff == null) {
-			stuff = new ZStuff();
+			stuff = new DBStuff();
 			stuff.init(factorySvc, registry, dbInterface.getSerialMap());
 		}
 		return stuff;

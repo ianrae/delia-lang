@@ -25,7 +25,7 @@ import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.ResourceTextFileReader;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactory;
 import org.h2.store.fs.FileUtils;
 
 public class ReplRunner  {
@@ -33,7 +33,7 @@ public class ReplRunner  {
 
 	private Delia delia;
 	private boolean isExternalDelia = false;
-	private ZDBInterfaceFactory dbInterface;
+	private DBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 
 	private DeliaException mostRecentException;

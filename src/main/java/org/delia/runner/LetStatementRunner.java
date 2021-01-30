@@ -21,7 +21,8 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.FetchSpec;
-import org.delia.hld.HLDManager;
+import org.delia.hld.HLDFacade;
+import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQuery;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.HLDSimpleQueryService;
@@ -32,8 +33,8 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.ZDBExecutor;
-import org.delia.zdb.ZDBInterfaceFactory;
+import org.delia.zdb.DBExecutor;
+import org.delia.zdb.DBInterfaceFactory;
 
 /**
  * This class is not thread-safe. Only use it as a local var.
@@ -43,24 +44,26 @@ import org.delia.zdb.ZDBInterfaceFactory;
 public class LetStatementRunner extends ServiceBase {
 
 	private DTypeRegistry registry;
-	private ZDBInterfaceFactory dbInterface;
-	private ZDBExecutor zexec;
+	private DBInterfaceFactory dbInterface;
+	private DBExecutor zexec;
 	private FetchRunner fetchRunner;
 	private ScalarBuilder scalarBuilder;
 	private RunnerImpl runner;
 	private DatIdMap datIdMap;
-	private HLDManager hldManager;
+	private HLDFacade hldFacade;
 	private HLDQueryStatement mostRecentStatment;
+	private HLDFactory hldFactory;
 
-	public LetStatementRunner(FactoryService factorySvc, ZDBInterfaceFactory dbInterface, ZDBExecutor zexec, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLDManager hldManager, RunnerImpl runner, DatIdMap datIdMap) {
+	public LetStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, DBExecutor zexec, DTypeRegistry registry, 
+			FetchRunner fetchRunner, HLDFacade hldFacade, RunnerImpl runner, DatIdMap datIdMap) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
+		this.hldFactory = dbInterface.getHLDFactory();
 		this.runner = runner;
 		this.registry = registry;
 		this.fetchRunner = fetchRunner;
 		this.zexec = zexec;
-		this.hldManager = hldManager;
+		this.hldFacade = hldFacade;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 		this.datIdMap = datIdMap;
 	}
@@ -142,11 +145,11 @@ public class LetStatementRunner extends ServiceBase {
 	private QueryResponse executeDBQuery(QueryExp queryExp, QueryResponse existingQResp) {
 		QuerySpec spec = resolveFilterVars(queryExp);
 		
-		boolean flag1 = hldManager != null;
+		boolean flag1 = hldFacade != null;
 		QueryResponse qresp;
 		if (flag1) {
 			HLDQueryStatement hld = buildHLDQuery(spec, queryExp);
-			SqlStatementGroup stgroup = hldManager.generateSqlForQuery(hld, zexec);
+			SqlStatementGroup stgroup = hldFacade.generateSqlForQuery(hld, zexec);
 
 			QueryContext qtx = buildQueryContext(spec, existingQResp, hld);
 			qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **
@@ -186,7 +189,7 @@ public class LetStatementRunner extends ServiceBase {
 
 	private HLDQueryStatement buildHLDQuery(QuerySpec spec, QueryExp queryExp) {
 		spec.queryExp = queryExp;
-		HLDQueryStatement hld = hldManager.buildQueryStatement(spec, zexec, runner);
+		HLDQueryStatement hld = hldFacade.buildQueryStatement(spec, zexec, runner);
 		return hld;
 	}
 	
@@ -216,7 +219,7 @@ public class LetStatementRunner extends ServiceBase {
 		return spec;
 	}
 	private ResultValue invokeUserFunc(LetStatementExp exp, ResultValue resParam) {
-		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface);
+		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
 		ExecutionState execState = runner.getExecutionState();
 		execState.varMap.clear(); //user fn has its own variables
 
@@ -355,7 +358,7 @@ public class LetStatementRunner extends ServiceBase {
 					varRef.qresp = qresp.dvalList == null ? null : qresp;
 					return varRef;
 				} else {
-					if (! hldManager.canBuildHLD(queryExp, zexec, runner)) {
+					if (! hldFacade.canBuildHLD(queryExp, zexec, runner)) {
 						//usually means statement is scalar. let x = 5
 						return doVarRef(varRef, qresp, qresp.dvalList);
 					}
