@@ -25,13 +25,17 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.util.DeliaExceptionHelper;
 
-public class RuleFuncFactory {
+public class RuleFuncFactoryImpl implements RuleFunctionFactory {
 	private FactoryService factorySvc;
 	
-	public RuleFuncFactory(FactoryService factorySvc) {
+	public RuleFuncFactoryImpl(FactoryService factorySvc) {
 		this.factorySvc = factorySvc;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.delia.typebuilder.RuleFunctionFactory#createRule(org.delia.compiler.astx.XNAFMultiExp, int, org.delia.type.DType)
+	 */
+	@Override
 	public DRule createRule(XNAFMultiExp rfe, int index, DType dtype) {
 		//only one func. TODO: fix later!!
 		XNAFSingleExp qfe0 = rfe.qfeL.get(index);

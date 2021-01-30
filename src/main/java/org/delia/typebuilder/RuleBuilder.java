@@ -39,12 +39,12 @@ import org.delia.util.DeliaExceptionHelper;
 public class RuleBuilder extends ServiceBase {
 	
 	private DTypeRegistry registry;
-	private RuleFuncFactory ruleFactory;
+	private RuleFunctionFactory ruleFactory;
 
 	public RuleBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
-		this.ruleFactory = new RuleFuncFactory(factorySvc);
+		this.ruleFactory = factorySvc.createRuleFunctionFactory();
 	}
 	
 	public void addRules(DType dtype, TypeStatementExp typeStatementExp) {
