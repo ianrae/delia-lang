@@ -1,6 +1,6 @@
-# sizeon tests
+# sizeof tests
 
-FEATURE: sizeon
+FEATURE: sizeof int
 background:
   type Flight struct {id int primaryKey, wid int optional } wid.sizeof(8) end
 thenType: struct
