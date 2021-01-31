@@ -25,7 +25,6 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
-import org.delia.type.WrappedDate;
 import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -200,7 +199,11 @@ public class ValueHelper extends ServiceBase {
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
 		}
-		//TODO: blob
+		case BLOB:
+		{
+			byte[] byteArr = rs.getBytes(pair.name);
+			return dvalBuilder.buildBlob(byteArr, pair.type);
+		}
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(pair.name);
@@ -341,7 +344,11 @@ public class ValueHelper extends ServiceBase {
 			}
 			return dvalBuilder.buildLegacyDate(x, type);
 		}
-		//TODO: blob
+		case BLOB:
+		{
+			byte[] byteArr = rs.getBytes(rsIndex);
+			return dvalBuilder.buildBlob(byteArr, type);
+		}
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(rsIndex);
@@ -363,65 +370,65 @@ public class ValueHelper extends ServiceBase {
 		}
 	}
 	
-	public DValue valueInSql(Shape shape, Object value, DTypeRegistry registry) {
-		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(registry);
-		switch(shape) {
-		case INTEGER:
-			if (value instanceof String) {
-				return dvalBuilder.buildInt((String)value);
-			}
-			return dvalBuilder.buildInt((Integer)value);
-		case LONG:
-			if (value instanceof String) {
-				return dvalBuilder.buildLong((String)value);
-			} else if (value instanceof Integer) {
-				Integer n = (Integer) value;
-				return dvalBuilder.buildLong(n.longValue());
-			}
-			return dvalBuilder.buildLong((Long)value);
-		case NUMBER:
-			if (value instanceof String) {
-				return dvalBuilder.buildNumber((String)value);
-			} else if (value instanceof Integer) {
-				Integer n = (Integer) value;
-				return dvalBuilder.buildNumber(n.doubleValue());
-			} else if (value instanceof Long) {
-				Long n = (Long) value;
-				return dvalBuilder.buildNumber(n.doubleValue());
-			}
-			return dvalBuilder.buildNumber((Double)value);
-		case BOOLEAN:
-			if (value instanceof String) {
-				return dvalBuilder.buildBoolean((String)value);
-			}
-			return dvalBuilder.buildBoolean((Boolean)value);
-		case STRING:
-			return dvalBuilder.buildString(value.toString());
-		case DATE:
-			if (value instanceof String) {
-//				String s = convertDateStringToSQLTimestamp((String) value);
-				return dvalBuilder.buildDate((String)value);
-			} else if (value instanceof WrappedDate) {
-				WrappedDate wdt = (WrappedDate) value;
-				String s = convertDateToSQLTimestamp(wdt.getDate());
-				return dvalBuilder.buildString(s);
-			}
-			return dvalBuilder.buildString(value.toString());
-			//TODO: blob
-		case STRUCT:
-			if (value instanceof Integer) {
-				Integer n = (Integer) value;
-				return dvalBuilder.buildInt(n);
-			} else if (value instanceof Long) {
-				Long n = (Long) value;
-				return dvalBuilder.buildLong(n);
-			} else {
-				return dvalBuilder.buildString(value.toString());
-			}
-		default:
-			return dvalBuilder.buildString("");
-		}
-	}
+//	public DValue valueInSql(Shape shape, Object value, DTypeRegistry registry) {
+//		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(registry);
+//		switch(shape) {
+//		case INTEGER:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildInt((String)value);
+//			}
+//			return dvalBuilder.buildInt((Integer)value);
+//		case LONG:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildLong((String)value);
+//			} else if (value instanceof Integer) {
+//				Integer n = (Integer) value;
+//				return dvalBuilder.buildLong(n.longValue());
+//			}
+//			return dvalBuilder.buildLong((Long)value);
+//		case NUMBER:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildNumber((String)value);
+//			} else if (value instanceof Integer) {
+//				Integer n = (Integer) value;
+//				return dvalBuilder.buildNumber(n.doubleValue());
+//			} else if (value instanceof Long) {
+//				Long n = (Long) value;
+//				return dvalBuilder.buildNumber(n.doubleValue());
+//			}
+//			return dvalBuilder.buildNumber((Double)value);
+//		case BOOLEAN:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildBoolean((String)value);
+//			}
+//			return dvalBuilder.buildBoolean((Boolean)value);
+//		case STRING:
+//			return dvalBuilder.buildString(value.toString());
+//		case DATE:
+//			if (value instanceof String) {
+////				String s = convertDateStringToSQLTimestamp((String) value);
+//				return dvalBuilder.buildDate((String)value);
+//			} else if (value instanceof WrappedDate) {
+//				WrappedDate wdt = (WrappedDate) value;
+//				String s = convertDateToSQLTimestamp(wdt.getDate());
+//				return dvalBuilder.buildString(s);
+//			}
+//			return dvalBuilder.buildString(value.toString());
+//			//TODO: blob
+//		case STRUCT:
+//			if (value instanceof Integer) {
+//				Integer n = (Integer) value;
+//				return dvalBuilder.buildInt(n);
+//			} else if (value instanceof Long) {
+//				Long n = (Long) value;
+//				return dvalBuilder.buildLong(n);
+//			} else {
+//				return dvalBuilder.buildString(value.toString());
+//			}
+//		default:
+//			return dvalBuilder.buildString("");
+//		}
+//	}
 
 	/**
 	 * FUTURE: this probably needs to become db-specific
