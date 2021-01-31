@@ -46,6 +46,8 @@ public class PostgresFieldGen extends FieldGen {
 			return "DOUBLE PRECISION";
 		case DATE:
 			return "TIMESTAMP";
+		case BLOB:
+			return "bytea";
 		case STRING:
 		{
 			int n = sizeof == 0 ? 65536 : sizeof; 

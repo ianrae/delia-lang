@@ -65,6 +65,8 @@ public class FieldGen extends SqlElement {
 			return "DOUBLE";
 		case DATE:
 			return "TIMESTAMP";
+		case BLOB:
+			return "BLOB"; //h2
 		case STRING:
 		{
 			int n = sizeof == 0 ? 65536 : sizeof; 

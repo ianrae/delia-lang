@@ -318,6 +318,10 @@ public class PostgresBDDTests extends BDDBase {
 	public void testR2300() {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
+	@Test
+	public void testR2700() {
+		runR2700Blob("t0-blob.txt", 1);
+	}
 	
 	@Test
 	public void testDebug() {
@@ -327,7 +331,8 @@ public class PostgresBDDTests extends BDDBase {
 		enableSQLLogging = true;
 		
 //		runR900File("t0-update-mm-id.txt", 4);
-		runR2150File("t0-migrate-many-to-many3.txt", 2);
+//		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR2700Blob("t0-blob.txt", 1);
 	}
 	
 	//---

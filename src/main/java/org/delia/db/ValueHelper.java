@@ -31,8 +31,8 @@ import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class ValueHelper extends ServiceBase {
-	private DateFormatService fmtSvc;
-	private DValueConverterService dvalConverter;
+	protected DateFormatService fmtSvc;
+	protected DValueConverterService dvalConverter;
 
 	public ValueHelper(FactoryService factorySvc) {
 		super(factorySvc);
@@ -48,7 +48,7 @@ public class ValueHelper extends ServiceBase {
 		PreparedStatement stm = conn.prepareStatement(statement.sql, Statement.RETURN_GENERATED_KEYS);
 		return xcreatePrepStatement(stm, statement, conn);
 	}
-	private PreparedStatement xcreatePrepStatement(PreparedStatement stm, SqlStatement statement, Connection conn) throws SQLException {
+	protected PreparedStatement xcreatePrepStatement(PreparedStatement stm, SqlStatement statement, Connection conn) throws SQLException {
 		int index = 1;
 		for(DValue dval: statement.paramL) {
 			index = doCreatePrepStatement(stm, dval, index);
@@ -56,7 +56,7 @@ public class ValueHelper extends ServiceBase {
 
 		return stm;
 	}
-	private int doCreatePrepStatement(PreparedStatement stm, DValue dval, int index) throws SQLException {
+	protected int doCreatePrepStatement(PreparedStatement stm, DValue dval, int index) throws SQLException {
 		if (dval == null) {
 			stm.setObject(index++, null);
 			return index;
@@ -198,6 +198,7 @@ public class ValueHelper extends ServiceBase {
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
 		}
+		//TODO: blob
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(pair.name);
@@ -267,6 +268,7 @@ public class ValueHelper extends ServiceBase {
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
 		}
+		//TODO: blob
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(index);
@@ -333,6 +335,7 @@ public class ValueHelper extends ServiceBase {
 			}
 			return dvalBuilder.buildLegacyDate(x, type);
 		}
+		//TODO: blob
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(rsIndex);
@@ -398,6 +401,7 @@ public class ValueHelper extends ServiceBase {
 				return dvalBuilder.buildString(s);
 			}
 			return dvalBuilder.buildString(value.toString());
+			//TODO: blob
 		case STRUCT:
 			if (value instanceof Integer) {
 				Integer n = (Integer) value;
@@ -418,7 +422,7 @@ public class ValueHelper extends ServiceBase {
 	 * @param dt date
 	 * @return date as string in sql format
 	 */
-	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
+	protected String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		String s = zdt.format(sdf);

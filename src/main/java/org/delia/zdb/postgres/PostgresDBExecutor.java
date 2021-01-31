@@ -17,9 +17,9 @@ import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
-import org.delia.db.ValueHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
+import org.delia.db.postgres.PostgresValueHelper;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.hld.HLDFactory;
@@ -47,8 +47,8 @@ import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.DBListingType;
 import org.delia.zdb.TableCreator;
-import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 import org.delia.zdb.h2.DBExecutorBase;
+import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
 public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 
@@ -143,7 +143,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 			try {
 				SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
 				sqlctx.genKeysL = dbctxMain.genKeysL;
-				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new PostgresValueHelper(factorySvc), registry);
 				genVal = hldRSCconverter.extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {
 				DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
@@ -281,7 +281,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
 		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
 		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new PostgresValueHelper(factorySvc), registry);
 		if (selectResultType.isScalarShape()) {
 			QueryDetails details = new QueryDetails(); //TODO delete later
 			qresp.dvalList = hldRSCconverter.buildScalarResult(rs, selectResultType, details, dbactx);
