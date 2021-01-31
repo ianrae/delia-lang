@@ -102,6 +102,11 @@ public class ScalarValueBuilder extends ServiceBase {
 		builder.buildFromString(input);
 		return finish(builder, "blob", new LoggableBlob(input));
 	}
+	public DValue buildBlob(byte[] byteArr, DType dtype) {
+		BlobValueBuilder builder = new BlobValueBuilder(factorySvc, dtype);
+		builder.buildFromByteArray(byteArr);
+		return finish(builder, "blob", new LoggableBlob(byteArr));
+	}
 
 	public DValue buildBoolean(String input) {
 		return buildBoolean(input, registry.getType(BuiltInTypes.BOOLEAN_SHAPE));

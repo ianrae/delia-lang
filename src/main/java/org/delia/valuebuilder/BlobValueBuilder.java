@@ -28,6 +28,15 @@ public class BlobValueBuilder extends DValueBuilder {
 		WrappedBlob wblob = new WrappedBlob(byteArr);
 		this.newDVal = new DValueImpl(type, wblob);
 	}
+	public void buildFromByteArray(byte[] byteArr) {
+		if (byteArr == null) {
+			addNoDataError("no data");
+			return;
+		}
+
+		WrappedBlob wblob = new WrappedBlob(byteArr);
+		this.newDVal = new DValueImpl(type, wblob);
+	}
 
 	@Override
 	protected void onFinish() {

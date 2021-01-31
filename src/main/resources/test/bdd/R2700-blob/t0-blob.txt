@@ -16,6 +16,6 @@ when:
 then:
 value:a:Flight {
  vid:55
- vwid:4
+ vwid:4E/QIA==
 }
 

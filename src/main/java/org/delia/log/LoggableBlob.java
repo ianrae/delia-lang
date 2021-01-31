@@ -11,13 +11,23 @@ import org.delia.util.BlobUtils;
 public class LoggableBlob {
 	public int maxCharsToLog = 100;
 	private String base64Str;
+	private byte[] byteArr;
 	
 	public LoggableBlob(String base64Str) {
 		this.base64Str = base64Str;
 	}
+	public LoggableBlob(byte[] byteArr) {
+		this.byteArr = byteArr;
+	}
 	//TODO: add byte array ctor later
 	
 	public String toLoggableHexString() {
+		if (byteArr != null) {
+			//TODO this is really inefficient. fix later!!
+			String hex = BlobUtils.byteArrayToHexString(byteArr);
+			return hex.substring(0, maxCharsToLog) + "...";
+		}
+		
 		if (base64Str == null) {
 			return "null!";
 		} else if (base64Str.length() < maxCharsToLog) {
@@ -31,6 +41,12 @@ public class LoggableBlob {
 
 	@Override
 	public String toString() {
+		if (byteArr != null) {
+			//TODO this is really inefficient. fix later!!
+			String s = BlobUtils.toBase64(byteArr);
+			return s.substring(0, maxCharsToLog) + "...";
+		}
+		
 		if (base64Str == null) {
 			return "null!";
 		} else if (base64Str.length() < maxCharsToLog) {

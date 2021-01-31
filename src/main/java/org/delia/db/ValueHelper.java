@@ -270,7 +270,11 @@ public class ValueHelper extends ServiceBase {
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
 		}
-		//TODO: blob
+		case BLOB:
+		{
+			byte[] byteArr = rs.getBytes(index);
+			return dvalBuilder.buildBlob(byteArr, pair.type);
+		}
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(index);
