@@ -28,7 +28,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 
 	public H2DBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory, ConnectionFactory connFactory) {
 		super(factorySvc);
-		this.capabilities = new DBCapabilties(true, true, true, true);
+		this.capabilities = new DBCapabilties(true, true, true);
 		this.sqlLog = createNewLog();
 		this.connFactory = connFactory;
 		this.errorConverter = new H2ErrorConverter();

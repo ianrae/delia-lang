@@ -2,6 +2,7 @@ package org.delia.rule;
 
 import java.util.List;
 
+import org.delia.core.FactoryService;
 import org.delia.db.DBCapabilties;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
@@ -23,10 +24,12 @@ public class DRuleContext {
 	private boolean upsertFlag;
 	private DValue upsertPKVal;
 	private boolean softMandatoryRelationFlag;
+	private FactoryService factorySvc;
 
-	public DRuleContext(ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
+	public DRuleContext(FactoryService factorySvc, ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
 					boolean populateFKsFlag, FetchRunner fetchRunner, DValueCompareService compareSvc, 
 					boolean insertFlag, boolean upsertFlag, DValue upsertPKVal, boolean softMandatoryRelationFlag) {
+		this.factorySvc = factorySvc;
 		this.et = et;
 		this.ruleText = ruleText;
 		this.enableRelationModifierFlag = enableRelationModifierFlag;
@@ -113,6 +116,9 @@ public class DRuleContext {
 	}
 	public boolean isSoftMandatoryRelationFlag() {
 		return softMandatoryRelationFlag;
+	}
+	public FactoryService getFactorySvc() {
+		return factorySvc;
 	}
 	
 }

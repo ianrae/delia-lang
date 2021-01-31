@@ -11,11 +11,10 @@ import org.delia.db.DBType;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.SerialProvider.SerialGenerator;
 import org.delia.hld.HLDFactory;
-import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBConnection;
-import org.delia.zdb.DBConnectionObserverAdapter;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBObserverFactory;
 
 public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
 	protected DBCapabilties capabilities;
@@ -27,7 +26,7 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 
 	public MemDBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory) {
 		super(factorySvc);
-		this.capabilities = new DBCapabilties(false, false, false, false);
+		this.capabilities = new DBCapabilties(false, false, false);
 		this.hldFactory = hldFactory;
 	}
 	

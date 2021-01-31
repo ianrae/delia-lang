@@ -28,7 +28,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 
 	public PostgresDBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory, ConnectionFactory connFactory) {
 		super(factorySvc);
-		this.capabilities = new DBCapabilties(true, true, true, true);
+		this.capabilities = new DBCapabilties(true, true, true);
 		this.sqlLog = new SimpleLog();
 		this.connFactory = connFactory;
 		this.errorConverter = new PostgresErrorConverter(new SimpleSqlNameFormatter(true));
