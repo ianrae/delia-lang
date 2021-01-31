@@ -104,21 +104,21 @@ public class HLDFacade extends ServiceBase {
 		logDebug(hlddel);
 		return hlddel;
 	}
-	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 		logDebug(hldupdate);
 		return hldupdate;
 	}
-	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
-		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator);
+		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 		logDebug(hldupsert);
 		return hldupsert;
 	}
 	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
-		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator);
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator, blobLoader);
 		logDebug(hldins);
 		return hldins;
 	}

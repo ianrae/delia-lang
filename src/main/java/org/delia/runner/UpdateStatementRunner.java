@@ -60,7 +60,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
 	}
 
-	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2, BlobLoader blobLoader) {
 		this.hldFacade = hldFacade;
 		this.fetchRunner = fetchRunner2;
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
@@ -83,7 +83,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 			if (hldup.isEmpty()) {
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -133,7 +133,7 @@ public class UpdateStatementRunner extends ServiceBase {
 			return;
 		}
 	}
-	public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDFacade hldFacade2, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+	public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDFacade hldFacade2, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2, BlobLoader blobLoader) {
 		this.hldFacade = hldFacade2;
 		this.fetchRunner = fetchRunner2;
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
@@ -157,7 +157,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 			if (hldup.isEmpty()) {
 				res.ok = true;
 				res.shape = Shape.INTEGER;

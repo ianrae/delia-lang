@@ -154,6 +154,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public HLDDsonBuilder getHldBuilder() {
 		HLDDsonBuilder builder = super.getHldBuilder();
 		builder.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		builder.setBlobLoader(blobLoader);
 		return builder;
 	}
 	

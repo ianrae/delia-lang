@@ -249,10 +249,10 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeUpdateStatement(UpdateStatementExp exp, ResultValue res) {
-			updateStatementRunner.executeUpdateStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			updateStatementRunner.executeUpdateStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc, blobLoader);
 		}
 		private void executeUpsertStatement(UpsertStatementExp exp, ResultValue res) {
-			updateStatementRunner.executeUpsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			updateStatementRunner.executeUpsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc, blobLoader);
 		}
 		private void executeDeleteStatement(DeleteStatementExp exp, ResultValue res) {
 			//find DType for typename Actor
@@ -298,7 +298,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		}
 
 		private void executeInsertStatement(InsertStatementExp exp, ResultValue res) {
-			insertStatementRunner.executeInsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc);
+			insertStatementRunner.executeInsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, insertPrebuiltValueIterator, sprigSvc, blobLoader);
 		}
 		private boolean failIfNotStruct(DType dtype, String typeName, ResultValue res) {
 			if (! dtype.isStructShape()) {
@@ -315,7 +315,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 			return false;
 		}
 		private ResultValue executeLetStatement(LetStatementExp exp, ResultValue res) {
-			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap);
+			this.letStatementRunner = new LetStatementRunner(factorySvc, dbInterface, dbexecutor, registry, fetchRunner, hldFacade, this, datIdMap, blobLoader);
 			return letStatementRunner.executeLetStatement(exp, res);
 		}
 		

@@ -71,7 +71,7 @@ public class InsertStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldins = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldins = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 			if (hldins.hldinsert.cres.dval != null) {
 				stmgrp = hldFacade.generateSQL(hldins, dbexecutor);
 			} else if (hldins.hldinsert.cres.localET.areNoErrors()) {

@@ -402,7 +402,7 @@ public class DeliaImpl implements Delia {
 	@Override
 	public DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan) {
 		String src = readAllText(reader);
-		return this.executeMigrationPlan(reader, plan);
+		return this.executeMigrationPlan(src, plan);
 	}
 
 	@Override

@@ -25,7 +25,7 @@ public class RunnerHelper {
 		Delia delia = builder.buildEx(dbInterface, factorySvc);
 		
 		DeliaImpl impl = (DeliaImpl) delia;
-		currentRunner = impl.createRunner(null);
+		currentRunner = impl.createRunner(null, null);
 		LegacyRunner runner = new LegacyRunner(currentRunner, factorySvc);
 		
 //		runner.legacyTypeMode = true; //TODO: remove

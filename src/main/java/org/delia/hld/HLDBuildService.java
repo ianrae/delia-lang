@@ -25,10 +25,10 @@ public interface HLDBuildService {
 			DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader);
 
 	HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator,
-			DValueIterator insertPrebuiltValueIterator);
+			DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader);
 
 	HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator,
-			DValueIterator insertPrebuiltValueIterator);
+			DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader);
 
 	// -- sql generation --
 	String generateRawSql(HLDQueryStatement hld);

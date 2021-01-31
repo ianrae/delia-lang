@@ -99,11 +99,12 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 * @see org.delia.hld.HLDBuildService#fullBuildUpdate(org.delia.compiler.ast.UpdateStatementExp, org.delia.runner.VarEvaluator, org.delia.runner.DValueIterator)
 	 */
 	@Override
-	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		engineAssoc.setVarEvaluator(varEvaluator);
+		engine.setBlobLoader(blobLoader);
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp, stmt.moreL);
@@ -115,11 +116,12 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 * @see org.delia.hld.HLDBuildService#fullBuildUpsert(org.delia.compiler.ast.UpsertStatementExp, org.delia.runner.VarEvaluator, org.delia.runner.DValueIterator)
 	 */
 	@Override
-	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDUpsertStatement stmt = new HLDUpsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		engine.setBlobLoader(blobLoader);
 		stmt.hldupdate = engine.buildUpsert(upsertExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 		//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);

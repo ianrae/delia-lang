@@ -187,7 +187,7 @@ public class HLDBlobTests extends NewHLSTestBase {
 		log.log(src);
 		
 		mgr = createManager();
-		HLDInsertStatement hld = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator(), null);
+		HLDInsertStatement hld = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator(), null, null);
 		log.log(hld.toString());
 		assertEquals(expectedMoreSize, hld.moreL.size());
 		return hld;
