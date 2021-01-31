@@ -326,6 +326,9 @@ public class H2BDDTests extends BDDBase {
 		runR2600Sizeof("t0-sizeof-int.txt", 1);
 		runR2600Sizeof("t0-sizeof-string.txt", 2);
 		runR2600Sizeof("t0-sizeof-migration1.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1a.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1b.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
 	}
 
 	@Test
@@ -339,16 +342,9 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		runR950File("t0-crud-assoc-insert.txt", 6);
-//		runR1500File("t0-queryfn-orderby-2span.txt", 0);
-//		runR560File("t0-self-11.txt", 3);
-//		runR560File("t0-self-N1.txt", 4);
-		
-//		runR560File("t0-self-11.txt", 3);
-//		runR500File("t0-relation-many-to-many.txt", 11);
 //		runR2600Sizeof("t0-sizeof-string.txt", 2);
 //		runR2600Sizeof("t0-sizeof-int.txt", 1);
-		runR2600Sizeof("t0-sizeof-migration1.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
 	}
 	
 	//---
