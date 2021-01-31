@@ -62,7 +62,8 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R2300_multi_relation, 
 		R2400_log,
 		//R2500 input fn
-		R2600_sizeof
+		R2600_sizeof,
+		R2700_blob
 	}
 	public static class FileHelper {
 		
@@ -198,6 +199,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR2600Sizeof(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2600_sizeof, filename, numTests);
+	}
+	protected int runR2700Blob(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2700_blob, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("********* FILE: %s *********************", filename);

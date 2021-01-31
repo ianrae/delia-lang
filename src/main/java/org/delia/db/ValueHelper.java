@@ -26,6 +26,7 @@ import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.type.WrappedDate;
+import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
@@ -87,6 +88,15 @@ public class ValueHelper extends ServiceBase {
 			Date dt = dval.asLegacyDate();
 			Timestamp ts = new Timestamp(dt.getTime()); //TODO find way that doesn't lose nano seconds
 			stm.setTimestamp(index++, ts, cal);
+		}
+		break;
+		case BLOB:
+		{
+			//h2 and postgres both use hex format
+			String base64Str = dval.asString();
+			String hex = BlobUtils.base64ToHexString(base64Str);
+			stm.setString(index++, hex);
+			//TODO: use stm.setBlob later
 		}
 		break;
 		case STRUCT:

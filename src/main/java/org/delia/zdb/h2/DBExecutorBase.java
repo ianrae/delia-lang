@@ -18,9 +18,12 @@ import org.delia.db.sql.SimpleSqlNameFormatter;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.log.Log;
+import org.delia.log.LoggableBlob;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
+import org.delia.util.BlobUtils;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecuteContext;
@@ -130,6 +133,9 @@ public abstract class DBExecutorBase extends ServiceBase {
 		for(DValue dval: statement.paramL) {
 			if (dval == null) {
 				joiner.add("null");
+			} else if (dval.getType().isShape(Shape.BLOB)) {
+				LoggableBlob lb = new LoggableBlob(dval.asString());
+				joiner.add(String.format("'%s'", lb.toLoggableHexString()));
 			} else {
 				joiner.add(String.format("'%s'", dval.asString()));
 			}

@@ -37,4 +37,10 @@ public class BlobUtils {
 		}
 		return sb.toString();
 	}		
+	
+	public static String base64ToHexString(String base64Str) {
+		byte[] byteArr = BlobUtils.fromBase64(base64Str);
+		String hex = BlobUtils.byteArrayToHexString(byteArr);
+		return hex;
+	}
 }

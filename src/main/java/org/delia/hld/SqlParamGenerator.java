@@ -49,8 +49,7 @@ public class SqlParamGenerator {
 				} else if (dtypeHint.isShape(Shape.BLOB)) {
 					//h2 and postgres both use hex format
 					String base64Str = fval.asString();
-					byte[] byteArr = BlobUtils.fromBase64(base64Str);
-					String hex = BlobUtils.byteArrayToHexString(byteArr);
+					String hex = BlobUtils.base64ToHexString(base64Str);
 					return scalarBuilder.buildString(hex);
 				}
 			}

@@ -331,6 +331,11 @@ public class H2BDDTests extends BDDBase {
 		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
 		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
 	}
+	
+	@Test
+	public void testR2700() {
+		runR2700Blob("t0-blob.txt", 1);
+	}
 
 	@Test
 	public void testDebug() {
@@ -345,7 +350,7 @@ public class H2BDDTests extends BDDBase {
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR2600Sizeof("t0-sizeof-string.txt", 2);
 //		runR2600Sizeof("t0-sizeof-int.txt", 1);
-		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
+		runR2700Blob("t0-blob.txt", 1);
 	}
 	
 	//---

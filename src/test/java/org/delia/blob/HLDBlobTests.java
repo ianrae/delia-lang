@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.InsertStatementExp;
-import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
@@ -65,11 +64,11 @@ public class HLDBlobTests extends NewHLSTestBase {
 		SqlStatement stm = chkGroupGetFirst(stgroup, 1); 
 		assertEquals(3, stm.paramL.size());
 		
-		String hex = BlobUtils.byteArrayToHexString(BlobTests.SMALL);
-		assertEquals(hex, stm.paramL.get(2).asString());
+		String base64 = BlobUtils.toBase64(BlobTests.SMALL);
+		assertEquals(base64, stm.paramL.get(2).asString());
 		log.log(stm.sql);
 		//not alias would normally be present on orderDate
-		String s = String.format("insert Flight {field1: 3, field2: 30, field3:'%s'}", hex);
+		String s = String.format("INSERT INTO Flight (field1, field2, field3) VALUES(?, ?, ?)");
 		assertEquals(s, stm.sql);
 	}
 	
