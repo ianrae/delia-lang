@@ -97,9 +97,9 @@ public class BlobTests extends DeliaTestBase {
 	//-------------------------
 	private boolean useSrc2;
 	
-	private byte[] SMALL = new byte[] { (byte)0xe0, 0x4f, (byte)0xd0, 0x20 };	
-	private byte[] TEXTY = "Any String you want".getBytes();
-	private byte[] BINARY1 = "\u00e0\u004f\u00d0\u0020\u00ea\u003a\u0069\u0010".getBytes();	
+	public static final byte[] SMALL = new byte[] { (byte)0xe0, 0x4f, (byte)0xd0, 0x20 };	
+	public static final byte[] TEXTY = "Any String you want".getBytes();
+	public static final byte[] BINARY1 = "\u00e0\u004f\u00d0\u0020\u00ea\u003a\u0069\u0010".getBytes();	
 	
 	@Before
 	public void init() {

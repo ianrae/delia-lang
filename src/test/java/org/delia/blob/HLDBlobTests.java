@@ -11,12 +11,12 @@ import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.ValType;
 import org.delia.hld.cond.FilterCond;
 import org.delia.hld.cond.FilterCondBuilder;
-import org.delia.hld.cond.FilterFunc;
 import org.delia.hld.cond.FilterVal;
 import org.delia.hld.cond.OpFilterCond;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,6 +34,7 @@ public class HLDBlobTests extends NewHLSTestBase {
 	}	
 	@Test
 	public void testBlobParam() {
+		addBlob = true;
 		String src = String.format("let x = Flight[field3 == '4E/QIA==']");
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
@@ -41,10 +42,12 @@ public class HLDBlobTests extends NewHLSTestBase {
 		assertEquals(1, stgroup.size());
 		SqlStatement stm = stgroup.getFirst();
 		assertEquals(1, stm.paramL.size());
-		assertEquals(31, stm.paramL.get(0).asInt());
+		
+		String hex = BlobUtils.byteArrayToHexString(BlobTests.SMALL);
+		assertEquals(hex, stm.paramL.get(0).asString());
 		log.log(stm.sql);
 		//not alias would normally be present on orderDate
-		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE EXTRACT(%s FROM orderDate) = ?", "FF");
+		String s = String.format("SELECT t0.field1,t0.field2,t0.field3 FROM Flight as t0 WHERE t0.field3 = ?");
 		assertEquals(s, stm.sql);
 	}
 
@@ -57,17 +60,6 @@ public class HLDBlobTests extends NewHLSTestBase {
 	}
 	
 	
-	private void chkDate(String fn) {
-		String src = String.format("let x = Flight[orderDate.%s() == 31]", fn);
-		HLDQueryStatement hld = buildFromSrc(src, 0); 
-
-		String sql = mgr.generateRawSql(hld);
-		log.log(sql);
-		//not alias would normally be present on orderDate
-		String s = String.format("SELECT t0.field1,t0.field2,t0.orderDate FROM Flight as t0 WHERE EXTRACT(%s FROM orderDate) = 31", fn.toUpperCase());
-		assertEquals(s, sql);
-	}
-
 	private FilterCond buildCond(String src) {
 		QueryExp queryExp = compileQuery(src);
 		log.log(src);
@@ -84,24 +76,10 @@ public class HLDBlobTests extends NewHLSTestBase {
 		assertEquals(op, ofc.op.toString());
 		chkStr(val2, ofc.val2);
 	}
-//	private void chkbuilderOpIntFn(String src, int val1, String op, String fieldName, String val2) {
-//		FilterCond cond = buildCond(src);
-//		OpFilterCond ofc = (OpFilterCond) cond;
-//		chkInt(val1, ofc.val1);
-//		assertEquals(op, ofc.op.toString());
-//		chkFn(fieldName, val2, ofc.val2, 0);
-//	}
 
 	private void chkSymbol(String fieldName, FilterVal fval) {
 		assertEquals(ValType.SYMBOL, fval.valType);
 		assertEquals(fieldName, fval.asString());
-	}
-	private void chkFn(String fieldName, String fnName, FilterVal fval, int n) {
-		assertEquals(ValType.FUNCTION, fval.valType);
-		FilterFunc func = fval.filterFn;
-		assertEquals(n, func.argL.size());
-		assertEquals(fieldName, fval.asString());
-		assertEquals(fnName, func.fnName);
 	}
 	private void chkStr(String val1, FilterVal fval) {
 		assertEquals(ValType.STRING, fval.valType);

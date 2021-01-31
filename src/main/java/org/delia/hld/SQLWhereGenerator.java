@@ -15,6 +15,7 @@ import org.delia.hld.cond.OpAndOrFilter;
 import org.delia.hld.cond.OpFilterCond;
 import org.delia.hld.cond.SingleFilterCond;
 import org.delia.hld.cond.SymbolChain;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
@@ -62,8 +63,13 @@ public class SQLWhereGenerator {
 			if (ofc.customRenderer != null) {
 				return ofc.customRenderer.render(ofc, paramGen, stm);
 			}
-			String s1 = renderVal(ofc.val1, paramGen, stm);
-			String s2 = renderVal(ofc.val2, paramGen, stm);
+			
+			DType fieldType = getFieldType(ofc.val1); //may return null
+			if (fieldType == null) {
+				fieldType = getFieldType(ofc.val2); //may return null
+			}
+			String s1 = renderVal(ofc.val1, fieldType, paramGen, stm);
+			String s2 = renderVal(ofc.val2, fieldType, paramGen, stm);
 			String not = ofc.isNot ? "NOT " : "";
 			String op = opToSql(ofc.op.op);
 			return String.format("%s%s %s %s", not, s1, op, s2);
@@ -75,14 +81,15 @@ public class SQLWhereGenerator {
 			return String.format("%s %s %s", s1, and, s2);
 		} else if (filter instanceof InFilterCond) {
 			InFilterCond ifc = (InFilterCond) filter;
-			String s1 = renderVal(ifc.val1, paramGen, stm);
+			DType fieldType = ifc.val1.structField.fieldType;
+			String s1 = renderVal(ifc.val1, fieldType, paramGen, stm);
 			
 			StrCreator sc = new StrCreator();
 			sc.o("%s IN (", s1);
 			ListWalker<FilterVal> walker = new ListWalker<>(ifc.list);
 			while(walker.hasNext()) {
 				FilterVal ff = walker.next();
-				String s = renderVal(ff, paramGen, stm);
+				String s = renderVal(ff, fieldType, paramGen, stm);
 				sc.o(s);
 				walker.addIfNotLast(sc, ", ");
 			}
@@ -93,6 +100,13 @@ public class SQLWhereGenerator {
 		}
 	}
 
+
+	private DType getFieldType(FilterVal val1) {
+		if (val1.isSymbol()) {
+			return val1.structField.fieldType;
+		}
+		return null;
+	}
 
 	private String opToSql(String op) {
 		switch(op) {
@@ -112,12 +126,12 @@ public class SQLWhereGenerator {
 		if (paramGen == null) {
 			return sfc.renderSql();
 		} else {
-			DValue dval = paramGen.convert(sfc.val1);
+			DValue dval = paramGen.convert(sfc.val1, sfc.val1.structField.fieldType);
 			stm.paramL.add(dval);
 			return "?";
 		}
 	}
-	private String renderVal(FilterVal val1, SqlParamGenerator paramGen, SqlStatement stm) {
+	private String renderVal(FilterVal val1, DType dtypeHint, SqlParamGenerator paramGen, SqlStatement stm) {
 		if (val1.customRenderer != null) {
 			return val1.customRenderer.render(val1, paramGen, stm);
 		}
@@ -125,7 +139,7 @@ public class SQLWhereGenerator {
 		if (paramGen == null || notParam) {
 			return doRenderVal(val1);
 		} else {
-			DValue dval = paramGen.convert(val1);
+			DValue dval = paramGen.convert(val1, dtypeHint);
 			stm.paramL.add(dval);
 			return "?";
 		}

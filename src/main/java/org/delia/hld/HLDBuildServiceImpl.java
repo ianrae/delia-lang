@@ -146,9 +146,9 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	@Override
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
 		SqlGeneratorFactory genfact = hldToSqlConverter.getSqlGeneratorFactory();
-		SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
-		sqlMergeInto.init(hld.hldquery);
-		SqlStatement stm = sqlMergeInto.render();
+		SqlSelectStatement sqlSelect = genfact.createSelect(datIdMap);
+		sqlSelect.init(hld.hldquery);
+		SqlStatement stm = sqlSelect.render();
 		SqlStatementGroup stgrp = new SqlStatementGroup();
 		stgrp.add(stm);
 		return stgrp;
