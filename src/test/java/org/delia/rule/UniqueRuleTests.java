@@ -26,19 +26,17 @@ public class UniqueRuleTests extends DeliaTestBase {
 	
 	@Test
 	public void testFail() {
+		useSrc2 = true;
 		String src = "let x = Flight[1]";
-		rule = "uniqueFields(field1,field2)";
-		execute(src);
-		DValue dval = session.getFinalResult().getAsDValue();
-		assertEquals(1, dval.asStruct().getField("field1").asInt());
-		int n = dval.asStruct().getField("field2").asInt();
-		assertEquals(10, n);
+		rule = "uniqueFields(field2,field3)";
+		addDup = true;
+		executeFail(src, "rule-uniqueFields");
 	}	
 
 	//-------------------------
 	private boolean useSrc2;
 	private String rule = "uniqueFields(field1)";
-
+	private boolean addDup;
 	
 	@Before
 	public void init() {
@@ -52,19 +50,19 @@ public class UniqueRuleTests extends DeliaTestBase {
 		String s = rule;
 		String src = String.format("type Flight struct {field1 int primaryKey, field2 int } %s end", s);
 
-		s =  "";
 		src += String.format("\n insert Flight {field1: 1, field2: 10}");
-		src += String.format("\n insert Flight {field1: 2, field2: 20}");
+		s =  addDup ? "10" : "20";
+		src += String.format("\n insert Flight {field1: 2, field2: %s}", s);
 		return src;
 	}
 
 	private String buildSrc2() {
-		String src = "";
-//		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob optional } %s end", s);
-//
-//		s =  "";
-//		src += String.format("\n insert Flight {field1: 1, field2: null }");
-//		src += String.format("\n insert Flight {field1: 2, field2: '4E/QIA=='}");
+		String s = rule;
+		String src = String.format("type Flight struct {field1 int primaryKey, field2 int, field3 int } %s end", s);
+
+		src += String.format("\n insert Flight {field1: 1, field2: 10, field3: 10}");
+		s =  addDup ? "10" : "20";
+		src += String.format("\n insert Flight {field1: 2, field2: %s, field3: %s}", s, s);
 		return src;
 	}
 

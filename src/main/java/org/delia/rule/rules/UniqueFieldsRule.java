@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.DBHelper;
@@ -15,6 +16,7 @@ import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DValue;
+import org.delia.util.StringUtil;
 import org.delia.zdb.DBExecutor;
 
 public class UniqueFieldsRule extends DRuleBase {
@@ -34,20 +36,30 @@ public class UniqueFieldsRule extends DRuleBase {
 			return true;
 		}
 		
+		Map<String,String> map = new HashMap<>();
+		if (ctx.isInsertFlag()) {
+			String key = buildKey(dval);
+			map.put(key, "");
+		}
+		
 		//MEM
 		DBExecutor dbexecutor = ctx.getDbInterface().createExecutor();
-
+		dbexecutor.init1(ctx.getRegistry());
 		try {
-			Map<String,String> map = new HashMap<>();
-			QueryResponse qresp = doQueryAll(dval, dbexecutor, ctx); 
+			QueryResponse qresp = doQueryAll(dval, dbexecutor, ctx);
 			
+			ctx.getLog().log("xxxxxxzz " + qresp.dvalList.size());
 			for(DValue inner: qresp.dvalList) {
 				String key = buildKey(inner);
 				if (map.containsKey(key)) {
+					List<String> nameL = operL.stream().map(x -> x.getSubject()).collect(Collectors.toList());
+					String msg = String.format("fields (%s) are not unique", StringUtil.flatten(nameL));
+					ctx.addError(this, msg, operL.get(0));
 					return false;
 				}
 				map.put(key, "");
 			}
+			ctx.getLog().log("xxxxxxszz " + map.size());
 			
 		} finally {
 			if (dbexecutor != null) {

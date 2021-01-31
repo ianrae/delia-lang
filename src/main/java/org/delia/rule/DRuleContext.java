@@ -8,6 +8,7 @@ import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
+import org.delia.log.Log;
 import org.delia.runner.FetchRunner;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -133,5 +134,7 @@ public class DRuleContext {
 	public DTypeRegistry getRegistry() {
 		return registry;
 	}
-	
+	public Log getLog() {
+		return factorySvc.getLog();
+	}
 }
