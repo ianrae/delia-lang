@@ -17,6 +17,7 @@ import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -180,6 +181,15 @@ public class NewHLSTestBase extends BDDBase {
 		for(Exp exp: sessimpl.mostRecentContinueExpL) {
 			if (exp instanceof LetStatementExp) {
 				return (LetStatementExp) exp;
+			}
+		}
+		return null;
+	}
+	protected InsertStatementExp findInsert(DeliaSession session) {
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		for(Exp exp: sessimpl.mostRecentContinueExpL) {
+			if (exp instanceof InsertStatementExp) {
+				return (InsertStatementExp) exp;
 			}
 		}
 		return null;

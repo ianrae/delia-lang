@@ -9,6 +9,12 @@ import org.delia.type.Shape;
 import org.delia.util.BlobUtils;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
+/**
+ * Converts values in SQL WHEN clause to sql format.
+ * See ValueHelper for converion of values in INSERT,UPDATE,etc
+ * @author ian
+ *
+ */
 public class SqlParamGenerator {
 	protected ScalarValueBuilder scalarBuilder;
 	
@@ -58,4 +64,5 @@ public class SqlParamGenerator {
 				return null;
 		}
 	}
+	
 }

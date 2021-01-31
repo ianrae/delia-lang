@@ -3,6 +3,9 @@ package org.delia.blob;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.api.DeliaSessionImpl;
+import org.delia.compiler.ast.InsertStatementExp;
+import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
@@ -13,6 +16,7 @@ import org.delia.hld.cond.FilterCond;
 import org.delia.hld.cond.FilterCondBuilder;
 import org.delia.hld.cond.FilterVal;
 import org.delia.hld.cond.OpFilterCond;
+import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -33,14 +37,13 @@ public class HLDBlobTests extends NewHLSTestBase {
 		chkbuilderOpBlob("let x = Flight[field3 == '4E/QIA==']", "field3", "==", "4E/QIA==");
 	}	
 	@Test
-	public void testBlobParam() {
+	public void testBlobSelect() {
 		addBlob = true;
 		String src = String.format("let x = Flight[field3 == '4E/QIA==']");
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
 		SqlStatementGroup stgroup = mgr.generateSql(hld);
-		assertEquals(1, stgroup.size());
-		SqlStatement stm = stgroup.getFirst();
+		SqlStatement stm = chkGroupGetFirst(stgroup, 1); 
 		assertEquals(1, stm.paramL.size());
 		
 		String hex = BlobUtils.byteArrayToHexString(BlobTests.SMALL);
@@ -51,8 +54,26 @@ public class HLDBlobTests extends NewHLSTestBase {
 		assertEquals(s, stm.sql);
 	}
 
+	@Test
+	public void testBlobInsert() {
+		addBlob = true;
+		String src = String.format("insert Flight {field1: 3, field2: 30, field3:'4E/QIA=='}");
+		
+		HLDInsertStatement hld = buildInsertFromSrc(src, 0);
+
+		SqlStatementGroup stgroup = mgr.generateSql(hld);
+		SqlStatement stm = chkGroupGetFirst(stgroup, 1); 
+		assertEquals(3, stm.paramL.size());
+		
+		String hex = BlobUtils.byteArrayToHexString(BlobTests.SMALL);
+		assertEquals(hex, stm.paramL.get(2).asString());
+		log.log(stm.sql);
+		//not alias would normally be present on orderDate
+		String s = String.format("insert Flight {field1: 3, field2: 30, field3:'%s'}", hex);
+		assertEquals(s, stm.sql);
+	}
+	
 	//-------------------------
-	private String pkType = "int";
 	private boolean addBlob = false;
 
 	@Before
@@ -89,17 +110,29 @@ public class HLDBlobTests extends NewHLSTestBase {
 	@Override
 	protected String buildSrc() {
 		String s = addBlob ? ", field3 blob" : "";
-		String src = String.format("type Flight struct {field1 %s primaryKey, field2 int %s } end", pkType, s);
+		String src = String.format("type Flight struct {field1 int primaryKey, field2 int %s } end", s);
 
 		s = addBlob ? ", field3: '4E/QIA=='" : "";
-		if (pkType.equals("string")) {
-			src += String.format("\n insert Flight {field1: 'ab', field2: 10 %s}", s);
-			src += String.format("\n insert Flight {field1: 'cd', field2: 20 %s}", s);
-		} else {
-			src += String.format("\n insert Flight {field1: 1, field2: 10 %s}", s);
-			src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
-		}
+		src += String.format("\n insert Flight {field1: 1, field2: 10 %s}", s);
+		src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
 		return src;
+	}
+	protected HLDInsertStatement buildInsertFromSrc(String src, int expectedMoreSize) {
+		DeliaSessionImpl sessimpl = doCompileStatement(src);
+		InsertStatementExp insertExp = findInsert(sessimpl);
+		
+		log.log(src);
+		
+		mgr = createManager();
+		HLDInsertStatement hld = mgr.fullBuildInsert(insertExp, new DoNothingVarEvaluator(), null);
+		log.log(hld.toString());
+		assertEquals(expectedMoreSize, hld.moreL.size());
+		return hld;
+	}
+	private SqlStatement chkGroupGetFirst(SqlStatementGroup stgroup, int expected) {
+		assertEquals(expected, stgroup.size());
+		SqlStatement stm = stgroup.getFirst();
+		return stm;
 	}
 
 }
