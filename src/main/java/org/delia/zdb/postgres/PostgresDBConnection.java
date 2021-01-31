@@ -7,6 +7,8 @@ import java.sql.Statement;
 import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.ResultSetHelper;
+import org.delia.db.ValueHelper;
+import org.delia.db.postgres.PostgresValueHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.zdb.h2.H2DBConnection;
 
@@ -14,6 +16,7 @@ public class PostgresDBConnection extends H2DBConnection {
 
 	public PostgresDBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
 		super(factorySvc, connectionFactory, errorConverter);
+		this.valueHelper = new PostgresValueHelper(factorySvc, this);
 	}
 
 	@Override
@@ -58,5 +61,10 @@ public class PostgresDBConnection extends H2DBConnection {
 		}
 
 		return null;
+	}
+
+	@Override
+	public ValueHelper createValueHelper() {
+		return new PostgresValueHelper(factorySvc, this);
 	}
 }

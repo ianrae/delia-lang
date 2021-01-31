@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.db.SqlStatement;
+import org.delia.db.ValueHelper;
 import org.delia.type.DType;
 
 public class DBConnectionObserverAdapter implements DBConnection {
@@ -78,6 +79,10 @@ public class DBConnectionObserverAdapter implements DBConnection {
 	}
 	public void setStatementList(List<SqlStatement> statementList) {
 		this.statements = statementList;
+	}
+	@Override
+	public ValueHelper createValueHelper() {
+		return inner.createValueHelper();
 	}
 
 }

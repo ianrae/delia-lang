@@ -1,5 +1,6 @@
 package org.delia.zdb.h2;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,10 +16,11 @@ import org.delia.db.SqlStatement;
 import org.delia.db.ValueHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.type.DType;
+import org.delia.zdb.BlobCreator;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecuteContext;
 
-public class H2DBConnection extends ServiceBase implements DBConnection {
+public class H2DBConnection extends ServiceBase implements DBConnection, BlobCreator {
 	protected Connection conn;
 	protected ConnectionFactory connectionFactory;
 	protected ValueHelper valueHelper;
@@ -27,7 +29,7 @@ public class H2DBConnection extends ServiceBase implements DBConnection {
 	public H2DBConnection(FactoryService factorySvc, ConnectionFactory connectionFactory, DBErrorConverter errorConverter) {
 		super(factorySvc);
 		this.connectionFactory = connectionFactory;
-		this.valueHelper = new ValueHelper(factorySvc);
+		this.valueHelper = new ValueHelper(factorySvc, this);
 		this.errorConverter = errorConverter;
 	}
 
@@ -186,5 +188,22 @@ public class H2DBConnection extends ServiceBase implements DBConnection {
 	protected String getRsValue(ResultSet rs, int index) throws SQLException {
 		Object obj = rs.getObject(index);
 		return obj == null ? "" : obj.toString();
+	}
+
+	@Override
+	public Blob createBlob() {
+		Blob blob = null;
+		try {
+			blob =conn.createBlob();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return blob;
+	}
+
+	@Override
+	public ValueHelper createValueHelper() {
+		return new ValueHelper(factorySvc, this);
 	}
 }

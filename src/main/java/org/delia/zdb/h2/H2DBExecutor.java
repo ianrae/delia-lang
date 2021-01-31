@@ -142,7 +142,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 			try {
 				SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
 				sqlctx.genKeysL = dbctxMain.genKeysL;
-				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, conn.createValueHelper(), registry);
 				genVal = hldRSCconverter.extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {
 				DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
@@ -267,7 +267,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
 		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
 		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, conn.createValueHelper(), registry);
 		if (selectResultType.isScalarShape()) {
 			QueryDetails details = new QueryDetails(); //TODO delete later
 			qresp.dvalList = hldRSCconverter.buildScalarResult(rs, selectResultType, details, dbactx);

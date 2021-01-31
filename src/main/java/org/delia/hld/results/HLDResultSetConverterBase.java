@@ -44,7 +44,8 @@ public class HLDResultSetConverterBase extends ServiceBase {
 
 	public HLDResultSetConverterBase(DBType dbType, FactoryService factorySvc, ConnectionFactory connFactory) {
 		super(factorySvc);
-		this.valueHelper =  new ValueHelper(factorySvc); //sqlhelperFactory.createValueHelper();
+		//TODO fix null on next line
+		this.valueHelper =  new ValueHelper(factorySvc, null); //sqlhelperFactory.createValueHelper();
 	}
 	public HLDResultSetConverterBase(FactoryService factorySvc, ValueHelper valueHelper) {
 		super(factorySvc);

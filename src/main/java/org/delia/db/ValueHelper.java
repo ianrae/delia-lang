@@ -29,15 +29,18 @@ import org.delia.type.WrappedDate;
 import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.zdb.BlobCreator;
 
 public class ValueHelper extends ServiceBase {
 	protected DateFormatService fmtSvc;
 	protected DValueConverterService dvalConverter;
+	protected BlobCreator blobCreator;
 
-	public ValueHelper(FactoryService factorySvc) {
+	public ValueHelper(FactoryService factorySvc, BlobCreator blobCreator) {
 		super(factorySvc);
 		this.fmtSvc = factorySvc.getDateFormatService();
 		this.dvalConverter = new DValueConverterService(factorySvc);
+		this.blobCreator = blobCreator;
 	}
 	
 	public PreparedStatement createPrepStatement(SqlStatement statement, Connection conn) throws SQLException {
