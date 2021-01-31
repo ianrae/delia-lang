@@ -69,11 +69,13 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private DatIdMap datIdMap;
 		private UpdateStatementRunner updateStatementRunner;
 		private HLDFactory hldFactory;
+		private BlobLoader blobLoader;
 		
-		public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory) {
+		public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, BlobLoader blobLoader) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
 			this.hldFactory = hldFactory;
+			this.blobLoader = blobLoader;
 		}
 		@Override
 		public Log getLog() {

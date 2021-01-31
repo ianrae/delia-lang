@@ -56,7 +56,7 @@ public class InsertStatementRunner extends ServiceBase {
 	}
 
 	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner, 
-			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
+			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc, BlobLoader blobLoader) {
 
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 		DType dtype = registry.findTypeOrSchemaVersionType(exp.getTypeName());

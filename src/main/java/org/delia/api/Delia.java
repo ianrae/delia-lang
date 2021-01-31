@@ -7,6 +7,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.DBInterfaceFactory;
 
@@ -37,4 +38,14 @@ public interface Delia {
 	DeliaSession beginSession(BufferedReader reader);
 	ResultValue continueExecution(BufferedReader reader, DeliaSession dbsess);
 	DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan);
+	
+	ResultValue execute(String src, BlobLoader blobLoader);
+	DeliaSession beginSession(String src, BlobLoader blobLoader);
+	ResultValue continueExecution(String src, BlobLoader blobLoader, DeliaSession dbsess);
+	DeliaSession executeMigrationPlan(String src, BlobLoader blobLoader, MigrationPlan plan);
+	
+	ResultValue execute(BufferedReader reader, BlobLoader blobLoader);
+	DeliaSession beginSession(BufferedReader reader, BlobLoader blobLoader);
+	ResultValue continueExecution(BufferedReader reader, BlobLoader blobLoader, DeliaSession dbsess);
+	DeliaSession executeMigrationPlan(BufferedReader reader, BlobLoader blobLoader, MigrationPlan plan);
 }

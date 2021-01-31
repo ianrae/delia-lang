@@ -19,6 +19,7 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.HLDFacade;
 import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DeliaException;
 import org.delia.runner.InternalCompileState;
 import org.delia.runner.ResultValue;
@@ -57,10 +58,10 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ResultValue execute(String src) {
+	public ResultValue execute(String src, BlobLoader blobLoader) {
 		List<Exp> expL = compileDeliaSource(src, true);
 
-		Runner runner = createRunner(null);
+		Runner runner = createRunner(null, blobLoader);
 		execTypes(runner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null, extraInfo);
@@ -91,9 +92,9 @@ public class DeliaImpl implements Delia {
 
 
 	//only public for unit tests
-	public Runner createRunner(DeliaSession dbsess) {
+	public Runner createRunner(DeliaSession dbsess, BlobLoader blobLoader) {
 		ErrorTracker et = new SimpleErrorTracker(log);
-		Runner runner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
+		Runner runner = new RunnerImpl(factorySvc, dbInterface, hldFactory, blobLoader);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
@@ -123,13 +124,13 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public DeliaSession beginSession(String src) {
-		return doBeginExecution(src, null);
+		return doBeginExecution(src, null, null);
 	}
-	private DeliaSession doBeginExecution(String src, MigrationPlan plan) {
+	private DeliaSession doBeginExecution(String src, BlobLoader blobLoader, MigrationPlan plan) {
 		List<Exp> expL =  compileDeliaSource(src, false);
 
 		//1st pass
-		Runner mainRunner = createRunner(null);
+		Runner mainRunner = createRunner(null, blobLoader);
 		execTypes(mainRunner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan, extraInfo);
@@ -160,7 +161,7 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public DeliaSession executeMigrationPlan(String src, MigrationPlan plan) {
-		return doBeginExecution(src, plan);
+		return doBeginExecution(src, null, plan);
 	}
 
 	protected void execTypes(Runner mainRunner, List<Exp> extL) {
@@ -280,7 +281,7 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ResultValue continueExecution(String src, DeliaSession session) {
+	public ResultValue continueExecution(String src, BlobLoader blobLoader, DeliaSession session) {
 		Runner mostRecentRunner = session.getMostRecentRunner();
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
 		if (execCtx != null) {
@@ -298,7 +299,7 @@ public class DeliaImpl implements Delia {
 			}
 		}
 
-		Runner runner = createRunner(session);
+		Runner runner = createRunner(session, blobLoader);
 		ResultValue res = doExecute(runner, expL, session.getDatIdMap());
 		
 		if (session instanceof DeliaSessionImpl) {
@@ -407,5 +408,49 @@ public class DeliaImpl implements Delia {
 	@Override
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
+	}
+
+	@Override
+	public DeliaSession beginSession(String src, BlobLoader blobLoader) {
+		return beginSession(src, null);
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(String src, BlobLoader blobLoader, MigrationPlan plan) {
+		return doBeginExecution(src, blobLoader, plan);
+	}
+
+	@Override
+	public ResultValue execute(BufferedReader reader, BlobLoader blobLoader) {
+		String src = readAllText(reader);
+		return execute(src, blobLoader);
+	}
+
+	@Override
+	public DeliaSession beginSession(BufferedReader reader, BlobLoader blobLoader) {
+		String src = readAllText(reader);
+		return beginSession(src, blobLoader);
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(BufferedReader reader, BlobLoader blobLoader, MigrationPlan plan) {
+		String src = readAllText(reader);
+		return executeMigrationPlan(src, blobLoader, plan);
+	}
+
+	@Override
+	public ResultValue execute(String src) {
+		return execute(src, null);
+	}
+
+	@Override
+	public ResultValue continueExecution(String src, DeliaSession dbsess) {
+		return continueExecution(src, null, dbsess);
+	}
+
+	@Override
+	public ResultValue continueExecution(BufferedReader reader, BlobLoader blobLoader, DeliaSession dbsess) {
+		String src = readAllText(reader);
+		return continueExecution(src, blobLoader, dbsess);
 	}
 }

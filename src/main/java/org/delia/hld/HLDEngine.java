@@ -19,6 +19,7 @@ import org.delia.hld.cud.HLDUpdate;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsert;
 import org.delia.hld.simple.SimpleBase;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -40,6 +41,7 @@ import org.delia.util.DeliaExceptionHelper;
 public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	private HLDAliasManager aliasMgr;
 	private DValueIterator insertPrebuiltValueIterator;
+	private BlobLoader blobLoader;
 
 	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
@@ -225,5 +227,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
+	}
+
+	public void setBlobLoader(BlobLoader blobLoader) {
+		this.blobLoader = blobLoader;
 	}
 }

@@ -24,6 +24,7 @@ import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.log.LogLevel;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -115,7 +116,7 @@ public class HLDFacade extends ServiceBase {
 		logDebug(hldupsert);
 		return hldupsert;
 	}
-	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator) {
+	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator);
 		logDebug(hldins);

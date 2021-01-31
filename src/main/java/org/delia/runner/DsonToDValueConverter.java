@@ -16,6 +16,7 @@ import org.delia.core.ServiceBase;
 import org.delia.dval.DValueConverterService;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
+import org.delia.log.LoggableBlob;
 import org.delia.sprig.SprigService;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
@@ -23,8 +24,8 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
-import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.PartialStructValueBuilder;
 import org.delia.valuebuilder.RelationValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -37,6 +38,7 @@ public class DsonToDValueConverter extends ServiceBase {
 		private SprigService sprigSvc;
 		private Map<String,String> assocCrudMap;
 		private DValueConverterService dvalConverter;
+		private BlobLoader blobLoader;
 		
 		public DsonToDValueConverter(FactoryService factorySvc, ErrorTracker localET, DTypeRegistry registry, VarEvaluator varEvaluator, SprigService sprigSvc) {
 			super(factorySvc);
@@ -141,28 +143,51 @@ public class DsonToDValueConverter extends ServiceBase {
 				return null;
 			}
 			
-			if (Shape.STRING.equals(fieldType.getShape())) {
+			switch(fieldType.getShape()) {
+			case STRING: {
 				DValue dval = builder.buildString(input, fieldType); 
 				return dval;
-			} else if (Shape.INTEGER.equals(fieldType.getShape())) {
+			}
+			case INTEGER: {
 				DValue dval = builder.buildInt(input, fieldType); 
 				return dval;
-			} else if (Shape.LONG.equals(fieldType.getShape())) {
+			}
+			case LONG: {
 				DValue dval = builder.buildLong(input, fieldType); 
 				return dval;
-			} else if (Shape.NUMBER.equals(fieldType.getShape())) {
+			}
+			case NUMBER: {
 				DValue dval = builder.buildNumber(input, fieldType); 
 				return dval;
-			} else if (Shape.BOOLEAN.equals(fieldType.getShape())) {
+			}
+			case BOOLEAN: {
 				DValue dval = builder.buildBoolean(input, fieldType); 
 				return dval;
-			} else if (Shape.DATE.equals(fieldType.getShape())) {
+			}
+			case DATE: {
 				DValue dval = builder.buildDate(input, fieldType); 
 				return dval;
-			} else if (Shape.BLOB.equals(fieldType.getShape())) {
+			}
+			case BLOB: {
+				if (input != null && input.startsWith("$")) {
+					if (blobLoader == null) {
+						LoggableBlob lb = new LoggableBlob(input);
+						DeliaExceptionHelper.throwError("blob-loader-is-missing", 
+								"blob field value '%s' requires a BlobLoader", lb);
+					}
+					byte[] byteArr = blobLoader.getByteArray(input);
+					if (byteArr == null) {
+						LoggableBlob lb = new LoggableBlob(input);
+						DeliaExceptionHelper.throwError("blob-loader-value-not-found", 
+								"blob field value '%s' not found in the BlobLoader", lb);
+					}
+					DValue dval = builder.buildBlob(byteArr, fieldType);
+					return dval;
+				}
 				DValue dval = builder.buildBlob(input, fieldType); 
 				return dval;
-			} else if (Shape.STRUCT.equals(fieldType.getShape())) {
+			}
+			case STRUCT: {
 				DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
 				RelationValueBuilder rbuilder = new RelationValueBuilder(relType, fieldType.getName(), registry);
 				if (fieldExp.exp instanceof ListExp) {
@@ -182,7 +207,8 @@ public class DsonToDValueConverter extends ServiceBase {
 				}
 				DValue dval = rbuilder.getDValue();
 				return dval;
-			} else {
+			}
+			default:
 				return null;
 			}
 		}
@@ -209,6 +235,14 @@ public class DsonToDValueConverter extends ServiceBase {
 
 		public Map<String, String> getAssocCrudMap() {
 			return assocCrudMap;
+		}
+
+		public BlobLoader getBlobLoader() {
+			return blobLoader;
+		}
+
+		public void setBlobLoader(BlobLoader blobLoader) {
+			this.blobLoader = blobLoader;
 		}
 
 	}

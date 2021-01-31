@@ -9,6 +9,7 @@ import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 
@@ -21,7 +22,7 @@ public interface HLDBuildService {
 	HLDDeleteStatement fullBuildDelete(QueryExp queryExp);
 
 	HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator,
-			DValueIterator insertPrebuiltValueIterator);
+			DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader);
 
 	HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator,
 			DValueIterator insertPrebuiltValueIterator);

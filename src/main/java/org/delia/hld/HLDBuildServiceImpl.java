@@ -16,6 +16,7 @@ import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -79,11 +80,12 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 * @see org.delia.hld.HLDBuildService#fullBuildInsert(org.delia.compiler.ast.InsertStatementExp, org.delia.runner.VarEvaluator, org.delia.runner.DValueIterator)
 	 */
 	@Override
-	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		engine.setBlobLoader(blobLoader);
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		if (stmt.hldinsert.buildSuccessful()) {
 			engine.addParentUpdates(stmt.hldinsert, stmt.moreL);

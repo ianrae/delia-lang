@@ -19,6 +19,7 @@ import org.delia.hld.HLDQueryBuilderAdapter;
 import org.delia.hld.HLDServiceBase;
 import org.delia.hld.QueryBuilderHelper;
 import org.delia.relation.RelationInfo;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.ConversionResult;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DsonToDValueConverter;
@@ -43,6 +44,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 	private VarEvaluator varEvaluator;
 	private DValueIterator insertPrebuiltValueIterator = null; 
 	private ConversionHelper conversionHelper;
+	private BlobLoader blobLoader;
 
 	public HLDDsonBuilder(DTypeRegistry registry, FactoryService factorySvc, SprigService sprigSvc, VarEvaluator varEvaluator) {
 		super(registry, factorySvc, null, sprigSvc); //TODO do we need datIdMap
@@ -111,6 +113,7 @@ public class HLDDsonBuilder extends HLDServiceBase {
 		}
 
 		DsonToDValueConverter converter = new DsonToDValueConverter(factorySvc, cres.localET, registry, varEvaluator, sprigSvc);
+		converter.setBlobLoader(blobLoader);
 		if (doFull) {
 			cres.dval = converter.convertOne(dtype.getName(), dsonExp, cres);
 		} else {
@@ -493,5 +496,9 @@ public class HLDDsonBuilder extends HLDServiceBase {
 
 	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
+	}
+
+	public void setBlobLoader(BlobLoader blobLoader) {
+		this.blobLoader = blobLoader;
 	}
 }
