@@ -6,7 +6,7 @@ background:
 thenType: struct
 
 ---
-title: log1
+title: insert
 given:
   insert Flight {id: 55, wid: '4E/QIA==' }
   insert Flight {id: 56, wid: '4E/QIA==' }
@@ -19,3 +19,28 @@ value:a:Flight {
  vwid:4E/QIA==
 }
 
+---
+title: update
+given:
+  insert Flight {id: 55, wid: '4E/QIA==' }
+  update Flight[55] {wid: '4E/QIOo6aRA=' }
+when:
+  let x = Flight[true].ith(0)
+then:
+value:a:Flight {
+ vid:55
+ vwid:4E/QIOo6aRA=
+}
+
+---
+title: update null
+given:
+  insert Flight {id: 55, wid: '4E/QIA==' }
+  update Flight[55] {wid: null }
+when:
+  let x = Flight[true].ith(0)
+then:
+value:a:Flight {
+ vid:55
+ vwid:null
+}

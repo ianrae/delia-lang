@@ -202,6 +202,9 @@ public class ValueHelper extends ServiceBase {
 		case BLOB:
 		{
 			byte[] byteArr = rs.getBytes(pair.name);
+			if (rs.wasNull()) {
+				return null;
+			}
 			return dvalBuilder.buildBlob(byteArr, pair.type);
 		}
 		case BOOLEAN:
@@ -276,6 +279,9 @@ public class ValueHelper extends ServiceBase {
 		case BLOB:
 		{
 			byte[] byteArr = rs.getBytes(index);
+			if (rs.wasNull()) {
+				return null;
+			}
 			return dvalBuilder.buildBlob(byteArr, pair.type);
 		}
 		case BOOLEAN:
@@ -347,6 +353,9 @@ public class ValueHelper extends ServiceBase {
 		case BLOB:
 		{
 			byte[] byteArr = rs.getBytes(rsIndex);
+			if (rs.wasNull()) {
+				return null;
+			}
 			return dvalBuilder.buildBlob(byteArr, type);
 		}
 		case BOOLEAN:

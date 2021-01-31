@@ -25,6 +25,8 @@ public class BlobTests extends DeliaTestBase {
 	public void test() {
 		String s = BlobUtils.toBase64(SMALL);
 		log.log(s);
+		s = BlobUtils.toBase64(BINARY1);
+		log.log(s);
 	}	
 
 	@Test

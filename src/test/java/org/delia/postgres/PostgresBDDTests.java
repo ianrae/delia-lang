@@ -320,7 +320,7 @@ public class PostgresBDDTests extends BDDBase {
 	}
 	@Test
 	public void testR2700() {
-		runR2700Blob("t0-blob.txt", 1);
+		runR2700Blob("t0-blob.txt", 3);
 	}
 	
 	@Test
@@ -332,7 +332,7 @@ public class PostgresBDDTests extends BDDBase {
 		
 //		runR900File("t0-update-mm-id.txt", 4);
 //		runR2150File("t0-migrate-many-to-many3.txt", 2);
-		runR2700Blob("t0-blob.txt", 1);
+		runR2700Blob("t0-blob.txt", 3);
 	}
 	
 	//---
