@@ -25,6 +25,7 @@ public interface DValue {
 	boolean asBoolean();
 	ZonedDateTime asDate();
 	Date asLegacyDate();
+	WrappedBlob asBlob();
 	Map<String,DValue> asMap();
 	DStructHelper asStruct();
 	DRelation asRelation();

@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
+import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 
 
@@ -86,6 +87,9 @@ public class DValueImpl implements DValue, DValueInternal {
     	if (object instanceof WrappedDate) {
     		WrappedDate wdt = (WrappedDate) object;
     		return wdt.asString();
+    	} else if (object instanceof WrappedBlob) {
+    		WrappedBlob wblob = (WrappedBlob) object;
+    		return BlobUtils.toBase64(wblob.getByteArray()); //TODO: fails if file. fix later
     	}
         return object.toString();
     }
@@ -106,6 +110,11 @@ public class DValueImpl implements DValue, DValueInternal {
 		WrappedDate wdt = (WrappedDate) object;
         Date dt = wdt.getLegacyDate();
         return dt;
+    }
+    @Override
+    public WrappedBlob asBlob() {
+		WrappedBlob wblob = (WrappedBlob) object;
+		return wblob;
     }
 
     @Override
@@ -146,6 +155,8 @@ public class DValueImpl implements DValue, DValueInternal {
 			}
 		} else if (object != null && type.isNumericShape()) {
 			s = ": " + object.toString();
+		} else if (object != null && type.isShape(Shape.BLOB)) {
+			s = ": blob..."; //may be very large. don't output
 		}
 		return type.toString() + s ;
 	}

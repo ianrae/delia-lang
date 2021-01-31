@@ -1,7 +1,7 @@
 package org.delia.type;
 
 /**
- * 8 Shapes.
+ * 9 Shapes.
  * The shape represents the underlying type of data
  * (int, long, string, boolean, ectc)
  *
@@ -13,6 +13,7 @@ public enum Shape {
 	BOOLEAN,
 	STRING,
 	DATE,
+	BLOB,
 	STRUCT,
 	RELATION;
 	
@@ -24,6 +25,7 @@ public enum Shape {
 		case "string": return STRING;
 		case "boolean": return BOOLEAN;
 		case "date": return DATE;
+		case "blob": return BLOB;
 		case "relation": return RELATION;
 		default: return null;
 		}

@@ -2,14 +2,12 @@ package org.delia.blob;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
 
 import org.delia.db.sizeof.DeliaTestBase;
+import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,71 +18,6 @@ import org.junit.Test;
  */
 public class BlobTests extends DeliaTestBase { 
 	
-	public static class BlobUtils {
-		//https://www.baeldung.com/java-base64-encode-and-decode
-		public static String toBase64(byte[] byteArr) {
-			String encodedString = Base64.getEncoder().encodeToString(byteArr);
-			return encodedString;
-		}
-		public static byte[] fromBase64(String encodedString) {
-			byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-			return decodedBytes;
-		}
-		
-		public static InputStream toInputStream(byte[] byteArr) {
-			InputStream is = new ByteArrayInputStream(byteArr);		
-			return is;
-		}
-		
-		public static byte[] hexStringToByteArray(String s) {
-		    int len = s.length();
-		    byte[] data = new byte[len / 2];
-		    for (int i = 0; i < len; i += 2) {
-		        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-		                             + Character.digit(s.charAt(i+1), 16));
-		    }
-		    return data;
-		}		
-		public static String byteArrayToHexString(byte[] byteArr) {
-			StringBuilder sb = new StringBuilder();
-			for(byte bb: byteArr) {
-				String s = String.format("%x", bb);
-				sb.append(s);
-			}
-			return sb.toString();
-		}		
-	}
-	
-	public static enum BlobType {
-		FILE,
-		BTYE_ARRAY
-	}
-	public static class WrappedBlob {
-		
-		private BlobType type;
-		private byte[] byteArr;
-		private Object file;
-
-		public WrappedBlob(byte[] byteArr) {
-			this.type = BlobType.BTYE_ARRAY;
-			this.byteArr = byteArr;
-		}
-		public WrappedBlob(File f) {
-			this.type = BlobType.FILE;
-			this.file = f;
-		}
-		public BlobType type() {
-			return type;
-		}
-		public byte[] getByteArray() {
-			return byteArr;
-		}
-		public Object getFile() {
-			return file;
-		}
-		
-	}
-
 	@Test
 	public void test() {
 		String s = BlobUtils.toBase64(SMALL);
