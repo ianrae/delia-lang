@@ -107,8 +107,8 @@ public class FactoryServiceImpl implements FactoryService {
 		return logFactory;
 	}
 	@Override
-	public ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
-		return new ValidationRuleRunnerImpl(this, dbInterface.getCapabilities(), fetchRunner);
+	public ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner) {
+		return new ValidationRuleRunnerImpl(this, dbInterface, registry, dbInterface.getCapabilities(), fetchRunner);
 	}
 //	@Override
 //	public HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {

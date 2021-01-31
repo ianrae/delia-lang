@@ -9,7 +9,9 @@ import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
 import org.delia.runner.FetchRunner;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class DRuleContext {
 	private ErrorTracker et;
@@ -25,11 +27,16 @@ public class DRuleContext {
 	private DValue upsertPKVal;
 	private boolean softMandatoryRelationFlag;
 	private FactoryService factorySvc;
+	private DBInterfaceFactory dbInterface;
+	private DTypeRegistry registry;
 
-	public DRuleContext(FactoryService factorySvc, ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
+	public DRuleContext(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry,
+					ErrorTracker et, String ruleText, boolean enableRelationModifierFlag, DBCapabilties dbCapabilties, 
 					boolean populateFKsFlag, FetchRunner fetchRunner, DValueCompareService compareSvc, 
 					boolean insertFlag, boolean upsertFlag, DValue upsertPKVal, boolean softMandatoryRelationFlag) {
 		this.factorySvc = factorySvc;
+		this.dbInterface = dbInterface;
+		this.registry = registry;
 		this.et = et;
 		this.ruleText = ruleText;
 		this.enableRelationModifierFlag = enableRelationModifierFlag;
@@ -119,6 +126,12 @@ public class DRuleContext {
 	}
 	public FactoryService getFactorySvc() {
 		return factorySvc;
+	}
+	public DBInterfaceFactory getDbInterface() {
+		return dbInterface;
+	}
+	public DTypeRegistry getRegistry() {
+		return registry;
 	}
 	
 }

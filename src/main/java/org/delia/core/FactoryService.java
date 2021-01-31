@@ -41,7 +41,7 @@ public interface FactoryService {
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();
 	DiagnosticService getDiagnosticService();
-	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner);
+	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner);
 	boolean getEnableMEMSqlGenerationFlag();
 	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
