@@ -71,7 +71,7 @@ public class LetStatementRunner extends ServiceBase {
 	}
 
 	private ValidationRunner createValidationRunner() {
-		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
+		return factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 	}
 
 	private void addError(ResultValue res, String id, String msg) {

@@ -52,7 +52,7 @@ public class InsertStatementRunner extends ServiceBase {
 	}
 
 	private ValidationRunner createValidationRunner(FetchRunner fetchRunner) {
-		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
+		return factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 	}
 
 	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner, 

@@ -1,8 +1,10 @@
 package org.delia.rule;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.StringExp;
@@ -15,6 +17,7 @@ import org.delia.rule.fns.LenFnRule;
 import org.delia.rule.rules.ContainsRule;
 import org.delia.rule.rules.MaxLenRule;
 import org.delia.rule.rules.SizeofRule;
+import org.delia.rule.rules.UniqueFieldsRule;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.util.DeliaExceptionHelper;
@@ -74,10 +77,18 @@ public class DefaultRuleFunctionBuilder implements RuleFunctionBulder {
 		}
 		case "uniqueFields":
 		{
-			IdentExp arg = (IdentExp) qfe.argL.get(0);
-			RuleOperand oper = createOperand(fieldName, dtype, qfe.funcName);
-			guard = adjustGuard(oper, guard);
-			rule = new ContainsRule(guard, oper, arg.strValue());
+			boolean haveSetGuard = false;
+			List<RuleOperand> operL = new ArrayList<>();
+			for(Exp exp: qfe.argL) {
+				IdentExp arg = (IdentExp) exp;
+				RuleOperand oper = createOperand(arg.name(), dtype, qfe.funcName);
+				operL.add(oper);
+				if (!haveSetGuard) {
+					haveSetGuard = true;
+					guard = adjustGuard(oper, guard);
+				}
+			}
+			rule = new UniqueFieldsRule(guard, operL);
 			break;
 		}
 		case "len":

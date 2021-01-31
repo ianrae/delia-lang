@@ -27,7 +27,7 @@ public class MemFksFunction extends MemFunctionBase {
 	@Override
 	public QueryResponse process(HLSQuerySpan hlspan, QueryResponse qresp, QueryFuncContext ctx) {
 		for(DValue dval: qresp.dvalList) {
-			ValidationRunner ruleRunner = factorySvc.createValidationRunner(dbInterface, fetchRunner);
+			ValidationRunner ruleRunner = factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 			ruleRunner.enableRelationModifier(true);
 			ruleRunner.setPopulateFKsFlag(true);
 			ruleRunner.validateRelationRules(dval);

@@ -57,7 +57,7 @@ public class UpdateStatementRunner extends ServiceBase {
 	}
 
 	private ValidationRunner createValidationRunner() {
-		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
+		return factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 	}
 
 	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2, BlobLoader blobLoader) {
