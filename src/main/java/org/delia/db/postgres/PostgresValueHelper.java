@@ -1,5 +1,6 @@
 package org.delia.db.postgres;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.PreparedStatement;
@@ -35,13 +36,28 @@ public class PostgresValueHelper extends ValueHelper {
 //			String s = String.format("decode('%s', 'hex')", hex);
 //			stm.setString(index++, s);
 			
+			//https://jdbc.postgresql.org/documentation/head/binary-data.html
 			WrappedBlob wblob = dval.asBlob();
 			InputStream stream = BlobUtils.toInputStream(wblob.getByteArray());
-			stm.setBlob(index++, stream); 
+			try {
+				log.log("%d fffffffffff: %d", index, stream.available());
+//				stm.setBinaryStream(index++, stream, stream.available()ilable());
+				stm.setBytes(index++, wblob.getByteArray());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			log.log("fffffffffff");
+			
+			//https://stackoverflow.com/questions/49110818/method-org-postgresql-jdbc-pgconnection-createclob-is-not-yet-implemented/52596666
+//			WrappedBlob wblob = dval.asBlob();
+//			Blob sqlBlob = blobCreator.createBlob();
+//			sqlBlob.setBytes(0, wblob.getByteArray());
+//			stm.setBlob(index++, sqlBlob);
 		}
 		break;
 		default:
-			super.doCreatePrepStatement(stm, dval, index);
+			index = super.doCreatePrepStatement(stm, dval, index);
 			break;
 		}
 		return index;
