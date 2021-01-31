@@ -329,6 +329,7 @@ public class H2BDDTests extends BDDBase {
 		runR2600Sizeof("t0-sizeof-migration1a.txt", 2);
 		runR2600Sizeof("t0-sizeof-migration1b.txt", 2);
 		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
 	}
 
 	@Test
