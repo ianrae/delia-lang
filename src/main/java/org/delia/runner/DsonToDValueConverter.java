@@ -178,7 +178,7 @@ public class DsonToDValueConverter extends ServiceBase {
 					byte[] byteArr = blobLoader.getByteArray(input);
 					if (byteArr == null) {
 						LoggableBlob lb = new LoggableBlob(input);
-						DeliaExceptionHelper.throwError("blob-loader-value-not-found", 
+						DeliaExceptionHelper.throwError("blob-loader-var-not-found", 
 								"blob field value '%s' not found in the BlobLoader", lb);
 					}
 					DValue dval = builder.buildBlob(byteArr, fieldType);

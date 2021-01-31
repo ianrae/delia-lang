@@ -123,8 +123,8 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public DeliaSession beginSession(String src) {
-		return doBeginExecution(src, null, null);
+	public DeliaSession beginSession(String src, BlobLoader blobLoader) {
+		return doBeginExecution(src, blobLoader, null);
 	}
 	private DeliaSession doBeginExecution(String src, BlobLoader blobLoader, MigrationPlan plan) {
 		List<Exp> expL =  compileDeliaSource(src, false);
@@ -411,7 +411,7 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public DeliaSession beginSession(String src, BlobLoader blobLoader) {
+	public DeliaSession beginSession(String src) {
 		return beginSession(src, null);
 	}
 

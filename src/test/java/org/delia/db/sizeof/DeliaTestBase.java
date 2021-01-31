@@ -14,6 +14,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.log.Log;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
@@ -31,6 +32,7 @@ public abstract class DeliaTestBase  {
 	protected Delia delia;
 	protected DeliaSession session;
 	protected Log log = new UnitTestLog();
+	protected BlobLoader blobLoader;
 
 	protected abstract String buildSrc();
 
@@ -39,6 +41,7 @@ public abstract class DeliaTestBase  {
 		log.log("initial: " + initialSrc);
 		
 		DeliaGenericDao dao = createDao(); 
+		dao.setBlobLoader(blobLoader);
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
 

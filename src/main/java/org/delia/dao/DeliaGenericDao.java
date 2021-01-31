@@ -13,6 +13,7 @@ import org.delia.db.sql.ConnectionString;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
@@ -31,6 +32,7 @@ public class DeliaGenericDao  {
 	private DBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 	private FactoryService factorySvc;
+	private BlobLoader blobLoader;
 	
 	public DeliaGenericDao() {
 		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
@@ -72,12 +74,12 @@ public class DeliaGenericDao  {
 		if (mostRecentSess != null) {
 			DeliaExceptionHelper.throwError("dao-init-error", "can't start a Dao more than once");
 		}
-		mostRecentSess = delia.beginSession(src);
+		mostRecentSess = delia.beginSession(src, blobLoader);
 		return mostRecentSess.getFinalResult();
 	}
 
 	public ResultValue execute(String src) {
-		ResultValue res = delia.continueExecution(src, mostRecentSess);
+		ResultValue res = delia.continueExecution(src, blobLoader, mostRecentSess);
 		return res;
 	}
 	
@@ -150,5 +152,13 @@ public class DeliaGenericDao  {
 			DeliaExceptionHelper.throwError("dao-registry-not-created-yet", "you must call initialize() before calling this method");
 		}
 		return this.mostRecentSess.getExecutionContext().registry;
+	}
+
+	public BlobLoader getBlobLoader() {
+		return blobLoader;
+	}
+
+	public void setBlobLoader(BlobLoader blobLoader) {
+		this.blobLoader = blobLoader;
 	}
 }
