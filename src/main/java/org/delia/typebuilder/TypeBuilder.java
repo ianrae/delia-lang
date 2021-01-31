@@ -205,7 +205,7 @@ public class TypeBuilder extends ServiceBase {
 		} else if (s.equals("date")) {
 			return dateType;
 		} else if (s.equals("blob")) {
-			return dateType;
+			return blobType;
 		} else {
 			//this only works if subtypes defined _before_ they are used.
 			DType possibleStruct = registry.getType(fieldExp.typeName);

@@ -159,6 +159,9 @@ public class DsonToDValueConverter extends ServiceBase {
 			} else if (Shape.DATE.equals(fieldType.getShape())) {
 				DValue dval = builder.buildDate(input, fieldType); 
 				return dval;
+			} else if (Shape.BLOB.equals(fieldType.getShape())) {
+				DValue dval = builder.buildBlob(input, fieldType); 
+				return dval;
 			} else if (Shape.STRUCT.equals(fieldType.getShape())) {
 				DType relType = registry.getType(BuiltInTypes.RELATION_SHAPE);
 				RelationValueBuilder rbuilder = new RelationValueBuilder(relType, fieldType.getName(), registry);

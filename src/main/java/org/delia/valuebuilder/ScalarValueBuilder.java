@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.log.LoggableBlob;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -95,7 +96,13 @@ public class ScalarValueBuilder extends ServiceBase {
 		builder.buildFrom(value);
 		return finish(builder, "date", value);
 	}
-	
+	//TODO note. blob is not a scalar type. move this later
+	public DValue buildBlob(String input, DType dtype) {
+		BlobValueBuilder builder = new BlobValueBuilder(factorySvc, dtype);
+		builder.buildFromString(input);
+		return finish(builder, "blob", new LoggableBlob(input));
+	}
+
 	public DValue buildBoolean(String input) {
 		return buildBoolean(input, registry.getType(BuiltInTypes.BOOLEAN_SHAPE));
 	}

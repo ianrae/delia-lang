@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.delia.db.sizeof.DeliaTestBase;
+import org.delia.type.DValue;
 import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,8 +66,10 @@ public class BlobTests extends DeliaTestBase {
 	
 	@Test
 	public void testOK() {
-		String src = "let x = Flight[15]";
+		String src = "let x = Flight[1]";
 		execute(src);
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
 	}	
 	
 

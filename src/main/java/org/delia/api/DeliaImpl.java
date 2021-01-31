@@ -305,6 +305,7 @@ public class DeliaImpl implements Delia {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 			sessimpl.mostRecentContinueExpL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			sessimpl.mostRecentRunner = runner;
+			sessimpl.res = res;
 		}
 		return res;
 	}
