@@ -93,12 +93,12 @@ public class AssocTableCreator extends ServiceBase {
 		List<SqlElement> fieldL = new ArrayList<>();
 		//RelationInfo relinfo = DRuleHelper.findManyToManyRelation(relpair, (DStructType) relpair.type);
 		TypePair copy = new TypePair("leftv", leftType);
-		FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false);
+		FieldGen field = fieldgenFactory.createFieldGen(registry, copy, leftType, false, 0);
 		field.setIsAssocTblField(); //rightType.fieldIsOptional(otherSide.fieldName));
 		fieldL.add(field);
 
 		copy = new TypePair("rightv", rightType);
-		field = fieldgenFactory.createFieldGen(registry, copy, rightType, false);
+		field = fieldgenFactory.createFieldGen(registry, copy, rightType, false, 0);
 		field.setIsAssocTblField(); //leftType.fieldIsOptional(pair.name));
 		fieldL.add(field);
 

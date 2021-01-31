@@ -1,19 +1,16 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
-import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
-import org.delia.db.postgres.PostgresSqlGeneratorFactory;
 import org.delia.db.schema.SchemaMigrator;
-import org.delia.db.sqlgen.SqlGeneratorFactory;
-import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
-import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
+import org.delia.rule.RuleFuncFactoryImpl;
+import org.delia.rule.RuleFunctionFactory;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
@@ -128,6 +125,10 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public void setEnableMEMSqlGenerationFlag(boolean flag) {
 		enableMEMSqlGenerationFlag = flag;
+	}
+	@Override
+	public RuleFunctionFactory createRuleFunctionFactory() {
+		return new RuleFuncFactoryImpl(this);
 	}
 
 }

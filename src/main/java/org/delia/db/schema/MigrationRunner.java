@@ -35,16 +35,22 @@ public class MigrationRunner extends ServiceBase {
 						dbexecutor.createTable(st.typeName);
 					} else if (st.isFieldInsert()) {
 						log.log("  add-field: %s", st);
-						dbexecutor.createField(st.typeName, st.field);
+						dbexecutor.createField(st.typeName, st.field, st.sizeof);
 					} else if (st.isFieldRename()) {
 						log.log("  rename-field: %s %s", st, st.newName);
 						dbexecutor.renameField(st.typeName, st.field, st.newName);
 					} else if (st.isFieldAlterType()) {
 						log.log("  alter-field-type: %s %s", st, st.newName);
-						dbexecutor.alterFieldType(st.typeName, st.field, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, 0);
 					} else if (st.isFieldAlter()) {
 						log.log("  alter-field: %s '%s'", st, st.newName);
 						dbexecutor.alterField(st.typeName, st.field, st.newName);
+					} else if (st.isFieldAlterSizeInt()) {
+						log.log("  alter-field-sizeof-int: %s %s", st, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, st.sizeof);
+					} else if (st.isFieldAlterSizeString()) {
+						log.log("  alter-field-sizeof-str: %s %s", st, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, st.sizeof);
 					}
 				}
 			}

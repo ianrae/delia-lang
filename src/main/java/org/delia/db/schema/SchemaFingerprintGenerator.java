@@ -14,7 +14,11 @@ import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 
 public class SchemaFingerprintGenerator {
-	public static final int SCHEMA_VERSION = 1;
+	public static final int SCHEMA_VERSION = 2;
+	//v1 - may2020 - initial version
+	//v2 - feb2021 - add support for sizeof
+	
+	
 	private DTypeRegistry registry;
 
 	public String createFingerprint(DTypeRegistry registry) {
@@ -91,10 +95,19 @@ public class SchemaFingerprintGenerator {
 			}
 		}
 		
-		String fldName = getTypeAsString(pair);
-		String s = String.format("%s:%s:%s/%d", pair.name, fldName, flags, datId);
+		String fldType = getTypeAsString(pair);
+		String sizeofStr = calcSizeofStr(dtype, pair);
+		String s = String.format("%s:%s%s:%s/%d", pair.name, fldType, sizeofStr, flags, datId);
 		return s;
 	}
+	private String calcSizeofStr(DStructType dtype, TypePair pair) {
+		int n = DRuleHelper.getSizeofField(dtype, pair.name);
+		if (n != 0) {
+			return String.format("(%d)", n);
+		}
+		return "";
+	}
+
 	private String getTypeAsString(TypePair pair) {
 		try {
 			BuiltInTypes fieldType = BuiltInTypes.valueOf(pair.type.getName());

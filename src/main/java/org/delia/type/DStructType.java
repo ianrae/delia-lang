@@ -120,6 +120,18 @@ public class DStructType extends DType implements DStructTypeInternal {
         }
         return allFields;
     }
+    public TypePair findField(String fieldName) {
+    	for(TypePair pair: getAllFields()) {
+    		if (pair.name.equals(fieldName)) {
+    			return pair;
+    		}
+    	}
+        return null;
+    }
+    public boolean hasField(String fieldName) {
+    	TypePair pair = findField(fieldName);
+    	return pair != null;
+    }
 
     private List<TypePair> doAllFieldsForType(DStructType dtype) {
         DStructType baseType = (DStructType) dtype.getBaseType();

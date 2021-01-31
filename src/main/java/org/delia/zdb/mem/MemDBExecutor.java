@@ -311,7 +311,7 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
+	public void createField(String typeName, String field, int sizeof) {
 		MemDBTable tbl = tableMap.get(typeName);
 		if (tbl == null) {
 			tbl = handleUnknownTable(typeName);
@@ -343,7 +343,7 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
 		//nothing to do
 	}
 

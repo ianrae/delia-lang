@@ -56,7 +56,7 @@ public class PostgresTableCreator extends TableCreator {
 	}
 
 	@Override
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}
@@ -71,7 +71,7 @@ public class PostgresTableCreator extends TableCreator {
 		if (isManyToManyRelation(pair, dtype)) {
 			manyToManyFieldCount++;
 		} else {
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true, sizeof);
 			fieldL.add(field);
 		}
 

@@ -16,7 +16,6 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
-import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -172,6 +171,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	//Customer:struct:{id:int::O,firstName:string::,lastName:string:O:,points:int:O:}\n
 	public List<SchemaType> parseFingerprint(String fingerprint) {
 		parseVersion(fingerprint);
+		//Note v2 is backwards compatible with v1 so we don't need any extra code here
+		
 		fingerprint = StringUtils.substringAfter(fingerprint, ")");
 		String ar[] = fingerprint.split("\n");
 		List<SchemaType> list = new ArrayList<>();
@@ -237,7 +238,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		//add fieldinfo.fieldIndex - index of field within dtype
 		//if I and D have same fieldIndex and same type and options then do a rename
 
-		//I/U/D/R/A/AT
+		//I/U/D/R/A/AT/AS[Z|N]
 		for(FieldInfo finfo: flist1) {
 			FieldInfo f2 = findFieldIn(finfo, flist2);
 			if (f2 != null) {
@@ -249,6 +250,22 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					st.field = finfo.name;
 					st.newName = f2.type; //new field type
 					diffList.add(st);
+				} else {
+					String sizeofStr = calcSizeofString(finfo, f2);
+					if (sizeofStr != null) {
+						SchemaType st = new SchemaType();
+						st.typeName = st1.typeName;
+						st.line = st1.line;
+						if (f2.type.contains(":string")) { //TODO support types derived from string such as Name
+							st.action = "ASZ"; //alter size (string)
+						} else {
+							st.action = "ASN"; //alter size (int)
+						}
+						st.field = finfo.name;
+						st.newName = sizeofStr;
+						st.sizeof = f2.sizeof;
+						diffList.add(st);
+					}
 				}
 				
 				String deltaFlags = calcDeltaFlags(finfo, f2);
@@ -281,8 +298,17 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			st.line = st2.line;
 			st.action = "I";
 			st.field = f2.name;
+			st.sizeof = f2.sizeof;
 			diffList.add(st);
 		}
+	}
+
+	private String calcSizeofString(FieldInfo finfo, FieldInfo f2) {
+		if (finfo.sizeof == f2.sizeof) {
+			return null;
+		}
+		
+		return String.format("%d/%d", finfo.sizeof, f2.sizeof); // old/new size values
 	}
 
 	/** generate a string of modifier changes.
@@ -336,6 +362,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			FieldInfo finfo = new FieldInfo();
 			finfo.name = StringUtils.substringBefore(ss, ":");
 			finfo.type = StringUtils.substringBetween(ss, ":", ":");
+			finfo.type = calcSizeofIfAny(ss, finfo);
 			String tmp = StringUtils.substringAfterLast(ss, ":");
 			finfo.flagStr = StringUtils.substringBefore(tmp, "/");
 			tmp = StringUtils.substringAfterLast(ss, "/");
@@ -343,6 +370,17 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			list.add(finfo);
 		}
 		return list;
+	}
+
+	private String calcSizeofIfAny(String ss, FieldInfo finfo) {
+		String s = StringUtils.substringAfter(ss, "(");
+		if (StringUtils.isEmpty(s)) {
+			return finfo.type; //no sizeof
+		}
+		
+		String s2 = StringUtils.substringBefore(s, ")");
+		finfo.sizeof = Integer.parseInt(s2);
+		return StringUtils.substringBefore(ss, "("); //strip of (8)
 	}
 
 	private SchemaType findIn(SchemaType st, List<SchemaType> list2) {
@@ -411,6 +449,23 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 				}
 				if (st.newName.contains("S")) {
 					log.logError("error: not allowed to add/remove serial '%s.%s' ", st.typeName, st.field);
+					failCount++;
+				}
+			} else if (st.isFieldAlterSizeInt()) {
+				Integer old = Integer.parseInt(StringUtils.substringBefore(st.newName, "/"));
+				Integer newSize = Integer.parseInt(StringUtils.substringAfter(st.newName, "/"));
+				if (newSize < old) {
+					boolean canIgnore = (newSize == 0 && old == 32);
+					if (!canIgnore) {
+						log.logError("error: sizeof int being decreased. may cause data loss '%s.%s' ", st.typeName, st.field);
+						failCount++;
+					}
+				}
+			} else if (st.isFieldAlterSizeString()) {
+				Integer old = Integer.parseInt(StringUtils.substringBefore(st.newName, "/"));
+				Integer newSize = Integer.parseInt(StringUtils.substringAfter(st.newName, "/"));
+				if (newSize < old) {
+					log.logError("error: sizeof string being decreased. may cause data loss '%s.%s' ", st.typeName, st.field);
 					failCount++;
 				}
 			}

@@ -72,7 +72,8 @@ public class TableCreator extends ServiceBase {
 				continue;
 			}
 			
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, false);
+			int sizeof = calcSizeof(dtype, pair);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, false, sizeof);
 			fieldL.add(field);
 			index++;
 		}
@@ -127,6 +128,10 @@ public class TableCreator extends ServiceBase {
 	}
 	
 
+	private int calcSizeof(DStructType dtype, TypePair pair) {
+		return DRuleHelper.getSizeofField(dtype, pair.name);
+	}
+
 	protected void haveFieldsVisitTheirConstrainsts(List<SqlElement> fieldL, List<ConstraintGen> constraints) {
 		//have field see all its contraints
 		for(SqlElement el: fieldL) {
@@ -165,7 +170,7 @@ public class TableCreator extends ServiceBase {
 		return assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}
@@ -180,7 +185,7 @@ public class TableCreator extends ServiceBase {
 		if (isManyToManyRelation(pair, dtype)) {
 			manyToManyFieldCount++;
 		} else {
-			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+			FieldGen field = fieldgenFactory.createFieldGen(registry, pair, dtype, true, sizeof);
 			fieldL.add(field);
 		}
 		
@@ -261,14 +266,14 @@ public class TableCreator extends ServiceBase {
 		return nameFormatter.convert(tableName);
 	}
 
-	public String generateAlterFieldType(String tableName, String fieldName, String newFieldType) {
+	public String generateAlterFieldType(String tableName, String fieldName, String newFieldType, int sizeof) {
 		StrCreator sc = new StrCreator();
 		doAlterColumnPrefix(sc, tableName, fieldName);
 
 		DStructType dtype = (DStructType) registry.getType(tableName);
 		TypePair pair = DValueHelper.findField(dtype, fieldName);
 		
-		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true);
+		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true, sizeof);
 		String sqlType = fieldGen.deliaToSql(pair);
 		
 		sc.o(" SET DATA TYPE %s", sqlType); 

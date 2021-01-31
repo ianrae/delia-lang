@@ -318,25 +318,34 @@ public class H2BDDTests extends BDDBase {
 	public void testR2300() {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
+	
+	//R2400 tests not needed (only in mem tests)
+	
+	@Test
+	public void testR2600() {
+		runR2600Sizeof("t0-sizeof-int.txt", 1);
+		runR2600Sizeof("t0-sizeof-string.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1a.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1b.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
+	}
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 6;
+//		testIndexToRun = 1;
 //		DeliaImpl.useNewHLD = false;
-//		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 //		ResultSetToDValConverter.logResultSetDetails = true;
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		runR950File("t0-crud-assoc-insert.txt", 6);
-//		runR1500File("t0-queryfn-orderby-2span.txt", 0);
-//		runR560File("t0-self-11.txt", 3);
-//		runR560File("t0-self-N1.txt", 4);
-		
-//		runR560File("t0-self-11.txt", 3);
-		runR500File("t0-relation-many-to-many.txt", 11);
+//		runR2600Sizeof("t0-sizeof-string.txt", 2);
+//		runR2600Sizeof("t0-sizeof-int.txt", 1);
+		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
 	}
 	
 	//---

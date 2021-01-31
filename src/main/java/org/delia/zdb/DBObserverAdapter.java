@@ -159,8 +159,8 @@ public class DBObserverAdapter implements DBExecutor {
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
-		inner.createField(typeName, field);
+	public void createField(String typeName, String field, int sizeof) {
+		inner.createField(typeName, field, sizeof);
 	}
 
 	@Override
@@ -174,8 +174,8 @@ public class DBObserverAdapter implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-		inner.alterFieldType(typeName, fieldName, newFieldType);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
+		inner.alterFieldType(typeName, fieldName, newFieldType, sizeof);
 	}
 
 	@Override

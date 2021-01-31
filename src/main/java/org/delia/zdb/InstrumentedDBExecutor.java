@@ -126,8 +126,8 @@ public class InstrumentedDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
-		zexec.createField(typeName, field);
+	public void createField(String typeName, String field, int sizeof) {
+		zexec.createField(typeName, field, sizeof);
 	}
 
 	@Override
@@ -141,8 +141,8 @@ public class InstrumentedDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-		zexec.alterFieldType(typeName, fieldName, newFieldType);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
+		zexec.alterFieldType(typeName, fieldName, newFieldType, sizeof);
 	}
 
 	@Override

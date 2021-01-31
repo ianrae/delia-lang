@@ -11,6 +11,7 @@ import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
+import org.delia.rule.RuleFunctionFactory;
 import org.delia.runner.FetchRunner;
 import org.delia.runner.VarEvaluator;
 import org.delia.type.DTypeRegistry;
@@ -46,4 +47,5 @@ public interface FactoryService {
 	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner);
 	boolean getEnableMEMSqlGenerationFlag();
 	void setEnableMEMSqlGenerationFlag(boolean flag);
+	RuleFunctionFactory createRuleFunctionFactory();
 }

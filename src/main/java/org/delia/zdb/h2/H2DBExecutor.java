@@ -320,10 +320,10 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	}
 
 	@Override
-	public void createField(String typeName, String field) {
+	public void createField(String typeName, String field, int sizeof) {
 		failIfNotInit2(); 
 		DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		String sql = tableCreator.generateCreateField(typeName, dtype, field);
+		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof);
 		execSqlStatement(sql);
 	}
 
@@ -343,9 +343,9 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
 		failIfNotInit2(); 
-		String sql = tableCreator.generateAlterFieldType(typeName, fieldName, newFieldType);
+		String sql = tableCreator.generateAlterFieldType(typeName, fieldName, newFieldType, sizeof);
 		execSqlStatement(sql);
 	}
 

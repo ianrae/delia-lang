@@ -1,4 +1,4 @@
-package org.delia.typebuilder;
+package org.delia.rule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +19,6 @@ import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.rule.AlwaysRuleGuard;
-import org.delia.rule.DRule;
-import org.delia.rule.NotNullGuard;
-import org.delia.rule.RuleGuard;
-import org.delia.rule.RuleOperand;
-import org.delia.rule.RuleRuleOperand;
-import org.delia.rule.ScalarRuleOperand;
-import org.delia.rule.StructDValueRuleOperand;
 import org.delia.rule.rules.CompareOpRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -34,36 +26,85 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
+import org.delia.util.DeliaExceptionHelper;
 
 public class RuleBuilder extends ServiceBase {
+	private static class RuleDefPair {
+		public XNAFSingleExp exp;
+		public String fieldName;
+	}
 	
 	private DTypeRegistry registry;
-	private RuleFuncFactory ruleFactory;
+	private RuleFunctionFactory ruleFactory;
 
 	public RuleBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
-		this.ruleFactory = new RuleFuncFactory(factorySvc);
+		this.ruleFactory = factorySvc.createRuleFunctionFactory();
 	}
 	
 	public void addRules(DType dtype, TypeStatementExp typeStatementExp) {
 		for(RuleExp ruleExp: typeStatementExp.ruleSetExp.ruleL) {
 			if (ruleExp.opExpr instanceof FilterOpExp) {
 				FilterOpExp foe = (FilterOpExp) ruleExp.opExpr;
-				RuleOperand oper1 = createOperand(foe.op1);
-				RuleOperand oper2 = createOperand(foe.op2);
+				RuleOperand oper1 = createOperand(foe.op1, dtype);
+				RuleOperand oper2 = createOperand(foe.op2, dtype);
 				RuleGuard guard = createGuard(oper1, oper2); //new AlwaysRuleGuard();
 				DateFormatService fmtSvc = this.factorySvc.getDateFormatService();
 				CompareOpRule rule = new CompareOpRule(guard, oper1, foe.op, oper2, fmtSvc);
 				dtype.getRawRules().add(rule);
 			} else if (ruleExp.opExpr instanceof XNAFMultiExp) {
 				XNAFMultiExp rfe = (XNAFMultiExp) ruleExp.opExpr;
-				DRule rule = ruleFactory.createRule(rfe, 0);
+				DRule rule = ruleFactory.createRule(rfe, 0, dtype);
 				if (rule != null) {
 					dtype.getRawRules().add(rule);
+				} else {
+					DeliaExceptionHelper.throwError("unknown-rule", "Type %s: unknown rule '%s'", dtype.getName(), ruleExp.strValue());
 				}
 			}
 		}
+	}
+	
+	public List<String> findSizeofUpgrades(TypeStatementExp typeStatementExp) {
+		List<String> fieldNameL = new ArrayList<>();
+		for(RuleExp ruleExp: typeStatementExp.ruleSetExp.ruleL) {
+			if (ruleExp.opExpr instanceof XNAFMultiExp) {
+				XNAFMultiExp rfe = (XNAFMultiExp) ruleExp.opExpr;
+				RuleDefPair pair = findSizeOfRule(rfe);
+				if (pair == null) {
+					continue;
+				}
+				
+				IntegerExp arg = (IntegerExp) pair.exp.argL.get(0);
+				if (arg.val.intValue() == 64) {
+					fieldNameL.add(pair.fieldName);
+				}
+			}
+		}
+		return fieldNameL;
+	}
+	
+	private RuleDefPair findSizeOfRule(XNAFMultiExp rfe) {
+		//only one func. TODO: fix later!!
+		XNAFSingleExp qfe0 = rfe.qfeL.get(0);
+		XNAFSingleExp qfe = qfe0;
+
+		String fieldName = null;
+		if (rfe.qfeL.size() == 2) {
+			XNAFSingleExp qfe1 = rfe.qfeL.get(1);
+			if (!qfe0.isRuleFn && qfe1.isRuleFn) {
+				fieldName = qfe0.funcName;
+				qfe = qfe1;
+			}
+		}
+
+		if (qfe.funcName.equals("sizeof")) {
+			RuleDefPair pair = new RuleDefPair();
+			pair.exp = qfe;
+			pair.fieldName = fieldName;
+			return pair;
+		}
+		return null;
 	}
 
 	private RuleGuard createGuard(RuleOperand oper1, RuleOperand oper2) {
@@ -85,7 +126,7 @@ public class RuleBuilder extends ServiceBase {
 		}
 	}
 
-	private RuleOperand createOperand(Exp op1) {
+	private RuleOperand createOperand(Exp op1, DType dtype) {
 		if (op1 instanceof XNAFMultiExp) {
 			XNAFMultiExp rfe = (XNAFMultiExp) op1;
 			List<XNAFSingleExp> qfeL = rfe.qfeL;
@@ -93,7 +134,7 @@ public class RuleBuilder extends ServiceBase {
 				XNAFSingleExp qfe = qfeL.get(0);
 				if (qfe.isRuleFn) {
 					//add args later!!
-					DRule rule = ruleFactory.createRule(rfe, 0);
+					DRule rule = ruleFactory.createRule(rfe, 0, dtype);
 					RuleRuleOperand rro = new RuleRuleOperand(qfe.funcName, rule, null);
 					return rro;
 				} else if (qfe.argL.size() == 0) {
@@ -105,7 +146,7 @@ public class RuleBuilder extends ServiceBase {
 				XNAFSingleExp qfe1 = qfeL.get(0);
 				XNAFSingleExp qfe2 = qfeL.get(1);
 				//add args later!!
-				DRule rule = ruleFactory.createRule(rfe, 1);
+				DRule rule = ruleFactory.createRule(rfe, 1, dtype);
 				RuleRuleOperand rro = new RuleRuleOperand(qfe2.funcName, rule, qfe1.funcName);
 				return rro;
 			}
