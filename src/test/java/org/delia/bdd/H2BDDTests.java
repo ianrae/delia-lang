@@ -344,7 +344,7 @@ public class H2BDDTests extends BDDBase {
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR2600Sizeof("t0-sizeof-string.txt", 2);
 //		runR2600Sizeof("t0-sizeof-int.txt", 1);
-		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
+		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
 	}
 	
 	//---

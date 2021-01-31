@@ -256,13 +256,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 						SchemaType st = new SchemaType();
 						st.typeName = st1.typeName;
 						st.line = st1.line;
-						if (f2.type.equals("string")) { //TODO support types derived from string such as Name
+						if (f2.type.contains(":string")) { //TODO support types derived from string such as Name
 							st.action = "ASZ"; //alter size (string)
 						} else {
 							st.action = "ASN"; //alter size (int)
 						}
 						st.field = finfo.name;
 						st.newName = sizeofStr;
+						st.sizeof = f2.sizeof;
 						diffList.add(st);
 					}
 				}

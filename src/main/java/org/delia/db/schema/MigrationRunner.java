@@ -50,7 +50,8 @@ public class MigrationRunner extends ServiceBase {
 						log.log("  alter-field-sizeof-int: %s %s", st, st.newName);
 						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, st.sizeof);
 					} else if (st.isFieldAlterSizeString()) {
-						DeliaExceptionHelper.throwNotImplementedError("argstr");
+						log.log("  alter-field-sizeof-str: %s %s", st, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, st.sizeof);
 					}
 				}
 			}
