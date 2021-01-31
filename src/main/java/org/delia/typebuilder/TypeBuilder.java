@@ -189,6 +189,7 @@ public class TypeBuilder extends ServiceBase {
 		DType numberType = registry.getType(BuiltInTypes.NUMBER_SHAPE);
 		DType boolType = registry.getType(BuiltInTypes.BOOLEAN_SHAPE);
 		DType dateType = registry.getType(BuiltInTypes.DATE_SHAPE);
+		DType blobType = registry.getType(BuiltInTypes.BLOB_SHAPE);
 		
 		String s = fieldExp.typeName;
 		if (s.equals("string")) {
@@ -202,6 +203,8 @@ public class TypeBuilder extends ServiceBase {
 		} else if (s.equals("number")) {
 			return numberType;
 		} else if (s.equals("date")) {
+			return dateType;
+		} else if (s.equals("blob")) {
 			return dateType;
 		} else {
 			//this only works if subtypes defined _before_ they are used.

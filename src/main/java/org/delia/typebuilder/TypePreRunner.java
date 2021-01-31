@@ -78,6 +78,7 @@ public class TypePreRunner extends ServiceBase {
 		DType numberType = actualRegistry.getType(BuiltInTypes.NUMBER_SHAPE);
 		DType boolType = actualRegistry.getType(BuiltInTypes.BOOLEAN_SHAPE);
 		DType dateType = actualRegistry.getType(BuiltInTypes.DATE_SHAPE);
+		DType blobType = actualRegistry.getType(BuiltInTypes.BLOB_SHAPE);
 		
 		String s = fieldExp.typeName;
 		if (s.equals("string")) {
@@ -92,6 +93,8 @@ public class TypePreRunner extends ServiceBase {
 			return numberType;
 		} else if (s.equals("date")) {
 			return dateType;
+		} else if (s.equals("blob")) {
+			return blobType;
 		} else {
 			DType possibleStruct = preRegistry.getType(fieldExp.typeName);
 			if (possibleStruct != null) {

@@ -62,10 +62,17 @@ public class BlobTests extends DeliaTestBase {
 	    log.log(s);
 	    assertEquals("e04fd020ea3a6910", s);
 	}	
+	
+	@Test
+	public void testOK() {
+		String src = "let x = Flight[15]";
+		execute(src);
+	}	
+	
 
 	//-------------------------
-	private boolean addSizeof = true;
-	private String sizeofStr = "field2.sizeof(8)";
+//	private boolean addSizeof = true;
+//	private String sizeofStr = "field2.sizeof(8)";
 	private String expectedRuleFail = "rule-sizeof";
 	
 	private byte[] SMALL = new byte[] { (byte)0xe0, 0x4f, (byte)0xd0, 0x20 };	
@@ -78,23 +85,23 @@ public class BlobTests extends DeliaTestBase {
 
 	@Override
 	protected String buildSrc() {
-		String s = addSizeof ? sizeofStr : "";
-		String src = String.format("type Flight struct {field1 int primaryKey, field2 int } %s end", s);
+		String s = "";
+		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob } %s end", s);
 
 		s =  "";
-		src += String.format("\n insert Flight {field1: 1, field2: 10 %s}", s);
-		src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
+		src += String.format("\n insert Flight {field1: 1, field2: '4E/QIA=='}");
+		src += String.format("\n insert Flight {field1: 2, field2: '4E/QIA=='}");
 		return src;
 	}
-	private void chkIt(String rule, String s, boolean b) {
-		sizeofStr = rule;
-		String src = String.format("insert Flight {field1: 3, field2: %s }", s);
-		if (b) {
-			execute(src);
-		} else {
-			executeFail(src, expectedRuleFail);
-		}
-	}
+//	private void chkIt(String rule, String s, boolean b) {
+//		sizeofStr = rule;
+//		String src = String.format("insert Flight {field1: 3, field2: %s }", s);
+//		if (b) {
+//			execute(src);
+//		} else {
+//			executeFail(src, expectedRuleFail);
+//		}
+//	}
 
 
 }
