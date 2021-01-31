@@ -29,7 +29,6 @@ import org.delia.type.WrappedDate;
 import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.BlobCreator;
 
 public class ValueHelper extends ServiceBase {
 	protected DateFormatService fmtSvc;

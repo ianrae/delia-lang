@@ -7,11 +7,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.delia.core.FactoryService;
+import org.delia.db.BlobCreator;
 import org.delia.db.ValueHelper;
 import org.delia.type.DValue;
 import org.delia.type.WrappedBlob;
 import org.delia.util.BlobUtils;
-import org.delia.zdb.BlobCreator;
 
 public class PostgresValueHelper extends ValueHelper {
 

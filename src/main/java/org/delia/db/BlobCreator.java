@@ -1,4 +1,4 @@
-package org.delia.zdb;
+package org.delia.db;
 
 import java.sql.Blob;
 
