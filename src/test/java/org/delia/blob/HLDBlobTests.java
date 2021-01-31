@@ -20,6 +20,7 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +36,10 @@ public class HLDBlobTests extends NewHLSTestBase {
 	
 	@Test
 	public void test() {
-		addBlob = true;
 		chkbuilderOpBlob("let x = Flight[field3 == '4E/QIA==']", "field3", "==", "4E/QIA==");
 	}	
 	@Test
 	public void testBlobSelect() {
-		addBlob = true;
 		String src = String.format("let x = Flight[field3 == '4E/QIA==']");
 		HLDQueryStatement hld = buildFromSrc(src, 0); 
 
@@ -58,7 +57,6 @@ public class HLDBlobTests extends NewHLSTestBase {
 
 	@Test
 	public void testBlobInsert() {
-		addBlob = true;
 		String src = String.format("insert Flight {field1: 3, field2: 30, field3:'4E/QIA=='}");
 		
 		HLDInsertStatement hld = buildInsertFromSrc(src, 0);
@@ -77,7 +75,6 @@ public class HLDBlobTests extends NewHLSTestBase {
 	
 	@Test
 	public void testCompareNotAllowed() {
-		addBlob = true;
 		try {
 			chkbuilderOpBlob("let x = Flight[field3 < '4E/QIA==']", "field3", "==", "4E/QIA==");
 		} catch (DeliaException e) {
@@ -88,7 +85,6 @@ public class HLDBlobTests extends NewHLSTestBase {
 	}	
 	@Test
 	public void testOrderByNotAllowed() {
-		addBlob = true;
 		try {
 			chkbuilderOpBlob("let x = Flight[1].orderBy('field3')", "field3", "==", "4E/QIA==");
 		} catch (DeliaException e) {
@@ -108,14 +104,35 @@ public class HLDBlobTests extends NewHLSTestBase {
 		}
 		assertEquals(1,2); //should never get here
 	}	
+	@Test
+	public void testUniqueNotAllowed() {
+		buildUnique = true;
+		try {
+			chkbuilderOpBlob("let x = Flight[1]", "field3", "==", "4E/QIA==");
+		} catch (DeliaException e) {
+			assertEquals("blob-unique-not-allowed", e.getLastError().getId());
+			return;
+		}
+		assertEquals(1,2); //should never get here
+	}	
 
+	@Test
+	public void testLet() {
+		buildCond("let x = Flight[1].field3");
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals("4E/QIA==", dval.asString());
+		byte[] byteArr = dval.asBlob().getByteArray();
+		assertEquals("4E/QIA==", BlobUtils.toBase64(byteArr));
+	}	
 	
 	//-------------------------
 	private boolean addBlob = false;
 	private boolean buildBlobPK = false;
+	private boolean buildUnique = false;
 
 	@Before
 	public void init() {
+		addBlob = true;
 	}
 	
 	
@@ -150,7 +167,8 @@ public class HLDBlobTests extends NewHLSTestBase {
 		if (buildBlobPK) {
 			return buildBlobPK();
 		}
-		String s = addBlob ? ", field3 blob" : "";
+		String uniqueStr = buildUnique ? " unique" : "";
+		String s = addBlob ? ", field3 blob" + uniqueStr : "";
 		String src = String.format("type Flight struct {field1 int primaryKey, field2 int %s } end", s);
 
 		s = addBlob ? ", field3: '4E/QIA=='" : "";

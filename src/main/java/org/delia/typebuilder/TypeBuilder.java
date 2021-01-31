@@ -55,7 +55,14 @@ public class TypeBuilder extends ServiceBase {
 					fieldType = registry.getType(BuiltInTypes.LONG_SHAPE);
 					System.out.println("llllllllllllllllllllll " + fieldName);
 				}
+			} else if (fieldType.isShape(Shape.BLOB) && fieldExp.isUnique) {
+				String msg = String.format("blob field '%s': cannot be unique, in type '%s'", fieldName, typeStatementExp.typeName);
+				FutureDeclError future = new FutureDeclError("blob-unique-not-allowed", msg);
+				future.baseTypeName = typeStatementExp.baseTypeName;
+				et.addNoLog(future);
 			}
+			
+			
 			omap.add(fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial);
 		}
 		
