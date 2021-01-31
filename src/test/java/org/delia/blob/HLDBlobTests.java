@@ -16,12 +16,15 @@ import org.delia.hld.cond.FilterCondBuilder;
 import org.delia.hld.cond.FilterVal;
 import org.delia.hld.cond.OpFilterCond;
 import org.delia.hld.cud.HLDInsertStatement;
+import org.delia.runner.DeliaException;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
+
+import junit.framework.AssertionFailedError;
 
 /**
  * 
@@ -72,8 +75,44 @@ public class HLDBlobTests extends NewHLSTestBase {
 		assertEquals(s, stm.sql);
 	}
 	
+	@Test
+	public void testCompareNotAllowed() {
+		addBlob = true;
+		try {
+			chkbuilderOpBlob("let x = Flight[field3 < '4E/QIA==']", "field3", "==", "4E/QIA==");
+		} catch (DeliaException e) {
+			assertEquals("blob-compare-not-allowed", e.getLastError().getId());
+			return;
+		}
+		assertEquals(1,2); //should never get here
+	}	
+	@Test
+	public void testOrderByNotAllowed() {
+		addBlob = true;
+		try {
+			chkbuilderOpBlob("let x = Flight[1].orderBy('field3')", "field3", "==", "4E/QIA==");
+		} catch (DeliaException e) {
+			assertEquals("blob-orderBy-not-allowed", e.getLastError().getId());
+			return;
+		}
+		assertEquals(1,2); //should never get here
+	}	
+	@Test
+	public void testPKNotAllowed() {
+		buildBlobPK = true;
+		try {
+			chkbuilderOpBlob("let x = Flight[1]", "field3", "==", "4E/QIA==");
+		} catch (DeliaException e) {
+			assertEquals("primary-key-type-not-allowed", e.getLastError().getId());
+			return;
+		}
+		assertEquals(1,2); //should never get here
+	}	
+
+	
 	//-------------------------
 	private boolean addBlob = false;
+	private boolean buildBlobPK = false;
 
 	@Before
 	public void init() {
@@ -108,12 +147,19 @@ public class HLDBlobTests extends NewHLSTestBase {
 
 	@Override
 	protected String buildSrc() {
+		if (buildBlobPK) {
+			return buildBlobPK();
+		}
 		String s = addBlob ? ", field3 blob" : "";
 		String src = String.format("type Flight struct {field1 int primaryKey, field2 int %s } end", s);
 
 		s = addBlob ? ", field3: '4E/QIA=='" : "";
 		src += String.format("\n insert Flight {field1: 1, field2: 10 %s}", s);
 		src += String.format("\n insert Flight {field1: 2, field2: 20 %s}", s);
+		return src;
+	}
+	private String buildBlobPK() {
+		String src = String.format("type Flight struct {field1 blob primaryKey, field2 int } end");
 		return src;
 	}
 	protected HLDInsertStatement buildInsertFromSrc(String src, int expectedMoreSize) {
