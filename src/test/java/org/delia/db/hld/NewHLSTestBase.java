@@ -28,7 +28,6 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.hld.HLDBuildService;
 import org.delia.hld.HLDBuildServiceImpl;
 import org.delia.hld.HLDQueryStatement;
-import org.delia.hld.HLDSQLGenerator;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;

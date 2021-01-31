@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.delia.db.sizeof.DeliaTestBase;
+import org.delia.type.BlobType;
 import org.delia.type.DValue;
+import org.delia.type.WrappedBlob;
 import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,18 +67,35 @@ public class BlobTests extends DeliaTestBase {
 	}	
 	
 	@Test
-	public void testOK() {
+	public void testDelia() {
 		String src = "let x = Flight[1]";
 		execute(src);
 		DValue dval = session.getFinalResult().getAsDValue();
 		assertEquals(1, dval.asStruct().getField("field1").asInt());
+		WrappedBlob wblob = dval.asStruct().getField("field2").asBlob();
+		assertEquals(BlobType.BTYE_ARRAY, wblob.type());
+		String s = BlobUtils.toBase64(wblob.getByteArray());
+		log.log(s);
+		assertEquals("4E/QIA==", s);
+		
+		//check asString
+		s = dval.asStruct().getField("field2").asString();
+		assertEquals("4E/QIA==", s);
 	}	
 	
+	@Test
+	public void testDeliaNull() {
+		useSrc2 = true;
+		String src = "let x = Flight[1]";
+		execute(src);
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
+		DValue inner = dval.asStruct().getField("field2");
+		assertEquals(null, inner);
+	}	
 
 	//-------------------------
-//	private boolean addSizeof = true;
-//	private String sizeofStr = "field2.sizeof(8)";
-	private String expectedRuleFail = "rule-sizeof";
+	private boolean useSrc2;
 	
 	private byte[] SMALL = new byte[] { (byte)0xe0, 0x4f, (byte)0xd0, 0x20 };	
 	private byte[] TEXTY = "Any String you want".getBytes();
@@ -88,6 +107,9 @@ public class BlobTests extends DeliaTestBase {
 
 	@Override
 	protected String buildSrc() {
+		if (useSrc2) {
+			return buildSrc2();
+		}
 		String s = "";
 		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob } %s end", s);
 
@@ -96,15 +118,15 @@ public class BlobTests extends DeliaTestBase {
 		src += String.format("\n insert Flight {field1: 2, field2: '4E/QIA=='}");
 		return src;
 	}
-//	private void chkIt(String rule, String s, boolean b) {
-//		sizeofStr = rule;
-//		String src = String.format("insert Flight {field1: 3, field2: %s }", s);
-//		if (b) {
-//			execute(src);
-//		} else {
-//			executeFail(src, expectedRuleFail);
-//		}
-//	}
 
+	private String buildSrc2() {
+		String s = "";
+		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob optional } %s end", s);
+
+		s =  "";
+		src += String.format("\n insert Flight {field1: 1, field2: null }");
+		src += String.format("\n insert Flight {field1: 2, field2: '4E/QIA=='}");
+		return src;
+	}
 
 }
