@@ -343,7 +343,7 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
 		//nothing to do
 	}
 

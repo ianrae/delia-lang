@@ -377,7 +377,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			return finfo.type; //no sizeof
 		}
 		
-		String s2 = StringUtils.substringBefore(ss, ")");
+		String s2 = StringUtils.substringBefore(s, ")");
 		finfo.sizeof = Integer.parseInt(s2);
 		return StringUtils.substringBefore(ss, "("); //strip of (8)
 	}
@@ -451,8 +451,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					failCount++;
 				}
 			} else if (st.isFieldAlterSizeInt()) {
-				Integer old = Integer.parseInt(StringUtils.substringBefore(st.action, "/"));
-				Integer newSize = Integer.parseInt(StringUtils.substringAfter(st.action, "/"));
+				Integer old = Integer.parseInt(StringUtils.substringBefore(st.newName, "/"));
+				Integer newSize = Integer.parseInt(StringUtils.substringAfter(st.newName, "/"));
 				if (newSize < old) {
 					boolean canIgnore = (newSize == 0 && old == 32);
 					if (!canIgnore) {
@@ -461,8 +461,8 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 					}
 				}
 			} else if (st.isFieldAlterSizeString()) {
-				Integer old = Integer.parseInt(StringUtils.substringBefore(st.action, "/"));
-				Integer newSize = Integer.parseInt(StringUtils.substringAfter(st.action, "/"));
+				Integer old = Integer.parseInt(StringUtils.substringBefore(st.newName, "/"));
+				Integer newSize = Integer.parseInt(StringUtils.substringAfter(st.newName, "/"));
 				if (newSize < old) {
 					log.logError("error: sizeof string being decreased. may cause data loss '%s.%s' ", st.typeName, st.field);
 					failCount++;

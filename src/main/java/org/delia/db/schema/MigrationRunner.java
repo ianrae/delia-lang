@@ -42,12 +42,13 @@ public class MigrationRunner extends ServiceBase {
 						dbexecutor.renameField(st.typeName, st.field, st.newName);
 					} else if (st.isFieldAlterType()) {
 						log.log("  alter-field-type: %s %s", st, st.newName);
-						dbexecutor.alterFieldType(st.typeName, st.field, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, 0);
 					} else if (st.isFieldAlter()) {
 						log.log("  alter-field: %s '%s'", st, st.newName);
 						dbexecutor.alterField(st.typeName, st.field, st.newName);
 					} else if (st.isFieldAlterSizeInt()) {
-						DeliaExceptionHelper.throwNotImplementedError("argn");
+						log.log("  alter-field-sizeof-int: %s %s", st, st.newName);
+						dbexecutor.alterFieldType(st.typeName, st.field, st.newName, st.sizeof);
 					} else if (st.isFieldAlterSizeString()) {
 						DeliaExceptionHelper.throwNotImplementedError("argstr");
 					}

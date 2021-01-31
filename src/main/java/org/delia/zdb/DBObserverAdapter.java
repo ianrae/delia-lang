@@ -174,8 +174,8 @@ public class DBObserverAdapter implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-		inner.alterFieldType(typeName, fieldName, newFieldType);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
+		inner.alterFieldType(typeName, fieldName, newFieldType, sizeof);
 	}
 
 	@Override

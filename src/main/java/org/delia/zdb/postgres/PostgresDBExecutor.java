@@ -357,9 +357,9 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
 		failIfNotInit2(); 
-		String sql = tableCreator.generateAlterFieldType(typeName, fieldName, newFieldType);
+		String sql = tableCreator.generateAlterFieldType(typeName, fieldName, newFieldType, sizeof);
 		execSqlStatement(sql);
 	}
 

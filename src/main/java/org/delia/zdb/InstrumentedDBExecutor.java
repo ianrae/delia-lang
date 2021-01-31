@@ -141,8 +141,8 @@ public class InstrumentedDBExecutor implements DBExecutor {
 	}
 
 	@Override
-	public void alterFieldType(String typeName, String fieldName, String newFieldType) {
-		zexec.alterFieldType(typeName, fieldName, newFieldType);
+	public void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof) {
+		zexec.alterFieldType(typeName, fieldName, newFieldType, sizeof);
 	}
 
 	@Override

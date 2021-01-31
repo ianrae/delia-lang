@@ -1,0 +1,32 @@
+# sizeof migration tests
+
+FEATURE: migration 1 - change date type
+background:
+thenType: struct
+
+# -- start chain ---
+---
+title: migration3
+chainNextTest:true
+given:
+ type Customer struct {id int primaryKey serial, wid int } wid.sizeof(8) end
+
+when:
+ let z = 55
+then:
+value:a:int:55
+
+---
+title: migration3.1 - add field
+given:
+ type Customer struct {id int primaryKey serial, wid int  } wid.sizeof(16)  end
+
+when:
+  insert Customer { wid:34}
+  let x = Customer[1]
+then:
+value:a:Customer {
+ vid:1
+ vwid:34
+}
+

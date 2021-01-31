@@ -50,7 +50,7 @@ public interface DBExecutor extends AutoCloseable {
 	void createField(String typeName, String field, int sizeof);
 	void deleteField(String typeName, String field, int datId);
 	void renameField(String typeName, String fieldName, String newName);
-	void alterFieldType(String typeName, String fieldName, String newFieldType);
+	void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof);
 	void alterField(String typeName, String fieldName, String deltaFlags);
 
 	DBInterfaceFactory getDbInterface();

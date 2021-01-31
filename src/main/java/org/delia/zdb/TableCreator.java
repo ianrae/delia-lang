@@ -266,14 +266,14 @@ public class TableCreator extends ServiceBase {
 		return nameFormatter.convert(tableName);
 	}
 
-	public String generateAlterFieldType(String tableName, String fieldName, String newFieldType) {
+	public String generateAlterFieldType(String tableName, String fieldName, String newFieldType, int sizeof) {
 		StrCreator sc = new StrCreator();
 		doAlterColumnPrefix(sc, tableName, fieldName);
 
 		DStructType dtype = (DStructType) registry.getType(tableName);
 		TypePair pair = DValueHelper.findField(dtype, fieldName);
 		
-		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true, 0);
+		FieldGen fieldGen = fieldgenFactory.createFieldGen(registry, pair, dtype, true, sizeof);
 		String sqlType = fieldGen.deliaToSql(pair);
 		
 		sc.o(" SET DATA TYPE %s", sqlType); 
