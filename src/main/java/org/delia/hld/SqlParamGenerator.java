@@ -46,7 +46,7 @@ public class SqlParamGenerator {
 			if (dtypeHint != null) {
 				if (dtypeHint.isShape(Shape.DATE)) {
 					return scalarBuilder.buildString(fval.asString()); //TODO: fix this. what is correct date format in sql?
-				} else if (dtypeHint.isShape(Shape.BLOB)) {
+				} else if (dtypeHint.isBlobShape()) {
 					//h2 and postgres both use hex format
 					String base64Str = fval.asString();
 					String hex = BlobUtils.base64ToHexString(base64Str);

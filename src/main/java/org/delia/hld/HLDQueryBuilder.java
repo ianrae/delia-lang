@@ -18,7 +18,6 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -185,7 +184,7 @@ public class HLDQueryBuilder {
 				TypePair pair = DValueHelper.findField(currentScope, exp.strValue());
 				if (pair == null) {
 					DeliaExceptionHelper.throwUnknownFieldError(currentScope.getName(), exp.strValue());
-				} else if (pair.type.isShape(Shape.BLOB)) {
+				} else if (pair.type.isBlobShape()) {
 					DeliaExceptionHelper.throwError("blob-orderBy-not-allowed", "orderBy('%s'): not allowed for blob", pair.name);
 					
 				}

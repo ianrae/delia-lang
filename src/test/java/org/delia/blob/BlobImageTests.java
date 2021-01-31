@@ -13,7 +13,6 @@ import org.delia.runner.BlobLoader;
 import org.delia.type.BlobType;
 import org.delia.type.DValue;
 import org.delia.type.WrappedBlob;
-import org.delia.util.BlobUtils;
 import org.delia.util.InputStreamUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +66,6 @@ public class BlobImageTests extends DeliaTestBase {
 		String path = dir + "alberto.png";
 		InputStream inputStream = new FileInputStream(path);
 		try {
-
-			// Blob b = new SerialBlob(inputStream.readAllBytes());
 			byte[] bytes = InputStreamUtils.readAllBytesAndClose(inputStream);
 			return bytes;
 		} catch (IOException e) {

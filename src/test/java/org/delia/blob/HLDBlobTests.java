@@ -25,8 +25,6 @@ import org.delia.util.BlobUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import junit.framework.AssertionFailedError;
-
 /**
  * 
  * @author Ian Rae

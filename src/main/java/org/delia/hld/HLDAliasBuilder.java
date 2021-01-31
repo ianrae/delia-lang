@@ -21,7 +21,6 @@ import org.delia.relation.RelationInfo;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
-import org.delia.type.Shape;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
@@ -293,7 +292,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		if (val1.structField == null) {
 			return;
 		}
-		if (val1.structField.fieldType.isShape(Shape.BLOB)) {
+		if (val1.structField.fieldType.isBlobShape()) {
 			String opstr = ofc.op.toString();
 			if (opstr.equals("==") || opstr.equals("!")) {
 				//ok

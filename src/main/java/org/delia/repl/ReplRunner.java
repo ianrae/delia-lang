@@ -13,6 +13,7 @@ import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.log.Log;
+import org.delia.log.LoggableBlob;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DeliaException;
 import org.delia.runner.QueryResponse;
@@ -322,7 +323,13 @@ public class ReplRunner  {
 				}
 			}
 			DValue dval = (DValue) res.val;
-			String valStr = dval.getType().isShape(Shape.STRING) ? String.format("'%s'", dval.asString()) : dval.asString();
+			String valStr;
+			if (dval.getType().isBlobShape()) {
+				LoggableBlob lb = new LoggableBlob(dval.asBlob().getByteArray());
+				valStr = lb.toString();
+			} else {
+				valStr = dval.getType().isShape(Shape.STRING) ? String.format("'%s'", dval.asString()) : dval.asString();
+			}
 			//				String s = String.format("OK: %s (%s)", valStr, shapeStr(dval));
 			if (res.varName.equals("?")) {
 				return valStr;

@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
+import org.delia.log.LoggableBlob;
 import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 
@@ -156,7 +157,9 @@ public class DValueImpl implements DValue, DValueInternal {
 		} else if (object != null && type.isNumericShape()) {
 			s = ": " + object.toString();
 		} else if (object != null && type.isShape(Shape.BLOB)) {
-			s = ": blob..."; //may be very large. don't output
+			WrappedBlob wblob = new WrappedBlob((byte[]) object);
+			LoggableBlob lb = new LoggableBlob(wblob.getByteArray());
+			s = ": " + lb.toString();
 		}
 		return type.toString() + s ;
 	}

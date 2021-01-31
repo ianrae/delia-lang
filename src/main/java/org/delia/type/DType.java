@@ -69,6 +69,9 @@ public class DType implements DTypeInternal {
             return false;
         }
     }
+    public boolean isBlobShape() {
+    	return shape.equals(Shape.BLOB);
+    }
 
 	public Shape getShape() {
 		return shape;
