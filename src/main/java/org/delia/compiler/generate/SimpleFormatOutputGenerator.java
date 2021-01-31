@@ -5,12 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.delia.log.LoggableBlob;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.type.WrappedBlob;
 
 /**
  * Converts a DValue into a very simple text format. Used by unit tests.
@@ -19,6 +21,7 @@ import org.delia.type.Shape;
  */
 public class SimpleFormatOutputGenerator implements ValueGenerator {
 	public boolean includeVPrefix = true;
+	public boolean truncateLargeBlob = false;
 	
 	public List<String> outputL = new ArrayList<>();
 
@@ -112,6 +115,13 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
         } else if (dval.getType().isShape(Shape.STRING)) {
         	String s = dval.asString();
         	return String.format("'%s'", s);
+        } else if (dval.getType().isBlobShape()) {
+        	//TODO: add config param so can output all or a reasonable subset of blob
+        	if (truncateLargeBlob) {
+        		WrappedBlob wblob = dval.asBlob();
+        		LoggableBlob lb = new LoggableBlob(wblob.getByteArray());
+        		return lb.toString();
+        	}
         }
         
         return dval.asString();

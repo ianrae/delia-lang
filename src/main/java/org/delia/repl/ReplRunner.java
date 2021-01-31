@@ -359,6 +359,8 @@ public class ReplRunner  {
 		QueryResponse qresp = (QueryResponse) res.val;
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
 		gen.includeVPrefix = false;
+//		gen.truncateLargeBlob = true;
+
 		DeliaGeneratePhase phase = mostRecentSess.getExecutionContext().generator;
 
 		boolean multiple = qresp.dvalList.size() > 1;

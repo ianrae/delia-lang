@@ -155,6 +155,7 @@ public class StructChecker extends ValueCheckerBase {
 
 	private List<String> generateFromDVal(DValue dval) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.truncateLargeBlob = true;
 		// ErrorTracker et = new SimpleErrorTracker(log);
 		DeliaGeneratePhase phase = this.sess.getExecutionContext().generator;
 		boolean b = phase.generateValue(gen, dval, "a");
@@ -163,6 +164,7 @@ public class StructChecker extends ValueCheckerBase {
 	}
 	private List<String> generateFromMultiDVal(List<DValue> list) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.truncateLargeBlob = true;
 		// ErrorTracker et = new SimpleErrorTracker(log);
 		DeliaGeneratePhase phase = this.sess.getExecutionContext().generator;
 		for(DValue dval: list) {

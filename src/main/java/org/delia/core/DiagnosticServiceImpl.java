@@ -32,6 +32,7 @@ public class DiagnosticServiceImpl extends ServiceBase implements DiagnosticServ
 	public void log(String filterId, DValue dval, DTypeRegistry registry) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
 		gen.includeVPrefix = false;
+		gen.truncateLargeBlob = true; //avoid large log lines
 		DeliaGeneratePhase phase = new DeliaGeneratePhase(factorySvc, registry);
 		boolean b = phase.generateValue(gen, dval, "a");
 		String s = StringUtil.flattenNoComma(gen.outputL);
