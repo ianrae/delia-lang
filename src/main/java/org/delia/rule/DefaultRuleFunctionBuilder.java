@@ -3,6 +3,7 @@ package org.delia.rule;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.IntegerExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
@@ -69,6 +70,14 @@ public class DefaultRuleFunctionBuilder implements RuleFunctionBulder {
 			RuleOperand oper = createOperand(fieldName, dtype, qfe.funcName);
 			guard = adjustGuard(oper, guard);
 			rule = new SizeofRule(guard, oper, arg.val);
+			break;
+		}
+		case "uniqueFields":
+		{
+			IdentExp arg = (IdentExp) qfe.argL.get(0);
+			RuleOperand oper = createOperand(fieldName, dtype, qfe.funcName);
+			guard = adjustGuard(oper, guard);
+			rule = new ContainsRule(guard, oper, arg.strValue());
 			break;
 		}
 		case "len":
