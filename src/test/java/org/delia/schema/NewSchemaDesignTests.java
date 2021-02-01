@@ -667,7 +667,7 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public String fieldName;
 		public String newName; //rename
 		public String fieldType;
-		public int sizeof;
+		public Integer sizeof;
 		public String flags;
 		public String otherName; //index or constraint
 		public List<String> argsL = new ArrayList<>();
@@ -700,7 +700,6 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 				op.sizeof = 0;
 				op.flags = null;
 				op.otherName = null; //index or constraint
-//				public List<String> arsL = new ArrayList<>();
 				op.typeInfo = td.info;
 				op.fieldInfo = null;
 			}
@@ -711,6 +710,8 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 				op.typeName = td.typeName;
 				op.typeInfo = td.info;
 				op.newName = td.nmDelta; //should be non null!!
+				
+				doFields(opList, td);
 			}
 			
 			
@@ -726,6 +727,62 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			
 			
 			return opList;
+		}
+
+		private void doFields(List<SchemaChangeOperation> opList, SxTypeDelta td) {
+			
+			for(SxFieldDelta fd: td.fldsI) {
+				SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_ADD);
+				initForField(op, fd, td);
+			}
+			
+			doFieldUpdates(opList, td);
+			
+			for(SxFieldDelta fd: td.fldsD) {
+				SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_DELETE); 
+				initForField(op, fd, td);
+			}
+		}
+
+		private void initForField(SchemaChangeOperation op, SxFieldDelta fd, SxTypeDelta td) {
+			op.typeName = td.typeName;
+			op.typeInfo = td.info;
+			op.fieldName = fd.fieldName;
+			op.newName = null;
+			op.fieldType = fd.info.t;
+			op.sizeof = fd.info.sz;
+			op.flags = fd.info.flgs;
+			op.otherName = null; //index or constraint
+			op.typeInfo = td.info;
+			op.fieldInfo = fd.info;
+		}
+
+		private void doFieldUpdates(List<SchemaChangeOperation> opList, SxTypeDelta td) {
+			for(SxFieldDelta fd: td.fldsU) {
+				if (fd.fDelta != null) {
+					SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_RENAME); 
+					initForField(op, fd, td);
+					op.newName = fd.fDelta;
+				}
+				
+				if (fd.flgsDelta != null) {
+					SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_ALTER); 
+					initForField(op, fd, td);
+					op.flags = fd.flgsDelta;
+				}
+				
+				if (fd.szDelta != null) {
+					SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_ALTER_TYPE); 
+					initForField(op, fd, td);
+					op.sizeof = fd.szDelta;
+				}
+				
+				if (fd.tDelta != null) {
+					SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_ALTER_TYPE); 
+					initForField(op, fd, td);
+					op.fieldType = fd.tDelta;
+				}
+			}
 		}
 
 		private SchemaChangeOperation createAndAdd(List<SchemaChangeOperation> opList, OperationType opType) {
