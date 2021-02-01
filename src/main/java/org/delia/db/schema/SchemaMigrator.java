@@ -29,6 +29,8 @@ import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
+	public static boolean useNewSchemaGen = false;
+	
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	public static final String DAT_TABLE = "DELIA_ASSOC"; //DAT = Delia Assoc Table
 
@@ -98,6 +100,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @return true if successful
 	 */
 	public boolean performMigrations(boolean doLowRiskChecks) {
+		//TODO add new schem here if needed
+		if (useNewSchemaGen) {
+			//need dbFingerprint
+			//calc delta, optimize, gen ops, migrationRunner ops
+			//wait: make migrationsvc into interface and make two impls
+			//update associmpl, and popDatIdVisitor to use either impl too
+		}
+		
 		List<SchemaType> list = parseFingerprint(dbFingerprint);
 		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
 		
