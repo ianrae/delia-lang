@@ -74,6 +74,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			DBHelper.handleCloseFailure(e);
 		}
 	}
+	
+	public DatMapBuilder xxx() {
+		return new DatMapBuilderImpl(registry, factorySvc, zexec, this);
+	}
 
 	public boolean createSchemaTableIfNeeded() {
 //		SchemaContext ctx = new SchemaContext();
