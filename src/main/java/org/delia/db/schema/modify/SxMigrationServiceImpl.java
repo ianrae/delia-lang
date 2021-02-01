@@ -15,6 +15,8 @@ import org.delia.db.DBType;
 import org.delia.db.QuerySpec;
 import org.delia.db.schema.AlwaysNoMigrationPolicy;
 import org.delia.db.schema.AlwaysYesMigrationPolicy;
+import org.delia.db.schema.DatMapBuilder;
+import org.delia.db.schema.DatMapBuilderImpl;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationPolicy;
 import org.delia.db.schema.MigrationService;
@@ -184,7 +186,9 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		DatIdMap datIdMap = null;
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null)) {
 			migrator.createSchemaTableIfNeeded();
-			AssocService assocSvc = new AssocServiceImpl(migrator, factorySvc, factorySvc.getErrorTracker());
+			
+			DatMapBuilder datMapBuilder = new DatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor(), migrator);
+			AssocService assocSvc = new AssocServiceImpl(migrator, datMapBuilder, factorySvc, factorySvc.getErrorTracker());
 			assocSvc.assignDATIds(registry);
 			datIdMap = assocSvc.getDatIdMap();
 			

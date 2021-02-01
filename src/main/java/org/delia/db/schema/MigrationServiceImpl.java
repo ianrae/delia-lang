@@ -101,7 +101,8 @@ public class MigrationServiceImpl extends ServiceBase implements MigrationServic
 		DatIdMap datIdMap = null;
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null)) {
 			migrator.createSchemaTableIfNeeded();
-			AssocService assocSvc = new AssocServiceImpl(migrator, factorySvc, factorySvc.getErrorTracker());
+			DatMapBuilder datMapBuilder = new DatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor(), migrator);
+			AssocService assocSvc = new AssocServiceImpl(migrator, datMapBuilder, factorySvc, factorySvc.getErrorTracker());
 			assocSvc.assignDATIds(registry);
 			datIdMap = assocSvc.getDatIdMap();
 			

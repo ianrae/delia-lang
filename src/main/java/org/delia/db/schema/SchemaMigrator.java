@@ -75,10 +75,6 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		}
 	}
 	
-	public DatMapBuilder createDatMapBuilder() {
-		return new DatMapBuilderImpl(registry, factorySvc, zexec, this);
-	}
-
 	public boolean createSchemaTableIfNeeded() {
 //		SchemaContext ctx = new SchemaContext();
 		if (!zexec.rawTableDetect(SCHEMA_TABLE)) {

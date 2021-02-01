@@ -18,13 +18,13 @@ public class AssocServiceImpl implements AssocService {
 	private DatMapBuilder datMapBuilder;
 	private DBExecutor zexec;
 
-	public AssocServiceImpl(SchemaMigrator schemaMigrator, FactoryService factorySvc, ErrorTracker et) {
+	public AssocServiceImpl(SchemaMigrator schemaMigrator, DatMapBuilder datMapBuilder, FactoryService factorySvc, ErrorTracker et) {
 		this.factorySvc = factorySvc;
 		this.log = factorySvc.getLog();
 		this.et = et;
 //		this.schemaMigrator = schemaMigrator;
 		if (schemaMigrator != null) {
-			this.datMapBuilder = schemaMigrator.createDatMapBuilder();
+			this.datMapBuilder = datMapBuilder;
 			this.zexec = schemaMigrator.getZDBExecutor();
 		}
 	}
