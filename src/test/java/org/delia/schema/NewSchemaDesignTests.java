@@ -3,10 +3,11 @@ package org.delia.schema;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.delia.db.schema.SchemaType;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
@@ -23,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
+ * Given the increasing complexity of schema migration, we need a new design.
+ * 
  * @author Ian Rae
  *
  */
@@ -124,8 +127,6 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			}
 		}
 		
-		
-		
 		private boolean isBuiltInType(DType type) {
 			for(BuiltInTypes bintype: BuiltInTypes.values()) {
 				if (type.getName().equals(bintype.name())) {
@@ -193,10 +194,99 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			}
 			return pair.type.getName();
 		}
-		
-
 	}
 	
+	//== Delta ==
+	public static class SxFieldDelta {
+		public String fieldName;
+		public String fDelta; //null means no change. else is rename
+		public String tDelta; //""
+		public String flgsDelta; //""
+		public Integer szDelta; //null means no change, else is new size
+//		public int datId;  never changes
+	}	
+	
+	public static class SxTypeDelta {
+		public String typeName; 
+		public String nmDelta; //null means no change. else is rename
+		public String baDelta; //""
+		public List<SxFieldDelta> fldsI = new ArrayList<>();
+		public List<SxFieldDelta> fldsU = new ArrayList<>();
+		public List<SxFieldDelta> fldsD = new ArrayList<>();
+	}	
+	
+	public static class SxOtherDelta {
+		public String name;
+		public List<String> oldArgs;
+		public List<String> newArgs;
+	}	
+	
+	public static class SchemaDelta {
+		public List<SxTypeDelta> typesI = new ArrayList<>();
+		public List<SxTypeDelta> typesU = new ArrayList<>();
+		public List<SxTypeDelta> typesD = new ArrayList<>();
+		public List<SxOtherDelta> othersI = new ArrayList<>();
+		public List<SxOtherDelta> othersU = new ArrayList<>();
+		public List<SxOtherDelta> othersD = new ArrayList<>();
+		
+		public boolean isEmpty() {
+			if (typesI.isEmpty() && typesU.isEmpty() && typesD.isEmpty()) {
+				if (othersI.isEmpty() && othersD.isEmpty() && othersD.isEmpty()) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}	
+
+	public static class SchemaDeltaGenerator {
+		private DTypeRegistry registry;
+
+		public SchemaDeltaGenerator(DTypeRegistry registry) {
+			this.registry = registry;
+		}
+		
+		public SchemaDelta generate(SchemaDefinition schema1, SchemaDefinition schema2) {
+			SchemaDelta delta = new SchemaDelta();
+			
+			List<SxTypeInfo> list2 = new ArrayList<>(schema2.types);
+			for(SxTypeInfo tt: schema1.types) {
+				SxTypeInfo sc2 = findIn(tt, schema2);
+				if (sc2 != null) {
+					//diffFields(schema1, sc2, diffList);
+					list2.remove(sc2);
+					
+					SxTypeDelta td = buildTypeDelta(tt);
+					delta.typesU.add(td);
+				} else {
+					SxTypeDelta td = buildTypeDelta(tt);
+					delta.typesD.add(td); //in list1 but not in list2
+				}
+			}
+
+			for(SxTypeInfo tt: list2) {
+				SxTypeDelta td = buildTypeDelta(tt);
+				delta.typesI.add(td);
+			}
+			
+			//TODO: handle others
+
+			return delta;
+		}
+		
+		private SxTypeDelta buildTypeDelta(SxTypeInfo tt) {
+			SxTypeDelta typeDelta = new SxTypeDelta();
+			typeDelta.typeName = tt.nm;
+			// TODO Auto-generated method stub
+			return typeDelta;
+		}
+
+		private SxTypeInfo findIn(SxTypeInfo tt, SchemaDefinition schema2) {
+			Optional<SxTypeInfo> opt = schema2.types.stream().filter(x -> x.nm.equals(tt.nm)).findAny();
+			return opt.orElse(null);
+		}
+		
+	}
 	
 	@Test
 	public void test() {
@@ -205,6 +295,11 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(session.getExecutionContext().registry);
 		SchemaDefinition schema = schemaDefGen.generate();
 		dumpObj("schema", schema);
+		
+		SchemaDeltaGenerator deltaGen = new SchemaDeltaGenerator(session.getExecutionContext().registry);
+		SchemaDelta delta = deltaGen.generate(new SchemaDefinition(), schema);
+		dumpObj("delta", delta);
+		
 	}	
 
 	//-------------------------
