@@ -12,7 +12,7 @@ import org.delia.compiler.ast.TypeStatementExp;
 import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
-import org.delia.db.schema.MigrationService;
+import org.delia.db.schema.MigrationServiceImpl;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
@@ -44,7 +44,7 @@ public class DeliaImpl implements Delia {
 	private DBInterfaceFactory dbInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
-	private MigrationService migrationSvc;
+	private MigrationServiceImpl migrationSvc;
 	private ErrorAdjuster errorAdjuster;
 	private HLDFactory hldFactory;
 	
@@ -52,7 +52,7 @@ public class DeliaImpl implements Delia {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
+		this.migrationSvc = new MigrationServiceImpl(dbInterface, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
 		this.hldFactory = dbInterface.getHLDFactory();
 	}
