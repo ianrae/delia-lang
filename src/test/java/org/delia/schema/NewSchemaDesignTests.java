@@ -8,18 +8,14 @@ import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.db.schema.FieldInfo;
+import org.delia.db.DBType;
 import org.delia.db.sizeof.DeliaTestBase;
-import org.delia.hld.QueryBuilderHelper;
-import org.delia.hld.simple.SimpleSqlBuilder;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.UniqueFieldsRule;
-import org.delia.sprig.SprigService;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -233,7 +229,11 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public List<SxFieldDelta> fldsI = new ArrayList<>();
 		public List<SxFieldDelta> fldsU = new ArrayList<>();
 		public List<SxFieldDelta> fldsD = new ArrayList<>();
-		public SxTypeInfo info; //when adding a type
+		public SxTypeInfo info; //original
+		
+		public SxTypeDelta(String typeName) {
+			this.typeName = typeName;
+		}
 	}	
 	
 	public static class SxOtherDelta {
@@ -286,7 +286,6 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 
 			for(SxTypeInfo tt: list2) {
 				SxTypeDelta td = buildTypeDelta(tt);
-				td.info = tt;
 				delta.typesI.add(td);
 			}
 			
@@ -296,9 +295,8 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		}
 		
 		private SxTypeDelta buildTypeDelta(SxTypeInfo tt) {
-			SxTypeDelta typeDelta = new SxTypeDelta();
-			typeDelta.typeName = tt.nm;
-			// TODO Auto-generated method stub
+			SxTypeDelta typeDelta = new SxTypeDelta(tt.nm);
+			typeDelta.info = tt;
 			return typeDelta;
 		}
 
@@ -397,6 +395,109 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			}
 			return null;
 		}
+	}
+	
+	
+	public static class SchemaDeltaOptimizer extends RegAwareServiceBase {
+
+		private boolean isMemDB;
+
+		public SchemaDeltaOptimizer(DTypeRegistry registry, FactoryService factorySvc, DBType dbType) {
+			super(registry, factorySvc);
+			this.isMemDB = DBType.MEM.equals(dbType);
+		}
+		
+		public SchemaDelta generate(SchemaDelta delta) {
+			detectTableRename(delta);
+			detectFieldRename(delta);
+//			diffL = removeParentRelations(diffL);
+//			diffL = detectOneToManyFieldChange(diffL);
+
+			return delta;
+		}
+
+		private void detectTableRename(SchemaDelta delta) {
+			List<SxTypeDelta> newlist = new ArrayList<>();
+			List<SxTypeDelta> doomedL = new ArrayList<>();
+			for(SxTypeDelta st: delta.typesD) {
+				SxTypeDelta stOther = findMatchingTableInsert(delta, st);
+				if (stOther != null) {
+					SxTypeDelta td = new SxTypeDelta(st.typeName);
+					td.nmDelta = stOther.typeName;
+					delta.typesU.add(td);
+					
+					delta.typesI.remove(stOther);
+					doomedL.add(st);
+					log.log("migrate: '%s' -> '%s' replace with rename.", st.typeName, stOther.typeName);
+				}
+				newlist.add(st);
+			}
+			
+			for(SxTypeDelta doomed: doomedL) {
+				delta.typesD.remove(doomed);
+			}
+		}
+		
+		private void detectFieldRename(SchemaDelta delta) {
+			for(SxTypeDelta td: delta.typesU) {
+				doDetectFieldRename(td);
+			}
+		}
+		private void doDetectFieldRename(SxTypeDelta td) {	
+			List<SxFieldDelta> doomedL = new ArrayList<>();
+			for(SxFieldDelta st: td.fldsD) {
+				SxFieldDelta stOther = findMatchingFieldInsert(td, st);
+				if (stOther != null) {
+					SxFieldDelta fd = new SxFieldDelta(st.fieldName);
+					fd.fDelta = stOther.fieldName;
+					td.fldsU.add(fd);
+					
+					td.fldsI.remove(stOther);
+					doomedL.add(st);
+					log.log("migrate: '%s.%s' -> '%s.%s' replace with rename.", td.typeName, st.fieldName, td.typeName, st.fieldName);
+				}
+			}
+			
+			for(SxFieldDelta doomed: doomedL) {
+				td.fldsD.remove(doomed);
+			}
+		}
+
+		private SxTypeDelta findMatchingTableInsert(SchemaDelta delta, SxTypeDelta stTarget) {
+			int count = 0;
+			SxTypeDelta match = null;
+			for(SxTypeDelta st: delta.typesI) {
+				if (st.typeName.equals(st.typeName)) {
+					match = st;
+					count++;
+				}
+			}
+			
+			if (match != null && count == 1) {
+				return match;
+			}
+			return null;
+		}
+		private SxFieldDelta findMatchingFieldInsert(SxTypeDelta td, SxFieldDelta fdTarget) {
+			int count = 0;
+			SxFieldDelta match = null;
+			for(SxFieldDelta st: td.fldsI) {
+				if (st.fieldName.equals(fdTarget.fieldName)) {
+					if (st.info.t.equals(fdTarget.info.t)) {
+						if (st.info.flgs.equals(fdTarget.info.flgs)) {
+							match = st;
+							count++;
+						}						
+					}
+				}
+			}
+			
+			if (match != null && count == 1) {
+				return match;
+			}
+			return null;
+		}
+		
 	}
 	
 	@Test
