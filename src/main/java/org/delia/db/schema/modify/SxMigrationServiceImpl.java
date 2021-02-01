@@ -16,13 +16,11 @@ import org.delia.db.QuerySpec;
 import org.delia.db.schema.AlwaysNoMigrationPolicy;
 import org.delia.db.schema.AlwaysYesMigrationPolicy;
 import org.delia.db.schema.DatMapBuilder;
-import org.delia.db.schema.DatMapBuilderImpl;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationPolicy;
 import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.SafeMigrationPolicy;
 import org.delia.db.schema.SchemaMigrator;
-import org.delia.db.schema.SchemaType;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.QueryResponse;
@@ -60,7 +58,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = doNeedsMigration(registry, migrator);
 			log.logDebug("sxMIGRATION needed: %b", b);
 			if (b) {
-				List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
+				List<SchemaChangeOperation> opList = generateMigrationPlan(registry);
 //				MigrationPlan plan = migrator.generateMigrationPlan();
 				MigrationPlan plan = new MigrationPlan(); //TODO fix later
 				
@@ -86,7 +84,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		}
 		return true;
 	}
-	private List<SchemaChangeOperation> generateMigrationPlan(DTypeRegistry registry, SchemaMigrator migrator) {
+	private List<SchemaChangeOperation> generateMigrationPlan(DTypeRegistry registry) {
 		if (currentSchema == null) {
 			SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(registry, factorySvc);
 			currentSchema = schemaDefGen.generate();
@@ -158,7 +156,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = this.doNeedsMigration(registry, migrator);
 			log.log("RUN MIGRATION PLAN: %b", b);
 //			plan = migrator.runMigrationPlan(plan);
-			List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
+			List<SchemaChangeOperation> opList = generateMigrationPlan(registry);
 			b = migrator.sxPerformMigrations(opList);
 			return new MigrationPlan(); //TODO fix later to opsList
 		}
@@ -187,7 +185,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null)) {
 			migrator.createSchemaTableIfNeeded();
 			
-			DatMapBuilder datMapBuilder = new DatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor(), migrator);
+			DatMapBuilder datMapBuilder = new SxDatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor());
 			AssocService assocSvc = new AssocServiceImpl(migrator, datMapBuilder, factorySvc, factorySvc.getErrorTracker());
 			assocSvc.assignDATIds(registry);
 			datIdMap = assocSvc.getDatIdMap();

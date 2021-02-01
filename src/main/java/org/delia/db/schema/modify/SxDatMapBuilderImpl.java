@@ -1,6 +1,6 @@
-package org.delia.db.schema;
+package org.delia.db.schema.modify;
 
-import java.util.List;
+import java.io.IOException;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.assoc.DatIdMapHelper;
@@ -11,6 +11,8 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.RegAwareServiceBase;
 import org.delia.db.QuerySpec;
+import org.delia.db.schema.DatMapBuilder;
+import org.delia.db.schema.SchemaMigrator;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.type.DType;
@@ -18,22 +20,26 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.zdb.DBExecutor;
 
-public class DatMapBuilderImpl extends RegAwareServiceBase implements DatMapBuilder {
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+public class SxDatMapBuilderImpl extends RegAwareServiceBase implements DatMapBuilder {
 
 	private DBExecutor zexec;
-	private SchemaMigrator schemaMigrator;
 
-	public DatMapBuilderImpl(DTypeRegistry registry, FactoryService factorySvc, DBExecutor zexec, SchemaMigrator schemaMigrator) {
+	public SxDatMapBuilderImpl(DTypeRegistry registry, FactoryService factorySvc, DBExecutor zexec) {
 		super(registry, factorySvc);
 		this.zexec = zexec;
-		this.schemaMigrator = schemaMigrator;
 	}
 
 	@Override
 	public DatIdMap buildDatIdMapFromDBFingerprint() {
 		String fingerprint = calcDBFingerprint();
 		log.log("DB fingerprint: " + fingerprint);
-		return buildDatIdMap(fingerprint);
+		SchemaDefinition schema = createSchemaDefFromJSON(fingerprint);
+		return buildDatIdMap(schema);
 	}
 
 	public String calcDBFingerprint() {
@@ -56,15 +62,13 @@ public class DatMapBuilderImpl extends RegAwareServiceBase implements DatMapBuil
 	}
 
 
-	private DatIdMap buildDatIdMap(String fingerprint) {
+	private DatIdMap buildDatIdMap(SchemaDefinition schema) {
 		DatIdMap datMap = new DatIdMap();
-		List<SchemaType> list = schemaMigrator.parseFingerprint(fingerprint);
-		for(SchemaType sctype: list) {
-			List<FieldInfo> fieldInfoL = schemaMigrator.parseFields(sctype);
-			for(FieldInfo ff: fieldInfoL) {
-				DType dtype = registry.getType(ff.type);
+		for(SxTypeInfo sctype: schema.types) {
+			for(SxFieldInfo ff: sctype.flds) {
+				DType dtype = registry.getType(ff.t);
 				if (dtype != null && dtype.isStructShape()) {
-					String key = DatIdMapHelper.createKey(sctype.typeName, ff.name);
+					String key = DatIdMapHelper.createKey(sctype.nm, ff.f);
 					int datId = ff.datId;
 					if (datId != 0) {
 						datMap.put(key, datId);
@@ -76,5 +80,23 @@ public class DatMapBuilderImpl extends RegAwareServiceBase implements DatMapBuil
 		return datMap;
 	}
 
+	private SchemaDefinition createSchemaDefFromJSON(String text) {
+		SchemaDefinition def = null;
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			def = mapper.readValue(text, SchemaDefinition.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return def;
+	}
 
 }
