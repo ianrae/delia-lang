@@ -157,7 +157,6 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		QueryResponse qresp = querySvc.execQuery(spec.queryExp, zexec);
 		//TODO: should specify orderby id!!
 		
-		
 		if (qresp.emptyResults()) {
 			return "";
 		}
@@ -238,7 +237,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		//add fieldinfo.fieldIndex - index of field within dtype
 		//if I and D have same fieldIndex and same type and options then do a rename
 
-		//I/U/D/R/A/AT/AS[Z|N]
+		//I/U/D/R/A/AT/ASZ/ASN
 		for(FieldInfo finfo: flist1) {
 			FieldInfo f2 = findFieldIn(finfo, flist2);
 			if (f2 != null) {
@@ -357,6 +356,9 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		List<FieldInfo> list = new ArrayList<>();
 		String s = StringUtils.substringAfter(schema1.line, "{");
 		s = StringUtils.substringBeforeLast(s, "}");
+		String strrules = StringUtils.substringAfterLast(s, "|");
+		s = StringUtils.substringBeforeLast(s, "|");
+		
 		String[] ar = s.split(",");
 		for(String ss: ar) {
 			FieldInfo finfo = new FieldInfo();
@@ -369,6 +371,19 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			finfo.datId = Integer.parseInt(tmp);
 			list.add(finfo);
 		}
+		
+		if (! strrules.isEmpty()) {
+			ar = strrules.split(";");
+			for(String ss: ar) {
+				FieldInfo finfo = new FieldInfo();
+				finfo.isField = false;
+				finfo.name = ss; //StringUtils.substringBefore(ss, "(");
+				finfo.type = StringUtils.substringBefore(ss, "(");
+				finfo.ruleStr = StringUtils.substringBetween(ss, "(", ")");
+				list.add(finfo);
+			}
+		}
+		
 		return list;
 	}
 

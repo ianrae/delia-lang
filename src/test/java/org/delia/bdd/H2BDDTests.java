@@ -90,7 +90,7 @@ public class H2BDDTests extends BDDBase {
 	
 	@Test
 	public void testR660() {
-		runR650File("t0-rule-uniquefields.txt", 1);
+		runR660File("t0-rule-uniquefields.txt", 1);
 	}
 	
 	@Test
@@ -356,7 +356,7 @@ public class H2BDDTests extends BDDBase {
 //		runR2600Sizeof("t0-sizeof-string.txt", 2);
 //		runR2600Sizeof("t0-sizeof-int.txt", 1);
 //		runR2700Blob("t0-blob.txt", 1);
-		runR650File("t0-rule-uniquefields.txt", 1);
+		runR660File("t0-rule-uniquefields.txt", 1);
 	}
 	
 	//---

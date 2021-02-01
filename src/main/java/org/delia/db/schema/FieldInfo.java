@@ -6,4 +6,6 @@ public class FieldInfo {
 	public int sizeof;
 	public String flagStr;
 	public int datId;
+	public boolean isField=true;
+	public String ruleStr;
 }

@@ -79,7 +79,8 @@ public class SchemaFingerprintGenerator {
 				joiner.add(s);
 			}
 		}
-		return joiner.toString();
+		String s = joiner.toString();
+		return s.isEmpty() ? s : "|" + s;
 	}
 
 	private String genField(DStructType dtype, TypePair pair) {
