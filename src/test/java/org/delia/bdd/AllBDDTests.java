@@ -1,5 +1,6 @@
 package org.delia.bdd;
 
+import org.delia.api.DeliaImpl;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.hld.HLDFactoryImpl;
@@ -351,6 +352,7 @@ public class AllBDDTests extends BDDBase {
 	@Before
 	public void init() {
 //		DeliaFactory.useHLSMEM = true;
+		DeliaImpl.useNewSchemaGen = true;
 	}
 	@After
 	public void shutdown() {

@@ -2,6 +2,7 @@ package org.delia.db.schema.modify;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.assoc.DatIdMap;
 import org.delia.assoc.DatIdMapHelper;
 import org.delia.compiler.ast.BooleanExp;
@@ -80,11 +81,15 @@ public class SxDatMapBuilderImpl extends RegAwareServiceBase implements DatMapBu
 		return datMap;
 	}
 
-	private SchemaDefinition createSchemaDefFromJSON(String text) {
+	private SchemaDefinition createSchemaDefFromJSON(String json) {
+		if (StringUtils.isEmpty(json)) {
+			return new SchemaDefinition();
+		}
+		
 		SchemaDefinition def = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			def = mapper.readValue(text, SchemaDefinition.class);
+			def = mapper.readValue(json, SchemaDefinition.class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
