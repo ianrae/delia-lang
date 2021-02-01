@@ -64,15 +64,18 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 				
 				if (policy.shouldMigrationOccur(plan)) {
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
-					b = migrator.performMigrations(performRiskChecks);
+					//TODO: implement checks later
+//					b = migrator.performMigrations(performRiskChecks);
+					b = migrator.sxPerformMigrations(opList);
 					if (! b) {
 						return false;
 					}
 				} else {
 					log.logError("MIGRATION rejected due to policy : %s", policy.getClass().getSimpleName());
 					log.log("=== MIGRATION PLAN ===");
-					for(SchemaType ss: plan.diffL) {
-						log.log(ss.getSummary());
+					for(SchemaChangeOperation op: opList) {
+						String s = ori.render(op);
+						log.log(s);
 					}
 					log.log("=== END MIGRATION PLAN ===");
 					return false;
@@ -134,9 +137,10 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	public MigrationPlan createMigrationPlan(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
 			migrator.createSchemaTableIfNeeded();
-			boolean b = migrator.dbNeedsMigration();
+//			boolean b = migrator.dbNeedsMigration();
+			boolean b = this.doNeedsMigration(registry, migrator);
 			log.log("MIGRATION PLAN: %b", b);
-			MigrationPlan plan = migrator.generateMigrationPlan();
+			MigrationPlan plan = migrator.generateMigrationPlan(); //TODO change to opsList later
 			return plan;
 		}
 	}
@@ -148,10 +152,13 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
 			migrator.createSchemaTableIfNeeded();
-			boolean b = migrator.dbNeedsMigration();
+//			boolean b = migrator.dbNeedsMigration();
+			boolean b = this.doNeedsMigration(registry, migrator);
 			log.log("RUN MIGRATION PLAN: %b", b);
-			plan = migrator.runMigrationPlan(plan);
-			return plan;
+//			plan = migrator.runMigrationPlan(plan);
+			List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
+			b = migrator.sxPerformMigrations(opList);
+			return new MigrationPlan(); //TODO fix later to opsList
 		}
 	}
 

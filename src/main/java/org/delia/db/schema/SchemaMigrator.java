@@ -16,6 +16,7 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -413,6 +414,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		}
 		
 		return migrationRunner.performMigrations(currentFingerprint, plan, orderL);
+	}
+	public boolean sxPerformMigrations(List<SchemaChangeOperation> opList) {
+		//create types in correct dependency order
+		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
+		List<String> orderL = typeSorter.topoSort(registry);
+		
+		return migrationRunner.sxPerformMigrations(currentFingerprint, opList, orderL);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {

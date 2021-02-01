@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -126,5 +127,33 @@ public class MigrationRunner extends ServiceBase {
 		dval = structBuilder.getDValue();
 		return dval;
 	}
+	
+	//=new one
+	public boolean sxPerformMigrations(String currentFingerprint, List<SchemaChangeOperation> opList, List<String> orderL) {
+		log.log("running migration with %d steps:", orderL.size());
+		for(String typeName: orderL) {
+			for(SchemaChangeOperation op: opList) {
+				if (op.typeName.equals(typeName)) {
+					log.log("  %s: %s. fld: %s", op.opType.name(), op.typeName, op.fieldName);
+					dbexecutor.executeSchemaChangeOperation(op);
+				}
+			}
+		}
+		
+		//write new schema to db
+		DStructType dtype = registry.getSchemaVersionType();
+		DValue dval = createSchemaObj(dtype, currentFingerprint);
+		if (dval == null) {
+			return false;
+		}
+
+//		InsertContext ictx = new InsertContext();
+//		dbexecutor.executeInsert(dval, ictx);
+		insertRunner.doInsert(dval);
+
+		return true;
+	}
+	
+	
 
 }
