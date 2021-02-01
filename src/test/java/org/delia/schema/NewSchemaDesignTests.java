@@ -11,10 +11,9 @@ import java.util.stream.Collectors;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
-import org.delia.db.schema.FieldInfo;
-import org.delia.db.schema.SchemaType;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.relation.RelationCardinality;
+import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -404,7 +403,6 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 	
 	
 	public static class SchemaDeltaOptimizer extends RegAwareServiceBase {
-
 		private boolean isMemDB;
 
 		public SchemaDeltaOptimizer(DTypeRegistry registry, FactoryService factorySvc, DBType dbType) {
@@ -412,11 +410,11 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			this.isMemDB = DBType.MEM.equals(dbType);
 		}
 		
-		public SchemaDelta generate(SchemaDelta delta) {
+		public SchemaDelta optimize(SchemaDelta delta) {
 			detectTableRename(delta);
 			detectFieldRename(delta);
 			removeParentRelations(delta);
-//			diffL = detectOneToManyFieldChange(diffL);
+			detectOneToManyFieldChange(delta);
 
 			return delta;
 		}
@@ -559,6 +557,56 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			return false;
 		}
 
+		private void detectOneToManyFieldChange(SchemaDelta delta) {
+			for(SxTypeDelta td: delta.typesU) {
+				doDetectOneToManyFieldChange(td, delta);
+			}
+		}
+		private void doDetectOneToManyFieldChange(SxTypeDelta td, SchemaDelta delta) {
+			for(SxFieldDelta st: td.fldsU) {
+				if (st.flgsDelta == null) {
+					continue;
+				}
+				
+				if (st.flgsDelta.equals("-a,+c")) { //changing parent from one to many?
+					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeNamex, st.fieldName, registry);
+//					DType farType = ruleMany.relInfo.farType;
+//					DStructType nearType = ruleMany.relInfo.nearType;
+					RelationInfo otherSide = ruleMany.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+
+					SxTypeDelta otherTd = findOther(delta, otherSide.nearType);
+					SxFieldDelta newfd = new SxFieldDelta(otherSide.fieldName, otherTd.typeName);
+//					st.action = "A";
+//					st.field = otherSide.fieldName;
+//					st.typeName = otherSide.nearType.getName();
+					newfd.flgsDelta = "-U"; //remove UNIQUE
+					otherTd.fldsU.add(newfd);
+
+					log.log("migrate: one to many on '%s.%s'", st.typeNamex, st.fieldName);
+				} else if (st.flgsDelta.equals("-c,+a")) { //changing parent from many to one?
+					RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeNamex, st.fieldName, registry);
+//					DType farType = ruleOne.relInfo.farType;
+//					DStructType nearType = ruleOne.relInfo.nearType;
+					RelationInfo otherSide = ruleOne.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
+
+					SxTypeDelta otherTd = findOther(delta, otherSide.nearType);
+					SxFieldDelta newfd = new SxFieldDelta(otherSide.fieldName, otherTd.typeName);
+//					st.action = "A";
+//					st.field = otherSide.fieldName;
+//					st.typeName = otherSide.nearType.getName();
+					newfd.flgsDelta = "+U"; //remove UNIQUE
+					otherTd.fldsU.add(newfd);
+
+					log.log("migrate: one to many on '%s.%s'", st.typeNamex, st.fieldName);
+				}
+			}
+		}
+
+		private SxTypeDelta findOther(SchemaDelta delta, DStructType nearType) {
+			String target = nearType.getName();
+			Optional<SxTypeDelta> opt = delta.typesU.stream().filter(x -> x.typeName.equals(target)).findAny();
+			return opt.get(); //must be there
+		}
 
 		private SxTypeDelta findMatchingTableInsert(SchemaDelta delta, SxTypeDelta stTarget) {
 			int count = 0;
@@ -594,7 +642,97 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			}
 			return null;
 		}
+	}
+	
+	//New migration plan
+	public static enum OperationType {
+		TABLE_ADD,
+		TABLE_DELETE,
+		TABLE_RENAME,
+		FIELD_ADD,
+		FIELD_DELETE,
+		FIELD_RENAME,
+		FIELD_ALTER, //flags
+		FIELD_ALTER_TYPE, //includes size
+		INDEX_ADD,
+		INDEX_DELETE,
+		INDEX_ALTER,
+		CONSTRAINT_ADD,
+		CONSTRAINT_DELETE,
+		CONSTRAINT_ALTER,
+	}
+	public static class SchemaChangeOperation {
+		public OperationType opType;
+		public String typeName;
+		public String fieldName;
+		public String newName; //rename
+		public String fieldType;
+		public int sizeof;
+		public String flags;
+		public String otherName; //index or constraint
+		public List<String> argsL = new ArrayList<>();
+		public SxTypeInfo typeInfo; //when adding
+		public SxFieldInfo fieldInfo; //when adding
 		
+		public SchemaChangeOperation(OperationType opType) {
+			this.opType = opType;
+		}
+	}
+	
+	public static class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
+		private boolean isMemDB;
+
+		public SchemaMigrationPlanGenerator(DTypeRegistry registry, FactoryService factorySvc, DBType dbType) {
+			super(registry, factorySvc);
+			this.isMemDB = DBType.MEM.equals(dbType);
+		}
+		
+		public List<SchemaChangeOperation> generate(SchemaDelta delta) {
+			List<SchemaChangeOperation> opList = new ArrayList<>();
+			
+			//tbl I
+			for(SxTypeDelta td: delta.typesI) {
+				SchemaChangeOperation op = createAndAdd(opList, OperationType.TABLE_ADD); 
+				op.typeName = td.typeName;
+				op.fieldName = null;
+				op.newName = null;
+				op.fieldType = null;
+				op.sizeof = 0;
+				op.flags = null;
+				op.otherName = null; //index or constraint
+//				public List<String> arsL = new ArrayList<>();
+				op.typeInfo = td.info;
+				op.fieldInfo = null;
+			}
+			
+			//tbl U
+			for(SxTypeDelta td: delta.typesU) {
+				SchemaChangeOperation op = createAndAdd(opList, OperationType.TABLE_RENAME); 
+				op.typeName = td.typeName;
+				op.typeInfo = td.info;
+				op.newName = td.nmDelta; //should be non null!!
+			}
+			
+			
+			//tbl D
+			for(SxTypeDelta td: delta.typesD) {
+				SchemaChangeOperation op = createAndAdd(opList, OperationType.TABLE_DELETE); 
+				op.typeName = td.typeName;
+				op.typeInfo = td.info;
+			}
+			
+			//other
+			//TODO
+			
+			
+			return opList;
+		}
+
+		private SchemaChangeOperation createAndAdd(List<SchemaChangeOperation> opList, OperationType opType) {
+			SchemaChangeOperation op = new SchemaChangeOperation(opType);
+			opList.add(op);
+			return op;
+		}
 	}
 	
 	@Test
@@ -611,6 +749,14 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		SchemaDelta delta = deltaGen.generate(new SchemaDefinition(), schema);
 		dumpObj("delta", delta);
 		
+		DBType dbType = delia.getDBInterface().getDBType();
+		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, delia.getFactoryService(), dbType);
+		delta = optimizer.optimize(delta);
+		dumpObj("opt", delta);
+		
+		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, delia.getFactoryService(), dbType);
+		List<SchemaChangeOperation> ops = plangen.generate(delta);
+		dumpObj("op", ops);
 	}	
 
 	//-------------------------
