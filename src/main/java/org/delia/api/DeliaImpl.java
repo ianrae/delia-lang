@@ -39,6 +39,7 @@ public class DeliaImpl implements Delia {
 	}
 	
 //	public static boolean useNewHLD = true;
+	public static boolean useNewSchemaGen = false;
 	
 	private Log log;
 	private DBInterfaceFactory dbInterface;
