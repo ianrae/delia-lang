@@ -66,18 +66,6 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	
 	@Override
 	public void close() {
-//		try {
-//			rawExecutor.close();
-//		} catch (Exception e) {
-//			DBHelper.handleCloseFailure(e);
-//		}
-//		//and close 2nd one
-//		try {
-//			dbexecutor.close();
-//		} catch (Exception e) {
-//			DBHelper.handleCloseFailure(e);
-//		}
-		//and close 3rd one
 		try {
 			zexec.close();
 		} catch (Exception e) {

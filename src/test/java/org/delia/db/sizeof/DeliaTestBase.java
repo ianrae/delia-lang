@@ -17,6 +17,7 @@ import org.delia.log.Log;
 import org.delia.runner.BlobLoader;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
+import org.delia.util.render.ObjectRendererImpl;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.Before;
 
@@ -73,6 +74,12 @@ public abstract class DeliaTestBase  {
 			assertEquals(expectedErrId, e.getLastError().getId());
 		}
 		assertEquals(false, ok);
+	}
+	protected void dumpObj(String title, Object obj) {
+		log.log(title);
+		ObjectRendererImpl ori = new ObjectRendererImpl();
+		String json = ori.render(obj);
+		log.log(json);
 	}
 
 }
