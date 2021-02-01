@@ -11,6 +11,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
 import org.delia.assoc.PopulateDatIdVisitor;
+import org.delia.db.schema.DatMapBuilder;
 import org.delia.db.schema.FieldInfo;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
@@ -113,17 +114,18 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		DatIdMap datIdMap = null; //TODO is this ok?
 
 		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator(), datIdMap)) {
-			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
+			DatMapBuilder datMapBuilder = migrator.createDatMapBuilder();
+			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(datMapBuilder, registry, delia.getLog());
 			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
 			datIdMap = visitor.getDatIdMap();
 
-			DBExecutor rawExecutor = visitor.getSchemaMigrator().getZDBExecutor();
+			DBExecutor rawExecutor = migrator.getZDBExecutor();
 			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);
 			enumerator = new ManyToManyEnumerator();
 			enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
 			
-			visitor.getSchemaMigrator().close();
+			migrator.close();
 			
 		}
 	}

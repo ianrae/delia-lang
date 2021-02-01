@@ -1,10 +1,12 @@
 package org.delia.assoc;
 
 import org.delia.core.FactoryService;
+import org.delia.db.schema.DatMapBuilder;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.ErrorTracker;
 import org.delia.log.Log;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.DBExecutor;
 
 public class AssocServiceImpl implements AssocService {
 
@@ -12,18 +14,24 @@ public class AssocServiceImpl implements AssocService {
 	private ErrorTracker et;
 	private FactoryService factorySvc;
 	private DatIdMap datIdMap;
-	private SchemaMigrator schemaMigrator;
+//	private SchemaMigrator schemaMigrator;
+	private DatMapBuilder datMapBuilder;
+	private DBExecutor zexec;
 
 	public AssocServiceImpl(SchemaMigrator schemaMigrator, FactoryService factorySvc, ErrorTracker et) {
 		this.factorySvc = factorySvc;
 		this.log = factorySvc.getLog();
 		this.et = et;
-		this.schemaMigrator = schemaMigrator;
+//		this.schemaMigrator = schemaMigrator;
+		if (schemaMigrator != null) {
+			this.datMapBuilder = schemaMigrator.createDatMapBuilder();
+			this.zexec = schemaMigrator.getZDBExecutor();
+		}
 	}
 	
 	@Override
 	public void assignDATIds(DTypeRegistry registry) {
-		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(schemaMigrator, registry, log);
+		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(datMapBuilder, registry, log);
 		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(registry, visitor);
 		int numLoaded = visitor.datIdCounter;
@@ -34,12 +42,12 @@ public class AssocServiceImpl implements AssocService {
 
 		visitor.loadSchemaFingerprintIfNeeded(); //force loading of fingerprint and loading datIdMap
 
-		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, schemaMigrator.getZDBExecutor(), registry, log, datIdMap);
+		CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(factorySvc, zexec, registry, log, datIdMap);
 		//since types of fields may have been deleted, we can't trust the registry
 		//to visit all types needed for schema migration.
 		newIdVisitor.initTableNameCreatorIfNeeded(); //explicitly load every time.
 
-		if (schemaMigrator == null) {
+		if (datMapBuilder == null) {
 			log.log("DAT ids: %d loaded, %d added", 0, 0);
 			return; //there are no many-to-many types
 		}

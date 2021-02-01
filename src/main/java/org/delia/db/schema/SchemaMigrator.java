@@ -75,7 +75,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		}
 	}
 	
-	public DatMapBuilder xxx() {
+	public DatMapBuilder createDatMapBuilder() {
 		return new DatMapBuilderImpl(registry, factorySvc, zexec, this);
 	}
 
