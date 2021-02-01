@@ -4,15 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.delia.db.schema.SchemaType;
+import org.delia.assoc.DatIdMap;
+import org.delia.core.FactoryService;
+import org.delia.core.ServiceBase;
+import org.delia.db.schema.FieldInfo;
 import org.delia.db.sizeof.DeliaTestBase;
+import org.delia.hld.QueryBuilderHelper;
+import org.delia.hld.simple.SimpleSqlBuilder;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.UniqueFieldsRule;
+import org.delia.sprig.SprigService;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
@@ -54,6 +61,16 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public List<SxOtherInfo> others = new ArrayList<>();
 	}	
 	
+	
+	public static class RegAwareServiceBase extends ServiceBase {
+		protected DTypeRegistry registry;
+
+		public RegAwareServiceBase(DTypeRegistry registry, FactoryService factorySvc) {
+			super(factorySvc);
+			this.registry = registry;
+		}
+	}	
+	
 	/**
 	 * TODO
 	 *  registry to SchemaDefinition
@@ -62,13 +79,11 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 	 *  SchemaDelta to MigrationPlan (series of SCA)
 	 */
 	
-	public static class SchemaDefinitionGenerator {
+	public static class SchemaDefinitionGenerator extends RegAwareServiceBase {
 		public static final int VERSION = 3;
 		
-		private DTypeRegistry registry;
-
-		public SchemaDefinitionGenerator(DTypeRegistry registry) {
-			this.registry = registry;
+		public SchemaDefinitionGenerator(DTypeRegistry registry, FactoryService factorySvc) {
+			super(registry, factorySvc);
 		}
 		
 		public SchemaDefinition generate() {
@@ -204,6 +219,11 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public String flgsDelta; //""
 		public Integer szDelta; //null means no change, else is new size
 //		public int datId;  never changes
+		public SxFieldInfo info; //when adding
+		
+		public SxFieldDelta(String fieldName) {
+			this.fieldName = fieldName;
+		}
 	}	
 	
 	public static class SxTypeDelta {
@@ -213,6 +233,7 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public List<SxFieldDelta> fldsI = new ArrayList<>();
 		public List<SxFieldDelta> fldsU = new ArrayList<>();
 		public List<SxFieldDelta> fldsD = new ArrayList<>();
+		public SxTypeInfo info; //when adding a type
 	}	
 	
 	public static class SxOtherDelta {
@@ -239,11 +260,10 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		}
 	}	
 
-	public static class SchemaDeltaGenerator {
-		private DTypeRegistry registry;
+	public static class SchemaDeltaGenerator extends RegAwareServiceBase {
 
-		public SchemaDeltaGenerator(DTypeRegistry registry) {
-			this.registry = registry;
+		public SchemaDeltaGenerator(DTypeRegistry registry, FactoryService factorySvc) {
+			super(registry, factorySvc);
 		}
 		
 		public SchemaDelta generate(SchemaDefinition schema1, SchemaDefinition schema2) {
@@ -253,10 +273,10 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			for(SxTypeInfo tt: schema1.types) {
 				SxTypeInfo sc2 = findIn(tt, schema2);
 				if (sc2 != null) {
-					//diffFields(schema1, sc2, diffList);
+					SxTypeDelta td = buildTypeDelta(tt);
+					diffFields(tt, sc2, delta, td);
 					list2.remove(sc2);
 					
-					SxTypeDelta td = buildTypeDelta(tt);
 					delta.typesU.add(td);
 				} else {
 					SxTypeDelta td = buildTypeDelta(tt);
@@ -266,6 +286,7 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 
 			for(SxTypeInfo tt: list2) {
 				SxTypeDelta td = buildTypeDelta(tt);
+				td.info = tt;
 				delta.typesI.add(td);
 			}
 			
@@ -286,17 +307,109 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			return opt.orElse(null);
 		}
 		
+		private void diffFields(SxTypeInfo tt, SxTypeInfo sc2, SchemaDelta delta, SxTypeDelta td) {
+//			private void diffFields(SchemaType st1, SchemaType st2, List<SchemaType> diffList) {
+			
+			List<SxFieldInfo> flist1 = tt.flds;
+			List<SxFieldInfo> flist2 = sc2.flds;
+			List<SxFieldInfo> list2 = new ArrayList<>(flist2);
+			
+			//TODO support rename
+			//add fieldinfo.fieldIndex - index of field within dtype
+			//if I and D have same fieldIndex and same type and options then do a rename
+
+			//I/U/D/R/A/AT/ASZ/ASN
+			for(SxFieldInfo finfo: flist1) {
+				SxFieldInfo f2 = findFieldIn(finfo, flist2);
+				if (f2 != null) {
+					if (!finfo.t.equals(f2.t)) {
+						SxFieldDelta fd = new SxFieldDelta(finfo.f);
+						fd.tDelta = f2.t;
+						td.fldsU.add(fd);
+					} else {
+						Integer sizeofDelta = calcSizeofString(finfo, f2);
+						if (sizeofDelta != null) {
+							SxFieldDelta fd = new SxFieldDelta(finfo.f);
+							fd.szDelta = sizeofDelta;
+							td.fldsU.add(fd);
+						}
+					}
+					
+					String deltaFlags = calcDeltaFlags(finfo, f2);
+					if (!StringUtil.isNullOrEmpty(deltaFlags)) {
+						SxFieldDelta fd = new SxFieldDelta(finfo.f);
+						fd.flgsDelta = deltaFlags;
+						td.fldsU.add(fd);
+					}
+					
+					list2.remove(f2);
+				} else {
+					SxFieldDelta fd = new SxFieldDelta(finfo.f);
+					td.fldsD.add(fd);
+				}
+			}
+
+			for(SxFieldInfo f2: list2) {
+				//in list2 but not in list1
+				SxFieldDelta fd = new SxFieldDelta(f2.f);
+				fd.info = f2;
+				td.fldsI.add(fd);
+			}
+		}
+
+		private Integer calcSizeofString(SxFieldInfo finfo, SxFieldInfo f2) {
+			if (finfo.sz == f2.sz) {
+				return null;
+			}
+			
+			return f2.sz; // new size value
+		}
+
+		/** generate a string of modifier changes.
+		 *  +O means adding optional
+		 *  -O means removing optional
+		 *  -also +U,-U,+P,-P,+S,-S
+		 */
+		private String calcDeltaFlags(SxFieldInfo finfo, SxFieldInfo f2) {
+			StringJoiner joiner = new StringJoiner(",");
+			for(int i = 0; i < finfo.flgs.length(); i++) {
+				char ch = finfo.flgs.charAt(i);
+				if (f2.flgs.indexOf(ch) < 0) { //in f1 and not in f2?
+					joiner.add(String.format("-%c", ch));
+				}
+			}		
+			
+			for(int i = 0; i < f2.flgs.length(); i++) {
+				char ch = f2.flgs.charAt(i);
+				if (finfo.flgs.indexOf(ch) < 0) { //not in f1 and in f2?
+					joiner.add(String.format("+%c", ch));
+				}
+			}		
+			
+			return joiner.toString();
+		}
+
+		private SxFieldInfo findFieldIn(SxFieldInfo target, List<SxFieldInfo> flist2) {
+			for(SxFieldInfo f2: flist2) {
+				if (target.f.equals(f2.f)) {
+					return f2;
+				}
+			}
+			return null;
+		}
 	}
 	
 	@Test
 	public void test() {
 		String src = "let x = Flight[1]";
 		execute(src);
-		SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(session.getExecutionContext().registry);
+		
+		DTypeRegistry registry = session.getExecutionContext().registry;
+		SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(registry, delia.getFactoryService());
 		SchemaDefinition schema = schemaDefGen.generate();
 		dumpObj("schema", schema);
 		
-		SchemaDeltaGenerator deltaGen = new SchemaDeltaGenerator(session.getExecutionContext().registry);
+		SchemaDeltaGenerator deltaGen = new SchemaDeltaGenerator(registry, delia.getFactoryService());
 		SchemaDelta delta = deltaGen.generate(new SchemaDefinition(), schema);
 		dumpObj("delta", delta);
 		
