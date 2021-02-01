@@ -17,6 +17,7 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
+import org.delia.db.schema.SchemaChangeAction;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
@@ -39,6 +40,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
@@ -411,6 +413,10 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	@Override
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
+	}
+	@Override
+	public void performSchemaChangeAction(SchemaChangeAction action) {
+		//TODO: i think nothing do do here
 	}
 
 }

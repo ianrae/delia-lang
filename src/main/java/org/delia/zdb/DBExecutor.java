@@ -5,6 +5,7 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
+import org.delia.db.schema.SchemaChangeAction;
 import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
@@ -52,6 +53,7 @@ public interface DBExecutor extends AutoCloseable {
 	void renameField(String typeName, String fieldName, String newName);
 	void alterFieldType(String typeName, String fieldName, String newFieldType, int sizeof);
 	void alterField(String typeName, String fieldName, String deltaFlags);
+	void performSchemaChangeAction(SchemaChangeAction action);
 
 	DBInterfaceFactory getDbInterface();
 	HLDFactory getHLDFactory();
