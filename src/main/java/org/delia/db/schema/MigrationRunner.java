@@ -25,10 +25,10 @@ public class MigrationRunner extends ServiceBase {
 		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface);
 	}
 
-	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {
+	public boolean performMigrations(String currentFingerprint, MigrationPlan plan, List<String> orderL) {
 		log.log("running migration with %d steps:", orderL.size());
 		for(String typeName: orderL) {
-			for(SchemaType st: diffL) {
+			for(SchemaType st: plan.diffL) {
 				if (st.typeName.equals(typeName)) {
 					if (st.isTblInsert()) {
 						log.log("  create-table: %s", st.typeName);
@@ -56,7 +56,12 @@ public class MigrationRunner extends ServiceBase {
 			}
 		}
 		
-		for(SchemaType st: diffL) {
+		for(SchemaChangeAction action: plan.changeActionL) {
+			log.log("  change-action: %s, %s", action.typeName, action.changeType);
+			dbexecutor.performSchemaChangeAction(action);
+		}
+		
+		for(SchemaType st: plan.diffL) {
 			if (st.isTblDelete()) {
 				log.log("  delete-table: %s", st.typeName);
 				doSoftDelete(st.typeName);

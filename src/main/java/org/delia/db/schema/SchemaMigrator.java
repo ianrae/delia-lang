@@ -115,7 +115,9 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		
 		List<SchemaType> diffL =  calcDiff(list, list2);
 		diffL = optimizer.optimizeDiffs(diffL);
-		boolean b = performMigrations(diffL, doLowRiskChecks);
+		MigrationPlan plan = new MigrationPlan();
+		plan.diffL = diffL;
+		boolean b = performMigrations(plan, doLowRiskChecks);
 		return b;
 	}
 	
@@ -142,7 +144,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @param plan migration plan
 	 */
 	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
-		boolean b = performMigrations(plan.diffL, false);
+		boolean b = performMigrations(plan, false);
 		plan.runResultFlag = b;
 		return plan;
 	}
@@ -407,17 +409,17 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks) {
+	public boolean performMigrations(MigrationPlan plan, boolean doLowRiskChecks) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
 		
-		if (! preRunCheck(diffL, orderL, doLowRiskChecks)) {
+		if (! preRunCheck(plan.diffL, orderL, doLowRiskChecks)) {
 			log.logError("migration halted due to pre-migration check errors. No schema changes were made.");
 			return false;
 		}
 		
-		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL);
+		return migrationRunner.performMigrations(currentFingerprint, plan, orderL);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {

@@ -8,6 +8,7 @@ import org.delia.base.DBHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
+import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.error.ErrorTracker;
@@ -48,7 +49,9 @@ public class SchemaMigratorTests {
 		assertEquals(1, diffL.size());
 		assertEquals("Customer", diffL.get(0).typeName);
 
-		b = migrator.performMigrations(diffL, true);
+		MigrationPlan plan = new MigrationPlan();
+		plan.diffL = diffL;
+		b = migrator.performMigrations(plan, true);
 		assertEquals(true, b);
 
 		String fingerprint = migrator.calcDBFingerprint();

@@ -8,6 +8,7 @@ import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.TypeStatementExp;
+import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.schema.SchemaType;
 import org.delia.runner.CompilerHelper;
@@ -103,7 +104,9 @@ public class StartupTestBase {
 		assertEquals(nAdded, diffL.size());
 		assertEquals(typeName, diffL.get(0).typeName);
 
-		b = migrator.performMigrations(diffL, true);
+		MigrationPlan plan = new MigrationPlan();
+		plan.diffL = diffL;
+		b = migrator.performMigrations(plan, true);
 		assertEquals(true, b);
 	}
 
