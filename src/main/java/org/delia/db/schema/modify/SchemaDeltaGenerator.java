@@ -31,10 +31,11 @@ import org.delia.util.StringUtil;
 				SxTypeInfo sc2 = findIn(tt, schema2);
 				if (sc2 != null) {
 					SxTypeDelta td = buildTypeDelta(tt);
-					diffFields(tt, sc2, delta, td);
-					list2.remove(sc2);
-					
-					delta.typesU.add(td);
+					int n = diffFields(tt, sc2, delta, td);
+					if (n > 0) {
+						list2.remove(sc2);
+						delta.typesU.add(td);
+					}
 				} else {
 					SxTypeDelta td = buildTypeDelta(tt);
 					delta.typesD.add(td); //in list1 but not in list2
@@ -62,12 +63,14 @@ import org.delia.util.StringUtil;
 			return opt.orElse(null);
 		}
 		
-		private void diffFields(SxTypeInfo tt, SxTypeInfo sc2, SchemaDelta delta, SxTypeDelta td) {
+		private int diffFields(SxTypeInfo tt, SxTypeInfo sc2, SchemaDelta delta, SxTypeDelta td) {
 //			private void diffFields(SchemaType st1, SchemaType st2, List<SchemaType> diffList) {
 			
 			List<SxFieldInfo> flist1 = tt.flds;
 			List<SxFieldInfo> flist2 = sc2.flds;
 			List<SxFieldInfo> list2 = new ArrayList<>(flist2);
+			
+			int nStart = td.fldsD.size() + td.fldsI.size() + td.fldsU.size();
 			
 			//TODO support rename
 			//add fieldinfo.fieldIndex - index of field within dtype
@@ -114,6 +117,9 @@ import org.delia.util.StringUtil;
 				fd.info = f2;
 				td.fldsI.add(fd);
 			}
+			
+			int nEnd = td.fldsD.size() + td.fldsI.size() + td.fldsU.size();
+			return nEnd - nStart;
 		}
 
 		private Integer calcSizeofString(SxFieldInfo finfo, SxFieldInfo f2) {

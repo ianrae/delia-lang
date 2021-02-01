@@ -40,10 +40,13 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 		
 		//tbl U
 		for(SxTypeDelta td: delta.typesU) {
-			SchemaChangeOperation op = createAndAdd(opList, OperationType.TABLE_RENAME); 
-			op.typeName = td.typeName;
-			op.typeInfo = td.info;
-			op.newName = td.nmDelta; //should be non null!!
+			//Note. td may be here just as a carrier of field changes.
+			if (td.nmDelta != null) {
+				SchemaChangeOperation op = createAndAdd(opList, OperationType.TABLE_RENAME); 
+				op.typeName = td.typeName;
+				op.typeInfo = td.info;
+				op.newName = td.nmDelta; 
+			}
 			
 			doFields(opList, td);
 		}
