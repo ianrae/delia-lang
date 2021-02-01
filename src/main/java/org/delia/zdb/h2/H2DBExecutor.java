@@ -387,7 +387,40 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 
 	@Override
 	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
-		DeliaExceptionHelper.throwNotImplementedError("scop!");
+		switch(op.opType) {
+		case TABLE_ADD:
+			this.createTable(op.typeName);
+			break;
+		case TABLE_DELETE:
+			this.deleteTable(op.typeName);
+			break;
+		case TABLE_RENAME:
+			this.renameTable(op.typeName, op.newName);
+			break;
+		case FIELD_ADD:
+			this.createField(op.typeName, op.fieldName, op.sizeof);
+			break;
+		case FIELD_DELETE:
+			this.deleteField(op.typeName, op.fieldName, op.fieldInfo.datId);
+			break;
+		case FIELD_RENAME:
+			this.renameField(op.typeName, op.fieldName, op.newName);
+			break;
+		case FIELD_ALTER: //flags
+			this.alterField(op.typeName, op.fieldName, op.flags);
+			break;
+		case FIELD_ALTER_TYPE: //includes size
+			this.alterFieldType(op.typeName, op.fieldName, op.fieldType, op.sizeof);
+			break;
+		case INDEX_ADD:
+		case INDEX_DELETE:
+		case INDEX_ALTER:
+		case CONSTRAINT_ADD:
+		case CONSTRAINT_DELETE:
+		case CONSTRAINT_ALTER:
+		default:
+			break;
+		}
 	}
 
 }

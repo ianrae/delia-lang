@@ -411,12 +411,12 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		
 		return migrationRunner.performMigrations(currentFingerprint, plan, orderL);
 	}
-	public boolean sxPerformMigrations(List<SchemaChangeOperation> opList) {
+	public boolean sxPerformMigrations(String fingerprintJson, List<SchemaChangeOperation> opList) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
 		
-		return migrationRunner.sxPerformMigrations(currentFingerprint, opList, orderL);
+		return migrationRunner.sxPerformMigrations(fingerprintJson, opList, orderL);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {

@@ -66,7 +66,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
 					//TODO: implement checks later
 //					b = migrator.performMigrations(performRiskChecks);
-					b = migrator.sxPerformMigrations(opList);
+					b = migrator.sxPerformMigrations(currentFingerprint, opList);
 					if (! b) {
 						return false;
 					}
@@ -157,7 +157,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			log.log("RUN MIGRATION PLAN: %b", b);
 //			plan = migrator.runMigrationPlan(plan);
 			List<SchemaChangeOperation> opList = generateMigrationPlan(registry);
-			b = migrator.sxPerformMigrations(opList);
+			b = migrator.sxPerformMigrations(currentFingerprint, opList);
 			return new MigrationPlan(); //TODO fix later to opsList
 		}
 	}
