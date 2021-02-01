@@ -11,7 +11,10 @@ import java.util.stream.Collectors;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBType;
+import org.delia.db.schema.FieldInfo;
+import org.delia.db.schema.SchemaType;
 import org.delia.db.sizeof.DeliaTestBase;
+import org.delia.relation.RelationCardinality;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -216,9 +219,11 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public Integer szDelta; //null means no change, else is new size
 //		public int datId;  never changes
 		public SxFieldInfo info; //when adding
+		public String typeNamex;
 		
-		public SxFieldDelta(String fieldName) {
+		public SxFieldDelta(String fieldName, String typeName) {
 			this.fieldName = fieldName;
+			this.typeNamex = typeName;
 		}
 	}	
 	
@@ -321,13 +326,13 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 				SxFieldInfo f2 = findFieldIn(finfo, flist2);
 				if (f2 != null) {
 					if (!finfo.t.equals(f2.t)) {
-						SxFieldDelta fd = new SxFieldDelta(finfo.f);
+						SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 						fd.tDelta = f2.t;
 						td.fldsU.add(fd);
 					} else {
 						Integer sizeofDelta = calcSizeofString(finfo, f2);
 						if (sizeofDelta != null) {
-							SxFieldDelta fd = new SxFieldDelta(finfo.f);
+							SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 							fd.szDelta = sizeofDelta;
 							td.fldsU.add(fd);
 						}
@@ -335,21 +340,21 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 					
 					String deltaFlags = calcDeltaFlags(finfo, f2);
 					if (!StringUtil.isNullOrEmpty(deltaFlags)) {
-						SxFieldDelta fd = new SxFieldDelta(finfo.f);
+						SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 						fd.flgsDelta = deltaFlags;
 						td.fldsU.add(fd);
 					}
 					
 					list2.remove(f2);
 				} else {
-					SxFieldDelta fd = new SxFieldDelta(finfo.f);
+					SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 					td.fldsD.add(fd);
 				}
 			}
 
 			for(SxFieldInfo f2: list2) {
 				//in list2 but not in list1
-				SxFieldDelta fd = new SxFieldDelta(f2.f);
+				SxFieldDelta fd = new SxFieldDelta(f2.f, tt.nm);
 				fd.info = f2;
 				td.fldsI.add(fd);
 			}
@@ -410,7 +415,7 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		public SchemaDelta generate(SchemaDelta delta) {
 			detectTableRename(delta);
 			detectFieldRename(delta);
-//			diffL = removeParentRelations(diffL);
+			removeParentRelations(delta);
 //			diffL = detectOneToManyFieldChange(diffL);
 
 			return delta;
@@ -448,7 +453,7 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 			for(SxFieldDelta st: td.fldsD) {
 				SxFieldDelta stOther = findMatchingFieldInsert(td, st);
 				if (stOther != null) {
-					SxFieldDelta fd = new SxFieldDelta(st.fieldName);
+					SxFieldDelta fd = new SxFieldDelta(st.fieldName, td.typeName);
 					fd.fDelta = stOther.fieldName;
 					td.fldsU.add(fd);
 					
@@ -462,6 +467,98 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 				td.fldsD.remove(doomed);
 			}
 		}
+		/**
+		 * In 1-to-1 and 1-to-many the parent side of a relation doesn't exist in the
+		 * db, so remove steps for them.
+		 * 
+		 * @param diffL
+		 * @return
+		 */
+		private void removeParentRelations(SchemaDelta delta) {
+			if (isMemDB) {
+				return; //we need to modify parent relations too in MEM db
+			}
+			
+			List<SxTypeDelta> combinedList = new ArrayList<>(delta.typesI);
+			combinedList.addAll(delta.typesU);
+			
+			List<SxFieldDelta> newlist = new ArrayList<>();
+			List<SxFieldDelta> manyToManyList = new ArrayList<>();
+			
+			for(SxTypeDelta st: combinedList) {
+				List<SxFieldDelta> doomedList = new ArrayList<>();
+				for(SxFieldDelta fd: st.fldsI) {
+					RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, fd.fieldName, registry);
+					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, fd.fieldName, registry);
+					if (ruleOne != null && ruleOne.isParent()) {
+						//don't add
+					} else 	if (ruleMany != null) {
+						if (ruleMany.relInfo.isManyToMany()) {
+							if (! findOtherSideOfRelation(manyToManyList, fd)) {
+								newlist.add(fd);
+								manyToManyList.add(fd);
+							}
+						} else {
+							//don't add (many side is always a parent)
+							doomedList.add(fd);
+						}
+					}
+				}
+				doomedList = removeDoomed(st.fldsI, doomedList);
+				
+				for(SxFieldDelta fd: st.fldsU) {
+					if (fd.fDelta != null) { //field rename
+						RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeName, fd.fDelta, registry);
+						RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, fd.fDelta, registry);
+						if (ruleOne != null && ruleOne.isParent()) {
+							//don't add
+						} else 	if (ruleMany != null) {
+							if (ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+								//do nothing - field names not in assoc table
+							} else {
+								//don't add (many side is always a parent)
+							}
+						}
+					}
+				} 
+				doomedList = removeDoomed(st.fldsI, doomedList);
+				
+				for(SxFieldDelta fd: st.fldsU) {
+					//relation codes
+					// a - relation one parent
+					// b - relation one         (child)
+					// c = relation many parent
+					// d = relation many        (child) -can this occur?
+					String flags = fd.flgsDelta;
+					if (flags != null && (flags.contains("a") || flags.contains("c"))) {
+						doomedList.add(fd);
+					} else {
+					}
+				}
+				doomedList = removeDoomed(st.fldsI, doomedList);
+			}
+		}
+		
+		private List<SxFieldDelta> removeDoomed(List<SxFieldDelta> list, List<SxFieldDelta> doomedList) {
+			for(SxFieldDelta fd: doomedList) {
+				list.remove(fd);
+			}
+			doomedList.clear();
+			return doomedList;
+		}
+
+		private boolean findOtherSideOfRelation(List<SxFieldDelta> manyToManyList, SxFieldDelta target) {
+			for(SxFieldDelta st: manyToManyList) {
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeNamex, st.fieldName, registry);
+				if (ruleMany != null) {
+					if (ruleMany.relInfo.farType.getName().equals(target.typeNamex)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 
 		private SxTypeDelta findMatchingTableInsert(SchemaDelta delta, SxTypeDelta stTarget) {
 			int count = 0;
