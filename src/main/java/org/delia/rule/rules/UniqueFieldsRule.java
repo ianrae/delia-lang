@@ -111,4 +111,7 @@ public class UniqueFieldsRule extends DRuleBase {
 		if (operL.isEmpty()) return null;
 		return operL.get(0).getSubject(); //TODO: is this ok
 	}
+	public List<RuleOperand> getOperList() {
+		return operL;
+	}
 }

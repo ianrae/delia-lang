@@ -89,6 +89,11 @@ public class H2BDDTests extends BDDBase {
 	}
 	
 	@Test
+	public void testR660() {
+		runR650File("t0-rule-uniquefields.txt", 1);
+	}
+	
+	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
@@ -350,7 +355,8 @@ public class H2BDDTests extends BDDBase {
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR2600Sizeof("t0-sizeof-string.txt", 2);
 //		runR2600Sizeof("t0-sizeof-int.txt", 1);
-		runR2700Blob("t0-blob.txt", 1);
+//		runR2700Blob("t0-blob.txt", 1);
+		runR650File("t0-rule-uniquefields.txt", 1);
 	}
 	
 	//---
