@@ -20,6 +20,7 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
 import org.delia.db.schema.SchemaChangeAction;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.hld.HLDFactory;
@@ -394,6 +395,11 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public void performSchemaChangeAction(SchemaChangeAction action) {
 		DeliaExceptionHelper.throwNotImplementedError("sca!");
+	}
+
+	@Override
+	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
+		DeliaExceptionHelper.throwNotImplementedError("scop!");
 	}
 
 }

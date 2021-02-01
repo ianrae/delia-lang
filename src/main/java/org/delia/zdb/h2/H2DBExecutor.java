@@ -19,6 +19,7 @@ import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.schema.SchemaChangeAction;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
@@ -382,6 +383,11 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public void performSchemaChangeAction(SchemaChangeAction action) {
 		DeliaExceptionHelper.throwNotImplementedError("sca!");
+	}
+
+	@Override
+	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
+		DeliaExceptionHelper.throwNotImplementedError("scop!");
 	}
 
 }
