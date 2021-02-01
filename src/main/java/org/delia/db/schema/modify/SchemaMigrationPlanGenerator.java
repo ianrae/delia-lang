@@ -83,9 +83,15 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 		op.typeInfo = td.info;
 		op.fieldName = fd.fieldName;
 		op.newName = null;
-		op.fieldType = fd.info.t;
-		op.sizeof = fd.info.sz;
-		op.flags = fd.info.flgs;
+		if (fd.info == null) {
+			op.fieldType = null;
+			op.sizeof = 0;
+			op.flags = null;
+		} else {
+			op.fieldType = fd.info.t;
+			op.sizeof = fd.info.sz;
+			op.flags = fd.info.flgs;
+		}
 		op.otherName = null; //index or constraint
 		op.typeInfo = td.info;
 		op.fieldInfo = fd.info;

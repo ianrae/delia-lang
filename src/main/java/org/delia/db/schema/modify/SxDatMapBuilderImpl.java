@@ -42,6 +42,11 @@ public class SxDatMapBuilderImpl extends RegAwareServiceBase implements DatMapBu
 		SchemaDefinition schema = createSchemaDefFromJSON(fingerprint);
 		return buildDatIdMap(schema);
 	}
+	
+	public SchemaDefinition parseJson(String fingerprintJson) {
+		SchemaDefinition schema = createSchemaDefFromJSON(fingerprintJson);
+		return schema;
+	}
 
 	public String calcDBFingerprint() {
 		//TODO: query just single record (most recent);

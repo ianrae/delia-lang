@@ -80,12 +80,14 @@ import org.delia.util.StringUtil;
 					if (!finfo.t.equals(f2.t)) {
 						SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 						fd.tDelta = f2.t;
+						fd.info = finfo;
 						td.fldsU.add(fd);
 					} else {
 						Integer sizeofDelta = calcSizeofString(finfo, f2);
 						if (sizeofDelta != null) {
 							SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 							fd.szDelta = sizeofDelta;
+							fd.info = finfo;
 							td.fldsU.add(fd);
 						}
 					}
@@ -94,12 +96,14 @@ import org.delia.util.StringUtil;
 					if (!StringUtil.isNullOrEmpty(deltaFlags)) {
 						SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
 						fd.flgsDelta = deltaFlags;
+						fd.info = finfo;
 						td.fldsU.add(fd);
 					}
 					
 					list2.remove(f2);
 				} else {
 					SxFieldDelta fd = new SxFieldDelta(finfo.f, tt.nm);
+					fd.info = finfo;
 					td.fldsD.add(fd);
 				}
 			}

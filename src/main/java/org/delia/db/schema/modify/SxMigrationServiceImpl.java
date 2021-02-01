@@ -58,7 +58,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = doNeedsMigration(registry, migrator);
 			log.logDebug("sxMIGRATION needed: %b", b);
 			if (b) {
-				List<SchemaChangeOperation> opList = generateMigrationPlan(registry);
+				List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
 //				MigrationPlan plan = migrator.generateMigrationPlan();
 				MigrationPlan plan = new MigrationPlan(); //TODO fix later
 				
@@ -84,14 +84,16 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		}
 		return true;
 	}
-	private List<SchemaChangeOperation> generateMigrationPlan(DTypeRegistry registry) {
+	private List<SchemaChangeOperation> generateMigrationPlan(DTypeRegistry registry, SchemaMigrator migrator) {
 		if (currentSchema == null) {
 			SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(registry, factorySvc);
 			currentSchema = schemaDefGen.generate();
 		}
 		
+		SxDatMapBuilderImpl datMapBuilder = new SxDatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor());
+		SchemaDefinition prevSchema = datMapBuilder.parseJson(dbFingerprint);
 		SchemaDeltaGenerator deltaGen = new SchemaDeltaGenerator(registry, factorySvc);
-		SchemaDelta delta = deltaGen.generate(new SchemaDefinition(), currentSchema);
+		SchemaDelta delta = deltaGen.generate(prevSchema, currentSchema);
 		
 		DBType dbType = dbInterface.getDBType();
 		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, factorySvc, dbType);
@@ -108,6 +110,8 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		this.currentSchema = schema;
 		this.currentFingerprint = ori.render(schema);
 		this.dbFingerprint = calcDBFingerprint(registry, migrator.getZDBExecutor());
+		
+		log.log("ZZZ DB is: %s", dbFingerprint);
 
 		return !currentFingerprint.equals(dbFingerprint);
 	}
@@ -156,7 +160,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = this.doNeedsMigration(registry, migrator);
 			log.log("RUN MIGRATION PLAN: %b", b);
 //			plan = migrator.runMigrationPlan(plan);
-			List<SchemaChangeOperation> opList = generateMigrationPlan(registry);
+			List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
 			b = migrator.sxPerformMigrations(currentFingerprint, opList);
 			return new MigrationPlan(); //TODO fix later to opsList
 		}
