@@ -242,10 +242,8 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public SimpleUpdate getDATUpdate(RelationInfo relinfo, DatIdMap datIdMap) {
 		HLDDsonBuilder hldBuilder = getHldBuilder();
 		
-//		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
 		String fld1 = datIdMap.getAssocFieldFor(relinfo);
-		
-		//create a temp type for the assoc table
+		fld1 = (fld1.equals("leftv")) ? "leftName" : "rightName";
 		DStructType structType = registry.getDATType(); 
 		
 		ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(registry);
@@ -256,6 +254,9 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 		DValue strVal = scalarBuilder.buildString(String.format("%s.%s", relinfo.nearType.getName(), relinfo.fieldName));
 		HLDUpdate hld = hldBuilder.buildSimpleUpdate(structType, pkpair.name, pkval, fld1, strVal);
 		hld.hld = buildQuery(queryExp);
+		
+		HLDAliasBuilder aliasBuilder = createAliasBuilder();
+		aliasBuilder.assignAliases(hld);
 		
 		SimpleSqlBuilder simpleBuilder = new SimpleSqlBuilder();
 		SimpleUpdate simple = simpleBuilder.buildFrom(hld);

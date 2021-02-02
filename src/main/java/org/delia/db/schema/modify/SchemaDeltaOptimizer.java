@@ -83,9 +83,9 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 
 				td.fldsI.remove(stOther);
 				doomedL.add(st);
-				log.log("migrate: '%s.%s' -> '%s.%s' replace with rename.", td.typeName, st.fieldName, td.typeName, st.fieldName);
+				log.log("migrate: '%s.%s' -> '%s.%s' replace with rename.", td.typeName, st.fieldName, td.typeName, fd.fDelta);
 				
-				RelationManyRule ruleMany = DRuleHelper.findManyRule(td.typeName, fd.fieldName, registry);
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(td.typeName, fd.fDelta, registry);
 				if (ruleMany != null && ruleMany.relInfo.isManyToMany()) {
 					//MM fields are stored in DAT table (not in actual db schema)
 					//UPDATE CustomerAddressDat1 SET leftv = 'Customer.addr2' WHERE id=dat
@@ -110,8 +110,6 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 		stm.sql = sqlgen.gen(simple, stm);
 		return stm;
 	}
-	
-	
 	
 	/**
 	 * In 1-to-1 and 1-to-many the parent side of a relation doesn't exist in the

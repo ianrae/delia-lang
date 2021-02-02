@@ -411,9 +411,12 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 			break;
 		case FIELD_RENAME_MANY_TO_MANY:
 		{
+			this.logSql(op.assocUpdateStm.sql);
 			DBExecuteContext dbctx = createContext();
 			int n = conn.executeCommandStatement(op.assocUpdateStm, dbctx);
-
+			if (n != 1) {
+				this.log.logError("FIELD_RENAME_MANY_TO_MANY failed!");
+			}
 		}
 			break;
 		case FIELD_ALTER: //flags
