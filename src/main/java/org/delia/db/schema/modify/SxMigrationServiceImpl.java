@@ -58,7 +58,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = doNeedsMigration(registry, migrator);
 			log.logDebug("sxMIGRATION needed: %b", b);
 			if (b) {
-				List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
+				SxMigrationPlan sxplan = generateMigrationPlan(registry, migrator);
 //				MigrationPlan plan = migrator.generateMigrationPlan();
 				MigrationPlan plan = new MigrationPlan(); //TODO fix later
 				
@@ -66,15 +66,21 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
 					//TODO: implement checks later
 //					b = migrator.performMigrations(performRiskChecks);
-					log.log("OP: %s", ori.render(opList));
-					b = migrator.sxPerformMigrations(currentFingerprint, opList);
+					SxPreRunChecker preRunChecker = new SxPreRunChecker(factorySvc, dbInterface, registry, varEvaluator, datIdMap);
+					b = preRunChecker.preRunCheck(sxplan.delta, performRiskChecks);
+					if (!b) {
+						return false;
+					}
+					
+					log.log("OP: %s", ori.render(sxplan.opList));
+					b = migrator.sxPerformMigrations(currentFingerprint, sxplan.opList);
 					if (! b) {
 						return false;
 					}
 				} else {
 					log.logError("MIGRATION rejected due to policy : %s", policy.getClass().getSimpleName());
 					log.log("=== MIGRATION PLAN ===");
-					for(SchemaChangeOperation op: opList) {
+					for(SchemaChangeOperation op: sxplan.opList) {
 						String s = ori.render(op);
 						log.log(s);
 					}
@@ -85,7 +91,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		}
 		return true;
 	}
-	private List<SchemaChangeOperation> generateMigrationPlan(DTypeRegistry registry, SchemaMigrator migrator) {
+	private SxMigrationPlan generateMigrationPlan(DTypeRegistry registry, SchemaMigrator migrator) {
 		if (currentSchema == null) {
 			SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(registry, factorySvc);
 			currentSchema = schemaDefGen.generate();
@@ -101,8 +107,10 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		delta = optimizer.optimize(delta);
 		
 		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, factorySvc, dbType);
-		List<SchemaChangeOperation> ops = plangen.generate(delta);
-		return ops;
+		SxMigrationPlan sxplan = new SxMigrationPlan();
+		sxplan.opList = plangen.generate(delta);
+		sxplan.delta = delta;
+		return sxplan;
 	}
 
 	private boolean doNeedsMigration(DTypeRegistry registry, SchemaMigrator migrator) {
@@ -161,8 +169,8 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = this.doNeedsMigration(registry, migrator);
 			log.log("RUN MIGRATION PLAN: %b", b);
 //			plan = migrator.runMigrationPlan(plan);
-			List<SchemaChangeOperation> opList = generateMigrationPlan(registry, migrator);
-			b = migrator.sxPerformMigrations(currentFingerprint, opList);
+			SxMigrationPlan sxplan = generateMigrationPlan(registry, migrator);
+			b = migrator.sxPerformMigrations(currentFingerprint, sxplan.opList);
 			return new MigrationPlan(); //TODO fix later to opsList
 		}
 	}

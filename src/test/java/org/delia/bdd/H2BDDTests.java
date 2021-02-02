@@ -354,9 +354,9 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-		runR2100File("t0-migration2.txt", 2);
 //		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 //		runR2700Blob("t0-blob.txt", 1);
+		runR2100File("t0-migration3a.txt", 2);
 	}
 	
 	//---
