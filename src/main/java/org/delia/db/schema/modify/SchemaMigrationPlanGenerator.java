@@ -108,6 +108,7 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 				SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_RENAME); 
 				initForField(op, fd, td);
 				op.newName = fd.fDelta;
+				op.assocTableName = fd.assocTableName; //may be null
 			}
 			
 			if (fd.flgsDelta != null) {

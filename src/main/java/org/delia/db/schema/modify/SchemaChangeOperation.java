@@ -16,6 +16,7 @@ public class SchemaChangeOperation {
 	public SxTypeInfo typeInfo; //when adding
 	public SxFieldInfo fieldInfo; //when adding
 	public boolean canCreateAssocTable; //only used in FIELD_ADD of MM relation field
+	public String assocTableName; //only used in FIELD_RENAME of MM relation field
 	
 	public SchemaChangeOperation(OperationType opType) {
 		this.opType = opType;

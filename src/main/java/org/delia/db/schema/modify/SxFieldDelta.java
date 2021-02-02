@@ -10,6 +10,7 @@ public class SxFieldDelta {
 	public SxFieldInfo info; //when adding
 	public String typeNamex;
 	public boolean canCreateAssocTable; //true for 2nd one
+	public String assocTableName; //only used for rename MM field
 
 	public SxFieldDelta(String fieldName, String typeName) {
 		this.fieldName = fieldName;

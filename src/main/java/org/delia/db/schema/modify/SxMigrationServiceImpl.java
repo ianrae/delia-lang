@@ -1,7 +1,5 @@
 package org.delia.db.schema.modify;
 
-import java.util.List;
-
 import org.delia.assoc.AssocService;
 import org.delia.assoc.AssocServiceImpl;
 import org.delia.assoc.DatIdMap;
@@ -58,7 +56,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = doNeedsMigration(registry, migrator);
 			log.logDebug("sxMIGRATION needed: %b", b);
 			if (b) {
-				SxMigrationPlan sxplan = generateMigrationPlan(registry, migrator);
+				SxMigrationPlan sxplan = generateMigrationPlan(registry, migrator, datIdMap);
 //				MigrationPlan plan = migrator.generateMigrationPlan();
 				MigrationPlan plan = new MigrationPlan(); //TODO fix later
 				
@@ -91,7 +89,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		}
 		return true;
 	}
-	private SxMigrationPlan generateMigrationPlan(DTypeRegistry registry, SchemaMigrator migrator) {
+	private SxMigrationPlan generateMigrationPlan(DTypeRegistry registry, SchemaMigrator migrator, DatIdMap datIdMap) {
 		if (currentSchema == null) {
 			SchemaDefinitionGenerator schemaDefGen = new SchemaDefinitionGenerator(registry, factorySvc);
 			currentSchema = schemaDefGen.generate();
@@ -103,7 +101,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		SchemaDelta delta = deltaGen.generate(prevSchema, currentSchema);
 		
 		DBType dbType = dbInterface.getDBType();
-		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, factorySvc, dbType);
+		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, factorySvc, dbType, datIdMap);
 		delta = optimizer.optimize(delta);
 		
 		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, factorySvc, dbType);
@@ -169,7 +167,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 			boolean b = this.doNeedsMigration(registry, migrator);
 			log.log("RUN MIGRATION PLAN: %b", b);
 //			plan = migrator.runMigrationPlan(plan);
-			SxMigrationPlan sxplan = generateMigrationPlan(registry, migrator);
+			SxMigrationPlan sxplan = generateMigrationPlan(registry, migrator, datIdMap);
 			b = migrator.sxPerformMigrations(currentFingerprint, sxplan.opList);
 			return new MigrationPlan(); //TODO fix later to opsList
 		}

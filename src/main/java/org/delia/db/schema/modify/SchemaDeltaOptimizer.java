@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.RegAwareServiceBase;
 import org.delia.db.DBType;
@@ -23,10 +24,12 @@ import org.delia.util.DRuleHelper;
  */
 public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 	private boolean isMemDB;
+	private DatIdMap datIdMap;
 
-	public SchemaDeltaOptimizer(DTypeRegistry registry, FactoryService factorySvc, DBType dbType) {
+	public SchemaDeltaOptimizer(DTypeRegistry registry, FactoryService factorySvc, DBType dbType, DatIdMap datIdMap) {
 		super(registry, factorySvc);
 		this.isMemDB = DBType.MEM.equals(dbType);
+		this.datIdMap = datIdMap;
 	}
 
 	public SchemaDelta optimize(SchemaDelta delta) {
@@ -77,6 +80,11 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 				td.fldsI.remove(stOther);
 				doomedL.add(st);
 				log.log("migrate: '%s.%s' -> '%s.%s' replace with rename.", td.typeName, st.fieldName, td.typeName, st.fieldName);
+				
+				RelationManyRule ruleMany = DRuleHelper.findManyRule(td.typeName, fd.fieldName, registry);
+				if (ruleMany != null && ruleMany.relInfo.isManyToMany()) {
+					fd.assocTableName = datIdMap.getAssocTblName(ruleMany.relInfo.getDatId());
+				}
 			}
 		}
 

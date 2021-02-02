@@ -407,7 +407,13 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 			this.deleteField(op.typeName, op.fieldName, op.fieldInfo.datId);
 			break;
 		case FIELD_RENAME:
-			this.renameField(op.typeName, op.fieldName, op.newName);
+		{
+			if (op.assocTableName != null) {
+				this.renameField(op.typeName, op.fieldName, op.newName);
+			} else {
+				this.renameField(op.typeName, op.fieldName, op.newName);
+			}
+		}
 			break;
 		case FIELD_ALTER: //flags
 			this.alterField(op.typeName, op.fieldName, op.flags);
