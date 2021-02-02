@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.schema.modify.OperationType;
 import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -12,6 +13,7 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.stringtemplate.v4.compiler.Bytecode.OperandType;
 
 public class MigrationRunner extends ServiceBase {
 
@@ -130,15 +132,23 @@ public class MigrationRunner extends ServiceBase {
 	
 	//=new one
 	public boolean sxPerformMigrations(String currentFingerprint, List<SchemaChangeOperation> opList, List<String> orderL) {
-		log.log("running migration with %d steps:", orderL.size());
+		log.log("running sxmigration with %d steps:", orderL.size());
 		for(String typeName: orderL) {
 			for(SchemaChangeOperation op: opList) {
-				if (op.typeName.equals(typeName)) {
+				//when we rename a table, op will be the old name, so check op.newName
+				boolean isMatchToNewName = false;
+				if (op.opType.equals(OperationType.TABLE_RENAME)) {
+					isMatchToNewName = op.newName.equals(typeName);
+				}
+				
+				if (op.typeName.equals(typeName) || isMatchToNewName) {
 					log.log("  %s: %s. fld: %s", op.opType.name(), op.typeName, op.fieldName);
 					dbexecutor.executeSchemaChangeOperation(op);
 				}
 			}
 		}
+		
+		
 		
 		//write new schema to db
 		DStructType dtype = registry.getSchemaVersionType();

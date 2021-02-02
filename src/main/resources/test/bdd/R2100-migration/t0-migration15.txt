@@ -24,7 +24,6 @@ value:a:Customer {
 
 ---
 title: migration15a.1 - alter field 
-#note. not really failing because of policy. simply not supported by most dbs
 given:
  type Customer struct {id int primaryKey, wid int, height int  } end
 
@@ -32,6 +31,6 @@ when:
   insert Customer { wid:34, height:45}
   let x = Customer[wid > 23].orderBy('id')
 then:
-ERROR: migration-failed-due-to-policy
+ERROR: unsupported-alter-field-change
 }
 
