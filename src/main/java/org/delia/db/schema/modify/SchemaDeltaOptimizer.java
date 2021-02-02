@@ -8,6 +8,10 @@ import org.delia.assoc.DatIdMap;
 import org.delia.core.FactoryService;
 import org.delia.core.RegAwareServiceBase;
 import org.delia.db.DBType;
+import org.delia.db.SqlStatement;
+import org.delia.hld.HLDEngine;
+import org.delia.hld.simple.SimpleSqlGenerator;
+import org.delia.hld.simple.SimpleUpdate;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -83,7 +87,12 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 				
 				RelationManyRule ruleMany = DRuleHelper.findManyRule(td.typeName, fd.fieldName, registry);
 				if (ruleMany != null && ruleMany.relInfo.isManyToMany()) {
-					fd.assocTableName = datIdMap.getAssocTblName(ruleMany.relInfo.getDatId());
+					//MM fields are stored in DAT table (not in actual db schema)
+					//UPDATE CustomerAddressDat1 SET leftv = 'Customer.addr2' WHERE id=dat
+					//String sql = UPDATE CustomerAddressDat1 SET leftv = 'Customer.addr2' WHERE id=dat
+					//fd.assocTableName = datIdMap.getAssocTblName(ruleMany.relInfo.getDatId());
+//					fd.assocFieldName = datIdMap.getAssocFieldFor(ruleMany.relinfo);
+					fd.assocUpdateStm =  genMMFieldRename(ruleMany.relInfo);
 				}
 			}
 		}
@@ -92,6 +101,18 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 			td.fldsD.remove(doomed);
 		}
 	}
+	
+	private SqlStatement genMMFieldRename(RelationInfo relinfo) {
+		HLDEngine engine = new HLDEngine(registry, factorySvc, datIdMap, null);
+		SimpleUpdate simple = engine.getDATUpdate(relinfo, datIdMap);
+		SimpleSqlGenerator sqlgen = new SimpleSqlGenerator(registry, factorySvc);
+		SqlStatement stm = new SqlStatement();
+		stm.sql = sqlgen.gen(simple, stm);
+		return stm;
+	}
+	
+	
+	
 	/**
 	 * In 1-to-1 and 1-to-many the parent side of a relation doesn't exist in the
 	 * db, so remove steps for them.

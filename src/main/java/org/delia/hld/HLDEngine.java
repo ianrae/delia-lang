@@ -19,6 +19,9 @@ import org.delia.hld.cud.HLDUpdate;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsert;
 import org.delia.hld.simple.SimpleBase;
+import org.delia.hld.simple.SimpleSqlBuilder;
+import org.delia.hld.simple.SimpleUpdate;
+import org.delia.relation.RelationInfo;
 import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
@@ -26,8 +29,10 @@ import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -232,5 +237,28 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	public void setBlobLoader(BlobLoader blobLoader) {
 		this.blobLoader = blobLoader;
+	}
+
+	public SimpleUpdate getDATUpdate(RelationInfo relinfo, DatIdMap datIdMap) {
+		HLDDsonBuilder hldBuilder = getHldBuilder();
+		
+//		String assocTbl = datIdMap.getAssocTblName(relinfo.getDatId());
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		
+		//create a temp type for the assoc table
+		DStructType structType = registry.getDATType(); 
+		
+		ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(registry);
+		DValue pkval = scalarBuilder.buildInt(relinfo.getDatId());
+		QueryExp queryExp = queryBuilderHelper.buildPKQueryExp(structType, pkval);
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		DValue strVal = scalarBuilder.buildString(String.format("%s.%s", relinfo.nearType.getName(), relinfo.fieldName));
+		HLDUpdate hld = hldBuilder.buildSimpleUpdate(structType, pkpair.name, pkval, fld1, strVal);
+		hld.hld = buildQuery(queryExp);
+		
+		SimpleSqlBuilder simpleBuilder = new SimpleSqlBuilder();
+		SimpleUpdate simple = simpleBuilder.buildFrom(hld);
+		return simple;
 	}
 }

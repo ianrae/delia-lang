@@ -3,6 +3,8 @@ package org.delia.db.schema.modify;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.db.SqlStatement;
+
 public class SchemaChangeOperation {
 	public OperationType opType;
 	public String typeName;
@@ -16,8 +18,9 @@ public class SchemaChangeOperation {
 	public SxTypeInfo typeInfo; //when adding
 	public SxFieldInfo fieldInfo; //when adding
 	public boolean canCreateAssocTable; //only used in FIELD_ADD of MM relation field
-	public String assocTableName; //only used in FIELD_RENAME of MM relation field
-	
+//	public String assocTableName; //only used in FIELD_RENAME of MM relation field
+	public SqlStatement assocUpdateStm; //only used for rename MM field
+
 	public SchemaChangeOperation(OperationType opType) {
 		this.opType = opType;
 	}

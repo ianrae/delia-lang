@@ -2,6 +2,7 @@ package org.delia.schema;
 
 import java.util.List;
 
+import org.delia.assoc.DatIdMap;
 import org.delia.db.DBType;
 import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.db.schema.modify.SchemaDefinition;
@@ -38,7 +39,8 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		dumpObj("delta", delta);
 		
 		DBType dbType = delia.getDBInterface().getDBType();
-		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, delia.getFactoryService(), dbType);
+		DatIdMap datIdMap = session.getDatIdMap();
+		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, delia.getFactoryService(), dbType, datIdMap);
 		delta = optimizer.optimize(delta);
 		dumpObj("opt", delta);
 		

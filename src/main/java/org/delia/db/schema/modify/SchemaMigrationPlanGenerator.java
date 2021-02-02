@@ -105,10 +105,16 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 	private void doFieldUpdates(List<SchemaChangeOperation> opList, SxTypeDelta td) {
 		for(SxFieldDelta fd: td.fldsU) {
 			if (fd.fDelta != null) {
-				SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_RENAME); 
-				initForField(op, fd, td);
-				op.newName = fd.fDelta;
-				op.assocTableName = fd.assocTableName; //may be null
+				if (fd.assocUpdateStm != null) {
+					SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_RENAME_MANY_TO_MANY); 
+					initForField(op, fd, td);
+					op.newName = fd.fDelta;
+					op.assocUpdateStm = fd.assocUpdateStm;
+				} else {
+					SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_RENAME); 
+					initForField(op, fd, td);
+					op.newName = fd.fDelta;
+				}
 			}
 			
 			if (fd.flgsDelta != null) {

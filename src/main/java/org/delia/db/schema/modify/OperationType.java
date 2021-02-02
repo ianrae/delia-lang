@@ -8,6 +8,7 @@ public enum OperationType {
 	FIELD_ADD,
 	FIELD_DELETE,
 	FIELD_RENAME,
+	FIELD_RENAME_MANY_TO_MANY,
 	FIELD_ALTER, //flags
 	FIELD_ALTER_TYPE, //includes size
 	INDEX_ADD,
@@ -15,5 +16,5 @@ public enum OperationType {
 	INDEX_ALTER,
 	CONSTRAINT_ADD,
 	CONSTRAINT_DELETE,
-	CONSTRAINT_ALTER,
+	CONSTRAINT_ALTER
 }
