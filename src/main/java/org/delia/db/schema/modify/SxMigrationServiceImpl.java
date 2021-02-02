@@ -66,6 +66,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
 					//TODO: implement checks later
 //					b = migrator.performMigrations(performRiskChecks);
+					log.log("OP: %s", ori.render(opList));
 					b = migrator.sxPerformMigrations(currentFingerprint, opList);
 					if (! b) {
 						return false;

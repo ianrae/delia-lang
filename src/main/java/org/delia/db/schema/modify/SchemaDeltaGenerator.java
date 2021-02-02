@@ -36,6 +36,7 @@ import org.delia.util.StringUtil;
 						list2.remove(sc2);
 						delta.typesU.add(td);
 					}
+					list2.remove(sc2);
 				} else {
 					SxTypeDelta td = buildTypeDelta(tt);
 					delta.typesD.add(td); //in list1 but not in list2
