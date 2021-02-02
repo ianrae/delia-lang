@@ -71,6 +71,8 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 		for(SxFieldDelta fd: td.fldsI) {
 			SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_ADD);
 			initForField(op, fd, td);
+			op.canCreateAssocTable = fd.canCreateAssocTable; //true for 2nd one
+
 		}
 		
 		doFieldUpdates(opList, td);

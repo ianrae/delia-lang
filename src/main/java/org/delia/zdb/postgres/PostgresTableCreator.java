@@ -56,7 +56,7 @@ public class PostgresTableCreator extends TableCreator {
 	}
 
 	@Override
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof, boolean canCreateAssocTable) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}
@@ -114,7 +114,7 @@ public class PostgresTableCreator extends TableCreator {
 			sc.nl();
 
 			if (isManyToManyRelation(pair, dtype)) {
-				alterGenerateAssocTable(sc, pair, dtype);
+				alterGenerateAssocTable(sc, pair, dtype, canCreateAssocTable);
 			}
 		}
 		return sc.toString();

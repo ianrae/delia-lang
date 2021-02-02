@@ -162,15 +162,15 @@ public class TableCreator extends ServiceBase {
 		return fieldgenFactory.generateFKConstraint(registry, pair, dtype, isAlter);
 	}
 	
-	protected void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype) {
-		assocTblCreator.alterGenerateAssocTable(sc, pair, dtype);
+	protected void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype, boolean canCreateAssocTable) {
+		assocTblCreator.alterGenerateAssocTable(sc, pair, dtype, canCreateAssocTable);
 	}
 	
 	protected String generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
 		return assocTblCreator.generateAssocTable(sc, xpair, dtype);
 	}
 
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof, boolean canCreateAssocTable) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}
@@ -226,7 +226,7 @@ public class TableCreator extends ServiceBase {
 				sc.nl();
 			}
 			if (isManyToManyRelation(pair, dtype)) {
-				alterGenerateAssocTable(sc, pair, dtype);
+				alterGenerateAssocTable(sc, pair, dtype, canCreateAssocTable);
 			}
 		}
 		return sc.toString();

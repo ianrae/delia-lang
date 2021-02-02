@@ -15,6 +15,7 @@ public class SchemaChangeOperation {
 	public List<String> argsL = new ArrayList<>();
 	public SxTypeInfo typeInfo; //when adding
 	public SxFieldInfo fieldInfo; //when adding
+	public boolean canCreateAssocTable; //only used in FIELD_ADD of MM relation field
 	
 	public SchemaChangeOperation(OperationType opType) {
 		this.opType = opType;

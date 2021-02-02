@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.delia.core.FactoryService;
 import org.delia.core.RegAwareServiceBase;
 import org.delia.db.DBType;
-import org.delia.relation.RelationCardinality;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
@@ -100,7 +99,7 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 		List<SxTypeDelta> combinedList = new ArrayList<>(delta.typesI);
 		combinedList.addAll(delta.typesU);
 
-		List<SxFieldDelta> newlist = new ArrayList<>();
+//		List<SxFieldDelta> newlist = new ArrayList<>();
 		List<SxFieldDelta> manyToManyList = new ArrayList<>();
 
 		for(SxTypeDelta st: combinedList) {
@@ -113,8 +112,10 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 				} else 	if (ruleMany != null) {
 					if (ruleMany.relInfo.isManyToMany()) {
 						if (! findOtherSideOfRelation(manyToManyList, fd)) {
-							newlist.add(fd);
+//							newlist.add(fd);
 							manyToManyList.add(fd);
+						} else {
+							fd.canCreateAssocTable = true;
 						}
 					} else {
 						//don't add (many side is always a parent)
@@ -133,7 +134,7 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 						doomedList.add(fd);
 					} else 	if (ruleMany != null) {
 						if (ruleMany.relInfo.isManyToMany()) {
-							//do nothing - field names not in assoc table
+							//do nothing - field names in assoc table
 						} else {
 							//don't add (many side is always a parent)
 							doomedList.add(fd);
@@ -180,11 +181,14 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 	}
 
 	private void detectOneToManyFieldChange(SchemaDelta delta) {
+		List<SxTypeDelta> newList = new ArrayList<>();
 		for(SxTypeDelta td: delta.typesU) {
-			doDetectOneToManyFieldChange(td, delta);
+			doDetectOneToManyFieldChange(td, delta, newList);
 		}
+		delta.typesU.addAll(newList);
 	}
-	private void doDetectOneToManyFieldChange(SxTypeDelta td, SchemaDelta delta) {
+	private void doDetectOneToManyFieldChange(SxTypeDelta td, SchemaDelta delta, List<SxTypeDelta> newList) {
+		List<SxFieldDelta> doomedL = new ArrayList<>();
 		for(SxFieldDelta st: td.fldsU) {
 			if (st.flgsDelta == null) {
 				continue;
@@ -197,13 +201,17 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 				RelationInfo otherSide = ruleMany.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
 
 				SxTypeDelta otherTd = findOther(delta, otherSide.nearType);
+				if (otherTd == null) {
+					otherTd = new SxTypeDelta(otherSide.nearType.getName());
+					newList.add(otherTd);
+				}
 				SxFieldDelta newfd = new SxFieldDelta(otherSide.fieldName, otherTd.typeName);
 				//					st.action = "A";
 				//					st.field = otherSide.fieldName;
 				//					st.typeName = otherSide.nearType.getName();
 				newfd.flgsDelta = "-U"; //remove UNIQUE
 				otherTd.fldsU.add(newfd);
-
+				doomedL.add(st);
 				log.log("migrate: one to many on '%s.%s'", st.typeNamex, st.fieldName);
 			} else if (st.flgsDelta.equals("-c,+a")) { //changing parent from many to one?
 				RelationOneRule ruleOne = DRuleHelper.findOneRule(st.typeNamex, st.fieldName, registry);
@@ -212,15 +220,23 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 				RelationInfo otherSide = ruleOne.relInfo.otherSide; //DRuleHelper.findOtherSideOneOrMany(farType, nearType);
 
 				SxTypeDelta otherTd = findOther(delta, otherSide.nearType);
-				SxFieldDelta newfd = new SxFieldDelta(otherSide.fieldName, otherTd.typeName);
+				if (otherTd == null) {
+					otherTd = new SxTypeDelta(otherSide.nearType.getName());
+					newList.add(otherTd);
+				}
+				SxFieldDelta newfd = new SxFieldDelta(otherSide.fieldName, otherSide.nearType.getName());
 				//					st.action = "A";
 				//					st.field = otherSide.fieldName;
 				//					st.typeName = otherSide.nearType.getName();
 				newfd.flgsDelta = "+U"; //remove UNIQUE
 				otherTd.fldsU.add(newfd);
-
+				doomedL.add(st);
 				log.log("migrate: one to many on '%s.%s'", st.typeNamex, st.fieldName);
 			}
+		}
+		
+		for(SxFieldDelta fd: doomedL) {
+			td.fldsU.remove(fd);
 		}
 	}
 

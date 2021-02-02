@@ -336,9 +336,12 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 
 	@Override
 	public void createField(String typeName, String field, int sizeof) {
+		createFieldEx(typeName, field, sizeof, false);
+	}
+	public void createFieldEx(String typeName, String field, int sizeof, boolean canCreateAssocTable) {
 		failIfNotInit2(); 
 		DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof);
+		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof, canCreateAssocTable);
 		execSqlStatement(sql);
 	}
 

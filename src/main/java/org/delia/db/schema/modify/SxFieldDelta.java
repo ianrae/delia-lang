@@ -9,6 +9,7 @@ public class SxFieldDelta {
 	//		public int datId;  never changes
 	public SxFieldInfo info; //when adding
 	public String typeNamex;
+	public boolean canCreateAssocTable; //true for 2nd one
 
 	public SxFieldDelta(String fieldName, String typeName) {
 		this.fieldName = fieldName;

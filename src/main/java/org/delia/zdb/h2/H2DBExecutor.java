@@ -322,9 +322,12 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 
 	@Override
 	public void createField(String typeName, String field, int sizeof) {
+		createFieldEx(typeName, field, sizeof, false);
+	}
+	public void createFieldEx(String typeName, String field, int sizeof, boolean canCreateAssocTable) {
 		failIfNotInit2(); 
 		DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof);
+		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof, canCreateAssocTable);
 		execSqlStatement(sql);
 	}
 
@@ -398,7 +401,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 			this.renameTable(op.typeName, op.newName);
 			break;
 		case FIELD_ADD:
-			this.createField(op.typeName, op.fieldName, op.sizeof);
+			this.createFieldEx(op.typeName, op.fieldName, op.sizeof, op.canCreateAssocTable);
 			break;
 		case FIELD_DELETE:
 			this.deleteField(op.typeName, op.fieldName, op.fieldInfo.datId);
