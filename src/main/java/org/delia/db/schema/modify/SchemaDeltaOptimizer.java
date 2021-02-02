@@ -130,30 +130,32 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 					RelationManyRule ruleMany = DRuleHelper.findManyRule(st.typeName, fd.fDelta, registry);
 					if (ruleOne != null && ruleOne.isParent()) {
 						//don't add
+						doomedList.add(fd);
 					} else 	if (ruleMany != null) {
-						if (ruleMany.relInfo.cardinality.equals(RelationCardinality.MANY_TO_MANY)) {
+						if (ruleMany.relInfo.isManyToMany()) {
 							//do nothing - field names not in assoc table
 						} else {
 							//don't add (many side is always a parent)
+							doomedList.add(fd);
 						}
 					}
 				}
 			} 
-			doomedList = removeDoomed(st.fldsI, doomedList);
+			doomedList = removeDoomed(st.fldsU, doomedList);
 
-			for(SxFieldDelta fd: st.fldsU) {
+			for(SxFieldDelta fd: st.fldsD) {
 				//relation codes
 				// a - relation one parent
 				// b - relation one         (child)
 				// c = relation many parent
 				// d = relation many        (child) -can this occur?
-				String flags = fd.flgsDelta;
+				String flags = fd.info.flgs;
 				if (flags != null && (flags.contains("a") || flags.contains("c"))) {
 					doomedList.add(fd);
 				} else {
 				}
 			}
-			doomedList = removeDoomed(st.fldsI, doomedList);
+			doomedList = removeDoomed(st.fldsD, doomedList);
 		}
 	}
 
@@ -225,7 +227,7 @@ public class SchemaDeltaOptimizer extends RegAwareServiceBase {
 	private SxTypeDelta findOther(SchemaDelta delta, DStructType nearType) {
 		String target = nearType.getName();
 		Optional<SxTypeDelta> opt = delta.typesU.stream().filter(x -> x.typeName.equals(target)).findAny();
-		return opt.get(); //must be there
+		return opt.orElse(null);
 	}
 
 	private SxTypeDelta findMatchingTableInsert(SchemaDelta delta, SxTypeDelta stTarget) {
