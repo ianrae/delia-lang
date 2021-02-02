@@ -25,7 +25,8 @@ public class LoggableBlob {
 		if (byteArr != null) {
 			//TODO this is really inefficient. fix later!!
 			String hex = BlobUtils.byteArrayToHexString(byteArr);
-			return hex.substring(0, maxCharsToLog) + "...";
+			String suffix = hex.length() > maxCharsToLog ? "..." : "";
+			return hex.substring(0, maxCharsToLog) + suffix;
 		}
 		
 		if (base64Str == null) {
@@ -44,7 +45,9 @@ public class LoggableBlob {
 		if (byteArr != null) {
 			//TODO this is really inefficient. fix later!!
 			String s = BlobUtils.toBase64(byteArr);
-			return s.substring(0, maxCharsToLog) + "...";
+			int n = s.length() < maxCharsToLog ? s.length() : maxCharsToLog;
+			String suffix = s.length() > maxCharsToLog ? "..." : "";
+			return s.substring(0, n) + suffix;
 		}
 		
 		if (base64Str == null) {
