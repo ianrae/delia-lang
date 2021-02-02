@@ -83,7 +83,7 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 			ValueException ve = (ValueException)e;
 			throw new DBException(ve.errL);
 		} catch (Exception e) {
-						e.printStackTrace();
+			e.printStackTrace();
 			DeliaError err = new DeliaError("db-resultset-error", e.getMessage());
 			throw new DBException(err);
 		}

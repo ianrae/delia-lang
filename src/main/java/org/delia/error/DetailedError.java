@@ -78,4 +78,9 @@ public class DetailedError extends DeliaError {
 		this.listIndex = listIndex;
 	}
 
+	@Override
+	public String toString() {
+		String s = super.toString();
+		return String.format("%s (%s.%s)", s, typeName, fieldName);
+	}
 }

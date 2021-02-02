@@ -53,7 +53,7 @@ public class SxPreRunChecker extends ServiceBase {
 		for(SxTypeDelta td: delta.typesU) {
 			for(SxFieldDelta fd: td.fldsI) {
 				//Note. we don't need this check for MEM db
-				if (doLowRiskChecks && ! fd.flgsDelta.contains("O") && ! isMemDB()) { //mandatory field?
+				if (doLowRiskChecks && (! fd.info.flgs.contains("O") && ! isMemDB())) { //mandatory field?
 					QueryBuilderService queryBuilder = this.factorySvc.getQueryBuilderService();
 					QueryExp exp = queryBuilder.createCountQuery(td.typeName);
 					HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(zexec.getDbInterface(), registry);
