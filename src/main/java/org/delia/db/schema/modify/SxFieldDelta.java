@@ -10,7 +10,7 @@ public class SxFieldDelta {
 	public Integer szDelta; //null means no change, else is new size
 	public SxFieldInfo info; //when adding
 	public String typeNamex;
-	public boolean canCreateAssocTable; //true for 2nd one
+	public boolean canCreateAssocTable; //true for 2nd one (when adding field)
 	public SqlStatement assocUpdateStm; //only used for rename MM field
 
 	public SxFieldDelta(String fieldName, String typeName) {

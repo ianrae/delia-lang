@@ -359,7 +359,8 @@ public class H2BDDTests extends BDDBase {
 //		runR2150File("t0-migrate-one-to-one2.txt", 2);
 //		runR2150File("t0-migrate-one-to-one6.txt", 2);
 //		runR2150File("t0-migrate-many-to-many1.txt", 3);
-		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+//		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	
 	//---

@@ -11,7 +11,7 @@ public class SxTypeDelta {
 	public List<SxFieldDelta> fldsU = new ArrayList<>();
 	public List<SxFieldDelta> fldsD = new ArrayList<>();
 	public SxTypeInfo info; //original
-	
+
 	public SxTypeDelta(String typeName) {
 		this.typeName = typeName;
 	}

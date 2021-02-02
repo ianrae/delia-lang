@@ -47,12 +47,12 @@ public class AssocTableCreator extends ServiceBase {
 		String tbl1 = info.nearType.getName();
 		String tbl2 = info.farType.getName();
 		
-		
 		if (canCreateAssocTable) {
 			TableInfo tblinfo = new TableInfo(tbl1, null);
 			this.alreadyCreatedL.add(tblinfo);
 			tblinfo = new TableInfo(tbl2, null);
 			this.alreadyCreatedL.add(tblinfo);
+			generateAssocTable(sc, pair, dtype);
 		}
 		
 //		if (! haveCreatedTable(tbl1)) {
@@ -64,7 +64,6 @@ public class AssocTableCreator extends ServiceBase {
 //			this.alreadyCreatedL.add(tblinfo);
 //		}
 		
-		generateAssocTable(sc, pair, dtype);
 	}
 	
 	public String generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {
