@@ -15,4 +15,9 @@ public class SxTypeDelta {
 	public SxTypeDelta(String typeName) {
 		this.typeName = typeName;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("I:%d,U:%d,D:%d", fldsI.size(), fldsU.size(), fldsD.size());
+	}
 }

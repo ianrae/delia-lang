@@ -19,4 +19,9 @@ public class SchemaDelta {
 		}
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("I:%d,U:%d,D:%d", typesI.size(), typesU.size(), typesD.size());
+	}
 }

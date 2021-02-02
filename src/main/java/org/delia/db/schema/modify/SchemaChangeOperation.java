@@ -19,4 +19,9 @@ public class SchemaChangeOperation {
 	public SchemaChangeOperation(OperationType opType) {
 		this.opType = opType;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("%s: %s.%s", opType.name(), typeName, fieldName);
+	}
 }

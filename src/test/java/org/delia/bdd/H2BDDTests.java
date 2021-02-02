@@ -346,7 +346,6 @@ public class H2BDDTests extends BDDBase {
 	@Test
 	public void testDebug() {
 //		testIndexToRun = 1;
-//		DeliaImpl.useNewHLD = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -357,7 +356,8 @@ public class H2BDDTests extends BDDBase {
 //		runR2150File("t0-migrate-one-to-one1a.txt", 2);
 //		runR2700Blob("t0-blob.txt", 1);
 //		runR2100File("t0-migration3a.txt", 2);
-		runR2100File("t0-migration10.txt", 2);
+//		runR2100File("t0-migration10.txt", 2);
+		runR2100File("t0-migration7.txt", 2);
 	}
 	
 	//---
