@@ -1,5 +1,6 @@
 package org.delia.rule;
 
+import org.delia.error.ErrorTracker;
 import org.delia.type.DValue;
 
 /**
@@ -15,4 +16,5 @@ public interface DRule {
 	String getSubject(); //for error messages
 	void setPolarity(boolean polarity);
 	boolean executeGuard(DValue dval);
+	void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et);
 }

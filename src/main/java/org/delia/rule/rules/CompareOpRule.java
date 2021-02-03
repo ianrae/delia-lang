@@ -33,16 +33,11 @@ public class CompareOpRule extends DRuleBase {
 			this.fmtSvc = fmtSvc;
 		}
 		
+		@Override
 		public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
-			if (oper1 instanceof StructDValueRuleOperand) {
-				StructDValueRuleOperand sro = (StructDValueRuleOperand) oper1;
-				if (! fieldExistSvc.existField(sro.getSubject())) {
-					String msg = String.format("Rule %s: unknown field '%s'", getName(), sro.getSubject());
-					et.add("zzzz", msg);
-				}
-			}
+			fieldExistSvc.checkRuleOperand(getName(), oper1, et);
+			fieldExistSvc.checkRuleOperand(getName(), oper2, et);
 		}
-		
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override

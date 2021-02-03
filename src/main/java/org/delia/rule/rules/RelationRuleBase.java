@@ -1,7 +1,9 @@
 package org.delia.rule.rules;
 
+import org.delia.error.ErrorTracker;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRuleBase;
+import org.delia.rule.FieldExistenceService;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.type.DStructType;
@@ -23,6 +25,12 @@ public abstract class RelationRuleBase extends DRuleBase {
 		this.registry = registry;
 		this.relationName = relationName;
 	}
+	
+	@Override
+	public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
+		fieldExistSvc.checkRuleOperand(getName(), oper1, et);
+	}
+	
 	
 	@Override
 	public boolean dependsOn(String fieldName) {

@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.db.DBHelper;
 import org.delia.db.QueryBuilderService;
+import org.delia.error.ErrorTracker;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
+import org.delia.rule.FieldExistenceService;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.runner.QueryResponse;
@@ -26,6 +28,14 @@ public class UniqueFieldsRule extends DRuleBase {
 		super("uniqueFields", guard);
 		this.operL = operL;
 	}
+	
+	@Override
+	public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
+		for(RuleOperand oper: operL) {
+			fieldExistSvc.checkRuleOperand(getName(), oper, et);
+		}
+	}
+	
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		if (ctx.getDBCapabilities().supportsUniqueConstraint()) {
