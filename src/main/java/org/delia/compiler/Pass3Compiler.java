@@ -27,11 +27,11 @@ public class Pass3Compiler extends CompilerPassBase {
 	private Map<String,UserFunctionDefStatementExp> userFnMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
 	private Map<String,InputFunctionDefStatementExp> inputFnMap = new HashMap<>(); //short-lived obj. ok to not use ConcurrentHashMap here
 	private boolean buildTypeMapFlag = true;
-	private Pass3RuleCompiler ruleCompiler;
+//	private Pass3RuleCompiler ruleCompiler;
 	
 	public Pass3Compiler(FactoryService factorySvc, ErrorLineFinder errorLineFinder, InternalCompileState execCtx) {
 		super(factorySvc, errorLineFinder, execCtx);
-		this.ruleCompiler = new Pass3RuleCompiler(factorySvc, errorLineFinder, execCtx);
+//		this.ruleCompiler = new Pass3RuleCompiler(factorySvc, errorLineFinder, execCtx);
 		
 		//copy in existing types,vars,etc
 		if (execCtx != null) {
