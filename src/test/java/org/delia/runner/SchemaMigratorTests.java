@@ -55,7 +55,7 @@ public class SchemaMigratorTests {
 		assertEquals(true, b);
 
 		String fingerprint = migrator.calcDBFingerprint();
-		assertEquals("(v1)Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
+		assertEquals("(v2)Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
 		
 		//and migrate again (should be nothing to do)
 		b = migrator.dbNeedsMigration();
