@@ -1,5 +1,6 @@
 package org.delia.postgres;
 
+import org.delia.api.DeliaImpl;
 import org.delia.bdd.BDDBase;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
@@ -333,7 +334,9 @@ public class PostgresBDDTests extends BDDBase {
 //		runR900File("t0-update-mm-id.txt", 4);
 //		runR2150File("t0-migrate-many-to-many3.txt", 2);
 //		runR2700Blob("t0-blob.txt", 3);
-		runR2100File("t0-migration10.txt", 2);
+//		runR2100File("t0-migration10.txt", 2);
+//		runR2100File("t0-migration15.txt", 2);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
 	}
 	
 	//---
@@ -344,6 +347,7 @@ public class PostgresBDDTests extends BDDBase {
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
+		DeliaImpl.useNewSchemaGen = true;
 	}
 	@After
 	public void shutdown() {

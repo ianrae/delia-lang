@@ -80,7 +80,9 @@ public class PostgresTableCreator extends TableCreator {
 		List<ConstraintGen> constraints = new ArrayList<>();
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
 			constraint = generateFKConstraint(sc, pair, dtype, true);
-			constraints.add(constraint);
+			if (constraint != null) {
+				constraints.add(constraint);
+			}
 		}
 
 		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
