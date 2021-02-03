@@ -30,10 +30,12 @@ import org.delia.util.DValueHelper;
 //final checks using registry
 public class Pass4Compiler extends CompilerPassBase {
 	private DTypeRegistry registry;
+	private Pass4RuleChecker ruleChecker;
 	
 	public Pass4Compiler(FactoryService factorySvc, ErrorLineFinder errorLineFinder, InternalCompileState execCtx, DTypeRegistry registry) {
 		super(factorySvc, errorLineFinder, execCtx);
 		this.registry = registry;
+		this.ruleChecker = new Pass4RuleChecker(factorySvc, errorLineFinder, execCtx, registry);
 	}
 
 	@Override
@@ -45,6 +47,7 @@ public class Pass4Compiler extends CompilerPassBase {
 			if (exp instanceof TypeStatementExp) {
 				TypeStatementExp typeExp = (TypeStatementExp) exp;
 				checkPrimaryKeys(typeExp, results);
+				chkRules(typeExp, results);
 			} else if (exp instanceof InsertStatementExp) {
 				InsertStatementExp insExp = (InsertStatementExp) exp;
 				chkAssocCrudInsert(insExp, results);
@@ -60,6 +63,10 @@ public class Pass4Compiler extends CompilerPassBase {
 		}
 		
 		return results;
+	}
+
+	private void chkRules(TypeStatementExp typeExp, CompilerResults results) {
+		ruleChecker.checkType(typeExp, results);
 	}
 
 	private void checkLet(LetStatementExp letExp, CompilerResults results) {

@@ -202,7 +202,7 @@ public class Pass3Compiler extends CompilerPassBase {
 	 */
 	private void checkRules(TypeStatementExp typeExp, Map<String, String> fieldMap, CompilerResults results) {
 //		if (!buildTypeMapFlag) {
-			ruleCompiler.processTypeExp(typeExp, fieldMap, results);
+//			ruleCompiler.processTypeExp(typeExp, fieldMap, results);
 //		}
 	}
 

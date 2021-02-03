@@ -5,12 +5,16 @@ import java.time.ZonedDateTime;
 
 import org.delia.core.DateFormatService;
 import org.delia.dval.compare.DValueCompareService;
+import org.delia.error.DeliaError;
+import org.delia.error.ErrorTracker;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
 import org.delia.rule.DValueRuleOperand;
+import org.delia.rule.FieldExistenceService;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.rule.RuleRuleOperand;
+import org.delia.rule.StructDValueRuleOperand;
 import org.delia.type.DRelation;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -28,6 +32,18 @@ public class CompareOpRule extends DRuleBase {
 			this.oper2 = oper2;
 			this.fmtSvc = fmtSvc;
 		}
+		
+		public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
+			if (oper1 instanceof StructDValueRuleOperand) {
+				StructDValueRuleOperand sro = (StructDValueRuleOperand) oper1;
+				if (! fieldExistSvc.existField(sro.getSubject())) {
+					String msg = String.format("Rule %s: unknown field '%s'", getName(), sro.getSubject());
+					et.add("zzzz", msg);
+				}
+			}
+		}
+		
+		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		protected boolean onValidate(DValue dval, DRuleContext ctx) {
