@@ -201,9 +201,9 @@ public class Pass3Compiler extends CompilerPassBase {
 	 * Only check rules once typeMap has been built.
 	 */
 	private void checkRules(TypeStatementExp typeExp, Map<String, String> fieldMap, CompilerResults results) {
-		if (!buildTypeMapFlag) {
+//		if (!buildTypeMapFlag) {
 			ruleCompiler.processTypeExp(typeExp, fieldMap, results);
-		}
+//		}
 	}
 
 	private StructFieldExp findOtherSide(TypeStatementExp typeExp, StructFieldExp sfeTarget) {

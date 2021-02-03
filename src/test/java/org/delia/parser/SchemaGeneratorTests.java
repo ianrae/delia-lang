@@ -26,7 +26,7 @@ public class SchemaGeneratorTests {
 		
 		SchemaFingerprintGenerator gen = new SchemaFingerprintGenerator();
 		String fingerprint = gen.createFingerprint(registry);
-		assertEquals("(v1)Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
+		assertEquals("(v2)Customer:struct:{id:int:U/0,firstName:string:/0,lastName:string:O/0,points:int:O/0,flag:boolean:O/0}\n", fingerprint);
 	}
 	
 	// --

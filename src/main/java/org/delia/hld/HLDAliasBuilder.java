@@ -292,7 +292,7 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 		if (val1.structField == null) {
 			return;
 		}
-		if (val1.structField.fieldType.isBlobShape()) {
+		if (val1.structField.fieldType != null && val1.structField.fieldType.isBlobShape()) {
 			String opstr = ofc.op.toString();
 			if (opstr.equals("==") || opstr.equals("!")) {
 				//ok
