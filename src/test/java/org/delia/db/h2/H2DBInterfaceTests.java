@@ -1,3 +1,4 @@
+package org.delia.db.h2;
 //package org.delia.h2;
 //
 //import static org.junit.Assert.assertEquals;

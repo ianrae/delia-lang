@@ -1,3 +1,4 @@
+package org.delia.db.postgres;
 //package org.delia.postgres;
 //
 //import static org.junit.Assert.assertEquals;

@@ -1,4 +1,4 @@
-package org.delia.h2;
+package org.delia.db.h2;
 
 import org.delia.base.DBTestHelper;
 import org.delia.db.DBType;

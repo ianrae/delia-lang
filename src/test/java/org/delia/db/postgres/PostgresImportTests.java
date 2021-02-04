@@ -1,4 +1,4 @@
-package org.delia.postgres;
+package org.delia.db.postgres;
 
 import java.util.ArrayList;
 import java.util.List;

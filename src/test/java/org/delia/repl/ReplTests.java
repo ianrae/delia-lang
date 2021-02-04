@@ -6,7 +6,7 @@ import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.db.DBType;
-import org.delia.h2.H2ConnectionHelper;
+import org.delia.db.h2.H2ConnectionHelper;
 import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 import org.junit.Test;

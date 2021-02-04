@@ -1,21 +1,23 @@
-package org.delia.postgres;
+package org.delia.bdd.h2;
 
 import org.delia.api.DeliaImpl;
 import org.delia.bdd.BDDBase;
+import org.delia.bdd.BDDBase.BDDGroup;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.bdd.core.MyFakeSQLDBInterface;
 import org.delia.db.DBType;
+import org.delia.hld.results.HLDResultSetConverterBase;
 import org.delia.zdb.DBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class PostgresBDDTests extends BDDBase {
-
+public class H2BDDTests extends BDDBase {
+	
 	//TODO: R100
 	//TODO: R200
 	//R250 - handled in t0-date-timezone.txt
-
+	
 	@Test
 	public void testR300() {
 		runR300File("t0-int.txt", 10);
@@ -72,7 +74,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR600File("t0-rule-contains.txt", 6);
 		runR600File("t0-rule-contains-scalar.txt", 2);
 		runR600File("t0-rule-compare-inheritance.txt", 4);
-
+		
 		runR600File("t0-rule-compare-int.txt", 4);
 		runR600File("t0-rule-compare-int-scalar.txt", 3);
 		runR600File("t0-rule-compare-long.txt", 2);
@@ -83,17 +85,17 @@ public class PostgresBDDTests extends BDDBase {
 		runR600File("t0-rule-compare-relation.txt", 2);
 		runR600File("t0-rule-string-len.txt", 0);
 	}
-
+	
 	@Test
 	public void testR650() {
 		runR650File("t0-rulefn-all.txt", 0);
 	}
-
+	
 	@Test
 	public void testR660() {
 		runR660File("t0-rule-uniquefields.txt", 1);
 	}
-
+	
 	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
@@ -101,12 +103,12 @@ public class PostgresBDDTests extends BDDBase {
 		runR700File("t0-insert-parent.txt", 2);
 		runR700File("t0-insert-parent2.txt", 1);
 	}
-
+	
 	@Test
 	public void testR800() {
 		runR800File("t0-delete.txt", 4);
 	}
-
+	
 	@Test
 	public void testR900() {
 		runR900File("t0-update.txt", 7);
@@ -116,15 +118,15 @@ public class PostgresBDDTests extends BDDBase {
 		runR900File("t0-update-mm-id-othertbl.txt", 2);
 		runR900File("t0-update-mm-other.txt", 2); //TODO: fix two
 		runR900File("t0-update-mm-other-othertbl.txt", 0); //TODO: fix two
-
+		
 		//TODO: !!!need tests for 1:1 and 1:N especially update Customer[55] { addr:[100,101]}
 	}
-
+	
 	@Test
 	public void testR950() {
 		runR950File("t0-crud-assoc-insert.txt", 6);
 	}
-
+	
 	@Test
 	public void testR1000() {
 		runR1000File("t0-upsert.txt", 4);
@@ -135,23 +137,23 @@ public class PostgresBDDTests extends BDDBase {
 		runR1000File("t0-upsert-mm-other.txt", 0); //TODO fix later
 		runR1000File("t0-upsert-unique.txt", 1); //TODO fix 3 later
 	}
-
+	
 	@Test
 	public void testR1100() {
 		runR1100File("t0-userfn.txt", 1);
 	}
-
+	
 	@Test
 	public void testR1200() {
 		runR1200File("t0-let-scalar.txt", 6);
 	}
-
+	
 	@Test
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
 		runR1300File("t0-let-varref.txt", 4); //TODO fix one
 	}
-
+	
 	@Test
 	public void testR1350() {
 		runR1350File("t0-filter-op-int.txt", 13);
@@ -168,12 +170,12 @@ public class PostgresBDDTests extends BDDBase {
 		runR1350File("t0-filter-rlike.txt", 0);
 		runR1350File("t0-filter-in-twitter.txt", 2); //TODO fix two 
 	}
-
+	
 	@Test
 	public void testR1400() {
 		runR1400File("t0-filterfn-date.txt", 12);
 	}
-
+	
 	@Test
 	public void testR1500() {
 		ignoreTest("t0-queryfn-orderby-2span.txt");
@@ -186,7 +188,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR1500File("t0-queryfn-first.txt", 2);
 		runR1500File("t0-queryfn-last.txt", 2);
 		runR1500File("t0-queryfn-ith.txt", 4);
-
+		
 		runR1500File("t0-queryfn-min.txt", 0);
 		runR1500File("t0-queryfn-min-int.txt", 4);
 		runR1500File("t0-queryfn-min-long.txt", 4);
@@ -225,7 +227,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR1550File("t0-queryfn-manymany-left.txt", 6);
 		runR1550File("t0-queryfn-manymany-right.txt", 6);
 	}	
-
+	
 	@Test
 	public void testR1600() {
 		runR1600File("t0-fetch.txt", 4);
@@ -235,7 +237,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR1600File("t0-fetch-fks.txt", 4);
 		runR1600File("t0-fetch-all.txt", 0);
 	}
-
+	
 	@Test
 	public void testR1700() {
 		runR1700File("t0-let-field-single.txt", 3);
@@ -243,22 +245,22 @@ public class PostgresBDDTests extends BDDBase {
 		runR1700File("t0-let-field-multiple.txt", 5);
 		runR1700File("t0-let-field-relation.txt", 2);
 	}
-
+	
 	@Test
 	public void testR1800() {
 		runR1800File("t0-dollardollar.txt", 2);
 	}
-
+	
 	@Test
 	public void testR1900() {
 		runR1900File("t0-let-return.txt", 0);
 	}
-
+	
 	@Test
 	public void testR2000() {
 		runR2000File("t0-sprig.txt", 3);
 	}
-
+	
 	@Test
 	public void testR2100() {
 		runR2100File("t0-migration.txt", 2);
@@ -294,7 +296,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2150File("t0-migrate-one-to-one4.txt", 2);
 		runR2150File("t0-migrate-one-to-one5.txt", 1);
 		runR2150File("t0-migrate-one-to-one6.txt", 2);
-
+		
 		runR2150File("t0-migrate-one-to-many1.txt", 3);
 		runR2150File("t0-migrate-one-to-many2.txt", 2);
 		runR2150File("t0-migrate-one-to-many2a.txt", 2);
@@ -302,7 +304,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2150File("t0-migrate-one-to-many4.txt", 2);
 		//is no test 5 for many-to-one
 		runR2150File("t0-migrate-one-to-many6.txt", 2);
-
+		
 		runR2150File("t0-migrate-many-to-many1.txt", 3);
 		runR2150File("t0-migrate-many-to-many1a.txt", 2);
 		runR2150File("t0-migrate-many-to-many2.txt", 1); //TODO fix one later
@@ -315,7 +317,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2150File("t0-migrate-many-to-many8.txt", 3);
 		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
-
+	
 	@Test
 	public void testR2200() {
 		runR2200File("t0-security-sql-injection.txt", 3);
@@ -324,9 +326,9 @@ public class PostgresBDDTests extends BDDBase {
 	public void testR2300() {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
-
+	
 	//R2400 tests not needed (only in mem tests)
-
+	
 	@Test
 	public void testR2600() {
 		runR2600Sizeof("t0-sizeof-int.txt", 1);
@@ -336,7 +338,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR2600Sizeof("t0-sizeof-migration1b.txt", 2);
 		runR2600Sizeof("t0-sizeof-migration1c.txt", 2);
 		runR2600Sizeof("t0-sizeof-migration2.txt", 2);
-	}	
+	}
 	
 	@Test
 	public void testR2700() {
@@ -345,24 +347,23 @@ public class PostgresBDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		//		testIndexToRun = 2;
-		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+//		testIndexToRun = 1;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
-
-		//		runR900File("t0-update-mm-id.txt", 4);
-		//		runR2150File("t0-migrate-many-to-many3.txt", 2);
-		//		runR2700Blob("t0-blob.txt", 3);
-		//		runR2100File("t0-migration10.txt", 2);
-		//		runR2100File("t0-migration15.txt", 2);
-		runR2150File("t0-migrate-one-to-one1.txt", 3);
+//		ResultSetToDValConverter.logResultSetDetails = true;
+		HLDResultSetConverterBase.logResultSetDetails = true; 
+		
+//		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
+//		runR2150File("t0-migrate-one-to-one1a.txt", 2);
+		runR2700Blob("t0-blob.txt", 3);
 	}
-
+	
 	//---
-	private DBType dbType = DBType.POSTGRES;
+	private DBType dbType = DBType.H2;
 	private boolean cleanTables = true;
 	private boolean enableSQLLogging = true;
-
+	
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
@@ -379,13 +380,14 @@ public class PostgresBDDTests extends BDDBase {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
 		db.cleanTables = cleanTables;
 		dbInterfaceToUse = db;
-		//		DeliaClient.forcedDBInterface = db;
+//		DeliaClient.forcedDBInterface = db;
 		if (enableSQLLogging) {
 			dbInterfaceToUse.enableSQLLogging(true);
 		}
+		
 		return super.runBDDFile(group, filename, numTests);
 	}
-
+	
 	@Override
 	public DBInterfaceFactory createForTest() {
 		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
@@ -393,5 +395,5 @@ public class PostgresBDDTests extends BDDBase {
 		dbInterfaceToUse = db;
 		return db;
 	}
-
+	
 }

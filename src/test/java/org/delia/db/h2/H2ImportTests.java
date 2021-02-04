@@ -1,4 +1,4 @@
-package org.delia.h2;
+package org.delia.db.h2;
 
 import java.util.ArrayList;
 import java.util.List;
