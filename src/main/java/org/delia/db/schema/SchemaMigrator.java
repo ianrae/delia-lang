@@ -88,7 +88,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return true;
 	}
 
-	public boolean dbNeedsMigration() {
+	private boolean dbNeedsMigration() {
 		this.currentFingerprint = fingerprintGenerator.createFingerprint(registry);
 		this.dbFingerprint = calcDBFingerprint();
 
@@ -99,7 +99,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * @param doLowRiskChecks whether to do additional pre-migration checks
 	 * @return true if successful
 	 */
-	public boolean performMigrations(boolean doLowRiskChecks) {
+	private boolean performMigrations(boolean doLowRiskChecks) {
 		List<SchemaType> list = parseFingerprint(dbFingerprint);
 		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
 		
@@ -133,14 +133,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * dbNeedsMigration MUST have been called before this.
 	 * @param plan migration plan
 	 */
-	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
+	private MigrationPlan runMigrationPlan(MigrationPlan plan) {
 		boolean b = performMigrations(plan, false);
 		plan.runResultFlag = b;
 		return plan;
 	}
 	
 
-	public String calcDBFingerprint() {
+	private String calcDBFingerprint() {
 		//TODO: query just single record (most recent);
 		FilterExp filter = new FilterExp(99, new BooleanExp(true)); //query all
 		QuerySpec spec = new QuerySpec();
@@ -160,7 +160,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	}
 
 	//Customer:struct:{id:int::O,firstName:string::,lastName:string:O:,points:int:O:}\n
-	public List<SchemaType> parseFingerprint(String fingerprint) {
+	private List<SchemaType> parseFingerprint(String fingerprint) {
 		parseVersion(fingerprint);
 		//Note v2 is backwards compatible with v1 so we don't need any extra code here
 		
@@ -190,15 +190,15 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return version;
 	}
 
-	public String getCurrentFingerprint() {
+	private String getCurrentFingerprint() {
 		return currentFingerprint;
 	}
 
-	public String getDbFingerprint() {
+	private String getDbFingerprint() {
 		return dbFingerprint;
 	}
 
-	public List<SchemaType> calcDiff(List<SchemaType> list1, List<SchemaType> list2Param) {
+	private List<SchemaType> calcDiff(List<SchemaType> list1, List<SchemaType> list2Param) {
 		List<SchemaType> diffList = new ArrayList<>();
 		List<SchemaType> list2 = new ArrayList<>(list2Param);
 		for(SchemaType schema1: list1) {
@@ -343,7 +343,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public List<FieldInfo> parseFields(SchemaType schema1) {
+	private List<FieldInfo> parseFields(SchemaType schema1) {
 		//Customer:struct:{id:int:P,wid:int:}
 		List<FieldInfo> list = new ArrayList<>();
 		String s = StringUtils.substringAfter(schema1.line, "{");
@@ -399,7 +399,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public boolean performMigrations(MigrationPlan plan, boolean doLowRiskChecks) {
+	private boolean performMigrations(MigrationPlan plan, boolean doLowRiskChecks) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
@@ -510,7 +510,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return true;
 	}
 
-//	public RawDBExecutor getRawExecutor() {
+//	private RawDBExecutor getRawExecutor() {
 //		return rawExecutor;
 //	}
 	public DBExecutor getZDBExecutor() {
