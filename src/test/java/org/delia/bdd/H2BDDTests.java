@@ -340,7 +340,7 @@ public class H2BDDTests extends BDDBase {
 	
 	@Test
 	public void testR2700() {
-		runR2700Blob("t0-blob.txt", 1);
+		runR2700Blob("t0-blob.txt", 3);
 	}
 
 	@Test
@@ -354,7 +354,7 @@ public class H2BDDTests extends BDDBase {
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-		runR2700Blob("t0-blob.txt", 1);
+		runR2700Blob("t0-blob.txt", 3);
 	}
 	
 	//---

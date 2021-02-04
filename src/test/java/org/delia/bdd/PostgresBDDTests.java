@@ -1,17 +1,16 @@
-package org.delia.bdd;
+package org.delia.postgres;
 
 import org.delia.api.DeliaImpl;
-import org.delia.base.UnitTestLog;
+import org.delia.bdd.BDDBase;
 import org.delia.bdd.core.BDDTesterEx;
-import org.delia.hld.HLDFactoryImpl;
-import org.delia.log.LogLevel;
+import org.delia.bdd.core.MyFakeSQLDBInterface;
+import org.delia.db.DBType;
 import org.delia.zdb.DBInterfaceFactory;
-import org.delia.zdb.mem.MemDBInterfaceFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AllBDDTests extends BDDBase {
+public class PostgresBDDTests extends BDDBase {
 	
 	//TODO: R100
 	//TODO: R200
@@ -88,11 +87,6 @@ public class AllBDDTests extends BDDBase {
 	@Test
 	public void testR650() {
 		runR650File("t0-rulefn-all.txt", 0);
-	}
-	
-	@Test
-	public void testR660() {
-		runR660File("t0-rule-uniquefields.txt", 1);
 	}
 	
 	@Test
@@ -262,65 +256,59 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testR2100() {
-		enableAllFileCheck = false;
 		runR2100File("t0-migration.txt", 2);
 		runR2100File("t0-migration2.txt", 2);
 		runR2100File("t0-migration3.txt", 2);
-//		runR2100File("t0-migration3a.txt", 2);
-//		runR2100File("t0-migration3b.txt", 2);
-//		runR2100File("t0-migration3c.txt", 2); //!!
-//		runR2100File("t0-migration4.txt", 2);
-//		runR2100File("t0-migration10.txt", 2);
-//		runR2100File("t0-migration10a.txt", 2);
-//		runR2100File("t0-migration10b.txt", 3);
-//		runR2100File("t0-migration11.txt", 0);
-//		runR2100File("t0-migration5.txt", 2);
-//		runR2100File("t0-migration7.txt", 2);
-//		runR2100File("t0-migration12.txt", 2);
-//		runR2100File("t0-migration13.txt", 2);
-//		runR2100File("t0-migration13a.txt", 2);
-//		runR2100File("t0-migration14.txt", 2);
-//		runR2100File("t0-migration14a.txt", 2);
-//		runR2100File("t0-migration15.txt", 2);
-//		runR2100File("t0-migration15a.txt", 2);
-//		runR2100File("t0-migration16.txt", 2);
-//		runR2100File("t0-migration16a.txt", 2);
+		runR2100File("t0-migration3a.txt", 2);
+		runR2100File("t0-migration3b.txt", 2);
+		runR2100File("t0-migration3c.txt", 2); //!!
+		runR2100File("t0-migration4.txt", 2);
+		runR2100File("t0-migration10.txt", 2);
+		runR2100File("t0-migration10a.txt", 2);
+		runR2100File("t0-migration10b.txt", 3);
+		runR2100File("t0-migration11.txt", 0);
+		runR2100File("t0-migration5.txt", 2);
+		runR2100File("t0-migration7.txt", 2);
+		runR2100File("t0-migration12.txt", 2);
+		runR2100File("t0-migration13.txt", 2);
+		runR2100File("t0-migration13a.txt", 2);
+		runR2100File("t0-migration14.txt", 2);
+		runR2100File("t0-migration14a.txt", 2);
+		runR2100File("t0-migration15.txt", 2);
+		runR2100File("t0-migration15a.txt", 2);
+		runR2100File("t0-migration16.txt", 2);
+		runR2100File("t0-migration16a.txt", 2);
 	}
 	@Test
 	public void testR2150() {
-		enableAllFileCheck = false;
-		enableMigration = true;
-		//none of these work because with MEM we are storing dvalues
-		//and when the schema changes we are not adding/removing fields from them.
-		//FUTURE fix at some point. MEM is not designed for migration.		
-//		runR2150File("t0-migrate-one-to-one1.txt", 3);
-//		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-//		runR2150File("t0-migrate-one-to-one2.txt", 2);
-//		runR2150File("t0-migrate-one-to-one2a.txt", 2);
-//		runR2150File("t0-migrate-one-to-one3.txt", 2);
-//		runR2150File("t0-migrate-one-to-one4.txt", 2);
-//		runR2150File("t0-migrate-one-to-one5.txt", 1);
-//		runR2150File("t0-migrate-one-to-one6.txt", 2);
-//		
-//		runR2150File("t0-migrate-one-to-many1.txt", 3);
-//		runR2150File("t0-migrate-one-to-many2.txt", 2);
-//		runR2150File("t0-migrate-one-to-many2a.txt", 2);
-//		runR2150File("t0-migrate-one-to-many3.txt", 2);
-//		runR2150File("t0-migrate-one-to-many4.txt", 2);
-//		//is no test 5 for many-to-one
-//		runR2150File("t0-migrate-one-to-many6.txt", 2);
-//		
-//		runR2150File("t0-migrate-many-to-many1.txt", 3);
-//		runR2150File("t0-migrate-many-to-many1a.txt", 2);
-//		runR2150File("t0-migrate-many-to-many2.txt", 1); //TODO fix one later
-//		runR2150File("t0-migrate-many-to-many2a.txt", 2);
-//		runR2150File("t0-migrate-many-to-many3.txt", 2);
-//		runR2150File("t0-migrate-many-to-many4.txt", 2);
-//		runR2150File("t0-migrate-many-to-many6.txt", 2);
-//		runR2150File("t0-migrate-many-to-many6a.txt", 2);
-//		runR2150File("t0-migrate-many-to-many7.txt", 0);
-//		runR2150File("t0-migrate-many-to-many8.txt", 3);
-//		runR2150File("t0-migrate-many-to-many8a.txt", 3);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR2150File("t0-migrate-one-to-one1a.txt", 2);
+		runR2150File("t0-migrate-one-to-one2.txt", 2);
+		runR2150File("t0-migrate-one-to-one2a.txt", 2);
+		runR2150File("t0-migrate-one-to-one3.txt", 2);
+		runR2150File("t0-migrate-one-to-one4.txt", 2);
+		runR2150File("t0-migrate-one-to-one5.txt", 1);
+		runR2150File("t0-migrate-one-to-one6.txt", 2);
+		
+		runR2150File("t0-migrate-one-to-many1.txt", 3);
+		runR2150File("t0-migrate-one-to-many2.txt", 2);
+		runR2150File("t0-migrate-one-to-many2a.txt", 2);
+		runR2150File("t0-migrate-one-to-many3.txt", 2);
+		runR2150File("t0-migrate-one-to-many4.txt", 2);
+		//is no test 5 for many-to-one
+		runR2150File("t0-migrate-one-to-many6.txt", 2);
+		
+		runR2150File("t0-migrate-many-to-many1.txt", 3);
+		runR2150File("t0-migrate-many-to-many1a.txt", 2);
+		runR2150File("t0-migrate-many-to-many2.txt", 1); //TODO fix one later
+		runR2150File("t0-migrate-many-to-many2a.txt", 2);
+		runR2150File("t0-migrate-many-to-many3.txt", 2);
+		runR2150File("t0-migrate-many-to-many4.txt", 2);
+		runR2150File("t0-migrate-many-to-many6.txt", 2);
+		runR2150File("t0-migrate-many-to-many6a.txt", 2);
+		runR2150File("t0-migrate-many-to-many7.txt", 0);
+		runR2150File("t0-migrate-many-to-many8.txt", 3);
+		runR2150File("t0-migrate-many-to-many8a.txt", 3);
 	}
 	
 	@Test
@@ -332,31 +320,33 @@ public class AllBDDTests extends BDDBase {
 		runR2300File("t0-multi-relation.txt", 0);
 	}
 	@Test
-	public void testR2400() {
-		runR2400File("t0-log.txt", 1);
+	public void testR2700() {
+		runR2700Blob("t0-blob.txt", 3);
 	}
-
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+//		testIndexToRun = 2;
+		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
-		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
-		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		diagnosticFilter = "I"; //log insert statements
-//		runR1500File("t0-queryfn-offset.txt", 5);
-//		runR1600File("t0-fetch.txt", 4);
-//		runR560File("t0-self-11.txt", 3);
-//		runR560File("t0-self-N1.txt", 4);
-		runR1000File("t0-upsert-mm-id.txt", 4);
+		enableSQLLogging = true;
+		
+//		runR900File("t0-update-mm-id.txt", 4);
+//		runR2150File("t0-migrate-many-to-many3.txt", 2);
+//		runR2700Blob("t0-blob.txt", 3);
+//		runR2100File("t0-migration10.txt", 2);
+//		runR2100File("t0-migration15.txt", 2);
+		runR2150File("t0-migrate-one-to-one1.txt", 3);
 	}
 	
 	//---
-	private boolean enableMigration;
-
+	private DBType dbType = DBType.POSTGRES;
+	private boolean cleanTables = true;
+	private boolean enableSQLLogging = true;
+	
 	@Before
 	public void init() {
-//		DeliaFactory.useHLSMEM = true;
+		disableAllSlowTestsIfNeeded();
 		DeliaImpl.useNewSchemaGen = true;
 	}
 	@After
@@ -364,16 +354,25 @@ public class AllBDDTests extends BDDBase {
 		chkAllFiles();
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
 	}
+
+	@Override
+	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
+		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
+		db.cleanTables = cleanTables;
+		dbInterfaceToUse = db;
+//		DeliaClient.forcedDBInterface = db;
+		if (enableSQLLogging) {
+			dbInterfaceToUse.enableSQLLogging(true);
+		}
+		return super.runBDDFile(group, filename, numTests);
+	}
 	
 	@Override
 	public DBInterfaceFactory createForTest() {
-		MemDBInterfaceFactory db;
-		db = new MemDBInterfaceFactory(createFactorySvc(), new HLDFactoryImpl());
-		
-		if (enableMigration) {
-			db.getCapabilities().setRequiresSchemaMigration(true);
-		}
+		MyFakeSQLDBInterface db = new MyFakeSQLDBInterface(dbType);
+		db.cleanTables = cleanTables;
+		dbInterfaceToUse = db;
 		return db;
 	}
-
+	
 }
