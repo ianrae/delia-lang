@@ -13,7 +13,6 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
-import org.delia.db.schema.MigrationServiceImpl;
 import org.delia.db.schema.modify.SxMigrationServiceImpl;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
@@ -41,7 +40,7 @@ public class DeliaImpl implements Delia {
 	}
 	
 //	public static boolean useNewHLD = true;
-	public static boolean useNewSchemaGen = false;
+//	public static boolean useNewSchemaGen = false;
 	
 	private Log log;
 	private DBInterfaceFactory dbInterface;
@@ -55,11 +54,7 @@ public class DeliaImpl implements Delia {
 		this.log = log;
 		this.dbInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		if (useNewSchemaGen) {
-			this.migrationSvc = new SxMigrationServiceImpl(dbInterface, factorySvc);
-		} else {
-			this.migrationSvc = new MigrationServiceImpl(dbInterface, factorySvc);
-		}
+		this.migrationSvc = new SxMigrationServiceImpl(dbInterface, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
 		this.hldFactory = dbInterface.getHLDFactory();
 	}

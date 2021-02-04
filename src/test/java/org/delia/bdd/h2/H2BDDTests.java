@@ -367,7 +367,6 @@ public class H2BDDTests extends BDDBase {
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
-		DeliaImpl.useNewSchemaGen = true;
 	}
 	@After
 	public void shutdown() {

@@ -366,7 +366,6 @@ public class PostgresBDDTests extends BDDBase {
 	@Before
 	public void init() {
 		disableAllSlowTestsIfNeeded();
-		DeliaImpl.useNewSchemaGen = true;
 	}
 	@After
 	public void shutdown() {

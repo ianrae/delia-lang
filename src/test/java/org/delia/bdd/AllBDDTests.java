@@ -356,8 +356,6 @@ public class AllBDDTests extends BDDBase {
 
 	@Before
 	public void init() {
-//		DeliaFactory.useHLSMEM = true;
-		DeliaImpl.useNewSchemaGen = true;
 	}
 	@After
 	public void shutdown() {
