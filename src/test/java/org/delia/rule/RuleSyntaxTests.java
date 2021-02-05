@@ -32,9 +32,20 @@ public class RuleSyntaxTests extends DeliaTestBase {
 		DValue dval = session.getFinalResult().getAsDValue();
 		assertEquals(1, dval.asStruct().getField("field1").asInt());
 	}	
+	
+	
+	//TODO: fix. parser should not accept this.
 	@Test
 	public void test2MissingComma() {
 		ruleSrc = "field2.maxlen(20) uniqueFields(field2)";
+		String src = "let x = Flight[1]";
+		execute(src);
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
+	}	
+	@Test
+	public void test2MissingComma2() {
+		ruleSrc = "uniqueFields(field2) uniqueFields(field3)";
 		String src = "let x = Flight[1]";
 		execute(src);
 		DValue dval = session.getFinalResult().getAsDValue();
@@ -52,7 +63,7 @@ public class RuleSyntaxTests extends DeliaTestBase {
 	@Override
 	protected String buildSrc() {
 		String s = ruleSrc;
-		String src = String.format("type Flight struct {field1 int primaryKey, field2 string } %s end", s);
+		String src = String.format("type Flight struct {field1 int primaryKey, field2 string, field3 string optional } %s end", s);
 
 		s =  "";
 		src += String.format("\n insert Flight {field1: 1, field2: 'a'}");

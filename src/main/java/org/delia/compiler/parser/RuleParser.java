@@ -42,43 +42,11 @@ public class RuleParser extends ParserBase {
 					(Integer pos, Exp op1, StringExp op, Exp op2) -> new FilterOpExp(pos, op1, op, op2));
 		}
 		
-		//fns
-//		private static Parser<Exp> fnOperand() {
-//			return Parsers.or(LetParser.explicitValue(), ident());
-//		}
-//		private static Parser<QueryFuncExp> ruleFn1() {
-//			return Parsers.sequence(ident(), term("("), fnOperand().many().sepBy(term(",")), term(")"), 
-//					(IdentExp exp1, Token tok, List<List<Exp>> arg, Token tok2) -> new QueryFuncExp(tok.index(), exp1, arg, true));
-//		}
-//		private static Parser<QueryFuncExp> ruleFn1NoArg() {
-//			return Parsers.or(ident()).
-//			map(new org.codehaus.jparsec.functors.Map<IdentExp, QueryFuncExp>() {
-//				@Override
-//				public QueryFuncExp map(IdentExp exp) {
-//					return new QueryFieldExp(99, exp);
-//				}
-//			});
-//		}
-//		private static Parser<QueryFuncExp> fieldOrFn() {
-//			return Parsers.or(ruleFn1(), ruleFn1NoArg()); 
-//		}
-//		private static Parser<QueryFuncExp> ruleFn2() {
-//			return Parsers.sequence(Parsers.INDEX, fieldOrFn(), 
-//					(Integer pos, QueryFuncExp qfe) -> qfe);
-//		}
-//		private static Parser<List<List<QueryFuncExp>>> ruleFn3() {
-//			return ruleFn2().many().sepBy(term("."));
-//		}
-//		private static Parser<Exp> ruleFn4() {
-//			return Parsers.sequence(Parsers.INDEX, term("!").optional(), ruleFn3(),
-//					(Integer pos, Token notTok, List<List<QueryFuncExp>> qfelist) -> new RuleFuncExp(pos, notTok == null, qfelist));
-//		}
 		private static Parser<Exp> ruleFn4x() {
 			return NameAndFuncParser.parseNameAndFuncs();
 		}
 		
 		private static Parser<Exp> allRules() {
-//			return Parsers.or(opexpr(), ruleFn4());
 			return Parsers.or(opexpr(), ruleFn4x());
 		}
 		
