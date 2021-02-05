@@ -356,7 +356,8 @@ public class H2BDDTests extends BDDBase {
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		runR2150File("t0-migrate-one-to-one1a.txt", 2);
-		runR2700Blob("t0-blob.txt", 3);
+//		runR2700Blob("t0-blob.txt", 3);
+		runR660File("t0-rule-uniquefields.txt", 1);
 	}
 	
 	//---

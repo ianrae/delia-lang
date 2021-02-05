@@ -28,7 +28,7 @@ public class SchemaDeltaGeneratorOther extends RegAwareServiceBase {
 		for(SxOtherInfo tt: schema1.others) {
 			SxOtherInfo tt2 = findIn(tt, schema2);
 			if (tt2 != null) {
-				SxOtherDelta td = buildTypeDelta(tt);
+				SxOtherDelta td = buildOtherDelta(tt);
 				int n = diffFields(tt, tt2, delta, td);
 				if (n > 0) {
 					list2.remove(tt2);
@@ -37,21 +37,23 @@ public class SchemaDeltaGeneratorOther extends RegAwareServiceBase {
 				}
 				list2.remove(tt2);
 			} else {
-				SxOtherDelta td = buildTypeDelta(tt);
+				SxOtherDelta td = buildOtherDelta(tt);
 				delta.othersD.add(td); //in list1 but not in list2
 			}
 		}
 
 		for(SxOtherInfo tt: list2) {
-			SxOtherDelta td = buildTypeDelta(tt);
+			SxOtherDelta td = buildOtherDelta(tt);
+			td.newArgs = tt.args;
 			delta.othersI.add(td);
 		}
 	}
 
-	private SxOtherDelta buildTypeDelta(SxOtherInfo tt) {
-		SxOtherDelta typeDelta = new SxOtherDelta(tt.ct);
-		typeDelta.info = tt;
-		return typeDelta;
+	private SxOtherDelta buildOtherDelta(SxOtherInfo tt) {
+		SxOtherDelta otherDelta = new SxOtherDelta(tt.ct);
+		otherDelta.info = tt;
+		otherDelta.typeName = tt.nm;
+		return otherDelta;
 	}
 
 	private SxOtherInfo findIn(SxOtherInfo tt, SchemaDefinition schema2) {

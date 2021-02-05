@@ -81,6 +81,7 @@ public class SchemaDefinitionGenerator extends RegAwareServiceBase {
 				String s = String.format("UFR(%s)", StringUtil.flatten(list));
 				
 				SxOtherInfo otherInfo = new SxOtherInfo();
+				otherInfo.nm = type.getName();
 				otherInfo.args = list;
 				otherInfo.ct = "uniqueFields";
 				schema.others.add(otherInfo);
