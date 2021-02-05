@@ -138,7 +138,7 @@ public class CSVImportServiceTests extends InputFunctionTestBase {
 	}
 
 	// --
-	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	public final String IMPORT_DIR = "src/test/resources/test/import/";
 
 	@Before
 	public void init() {

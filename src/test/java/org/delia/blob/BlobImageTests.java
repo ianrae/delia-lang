@@ -47,7 +47,7 @@ public class BlobImageTests extends DeliaTestBase {
 	
 
 	//-------------------------
-	private String dir = "src/main/resources/test/blob/";
+	private String dir = "src/test/resources/test/blob/";
 	
 	@Before
 	public void init() {

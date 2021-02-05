@@ -152,8 +152,8 @@ public class FilmAndActor2Tests  extends BDDBase {
 		return delia;
 	}
 	// --
-	private final String BASE_DIR = "src/main/resources/test/film2/";
-	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	private final String BASE_DIR = "src/test/resources/test/film2/";
+	public final String IMPORT_DIR = "src/test/resources/test/import/";
 
 	@Before
 	public void init() {
