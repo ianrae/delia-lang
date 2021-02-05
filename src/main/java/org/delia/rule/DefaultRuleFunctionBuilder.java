@@ -91,6 +91,22 @@ public class DefaultRuleFunctionBuilder implements RuleFunctionBulder {
 			rule = new UniqueFieldsRule(guard, operL);
 			break;
 		}
+		case "index":
+		{
+			boolean haveSetGuard = false;
+			List<RuleOperand> operL = new ArrayList<>();
+			for(Exp exp: qfe.argL) {
+				IdentExp arg = (IdentExp) exp;
+				RuleOperand oper = createOperand(arg.name(), dtype, qfe.funcName);
+				operL.add(oper);
+				if (!haveSetGuard) {
+					haveSetGuard = true;
+					guard = adjustGuard(oper, guard);
+				}
+			}
+			rule = new UniqueFieldsRule(guard, operL);
+			break;
+		}
 		case "len":
 		{
 			rule = new LenFnRule(guard);
