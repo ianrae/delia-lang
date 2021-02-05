@@ -29,12 +29,12 @@ public class NameAndFuncParser extends ParserBase {
 		public static void initLazy() {
 			ruleArgRef.set(NameAndFuncParser.parseNameAndFuncs());		
 		}
-		private static Parser<Exp> ruleArg() {
-			return Parsers.or(
-					LetParser.explicitValue(),
-					ruleArgRef.lazy(),
-					ident());
-		}
+//		private static Parser<Exp> ruleArg() {
+//			return Parsers.or(
+//					LetParser.explicitValue(),
+//					ruleArgRef.lazy(),
+//					ident());
+//		}
 		
 		//fns
 		private static Parser<Exp> fnOperand() {
