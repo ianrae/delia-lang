@@ -1,6 +1,7 @@
 package org.delia.compiler.parser;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jparsec.Parser;
 import org.jparsec.Parsers;
@@ -10,6 +11,7 @@ import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
+import org.delia.compiler.astx.XNAFTransientExp;
 
 /**
  * parses expressions like
@@ -40,34 +42,52 @@ public class NameAndFuncParser extends ParserBase {
 		private static Parser<Exp> fnOperand() {
 			return Parsers.or(LetParser.explicitValue(), ident());
 		}
-		private static Parser<XNAFSingleExp> ruleFn1() {
-			return Parsers.sequence(ident(), term("("), fnOperand().many().sepBy(term(",")), term(")"), 
-					(IdentExp exp1, Token tok, List<List<Exp>> arg, 
+		
+		private static Parser<XNAFTransientExp> args1() {
+			return Parsers.sequence(term("("), fnOperand().many().sepBy(term(",")), term(")"), 
+					(Token tok, List<List<Exp>> arg, 
 							Token tok2) 
-					-> new XNAFSingleExp(tok.index(), exp1, arg, true));
+					-> new XNAFTransientExp(tok.index(), arg));
 		}
-		private static Parser<XNAFSingleExp> ruleFn1NoArg() {
-			return Parsers.or(ident()).
-			map(new org.jparsec.functors.Map<IdentExp, XNAFSingleExp>() {
-				@Override
-				public XNAFSingleExp map(IdentExp exp) {
-					return new XNAFNameExp(99, exp);
-				}
-			});
+		private static Parser<XNAFSingleExp> ruleFn1a() {
+			return Parsers.sequence(ident(), args1().asOptional(), 
+					(IdentExp exp1, Optional<XNAFTransientExp> args) 
+					-> new XNAFSingleExp(99, exp1, args.orElse(null), true, null));
 		}
-		private static Parser<XNAFSingleExp> fieldOrFn() {
-			return Parsers.or(ruleFn1(), ruleFn1NoArg()); 
+		private static Parser<XNAFSingleExp> ruleFn1ax() {
+			return Parsers.sequence(Parsers.INDEX, ident(), 
+					(Integer pos, IdentExp exp1) 
+					-> new XNAFSingleExp(99, exp1, null, true, null));
 		}
+		
+//		private static Parser<XNAFSingleExp> ruleFn1() {
+//			return Parsers.sequence(ident(), term("("), fnOperand().many().sepBy(term(",")), term(")"), 
+//					(IdentExp exp1, Token tok, List<List<Exp>> arg, 
+//							Token tok2) 
+//					-> new XNAFSingleExp(tok.index(), exp1, arg, true));
+//		}
+//		private static Parser<XNAFSingleExp> ruleFn1NoArg() {
+//			return Parsers.or(ident()).
+//			map(new org.jparsec.functors.Map<IdentExp, XNAFSingleExp>() {
+//				@Override
+//				public XNAFSingleExp map(IdentExp exp) {
+//					return new XNAFNameExp(99, exp);
+//				}
+//			});
+//		}
+//		private static Parser<XNAFSingleExp> fieldOrFn() {
+//			return Parsers.or(ruleFn1(), ruleFn1NoArg()); 
+//		}
 		private static Parser<XNAFSingleExp> ruleFn2() {
-			return Parsers.sequence(Parsers.INDEX, fieldOrFn(), 
+			return Parsers.sequence(Parsers.INDEX, ruleFn1ax(), 
 					(Integer pos, XNAFSingleExp qfe) -> qfe);
 		}
 		private static Parser<List<List<XNAFSingleExp>>> ruleFn3() {
-			return ruleFn2().many().sepBy(term("="));
+			return ruleFn1a().many().sepBy(term("."));
 		}
 		public static Parser<Exp> parseNameAndFuncs() {
-			return Parsers.sequence(Parsers.INDEX, term("!").optional(), ruleFn3(),
-					(Integer pos, Token notTok, List<List<XNAFSingleExp>> qfelist) -> new XNAFMultiExp(pos, notTok == null, qfelist));
+			return Parsers.sequence(Parsers.INDEX, term("!").asOptional(), ruleFn3(),
+					(Integer pos, Optional<Token> notTok, List<List<XNAFSingleExp>> qfelist) -> new XNAFMultiExp(pos, notTok == null, qfelist));
 		}
 		
 	}
