@@ -70,7 +70,8 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	public static class FileHelper {
 		
 		public String getDir(BDDGroup group) {
-			String path = "src/main/resources/test/bdd/";
+//			String path = "src/main/resources/test/bdd/";
+			String path = "src/test/resources/test/bdd/";
 			String s = group.name().replace('_', '-');
 			path += s;
 			return path;

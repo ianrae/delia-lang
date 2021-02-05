@@ -92,7 +92,7 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testR660() {
-		runR660File("t0-rule-uniquefields.txt", 1);
+		runR660File("t0-rule-uniquefields.txt", 2);
 	}
 	
 	@Test
