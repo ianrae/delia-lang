@@ -55,6 +55,13 @@ public class StringUtil {
 		}
 		return joiner.toString();
 	}
+	public static String flattenEx(List<String> list, String delim) {
+		StringJoiner joiner = new StringJoiner(delim);
+		for(String s: list) {
+			joiner.add(s.trim());
+		}
+		return joiner.toString();
+	}
 	
 	public static String convertToSingleString(List<String> list) {
 		StringJoiner joiner = new StringJoiner("\n");
