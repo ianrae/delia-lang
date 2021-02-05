@@ -1,10 +1,10 @@
 package org.delia.compiler.parser;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 
 /**

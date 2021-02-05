@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.BooleanExp;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
@@ -31,7 +31,7 @@ public class LetParser extends ParserBase {
 
 	public static Parser<StringExp> stringValue() {
 		return Parsers.or(TerminalParser.stringSyntacticParser).
-				map(new org.codehaus.jparsec.functors.Map<String, StringExp>() {
+				map(new org.jparsec.functors.Map<String, StringExp>() {
 					@Override
 					public StringExp map(String arg0) {
 						return new StringExp(arg0);
@@ -77,7 +77,7 @@ public class LetParser extends ParserBase {
 	
 	private static Parser<Exp> nullValue() {
 		return Parsers.or(term("null")).
-				map(new org.codehaus.jparsec.functors.Map<Token, NullExp>() {
+				map(new org.jparsec.functors.Map<Token, NullExp>() {
 					@Override
 					public NullExp map(Token arg0) {
 						return new NullExp();
@@ -106,7 +106,7 @@ public class LetParser extends ParserBase {
 	}
 	public static Parser<Exp> dollarDollarAssignment() {
 		return Parsers.or(righthandside()).
-				map(new org.codehaus.jparsec.functors.Map<Exp, LetStatementExp>() {
+				map(new org.jparsec.functors.Map<Exp, LetStatementExp>() {
 					@Override
 					public LetStatementExp map(Exp exp) {
 						return new LetStatementExp(exp.getPos(), new IdentExp("$$"), null, exp);

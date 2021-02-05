@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.StringExp;
@@ -52,7 +52,7 @@ public class InputFunctionParser extends ParserBase {
 	
 	private static Parser<Exp> endIfStatement() {
 		return Parsers.or(term("endif")).
-				map(new org.codehaus.jparsec.functors.Map<Token, EndIfStatementExp>() {
+				map(new org.jparsec.functors.Map<Token, EndIfStatementExp>() {
 					@Override
 					public EndIfStatementExp map(Token arg0) {
 						return new EndIfStatementExp(99);
@@ -74,7 +74,7 @@ public class InputFunctionParser extends ParserBase {
 
 	private static Parser<TLangBodyExp> tlangBody() {
 		return Parsers.or(tlangBodyStatement().many().sepBy(term(","))).
-				map(new org.codehaus.jparsec.functors.Map<List<List<Exp>>, TLangBodyExp>() {
+				map(new org.jparsec.functors.Map<List<List<Exp>>, TLangBodyExp>() {
 					@Override
 					public TLangBodyExp map(List<List<Exp>> list) {
 						return new TLangBodyExp(99, list);
@@ -115,7 +115,7 @@ public class InputFunctionParser extends ParserBase {
 
 	private static Parser<InputFunctionBodyExp> fnBody() {
 		return Parsers.or(fnBodyStatements().many().sepBy(term(","))).
-				map(new org.codehaus.jparsec.functors.Map<List<List<Exp>>, InputFunctionBodyExp>() {
+				map(new org.jparsec.functors.Map<List<List<Exp>>, InputFunctionBodyExp>() {
 					@Override
 					public InputFunctionBodyExp map(List<List<Exp>> list) {
 						return new InputFunctionBodyExp(99, list);

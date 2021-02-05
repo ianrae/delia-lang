@@ -58,6 +58,23 @@ public class RuleTests {
 		assertEquals(1, exp.ruleL.size());
 		RuleHelper.chkFuncRule(exp.ruleL.get(0), 2, "x", 0);
 	}
+	@Test
+	public void testFn2a() {
+		RuleSetExp exp = parseRules("xyz(),len(15)");
+		assertEquals(2, exp.ruleL.size());
+		RuleHelper.chkFuncRule(exp.ruleL.get(1), 1, "len", 1);
+	}
+	@Test
+	public void testFn2aFail() {
+		RuleSetExp exp = parseRules("xyz() len(15)");
+		assertEquals(2, exp.ruleL.size());
+		RuleHelper.chkFuncRule(exp.ruleL.get(1), 1, "len", 1);
+	}
+	@Test
+	public void testFn2aFail2() {
+		RuleExp exp = parseRule("xyz(3) len(15)");
+		RuleHelper.chkFuncRule(exp, 1, "len", 1);
+	}
 	
 	// --
 	

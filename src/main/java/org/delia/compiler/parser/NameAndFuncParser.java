@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.astx.XNAFMultiExp;
@@ -25,9 +25,9 @@ import org.delia.compiler.astx.XNAFSingleExp;
  */
 public class NameAndFuncParser extends ParserBase {
 		
-		private static final Parser.Reference<Exp> ruleArgRef = Parser.newReference();
+//		private static final Parser.Reference<Exp> ruleArgRef = Parser.newReference();
 		public static void initLazy() {
-			ruleArgRef.set(NameAndFuncParser.parseNameAndFuncs());		
+//			ruleArgRef.set(NameAndFuncParser.parseNameAndFuncs());		
 		}
 //		private static Parser<Exp> ruleArg() {
 //			return Parsers.or(
@@ -48,7 +48,7 @@ public class NameAndFuncParser extends ParserBase {
 		}
 		private static Parser<XNAFSingleExp> ruleFn1NoArg() {
 			return Parsers.or(ident()).
-			map(new org.codehaus.jparsec.functors.Map<IdentExp, XNAFSingleExp>() {
+			map(new org.jparsec.functors.Map<IdentExp, XNAFSingleExp>() {
 				@Override
 				public XNAFSingleExp map(IdentExp exp) {
 					return new XNAFNameExp(99, exp);
@@ -63,7 +63,7 @@ public class NameAndFuncParser extends ParserBase {
 					(Integer pos, XNAFSingleExp qfe) -> qfe);
 		}
 		private static Parser<List<List<XNAFSingleExp>>> ruleFn3() {
-			return ruleFn2().many().sepBy(term("."));
+			return ruleFn2().many().sepBy(term("="));
 		}
 		public static Parser<Exp> parseNameAndFuncs() {
 			return Parsers.sequence(Parsers.INDEX, term("!").optional(), ruleFn3(),

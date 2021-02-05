@@ -2,8 +2,8 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.RuleExp;
@@ -58,7 +58,7 @@ public class RuleParser extends ParserBase {
 		
 		public static Parser<RuleSetExp> rules() {
 			return Parsers.or(oneRule().many().sepBy(term(","))).
-					map(new org.codehaus.jparsec.functors.Map<List<List<RuleExp>>, RuleSetExp>() {
+					map(new org.jparsec.functors.Map<List<List<RuleExp>>, RuleSetExp>() {
 						@Override
 						public RuleSetExp map(List<List<RuleExp>> ruleL) {
 							return new RuleSetExp(99, ruleL);

@@ -1,14 +1,14 @@
 package org.delia.compiler.parser;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.IdentExp;
 
 public class ParserBase {
 	public static Parser<IdentExp> ident() {
 		return Parsers.or(TerminalParser.identSyntacticParser)
-				.map(new org.codehaus.jparsec.functors.Map<String, IdentExp>() {
+				.map(new org.jparsec.functors.Map<String, IdentExp>() {
 					@Override
 					public IdentExp map(String arg0) {
 						return new IdentExp(arg0);
@@ -18,7 +18,7 @@ public class ParserBase {
 
 	public static Parser<IdentExp> dollarVar() {
 		return Parsers.or(term("$$"))
-				.map(new org.codehaus.jparsec.functors.Map<Token, IdentExp>() {
+				.map(new org.jparsec.functors.Map<Token, IdentExp>() {
 					@Override
 					public IdentExp map(Token tok) {
 						return new IdentExp(tok.index(), (String)tok.toString());

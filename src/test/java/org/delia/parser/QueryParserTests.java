@@ -1,6 +1,6 @@
 package org.delia.parser;
 
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.ParserException;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpFullExp;
