@@ -40,6 +40,7 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R600_rules,
 		R650_rule_fns,
 		R660_rule_unique,
+		R670_rule_index,
 		R700_crud_insert,
 		R800_crud_delete,
 		R900_crud_update,
@@ -134,6 +135,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR660File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R660_rule_unique, filename, numTests);
+	}
+	protected int runR670File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R670_rule_index, filename, numTests);
 	}
 	protected int runR700File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R700_crud_insert, filename, numTests);
