@@ -440,8 +440,12 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	}
 	private void execSqlStatementEx(SqlStatement stm) {
 		logSql(stm.sql);
-		DBExecuteContext dbctx = createContext();
-		conn.execStatement(stm, dbctx);
+		try {
+			DBExecuteContext dbctx = createContext();
+			conn.execStatement(stm, dbctx);
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
 	}
 
 }

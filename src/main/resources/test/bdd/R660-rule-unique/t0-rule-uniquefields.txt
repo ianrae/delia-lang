@@ -20,3 +20,14 @@ value:a:Flight {
  vfield2:11
 }
 
+---
+title: should fail
+given:
+  insert Flight {id: 55, field1: 10, field2: 11 }
+  insert Flight {id: 56, field1: 10, field2: 11 }
+  log 'hello'
+when:
+  let x = Flight[true].ith(0)
+then:
+ERROR:duplicate-unique-value
+

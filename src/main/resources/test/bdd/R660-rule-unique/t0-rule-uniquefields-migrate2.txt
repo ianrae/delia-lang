@@ -38,6 +38,6 @@ then:
 value:a:Flight {
  vid:57
  vfield1:10
- vfield2:11
+ vfield2:13
 }
 
