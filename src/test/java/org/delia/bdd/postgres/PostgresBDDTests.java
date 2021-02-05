@@ -91,10 +91,11 @@ public class PostgresBDDTests extends BDDBase {
 
 	@Test
 	public void testR660() {
-		runR660File("t0-rule-uniquefields.txt", 1);
+		runR660File("t0-rule-uniquefields.txt", 2);
 		runR660File("t0-rule-uniquefields2.txt", 2);
 		runR660File("t0-rule-uniquefields-migrate1.txt", 2);
 		runR660File("t0-rule-uniquefields-migrate2.txt", 2);
+		runR660File("t0-rule-uniquefields-migrate3.txt", 2);
 	}
 
 	@Test
@@ -349,16 +350,12 @@ public class PostgresBDDTests extends BDDBase {
 	@Test
 	public void testDebug() {
 		//		testIndexToRun = 2;
-		//BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
+		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
-		//		runR900File("t0-update-mm-id.txt", 4);
-		//		runR2150File("t0-migrate-many-to-many3.txt", 2);
-		//		runR2700Blob("t0-blob.txt", 3);
-		//		runR2100File("t0-migration10.txt", 2);
-		//		runR2100File("t0-migration15.txt", 2);
-		runR2150File("t0-migrate-one-to-one1.txt", 3);
+		runR660File("t0-rule-uniquefields.txt", 1);
+//		runR660File("t0-rule-uniquefields2.txt", 2);
 	}
 
 	//---

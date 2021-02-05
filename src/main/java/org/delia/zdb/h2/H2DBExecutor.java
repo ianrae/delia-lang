@@ -428,6 +428,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 		case INDEX_ADD:
 		case INDEX_DELETE:
 		case INDEX_ALTER:
+			break;
 			
 		case CONSTRAINT_ADD:
 		case CONSTRAINT_DELETE:
