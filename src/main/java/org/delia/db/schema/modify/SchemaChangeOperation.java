@@ -20,7 +20,8 @@ public class SchemaChangeOperation {
 	public boolean canCreateAssocTable; //only used in FIELD_ADD of MM relation field
 //	public String assocTableName; //only used in FIELD_RENAME of MM relation field
 	public SqlStatement assocUpdateStm; //only used for rename MM field
-
+	public SqlStatement otherStm;
+	
 	public SchemaChangeOperation(OperationType opType) {
 		this.opType = opType;
 	}

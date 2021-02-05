@@ -6,6 +6,9 @@ import java.util.List;
 import org.delia.core.FactoryService;
 import org.delia.core.RegAwareServiceBase;
 import org.delia.db.DBType;
+import org.delia.db.postgres.PostgresSqlGeneratorFactory;
+import org.delia.db.sqlgen.SqlConstraintStatement;
+import org.delia.db.sqlgen.SqlGeneratorFactoryImpl;
 import org.delia.type.DTypeRegistry;
 
 /*
@@ -15,10 +18,17 @@ import org.delia.type.DTypeRegistry;
  */
 public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 	private boolean isMemDB;
+	private SqlGeneratorFactoryImpl sqlGen;
 
 	public SchemaMigrationPlanGenerator(DTypeRegistry registry, FactoryService factorySvc, DBType dbType) {
 		super(registry, factorySvc);
 		this.isMemDB = DBType.MEM.equals(dbType);
+		
+		if (DBType.POSTGRES.equals(dbType)) {
+			this.sqlGen = new PostgresSqlGeneratorFactory(registry, factorySvc);
+		} else {
+			this.sqlGen = new SqlGeneratorFactoryImpl(registry, factorySvc);
+		}
 	}
 	
 	public List<SchemaChangeOperation> generate(SchemaDelta delta) {
@@ -62,26 +72,29 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 		//----- others ------------
 		for(SxOtherDelta oth: delta.othersI) {
 			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_ADD);
-			op.typeName = oth.typeName;
-			op.otherName = oth.name;
-			op.argsL = oth.newArgs;
+			initOtherOp(op, oth);
 		}
 		
 		for(SxOtherDelta oth: delta.othersU) {
 			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_ALTER); 
-			op.typeName = oth.typeName;
-			op.otherName = oth.name;
-			op.argsL = oth.newArgs;
+			initOtherOp(op, oth);
 		}
 		
 		for(SxOtherDelta oth: delta.othersD) {
 			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_DELETE); 
-			op.typeName = oth.typeName;
-			op.otherName = oth.name;
-			op.argsL = oth.newArgs;
+			initOtherOp(op, oth);
 		}
 		
 		return opList;
+	}
+
+	private void initOtherOp(SchemaChangeOperation op, SxOtherDelta oth) {
+		op.typeName = oth.typeName;
+		op.otherName = oth.name;
+		op.argsL = oth.newArgs;
+		SqlConstraintStatement constraintStatement = sqlGen.generateConstraint();
+		constraintStatement.init(op);
+		op.otherStm = constraintStatement.render();
 	}
 
 	private void doFields(List<SchemaChangeOperation> opList, SxTypeDelta td) {
@@ -90,7 +103,6 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 			SchemaChangeOperation op = createAndAdd(opList, OperationType.FIELD_ADD);
 			initForField(op, fd, td);
 			op.canCreateAssocTable = fd.canCreateAssocTable; //true for 2nd one
-
 		}
 		
 		doFieldUpdates(opList, td);

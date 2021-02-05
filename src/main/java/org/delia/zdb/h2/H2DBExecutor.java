@@ -428,12 +428,20 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 		case INDEX_ADD:
 		case INDEX_DELETE:
 		case INDEX_ALTER:
+			
 		case CONSTRAINT_ADD:
 		case CONSTRAINT_DELETE:
 		case CONSTRAINT_ALTER:
+			this.execSqlStatementEx(op.otherStm);
+			break;
 		default:
 			break;
 		}
+	}
+	private void execSqlStatementEx(SqlStatement stm) {
+		logSql(stm.sql);
+		DBExecuteContext dbctx = createContext();
+		conn.execStatement(stm, dbctx);
 	}
 
 }
