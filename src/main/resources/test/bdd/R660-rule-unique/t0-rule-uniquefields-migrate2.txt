@@ -1,6 +1,6 @@
 # uniquefields migration tests
 
-FEATURE: migration 1: drop constraint
+FEATURE: migration 2 : alter constraint
 background:
  configure loadFKs = true
 thenType: struct
@@ -26,12 +26,12 @@ value:a:Flight {
 }
 
 ---
-title: migration2 - drop constraint
+title: migration2 - alter constraint
 given:
-  type Flight struct {id int primaryKey, field1 int, field2 int }  end
+  type Flight struct {id int primaryKey, field1 int, field2 int } uniqueFields(field2)  end
 
 when:
-  insert Flight {id: 57, field1: 10, field2: 11 }
+  insert Flight {id: 57, field1: 10, field2: 13 }
 when:
   let x = Flight[57]
 then:

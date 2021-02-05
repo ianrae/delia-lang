@@ -92,6 +92,7 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 		op.typeName = oth.typeName;
 		op.otherName = oth.name;
 		op.argsL = oth.newArgs;
+		op.otherInfo = oth.info;
 		SqlConstraintStatement constraintStatement = sqlGen.generateConstraint();
 		constraintStatement.init(op);
 		op.otherStm = constraintStatement.render();

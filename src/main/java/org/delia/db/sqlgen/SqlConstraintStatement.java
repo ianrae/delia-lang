@@ -75,7 +75,7 @@ public class SqlConstraintStatement implements SqlStatementGenerator {
 		sc.o("ALTER TABLE %s", op.typeName);
 		//ALTER TABLE TEST ADD CONSTRAINT NAME_UNIQUE UNIQUE(NAME)
 		sc.addStr(" DROP CONSTRAINT");
-		String s = StringUtil.flattenEx(op.argsL, "_");
+		String s = StringUtil.flattenEx(op.otherInfo.args, "_");
 		String name = String.format("%s_%s__%s", op.typeName, op.otherName, s);
 		sc.o(" %s", name);
 	}
