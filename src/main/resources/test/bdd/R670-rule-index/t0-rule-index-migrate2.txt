@@ -1,4 +1,4 @@
-# uniquefields migration tests
+# index migration tests
 
 FEATURE: migration 2 : alter constraint
 background:
@@ -10,7 +10,7 @@ thenType: struct
 title: migration2
 chainNextTest:true
 given:
-  type Flight struct {id int primaryKey, field1 int, field2 int } uniqueFields(field1,field2) end
+  type Flight struct {id int primaryKey, field1 int, field2 int } index(field1,field2) end
 
 when:
   insert Flight {id: 55, field1: 10, field2: 11 }
@@ -28,7 +28,7 @@ value:a:Flight {
 ---
 title: migration2 - alter constraint
 given:
-  type Flight struct {id int primaryKey, field1 int, field2 int } uniqueFields(field2)  end
+  type Flight struct {id int primaryKey, field1 int, field2 int } index(field2)  end
 
 when:
   insert Flight {id: 57, field1: 10, field2: 13 }

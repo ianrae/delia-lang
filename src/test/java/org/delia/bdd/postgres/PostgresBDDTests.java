@@ -97,6 +97,14 @@ public class PostgresBDDTests extends BDDBase {
 		runR660File("t0-rule-uniquefields-migrate2.txt", 2);
 		runR660File("t0-rule-uniquefields-migrate3.txt", 2);
 	}
+	@Test
+	public void testR670() {
+		runR670File("t0-rule-index.txt", 2);
+		runR670File("t0-rule-index2.txt", 1);
+		runR670File("t0-rule-index-migrate1.txt", 2);
+		runR670File("t0-rule-index-migrate2.txt", 2);
+		runR670File("t0-rule-index-migrate3.txt", 2);
+	}
 
 	@Test
 	public void testR700() {

@@ -102,10 +102,10 @@ public class SqlConstraintStatement implements SqlStatementGenerator {
 	}
 	private void renderUpdateIndex(StrCreator sc) {
 		//ALTER INDEX IDXNAME RENAME TO IDX_TEST_NAME
-		String name = makeName("idx");
+		String name = makeOldName("idx");
 		sc.o("ALTER INDEX %s", name);
-		//CREATE INDEX IDXNAME ON TEST(NAME)
-		sc.o(" RENAME TO %s", "KKKKKKKKKKKKK"); //TODO FIX
+		name = makeName("idx");
+		sc.o(" RENAME TO %s", name);
 	}
 	private void renderDeleteIndex(StrCreator sc) {
 		String name = makeName("idx");
@@ -117,6 +117,11 @@ public class SqlConstraintStatement implements SqlStatementGenerator {
 	// -- helpers
 	private String makeName(String prefix) {
 		String s = StringUtil.flattenEx(op.argsL, "_");
+		String name = String.format("%s%s_%s__%s", prefix, op.typeName, op.otherName, s);
+		return name;
+	}
+	private String makeOldName(String prefix) {
+		String s = StringUtil.flattenEx(op.otherInfo.args, "_");
 		String name = String.format("%s%s_%s__%s", prefix, op.typeName, op.otherName, s);
 		return name;
 	}

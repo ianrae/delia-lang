@@ -1,10 +1,10 @@
-# uniqueFields rule tests
+# index rule tests
 
-FEATURE: uniqueFields 2
+FEATURE: index 2
 background:
   type Flight struct {id int primaryKey, field1 int, field2 int, field3 string, field4 string } 
-    uniqueFields(field1,field2),
-    uniqueFields(field3,field4) 
+    index(field1,field2),
+    index(field3,field4) 
   end
 thenType: struct
 
@@ -24,15 +24,4 @@ value:a:Flight {
  vfield3:'a'
  vfield4:'aa'
 }
-
----
-title: should fail
-given:
-  insert Flight {id: 55, field1: 10, field2: 10, field3: 'a', field4: 'a' }
-  insert Flight {id: 56, field1: 10, field2: 10, field3: 'a', field4: 'a' }
-  log 'hello'
-when:
-  let x = Flight[true].ith(0)
-then:
-ERROR:duplicate-unique-value
 

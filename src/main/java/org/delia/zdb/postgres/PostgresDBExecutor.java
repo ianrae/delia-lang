@@ -441,8 +441,6 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 		case INDEX_ADD:
 		case INDEX_DELETE:
 		case INDEX_ALTER:
-			break;
-
 		case CONSTRAINT_ADD:
 		case CONSTRAINT_DELETE:
 		case CONSTRAINT_ALTER:

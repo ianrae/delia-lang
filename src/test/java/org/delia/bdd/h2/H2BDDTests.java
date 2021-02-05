@@ -102,7 +102,7 @@ public class H2BDDTests extends BDDBase {
 	@Test
 	public void testR670() {
 		runR670File("t0-rule-index.txt", 2);
-		runR670File("t0-rule-index2.txt", 2);
+		runR670File("t0-rule-index2.txt", 1);
 		runR670File("t0-rule-index-migrate1.txt", 2);
 		runR670File("t0-rule-index-migrate2.txt", 2);
 		runR670File("t0-rule-index-migrate3.txt", 2);
@@ -367,11 +367,11 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-		runR670File("t0-rule-index.txt", 2);
-//		runR670File("t0-rule-index2.txt", 2);
+//		runR670File("t0-rule-index.txt", 2);
+//		runR670File("t0-rule-index2.txt", 1);
 //		runR670File("t0-rule-index-migrate1.txt", 2);
 //		runR670File("t0-rule-index-migrate2.txt", 2);
-//		runR670File("t0-rule-index-migrate3.txt", 2);
+		runR670File("t0-rule-index-migrate3.txt", 2);
 	}
 	
 	//---
