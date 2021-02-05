@@ -92,6 +92,9 @@ public class PostgresBDDTests extends BDDBase {
 	@Test
 	public void testR660() {
 		runR660File("t0-rule-uniquefields.txt", 1);
+		runR660File("t0-rule-uniquefields2.txt", 2);
+		runR660File("t0-rule-uniquefields-migrate1.txt", 2);
+		runR660File("t0-rule-uniquefields-migrate2.txt", 2);
 	}
 
 	@Test
