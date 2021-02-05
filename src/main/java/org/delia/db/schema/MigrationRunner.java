@@ -132,7 +132,7 @@ public class MigrationRunner extends ServiceBase {
 	
 	//=new one
 	public boolean sxPerformMigrations(String currentFingerprint, List<SchemaChangeOperation> opList, List<String> orderL) {
-		log.log("running sxmigration with %d steps:", orderL.size());
+		log.log("running sxmigration with %d steps:", opList.size());
 		for(String typeName: orderL) {
 			for(SchemaChangeOperation op: opList) {
 				//when we rename a table, op will be the old name, so check op.newName

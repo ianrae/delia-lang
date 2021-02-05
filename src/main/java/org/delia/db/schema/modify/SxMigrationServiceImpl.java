@@ -70,7 +70,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 						return false;
 					}
 					
-					log.log("OP: %s", ori.render(sxplan.opList));
+					log.log("OP(%d): %s", sxplan.opList.size(), ori.render(sxplan.opList));
 					b = migrator.sxPerformMigrations(currentFingerprint, sxplan.opList);
 					if (! b) {
 						return false;
