@@ -82,7 +82,7 @@ public class SchemaDefinitionGenerator extends RegAwareServiceBase {
 				
 				SxOtherInfo otherInfo = new SxOtherInfo();
 				otherInfo.args = list;
-				otherInfo.ct = "UF";
+				otherInfo.ct = "uniqueFields";
 				schema.others.add(otherInfo);
 			}
 		}

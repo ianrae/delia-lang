@@ -58,7 +58,7 @@ public class UniqueFieldsRule extends DRuleBase {
 		try {
 			QueryResponse qresp = doQueryAll(dval, dbexecutor, ctx);
 			
-			ctx.getLog().log("xxxxxxzz " + qresp.dvalList.size());
+			ctx.getLog().logDebug("xxxxxxzz " + qresp.dvalList.size());
 			for(DValue inner: qresp.dvalList) {
 				String key = buildKey(inner);
 				if (map.containsKey(key)) {
@@ -69,7 +69,7 @@ public class UniqueFieldsRule extends DRuleBase {
 				}
 				map.put(key, "");
 			}
-			ctx.getLog().log("xxxxxxszz " + map.size());
+			ctx.getLog().logDebug("xxxxxxszz " + map.size());
 			
 		} finally {
 			if (dbexecutor != null) {

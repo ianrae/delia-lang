@@ -59,9 +59,24 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 			op.typeInfo = td.info;
 		}
 		
-		//other
-		//TODO
+		//----- others ------------
+		for(SxOtherDelta oth: delta.othersI) {
+			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_ADD); 
+			op.otherName = oth.name;
+			op.argsL = oth.newArgs;
+		}
 		
+		for(SxOtherDelta oth: delta.othersU) {
+			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_ALTER); 
+			op.otherName = oth.name;
+			op.argsL = oth.newArgs;
+		}
+		
+		for(SxOtherDelta oth: delta.othersD) {
+			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_DELETE); 
+			op.otherName = oth.name;
+			op.argsL = oth.newArgs;
+		}
 		
 		return opList;
 	}

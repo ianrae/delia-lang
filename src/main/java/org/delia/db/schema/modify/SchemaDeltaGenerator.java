@@ -19,8 +19,11 @@ import org.delia.util.StringUtil;
 	 */
 	public class SchemaDeltaGenerator extends RegAwareServiceBase {
 
+		private SchemaDeltaGeneratorOther otherGenerator;
+
 		public SchemaDeltaGenerator(DTypeRegistry registry, FactoryService factorySvc) {
 			super(registry, factorySvc);
+			this.otherGenerator = new SchemaDeltaGeneratorOther(registry, factorySvc);
 		}
 		
 		public SchemaDelta generate(SchemaDefinition schema1, SchemaDefinition schema2) {
@@ -48,7 +51,7 @@ import org.delia.util.StringUtil;
 				delta.typesI.add(td);
 			}
 			
-			//TODO: handle others
+			otherGenerator.handleOthers(schema1, schema2, delta);
 
 			return delta;
 		}
