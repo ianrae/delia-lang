@@ -1,0 +1,43 @@
+# uniquefields migration tests
+
+FEATURE: migration 1
+background:
+ configure loadFKs = true
+thenType: struct
+
+# -- start chain ---
+---
+title: migration2
+chainNextTest:true
+given:
+  type Flight struct {id int primaryKey, field1 int, field2 int } uniqueFields(field1,field2) end
+
+when:
+  insert Flight {id: 55, field1: 10, field2: 11 }
+  insert Flight {id: 56, field1: 20, field2: 21 }
+  log 'hello'
+when:
+  let x = Flight[true].ith(0)
+then:
+value:a:Flight {
+ vid:55
+ vfield1:10
+ vfield2:11
+}
+
+---
+title: migration2.1 - add type
+given:
+  type Flight struct {id int primaryKey, field1 int, field2 int }  end
+
+when:
+  insert Flight {id: 57, field1: 10, field2: 11 }
+when:
+  let x = Flight[57]
+then:
+value:a:Flight {
+ vid:57
+ vfield1:10
+ vfield2:11
+}
+

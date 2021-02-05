@@ -38,6 +38,7 @@ public class SchemaDeltaGeneratorOther extends RegAwareServiceBase {
 				list2.remove(tt2);
 			} else {
 				SxOtherDelta td = buildOtherDelta(tt);
+				td.newArgs = tt.args;
 				delta.othersD.add(td); //in list1 but not in list2
 			}
 		}
