@@ -21,7 +21,7 @@ value:a:Flight {
 }
 
 ---
-title: should fail
+title: ok
 given:
   insert Flight {id: 55, field1: 10, field2: 11 }
   insert Flight {id: 56, field1: 10, field2: 11 }
@@ -29,5 +29,9 @@ given:
 when:
   let x = Flight[true].ith(0)
 then:
-ERROR:duplicate-unique-value
+value:a:Flight {
+ vid:55
+ vfield1:10
+ vfield2:11
+}
 

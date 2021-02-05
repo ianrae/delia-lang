@@ -71,21 +71,31 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 		
 		//----- others ------------
 		for(SxOtherDelta oth: delta.othersI) {
-			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_ADD);
+			OperationType opType = calcOpType(oth, "I");
+			SchemaChangeOperation op = createAndAdd(opList, opType);
 			initOtherOp(op, oth);
 		}
 		
 		for(SxOtherDelta oth: delta.othersU) {
-			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_ALTER); 
+			OperationType opType = calcOpType(oth, "U");
+			SchemaChangeOperation op = createAndAdd(opList, opType); 
 			initOtherOp(op, oth);
 		}
 		
 		for(SxOtherDelta oth: delta.othersD) {
-			SchemaChangeOperation op = createAndAdd(opList, OperationType.CONSTRAINT_DELETE); 
+			OperationType opType = calcOpType(oth, "D");
+			SchemaChangeOperation op = createAndAdd(opList, opType); 
 			initOtherOp(op, oth);
 		}
 		
 		return opList;
+	}
+
+	private OperationType calcOpType(SxOtherDelta oth, String action) {
+		if (oth.name.equals("index")) {
+			return action.equals("I") ? OperationType.INDEX_ADD : (action.equals("U") ? OperationType.INDEX_ALTER : OperationType.INDEX_DELETE);
+		}
+		return action.equals("I") ? OperationType.CONSTRAINT_ADD : (action.equals("U") ? OperationType.CONSTRAINT_ALTER : OperationType.CONSTRAINT_DELETE);
 	}
 
 	private void initOtherOp(SchemaChangeOperation op, SxOtherDelta oth) {

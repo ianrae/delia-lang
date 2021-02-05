@@ -15,6 +15,7 @@ import org.delia.rule.fns.DateMakeFnRule;
 import org.delia.rule.fns.DateYearFnRule;
 import org.delia.rule.fns.LenFnRule;
 import org.delia.rule.rules.ContainsRule;
+import org.delia.rule.rules.IndexRule;
 import org.delia.rule.rules.MaxLenRule;
 import org.delia.rule.rules.SizeofRule;
 import org.delia.rule.rules.UniqueFieldsRule;
@@ -104,7 +105,7 @@ public class DefaultRuleFunctionBuilder implements RuleFunctionBulder {
 					guard = adjustGuard(oper, guard);
 				}
 			}
-			rule = new UniqueFieldsRule(guard, operL);
+			rule = new IndexRule(guard, operL);
 			break;
 		}
 		case "len":

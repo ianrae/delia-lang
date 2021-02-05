@@ -425,11 +425,10 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 		case FIELD_ALTER_TYPE: //includes size
 			this.alterFieldType(op.typeName, op.fieldName, op.fieldType, op.sizeof);
 			break;
+			
 		case INDEX_ADD:
 		case INDEX_DELETE:
 		case INDEX_ALTER:
-			break;
-			
 		case CONSTRAINT_ADD:
 		case CONSTRAINT_DELETE:
 		case CONSTRAINT_ALTER:

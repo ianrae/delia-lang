@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.delia.core.FactoryService;
 import org.delia.core.RegAwareServiceBase;
 import org.delia.rule.DRule;
+import org.delia.rule.rules.IndexRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.UniqueFieldsRule;
@@ -78,12 +79,20 @@ public class SchemaDefinitionGenerator extends RegAwareServiceBase {
 			if (rule instanceof UniqueFieldsRule) {
 				UniqueFieldsRule ufr = (UniqueFieldsRule) rule;
 				List<String> list = ufr.getOperList().stream().map(x -> x.getSubject()).collect(Collectors.toList());
-				String s = String.format("UFR(%s)", StringUtil.flatten(list));
 				
 				SxOtherInfo otherInfo = new SxOtherInfo();
 				otherInfo.nm = type.getName();
 				otherInfo.args = list;
 				otherInfo.ct = "uniqueFields";
+				schema.others.add(otherInfo);
+			} else if (rule instanceof IndexRule) {
+				IndexRule ufr = (IndexRule) rule;
+				List<String> list = ufr.getOperList().stream().map(x -> x.getSubject()).collect(Collectors.toList());
+				
+				SxOtherInfo otherInfo = new SxOtherInfo();
+				otherInfo.nm = type.getName();
+				otherInfo.args = list;
+				otherInfo.ct = "index";
 				schema.others.add(otherInfo);
 			}
 		}
