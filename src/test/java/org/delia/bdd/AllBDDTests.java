@@ -350,7 +350,9 @@ public class AllBDDTests extends BDDBase {
 //		runR1350File("t0-filter-op-date.txt", 13);
 //		runR1350File("t0-filter-op-relation.txt", 14);
 //		runR1350File("t0-filter-and-or.txt", 7);
-		runR1350File("t0-filter-like.txt", 6);
+//		runR1350File("t0-filter-like.txt", 6);
+//		runR1400File("t0-filterfn-date.txt", 12);
+		runR660File("t0-rule-uniquefields.txt", 2);
 	}
 	
 	//---

@@ -197,7 +197,8 @@ public class FilterCondBuilder {
 			XNAFSingleExp el = xnaf.qfeL.get(0);
 			return new FilterVal(ValType.SYMBOL, el);
 		} else {
-			XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
+			XNAFSingleExp el = (XNAFSingleExp) xnaf.qfeL.get(0);
+//			XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
 			XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
 			//Note. addr.y is a field but will become a FUNCTION here
 			TypePair pair = DValueHelper.findField(fromType, el.strValue());

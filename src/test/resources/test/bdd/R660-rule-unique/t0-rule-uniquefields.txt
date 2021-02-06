@@ -29,5 +29,6 @@ given:
 when:
   let x = Flight[true].ith(0)
 then:
-ERROR:duplicate-unique-value
+IF(MEM):rule-uniqueFields
+ELSE:duplicate-unique-value
 
