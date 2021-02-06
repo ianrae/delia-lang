@@ -3,6 +3,7 @@ package org.delia.db.memdb.filter;
 import org.delia.compiler.ast.NullExp;
 import org.delia.db.InternalException;
 import org.delia.error.DeliaError;
+import org.delia.type.DRelation;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
@@ -30,6 +31,16 @@ public abstract class OpEvaluatorBase implements OpEvaluator {
 		throwIfNotFieldName(dval);
 		
 		if (dval.asStruct().getField(fieldName) == null) {
+			return (right instanceof NullExp);
+		}
+		if (right instanceof NullExp) {
+			return false;
+		}
+		return null;
+	}
+	protected Boolean checkRelationNull(DValue dval, Object right) {
+//		DRelation drel = dval.asRelation();
+		if (dval == null || dval.asRelation() == null) {
 			return (right instanceof NullExp);
 		}
 		if (right instanceof NullExp) {

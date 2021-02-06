@@ -85,7 +85,11 @@ public class OpFactory {
 			if (sexp.isSimpleField()) {
 				String fieldName = sexp.funcName;
 				DType hintType = DValueHelper.findFieldType(structType, fieldName);
-				return creatFromHint(op, OpEvaluatorBase.SCALAR_VAL, hintType);
+				if (hintType.isStructShape()) {
+					return creatFromHint(op, fieldName, hintType);
+				} else {
+					return creatFromHint(op, OpEvaluatorBase.SCALAR_VAL, hintType);
+				}
 			}
 		}
 		return null;

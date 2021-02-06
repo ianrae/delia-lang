@@ -22,11 +22,23 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 	@Override
 	protected boolean doMatch(Object left) {
 		DValue dval = (DValue) left;
-	      Boolean b = checkNull(dval, rightVar);
-	      if (b != null) {
-	        return b;
-	      }
-		DRelation drel1 = dval.asStruct().getField(fieldName).asRelation();
+		
+		DRelation drel1;
+		if (dval != null && dval.getType().isStructShape()) {
+			Boolean b = checkNull(dval, rightVar);
+			if (b != null) {
+				return b;
+			}
+			drel1 = dval.asStruct().getField(fieldName).asRelation();
+		} else {
+			Boolean b = checkRelationNull(dval, rightVar);
+			if (b != null) {
+				return b;
+			}
+			drel1 = dval.asRelation(); 
+		}
+		
+		
 		if (drel1.isMultipleKey()) {
 			for(DValue kk: drel1.getMultipleKeys()) {
 				if (doInnerMatch(kk)) {
@@ -37,7 +49,7 @@ public class RelationOpEvaluator extends OpEvaluatorBase {
 		}
 		
 		//we are checking if dval.fieldName (a relation) has an FK equal to rightVal
-		//However, the relation may be empty (if relation is optinal).
+		//However, the relation may be empty (if relation is optional).
 		if (drel1.getMultipleKeys().size() == 0) {
 			return false;
 		}
