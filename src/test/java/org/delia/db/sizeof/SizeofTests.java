@@ -15,6 +15,13 @@ public class SizeofTests extends DeliaTestBase {
 		String src = "let x = Flight[15]";
 		execute(src);
 	}	
+	
+	@Test
+	public void testOKa() {
+//		String src = "let x = Flight[field1 < 15]";
+		String src = "let x = Flight[16 > field1]";
+		execute(src);
+	}	
 
 	@Test
 	public void testFailUnknownField() {

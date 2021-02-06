@@ -115,6 +115,12 @@ public class LetTests {
 	}
 	
 	@Test
+	public void testDebug() {
+		chkDollarDollarQuery("Actor[x > y]", "Actor[x > y]");
+	}
+
+	
+	@Test
 	public void testMultiLine() {
 		chkTwoLine("Actor[$$]\nlet x = y", "let $$ = Actor[$$]", "let x = y");
 	}

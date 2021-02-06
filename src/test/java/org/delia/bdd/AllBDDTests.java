@@ -344,11 +344,7 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-//		runR1500File("t0-queryfn-offset.txt", 5);
-//		runR1600File("t0-fetch.txt", 4);
-//		runR560File("t0-self-11.txt", 3);
-//		runR560File("t0-self-N1.txt", 4);
-		runR1000File("t0-upsert-mm-id.txt", 4);
+		runR1350File("t0-filter-op-int.txt", 13);
 	}
 	
 	//---

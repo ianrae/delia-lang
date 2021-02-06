@@ -54,7 +54,7 @@ public class NameAndFuncParser extends ParserBase {
 					-> new XNAFSingleExp(99, exp1, args, true, null));
 		}
 		public static Parser<XNAFSingleExp> ruleFn1a() {
-			return Parsers.longer(ruleFn0a(), ruleFn0b());
+			return Parsers.or(ruleFn0b(), ruleFn0a());
 		}
 		
 //		private static Parser<XNAFSingleExp> ruleFn2() {
