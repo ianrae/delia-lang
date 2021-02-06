@@ -71,9 +71,9 @@ public class RuleTests {
 		RuleHelper.chkFuncRule(exp.ruleL.get(1), 1, "len", 1);
 	}
 	@Test
-	public void testFn2aFail2() {
-		RuleExp exp = parseRule("xyz(3), len(15)");
-		RuleHelper.chkFuncRule(exp, 1, "len", 1);
+	public void testFn2aOK() {
+		RuleSetExp exp = parseRules("xyz(3), len(15)");
+		//RuleHelper.chkFuncRule(exp, 1, "len", 1);
 	}
 	
 	// --

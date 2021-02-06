@@ -66,7 +66,7 @@ public class NameAndFuncParser extends ParserBase {
 		}
 		public static Parser<Exp> parseNameAndFuncs() {
 			return Parsers.sequence(Parsers.INDEX, term("!").asOptional(), ruleFn3(),
-					(Integer pos, Optional<Token> notTok, List<List<XNAFSingleExp>> qfelist) -> new XNAFMultiExp(pos, notTok == null, qfelist));
+					(Integer pos, Optional<Token> notTok, List<List<XNAFSingleExp>> qfelist) -> new XNAFMultiExp(pos, !notTok.isPresent(), qfelist));
 		}
 		
 	}
