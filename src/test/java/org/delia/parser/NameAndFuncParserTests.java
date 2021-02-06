@@ -9,7 +9,6 @@ import org.delia.compiler.parser.TerminalParser;
 import org.junit.Test;
 
 
-
 public class NameAndFuncParserTests {
 	
 	@Test
@@ -25,7 +24,7 @@ public class NameAndFuncParserTests {
 	@Test
 	public void test1a() {
 		Exp exp = parse1("Customer.foo().bar()");
-		assertEquals("Customer().foo().bar()", exp.strValue());
+		assertEquals("Customer.foo().bar()", exp.strValue());
 	}
 	
 	@Test

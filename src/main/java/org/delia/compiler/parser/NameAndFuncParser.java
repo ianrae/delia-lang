@@ -46,7 +46,7 @@ public class NameAndFuncParser extends ParserBase {
 		public static Parser<XNAFSingleExp> ruleFn0a() {
 			return Parsers.sequence(Parsers.INDEX, ident(), 
 					(Integer pos, IdentExp exp1) 
-					-> new XNAFSingleExp(99, exp1, null, true, null));
+					-> new XNAFSingleExp(99, exp1, null, false, null));
 		}
 		public static Parser<XNAFSingleExp> ruleFn0b() {
 			return Parsers.sequence(ident(), args1(), 

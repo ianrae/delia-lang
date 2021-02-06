@@ -47,6 +47,9 @@ public class XNAFSingleExp extends ExpBase {
 	
 	@Override
 	public String strValue() {
+		if (!isRuleFn) {
+			return funcName;
+		}
 		String ss = String.format("%s(", funcName);
 		int i = 0;
 		for(Exp exp : argL) {
