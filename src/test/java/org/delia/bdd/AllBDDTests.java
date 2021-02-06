@@ -344,7 +344,8 @@ public class AllBDDTests extends BDDBase {
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-		runR1350File("t0-filter-op-int.txt", 13);
+//		runR1350File("t0-filter-op-int.txt", 13);
+		runR1350File("t0-filter-op-number.txt", 13);
 	}
 	
 	//---

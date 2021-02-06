@@ -11,6 +11,7 @@ import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.compiler.astx.XNAFTransientExp;
 import org.delia.compiler.parser.LetParser;
+import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.ParserBase;
 import org.delia.compiler.parser.TerminalParser;
 import org.jparsec.Parser;
@@ -40,7 +41,7 @@ public class JParsec3Tests {
 		public static Parser<XNAFSingleExp> ruleFn0a() {
 			return Parsers.sequence(Parsers.INDEX, ident(), 
 					(Integer pos, IdentExp exp1) 
-					-> new XNAFSingleExp(99, exp1, null, true, null));
+					-> new XNAFSingleExp(99, exp1, null, false, null));
 		}
 		public static Parser<XNAFSingleExp> ruleFn0b() {
 			return Parsers.sequence(ident(), args1(), 
@@ -70,6 +71,31 @@ public class JParsec3Tests {
 		}
 
 	}	
+	
+	@Test
+	public void testABunch() {
+		chkParse("Customer", 1, "Customer");
+		chkParse("a.b", 2, "a.b");
+		chkParse("a.b.c", 3, "a.b.c");
+		
+		chkParse("Customer()", 1, "Customer()");
+		chkParse("a.Customer()", 2, "a.Customer()");
+		chkParse("a().Customer()", 2, "a().Customer()");
+		
+		chkParse("Customer(1)", 1, "Customer(1)");
+		chkParse("a.Customer(1,2)", 2, "a.Customer(1,2)");
+		chkParse("a(1,2).Customer(3,4)", 2, "a(1,2).Customer(3,4)");
+	}
+	
+	private void chkParse(String src, int n, String expected) {
+//		Exp exp = FooParser.parseNameAndFuncs().from(TerminalParser.tokenizer, TerminalParser.ignored.skipMany()).parse(src);
+		Exp exp = NameAndFuncParser.parseNameAndFuncs().from(TerminalParser.tokenizer, TerminalParser.ignored.skipMany()).parse(src);
+		XNAFMultiExp xexp = (XNAFMultiExp) exp;
+		assertEquals(n, xexp.qfeL.size());
+		assertEquals(expected, exp.strValue());
+	}
+
+
 
 	@Test
 	public void test0() {

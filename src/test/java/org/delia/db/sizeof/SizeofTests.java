@@ -18,8 +18,8 @@ public class SizeofTests extends DeliaTestBase {
 	
 	@Test
 	public void testOKa() {
-//		String src = "let x = Flight[field1 < 15]";
-		String src = "let x = Flight[16 > field1]";
+		String src = "let x = Flight[field1 < 15]";
+//		String src = "let x = Flight[16 > field1]";
 		execute(src);
 	}	
 

@@ -66,14 +66,15 @@ public class RuleTests {
 	}
 	@Test
 	public void testFn2aFail() {
-		RuleSetExp exp = parseRules("xyz() len(15)");
-		assertEquals(2, exp.ruleL.size());
-		RuleHelper.chkFuncRule(exp.ruleL.get(1), 1, "len", 1);
+		RuleSetExp exp = parseRules("xyz(14) len(15)");
+		assertEquals(1, exp.ruleL.size()); //TODO fix this!!
+		RuleHelper.chkFuncRule(exp.ruleL.get(0), 2, "xyz", 1);
 	}
 	@Test
 	public void testFn2aOK() {
 		RuleSetExp exp = parseRules("xyz(3), len(15)");
-		RuleHelper.chkFuncRule(exp.ruleL.get(0), 1, "len", 1);
+		assertEquals(2, exp.ruleL.size());
+		RuleHelper.chkFuncRule(exp.ruleL.get(0), 1, "xyz", 1);
 	}
 	
 	// --

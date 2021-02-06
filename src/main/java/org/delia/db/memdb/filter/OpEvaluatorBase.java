@@ -4,7 +4,9 @@ import org.delia.compiler.ast.NullExp;
 import org.delia.db.InternalException;
 import org.delia.error.DeliaError;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
 import org.delia.util.DValueHelper;
 
 public abstract class OpEvaluatorBase implements OpEvaluator {
@@ -54,6 +56,26 @@ public abstract class OpEvaluatorBase implements OpEvaluator {
 		} else {
 			throwIfNotFieldName(dval);
 			return dval.asStruct().getField(fieldName);
+		}
+	}
+	protected Integer resolveToInt(DValue dval) {
+		DValue tmp = getFieldValue(dval);
+		DType dtype = tmp.getType();
+		if (dtype.isShape(Shape.NUMBER)) {
+			Double n = tmp.asNumber();
+			return n.intValue();
+		} else {
+			return tmp.asInt(); //will only work for int and long. others should never occur
+		}
+	}
+	protected Long resolveToLong(DValue dval) {
+		DValue tmp = getFieldValue(dval);
+		DType dtype = tmp.getType();
+		if (dtype.isShape(Shape.NUMBER)) {
+			Double n = tmp.asNumber();
+			return n.longValue();
+		} else {
+			return tmp.asLong(); //will only work for int and long. others should never occur
 		}
 	}
 	
