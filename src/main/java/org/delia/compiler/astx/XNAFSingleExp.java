@@ -34,7 +34,7 @@ public class XNAFSingleExp extends ExpBase {
 		this.funcName = nameExp.name();
 		this.isRuleFn = isRuleFn;
 		
-		if (transientExp.argL != null) {
+		if (transientExp != null && transientExp.argL != null) {
 			List<Exp> list = new ArrayList<>();
 			if (! transientExp.argL.isEmpty()) {
 				for(Exp inner: transientExp.argL) {

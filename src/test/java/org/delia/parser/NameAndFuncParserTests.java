@@ -1,10 +1,9 @@
 package org.delia.parser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.parser.FullParser;
 import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.TerminalParser;
 import org.junit.Test;
@@ -26,7 +25,7 @@ public class NameAndFuncParserTests {
 	@Test
 	public void test1a() {
 		Exp exp = parse1("Customer.foo().bar()");
-		assertEquals("sdf", exp.strValue());
+		assertEquals("Customer().foo().bar()", exp.strValue());
 	}
 	
 	@Test
