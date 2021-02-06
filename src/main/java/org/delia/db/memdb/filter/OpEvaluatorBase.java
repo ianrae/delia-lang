@@ -3,7 +3,6 @@ package org.delia.db.memdb.filter;
 import org.delia.compiler.ast.NullExp;
 import org.delia.db.InternalException;
 import org.delia.error.DeliaError;
-import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
 import org.delia.type.Shape;

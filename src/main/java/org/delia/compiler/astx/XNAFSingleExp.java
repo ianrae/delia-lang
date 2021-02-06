@@ -45,6 +45,14 @@ public class XNAFSingleExp extends ExpBase {
 		}
 	}
 	
+	public boolean isSimpleField() {
+		if (! isRuleFn && argL.size() == 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	
 	@Override
 	public String strValue() {
 		if (!isRuleFn) {

@@ -339,13 +339,15 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
 //		runR1350File("t0-filter-op-int.txt", 13);
-		runR1350File("t0-filter-op-number.txt", 13);
+//		runR1350File("t0-filter-op-number.txt", 13);
+//		runR1350File("t0-filter-op-boolean.txt", 6);
+		runR1350File("t0-filter-op-date.txt", 13);
 	}
 	
 	//---
