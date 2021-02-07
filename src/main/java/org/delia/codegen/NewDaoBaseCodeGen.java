@@ -42,7 +42,7 @@ public class NewDaoBaseCodeGen extends NewCodeGenBase {
 		} else {
 			st.add("bname", structType.getBaseType().getName());
 		}
-		sc.o(st.render());
+		sc.addStr(st.render());
 		sc.nl();
 
 		sc.o("}");

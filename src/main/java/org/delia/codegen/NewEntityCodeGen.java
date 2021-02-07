@@ -29,7 +29,7 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 		STGroup g = new STGroupFile("templates/entity.stg");
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
-		sc.o(st.render());
+		sc.addStr(st.render());
 
 //		String baseType = (structType.getBaseType() == null) ? "DeliaImmutable" : structType.getBaseType().getName();
 		if (structType.getBaseType() == null) {
@@ -48,7 +48,7 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 			st.add("immutname", typeName + "Immut");
 			
 		}
-		sc.o(st.render());
+		sc.addStr(st.render());
 		sc.nl();
 
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
@@ -67,7 +67,7 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 				st.add("uname", StringUtil.uppify(fieldName));
 				st.add("fname", fieldName);
 				st.add("nullval", "null");
-				sc.o(st.render());
+				sc.addStr(st.render());
 				
 				if (helper().hasPK(ftype)) {
 					//t5(ftype,uname,pktype,pkfield) ::= <<
@@ -76,7 +76,7 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 					st.add("uname", StringUtil.uppify(fieldName));
 					st.add("pktype", helper().getPKType(ftype));
 					st.add("pkfield", helper().getPKField(ftype));
-					sc.o(st.render());
+					sc.addStr(st.render());
 				}
 			} else {
 				//t3(ftype,fobjname,uname,fname,asname) ::= <<
@@ -87,7 +87,7 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 				st.add("fname", fieldName);
 				st.add("asname", asFn);
 				st.add("nullval", nullValue);
-				sc.o(st.render());
+				sc.addStr(st.render());
 			}
 
 			sc.nl();
