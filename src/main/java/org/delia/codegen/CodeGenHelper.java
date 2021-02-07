@@ -36,6 +36,8 @@ public class CodeGenHelper {
 			return "String";
 		case DATE:
 			return "ZonedDateTime";
+		case BLOB:
+			return "WrappedBlob";
 		case STRUCT:
 		{
 			return ftype.getName();
@@ -64,6 +66,8 @@ public class CodeGenHelper {
 			return "String";
 		case DATE:
 			return "ZonedDateTime";
+		case BLOB:
+			return "WrappedBlob";
 		case STRUCT:
 		{
 			return ftype.getName();
@@ -87,6 +91,8 @@ public class CodeGenHelper {
 			return "asString";
 		case DATE:
 			return "asDate";
+		case BLOB:
+			return "asBlob";
 		case STRUCT:
 		{
 			return "TODOfix" + ftype.getName();
@@ -108,8 +114,8 @@ public class CodeGenHelper {
 		case BOOLEAN:
 			return flag ? "false" : "null";
 		case STRING:
-			return "null";
 		case DATE:
+		case BLOB:
 			return "null";
 		case STRUCT:
 		{
