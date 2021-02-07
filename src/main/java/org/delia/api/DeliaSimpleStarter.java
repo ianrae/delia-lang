@@ -1,8 +1,6 @@
 package org.delia.api;
 
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 
 import org.delia.base.UnitTestLog;
 import org.delia.builder.ConnectionBuilder;
@@ -11,8 +9,6 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.log.Log;
-import org.delia.util.StringUtil;
-import org.delia.util.TextFileReader;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
 
 /**
@@ -48,10 +44,9 @@ public class DeliaSimpleStarter {
 		return new DeliaGenericDao(delia);
 	}
 
-	public DeliaSession execute(FileReader reader) throws IOException {
-		TextFileReader r = new TextFileReader();
-		List<String> lines = r.ReadFileFromReader(reader);
-		String src = StringUtil.flattenEx(lines, StringUtil.eol());
+	public DeliaSession executeFromResource(String resourcePath) throws IOException {
+		DeliaLoader loader = new DeliaLoader();
+		String src = loader.fromResource(resourcePath);
 		return execute(src);
 	}
 

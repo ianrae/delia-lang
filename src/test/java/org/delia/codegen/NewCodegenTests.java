@@ -3,13 +3,12 @@ package org.delia.codegen;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.delia.api.DeliaLoader;
 import org.delia.codegen.fluent.CodeGenBuilder;
 import org.delia.db.sizeof.DeliaTestBase;
-import org.delia.util.DirectoryUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,8 +36,9 @@ public class NewCodegenTests extends DeliaTestBase {
 	@Test
 	public void testFileReader() throws IOException {
 		FileReader r = new FileReader("src/test/resources/test/northwind/northwind-small.txt");
-		
-		CodeGeneratorService codegen = CodeGenBuilder.create(r).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		DeliaLoader loader = new DeliaLoader();
+		String src = loader.fromReader(r);
+		CodeGeneratorService codegen = CodeGenBuilder.create(src).allTypes().addStandardGenerators().toPackage("com.foo").build();
 		codegen.getOptions().addJsonIgnoreToRelations = true;
 		StringBuilder sb = new StringBuilder();
 		boolean b2 = codegen.run(sb);
@@ -47,6 +47,19 @@ public class NewCodegenTests extends DeliaTestBase {
 		assertEquals(true, b2);
 	}	
 	
+	@Test
+	public void testResource() throws IOException {
+		String resourcePath = "src/test/resources/test/northwind/northwind-small.txt";
+		DeliaLoader loader = new DeliaLoader();
+		String src = loader.fromResource(resourcePath);
+		CodeGeneratorService codegen = CodeGenBuilder.create(src).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		codegen.getOptions().addJsonIgnoreToRelations = true;
+		StringBuilder sb = new StringBuilder();
+		boolean b2 = codegen.run(sb);
+		log.log("==== output ====");
+		log.log(sb.toString());
+		assertEquals(true, b2);
+	}	
 	
 	@Test
 	public void test1() {

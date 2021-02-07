@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+import org.delia.api.DeliaLoader;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSimpleStarter;
 import org.delia.core.FactoryService;
@@ -25,9 +26,11 @@ public class CodeGenBuilder {
 		CodeGenBuilder builder = new CodeGenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
 		return builder;
 	}
-	public static CodeGenBuilder create(FileReader reader) throws IOException {
+	public static CodeGenBuilder createFromResource(String resourcePath) throws IOException {
+		DeliaLoader loader = new DeliaLoader();
+		String src = loader.fromResource(resourcePath);
 		DeliaSimpleStarter simpleStarter = new DeliaSimpleStarter();
-		DeliaSession session = simpleStarter.execute(reader);
+		DeliaSession session = simpleStarter.execute(src);
 		CodeGenBuilder builder = new CodeGenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
 		return builder;
 	}
