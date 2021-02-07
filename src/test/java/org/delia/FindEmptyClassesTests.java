@@ -23,6 +23,7 @@ public class FindEmptyClassesTests  {
 		List<String> list = DirectoryUtil.getFilesInRecursive(dir, "java"); 
 		//assertEquals(22, list.size());
 		
+		log("--list--");
 		for(String path: list) {
 			if (fileIsCommentedOut(path)) {
 				log(path);
@@ -55,6 +56,10 @@ public class FindEmptyClassesTests  {
 				}
 			}
 		}
+		
+		maxAdjacentCount = Integer.max(maxAdjacentCount, adjacentCount);
+		
+		
 //		log(String.format("  %d", maxAdjacentCount));
 		return maxAdjacentCount > 20;
 	}
