@@ -10,6 +10,7 @@ import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.sprig.SprigServiceImpl;
+import org.delia.type.DTypeRegistry;
 
 public class DeliaSessionImpl implements DeliaSession {
 	public boolean ok;
@@ -103,6 +104,11 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public ZoneId getDefaultTimezone() {
 		return zoneId;
+	}
+
+	@Override
+	public DTypeRegistry getRegistry() {
+		return execCtx.registry;
 	}
 	
 }

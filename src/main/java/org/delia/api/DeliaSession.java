@@ -6,6 +6,7 @@ import org.delia.assoc.DatIdMap;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
+import org.delia.type.DTypeRegistry;
 /**
  * An instance of Delia that can be used from a single thread.
  * A Delia session contains the types and variables defined by the initial
@@ -25,6 +26,7 @@ public interface DeliaSession {
 	boolean ok();
 	ResultValue getFinalResult();
 	ExecutionState getExecutionContext();
+	DTypeRegistry getRegistry();
 	void setRunnerIntiliazer(RunnerInitializer runnerInitializer);
 	RunnerInitializer getRunnerIntiliazer();
 	Delia getDelia();
