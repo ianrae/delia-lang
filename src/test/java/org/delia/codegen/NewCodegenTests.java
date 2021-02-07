@@ -11,7 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * rules are built in RuleFuncFactory
+ * new version of codegen using a fluent api
+ * 
  * @author Ian Rae
  *
  */

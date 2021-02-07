@@ -13,6 +13,9 @@ public class CGBuilder2 {
 	
 	public CGBuilder3 addStandardGenerators() {
 		generatorsL.add(new NewGetterInterfaceCodeGen());
+		generatorsL.add(new NewImmutCodeGen());
+		generatorsL.add(new NewSetterInterfaceCodeGen());
+		generatorsL.add(new NewEntityCodeGen());
 		//TODO more
 		return new CGBuilder3(this);
 	}
