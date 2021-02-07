@@ -5,9 +5,9 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.util.StringUtil;
 
-public class NewSetterInterfaceCodeGen extends NewCodeGenBase {
+public class SetterInterfaceCodeGen extends NewCodeGenBase {
 
-	public NewSetterInterfaceCodeGen() {
+	public SetterInterfaceCodeGen() {
 		super(true);
 	}
 	
@@ -23,6 +23,7 @@ public class NewSetterInterfaceCodeGen extends NewCodeGenBase {
 		String typeName = structType.getName();
 
 		StrCreator sc = new StrCreator();
+		addDoNotModifyComment(sc);
 		helper().addImports(sc, structType);
 		sc.o("import org.delia.codegen.DeliaEntity;");
 		sc.nl();

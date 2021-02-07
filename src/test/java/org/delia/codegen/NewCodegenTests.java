@@ -102,7 +102,7 @@ public class NewCodegenTests extends DeliaTestBase {
 	public void testDaoBase() {
 		String src = buildSrc();
 		
-		NewDaoBaseCodeGen gen = new NewDaoBaseCodeGen();
+		DaoBaseCodeGen gen = new DaoBaseCodeGen("com.foo");
 		CodeGeneratorService codegen = CodeGenBuilder.create(src).allTypes().addGenerator(gen).toPackage("com.foo").build();
 		codegen.getOptions().addJsonIgnoreToRelations = true;
 		StringBuilder sb = new StringBuilder();

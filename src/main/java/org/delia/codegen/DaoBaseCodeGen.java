@@ -7,10 +7,13 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class NewDaoBaseCodeGen extends NewCodeGenBase {
+public class DaoBaseCodeGen extends NewCodeGenBase {
 
-	public NewDaoBaseCodeGen() {
+	private String entityPackageName;
+
+	public DaoBaseCodeGen(String entityPackageName) {
 		super(true);
+		this.entityPackageName = entityPackageName;
 	}
 	
 	@Override
@@ -24,11 +27,19 @@ public class NewDaoBaseCodeGen extends NewCodeGenBase {
 		DStructType structType = (DStructType) typeParam; //structTypesOnly is true
 		String typeName = structType.getName();
 		StrCreator sc = new StrCreator();
-		helper().addImports(sc, structType);
+//		helper().addImports(sc, structType);
+		addDoNotModifyComment(sc);
+		sc.o("package %s;", packageName);
+		sc.nl();
+		
+		
 		STGroup g = new STGroupFile("templates/daoBase.stg");
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
 		sc.o(st.render());
+		sc.o("import %s.%s;\n", entityPackageName, typeName);
+		sc.o("import %s.%sImmut;\n", entityPackageName, typeName);
+		sc.nl();
 
 		//t2(cname,iname,bname,itname,immutname) ::= <<
 		st = g.getInstanceOf("t2");
@@ -40,7 +51,8 @@ public class NewDaoBaseCodeGen extends NewCodeGenBase {
 		if (structType.getBaseType() == null) {
 			st.add("bname", "EntityDaoBase");
 		} else {
-			st.add("bname", structType.getBaseType().getName());
+//			st.add("bname", structType.getBaseType().getName());
+			st.add("bname", "EntityDaoBase");
 		}
 		sc.addStr(st.render());
 		sc.nl();

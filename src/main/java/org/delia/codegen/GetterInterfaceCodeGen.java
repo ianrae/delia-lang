@@ -7,9 +7,9 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.util.StringUtil;
 
-public class NewGetterInterfaceCodeGen extends NewCodeGenBase {
+public class GetterInterfaceCodeGen extends NewCodeGenBase {
 
-	public NewGetterInterfaceCodeGen() {
+	public GetterInterfaceCodeGen() {
 		super(true);
 	}
 	
@@ -25,6 +25,7 @@ public class NewGetterInterfaceCodeGen extends NewCodeGenBase {
 		String typeName = structType.getName();
 
 		StrCreator sc = new StrCreator();
+		addDoNotModifyComment(sc);
 		helper().addImports(sc, getImportList(structType));
 		sc.o("import org.delia.codegen.DeliaImmutable;");
 		sc.nl();

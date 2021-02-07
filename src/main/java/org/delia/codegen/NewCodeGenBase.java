@@ -1,5 +1,6 @@
 package org.delia.codegen;
 
+import org.delia.db.sql.StrCreator;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 
@@ -15,6 +16,10 @@ public abstract class NewCodeGenBase implements CodeGenerator {
 		this.structTypesOnly = structTypesOnly;
 		this.helper = null;//new CodeGenHelper(DTypeRegistry registry, String packageName) {
 
+	}
+	
+	protected void addDoNotModifyComment(StrCreator sc) {
+		sc.o("//DO NOT MODIFY THIS FILE. IT IS CREATED BY DELIA CODE GENERATOR.");
 	}
 	
 	protected CodeGenHelper helper() {

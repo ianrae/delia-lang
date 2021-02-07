@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.codegen.CodeGenerator;
-import org.delia.codegen.NewEntityCodeGen;
-import org.delia.codegen.NewGetterInterfaceCodeGen;
-import org.delia.codegen.NewImmutCodeGen;
-import org.delia.codegen.NewSetterInterfaceCodeGen;
+import org.delia.codegen.EntityCodeGen;
+import org.delia.codegen.GetterInterfaceCodeGen;
+import org.delia.codegen.ImmutCodeGen;
+import org.delia.codegen.SetterInterfaceCodeGen;
 
 public class CGBuilder2 {
 	CodeGenBuilder builder;
@@ -18,10 +18,10 @@ public class CGBuilder2 {
 	}
 	
 	public CGBuilder3 addStandardGenerators() {
-		generatorsL.add(new NewGetterInterfaceCodeGen());
-		generatorsL.add(new NewImmutCodeGen());
-		generatorsL.add(new NewSetterInterfaceCodeGen());
-		generatorsL.add(new NewEntityCodeGen());
+		generatorsL.add(new GetterInterfaceCodeGen());
+		generatorsL.add(new ImmutCodeGen());
+		generatorsL.add(new SetterInterfaceCodeGen());
+		generatorsL.add(new EntityCodeGen());
 		//TODO more
 		return new CGBuilder3(this);
 	}

@@ -8,15 +8,15 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class NewEntityCodeGen extends NewCodeGenBase {
+public class ImmutCodeGen extends NewCodeGenBase {
 
-	public NewEntityCodeGen() {
+	public ImmutCodeGen() {
 		super(true);
 	}
 	
 	@Override
 	public String buildJavaFileName(DType dtype) {
-		String filename = String.format("%sEntity.java", dtype.getName());
+		String filename = String.format("%sImmut.java", dtype.getName());
 		return filename;
 	}
 
@@ -25,71 +25,63 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 		DStructType structType = (DStructType) typeParam; //structTypesOnly is true
 		String typeName = structType.getName();
 		StrCreator sc = new StrCreator();
+		addDoNotModifyComment(sc);
 		helper().addImports(sc, structType);
-		STGroup g = new STGroupFile("templates/entity.stg");
+		
+		STGroup g = new STGroupFile("templates/immut.stg");
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
 		sc.addStr(st.render());
-
+		
 //		String baseType = (structType.getBaseType() == null) ? "DeliaImmutable" : structType.getBaseType().getName();
 		if (structType.getBaseType() == null) {
-			//t2(cname,iname,ename,immutname) ::= <<
 			st = g.getInstanceOf("t2");
-			st.add("cname", typeName + "Entity");
+			st.add("cname", typeName + "Immut");
 			st.add("iname", typeName);
-			st.add("ename", typeName + "Setter");
-			st.add("immutname", typeName + "Immut");
 		} else {
 			st = g.getInstanceOf("t2base");
-			st.add("cname", typeName + "Entity");
+			st.add("cname", typeName + "Immut");
 			st.add("base", structType.getBaseType().getName());
 			st.add("iname", typeName);
-			st.add("ename", typeName + "Setter");
-			st.add("immutname", typeName + "Immut");
-			
 		}
+		
 		sc.addStr(st.render());
 		sc.nl();
-
+		
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
 			String javaType = helper().convertToJava(structType, fieldName);
-			String javaObjType = helper().convertToJava(structType, fieldName, ftype, false);
 			String asFn = helper().convertToAsFn(ftype);
-			String nullValue = helper().getNullValueFor(structType, fieldName);
-
+			
 			if (ftype.isStructShape()) {
-				//t4(ftype,fobjname,uname,fname) ::= <<
+				//t4(ftype,uname,fname) ::= <<
 				st = g.getInstanceOf("t4");
 				st.add("ftype", javaType);
-				st.add("fobjname", javaObjType);
 				st.add("uname", StringUtil.uppify(fieldName));
 				st.add("fname", fieldName);
-				st.add("nullval", "null");
 				sc.addStr(st.render());
 				
 				if (helper().hasPK(ftype)) {
-					//t5(ftype,uname,pktype,pkfield) ::= <<
+					//t5(ftype,uname,fname,pktype,asname) ::= <<
 					st = g.getInstanceOf("t5");
 					st.add("ftype", javaType);
 					st.add("uname", StringUtil.uppify(fieldName));
+					st.add("fname", fieldName);
 					st.add("pktype", helper().getPKType(ftype));
-					st.add("pkfield", helper().getPKField(ftype));
+					st.add("asname", helper().getPKTypeAsFn(ftype));
 					sc.addStr(st.render());
 				}
 			} else {
-				//t3(ftype,fobjname,uname,fname,asname) ::= <<
+				//t3(ftype,uname,fname,asname) ::= <<
 				st = g.getInstanceOf("t3");
 				st.add("ftype", javaType);
-				st.add("fobjname", javaObjType);
 				st.add("uname", StringUtil.uppify(fieldName));
 				st.add("fname", fieldName);
 				st.add("asname", asFn);
-				st.add("nullval", nullValue);
 				sc.addStr(st.render());
 			}
-
+			
 			sc.nl();
 
 		}
