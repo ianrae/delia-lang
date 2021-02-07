@@ -4,16 +4,20 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.delia.api.DeliaSession;
+import org.delia.core.FactoryService;
+import org.delia.core.RegAwareServiceBase;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.StringUtil;
+import org.delia.util.TextFileWriter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,17 +41,17 @@ public class NewCodegenTests extends DeliaTestBase {
 	     String generate(DType dtype);
 	}
 	
-	public static class CodeGeneratorService {
+	public static class CodeGeneratorService extends RegAwareServiceBase {
 
 		private List<String> typeNameL;
 		private List<CodeGenerator> generatorL;
 		private String packageName;
-		private DTypeRegistry registry;
 		private File outputDir;
 		private StringBuilder sb;
 		private CodeGeneratorOptions options = new CodeGeneratorOptions();
 		
-		public CodeGeneratorService(DTypeRegistry registry, List<String> typeNames, List<CodeGenerator> generatorsL, String packageName) {
+		public CodeGeneratorService(DTypeRegistry registry, FactoryService factorySvc, List<String> typeNames, List<CodeGenerator> generatorsL, String packageName) {
+			super(registry, factorySvc);
 			this.registry = registry;
 			this.typeNameL = typeNames;
 			this.generatorL = generatorsL;
@@ -71,7 +75,7 @@ public class NewCodegenTests extends DeliaTestBase {
 				for(CodeGenerator gen: generatorL) {
 					gen.setRegistry(registry);
 					gen.setOptions(options);
-					gen.setPackageName(typeName);
+					gen.setPackageName(packageName);
 					if (!gen.canProcess(dtype)) {
 						continue;
 					}
@@ -92,8 +96,12 @@ public class NewCodegenTests extends DeliaTestBase {
 		}
 
 		private void writeToFile(String fileName, String text) {
-			// TODO Auto-generated method stub
-			
+			String targetDir = outputDir.getAbsolutePath();
+			targetDir = targetDir.replace('\\', '/');
+			String path = String.format("%s/%s", targetDir, fileName); 
+			this.log.log("writing %s", path);
+			TextFileWriter w = new TextFileWriter();
+			w.writeFile(path, Collections.singletonList(text));
 		}
 
 		public CodeGeneratorOptions getOptions() {
@@ -145,12 +153,6 @@ public class NewCodegenTests extends DeliaTestBase {
 		}
 
 		@Override
-		public String buildJavaFileName(DType dtype) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
 		public void setRegistry(DTypeRegistry registry) {
 			this.registry = registry;
 		}
@@ -160,6 +162,12 @@ public class NewCodegenTests extends DeliaTestBase {
 
 		public GetterInterfaceCodeGen() {
 			super(true);
+		}
+		
+		@Override
+		public String buildJavaFileName(DType dtype) {
+			String filename = String.format("%s.java", dtype.getName());
+			return filename;
 		}
 
 		@Override
@@ -201,7 +209,6 @@ public class NewCodegenTests extends DeliaTestBase {
 			return sc.toString();
 		}
 
-
 		protected List<String> getImportList(DStructType structType) {
 			List<String> list = helper().getImportList(structType);
 			if (options.addJsonIgnoreToRelations) {
@@ -209,7 +216,6 @@ public class NewCodegenTests extends DeliaTestBase {
 			}
 			return list;
 		}
-
 	}
 	
 	public static class CGBuilder4 {
@@ -222,7 +228,7 @@ public class NewCodegenTests extends DeliaTestBase {
 		public CodeGeneratorService build() {
 			List<String> typeNames = buildTypeNamesList();
 			CodegenBuilder builder = builder3.builder2.builder;
-			return new CodeGeneratorService(builder.registry, typeNames, builder3.builder2.generatorsL, builder3.packageName);
+			return new CodeGeneratorService(builder.registry, builder.factorySvc, typeNames, builder3.builder2.generatorsL, builder3.packageName);
 		}
 
 		private List<String> buildTypeNamesList() {
@@ -274,14 +280,16 @@ public class NewCodegenTests extends DeliaTestBase {
 		boolean allTypes;
 		List<String> theseTypes;
 		private DTypeRegistry registry;
+		private FactoryService factorySvc;
 		
 		public static CodegenBuilder createBuilder(DeliaSession session) {
-			CodegenBuilder builder = new CodegenBuilder(session.getRegistry());
+			CodegenBuilder builder = new CodegenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
 			return builder;
 		}
 		
-		public CodegenBuilder(DTypeRegistry registry) {
+		public CodegenBuilder(DTypeRegistry registry, FactoryService factorySvc) {
 			this.registry = registry;
+			this.factorySvc = factorySvc;
 		}
 		
 		public CGBuilder2 allTypes() {
@@ -295,15 +303,12 @@ public class NewCodegenTests extends DeliaTestBase {
 	}
 	
 	@Test
-	public void testDelia() {
+	public void test1() {
 		String src = "let x = Flight[1]";
 		execute(src);
 		
 		CodeGeneratorService codegen = CodegenBuilder.createBuilder(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
-		
-		String dir = "C:/tmp/delia/newcodegen";
-		//boolean b = codegen.run(new File(dir));
-		
+		codegen.getOptions().addJsonIgnoreToRelations = true;
 		StringBuilder sb = new StringBuilder();
 		boolean b2 = codegen.run(sb);
 		log.log("==== output ====");
@@ -311,6 +316,16 @@ public class NewCodegenTests extends DeliaTestBase {
 		assertEquals(true, b2);
 	}	
 	
+	@Test
+	public void testFile() {
+		String src = "let x = Flight[1]";
+		execute(src);
+		
+		CodeGeneratorService codegen = CodegenBuilder.createBuilder(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		String dir = "C:/tmp/delia/newcodegen";
+		boolean b = codegen.run(new File(dir));
+		assertEquals(true, b);
+	}	
 	
 	@Before
 	public void init() {
@@ -319,8 +334,8 @@ public class NewCodegenTests extends DeliaTestBase {
 	@Override
 	protected String buildSrc() {
 		String s = "";
-		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob } %s end", s);
-		src += String.format(" type Address struct {id int primaryKey, name string } %s end", s);
+		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob, relation  addr Address one parent optional } %s end", s);
+		src += String.format(" type Address struct {id int primaryKey, name string, relation flight Flight one optional } %s end", s);
 
 		s =  "";
 		src += String.format("\n insert Flight {field1: 1, field2: '4E/QIA=='}");
