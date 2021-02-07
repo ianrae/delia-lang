@@ -42,6 +42,9 @@ public class CodeGenBuilder {
 	public static void createDaoAndEntities(String deliaSrc, String baseDaoPackageName, File baseSrcDir) {
 		DeliaSimpleStarter simpleStarter = new DeliaSimpleStarter();
 		DeliaSession session = simpleStarter.execute(deliaSrc);
+		createDaoAndEntities(session, baseDaoPackageName, baseSrcDir);
+	}
+	public static void createDaoAndEntities(DeliaSession session, String baseDaoPackageName, File baseSrcDir) {
 		FactoryService factorySvc = session.getDelia().getFactoryService();
 
 		//step 1. build entities in {basepackage}.entities
