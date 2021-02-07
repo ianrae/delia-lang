@@ -10,8 +10,8 @@ import org.platframework.dao.PagedList;
 >>
 
 
-t2(cname,iname,bname,iname,immutname) ::= <<
-  public class <cname> extends <bname>\<<iname>> {
+t2(cname,iname,bname,itname,immutname) ::= <<
+  public class <cname> extends <bname><itname> {
 
     public <cname>((DeliaSession session) {
 		super(session, "<iname>");
@@ -22,42 +22,6 @@ t2(cname,iname,bname,iname,immutname) ::= <<
 	}
 	
 	
-	public PagedList\<<iname>> findPage(int pgNum, int pgSize, long totalSize) {
-		return findPage("true", pgNum, pgSize, totalSize);
-	}
-	public PagedList\<<iname>> findPage(String filter, int pgNum, int pgSize, long totalSize) {
-		int iStart = pgNum * pgSize;
-		String src = String.format("%s[%s].offset(%d).limit(%d).orderBy('id')", typeName, filter, iStart, pgSize); //TODO add orderBy, offset, etc.
-		ResultValue res = doQuery(src);
-		List\<<iname>> tmpL = createImmutList(res); //TODO optimize. only create items needed for page
-		
-		PagedList\<<iname>> list = new PagedList\<<iname>>(pgNum, pgSize);
-		list.totalSize = (int)totalSize;
-		list.list = tmpL;
-		
-		return list;
-	}
-	
-	public long getCount() {
-		String src = String.format("%s[true].count()", typeName);
-		ResultValue res = doQuery(src);
-		Long count = res.getAsDValue().asLong();
-		return count;
-	}
-	
-
-	@Override
-	protected <iname> createImmutFromDVal(DValue dval) {
-		//TODO: is this ok? should dval ever be null?
-		if (dval == null) {
-			return null;
-		}
-		return new <immutname>(dval);
-	}
-	
-	public void deleteAll() {
-		doDeleteAll();
-	}
 
 >>
 

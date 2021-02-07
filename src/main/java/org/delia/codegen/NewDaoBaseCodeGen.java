@@ -30,22 +30,17 @@ public class NewDaoBaseCodeGen extends NewCodeGenBase {
 		ST st = g.getInstanceOf("t1");
 		sc.o(st.render());
 
-//		String baseType = (structType.getBaseType() == null) ? "DeliaImmutable" : structType.getBaseType().getName();
+		//t2(cname,iname,bname,itname,immutname) ::= <<
+		st = g.getInstanceOf("t2");
+		st.add("cname", typeName + "DaoBase");
+		st.add("iname", typeName);
+		st.add("itname", String.format("<%s>", typeName));
+		st.add("immutname", typeName + "Immut");
+
 		if (structType.getBaseType() == null) {
-			st = g.getInstanceOf("t2");
-			st.add("cname", typeName + "Entity");
-			st.add("iname", typeName);
 			st.add("bname", "EntityDaoBase");
-			st.add("ename", typeName + "Setter");
-			st.add("immutname", typeName + "Immut");
 		} else {
-			st = g.getInstanceOf("t2base");
-			st.add("cname", typeName + "Entity");
 			st.add("bname", structType.getBaseType().getName());
-			st.add("iname", typeName);
-			st.add("ename", typeName + "Setter");
-			st.add("immutname", typeName + "Immut");
-			
 		}
 		sc.o(st.render());
 		sc.nl();

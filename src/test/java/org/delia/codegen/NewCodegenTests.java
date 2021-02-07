@@ -86,6 +86,23 @@ public class NewCodegenTests extends DeliaTestBase {
 		assertEquals(true, b);
 	}	
 	
+	@Test
+	public void testDaoBase() {
+		String src = buildSrc();
+		
+		NewDaoBaseCodeGen gen = new NewDaoBaseCodeGen();
+		CodeGeneratorService codegen = CodeGenBuilder.create(src).allTypes().addGenerator(gen).toPackage("com.foo").build();
+		codegen.getOptions().addJsonIgnoreToRelations = true;
+		StringBuilder sb = new StringBuilder();
+		boolean b2 = codegen.run(sb);
+		log.log("==== output ====");
+		log.log(sb.toString());
+		assertEquals(true, b2);
+	}	
+	
+	
+	
+	// --- helpers
 	@Before
 	public void init() {
 	}
