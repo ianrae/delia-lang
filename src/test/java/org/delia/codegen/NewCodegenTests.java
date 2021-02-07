@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
-import org.delia.codegen.fluent.CodegenBuilder;
+import org.delia.codegen.fluent.CodeGenBuilder;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class NewCodegenTests extends DeliaTestBase {
 		String src = "let x = Flight[1]";
 		execute(src);
 		
-		CodeGeneratorService codegen = CodegenBuilder.createBuilder(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		CodeGeneratorService codegen = CodeGenBuilder.create(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
 		codegen.getOptions().addJsonIgnoreToRelations = true;
 		StringBuilder sb = new StringBuilder();
 		boolean b2 = codegen.run(sb);
@@ -36,7 +36,7 @@ public class NewCodegenTests extends DeliaTestBase {
 		String src = "let x = Flight[1]";
 		execute(src);
 		
-		CodeGeneratorService codegen = CodegenBuilder.createBuilder(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		CodeGeneratorService codegen = CodeGenBuilder.create(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
 		String dir = "C:/tmp/delia/newcodegen";
 		boolean b = codegen.run(new File(dir));
 		assertEquals(true, b);

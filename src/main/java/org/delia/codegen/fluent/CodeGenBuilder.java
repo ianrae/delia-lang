@@ -6,18 +6,18 @@ import org.delia.api.DeliaSession;
 import org.delia.core.FactoryService;
 import org.delia.type.DTypeRegistry;
 
-public class CodegenBuilder {
+public class CodeGenBuilder {
 	boolean allTypes;
 	List<String> theseTypes;
 	DTypeRegistry registry;
 	FactoryService factorySvc;
 	
-	public static CodegenBuilder createBuilder(DeliaSession session) {
-		CodegenBuilder builder = new CodegenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
+	public static CodeGenBuilder create(DeliaSession session) {
+		CodeGenBuilder builder = new CodeGenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
 		return builder;
 	}
 	
-	public CodegenBuilder(DTypeRegistry registry, FactoryService factorySvc) {
+	public CodeGenBuilder(DTypeRegistry registry, FactoryService factorySvc) {
 		this.registry = registry;
 		this.factorySvc = factorySvc;
 	}

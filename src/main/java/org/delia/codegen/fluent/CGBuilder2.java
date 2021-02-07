@@ -10,10 +10,10 @@ import org.delia.codegen.NewImmutCodeGen;
 import org.delia.codegen.NewSetterInterfaceCodeGen;
 
 public class CGBuilder2 {
-	CodegenBuilder builder;
+	CodeGenBuilder builder;
 	List<CodeGenerator> generatorsL = new ArrayList<>();
 	
-	public CGBuilder2(CodegenBuilder builder) {
+	public CGBuilder2(CodeGenBuilder builder) {
 		this.builder = builder;
 	}
 	
