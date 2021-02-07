@@ -85,6 +85,18 @@ public class NewCodegenTests extends DeliaTestBase {
 		boolean b = codegen.run(new File(dir));
 		assertEquals(true, b);
 	}	
+	@Test
+	public void testFileDontCreatePackageDir() {
+		String src = "let x = Flight[1]";
+		execute(src);
+		
+		CodeGeneratorService codegen = CodeGenBuilder.create(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		codegen.getOptions().createPackageDirs = false;
+		codegen.getOptions().overrideIfExists = false;
+		String dir = "C:/tmp/delia/newcodegen";
+		boolean b = codegen.run(new File(dir));
+		assertEquals(true, b);
+	}	
 	
 	@Test
 	public void testDaoBase() {

@@ -1,6 +1,10 @@
 package org.delia.codegen;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,6 +43,17 @@ public class CodeGeneratorService extends RegAwareServiceBase {
 	
 	protected boolean doRun(boolean outputToFile) {
 		
+		if (outputToFile && options.createPackageDirs) {
+			String dirs = buildFullPathIncludingPackageDirs(); 
+			try {
+				Path pp = Paths.get(dirs);
+				Files.createDirectories(pp);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		for(String typeName: typeNameL) {
 			DType dtype = registry.getType(typeName);
 			
@@ -49,6 +64,7 @@ public class CodeGeneratorService extends RegAwareServiceBase {
 				if (!gen.canProcess(dtype)) {
 					continue;
 				}
+				
 				
 				String fileName = gen.buildJavaFileName(dtype);
 				String text = gen.generate(dtype);
@@ -65,11 +81,36 @@ public class CodeGeneratorService extends RegAwareServiceBase {
 		return true;
 	}
 
+	private String buildFullPathIncludingPackageDirs() {
+		char sep = getDirSepChar();
+		String dirs = packageName.replace('.', sep);
+		
+		String targetDir = outputDir.getAbsolutePath();
+		String path = String.format("%s%s%s", targetDir, sep, dirs); 
+		return path;
+	}
+	private char getDirSepChar() {
+		boolean isWindows = StringUtil.eol().length() == 2;
+		char sep = isWindows ? '\\' : '/';
+		return sep;
+	}
+
 	private void writeToFile(String fileName, String text) {
 		String targetDir = outputDir.getAbsolutePath();
-		targetDir = targetDir.replace('\\', '/');
-		String path = String.format("%s/%s", targetDir, fileName); 
-		this.log.log("writing %s", path);
+		if (options.createPackageDirs) {
+			targetDir = buildFullPathIncludingPackageDirs();
+		}
+		char sep = getDirSepChar();
+		String path = String.format("%s%s%s", targetDir, sep, fileName); 
+		if (! options.overrideIfExists) {
+			File f = new File(path);
+			if (f.exists()) {
+				log.log("already exists. not writing %s", path);
+				return;
+			}
+		}
+		
+		log.log("writing %s", path);
 		TextFileWriter w = new TextFileWriter();
 		w.writeFile(path, Collections.singletonList(text));
 	}
