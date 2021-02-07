@@ -19,7 +19,6 @@ import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.util.render.ObjectRendererImpl;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
-import org.junit.Before;
 
 /**
  * Base class for tests using Delia and DeliaSession

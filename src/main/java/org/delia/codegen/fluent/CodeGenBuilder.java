@@ -3,6 +3,7 @@ package org.delia.codegen.fluent;
 import java.util.List;
 
 import org.delia.api.DeliaSession;
+import org.delia.api.DeliaSimpleStarter;
 import org.delia.core.FactoryService;
 import org.delia.type.DTypeRegistry;
 
@@ -13,6 +14,12 @@ public class CodeGenBuilder {
 	FactoryService factorySvc;
 	
 	public static CodeGenBuilder create(DeliaSession session) {
+		CodeGenBuilder builder = new CodeGenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
+		return builder;
+	}
+	public static CodeGenBuilder create(String deliaSrc) {
+		DeliaSimpleStarter simpleStarter = new DeliaSimpleStarter();
+		DeliaSession session = simpleStarter.execute(deliaSrc);
 		CodeGenBuilder builder = new CodeGenBuilder(session.getRegistry(), session.getDelia().getFactoryService());
 		return builder;
 	}

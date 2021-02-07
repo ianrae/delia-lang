@@ -18,6 +18,20 @@ import org.junit.Test;
 public class NewCodegenTests extends DeliaTestBase { 
 	
 	@Test
+	public void testSimple() {
+		String src = buildSrc();
+		
+		CodeGeneratorService codegen = CodeGenBuilder.create(src).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		codegen.getOptions().addJsonIgnoreToRelations = true;
+		StringBuilder sb = new StringBuilder();
+		boolean b2 = codegen.run(sb);
+		log.log("==== output ====");
+		log.log(sb.toString());
+		assertEquals(true, b2);
+	}	
+	
+	
+	@Test
 	public void test1() {
 		String src = "let x = Flight[1]";
 		execute(src);
