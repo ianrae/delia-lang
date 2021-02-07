@@ -112,6 +112,13 @@ public class NewCodegenTests extends DeliaTestBase {
 		assertEquals(true, b2);
 	}	
 	
+	@Test
+	public void testFullDao() {
+		String src = buildSrc();
+		String dir = "C:/tmp/delia/newcodegen";
+		
+		CodeGenBuilder.createDaoAndEntities(src, "com.foo.dao", new File(dir));
+	}	
 	
 	
 	// --- helpers
