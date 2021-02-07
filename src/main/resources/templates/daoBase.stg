@@ -21,6 +21,9 @@ t2(cname,iname,bname,itname,immutname) ::= <<
 	public <iname> findById(int id) {
 		return doFindById(id);
 	}
+	public DValue insert(<iname> entity) {
+		return doInsert(entity);
+	}
 	
 	public PagedList<itname> findPage(int pgNum, int pgSize, long totalSize) {
 		return findPage("true", pgNum, pgSize, totalSize);

@@ -1,0 +1,24 @@
+
+
+t1() ::= <<
+import org.delia.api.DeliaSession;
+import org.delia.dao.EntityDaoBase;
+import org.delia.runner.ResultValue;
+import org.delia.type.DValue;
+import org.platframework.dao.PagedList;
+import java.util.*;
+
+>>
+
+
+t2(cname,iname,bname,itname,immutname) ::= <<
+  public class <cname> extends <bname> {
+
+    public <cname>(DeliaSession session) {
+		super(session);
+	}
+
+	//TODO: add custom query methods here	
+
+>>
+

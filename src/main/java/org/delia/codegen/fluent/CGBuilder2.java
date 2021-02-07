@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.delia.codegen.CodeGenerator;
-import org.delia.codegen.EntityCodeGen;
-import org.delia.codegen.GetterInterfaceCodeGen;
-import org.delia.codegen.ImmutCodeGen;
-import org.delia.codegen.SetterInterfaceCodeGen;
+import org.delia.codegen.generators.EntityCodeGen;
+import org.delia.codegen.generators.GetterInterfaceCodeGen;
+import org.delia.codegen.generators.ImmutCodeGen;
+import org.delia.codegen.generators.SetterInterfaceCodeGen;
 
 public class CGBuilder2 {
 	CodeGenBuilder builder;

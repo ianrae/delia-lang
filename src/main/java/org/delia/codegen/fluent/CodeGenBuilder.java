@@ -9,7 +9,8 @@ import org.delia.api.DeliaLoader;
 import org.delia.api.DeliaSession;
 import org.delia.api.DeliaSimpleStarter;
 import org.delia.codegen.CodeGeneratorService;
-import org.delia.codegen.DaoBaseCodeGen;
+import org.delia.codegen.generators.DaoBaseCodeGen;
+import org.delia.codegen.generators.DaoCodeGen;
 import org.delia.core.FactoryService;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
@@ -61,13 +62,14 @@ public class CodeGenBuilder {
 			DeliaExceptionHelper.throwError("codegen-fail", "building base daos failed");
 		}
 		
-//		//step 3. build base daos in {basepackage}.base
-//		builder = new CodeGenBuilder(session.getRegistry(), factorySvc);
-//		gen = builder.allTypes().addStandardGenerators().toPackage(baseDaoPackageName).build();
-//		gen.getOptions().overrideIfExists = false;
-//		if (!gen.run(baseSrcDir)) {
-//			DeliaExceptionHelper.throwError("codegen-fail", "building daos failed");
-//		}
+		//step 3. build base daos in {basepackage}.base
+		builder = new CodeGenBuilder(session.getRegistry(), factorySvc);
+		DaoCodeGen daoGen = new DaoCodeGen(entityPackage, basePackage);
+		gen = builder.allTypes().addGenerator(daoGen).toPackage(baseDaoPackageName).build();
+		gen.getOptions().overrideIfExists = false;
+		if (!gen.run(baseSrcDir)) {
+			DeliaExceptionHelper.throwError("codegen-fail", "building daos failed");
+		}
 	}
 	
 	public CodeGenBuilder(DTypeRegistry registry, FactoryService factorySvc) {

@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.delia.api.DeliaLoader;
 import org.delia.codegen.fluent.CodeGenBuilder;
+import org.delia.codegen.generators.DaoBaseCodeGen;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.junit.Before;
 import org.junit.Test;

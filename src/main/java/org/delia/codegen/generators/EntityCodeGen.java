@@ -1,5 +1,6 @@
-package org.delia.codegen;
+package org.delia.codegen.generators;
 
+import org.delia.codegen.CodeGenBase;
 import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
