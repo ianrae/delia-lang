@@ -25,7 +25,7 @@ public class NewGetterInterfaceCodeGen extends NewCodeGenBase {
 		String typeName = structType.getName();
 
 		StrCreator sc = new StrCreator();
-		helper().addImports(sc, structType);
+		helper().addImports(sc, getImportList(structType));
 		sc.o("import org.delia.codegen.DeliaImmutable;");
 		sc.nl();
 		sc.nl();

@@ -161,6 +161,16 @@ public class CodeGenHelper {
 		sc.nl();
 		sc.nl();
 	}
+	public void addImports(StrCreator sc, List<String> importL) {
+		sc.o("package %s;", packageName);
+		sc.nl();
+		for(String s: importL) {
+			sc.o(s);
+			sc.nl();
+		}
+		sc.nl();
+		sc.nl();
+	}
 
 
 	public boolean hasPK(DType ftype) {

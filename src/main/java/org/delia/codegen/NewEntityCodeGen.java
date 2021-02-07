@@ -98,9 +98,4 @@ public class NewEntityCodeGen extends NewCodeGenBase {
 
 		return sc.toString();
 	}
-
-	private void line(StrCreator sc, String str) {
-		sc.o("%s\n", str);
-	}
-
 }
