@@ -4,8 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
-import org.delia.codegen.newcodegen.CodeGeneratorService;
-import org.delia.codegen.newcodegen.CodegenBuilder;
+import org.delia.codegen.fluent.CodegenBuilder;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,7 +1,9 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen.fluent;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.delia.codegen.CodeGeneratorService;
 
 public class CGBuilder4 {
 	CGBuilder3 builder3;

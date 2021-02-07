@@ -1,7 +1,13 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen.fluent;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.delia.codegen.CodeGenerator;
+import org.delia.codegen.NewEntityCodeGen;
+import org.delia.codegen.NewGetterInterfaceCodeGen;
+import org.delia.codegen.NewImmutCodeGen;
+import org.delia.codegen.NewSetterInterfaceCodeGen;
 
 public class CGBuilder2 {
 	CodegenBuilder builder;

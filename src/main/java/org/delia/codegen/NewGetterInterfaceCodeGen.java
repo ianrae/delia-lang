@@ -1,4 +1,4 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen;
 
 import java.util.List;
 

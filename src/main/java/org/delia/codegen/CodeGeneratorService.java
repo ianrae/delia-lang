@@ -1,4 +1,4 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen;
 
 import java.io.File;
 import java.util.Collections;

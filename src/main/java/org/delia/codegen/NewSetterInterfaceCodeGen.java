@@ -1,4 +1,4 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen;
 
 import org.delia.db.sql.StrCreator;
 import org.delia.type.DStructType;

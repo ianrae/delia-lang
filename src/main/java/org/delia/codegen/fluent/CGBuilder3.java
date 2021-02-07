@@ -1,4 +1,4 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen.fluent;
 
 public class CGBuilder3 {
 	CGBuilder2 builder2;

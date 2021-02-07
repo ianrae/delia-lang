@@ -1,4 +1,4 @@
-package org.delia.codegen.newcodegen;
+package org.delia.codegen;
 
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
