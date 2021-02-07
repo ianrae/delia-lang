@@ -3,15 +3,14 @@ package org.delia.compiler.parser;
 import java.util.List;
 import java.util.Optional;
 
-import org.jparsec.Parser;
-import org.jparsec.Parsers;
-import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.compiler.astx.XNAFTransientExp;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 
 /**
  * parses expressions like

@@ -15,7 +15,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.hld.ValType;
 import org.delia.runner.VarEvaluator;

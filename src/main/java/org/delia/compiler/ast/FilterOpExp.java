@@ -1,7 +1,6 @@
 package org.delia.compiler.ast;
 
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 
 public class FilterOpExp extends ExpBase {
@@ -32,9 +31,8 @@ public class FilterOpExp extends ExpBase {
 			XNAFMultiExp multiexp = (XNAFMultiExp) op1;
 			if (multiexp.qfeL.size() == 1) {
 				XNAFSingleExp inner = multiexp.qfeL.get(0);
-				if (inner instanceof XNAFNameExp) {
-					XNAFNameExp nameexp = (XNAFNameExp) inner;
-					return new IdentExp(nameexp.funcName);
+				if (inner.isSimpleField()) {
+					return new IdentExp(inner.funcName);
 				}
 			}
 		}
@@ -45,9 +43,8 @@ public class FilterOpExp extends ExpBase {
 			XNAFMultiExp multiexp = (XNAFMultiExp) op2;
 			if (multiexp.qfeL.size() == 1) {
 				XNAFSingleExp inner = multiexp.qfeL.get(0);
-				if (inner instanceof XNAFNameExp) {
-					XNAFNameExp nameexp = (XNAFNameExp) inner;
-					return new IdentExp(nameexp.funcName);
+				if (inner.isSimpleField()) {
+					return new IdentExp(inner.funcName);
 				}
 			}
 		}

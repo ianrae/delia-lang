@@ -10,7 +10,6 @@ import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -188,7 +187,7 @@ public class SqlWhereConverter extends ServiceBase {
 		if (op1 instanceof XNAFMultiExp) {
 			XNAFMultiExp mexp = (XNAFMultiExp) op1;
 			if (!CollectionUtils.isEmpty(mexp.qfeL)) {
-				XNAFNameExp nexp = (XNAFNameExp) mexp.qfeL.get(0);
+				XNAFSingleExp nexp = mexp.qfeL.get(0);
 				String fieldName = nexp.funcName;
 				return getFromOpByFieldName(typeName, fieldName, details);
 			}

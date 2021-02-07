@@ -15,7 +15,7 @@ import org.delia.compiler.ast.QueryFuncExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.dval.DValueConverterService;
 import org.delia.runner.FilterEvaluator;
@@ -65,7 +65,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	
 	private XNAFMultiExp buildXNAFExp(String fieldName) {
 		XNAFMultiExp exp = new XNAFMultiExp(99, false, null);
-		XNAFNameExp nameExp = new XNAFNameExp(99, new IdentExp(fieldName));
+		XNAFSingleExp nameExp = new XNAFSingleExp(99, new IdentExp(fieldName), null, false);
 		exp.qfeL.add(nameExp);
 		return exp;
 	}
