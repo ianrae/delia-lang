@@ -7,7 +7,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.util.StringUtil;
 
-public class GetterInterfaceCodeGen extends NewCodeGenBase {
+public class GetterInterfaceCodeGen extends CodeGenBase {
 
 	public GetterInterfaceCodeGen() {
 		super(true);

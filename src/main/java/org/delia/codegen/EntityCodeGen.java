@@ -8,7 +8,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class EntityCodeGen extends NewCodeGenBase {
+public class EntityCodeGen extends CodeGenBase {
 
 	public EntityCodeGen() {
 		super(true);

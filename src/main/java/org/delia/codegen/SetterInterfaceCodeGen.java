@@ -5,7 +5,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.util.StringUtil;
 
-public class SetterInterfaceCodeGen extends NewCodeGenBase {
+public class SetterInterfaceCodeGen extends CodeGenBase {
 
 	public SetterInterfaceCodeGen() {
 		super(true);

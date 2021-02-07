@@ -48,7 +48,6 @@ t2(cname,iname,bname,itname,immutname) ::= <<
 
 	@Override
 	protected <iname> createImmutFromDVal(DValue dval) {
-		//TODO: is this ok? should dval ever be null?
 		if (dval == null) {
 			return null;
 		}

@@ -4,7 +4,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 
-public abstract class NewCodeGenBase implements CodeGenerator {
+public abstract class CodeGenBase implements CodeGenerator {
 	
 	protected CodeGeneratorOptions options;
 	protected String packageName;
@@ -12,14 +12,15 @@ public abstract class NewCodeGenBase implements CodeGenerator {
 	private DTypeRegistry registry;
 	private CodeGenHelper helper;
 
-	public NewCodeGenBase(boolean structTypesOnly) {
+	public CodeGenBase(boolean structTypesOnly) {
 		this.structTypesOnly = structTypesOnly;
 		this.helper = null;//new CodeGenHelper(DTypeRegistry registry, String packageName) {
 
 	}
 	
 	protected void addDoNotModifyComment(StrCreator sc) {
-		sc.o("//DO NOT MODIFY THIS FILE. IT IS CREATED BY DELIA CODE GENERATOR.");
+		sc.o("//DO NOT MODIFY THIS FILE. IT WAS CREATED BY DELIA CODE GENERATOR.");
+		sc.nl();
 	}
 	
 	protected CodeGenHelper helper() {

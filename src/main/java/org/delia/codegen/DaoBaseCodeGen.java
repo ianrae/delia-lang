@@ -7,7 +7,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class DaoBaseCodeGen extends NewCodeGenBase {
+public class DaoBaseCodeGen extends CodeGenBase {
 
 	private String entityPackageName;
 

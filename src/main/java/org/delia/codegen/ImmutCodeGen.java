@@ -8,7 +8,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class ImmutCodeGen extends NewCodeGenBase {
+public class ImmutCodeGen extends CodeGenBase {
 
 	public ImmutCodeGen() {
 		super(true);
