@@ -2,6 +2,8 @@ package org.delia.codegen;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,10 +25,23 @@ import org.junit.Test;
  */
 public class NewCodegenTests extends DeliaTestBase { 
 	
+	public interface CodeGenerator {
+		
+	}
+	
 	public static class CodeGeneratorService {
 
-		public CodeGenerator(List<String> typeNames) {
+		public CodeGeneratorService(List<String> typeNames, List<CodeGenerator> generatorsL, String packageName) {
 			// TODO Auto-generated constructor stub
+		}
+
+		public boolean run(File dir) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+		public boolean run(StringBuilder sb) {
+			// TODO Auto-generated method stub
+			return false;
 		}
 		
 	}
@@ -40,7 +55,7 @@ public class NewCodegenTests extends DeliaTestBase {
 		
 		public CodeGeneratorService build() {
 			List<String> typeNames = buildTypeNamesList();
-			return new CodeGeneratorService(typeNames);
+			return new CodeGeneratorService(typeNames, builder3.builder2.generatorsL, builder3.packageName);
 		}
 
 		private List<String> buildTypeNamesList() {
@@ -50,23 +65,25 @@ public class NewCodegenTests extends DeliaTestBase {
 			}
 			return builder.theseTypes;
 		}
-		
 	}
 	public static class CGBuilder3 {
 		CGBuilder2 builder2;
+		String packageName;
 
 		public CGBuilder3(CGBuilder2 builder2) {
 			this.builder2 = builder2;
 		}
 		
 		public CGBuilder4 toPackage(String packageName) {
+			this.packageName = packageName;
 			return new CGBuilder4(this);
 		}
 		
 	}
 	public static class CGBuilder2 {
 		CodegenBuilder builder;
-
+		List<CodeGenerator> generatorsL = new ArrayList<>();
+		
 		public CGBuilder2(CodegenBuilder builder) {
 			this.builder = builder;
 		}
@@ -74,10 +91,12 @@ public class NewCodegenTests extends DeliaTestBase {
 		public CGBuilder3 addStandardGenerators() {
 			return new CGBuilder3(this);
 		}
-		public CGBuilder3 addGenerator(Object generator) {
+		public CGBuilder3 addGenerator(CodeGenerator generator) {
+			generatorsL.add(generator);
 			return new CGBuilder3(this);
 		}
-		public CGBuilder3 addGenerators(List<Object> generators) {
+		public CGBuilder3 addGenerators(List<CodeGenerator> generators) {
+			generatorsL.addAll(generators);
 			return new CGBuilder3(this);
 		}
 	}
@@ -110,17 +129,15 @@ public class NewCodegenTests extends DeliaTestBase {
 	public void testDelia() {
 		String src = "let x = Flight[1]";
 		execute(src);
-		DValue dval = session.getFinalResult().getAsDValue();
-		assertEquals(1, dval.asStruct().getField("field1").asInt());
-		WrappedBlob wblob = dval.asStruct().getField("field2").asBlob();
-		assertEquals(BlobType.BTYE_ARRAY, wblob.type());
-		String s = BlobUtils.toBase64(wblob.getByteArray());
-		log.log(s);
-		assertEquals("4E/QIA==", s);
 		
-		//check asString
-		s = dval.asStruct().getField("field2").asString();
-		assertEquals("4E/QIA==", s);
+		CodeGeneratorService codegen = CodegenBuilder.createBuilder(session).allTypes().addStandardGenerators().toPackage("com.foo").build();
+		
+		String dir = "C:/tmp/delia/newcodegen";
+		//boolean b = codegen.run(new File(dir));
+		
+		StringBuilder sb = new StringBuilder();
+		boolean b2 = codegen.run(sb);
+		log.log(sb.toString());
 	}	
 	
 	
@@ -132,7 +149,7 @@ public class NewCodegenTests extends DeliaTestBase {
 	protected String buildSrc() {
 		String s = "";
 		String src = String.format("type Flight struct {field1 int primaryKey, field2 blob } %s end", s);
-		src += String.format("type Address struct {field1 int primaryKey, field2 string } %s end", s);
+		src += String.format(" type Address struct {id int primaryKey, name string } %s end", s);
 
 		s =  "";
 		src += String.format("\n insert Flight {field1: 1, field2: '4E/QIA=='}");
