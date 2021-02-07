@@ -49,7 +49,7 @@ public class NewCodegenTests extends DeliaTestBase {
 	
 	@Test
 	public void testResource() throws IOException {
-		String resourcePath = "src/test/resources/test/northwind/northwind-small.txt";
+		String resourcePath = "test/northwind/northwind-small.txt";
 		DeliaLoader loader = new DeliaLoader();
 		String src = loader.fromResource(resourcePath);
 		CodeGeneratorService codegen = CodeGenBuilder.create(src).allTypes().addStandardGenerators().toPackage("com.foo").build();
