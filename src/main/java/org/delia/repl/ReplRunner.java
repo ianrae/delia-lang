@@ -1,5 +1,6 @@
 package org.delia.repl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,6 @@ import org.delia.util.ResourceTextFileReader;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.DBInterfaceFactory;
-import org.h2.store.fs.FileUtils;
 
 public class ReplRunner  {
 	private Log log = new SimpleLog();
@@ -416,7 +416,8 @@ public class ReplRunner  {
 	}
 
 	public boolean doesFileExist(String path) {
-		return FileUtils.exists(path);
+		File f = new File(path);
+		return f.exists();
 	}
 
 	public String getSessionName() {

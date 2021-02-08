@@ -9,8 +9,7 @@ import org.delia.db.DBException;
 import org.delia.db.DBValidationException;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.DeliaError;
-import org.delia.type.DTypeRegistry;
-import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
+//import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 
 public class H2ErrorConverter extends DBErrorConverterBase {
 
@@ -18,9 +17,7 @@ public class H2ErrorConverter extends DBErrorConverterBase {
 	@Override
 	public void convertAndRethrowException(SQLException e) {
 		printStackTraceIfEnabled(e);
-		if (e instanceof JdbcSQLIntegrityConstraintViolationException) {
-			//				JdbcSQLIntegrityConstraintViolationException ex = (JdbcSQLIntegrityConstraintViolationException) e;
-
+		if (isClass(e, "JdbcSQLIntegrityConstraintViolationException")) {
 			DeliaError err = new DeliaError("db-validation-fail", e.getMessage());
 			throw new DBValidationException(err);
 		} else {

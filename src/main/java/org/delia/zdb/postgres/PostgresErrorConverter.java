@@ -10,8 +10,8 @@ import org.delia.db.DBValidationException;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.TableInfo;
 import org.delia.error.DeliaError;
-import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
-import org.postgresql.util.PSQLException;
+//import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
+//import org.postgresql.util.PSQLException;
 
 public class PostgresErrorConverter extends DBErrorConverterBase {
 	
@@ -31,11 +31,11 @@ public class PostgresErrorConverter extends DBErrorConverterBase {
 		
 		if (isPSQLExceptionWith(e, "duplicate key value violates unique")) {
 			throw new DBValidationException(makeError("duplicate-unique-value", e));
-		} else 		if (isPSQLExceptionWith(e, "violates foreign key constraint")) {
+		} else if (isPSQLExceptionWith(e, "violates foreign key constraint")) {
 			throw new DBValidationException(makeError("db-validation-fail", e));
-		} else if (e instanceof JdbcSQLIntegrityConstraintViolationException) {
+		} else if (isClass(e, "JdbcSQLIntegrityConstraintViolationException")) {
 			throw new DBValidationException(makeError("db-validation-fail", e));
-		} else if (e instanceof JdbcSQLIntegrityConstraintViolationException) {
+		} else if (isClass(e, "JdbcSQLIntegrityConstraintViolationException")) {
 			throw new DBValidationException(makeError("db-validation-fail", e));
 		} else {
 			DeliaError err = new DeliaError("db-unexpected-exception", "UNEXPECTED error: " + e.getMessage());
@@ -72,9 +72,11 @@ public class PostgresErrorConverter extends DBErrorConverterBase {
 		return err;
 	}
 	
-	
 	private boolean isPSQLExceptionWith(SQLException e, String string) {
-		if (e instanceof PSQLException && e.getMessage().contains(string)) {
+//		if (e instanceof PSQLException && e.getMessage().contains(string)) {
+//			return true;
+//		}
+		if (isClass(e, "PSQLException") && e.getMessage().contains(string)) {
 			return true;
 		}
 		return false;

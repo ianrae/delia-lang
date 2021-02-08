@@ -2,7 +2,6 @@ package org.delia.api;
 
 import java.io.IOException;
 
-import org.delia.base.UnitTestLog;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -21,12 +20,12 @@ import org.delia.zdb.mem.MemDBInterfaceFactory;
 public class DeliaSimpleStarter {
 	protected Delia delia;
 	protected DeliaSession session;
-	protected Log log = new UnitTestLog();
+	protected Log log;
 
 	public DeliaSession execute(String deliaSrc) {
-		log.log("initial: " + deliaSrc);
-		
 		DeliaGenericDao dao = createDao(); 
+		log = delia.getLog();
+		log.log("initial: " + deliaSrc);
 		boolean b = dao.initialize(deliaSrc);
 		if (! b) {
 			return null; //error 
