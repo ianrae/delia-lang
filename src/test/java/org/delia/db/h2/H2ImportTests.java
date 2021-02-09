@@ -15,7 +15,7 @@ import org.delia.dataimport.ImportGroupSpec;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.h2.test.H2TestCleaner;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
@@ -112,7 +112,7 @@ public class H2ImportTests  extends BDDBase {
 	}
 	
 	private Delia createDelia() {
-		ConnectionString connStr = H2ConnectionHelper.getTestDB();
+		ConnectionDefinition connStr = H2ConnectionHelper.getTestDB();
 		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		
 //		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB();

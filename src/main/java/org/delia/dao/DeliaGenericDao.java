@@ -1,6 +1,6 @@
 package org.delia.dao;
 
-import org.delia.ConnectionStringBuilder;
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
 import org.delia.DeliaFactory;
 import org.delia.DeliaSession;
@@ -8,7 +8,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -34,7 +34,7 @@ public class DeliaGenericDao  {
 	private BlobLoader blobLoader;
 	
 	public DeliaGenericDao() {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		ConnectionDefinition connStr = ConnectionDefinitionBuilder.createMEM();
 		this.delia = DeliaBuilder.withConnection(connStr).build();
 		this.dbInterface = delia.getDBInterface();
 		this.factorySvc = delia.getFactoryService();
@@ -55,7 +55,7 @@ public class DeliaGenericDao  {
 		this.mostRecentSess = session;
 	}
 
-	public DeliaGenericDao(ConnectionString connString, DBType dbType, Log log) {
+	public DeliaGenericDao(ConnectionDefinition connString, DBType dbType, Log log) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		this.factorySvc = new FactoryServiceImpl(log, et);
 		delia = DeliaFactory.create(connString, dbType, log, factorySvc);

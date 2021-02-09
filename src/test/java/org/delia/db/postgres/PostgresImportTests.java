@@ -14,7 +14,7 @@ import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
@@ -106,7 +106,7 @@ public class PostgresImportTests  extends BDDBase {
 	
 	
 	private Delia createDelia() {
-		ConnectionString connStr = PostgresConnectionHelper.getTestDB();
+		ConnectionDefinition connStr = PostgresConnectionHelper.getTestDB();
 		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		return delia;
 	}

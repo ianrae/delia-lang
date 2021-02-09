@@ -2,10 +2,10 @@ package org.delia.repl;
 
 import java.io.IOException;
 
-import org.delia.ConnectionStringBuilder;
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.bdd.BDDBase;
 import org.delia.db.h2.H2ConnectionHelper;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.zdb.DBInterfaceFactory;
 import org.junit.Before;
 
@@ -14,14 +14,14 @@ public class ReplTests extends BDDBase {
 
 //	@Test
 	public void test() throws IOException {
-		ConnectionString connDef = ConnectionStringBuilder.createMEM();
+		ConnectionDefinition connDef = ConnectionDefinitionBuilder.createMEM();
 		DeliaRepl repl = new DeliaRepl(connDef, BASE_DIR);
 		repl.run();
 	}
 
 //	@Test
 	public void testH2() throws IOException {
-		ConnectionString connDef = H2ConnectionHelper.getTestDB();		
+		ConnectionDefinition connDef = H2ConnectionHelper.getTestDB();		
 		DeliaRepl repl = new DeliaRepl(connDef, BASE_DIR);
 		repl.run();
 	}

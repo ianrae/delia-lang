@@ -4,12 +4,12 @@ package org.delia.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.delia.ConnectionStringBuilder;
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
 import org.delia.base.DBTestHelper;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.log.Log;
 import org.delia.log.StandardLogFactory;
 import org.delia.runner.DeliaException;

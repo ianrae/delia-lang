@@ -3,14 +3,14 @@ package org.delia.db.h2;
 import javax.sql.DataSource;
 
 import org.delia.db.DBType;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 
 public class H2ConnectionHelper {
 	
 	public static boolean usePostgresVariant = false;
 
-	public static ConnectionString getTestDB() {
-		ConnectionString connStr = new ConnectionString();
+	public static ConnectionDefinition getTestDB() {
+		ConnectionDefinition connStr = new ConnectionDefinition();
 		connStr.dbType = DBType.H2;
 
 		//postgres variant of h2

@@ -12,7 +12,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.db.schema.MigrationPlan;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.log.Log;
 import org.delia.log.LoggableBlob;
 import org.delia.log.SimpleLog;
@@ -49,10 +49,10 @@ public class ReplRunner  {
 
 	protected ReplOutputWriter outWriter;
 
-	private ConnectionString connectionDef;
+	private ConnectionDefinition connectionDef;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
 
-	public ReplRunner(ConnectionString connDef, ReplOutputWriter outWriter) {
+	public ReplRunner(ConnectionDefinition connDef, ReplOutputWriter outWriter) {
 		this.connectionDef = connDef;
 		this.outWriter = outWriter;
 		addAllCmds();

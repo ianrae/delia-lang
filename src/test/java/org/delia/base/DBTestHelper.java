@@ -1,11 +1,11 @@
 package org.delia.base;
 
-import org.delia.ConnectionStringBuilder;
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.hld.HLDFactoryImpl;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
@@ -28,7 +28,7 @@ public class DBTestHelper {
 	}
 	
 	public static Delia createNewDelia() {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		ConnectionDefinition connStr = ConnectionDefinitionBuilder.createMEM();
 		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		return delia;
 	}

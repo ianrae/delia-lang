@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import org.delia.DeliaSession;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.ResultValue;
 
 public class DeliaRepl {
@@ -12,9 +12,9 @@ public class DeliaRepl {
 	private boolean shouldQuit = false;
 	private String baseDir;
 //	private ConnectionInfo connectionInfo;
-	private ConnectionString connectionDef;
+	private ConnectionDefinition connectionDef;
 	
-	public DeliaRepl(ConnectionString connectionDef, String baseDir) {
+	public DeliaRepl(ConnectionDefinition connectionDef, String baseDir) {
 		this.baseDir = baseDir;
 		this.connectionDef = connectionDef;
 		this.runner = new ReplRunner(connectionDef, new ConsoleOutputWriter());

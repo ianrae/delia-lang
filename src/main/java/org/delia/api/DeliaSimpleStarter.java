@@ -2,13 +2,13 @@ package org.delia.api;
 
 import java.io.IOException;
 
-import org.delia.ConnectionStringBuilder;
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
 import org.delia.DeliaLoader;
 import org.delia.DeliaSession;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.log.Log;
 import org.delia.zdb.mem.MemDBInterfaceFactory;
 
@@ -38,7 +38,7 @@ public class DeliaSimpleStarter {
 	}
 	
 	public DeliaGenericDao createDao() {
-		ConnectionString info = ConnectionStringBuilder.createMEM();
+		ConnectionDefinition info = ConnectionDefinitionBuilder.createMEM();
 		this.delia = DeliaBuilder.withConnection(info).build();
 		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();

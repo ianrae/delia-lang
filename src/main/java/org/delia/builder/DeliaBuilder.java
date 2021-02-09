@@ -5,7 +5,7 @@ import org.delia.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -22,7 +22,7 @@ import org.delia.zdb.DBInterfaceFactory;
 public class DeliaBuilder {
 	private static DeliaBuilder theSingleton;
 //	private ConnectionInfo info;
-	private ConnectionString connStr;
+	private ConnectionDefinition connStr;
 	private Log log;
 	private LogFactory logFactory;
 	private DBType dbType;
@@ -32,7 +32,7 @@ public class DeliaBuilder {
 //		theSingleton.info = info;
 //		return theSingleton;
 //	}
-	public static DeliaBuilder withConnection(ConnectionString connStr) {
+	public static DeliaBuilder withConnection(ConnectionDefinition connStr) {
 		theSingleton = new DeliaBuilder();
 		theSingleton.connStr = connStr;
 		theSingleton.dbType = connStr.dbType;

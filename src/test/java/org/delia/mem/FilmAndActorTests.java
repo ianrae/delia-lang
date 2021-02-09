@@ -3,7 +3,7 @@ package org.delia.mem;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.ConnectionStringBuilder;
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
@@ -14,7 +14,7 @@ import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.dataimport.ImportTool;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.type.DValue;

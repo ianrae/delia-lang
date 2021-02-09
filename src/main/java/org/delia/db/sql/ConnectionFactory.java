@@ -15,7 +15,7 @@ import org.delia.db.DBErrorConverter;
 public interface ConnectionFactory {
 
 	Connection createConnection();
-	ConnectionString getConnectionString();
+	ConnectionDefinition getConnectionString();
 	void setErrorConverter(DBErrorConverter errorConverter);
 	String getConnectionSummary();
 }

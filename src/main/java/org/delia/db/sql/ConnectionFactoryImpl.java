@@ -16,13 +16,13 @@ import org.delia.log.Log;
  */
 public class ConnectionFactoryImpl implements ConnectionFactory {
 	
-	public ConnectionString connectionString;
+	public ConnectionDefinition connectionString;
 	private DBErrorConverter errorConverter;
 	private Log log;
 	private boolean haveLoggedJDBC = false;
 	private DataSource ds;
 	
-	public ConnectionFactoryImpl(ConnectionString connStr, Log log) {
+	public ConnectionFactoryImpl(ConnectionDefinition connStr, Log log) {
 		this.connectionString = connStr;
 		this.ds = connStr.ds; //if null then use jdbcUrl
 		this.log = log;
@@ -50,7 +50,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	}
 
 	@Override
-	public ConnectionString getConnectionString() {
+	public ConnectionDefinition getConnectionString() {
 		return this.connectionString;
 	}
 

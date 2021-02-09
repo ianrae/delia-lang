@@ -1,12 +1,12 @@
 package org.delia.db.postgres;
 
 import org.delia.db.DBType;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 
 public class PostgresConnectionHelper {
 	
-	public static ConnectionString getTestDB() {
-		ConnectionString connStr = new ConnectionString();
+	public static ConnectionDefinition getTestDB() {
+		ConnectionDefinition connStr = new ConnectionDefinition();
 		connStr.jdbcUrl = "jdbc:postgresql://localhost/delia";
 		
 		connStr.dbType = DBType.POSTGRES;
