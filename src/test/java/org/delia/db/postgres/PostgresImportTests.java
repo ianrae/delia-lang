@@ -8,14 +8,13 @@ import org.delia.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
+import org.delia.db.sql.ConnectionString;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
@@ -107,8 +106,8 @@ public class PostgresImportTests  extends BDDBase {
 	
 	
 	private Delia createDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.POSTGRES).connectionString(PostgresConnectionHelper.getTestDB()).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = PostgresConnectionHelper.getTestDB();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		return delia;
 	}
 

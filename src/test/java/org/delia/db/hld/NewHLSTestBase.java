@@ -7,13 +7,12 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
@@ -26,6 +25,7 @@ import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
+import org.delia.db.sql.ConnectionString;
 import org.delia.hld.HLDBuildService;
 import org.delia.hld.HLDBuildServiceImpl;
 import org.delia.hld.HLDQueryStatement;
@@ -210,8 +210,8 @@ public class NewHLSTestBase extends BDDBase {
 	//---
 
 	protected DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		this.delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;

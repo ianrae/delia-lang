@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.api.MigrationAction;
@@ -13,6 +14,7 @@ import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.db.schema.MigrationPlan;
+import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
 import org.delia.log.LoggableBlob;
 import org.delia.log.SimpleLog;
@@ -80,7 +82,8 @@ public class ReplRunner  {
 
 	public void restart(DeliaSession externalDeliaSession) {
 		if (externalDeliaSession == null) {
-			this.delia = DeliaBuilder.withConnection(connectionInfo).build();
+			ConnectionString connStr = ConnectionStringBuilder.create(connectionInfo);
+			this.delia = DeliaBuilder.withConnection(connStr).build();
 		} else {
 			this.delia = externalDeliaSession.getDelia();
 			this.mostRecentSess = externalDeliaSession;

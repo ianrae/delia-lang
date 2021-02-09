@@ -3,12 +3,14 @@ package org.delia.dataimport;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.db.DBType;
+import org.delia.db.sql.ConnectionString;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
@@ -59,8 +61,8 @@ public class CSVImportService  {
 
 	public InputFunctionResult dryRunLevel1(String csvPath, String deliaSrc, String typeName, 
 				String inputFunctionName, Options options) {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		if (options.logLevel != null) {
 			delia.getLog().setLevel(options.logLevel);
 		}
@@ -85,8 +87,8 @@ public class CSVImportService  {
 	}
 
 	public List<InputFunctionResult> dryRunLevel2(List<ImportGroupSpec> groupList, String deliaSrc, Options options) {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
@@ -116,8 +118,8 @@ public class CSVImportService  {
 
 	public List<InputFunctionResult> dryRunLevel3(List<ImportGroupSpec> groupList, String deliaSrc,
 			ExternalDataLoader externalLoader, Options options) {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 

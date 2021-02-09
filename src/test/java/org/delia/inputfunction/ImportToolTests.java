@@ -6,16 +6,12 @@ import java.util.List;
 
 import org.delia.Delia;
 import org.delia.DeliaSession;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupBuilder;
 import org.delia.dataimport.ImportLevel;
 import org.delia.dataimport.ImportTool;
-import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.ExternalDataLoader;
@@ -28,8 +24,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	
 	@Test
 	public void testTool1Category() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = createNewDelia();
 		String src = createCategorySrc(false);
 		buildSrc(delia, src);
 		
@@ -54,8 +49,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	
 	@Test
 	public void testTool1ProductSource() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = createNewDelia();
 		String src = createCategorySrc(false);
 		buildSrc(delia, src);
 		
@@ -91,8 +85,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	}
 	
 	private Delia initDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = createNewDelia();
 		String src = createCategorySrc(false);
 		src += " " + createProductSrc();
 		buildSrc(delia, src);
@@ -182,8 +175,7 @@ public class ImportToolTests extends InputFunctionTestBase {
 	}
 
 	private ExternalDataLoader createExternalLoader() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia externalDelia = DeliaBuilder.withConnection(info).build();
+		Delia externalDelia = createNewDelia();
 		
 		String src = createCategorySrc(false);
 		src += " " + createProductSrc();

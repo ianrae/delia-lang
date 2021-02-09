@@ -5,14 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.Delia;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
-import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
@@ -203,11 +198,6 @@ public class DataImportServiceTests extends InputFunctionTestBase {
 		src += String.format(" let var1 = 55");
 
 		return src;
-	}
-	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
 	}
 	private InputFunctionResult buildAndRun(String tlang, LineObjIterator lineObjIter) {
 		createDelia(tlang);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
@@ -17,6 +18,7 @@ import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
+import org.delia.db.sql.ConnectionString;
 import org.delia.error.DeliaError;
 import org.delia.typebuilder.PreTypeRegistry;
 import org.delia.typebuilder.TypePreRunner;
@@ -106,8 +108,8 @@ public class TypePreScannerTests extends BDDBase {
 	}
 
 	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		return new DeliaGenericDao(delia);
 	}
 

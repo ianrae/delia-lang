@@ -96,8 +96,7 @@ public class CSVImportServiceTests extends InputFunctionTestBase {
 	}
 	
 	private ExternalDataLoader createExternalLoader() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia externalDelia = DeliaBuilder.withConnection(info).build();
+		Delia externalDelia = createNewDelia();
 		
 		String srcPath = IMPORT_DIR + "product-and-category.txt";
 		TextFileReader reader = new TextFileReader();
@@ -130,8 +129,7 @@ public class CSVImportServiceTests extends InputFunctionTestBase {
 		CSVImportService csvSvc = new CSVImportService();
 		
 		//mem in this test but would normally be a real database
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = createNewDelia();
 		
 		List<InputFunctionResult> resultL = csvSvc.importIntoDatabase(groupList, deliaSrc, delia);
 		csvSvc.dumpReports(resultL);

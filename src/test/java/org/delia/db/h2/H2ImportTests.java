@@ -8,8 +8,6 @@ import org.delia.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
@@ -17,6 +15,7 @@ import org.delia.dataimport.ImportGroupSpec;
 import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.h2.test.H2TestCleaner;
+import org.delia.db.sql.ConnectionString;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
@@ -113,8 +112,11 @@ public class H2ImportTests  extends BDDBase {
 	}
 	
 	private Delia createDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB()).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = H2ConnectionHelper.getTestDB();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
+		
+//		ConnectionInfo info = ConnectionBuilder.dbType(DBType.H2).connectionString(H2ConnectionHelper.getTestDB();
+//		Delia delia = DeliaBuilder.withConnection(info).build();
 		this.observerFactory = new CollectingObserverFactory();
 		delia.getOptions().dbObserverFactory = observerFactory;
 		delia.getOptions().observeHLDSQLOnly = false;

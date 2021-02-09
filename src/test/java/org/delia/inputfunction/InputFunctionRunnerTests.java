@@ -5,16 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.Delia;
 import org.delia.DeliaSession;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionDefStatementExp;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.DBType;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
@@ -226,11 +221,5 @@ public class InputFunctionRunnerTests extends InputFunctionTestBase {
 		src += " input function foo(Customer c) { ID -> c.id using { LINENUM }, WID -> c.wid, NAME -> c.name}";
 		
 		return src;
-	}
-
-	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
 	}
 }

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import org.delia.db.DBErrorConverter;
 import org.delia.log.Log;
 
@@ -18,9 +20,11 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	private DBErrorConverter errorConverter;
 	private Log log;
 	private boolean haveLoggedJDBC = false;
+	private DataSource ds;
 	
 	public ConnectionFactoryImpl(ConnectionString connStr, Log log) {
 		this.connectionString = connStr;
+		this.ds = connStr.ds; //if null then use jdbcUrl
 		this.log = log;
 	}
 
@@ -33,7 +37,12 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 				log.log("JDBC: url: %s", connectionString.jdbcUrl);
 				log.log("JDBC: user: %s, pwd: %s", connectionString.userName, connectionString.pwd);
 			}
-			conn = DriverManager.getConnection(connectionString.jdbcUrl, connectionString.userName, connectionString.pwd);
+			
+			if (ds != null) {
+				conn = ds.getConnection(connectionString.userName, connectionString.pwd);
+			} else {
+				conn = DriverManager.getConnection(connectionString.jdbcUrl, connectionString.userName, connectionString.pwd);
+			}
 		} catch (SQLException e) {
 			errorConverter.convertAndRethrowException(e);
 		}      

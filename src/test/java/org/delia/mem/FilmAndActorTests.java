@@ -3,6 +3,7 @@ package org.delia.mem;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
@@ -16,6 +17,7 @@ import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.dataimport.ImportTool;
 import org.delia.db.DBType;
+import org.delia.db.sql.ConnectionString;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.type.DValue;
@@ -138,8 +140,8 @@ public class FilmAndActorTests  extends BDDBase {
 	
 	
 	private Delia createDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		Delia delia = DeliaBuilder.withConnection(connStr).build();
 		return delia;
 	}
 	// --

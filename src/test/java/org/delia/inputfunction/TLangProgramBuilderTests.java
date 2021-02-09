@@ -2,10 +2,6 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.Delia;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;
 import org.delia.compiler.ast.inputfunction.InputFunctionBodyExp;
@@ -14,7 +10,6 @@ import org.delia.compiler.parser.InputFunctionParser;
 import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.TerminalParser;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.DBType;
 import org.delia.runner.DeliaException;
 import org.delia.tlang.TLangProgramBuilder;
 import org.delia.tlang.runner.TLangProgram;
@@ -95,13 +90,6 @@ public class TLangProgramBuilderTests extends InputFunctionTestBase {
 		return src;
 	}
 
-	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
-	}
-	
-	
 	private InputFunctionDefStatementExp parse(String src) {
 		log.log(src);
 		NameAndFuncParser.initLazy();

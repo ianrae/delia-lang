@@ -2,7 +2,6 @@ package org.delia.app;
 
 import org.delia.Delia;
 import org.delia.DeliaSession;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
@@ -17,8 +16,8 @@ public class TypeDao {
 	private DeliaGenericDao innerDao;
 	protected String typeName;
 	
-	public TypeDao(String typeName, ConnectionInfo info) {
-		this(typeName, DeliaBuilder.withConnection(info).build());
+	public TypeDao(String typeName, ConnectionString connStr) {
+		this(typeName, DeliaBuilder.withConnection(connStr).build());
 	}
 	public TypeDao(String typeName, Delia delia) {
 		this.typeName = typeName;

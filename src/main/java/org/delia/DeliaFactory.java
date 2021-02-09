@@ -1,5 +1,7 @@
 package org.delia;
 
+import javax.sql.DataSource;
+
 import org.delia.api.DeliaImpl;
 import org.delia.builder.ConnectionInfo;
 import org.delia.core.FactoryService;
@@ -24,21 +26,21 @@ import org.delia.zdb.postgres.PostgresDBInterfaceFactory;
  */
 public class DeliaFactory {
 	//normally you don't need to provide a customer HLDFactory
-	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc) {
-		return create(info, log, factorySvc, new HLDFactoryImpl());
-	}
+//	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc) {
+//		return create(info, log, factorySvc, new HLDFactoryImpl());
+//	}
 	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc) {
 		return create(connectionString, dbType, log, factorySvc, new HLDFactoryImpl());
 	}
 	
 	//and now same methods with HLDFactory
-	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
-		ConnectionString connectionString = new ConnectionString();
-		connectionString.jdbcUrl = info.jdbcUrl;
-		connectionString.pwd = info.password;
-		connectionString.userName = info.userName;
-		return create(connectionString, info.dbType, log, factorySvc, hldFactory);
-	}
+//	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
+//		ConnectionString connectionString = new ConnectionString();
+//		connectionString.jdbcUrl = info.jdbcUrl;
+//		connectionString.pwd = info.password;
+//		connectionString.userName = info.userName;
+//		return create(connectionString, info.dbType, log, factorySvc, hldFactory);
+//	}
 	public static Delia create(ConnectionString connectionString, DBType dbType, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
 		ConnectionFactory connFactory = new ConnectionFactoryImpl(connectionString, log);
 		

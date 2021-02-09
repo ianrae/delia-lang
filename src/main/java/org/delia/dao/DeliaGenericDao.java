@@ -1,10 +1,9 @@
 package org.delia.dao;
 
+import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaFactory;
 import org.delia.DeliaSession;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
@@ -35,16 +34,15 @@ public class DeliaGenericDao  {
 	private BlobLoader blobLoader;
 	
 	public DeliaGenericDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		ConnectionString connStr = ConnectionStringBuilder.createMEM();
+		this.delia = DeliaBuilder.withConnection(connStr).build();
 		this.dbInterface = delia.getDBInterface();
 		this.factorySvc = delia.getFactoryService();
-		this.delia = delia;
 	}
 	
-	public DeliaGenericDao(ConnectionInfo info) {
-		this(DeliaBuilder.withConnection(info).build());
-	}
+//	public DeliaGenericDao(ConnectionInfo info) {
+//		this(DeliaBuilder.withConnection(info).build());
+//	}
 	public DeliaGenericDao(Delia delia) {
 		this.dbInterface = delia.getDBInterface();
 		this.factorySvc = delia.getFactoryService();

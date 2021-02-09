@@ -21,21 +21,21 @@ import org.delia.zdb.DBInterfaceFactory;
  */
 public class DeliaBuilder {
 	private static DeliaBuilder theSingleton;
-	private ConnectionInfo info;
+//	private ConnectionInfo info;
 	private ConnectionString connStr;
 	private Log log;
 	private LogFactory logFactory;
 	private DBType dbType;
 	
-	public static DeliaBuilder withConnection(ConnectionInfo info) {
-		theSingleton = new DeliaBuilder();
-		theSingleton.info = info;
-		return theSingleton;
-	}
-	public static DeliaBuilder withConnection(ConnectionString connStr, DBType dbType) {
+//	public static DeliaBuilder withConnection(ConnectionInfo info) {
+//		theSingleton = new DeliaBuilder();
+//		theSingleton.info = info;
+//		return theSingleton;
+//	}
+	public static DeliaBuilder withConnection(ConnectionString connStr) {
 		theSingleton = new DeliaBuilder();
 		theSingleton.connStr = connStr;
-		theSingleton.dbType = dbType;
+		theSingleton.dbType = connStr.dbType;
 		return theSingleton;
 	}
 	public DeliaBuilder log(Log log) {
@@ -57,13 +57,13 @@ public class DeliaBuilder {
 		}
 		ErrorTracker et = new SimpleErrorTracker(log);
 		FactoryService factorySvc = new FactoryServiceImpl(log, et, logFactory);
-		if (info != null) {
-			Delia delia = DeliaFactory.create(info, log, factorySvc);
-			return delia;
-		} else {
+//		if (info != null) {
+//			Delia delia = DeliaFactory.create(info, log, factorySvc);
+//			return delia;
+//		} else {
 			Delia delia = DeliaFactory.create(connStr, dbType, log, factorySvc);
 			return delia;
-		}
+//		}
 	}
 
 	/**
