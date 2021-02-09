@@ -1,5 +1,6 @@
-package org.delia.api;
+package org.delia;
 
+import org.delia.api.DeliaImpl;
 import org.delia.builder.ConnectionInfo;
 import org.delia.core.FactoryService;
 import org.delia.db.DBType;

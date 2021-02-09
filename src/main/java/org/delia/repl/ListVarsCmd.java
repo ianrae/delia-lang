@@ -3,7 +3,7 @@ package org.delia.repl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.runner.ResultValue;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DValue;

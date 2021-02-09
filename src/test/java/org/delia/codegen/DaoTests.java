@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.app.DaoTestBase;
 import org.delia.codegen.sample.Flight;
 import org.delia.codegen.sample.FlightEntity;

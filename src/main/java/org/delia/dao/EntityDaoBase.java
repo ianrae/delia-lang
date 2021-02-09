@@ -3,8 +3,8 @@ package org.delia.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.codegen.DeliaEntity;
 import org.delia.codegen.DeliaImmutable;
 import org.delia.core.ServiceBase;

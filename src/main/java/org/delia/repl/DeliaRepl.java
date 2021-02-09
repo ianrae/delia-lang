@@ -3,7 +3,7 @@ package org.delia.repl;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.builder.ConnectionInfo;
 import org.delia.runner.ResultValue;
 

@@ -1,7 +1,7 @@
 package org.delia.runner.inputfunction;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 
 public class InputFunctionRequest {
 	public ProgramSet progset;

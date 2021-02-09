@@ -1,5 +1,6 @@
-package org.delia.api;
+package org.delia;
 
+import org.delia.api.MigrationAction;
 import org.delia.zdb.DBObserverFactory;
 
 /**

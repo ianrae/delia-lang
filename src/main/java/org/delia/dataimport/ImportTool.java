@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.core.ServiceBase;
 import org.delia.db.sql.StrCreator;
 import org.delia.db.sql.table.ListWalker;

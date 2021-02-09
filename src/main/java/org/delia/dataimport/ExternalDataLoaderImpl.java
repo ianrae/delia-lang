@@ -1,6 +1,6 @@
 package org.delia.dataimport;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;

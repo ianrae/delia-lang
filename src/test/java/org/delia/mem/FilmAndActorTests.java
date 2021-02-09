@@ -3,8 +3,8 @@ package org.delia.mem;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;

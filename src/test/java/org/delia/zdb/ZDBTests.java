@@ -2,8 +2,8 @@ package org.delia.zdb;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLogFactory;
 import org.delia.bdd.BDDBase;

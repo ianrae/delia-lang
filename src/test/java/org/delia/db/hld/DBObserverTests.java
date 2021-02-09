@@ -7,8 +7,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;

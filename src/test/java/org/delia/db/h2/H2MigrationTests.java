@@ -2,7 +2,7 @@ package org.delia.db.h2;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.DeliaFactory;
+import org.delia.DeliaFactory;
 import org.delia.base.DBTestHelper;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;

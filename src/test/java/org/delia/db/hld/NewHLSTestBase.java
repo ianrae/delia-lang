@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
 import org.delia.bdd.BDDBase;

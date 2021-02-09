@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.db.DBType;
 
 public class BDDHelper  {

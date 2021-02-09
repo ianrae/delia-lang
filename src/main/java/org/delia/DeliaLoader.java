@@ -1,4 +1,4 @@
-package org.delia.api;
+package org.delia;
 
 import java.io.File;
 import java.io.IOException;

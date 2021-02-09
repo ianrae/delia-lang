@@ -2,7 +2,7 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.api.DeliaImpl;
 import org.delia.base.FakeTypeCreator;
 import org.delia.base.UnitTestLog;

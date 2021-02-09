@@ -2,7 +2,7 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;

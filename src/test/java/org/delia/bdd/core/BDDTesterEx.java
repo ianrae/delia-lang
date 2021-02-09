@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.checker.BDDResult;
 import org.delia.bdd.core.checker.BoolChecker;

@@ -1,7 +1,8 @@
-package org.delia.api;
+package org.delia;
 
 import java.time.ZoneId;
 
+import org.delia.api.RunnerInitializer;
 import org.delia.assoc.DatIdMap;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;

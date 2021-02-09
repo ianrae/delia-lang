@@ -1,7 +1,7 @@
 package org.delia.app;
 
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.bdd.MemBDDBase;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;

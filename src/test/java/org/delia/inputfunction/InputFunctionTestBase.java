@@ -2,8 +2,8 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;

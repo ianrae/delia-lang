@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;

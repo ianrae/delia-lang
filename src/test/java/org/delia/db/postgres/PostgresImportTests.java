@@ -3,8 +3,8 @@ package org.delia.db.postgres;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;

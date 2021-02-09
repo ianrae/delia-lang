@@ -3,8 +3,8 @@ package org.delia.db.sizeof;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
 import org.delia.base.UnitTestLog;

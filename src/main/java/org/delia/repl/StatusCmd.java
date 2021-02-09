@@ -1,7 +1,7 @@
 package org.delia.repl;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.DBInterfaceFactory;

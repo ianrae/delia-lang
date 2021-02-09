@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
 import org.delia.builder.ConnectionBuilder;

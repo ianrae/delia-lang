@@ -2,9 +2,9 @@ package org.delia.scope.scopetest.relation;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaFactory;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaFactory;
+import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryServiceImpl;

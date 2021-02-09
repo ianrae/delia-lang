@@ -1,7 +1,7 @@
 package org.delia.builder;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaFactory;
+import org.delia.Delia;
+import org.delia.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.DBType;

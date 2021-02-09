@@ -1,6 +1,6 @@
 package org.delia.repl;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.db.DBType;
 import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlStatement;

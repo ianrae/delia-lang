@@ -3,7 +3,7 @@ package org.delia.hld;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;

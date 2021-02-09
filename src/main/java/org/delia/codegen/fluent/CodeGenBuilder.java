@@ -5,8 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-import org.delia.api.DeliaLoader;
-import org.delia.api.DeliaSession;
+import org.delia.DeliaLoader;
+import org.delia.DeliaSession;
 import org.delia.api.DeliaSimpleStarter;
 import org.delia.codegen.CodeGeneratorService;
 import org.delia.codegen.generators.DaoBaseCodeGen;

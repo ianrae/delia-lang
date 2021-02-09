@@ -4,6 +4,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.runner.ExecutionState;

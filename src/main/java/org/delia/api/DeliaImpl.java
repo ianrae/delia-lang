@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.delia.Delia;
+import org.delia.DeliaOptions;
+import org.delia.DeliaSession;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;

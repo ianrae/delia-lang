@@ -2,6 +2,9 @@ package org.delia.api;
 
 import java.io.IOException;
 
+import org.delia.Delia;
+import org.delia.DeliaLoader;
+import org.delia.DeliaSession;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;

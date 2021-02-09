@@ -2,6 +2,7 @@ package org.delia.api;
 
 import java.util.List;
 
+import org.delia.DeliaOptions;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
 import org.delia.core.FactoryService;
