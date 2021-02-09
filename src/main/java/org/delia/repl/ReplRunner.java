@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.api.MigrationAction;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
@@ -45,21 +43,23 @@ public class ReplRunner  {
 
 	private MigrationPlan currentMigrationPlan;
 
-	private ConnectionInfo connectionInfo;
+//	private ConnectionInfo connectionInfo;
 
 	private String sessionName;
 
 	protected ReplOutputWriter outWriter;
+
+	private ConnectionString connectionDef;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
 
-	public ReplRunner(ConnectionInfo info, ReplOutputWriter outWriter) {
-		this.connectionInfo = info;
+	public ReplRunner(ConnectionString connDef, ReplOutputWriter outWriter) {
+		this.connectionDef = connDef;
 		this.outWriter = outWriter;
 		addAllCmds();
 		restart(null);
 	}
 	public ReplRunner(DeliaSession externalDeliaSession, ReplOutputWriter outWriter) {
-		this.connectionInfo = null; //TODO: will this be a problem?
+		this.connectionDef = null; //TODO: will this be a problem?
 		this.outWriter = outWriter;
 		addAllCmds();
 		restart(externalDeliaSession);
@@ -82,8 +82,7 @@ public class ReplRunner  {
 
 	public void restart(DeliaSession externalDeliaSession) {
 		if (externalDeliaSession == null) {
-			ConnectionString connStr = ConnectionStringBuilder.create(connectionInfo);
-			this.delia = DeliaBuilder.withConnection(connStr).build();
+			this.delia = DeliaBuilder.withConnection(connectionDef).build();
 		} else {
 			this.delia = externalDeliaSession.getDelia();
 			this.mostRecentSess = externalDeliaSession;

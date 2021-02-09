@@ -3,15 +3,9 @@ package org.delia.dataimport;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.db.DBType;
-import org.delia.db.sql.ConnectionString;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.GroupPair;
