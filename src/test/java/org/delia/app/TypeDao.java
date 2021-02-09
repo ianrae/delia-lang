@@ -5,7 +5,6 @@ import org.delia.DeliaSession;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
@@ -28,9 +27,9 @@ public class TypeDao {
 		this.innerDao = new DeliaGenericDao(delia, session);
 	}
 
-	public TypeDao(String typeName, ConnectionDefinition connString, DBType dbType, Log log) {
+	public TypeDao(String typeName, ConnectionDefinition connString, Log log) {
 		this.typeName = typeName;
-		this.innerDao = new DeliaGenericDao(connString, dbType, log);
+		this.innerDao = new DeliaGenericDao(connString, log);
 	}
 
 	public boolean initialize(String src) {

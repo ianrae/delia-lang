@@ -7,7 +7,6 @@ import org.delia.DeliaSession;
 import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
@@ -55,10 +54,10 @@ public class DeliaGenericDao  {
 		this.mostRecentSess = session;
 	}
 
-	public DeliaGenericDao(ConnectionDefinition connString, DBType dbType, Log log) {
+	public DeliaGenericDao(ConnectionDefinition connString, Log log) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		this.factorySvc = new FactoryServiceImpl(log, et);
-		delia = DeliaFactory.create(connString, dbType, log, factorySvc);
+		delia = DeliaFactory.create(connString, log, factorySvc);
 	}
 
 	public boolean initialize(String src) {

@@ -1,14 +1,11 @@
 package org.delia;
 
-import javax.sql.DataSource;
-
 import org.delia.api.DeliaImpl;
-import org.delia.builder.ConnectionInfo;
 import org.delia.core.FactoryService;
 import org.delia.db.DBType;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
-import org.delia.db.sql.ConnectionDefinition;
 import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.Log;
@@ -29,8 +26,8 @@ public class DeliaFactory {
 //	public static Delia create(ConnectionInfo info, Log log, FactoryService factorySvc) {
 //		return create(info, log, factorySvc, new HLDFactoryImpl());
 //	}
-	public static Delia create(ConnectionDefinition connectionString, DBType dbType, Log log, FactoryService factorySvc) {
-		return create(connectionString, dbType, log, factorySvc, new HLDFactoryImpl());
+	public static Delia create(ConnectionDefinition connectionString, Log log, FactoryService factorySvc) {
+		return create(connectionString, log, factorySvc, new HLDFactoryImpl());
 	}
 	
 	//and now same methods with HLDFactory
@@ -41,11 +38,11 @@ public class DeliaFactory {
 //		connectionString.userName = info.userName;
 //		return create(connectionString, info.dbType, log, factorySvc, hldFactory);
 //	}
-	public static Delia create(ConnectionDefinition connectionString, DBType dbType, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
-		ConnectionFactory connFactory = new ConnectionFactoryImpl(connectionString, log);
+	public static Delia create(ConnectionDefinition connectionDef, Log log, FactoryService factorySvc, HLDFactory hldFactory) {
+		ConnectionFactory connFactory = new ConnectionFactoryImpl(connectionDef, log);
 		
 		DBInterfaceFactory dbInterface = null;
-		switch(dbType) {
+		switch(connectionDef.dbType) {
 		case MEM:
 			dbInterface = new MemDBInterfaceFactory(factorySvc, hldFactory);
 			break;
@@ -56,7 +53,7 @@ public class DeliaFactory {
 			dbInterface = new PostgresDBInterfaceFactory(factorySvc, hldFactory, connFactory);
 			break;
 		default:
-			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", dbType == null ? "null" : dbType.name());
+			DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", connectionDef.dbType == null ? "null" : connectionDef.dbType.name());
 			break;
 		}
 		return create(dbInterface, log, factorySvc);

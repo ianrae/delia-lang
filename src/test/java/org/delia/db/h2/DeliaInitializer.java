@@ -1,7 +1,5 @@
 package org.delia.db.h2;
 
-import static org.junit.Assert.assertEquals;
-
 import org.delia.Delia;
 import org.delia.DeliaFactory;
 import org.delia.assoc.DatIdMap;
@@ -13,8 +11,6 @@ import org.delia.db.DBType;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.hld.HLDFactory;
-import org.delia.hld.HLDFactoryImpl;
 import org.delia.log.Log;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DoNothingVarEvaluator;
@@ -62,7 +58,7 @@ public class DeliaInitializer {
 		break;
 		case H2:
 		{
-			Delia deliaTmp = DeliaFactory.create(H2ConnectionHelper.getTestDB(), DBType.H2, log, factorySvc);
+			Delia deliaTmp = DeliaFactory.create(H2ConnectionHelper.getTestDB(), log, factorySvc);
 			dbInterface = deliaTmp.getDBInterface(); //new H2DBInterface(factorySvc, H2ConnectionHelper.getTestDB());
 //			dbInterface.init(factorySvc);
 			
