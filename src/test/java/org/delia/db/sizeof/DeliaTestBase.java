@@ -3,15 +3,13 @@ package org.delia.db.sizeof;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
+import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.sql.ConnectionString;
 import org.delia.log.Log;
 import org.delia.runner.BlobLoader;
 import org.delia.runner.DeliaException;
@@ -54,8 +52,7 @@ public abstract class DeliaTestBase  {
 	}
 	
 	protected DeliaGenericDao createDao() {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		this.delia = DeliaBuilder.withConnection(connStr).build();
+		this.delia = DBTestHelper.createNewDelia();
 		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;

@@ -2,17 +2,14 @@ package org.delia.inputfunction;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.app.NorthwindHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
-import org.delia.db.sql.ConnectionString;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObjIterator;
 import org.delia.zdb.DBInterfaceFactory;
@@ -28,8 +25,7 @@ public class InputFunctionTestBase  extends BDDBase {
 	protected int numExpectedColumnsProcessed;
 	
 	protected Delia createNewDelia() {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		return DeliaBuilder.withConnection(connStr).build();
+		return DBTestHelper.createNewDelia();
 	}
 	protected DeliaGenericDao createDao() {
 		this.delia = createNewDelia();

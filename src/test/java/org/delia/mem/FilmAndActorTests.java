@@ -137,8 +137,7 @@ public class FilmAndActorTests  extends BDDBase {
 	
 	
 	private Delia createDelia() {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		Delia delia = DeliaBuilder.withConnection(connStr).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		return delia;
 	}
 	// --

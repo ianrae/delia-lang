@@ -6,6 +6,7 @@ import java.util.List;
 import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
+import org.delia.base.DBTestHelper;
 import org.delia.builder.ConnectionBuilder;
 import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
@@ -61,8 +62,7 @@ public class CSVImportService  {
 
 	public InputFunctionResult dryRunLevel1(String csvPath, String deliaSrc, String typeName, 
 				String inputFunctionName, Options options) {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		Delia delia = DeliaBuilder.withConnection(connStr).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		if (options.logLevel != null) {
 			delia.getLog().setLevel(options.logLevel);
 		}
@@ -87,8 +87,7 @@ public class CSVImportService  {
 	}
 
 	public List<InputFunctionResult> dryRunLevel2(List<ImportGroupSpec> groupList, String deliaSrc, Options options) {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		Delia delia = DeliaBuilder.withConnection(connStr).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
@@ -118,8 +117,7 @@ public class CSVImportService  {
 
 	public List<InputFunctionResult> dryRunLevel3(List<ImportGroupSpec> groupList, String deliaSrc,
 			ExternalDataLoader externalLoader, Options options) {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		Delia delia = DeliaBuilder.withConnection(connStr).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		this.session = delia.beginSession(deliaSrc);
 		
 		importSvc = createDataImportService(options); 
