@@ -7,14 +7,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
 import org.delia.DeliaSession;
+import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.SqlStatement;
-import org.delia.db.sql.ConnectionString;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.CollectingObserverFactory;
 import org.delia.zdb.DBConnectionObserverAdapter;
@@ -119,9 +117,7 @@ public class DBObserverTests extends BDDBase {
 		this.delia = dao.getDelia();
 	}
 	private DeliaGenericDao createDao() {
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		Delia delia = DeliaBuilder.withConnection(connStr).build();
-		return new DeliaGenericDao(delia);
+		return DBTestHelper.createDao();
 	}
 
 	private String buildSrc(String additionalSrc) {

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 
 import org.delia.ConnectionStringBuilder;
 import org.delia.Delia;
+import org.delia.base.DBTestHelper;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.sql.ConnectionString;
@@ -188,11 +189,8 @@ public class DeliaDaoTests extends DaoTestBase {
 	public void testStandardLog() {
 		String src = buildSrc();
 		
-		StandardLogFactory logFactory = new StandardLogFactory();
-		Log slog = logFactory.create(this.getClass());
-		ConnectionString connStr = ConnectionStringBuilder.createMEM();
-		Delia delia = DeliaBuilder.withConnection(connStr).build();
-		DeliaGenericDao dao = new DeliaGenericDao(delia);
+		//TODO: fix this. where is the log???
+		DeliaGenericDao dao = DBTestHelper.createDao();
 		
 		boolean b = dao.initialize(src);
 		assertEquals(true, b);
