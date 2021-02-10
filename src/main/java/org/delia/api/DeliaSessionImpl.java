@@ -6,9 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.Delia;
 import org.delia.DeliaSession;
+import org.delia.app.LambdaTests.DoNothingTransactionProvider;
+import org.delia.app.LambdaTests.DoSomething3;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
+import org.delia.db.transaction.TransactionBody;
 import org.delia.db.transaction.TransactionProvider;
+import org.delia.db.transaction.VoidTransactionBody;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
@@ -115,8 +119,30 @@ public class DeliaSessionImpl implements DeliaSession {
 	}
 
 	@Override
-	public TransactionProvider createTransaction() {
-		return delia.getFactoryService().createTransactionProvider();
+	public <T> T runInTransaction(TransactionBody<T> body) {
+		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider();
+		transProvider.beginTransaction();
+		T res = null;
+		try {
+			res = body.doSomething();
+			transProvider.commitTransaction();
+		} catch(Exception e) {
+			transProvider.rollbackTransaction();
+			throw e;
+		}
+		return res;
 	}
-	
+
+	@Override
+	public void runInTransactionVoid(VoidTransactionBody body) {
+		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider();
+		transProvider.beginTransaction();
+		try {
+			body.doSomething();
+			transProvider.commitTransaction();
+		} catch(Exception e) {
+			transProvider.rollbackTransaction();
+			throw e;
+		}
+	}
 }

@@ -2,6 +2,7 @@ package org.delia.db.transaction;
 
 import static org.junit.Assert.assertEquals;
 
+import org.delia.DeliaSession;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -18,19 +19,26 @@ public class TransactionTests extends DeliaTestBase {
 		execute(""); //begin cannot run in transaction
 		
 		String src = "let x = Flight[1]";
-		TransactionProvider trans = session.createTransaction();
-		trans.beginTransaction();
-		try {
-			continueExecution(src);
-			trans.commitTransaction();
-		} catch (Exception e) {
-			trans.rollbackTransaction();
-		}
+		DeliaSession tmp = session.runInTransaction(() -> {
+			return continueExecution(src);
+		});
 		DValue dval = session.getFinalResult().getAsDValue();
 		assertEquals(1, dval.asStruct().getField("field1").asInt());
-		assertEquals("sfd", dval.asStruct().getField("field2").asString());
+		assertEquals("abc", dval.asStruct().getField("field2").asString());
 	}	
 	
+	@Test
+	public void testNoReturn() {
+		execute(""); //begin cannot run in transaction
+		
+		String src = "let x = Flight[1]";
+		session.runInTransactionVoid(() -> {
+			continueExecution(src);
+		});
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
+		assertEquals("abc", dval.asStruct().getField("field2").asString());
+	}	
 
 	//-------------------------
 	@Before
