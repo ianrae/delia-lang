@@ -8,6 +8,7 @@ import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
+import org.delia.db.transaction.TransactionProvider;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
@@ -111,6 +112,11 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public DTypeRegistry getRegistry() {
 		return execCtx.registry;
+	}
+
+	@Override
+	public TransactionProvider createTransaction() {
+		return delia.getFactoryService().createTransactionProvider();
 	}
 	
 }

@@ -50,6 +50,13 @@ public abstract class DeliaTestBase  {
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 		return sessimpl;
 	}
+	protected DeliaSessionImpl continueExecution(String src) {
+		log.log("src: %s", src);
+		ResultValue res = delia.continueExecution(src, session);
+		
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		return sessimpl;
+	}
 	
 	protected DeliaGenericDao createDao() {
 		this.delia = DBTestHelper.createNewDelia();

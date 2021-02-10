@@ -4,6 +4,7 @@ import java.time.ZoneId;
 
 import org.delia.api.RunnerInitializer;
 import org.delia.assoc.DatIdMap;
+import org.delia.db.transaction.TransactionProvider;
 import org.delia.runner.ExecutionState;
 import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
@@ -35,4 +36,5 @@ public interface DeliaSession {
 	Runner getMostRecentRunner();
 	DeliaSession createChildSession();
 	ZoneId getDefaultTimezone();
+	TransactionProvider createTransaction();
 }
