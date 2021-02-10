@@ -17,6 +17,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.modify.SxMigrationServiceImpl;
+import org.delia.db.transaction.TransactionProvider;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
@@ -87,7 +88,19 @@ public class DeliaImpl implements Delia {
 		}
 
 		runner.setDatIdMap(datIdMap);
-		res = runner.executeProgram(expL);
+		if (deliaOptions.executeInTransaction) {
+			TransactionProvider tp = factorySvc.createTransactionProvider();
+			tp.beginTransaction();
+			try {
+				res = runner.executeProgram(expL);
+				tp.commitTransaction();
+			} catch (Exception e) {
+				tp.rollbackTransaction();
+			}
+		} else {
+			//normal execution
+			res = runner.executeProgram(expL);
+		}
 		if (res != null && ! res.ok) {
 			List<DeliaError> errL = errorAdjuster.adjustErrors(res.errors);
 			throw new DeliaException(errL);

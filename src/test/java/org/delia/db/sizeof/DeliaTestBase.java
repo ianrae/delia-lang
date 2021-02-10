@@ -30,7 +30,8 @@ public abstract class DeliaTestBase  {
 	protected DeliaSession session;
 	protected Log log = new UnitTestLog();
 	protected BlobLoader blobLoader;
-
+	protected boolean executeInTransaction = false;
+	
 	protected abstract String buildSrc();
 
 	protected DeliaSessionImpl execute(String src) {
@@ -38,11 +39,12 @@ public abstract class DeliaTestBase  {
 		log.log("initial: " + initialSrc);
 		
 		DeliaGenericDao dao = createDao(); 
+		Delia delia = dao.getDelia();
+		delia.getOptions().executeInTransaction = executeInTransaction;
 		dao.setBlobLoader(blobLoader);
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
 
-		Delia delia = dao.getDelia();
 		this.session = dao.getMostRecentSession();
 		log.log("src: %s", src);
 		ResultValue res = delia.continueExecution(src, session);
@@ -52,6 +54,7 @@ public abstract class DeliaTestBase  {
 	}
 	protected DeliaSessionImpl continueExecution(String src) {
 		log.log("src: %s", src);
+		delia.getOptions().executeInTransaction = executeInTransaction;
 		ResultValue res = delia.continueExecution(src, session);
 		
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;

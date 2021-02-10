@@ -39,6 +39,22 @@ public class TransactionTests extends DeliaTestBase {
 		assertEquals(1, dval.asStruct().getField("field1").asInt());
 		assertEquals("abc", dval.asStruct().getField("field2").asString());
 	}	
+	
+	@Test
+	public void testExecute() {
+		executeInTransaction = true;
+		execute(""); //run in transaction
+		executeInTransaction = false;
+
+		String src = "let x = Flight[1]";
+		continueExecution(src);
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
+		assertEquals("abc", dval.asStruct().getField("field2").asString());
+	}	
+	
+	
+	
 
 	//-------------------------
 	@Before

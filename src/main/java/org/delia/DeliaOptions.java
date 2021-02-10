@@ -19,4 +19,5 @@ public class DeliaOptions {
 	public boolean logSourceBeforeCompile; //log all delia source before it is compiled
 	public DBObserverFactory dbObserverFactory;
 	public boolean observeHLDSQLOnly = true;
+	public boolean executeInTransaction = false; //use when want execute()/continueExeuction() in transaction
 }
