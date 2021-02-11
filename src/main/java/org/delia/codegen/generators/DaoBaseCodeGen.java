@@ -44,27 +44,50 @@ public class DaoBaseCodeGen extends CodeGenBase {
 		sc.o(st.render());
 		sc.o("import %s.%s;\n", entityPackageName, typeName);
 		sc.o("import %s.%sImmut;\n", entityPackageName, typeName);
+		sc.o("import %s.%sEntity;\n", entityPackageName, typeName);
 		sc.nl();
 
 		//t2(cname,iname,bname,itname,immutname) ::= <<
-		st = g.getInstanceOf("t2");
-		st.add("cname", typeName + "DaoBase");
-		st.add("iname", typeName);
-		st.add("itname", String.format("<%s>", typeName));
-		st.add("immutname", typeName + "Immut");
-		st.add("asFn", getPKType(structType));
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		if (pkpair == null) {
+			st = g.getInstanceOf("t2");
+			st.add("cname", typeName + "DaoBase");
+			st.add("iname", typeName);
+			st.add("itname", String.format("<%s>", typeName));
+			st.add("immutname", typeName + "Immut");
 
-		if (structType.getBaseType() == null) {
-			st.add("bname", "EntityDaoBase");
+			if (structType.getBaseType() == null) {
+				st.add("bname", "EntityDaoBase");
+			} else {
+//				st.add("bname", structType.getBaseType().getName());
+				st.add("bname", "EntityDaoBase");
+			}
+			sc.addStr(st.render());
+			sc.nl();
+
+			sc.o("}");
+			sc.nl();
 		} else {
-//			st.add("bname", structType.getBaseType().getName());
-			st.add("bname", "EntityDaoBase");
-		}
-		sc.addStr(st.render());
-		sc.nl();
+			st = g.getInstanceOf("t2a");
+			st.add("cname", typeName + "DaoBase");
+			st.add("iname", typeName);
+			st.add("itname", String.format("<%s>", typeName));
+			st.add("immutname", typeName + "Immut");
+			st.add("asFn", getPKType(structType));
+			st.add("pkname", StringUtil.uppify(pkpair.name));
 
-		sc.o("}");
-		sc.nl();
+			if (structType.getBaseType() == null) {
+				st.add("bname", "EntityDaoBase");
+			} else {
+//				st.add("bname", structType.getBaseType().getName());
+				st.add("bname", "EntityDaoBase");
+			}
+			sc.addStr(st.render());
+			sc.nl();
+
+			sc.o("}");
+			sc.nl();
+		}
 
 		return sc.toString();
 	}
