@@ -3,8 +3,8 @@ package org.delia.db.transaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.delia.db.DBType;
 import org.delia.log.Log;
-import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBConnectionInternal;
 import org.delia.zdb.DBInterfaceFactory;
 
@@ -25,8 +25,13 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	@Override
 	public void beginTransaction() {
 		log.log("beginTransaction..");
-		transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+		if (transAwareDBInterface == null) {
+			transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+		}
 		transAwareDBInterface.openConnection();
+		if (isMEMDb()) {
+			return; //nothing to do
+		}
 		this.taConn = transAwareDBInterface.getCurrentConn();
 		Connection jdbcConn = getJdbcConn(); 
 		try {
@@ -37,9 +42,16 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 		}
 	}
 
+	private boolean isMEMDb() {
+		return dbInterface.getDBType().equals(DBType.MEM);
+	}
+
 	@Override
 	public void commitTransaction() {
 		log.log("commitTransaction.");
+		if (isMEMDb()) {
+			return; //nothing to do
+		}
 		Connection jdbcConn = getJdbcConn(); 
 		try {
 			jdbcConn.commit();
@@ -60,6 +72,9 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	@Override
 	public void rollbackTransaction() {
 		log.log("rollbackTransaction.");
+		if (isMEMDb()) {
+			return; //nothing to do
+		}
 		Connection jdbcConn = getJdbcConn(); 
 		try {
 			jdbcConn.rollback();
@@ -73,6 +88,9 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 
 	@Override
 	public TransactionAwareDBInterface getTransactionAwareDBInterface() {
+		if (transAwareDBInterface == null) {
+			transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+		}
 		return transAwareDBInterface;
 	}
 }

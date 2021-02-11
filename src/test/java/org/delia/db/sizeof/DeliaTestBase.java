@@ -90,5 +90,15 @@ public abstract class DeliaTestBase  {
 		String json = ori.render(obj);
 		log.log(json);
 	}
+	/**
+	 * When we want to run all unit tests but not have to wait
+	 * 15 minutes for H2 and Postgress BDD tests to run,
+	 * set disableAllSlowTests to true. They will fail immediately.
+	 */
+	protected void disableAllSlowTestsIfNeeded() {
+		if (DBTestHelper.disableAllSlowTests) {
+			throw new IllegalArgumentException("disable SLOW tests");
+		}
+	}
 
 }

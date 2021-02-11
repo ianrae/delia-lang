@@ -77,7 +77,7 @@ public class DeliaImpl implements Delia {
 			return migrationPlanRes;
 		}
 
-		return doExecute(runner, expL, extraInfo.datIdMap);
+		return doExecute(runner, expL, extraInfo.datIdMap, tp);
 	}
 
 
@@ -89,7 +89,7 @@ public class DeliaImpl implements Delia {
 		return null;
 	}
 
-	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap) {
+	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap, TransactionProvider tp) {
 		ResultValue res = null;
 		if (!deliaOptions.enableExecution) {
 			res = new ResultValue();
@@ -99,7 +99,6 @@ public class DeliaImpl implements Delia {
 
 		runner.setDatIdMap(datIdMap);
 		if (deliaOptions.executeInTransaction) {
-			TransactionProvider tp = factorySvc.createTransactionProvider(mainDBInterface);
 			tp.beginTransaction();
 			try {
 				res = runner.executeProgram(expL);
@@ -195,7 +194,7 @@ public class DeliaImpl implements Delia {
 			return session;
 		}
 
-		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap);
+		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap, tp);
 
 		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();
@@ -349,7 +348,7 @@ public class DeliaImpl implements Delia {
 		}
 
 		Runner runner = createRunner(session, blobLoader, null);
-		ResultValue res = doExecute(runner, expL, session.getDatIdMap());
+		ResultValue res = doExecute(runner, expL, session.getDatIdMap(), null);
 		
 		if (session instanceof DeliaSessionImpl) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;

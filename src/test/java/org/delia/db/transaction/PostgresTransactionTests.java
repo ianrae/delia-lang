@@ -91,6 +91,7 @@ public class PostgresTransactionTests extends DeliaTestBase {
 	//-------------------------
 	@Before
 	public void init() {
+		disableAllSlowTestsIfNeeded();
 		alreadyCreatedDao = createDao();
 		cleanTables();
 	}

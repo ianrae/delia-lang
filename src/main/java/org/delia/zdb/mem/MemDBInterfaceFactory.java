@@ -14,9 +14,10 @@ import org.delia.hld.HLDFactory;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactoryInternal;
 import org.delia.zdb.DBObserverFactory;
 
-public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
+public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory,DBInterfaceFactoryInternal {
 	protected DBCapabilties capabilities;
 	private Map<String,MemDBTable> tableMap; //only one for new
 	private Map<String,SerialGenerator> serialMap = new ConcurrentHashMap<>(); //key, nextId values
@@ -74,6 +75,11 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 		}
 		return exec;
 	}
+
+	@Override
+	public DBExecutor createExecutorEx(DBConnection conn) {
+		return createExecutor();
+	}
 	
 	
 	public Map<String, SerialGenerator> getSerialMap() {
@@ -107,5 +113,4 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
 	}
-
 }

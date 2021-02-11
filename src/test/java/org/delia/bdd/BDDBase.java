@@ -95,7 +95,6 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		filesExecutedL.add(filename);
 	}
 	
-
 	/**
 	 * When we want to run all unit tests but not have to wait
 	 * 15 minutes for H2 and Postgress BDD tests to run,

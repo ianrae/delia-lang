@@ -11,6 +11,7 @@ import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.ResultValue;
+import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,39 +59,39 @@ public class H2TransactionTests extends DeliaTestBase {
 		assertEquals(2, n.intValue());
 	}	
 	
+	@Test
+	public void testNoReturn() {
+		execute(""); //begin cannot run in transaction
+		
+		String src = "let x = Flight[1]";
+		session.runInTransactionVoid(() -> {
+			continueExecution(src);
+		});
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
+		assertEquals("abc", dval.asStruct().getField("field2").asString());
+	}	
 	
-//	@Test
-//	public void testNoReturn() {
-//		execute(""); //begin cannot run in transaction
-//		
-//		String src = "let x = Flight[1]";
-//		session.runInTransactionVoid(() -> {
-//			continueExecution(src);
-//		});
-//		DValue dval = session.getFinalResult().getAsDValue();
-//		assertEquals(1, dval.asStruct().getField("field1").asInt());
-//		assertEquals("abc", dval.asStruct().getField("field2").asString());
-//	}	
-//	
-//	@Test
-//	public void testExecute() {
-//		executeInTransaction = true;
-//		execute(""); //run in transaction
-//		executeInTransaction = false;
-//
-//		String src = "let x = Flight[1]";
-//		continueExecution(src);
-//		DValue dval = session.getFinalResult().getAsDValue();
-//		assertEquals(1, dval.asStruct().getField("field1").asInt());
-//		assertEquals("abc", dval.asStruct().getField("field2").asString());
-//	}	
-//	
-//	
+	@Test
+	public void testExecute() {
+		executeInTransaction = true;
+		execute(""); //run in transaction
+		executeInTransaction = false;
+
+		String src = "let x = Flight[1]";
+		continueExecution(src);
+		DValue dval = session.getFinalResult().getAsDValue();
+		assertEquals(1, dval.asStruct().getField("field1").asInt());
+		assertEquals("abc", dval.asStruct().getField("field2").asString());
+	}	
+	
+	
 	
 
 	//-------------------------
 	@Before
 	public void init() {
+		disableAllSlowTestsIfNeeded();
 		alreadyCreatedDao = createDao();
 		cleanTables();
 	}
