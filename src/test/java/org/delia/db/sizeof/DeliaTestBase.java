@@ -3,6 +3,7 @@ package org.delia.db.sizeof;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
@@ -46,8 +47,10 @@ public abstract class DeliaTestBase  {
 		assertEquals(true, b);
 
 		this.session = dao.getMostRecentSession();
-		log.log("src: %s", src);
-		ResultValue res = delia.continueExecution(src, session);
+		if (StringUtils.isNotEmpty(src)) {
+			log.log("src: %s", src);
+			ResultValue res = delia.continueExecution(src, session);
+		}
 		
 		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 		return sessimpl;

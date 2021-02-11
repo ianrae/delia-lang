@@ -8,6 +8,7 @@ import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
+import org.delia.db.transaction.TransactionAdapter;
 import org.delia.db.transaction.TransactionBody;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.db.transaction.VoidTransactionBody;
@@ -121,29 +122,46 @@ public class DeliaSessionImpl implements DeliaSession {
 
 	@Override
 	public <T> T runInTransaction(TransactionBody<T> body) {
-		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
-		transProvider.beginTransaction();
+		TransactionProvider transProvider = initTransProvider(); 
 		T res = null;
 		try {
 			res = body.doSomething();
 			transProvider.commitTransaction();
 		} catch(Exception e) {
 			transProvider.rollbackTransaction();
+			endTransProvider();
 			throw e;
 		}
+		endTransProvider();
 		return res;
 	}
 
 	@Override
 	public void runInTransactionVoid(VoidTransactionBody body) {
-		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
-		transProvider.beginTransaction();
+		TransactionProvider transProvider = initTransProvider(); 
 		try {
 			body.doSomething();
 			transProvider.commitTransaction();
 		} catch(Exception e) {
 			transProvider.rollbackTransaction();
+			endTransProvider();
 			throw e;
 		}
+		endTransProvider();
 	}
+	
+
+	private TransactionProvider initTransProvider() {
+		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
+		if (transProvider instanceof TransactionAdapter) {
+			TransactionAdapter ta = (TransactionAdapter) transProvider;
+			currentDBInterface = ta.createTransactionAwareDBInterface();
+		}
+		transProvider.beginTransaction();
+		return transProvider;
+	}
+	private void endTransProvider() {
+		currentDBInterface = delia.getDBInterface();
+	}
+	
 }

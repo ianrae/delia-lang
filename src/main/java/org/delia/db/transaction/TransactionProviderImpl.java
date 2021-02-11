@@ -3,7 +3,7 @@ package org.delia.db.transaction;
 import org.delia.log.Log;
 import org.delia.zdb.DBInterfaceFactory;
 
-public class TransactionProviderImpl implements TransactionProvider {
+public class TransactionProviderImpl implements TransactionProvider, TransactionAdapter {
 
 	private Log log;
 	private DBInterfaceFactory dbInterface;
@@ -26,6 +26,11 @@ public class TransactionProviderImpl implements TransactionProvider {
 	@Override
 	public void rollbackTransaction() {
 		log.log("rollbackTransaction.");
+	}
+
+	@Override
+	public DBInterfaceFactory createTransactionAwareDBInterface() {
+		return new TransactionAwareDBInterface(dbInterface);
 	}
 
 }

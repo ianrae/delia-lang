@@ -149,9 +149,7 @@ public class DeliaImpl implements Delia {
 		if (dbsess != null) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) dbsess;
 			return sessimpl.currentDBInterface;
-		}
-		
-		if (this.deliaOptions.executeInTransaction) {
+		} else if (this.deliaOptions.executeInTransaction) {
 			DBInterfaceFactory dbinter = new TransactionAwareDBInterface(mainDBInterface);
 			return dbinter;
 		} else {
