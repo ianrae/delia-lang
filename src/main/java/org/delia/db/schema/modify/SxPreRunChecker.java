@@ -14,7 +14,7 @@ import org.delia.type.DValue;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
-public class SxPreRunChecker extends ServiceBase {
+public class SxPreRunChecker extends ServiceBase implements AutoCloseable {
 
 	private DTypeRegistry registry;
 	private DBExecutor zexec;
@@ -124,6 +124,12 @@ public class SxPreRunChecker extends ServiceBase {
 			return false;
 		}
 		return true;
+	}
+
+
+	@Override
+	public void close() throws Exception {
+		zexec.close();
 	}
 
 }

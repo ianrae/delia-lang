@@ -64,8 +64,11 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 					boolean performRiskChecks = policy.shouldPerformRiskChecks();
 					//TODO: implement checks later
 //					b = migrator.performMigrations(performRiskChecks);
-					SxPreRunChecker preRunChecker = new SxPreRunChecker(factorySvc, dbInterface, registry, varEvaluator, datIdMap);
-					b = preRunChecker.preRunCheck(sxplan.delta, performRiskChecks);
+					try(SxPreRunChecker preRunChecker = new SxPreRunChecker(factorySvc, dbInterface, registry, varEvaluator, datIdMap)) {
+						b = preRunChecker.preRunCheck(sxplan.delta, performRiskChecks);
+					} catch(Exception e) {
+						log.logError("SxPreRunChecker failed!");
+					}
 					if (!b) {
 						return false;
 					}

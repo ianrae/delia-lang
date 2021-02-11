@@ -41,14 +41,14 @@ public class H2DBConnection extends ServiceBase implements DBConnection, BlobCre
 		}
 
 		conn = connectionFactory.createConnection();
-		
-		factorySvc.getLog().log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+//		factorySvc.getLog().log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
 	}
 
 	@Override
 	public void close() {
 		try {
 			conn.close();
+//			factorySvc.getLog().log("CLOSE:CCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
