@@ -19,6 +19,7 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
@@ -93,8 +94,18 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
     			if (val instanceof DeliaImmutable) {
     				DeliaImmutable immut = (DeliaImmutable) val;
     				DValue dval = immut.internalDValue();
-    				if (DRelationHelper.isRelation(structType, fieldName) && dval != null) {
-    					dval = createEmptyRelation(structType, fieldName, dval);
+    				if (DRelationHelper.isRelation(structType, fieldName)) {
+    					if (dval != null) {
+    						dval = createEmptyRelation(structType, fieldName, dval);
+    					} else if (immut instanceof DeliaEntity) {
+    						TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pair.type);
+    						if (pkpair != null) {
+    							DeliaEntity innerEntity = (DeliaEntity) immut;
+    							Object pkvalue = innerEntity.internalSetValueMap().get(pkpair.name);
+    							DValue pkVal = dvalConverter.buildFromObject(pkvalue, pkpair.type.getShape(), scalarBuilder);
+        						dval = createEmptyRelation(structType, fieldName, pkVal);
+    						}
+    					}
     				}
     				builder.addField(fieldName, dval);
     			} else {
