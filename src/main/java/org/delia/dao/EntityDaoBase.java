@@ -22,6 +22,7 @@ import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.PartialStructValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
@@ -50,10 +51,14 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
 	}
 	
-	protected ResultValue doInsertOrUpdate(T entity, String src, InsertExtraInfo extraInfo) {
+	protected ResultValue doInsertOrUpdate(boolean isInsert, T entity, String src, InsertExtraInfo extraInfo) {
 		List<DValue> inputL = new ArrayList<>();
 		if (entity != null) {
-			inputL.add(createDValue(entity));
+			if (isInsert) {
+				inputL.add(createDValue(entity));
+			} else {
+				inputL.add(createPartialDValue(entity));
+			}
 		}
 		DValueIterator iter = new DValueIterator(inputL);	
 		DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
@@ -72,22 +77,32 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		return res;
 	}
 	
-    protected DValue createDValue(T obj) {
+    private DValue createPartialDValue(T obj) {
     	if (obj instanceof DeliaEntity) {
     		DeliaEntity entity = (DeliaEntity) obj;
-    		return this.buildFromEntity(entity, typeName);
+        	PartialStructValueBuilder builder = new PartialStructValueBuilder(structType);
+    		return this.buildFromEntity(entity, typeName, builder);
+    	} else {
+    		return obj.internalDValue();
+    	}
+	}
+
+	protected DValue createDValue(T obj) {
+    	if (obj instanceof DeliaEntity) {
+    		DeliaEntity entity = (DeliaEntity) obj;
+        	StructValueBuilder builder = new StructValueBuilder(structType);
+    		return this.buildFromEntity(entity, typeName, builder);
     	} else {
     		return obj.internalDValue();
     	}
     }
 
-    protected DValue buildFromEntity(DeliaEntity entity, String typeName) {
+    protected DValue buildFromEntity(DeliaEntity entity, String typeName, StructValueBuilder builder) {
     	if (entity.internalSetValueMap().isEmpty()) {
     		DeliaImmutable immut = (DeliaImmutable) entity;
     		return immut.internalDValue();
     	}
     		
-    	StructValueBuilder builder = new StructValueBuilder(structType);
     	for(TypePair pair: structType.getAllFields()) {
     		String fieldName = pair.name;
     		if (entity.internalSetValueMap().containsKey(fieldName)) {
@@ -207,7 +222,8 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 	protected DValue doInsert(T entity) {
 		String src = String.format("insert %s {}", typeName);
 		InsertExtraInfo extraInfo = new InsertExtraInfo();
-		doInsertOrUpdate(entity, src, extraInfo);
+    	StructValueBuilder builder = new StructValueBuilder(structType);
+		doInsertOrUpdate(true, entity, src, extraInfo);
 		return extraInfo.generatedSerialValue;
 	}
 	protected boolean canSetSerialId(T entity, DValue serialVal) {
@@ -220,14 +236,14 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 	protected int doUpdate(T entity) {
 		DValue pkval = getPrimaryKeyValue(entity);
 		String src = String.format("update %s[%s] {}", typeName, pkval.asString());
-		ResultValue res = doInsertOrUpdate(entity, src, null);
+		ResultValue res = doInsertOrUpdate(false, entity, src, null);
 		Integer updateCount = (Integer) res.val;
 		return updateCount;
 	}
 	protected int doUpsert(T entity) {
 		DValue pkval = getPrimaryKeyValue(entity);
 		String src = String.format("upsert %s[%s] {}", typeName, pkval.asString());
-		ResultValue res = doInsertOrUpdate(entity, src, null);
+		ResultValue res = doInsertOrUpdate(true, entity, src, null);
 		Integer updateCount = (Integer) res.val;
 		return updateCount;
 	}
@@ -235,11 +251,11 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 	protected void doDelete(T entity) {
 		DValue pkval = getPrimaryKeyValue(entity);
 		String src = String.format("delete %s[%s]", typeName, pkval.asString());
-		ResultValue res = doInsertOrUpdate(entity, src, null);
+		ResultValue res = doInsertOrUpdate(false, entity, src, null);
 	}
 	protected void doDeleteAll() {
 		String src = String.format("delete %s[true]", typeName);
-		ResultValue res = doInsertOrUpdate(null, src, null);
+		ResultValue res = doInsertOrUpdate(false, null, src, null);
 	}
 	
 	//--derived classes can override these if necessary--
