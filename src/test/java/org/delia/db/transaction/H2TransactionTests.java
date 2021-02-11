@@ -10,6 +10,7 @@ import org.delia.db.h2.H2ConnectionHelper;
 import org.delia.db.h2.test.H2TestCleaner;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.db.sql.ConnectionDefinition;
+import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,13 +25,16 @@ public class H2TransactionTests extends DeliaTestBase {
 	public void test() {
 		execute(""); //begin cannot run in transaction
 		
-		String src = "let x = Flight[1]";
+		final String src = buildMoreSrc();
 		DeliaSession tmp = session.runInTransaction(() -> {
 			return continueExecution(src);
 		});
-		DValue dval = session.getFinalResult().getAsDValue();
-		assertEquals(1, dval.asStruct().getField("field1").asInt());
-		assertEquals("abc", dval.asStruct().getField("field2").asString());
+		
+		String src2 = "let x = Flight[true].count()";
+		tmp = continueExecution(src2);
+		ResultValue res = tmp.getFinalResult();
+		Long n = (Long) res.getAsDValue().asLong();
+		assertEquals(4, n.intValue());
 	}	
 	
 //	@Test
@@ -77,6 +81,12 @@ public class H2TransactionTests extends DeliaTestBase {
 		s =  "";
 		src += String.format("\n insert Flight {field1: 1, field2: 'abc'}");
 		src += String.format("\n insert Flight {field1: 2, field2: 'def'}");
+		return src;
+	}
+	protected String buildMoreSrc() {
+		String src = "";
+		src += String.format("\n insert Flight {field1: 3, field2: 'abc'}");
+		src += String.format("\n insert Flight {field1: 4, field2: 'def'}");
 		return src;
 	}
 	

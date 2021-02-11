@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.delia.log.Log;
+import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBConnectionInternal;
 import org.delia.zdb.DBInterfaceFactory;
 
@@ -12,6 +13,9 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	private Log log;
 	private DBInterfaceFactory dbInterface;
 	private TransactionAwareDBInterface transAwareDBInterface;
+//	private DBConnection dbConn;
+	private TransactionAwareDBConnection taConn;
+
 
 	public TransactionProviderImpl(DBInterfaceFactory dbInterface, Log log) {
 		this.dbInterface = dbInterface;
@@ -22,9 +26,11 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	public void beginTransaction() {
 		log.log("beginTransaction..");
 		transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+		transAwareDBInterface.openConnection();
+		this.taConn = transAwareDBInterface.getCurrentConn();
 		Connection jdbcConn = getJdbcConn(); 
 		try {
-			jdbcConn.commit();
+			jdbcConn.setAutoCommit(false);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -40,6 +46,8 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			taConn.actuallyClose();
 		}
 	}
 
@@ -58,6 +66,8 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			taConn.actuallyClose();
 		}
 	}
 
@@ -65,11 +75,4 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	public TransactionAwareDBInterface getTransactionAwareDBInterface() {
 		return transAwareDBInterface;
 	}
-
-//	@Override
-//	public DBInterfaceFactory createTransactionAwareDBInterface() {
-//		this.transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
-//		return transAwareDBInterface;
-//	}
-
 }
