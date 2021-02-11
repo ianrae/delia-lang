@@ -14,6 +14,7 @@ import org.delia.error.DetailedError;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.ResultValue;
 import org.delia.runner.RunnerImpl;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -103,7 +104,7 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
     							DeliaEntity innerEntity = (DeliaEntity) immut;
     							Object pkvalue = innerEntity.internalSetValueMap().get(pkpair.name);
     							DValue pkVal = dvalConverter.buildFromObject(pkvalue, pkpair.type.getShape(), scalarBuilder);
-        						dval = createEmptyRelation(structType, fieldName, pkVal);
+        						dval = createEmptyRelationEx(structType, fieldName, pkVal);
     						}
     					}
     				}
@@ -139,6 +140,14 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 		DValue newVal = DRelationHelper.createEmptyRelation(structType, fieldName, registry);
 		if (newVal != null) {
 			DRelationHelper.addFK(newVal, relValue);
+		}
+		return newVal;
+	}
+	private DValue createEmptyRelationEx(DStructType structType, String fieldName, DValue fkval) {
+		DValue newVal = DRelationHelper.createEmptyRelation(structType, fieldName, registry);
+		if (newVal != null) {
+			DRelation drel = newVal.asRelation();
+			drel.addKey(fkval);
 		}
 		return newVal;
 	}
