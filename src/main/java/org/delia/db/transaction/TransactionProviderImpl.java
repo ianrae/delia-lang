@@ -1,12 +1,15 @@
 package org.delia.db.transaction;
 
 import org.delia.log.Log;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class TransactionProviderImpl implements TransactionProvider {
 
 	private Log log;
+	private DBInterfaceFactory dbInterface;
 
-	public TransactionProviderImpl(Log log) {
+	public TransactionProviderImpl(DBInterfaceFactory dbInterface, Log log) {
+		this.dbInterface = dbInterface;
 		this.log = log;
 	}
 	

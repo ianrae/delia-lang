@@ -16,6 +16,7 @@ import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DTypeRegistry;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class DeliaSessionImpl implements DeliaSession {
 	public boolean ok;
@@ -30,6 +31,7 @@ public class DeliaSessionImpl implements DeliaSession {
 	public DatIdMap datIdMap;
 	public Runner mostRecentRunner;
 	public ZoneId zoneId;
+	public DBInterfaceFactory currentDBInterface;
 	
 	public DeliaSessionImpl(Delia delia) {
 		this.delia = delia;
@@ -87,6 +89,7 @@ public class DeliaSessionImpl implements DeliaSession {
 		child.datIdMap = this.datIdMap;
 		child.mostRecentRunner = null;
 		child.zoneId = zoneId;
+		//TODO: what about currentDBInterface?
 		return child;
 	}
 
@@ -118,7 +121,7 @@ public class DeliaSessionImpl implements DeliaSession {
 
 	@Override
 	public <T> T runInTransaction(TransactionBody<T> body) {
-		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider();
+		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
 		transProvider.beginTransaction();
 		T res = null;
 		try {
@@ -133,7 +136,7 @@ public class DeliaSessionImpl implements DeliaSession {
 
 	@Override
 	public void runInTransactionVoid(VoidTransactionBody body) {
-		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider();
+		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
 		transProvider.beginTransaction();
 		try {
 			body.doSomething();

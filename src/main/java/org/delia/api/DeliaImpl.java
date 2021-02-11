@@ -17,6 +17,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.modify.SxMigrationServiceImpl;
+import org.delia.db.transaction.TransactionAwareDBInterface;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
@@ -47,7 +48,7 @@ public class DeliaImpl implements Delia {
 //	public static boolean useNewSchemaGen = false;
 	
 	private Log log;
-	private DBInterfaceFactory dbInterface;
+	private DBInterfaceFactory mainDBInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
@@ -56,7 +57,7 @@ public class DeliaImpl implements Delia {
 	
 	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
-		this.dbInterface = dbInterface;
+		this.mainDBInterface = dbInterface;
 		this.factorySvc = factorySvc;
 		this.migrationSvc = new SxMigrationServiceImpl(dbInterface, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
@@ -89,7 +90,7 @@ public class DeliaImpl implements Delia {
 
 		runner.setDatIdMap(datIdMap);
 		if (deliaOptions.executeInTransaction) {
-			TransactionProvider tp = factorySvc.createTransactionProvider();
+			TransactionProvider tp = factorySvc.createTransactionProvider(mainDBInterface);
 			tp.beginTransaction();
 			try {
 				res = runner.executeProgram(expL);
@@ -112,7 +113,10 @@ public class DeliaImpl implements Delia {
 	//only public for unit tests
 	public Runner createRunner(DeliaSession dbsess, BlobLoader blobLoader) {
 		ErrorTracker et = new SimpleErrorTracker(log);
-		Runner runner = new RunnerImpl(factorySvc, dbInterface, hldFactory, blobLoader);
+		
+		//to support transactions use session dbInterface if there is one
+		DBInterfaceFactory dbinter = calcDBInterface(dbsess); 
+		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
@@ -133,11 +137,26 @@ public class DeliaImpl implements Delia {
 		runner.setHLDFacade(hldFacade);
 
 		if (deliaOptions.dbObserverFactory != null) {
-			dbInterface.setObserverFactory(deliaOptions.dbObserverFactory);
-			dbInterface.setIgnoreSimpleSvcSql(deliaOptions.observeHLDSQLOnly);
+			dbinter.setObserverFactory(deliaOptions.dbObserverFactory);
+			dbinter.setIgnoreSimpleSvcSql(deliaOptions.observeHLDSQLOnly);
 		}
 		
 		return runner;
+	}
+
+	private DBInterfaceFactory calcDBInterface(DeliaSession dbsess) {
+		//to support transactions use session dbInterface if there is one
+		if (dbsess != null) {
+			DeliaSessionImpl sessimpl = (DeliaSessionImpl) dbsess;
+			return sessimpl.currentDBInterface;
+		}
+		
+		if (this.deliaOptions.executeInTransaction) {
+			DBInterfaceFactory dbinter = new TransactionAwareDBInterface(mainDBInterface);
+			return dbinter;
+		} else {
+			return mainDBInterface;
+		}
 	}
 
 	@Override
@@ -161,6 +180,7 @@ public class DeliaImpl implements Delia {
 			session.datIdMap = extraInfo.datIdMap;
 			session.mostRecentRunner = mainRunner;
 			session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
+			session.currentDBInterface = mainDBInterface;
 			return session;
 		}
 
@@ -174,6 +194,7 @@ public class DeliaImpl implements Delia {
 		session.datIdMap = extraInfo.datIdMap;
 		session.mostRecentRunner = mainRunner;
 		session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
+		session.currentDBInterface = mainDBInterface;
 		return session;
 	}
 
@@ -205,7 +226,7 @@ public class DeliaImpl implements Delia {
 		}
 		
 		//replace error converter with a registry aware one (better at parsing errors)
-		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
+		DBErrorConverter errorConverter = mainDBInterface.getDBErrorConverter();
 		if (errorConverter != null) {
 //		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
 //		dbInterface.setDBErrorConverter(radbec);
@@ -234,7 +255,7 @@ public class DeliaImpl implements Delia {
 		
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.
-		if (dbInterface.getCapabilities().requiresSchemaMigration()) {
+		if (mainDBInterface.getCapabilities().requiresSchemaMigration()) {
 			migrationSvc.initPolicy(deliaOptions.useSafeMigrationPolicy, deliaOptions.enableAutomaticMigrations);
 			
 			switch(deliaOptions.migrationAction) {
@@ -242,10 +263,10 @@ public class DeliaImpl implements Delia {
 			{
 				boolean b;
 				if (deliaOptions.disableSQLLoggingDuringSchemaMigration) {
-					boolean prev = dbInterface.isSQLLoggingEnabled();
-					dbInterface.enableSQLLogging(false);
+					boolean prev = mainDBInterface.isSQLLoggingEnabled();
+					mainDBInterface.enableSQLLogging(false);
 					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
-					dbInterface.enableSQLLogging(prev);
+					mainDBInterface.enableSQLLogging(prev);
 				} else {
 					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
 				}
@@ -365,7 +386,7 @@ public class DeliaImpl implements Delia {
 		return expL;
 	}
 	private CompilerHelper createCompilerHelper() {
-		return new CompilerHelper(dbInterface, log, factorySvc, deliaOptions);
+		return new CompilerHelper(mainDBInterface, log, factorySvc, deliaOptions);
 	}
 	
 	
@@ -387,11 +408,11 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public DBInterfaceFactory getDBInterface() {
-		return dbInterface;
+		return mainDBInterface;
 	}
 	//for internal use only - unit tests
 	public void setDbInterface(DBInterfaceFactory dbInterface) {
-		this.dbInterface = dbInterface;
+		this.mainDBInterface = dbInterface;
 	}
 	
 	private String readAllText(BufferedReader reader) {

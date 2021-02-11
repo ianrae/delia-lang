@@ -5,7 +5,9 @@ import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.transaction.DoNothingTransactionProvider;
+import org.delia.db.transaction.TransactionAwareDBInterface;
 import org.delia.db.transaction.TransactionProvider;
+import org.delia.db.transaction.TransactionProviderImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.hld.HLDSimpleQueryService;
@@ -133,8 +135,9 @@ public class FactoryServiceImpl implements FactoryService {
 		return new RuleFuncFactoryImpl(this);
 	}
 	@Override
-	public TransactionProvider createTransactionProvider() {
-		return new DoNothingTransactionProvider(log);
+	public TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface) {
+//		return new DoNothingTransactionProvider(log);
+		return new TransactionProviderImpl(dbInterface, log);
 	}
 
 }

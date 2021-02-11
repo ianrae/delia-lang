@@ -46,5 +46,5 @@ public interface FactoryService {
 	boolean getEnableMEMSqlGenerationFlag();
 	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
-	TransactionProvider createTransactionProvider();
+	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
 }
