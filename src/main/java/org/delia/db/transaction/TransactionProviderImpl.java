@@ -29,9 +29,6 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 			transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
 		}
 		transAwareDBInterface.openConnection();
-		if (isMEMDb()) {
-			return; //nothing to do
-		}
 		this.taConn = transAwareDBInterface.getCurrentConn();
 		Connection jdbcConn = getJdbcConn(); 
 		try {
@@ -42,16 +39,9 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 		}
 	}
 
-	private boolean isMEMDb() {
-		return dbInterface.getDBType().equals(DBType.MEM);
-	}
-
 	@Override
 	public void commitTransaction() {
 		log.log("commitTransaction.");
-		if (isMEMDb()) {
-			return; //nothing to do
-		}
 		Connection jdbcConn = getJdbcConn(); 
 		try {
 			jdbcConn.commit();
@@ -72,9 +62,6 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	@Override
 	public void rollbackTransaction() {
 		log.log("rollbackTransaction.");
-		if (isMEMDb()) {
-			return; //nothing to do
-		}
 		Connection jdbcConn = getJdbcConn(); 
 		try {
 			jdbcConn.rollback();

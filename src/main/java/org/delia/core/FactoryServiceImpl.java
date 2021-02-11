@@ -1,6 +1,7 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
@@ -136,7 +137,9 @@ public class FactoryServiceImpl implements FactoryService {
 	}
 	@Override
 	public TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface) {
-//		return new DoNothingTransactionProvider(log);
+		if (dbInterface.getDBType().equals(DBType.MEM)) {
+			return new DoNothingTransactionProvider(log);
+		}
 		return new TransactionProviderImpl(dbInterface, log);
 	}
 

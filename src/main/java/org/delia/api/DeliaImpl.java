@@ -157,16 +157,20 @@ public class DeliaImpl implements Delia {
 		if (dbsess != null) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) dbsess;
 			if (sessimpl.transactionProvider != null) {
-				TransactionAdapter ta = (TransactionAdapter) sessimpl.transactionProvider;
+				//MEM db uses DoNothingTransactionProvider which does not implement TransactionAdapter
+				if (sessimpl.transactionProvider instanceof TransactionAdapter) {
+					TransactionAdapter ta = (TransactionAdapter) sessimpl.transactionProvider;
+					return ta.getTransactionAwareDBInterface();
+				}
+			}
+		} else if (tp != null) {
+			//MEM db uses DoNothingTransactionProvider which does not implement TransactionAdapter
+			if (tp instanceof TransactionAdapter) {
+				TransactionAdapter ta = (TransactionAdapter) tp;
 				return ta.getTransactionAwareDBInterface();
 			}
-			return mainDBInterface;
-		} else if (tp != null) {
-			TransactionAdapter ta = (TransactionAdapter) tp;
-			return ta.getTransactionAwareDBInterface();
-		} else {
-			return mainDBInterface;
 		}
+		return mainDBInterface;
 	}
 
 	@Override
