@@ -22,10 +22,10 @@ import org.junit.Test;
 public class H2TransactionTests extends DeliaTestBase { 
 	
 	@Test
-	public void test() {
-		execute(""); //begin cannot run in transaction
+	public void testCommit() {
+		execute(""); 
 		
-		final String src = buildMoreSrc();
+		final String src = buildMoreSrc(3);
 		DeliaSession tmp = session.runInTransaction(() -> {
 			return continueExecution(src);
 		});
@@ -36,6 +36,29 @@ public class H2TransactionTests extends DeliaTestBase {
 		Long n = (Long) res.getAsDValue().asLong();
 		assertEquals(4, n.intValue());
 	}	
+	
+	@Test
+	public void testRollback() {
+		execute(""); 
+		
+		final String src = buildMoreSrc(3);
+		DeliaSession tmp;
+		try {
+			tmp = session.runInTransaction(() -> {
+				continueExecution(src);
+				throw new IllegalArgumentException("bam!");
+			});
+		} catch (IllegalArgumentException e) {
+			log.log("rollback should have occurred!");
+		}
+		
+		String src2 = "let x = Flight[true].count()";
+		tmp = continueExecution(src2);
+		ResultValue res = tmp.getFinalResult();
+		Long n = (Long) res.getAsDValue().asLong();
+		assertEquals(2, n.intValue());
+	}	
+	
 	
 //	@Test
 //	public void testNoReturn() {
@@ -83,10 +106,11 @@ public class H2TransactionTests extends DeliaTestBase {
 		src += String.format("\n insert Flight {field1: 2, field2: 'def'}");
 		return src;
 	}
-	protected String buildMoreSrc() {
+	protected String buildMoreSrc(int startId) {
 		String src = "";
-		src += String.format("\n insert Flight {field1: 3, field2: 'abc'}");
-		src += String.format("\n insert Flight {field1: 4, field2: 'def'}");
+		int id = startId;
+		src += String.format("\n insert Flight {field1: %d, field2: 'abc'}", id);
+		src += String.format("\n insert Flight {field1: %d, field2: 'def'}", id+1);
 		return src;
 	}
 	

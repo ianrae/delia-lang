@@ -4,9 +4,11 @@ import org.delia.db.DBCapabilties;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.DBType;
 import org.delia.hld.HLDFactory;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactoryInternal;
 import org.delia.zdb.DBObserverFactory;
 
 public class TransactionAwareDBInterface implements DBInterfaceFactory {
@@ -48,7 +50,11 @@ public class TransactionAwareDBInterface implements DBInterfaceFactory {
 
 	@Override
 	public DBExecutor createExecutor() {
-		return inner.createExecutor();
+		if (! (inner instanceof DBInterfaceFactoryInternal)) {
+			DeliaExceptionHelper.throwNotImplementedError("DBType %s needs to support DBInterfaceFactoryInternal to have transactions", inner.getDBType().name());
+		}
+		DBInterfaceFactoryInternal dbint = (DBInterfaceFactoryInternal) inner;
+		return dbint.createExecutorEx(currentConn);
 	}
 
 	@Override
