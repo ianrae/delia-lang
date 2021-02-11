@@ -57,7 +57,7 @@ public class EntityCodeGen extends CodeGenBase {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
 			String javaType = helper().convertToJava(structType, fieldName);
-			String javaObjType = helper().convertToJava(structType, fieldName, ftype, false);
+			String javaObjType = helper().convertToJava(ftype, false);
 			String asFn = helper().convertToAsFn(ftype);
 			String nullValue = helper().getNullValueFor(structType, fieldName);
 
@@ -76,6 +76,7 @@ public class EntityCodeGen extends CodeGenBase {
 					st = g.getInstanceOf("t5");
 					st.add("ftype", javaType);
 					st.add("uname", StringUtil.uppify(fieldName));
+					st.add("uname2", ftype.getName());
 					st.add("pktype", helper().getPKType(ftype));
 					st.add("pkfield", helper().getPKField(ftype));
 					sc.addStr(st.render());

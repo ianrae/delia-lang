@@ -38,18 +38,27 @@ public class GetterInterfaceCodeGen extends CodeGenBase {
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
+			boolean isList = helper().isList(structType, fieldName);
 			String javaType = helper().convertToJava(structType, fieldName);
 			boolean hasPK = helper().hasPK(ftype);
 			if (options.addJsonIgnoreToRelations && hasPK) {
 				sc.o("  @JsonIgnore");
 				sc.nl();
 			}
-			sc.o("  %s get%s();", javaType, StringUtil.uppify(fieldName));
+			if (isList) {
+				sc.o("  List<%s> get%s();", javaType, StringUtil.uppify(fieldName));
+			} else {
+				sc.o("  %s get%s();", javaType, StringUtil.uppify(fieldName));
+			}
 			sc.nl();
 			
 			if (hasPK) {
 				String pkType = helper().getPKType(ftype);
-				sc.o("  %s get%sPK();", pkType, StringUtil.uppify(fieldName));
+				if (isList) {
+					sc.o("  List<%s> get%sPK();", pkType, StringUtil.uppify(fieldName));
+				} else {
+					sc.o("  %s get%sPK();", pkType, StringUtil.uppify(fieldName));
+				}
 				sc.nl();
 			}
 

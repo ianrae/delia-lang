@@ -2,8 +2,11 @@ package org.delia.codegen.generators;
 
 import org.delia.codegen.CodeGenBase;
 import org.delia.db.sql.StrCreator;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
 import org.delia.util.StringUtil;
 
 public class SetterInterfaceCodeGen extends CodeGenBase {
@@ -39,6 +42,16 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 			String javaType = helper().convertToJava(structType, fieldName);
 			sc.o("  void set%s(%s val);", StringUtil.uppify(fieldName), javaType);
 			sc.nl();
+			if (ftype.isStructShape()) {
+				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+				if (pkpair != null) {
+					String s = helper().convertToJava(pkpair.type, false); //Integer
+//					String s = BuiltInTypes.getDeliaTypeNameFromShape(pkpair.type.getShape());
+					sc.o("  void set%sPK(%s val);", StringUtil.uppify(fieldName), s);
+					sc.nl();
+				}
+			}
+			
 		}
 		sc.o("}");
 		sc.nl();

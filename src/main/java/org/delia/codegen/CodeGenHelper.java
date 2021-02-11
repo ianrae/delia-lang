@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.delia.db.sql.StrCreator;
+import org.delia.rule.rules.RelationManyRule;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
+import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
 import org.delia.util.StringUtil;
 
@@ -50,9 +52,16 @@ public class CodeGenHelper {
 	public String convertToJava(DStructType structType, String fieldName) {
 		boolean flag = !structType.fieldIsOptional(fieldName);
 		DType ftype = structType.getDeclaredFields().get(fieldName);
-		return convertToJava(structType, fieldName, ftype, flag);
+		return convertToJava(ftype, flag);
 	}
-	public String convertToJava(DStructType structType, String fieldName, DType ftype, boolean flag) {
+	public boolean isList(DStructType structType, String fieldName) {
+		RelationManyRule manyRule = DRuleHelper.findManyRule(structType, fieldName);
+		if (manyRule == null) {
+			return false;
+		}
+		return true;
+	}
+	public String convertToJava(DType ftype, boolean flag) {
 		switch(ftype.getShape()) {
 		case INTEGER:
 			return flag ? "int" : "Integer";
