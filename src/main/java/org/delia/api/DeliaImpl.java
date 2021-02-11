@@ -44,9 +44,6 @@ public class DeliaImpl implements Delia {
 		public DatIdMap datIdMap;
 	}
 	
-//	public static boolean useNewHLD = true;
-//	public static boolean useNewSchemaGen = false;
-	
 	private Log log;
 	private DBInterfaceFactory mainDBInterface;
 	private FactoryService factorySvc;
@@ -68,8 +65,8 @@ public class DeliaImpl implements Delia {
 	public ResultValue execute(String src, BlobLoader blobLoader) {
 		List<Exp> expL = compileDeliaSource(src, true);
 
-		TransactionProvider tp = createTransactionProviderIfExecuteInTransaction();
-		Runner runner = createRunner(null, blobLoader, tp);
+		TransactionProvider tpEIT = createTransactionProviderIfExecuteInTransaction();
+		Runner runner = createRunner(null, blobLoader, tpEIT);
 		execTypes(runner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null, extraInfo);
@@ -77,10 +74,15 @@ public class DeliaImpl implements Delia {
 			return migrationPlanRes;
 		}
 
-		return doExecute(runner, expL, extraInfo.datIdMap, tp);
+		return doExecute(runner, expL, extraInfo.datIdMap, tpEIT);
 	}
 
 
+	/**
+	 * One of the transaction modes is to run each Delia execute method in a transaction.
+	 * This is controlled by delia options flag: executeInTransaction
+	 * @return tpEIT (EIT means 'execute in transaction')
+	 */
 	private TransactionProvider createTransactionProviderIfExecuteInTransaction() {
 		if (deliaOptions.executeInTransaction) {
 			TransactionProvider tp = factorySvc.createTransactionProvider(mainDBInterface);
@@ -89,7 +91,7 @@ public class DeliaImpl implements Delia {
 		return null;
 	}
 
-	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap, TransactionProvider tp) {
+	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap, TransactionProvider tpEIT) {
 		ResultValue res = null;
 		if (!deliaOptions.enableExecution) {
 			res = new ResultValue();
@@ -99,12 +101,12 @@ public class DeliaImpl implements Delia {
 
 		runner.setDatIdMap(datIdMap);
 		if (deliaOptions.executeInTransaction) {
-			tp.beginTransaction();
+			tpEIT.beginTransaction();
 			try {
 				res = runner.executeProgram(expL);
-				tp.commitTransaction();
+				tpEIT.commitTransaction();
 			} catch (Exception e) {
-				tp.rollbackTransaction();
+				tpEIT.rollbackTransaction();
 			}
 		} else {
 			//normal execution
@@ -181,8 +183,8 @@ public class DeliaImpl implements Delia {
 		List<Exp> expL =  compileDeliaSource(src, false);
 
 		//1st pass
-		TransactionProvider tp = createTransactionProviderIfExecuteInTransaction();
-		Runner mainRunner = createRunner(null, blobLoader, tp);
+		TransactionProvider tpEIT = createTransactionProviderIfExecuteInTransaction();
+		Runner mainRunner = createRunner(null, blobLoader, tpEIT);
 		execTypes(mainRunner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan, extraInfo);
@@ -198,7 +200,7 @@ public class DeliaImpl implements Delia {
 			return session;
 		}
 
-		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap, tp);
+		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap, tpEIT);
 
 		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();

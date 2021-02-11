@@ -125,6 +125,7 @@ public class DeliaSessionImpl implements DeliaSession {
 	public <T> T runInTransaction(TransactionBody<T> body) {
 		TransactionProvider transProvider = initTransProvider(); 
 		T res = null;
+		transProvider.beginTransaction();
 		try {
 			res = body.doSomething();
 			transProvider.commitTransaction();
@@ -140,6 +141,7 @@ public class DeliaSessionImpl implements DeliaSession {
 	@Override
 	public void runInTransactionVoid(VoidTransactionBody body) {
 		TransactionProvider transProvider = initTransProvider(); 
+		transProvider.beginTransaction();
 		try {
 			body.doSomething();
 			transProvider.commitTransaction();
@@ -159,7 +161,6 @@ public class DeliaSessionImpl implements DeliaSession {
 		
 		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
 		this.transactionProvider = transProvider;
-		transProvider.beginTransaction();
 		return transProvider;
 	}
 	private void endTransProvider() {

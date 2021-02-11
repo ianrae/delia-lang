@@ -2,6 +2,13 @@ package org.delia.db.transaction;
 
 import org.delia.log.Log;
 
+/**
+ * Some databases, such as MEM do not support transactions. 
+ * This class implements a do-nothing transaction provider.
+ * 
+ * @author ian
+ *
+ */
 public class DoNothingTransactionProvider implements TransactionProvider {
 
 	private Log log;
