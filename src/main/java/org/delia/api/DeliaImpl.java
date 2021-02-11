@@ -18,7 +18,6 @@ import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.modify.SxMigrationServiceImpl;
 import org.delia.db.transaction.TransactionAdapter;
-import org.delia.db.transaction.TransactionAwareDBInterface;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
@@ -69,7 +68,8 @@ public class DeliaImpl implements Delia {
 	public ResultValue execute(String src, BlobLoader blobLoader) {
 		List<Exp> expL = compileDeliaSource(src, true);
 
-		Runner runner = createRunner(null, blobLoader);
+		TransactionProvider tp = createTransactionProviderIfExecuteInTransaction();
+		Runner runner = createRunner(null, blobLoader, tp);
 		execTypes(runner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null, extraInfo);
@@ -80,6 +80,14 @@ public class DeliaImpl implements Delia {
 		return doExecute(runner, expL, extraInfo.datIdMap);
 	}
 
+
+	private TransactionProvider createTransactionProviderIfExecuteInTransaction() {
+		if (deliaOptions.executeInTransaction) {
+			TransactionProvider tp = factorySvc.createTransactionProvider(mainDBInterface);
+			return tp;
+		}
+		return null;
+	}
 
 	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap) {
 		ResultValue res = null;
@@ -112,11 +120,11 @@ public class DeliaImpl implements Delia {
 
 
 	//only public for unit tests
-	public Runner createRunner(DeliaSession dbsess, BlobLoader blobLoader) {
+	public Runner createRunner(DeliaSession dbsess, BlobLoader blobLoader, TransactionProvider tp) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		
 		//to support transactions use session dbInterface if there is one
-		DBInterfaceFactory dbinter = calcDBInterface(dbsess); 
+		DBInterfaceFactory dbinter = calcDBInterface(dbsess, tp); 
 		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
@@ -145,7 +153,7 @@ public class DeliaImpl implements Delia {
 		return runner;
 	}
 
-	private DBInterfaceFactory calcDBInterface(DeliaSession dbsess) {
+	private DBInterfaceFactory calcDBInterface(DeliaSession dbsess, TransactionProvider tp) {
 		//to support transactions use session dbInterface if there is one
 		if (dbsess != null) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) dbsess;
@@ -154,9 +162,9 @@ public class DeliaImpl implements Delia {
 				return ta.getTransactionAwareDBInterface();
 			}
 			return mainDBInterface;
-		} else if (this.deliaOptions.executeInTransaction) {
-			DBInterfaceFactory dbinter = new TransactionAwareDBInterface(mainDBInterface);
-			return dbinter;
+		} else if (tp != null) {
+			TransactionAdapter ta = (TransactionAdapter) tp;
+			return ta.getTransactionAwareDBInterface();
 		} else {
 			return mainDBInterface;
 		}
@@ -170,7 +178,8 @@ public class DeliaImpl implements Delia {
 		List<Exp> expL =  compileDeliaSource(src, false);
 
 		//1st pass
-		Runner mainRunner = createRunner(null, blobLoader);
+		TransactionProvider tp = createTransactionProviderIfExecuteInTransaction();
+		Runner mainRunner = createRunner(null, blobLoader, tp);
 		execTypes(mainRunner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan, extraInfo);
@@ -339,7 +348,7 @@ public class DeliaImpl implements Delia {
 			}
 		}
 
-		Runner runner = createRunner(session, blobLoader);
+		Runner runner = createRunner(session, blobLoader, null);
 		ResultValue res = doExecute(runner, expL, session.getDatIdMap());
 		
 		if (session instanceof DeliaSessionImpl) {

@@ -6,8 +6,8 @@ import org.delia.DeliaSession;
 import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
-import org.delia.db.h2.H2ConnectionHelper;
 import org.delia.db.h2.test.H2TestCleaner;
+import org.delia.db.postgres.PostgresConnectionHelper;
 import org.delia.db.sizeof.DeliaTestBase;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.ResultValue;
@@ -18,7 +18,7 @@ import org.junit.Test;
  * @author Ian Rae
  *
  */
-public class H2TransactionTests extends DeliaTestBase { 
+public class PostgresTransactionTests extends DeliaTestBase { 
 	
 	@Test
 	public void testCommit() {
@@ -115,14 +115,14 @@ public class H2TransactionTests extends DeliaTestBase {
 	
 	@Override
 	protected DeliaGenericDao createDao() {
-		ConnectionDefinition connStr = H2ConnectionHelper.getTestDB();
+		ConnectionDefinition connStr = PostgresConnectionHelper.getTestDB();
 		this.delia = DeliaBuilder.withConnection(connStr).build();
 		System.out.println("creating dao..");
 		return new DeliaGenericDao(delia);
 	}
 	
 	private void cleanTables() {
-		H2TestCleaner cleaner = new H2TestCleaner(DBType.H2);
+		H2TestCleaner cleaner = new H2TestCleaner(DBType.POSTGRES);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
 	}
 
