@@ -12,7 +12,7 @@ import org.delia.zdb.DBObserverFactory;
 public class TransactionAwareDBInterface implements DBInterfaceFactory {
 	
 	private DBInterfaceFactory inner;
-	private DBConnection currentConn; //one and only
+	private TransactionAwareDBConnection currentConn; //one and only
 	
 	public TransactionAwareDBInterface(DBInterfaceFactory dbInterface) {
 		this.inner = dbInterface;
@@ -41,7 +41,7 @@ public class TransactionAwareDBInterface implements DBInterfaceFactory {
 	@Override
 	public DBConnection openConnection() {
 		if (currentConn == null) {
-			currentConn = inner.openConnection();
+			currentConn = new TransactionAwareDBConnection(inner.openConnection());
 		}
 		return currentConn;
 	}
@@ -79,6 +79,10 @@ public class TransactionAwareDBInterface implements DBInterfaceFactory {
 	@Override
 	public HLDFactory getHLDFactory() {
 		return inner.getHLDFactory();
+	}
+
+	public TransactionAwareDBConnection getCurrentConn() {
+		return currentConn;
 	}
 
 }

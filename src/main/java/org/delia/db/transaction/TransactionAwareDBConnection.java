@@ -14,6 +14,9 @@ public class TransactionAwareDBConnection implements DBConnection {
 
 	public TransactionAwareDBConnection(DBConnection conn) {
 		this.conn = conn;
+		
+		//we lazily start transaction when first connection is created within the transaction
+		//this.conn.setAutoCommit(false);
 	}
 	
 	@Override
