@@ -1,7 +1,5 @@
 package org.delia.db.h2;
 
-import javax.sql.DataSource;
-
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
 

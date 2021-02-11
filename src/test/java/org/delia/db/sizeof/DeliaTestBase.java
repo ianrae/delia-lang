@@ -32,6 +32,7 @@ public abstract class DeliaTestBase  {
 	protected Log log = new UnitTestLog();
 	protected BlobLoader blobLoader;
 	protected boolean executeInTransaction = false;
+	protected DeliaGenericDao alreadyCreatedDao; 
 	
 	protected abstract String buildSrc();
 
@@ -39,7 +40,7 @@ public abstract class DeliaTestBase  {
 		String initialSrc = buildSrc();
 		log.log("initial: " + initialSrc);
 		
-		DeliaGenericDao dao = createDao(); 
+		DeliaGenericDao dao = alreadyCreatedDao != null ? alreadyCreatedDao : createDao(); 
 		Delia delia = dao.getDelia();
 		delia.getOptions().executeInTransaction = executeInTransaction;
 		dao.setBlobLoader(blobLoader);

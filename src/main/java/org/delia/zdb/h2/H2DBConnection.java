@@ -18,9 +18,10 @@ import org.delia.db.ValueHelper;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.type.DType;
 import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBConnectionInternal;
 import org.delia.zdb.DBExecuteContext;
 
-public class H2DBConnection extends ServiceBase implements DBConnection, BlobCreator {
+public class H2DBConnection extends ServiceBase implements DBConnection, BlobCreator, DBConnectionInternal {
 	protected Connection conn;
 	protected ConnectionFactory connectionFactory;
 	protected ValueHelper valueHelper;
@@ -40,6 +41,8 @@ public class H2DBConnection extends ServiceBase implements DBConnection, BlobCre
 		}
 
 		conn = connectionFactory.createConnection();
+		
+		factorySvc.getLog().log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
 	}
 
 	@Override
@@ -205,5 +208,10 @@ public class H2DBConnection extends ServiceBase implements DBConnection, BlobCre
 	@Override
 	public ValueHelper createValueHelper() {
 		return new ValueHelper(factorySvc, this);
+	}
+
+	@Override
+	public Connection getJdbcConnection() {
+		return conn;
 	}
 }

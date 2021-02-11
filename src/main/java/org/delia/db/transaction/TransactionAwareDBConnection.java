@@ -1,11 +1,14 @@
 package org.delia.db.transaction;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.delia.db.SqlStatement;
 import org.delia.db.ValueHelper;
 import org.delia.type.DType;
 import org.delia.zdb.DBConnection;
+import org.delia.zdb.DBConnectionInternal;
 import org.delia.zdb.DBExecuteContext;
 
 public class TransactionAwareDBConnection implements DBConnection {
@@ -16,7 +19,15 @@ public class TransactionAwareDBConnection implements DBConnection {
 		this.conn = conn;
 		
 		//we lazily start transaction when first connection is created within the transaction
-		//this.conn.setAutoCommit(false);
+		DBConnectionInternal conni = getConnInternal();
+		Connection jdbcConn = conni.getJdbcConnection();
+		try {
+			System.out.println("autoCommitFALSE");
+			jdbcConn.setAutoCommit(false);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -31,6 +42,9 @@ public class TransactionAwareDBConnection implements DBConnection {
 	
 	public void actuallyClose() {
 		conn.close();
+	}
+	public DBConnectionInternal getConnInternal() {
+		return (DBConnectionInternal) conn;
 	}
 
 	@Override

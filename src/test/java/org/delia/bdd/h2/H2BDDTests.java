@@ -359,7 +359,7 @@ public class H2BDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 1;
+		testIndexToRun = 0;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
@@ -372,7 +372,8 @@ public class H2BDDTests extends BDDBase {
 //		runR670File("t0-rule-index-migrate1.txt", 2);
 //		runR670File("t0-rule-index-migrate2.txt", 2);
 //		runR670File("t0-rule-index-migrate3.txt", 2);
-		runR670File("t0-rule-index2.txt", 1);
+//		runR670File("t0-rule-index2.txt", 1);
+		runR1700File("t0-let-field-single.txt", 3);
 	}
 	
 	//---
