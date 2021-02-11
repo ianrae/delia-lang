@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.delia.Delia;
 import org.delia.DeliaSession;
-import org.delia.app.LambdaTests.DoNothingTransactionProvider;
-import org.delia.app.LambdaTests.DoSomething3;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
 import org.delia.db.transaction.TransactionBody;
