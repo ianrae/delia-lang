@@ -91,7 +91,8 @@ public class DeliaSessionImpl implements DeliaSession {
 		child.datIdMap = this.datIdMap;
 		child.mostRecentRunner = null;
 		child.zoneId = zoneId;
-		//TODO: what about currentDBInterface?
+		//DAOs use child session so we want them to be in any current transaction
+		child.transactionProvider = transactionProvider;
 		return child;
 	}
 

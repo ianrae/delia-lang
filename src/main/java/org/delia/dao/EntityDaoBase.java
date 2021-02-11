@@ -225,7 +225,6 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 	protected DValue doInsert(T entity) {
 		String src = String.format("insert %s {}", typeName);
 		InsertExtraInfo extraInfo = new InsertExtraInfo();
-    	StructValueBuilder builder = new StructValueBuilder(structType);
 		doInsertOrUpdate(true, entity, src, extraInfo);
 		return extraInfo.generatedSerialValue;
 	}

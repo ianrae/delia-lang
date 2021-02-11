@@ -2,8 +2,12 @@ package org.delia.codegen.generators;
 
 import org.delia.codegen.CodeGenBase;
 import org.delia.db.sql.StrCreator;
+import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
+import org.delia.util.StringUtil;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -48,6 +52,7 @@ public class DaoBaseCodeGen extends CodeGenBase {
 		st.add("iname", typeName);
 		st.add("itname", String.format("<%s>", typeName));
 		st.add("immutname", typeName + "Immut");
+		st.add("asFn", getPKType(structType));
 
 		if (structType.getBaseType() == null) {
 			st.add("bname", "EntityDaoBase");
@@ -62,5 +67,16 @@ public class DaoBaseCodeGen extends CodeGenBase {
 		sc.nl();
 
 		return sc.toString();
+	}
+
+	private Object getPKType(DStructType structType) {
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		if (pkpair == null) {
+			return null;
+		}
+		String s = BuiltInTypes.getDeliaTypeNameFromShape(pkpair.type.getShape());
+		s = StringUtil.uppify(s);
+		s = String.format("as%s", s);
+		return s;
 	}
 }

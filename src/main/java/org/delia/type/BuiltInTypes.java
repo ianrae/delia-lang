@@ -29,6 +29,19 @@ public enum BuiltInTypes {
     	default: return "unknown!";
     	}
     }
+	public static String getAsFnName(BuiltInTypes builtIn) {
+    	switch(builtIn) {
+    	case INTEGER_SHAPE: return "asInt";
+    	case BOOLEAN_SHAPE: return "asBoolean";
+    	case NUMBER_SHAPE: return "asNumber";
+    	case DATE_SHAPE: return "asDate";
+    	case BLOB_SHAPE: return "asBlob";
+    	case LONG_SHAPE: return "asLong";
+    	case STRING_SHAPE: return "asString";
+    	case RELATION_SHAPE: return "asRelation";
+    	default: return "unknown!";
+    	}
+    }
 	public static String convertDTypeNameToDeliaName(String typeName) {
     	switch(typeName) {
     	case "INTEGER_SHAPE": return "int";
