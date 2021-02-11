@@ -8,7 +8,6 @@ import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.ast.Exp;
-import org.delia.db.transaction.TransactionAdapter;
 import org.delia.db.transaction.TransactionBody;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.db.transaction.VoidTransactionBody;
@@ -17,6 +16,7 @@ import org.delia.runner.ResultValue;
 import org.delia.runner.Runner;
 import org.delia.sprig.SprigServiceImpl;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.zdb.DBInterfaceFactory;
 
 public class DeliaSessionImpl implements DeliaSession {
@@ -32,7 +32,8 @@ public class DeliaSessionImpl implements DeliaSession {
 	public DatIdMap datIdMap;
 	public Runner mostRecentRunner;
 	public ZoneId zoneId;
-	public DBInterfaceFactory currentDBInterface;
+//	public DBInterfaceFactory currentDBInterface;
+	public TransactionProvider transactionProvider; //at most one
 	
 	public DeliaSessionImpl(Delia delia) {
 		this.delia = delia;
@@ -152,16 +153,17 @@ public class DeliaSessionImpl implements DeliaSession {
 	
 
 	private TransactionProvider initTransProvider() {
-		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
-		if (transProvider instanceof TransactionAdapter) {
-			TransactionAdapter ta = (TransactionAdapter) transProvider;
-			currentDBInterface = ta.createTransactionAwareDBInterface();
+		if (transactionProvider != null) {
+			DeliaExceptionHelper.throwError("nested-transactions-not-supported", "Not allowed to run a transaction within a transaction");
 		}
+		
+		TransactionProvider transProvider = delia.getFactoryService().createTransactionProvider(delia.getDBInterface());
+		this.transactionProvider = transProvider;
 		transProvider.beginTransaction();
 		return transProvider;
 	}
 	private void endTransProvider() {
-		currentDBInterface = delia.getDBInterface();
+		transactionProvider = null;
 	}
 	
 }

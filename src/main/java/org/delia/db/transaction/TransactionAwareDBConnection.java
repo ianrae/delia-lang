@@ -1,8 +1,6 @@
 package org.delia.db.transaction;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import org.delia.db.SqlStatement;
 import org.delia.db.ValueHelper;
@@ -17,17 +15,6 @@ public class TransactionAwareDBConnection implements DBConnection {
 
 	public TransactionAwareDBConnection(DBConnection conn) {
 		this.conn = conn;
-		
-		//we lazily start transaction when first connection is created within the transaction
-		DBConnectionInternal conni = getConnInternal();
-		Connection jdbcConn = conni.getJdbcConnection();
-		try {
-			System.out.println("autoCommitFALSE");
-			jdbcConn.setAutoCommit(false);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	@Override

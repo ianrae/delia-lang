@@ -21,7 +21,14 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	@Override
 	public void beginTransaction() {
 		log.log("beginTransaction..");
-		//transAwareDBInterface will lazily start the transaction
+		transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+		Connection jdbcConn = getJdbcConn(); 
+		try {
+			jdbcConn.commit();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -55,9 +62,14 @@ public class TransactionProviderImpl implements TransactionProvider, Transaction
 	}
 
 	@Override
-	public DBInterfaceFactory createTransactionAwareDBInterface() {
-		this.transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+	public TransactionAwareDBInterface getTransactionAwareDBInterface() {
 		return transAwareDBInterface;
 	}
+
+//	@Override
+//	public DBInterfaceFactory createTransactionAwareDBInterface() {
+//		this.transAwareDBInterface = new TransactionAwareDBInterface(dbInterface);
+//		return transAwareDBInterface;
+//	}
 
 }

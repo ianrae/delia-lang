@@ -17,6 +17,7 @@ import org.delia.db.DBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.modify.SxMigrationServiceImpl;
+import org.delia.db.transaction.TransactionAdapter;
 import org.delia.db.transaction.TransactionAwareDBInterface;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.error.DeliaError;
@@ -148,7 +149,11 @@ public class DeliaImpl implements Delia {
 		//to support transactions use session dbInterface if there is one
 		if (dbsess != null) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) dbsess;
-			return sessimpl.currentDBInterface;
+			if (sessimpl.transactionProvider != null) {
+				TransactionAdapter ta = (TransactionAdapter) sessimpl.transactionProvider;
+				return ta.getTransactionAwareDBInterface();
+			}
+			return mainDBInterface;
 		} else if (this.deliaOptions.executeInTransaction) {
 			DBInterfaceFactory dbinter = new TransactionAwareDBInterface(mainDBInterface);
 			return dbinter;
@@ -178,7 +183,6 @@ public class DeliaImpl implements Delia {
 			session.datIdMap = extraInfo.datIdMap;
 			session.mostRecentRunner = mainRunner;
 			session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
-			session.currentDBInterface = mainDBInterface;
 			return session;
 		}
 
@@ -192,7 +196,6 @@ public class DeliaImpl implements Delia {
 		session.datIdMap = extraInfo.datIdMap;
 		session.mostRecentRunner = mainRunner;
 		session.zoneId = factorySvc.getTimeZoneService().getDefaultTimeZone();
-		session.currentDBInterface = mainDBInterface;
 		return session;
 	}
 
