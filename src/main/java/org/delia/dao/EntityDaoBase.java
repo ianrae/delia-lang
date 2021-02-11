@@ -60,12 +60,15 @@ public abstract class EntityDaoBase<T extends DeliaImmutable> extends ServiceBas
 				inputL.add(createPartialDValue(entity));
 			}
 		}
-		DValueIterator iter = new DValueIterator(inputL);	
-		DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
 		
 		//use child session for thread-safety and isolation
 		DeliaSession session = mainSession.createChildSession();
-		session.setRunnerIntiliazer(dri);
+
+		if (! inputL.isEmpty()) {
+			DValueIterator iter = new DValueIterator(inputL);	
+			DaoRunnerInitializer dri = new DaoRunnerInitializer(iter);
+			session.setRunnerIntiliazer(dri);
+		}
 		ResultValue res = delia.continueExecution(src, session);
 		session.setRunnerIntiliazer(null);
 		if (extraInfo != null) {
