@@ -65,3 +65,37 @@ t5(ftype,uname,fname,pktype,asname) ::= <<
   }
 >>
 
+t4list(ftype,listftype,uname,fname) ::= <<
+  @Override
+  public <listftype> get<uname>() {
+	DValue inner = helper.getField("<fname>");
+	if (inner == null) return null;
+	DRelation drel =  inner.asRelation();
+	if (drel.haveFetched()) {
+	    <listftype> list = new ArrayList\<>();
+	    for(DValue fetched: drel.getFetchedItems()) {
+			<ftype> immut = new <ftype>Immut(fetched);
+			list.add(immut);
+		}
+		return list; //hey
+	} else {
+		return null;
+	}
+  }
+>>
+
+t5list(ftype,listpktype,uname,fname,pktype,asname) ::= <<
+  @Override
+  public <listpktype> get<uname>PK() {
+    DValue inner = helper.getField("<fname>");
+    if (inner == null) return 0;
+    DRelation drel =  inner.asRelation();
+    
+    <listpktype> list = new ArrayList\<>();
+    for(DValue fk: drel.getMultipleKeys()) {
+		<pktype> x = fk.<asname>();
+		list.add(x);
+	}
+	return list; //heyx
+  }
+>>

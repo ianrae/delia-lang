@@ -52,10 +52,14 @@ public class ImmutCodeGen extends CodeGenBase {
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
 
+			boolean isList = helper().isList(structType, fieldName);
 			String javaType = helper().convertToJava(structType, fieldName);
 			String asFn = helper().convertToAsFn(ftype);
 			
 			if (ftype.isStructShape()) {
+				if (isList) {
+					doListOnes(g, sc, javaType, fieldName, ftype);
+				}
 				//t4(ftype,uname,fname) ::= <<
 				st = g.getInstanceOf("t4");
 				st.add("ftype", javaType);
@@ -90,5 +94,27 @@ public class ImmutCodeGen extends CodeGenBase {
 		sc.nl();
 
 		return sc.toString();
+	}
+
+	private void doListOnes(STGroup g, StrCreator sc, String javaType, String fieldName, DType ftype) {
+		//t4(ftype,uname,fname) ::= <<
+		ST st = g.getInstanceOf("t4list");
+		st.add("ftype", javaType);
+		st.add("listftype", String.format("List<%s>", javaType));
+		st.add("uname", StringUtil.uppify(fieldName));
+		st.add("fname", fieldName);
+		sc.addStr(st.render());
+		
+		if (helper().hasPK(ftype)) {
+			//t5(ftype,uname,fname,pktype,asname) ::= <<
+			st = g.getInstanceOf("t5list");
+			st.add("listpktype", String.format("List<%s>", helper().getPKType(ftype)));
+			st.add("ftype", javaType);
+			st.add("uname", StringUtil.uppify(fieldName));
+			st.add("fname", fieldName);
+			st.add("pktype", helper().getPKType(ftype));
+			st.add("asname", helper().getPKTypeAsFn(ftype));
+			sc.addStr(st.render());
+		}
 	}
 }
