@@ -81,6 +81,7 @@ public class MemFetchFunction extends MemFunctionBase {
 					//it may be that its an empty relation. if so, don't fetch
 					if (inner.asRelation().getMultipleKeys().isEmpty()) {
 						inner = null;
+						dval.asMap().put(targetFieldName, inner);
 						continue;
 					}
 				}
