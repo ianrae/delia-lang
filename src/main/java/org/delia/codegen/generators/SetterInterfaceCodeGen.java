@@ -30,6 +30,7 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 		addDoNotModifyComment(sc);
 		helper().addImports(sc, structType);
 		sc.o("import org.delia.codegen.DeliaEntity;");
+		sc.o("import java.util.List;");
 		sc.nl();
 		sc.nl();
 		
@@ -38,20 +39,34 @@ public class SetterInterfaceCodeGen extends CodeGenBase {
 		sc.nl();
 		for(String fieldName: structType.getDeclaredFields().keySet()) {
 			DType ftype = structType.getDeclaredFields().get(fieldName);
-
+			boolean isList = helper().isList(structType, fieldName);
 			String javaType = helper().convertToJava(structType, fieldName);
-			sc.o("  void set%s(%s val);", StringUtil.uppify(fieldName), javaType);
-			sc.nl();
-			if (ftype.isStructShape()) {
-				TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(ftype);
-				if (pkpair != null) {
-					String s = helper().convertToJava(pkpair.type, false); //Integer
-//					String s = BuiltInTypes.getDeliaTypeNameFromShape(pkpair.type.getShape());
-					sc.o("  void set%sPK(%s val);", StringUtil.uppify(fieldName), s);
-					sc.nl();
+			
+			if (isList) {
+				sc.o("  void set%s(List<%s> val);", StringUtil.uppify(fieldName), javaType);
+				sc.nl();
+				if (ftype.isStructShape()) {
+					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+					if (pkpair != null) {
+						String s = helper().convertToJava(pkpair.type, false); //Integer
+//						String s = BuiltInTypes.getDeliaTypeNameFromShape(pkpair.type.getShape());
+						sc.o("  void set%sPK(List<%s> val);", StringUtil.uppify(fieldName), s);
+						sc.nl();
+					}
+				}
+			} else {
+				sc.o("  void set%s(%s val);", StringUtil.uppify(fieldName), javaType);
+				sc.nl();
+				if (ftype.isStructShape()) {
+					TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(ftype);
+					if (pkpair != null) {
+						String s = helper().convertToJava(pkpair.type, false); //Integer
+//						String s = BuiltInTypes.getDeliaTypeNameFromShape(pkpair.type.getShape());
+						sc.o("  void set%sPK(%s val);", StringUtil.uppify(fieldName), s);
+						sc.nl();
+					}
 				}
 			}
-			
 		}
 		sc.o("}");
 		sc.nl();
