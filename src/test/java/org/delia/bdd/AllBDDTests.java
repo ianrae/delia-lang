@@ -99,7 +99,7 @@ public class AllBDDTests extends BDDBase {
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
-		runR700File("t0-insert-parent.txt", 2);
+		runR700File("t0-insert-parent.txt", 5);
 		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
@@ -339,20 +339,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 5;
+//		testIndexToRun = 4;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-//		runR1350File("t0-filter-op-int.txt", 13);
-//		runR1350File("t0-filter-op-number.txt", 13);
-//		runR1350File("t0-filter-op-boolean.txt", 6);
-//		runR1350File("t0-filter-op-date.txt", 13);
-//		runR1350File("t0-filter-op-relation.txt", 14);
-//		runR1350File("t0-filter-and-or.txt", 7);
-//		runR1350File("t0-filter-like.txt", 6);
-//		runR1400File("t0-filterfn-date.txt", 12);
-		runR660File("t0-rule-uniquefields.txt", 2);
+		runR700File("t0-insert-parent.txt", 5);
 	}
 	
 	//---

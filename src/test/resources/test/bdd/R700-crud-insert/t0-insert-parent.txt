@@ -38,3 +38,48 @@ value:a:Address {
  vcity:'kingston'
  vmanager:{56}
 }
+
+---
+title: add worker,query parent
+given:
+  insert Customer {id: 56, name: 'bob', workers: '100' }
+when:
+  let x = Customer[56]
+then:
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vworkers:null
+}
+
+---
+title: add worker,query parent fks
+given:
+  insert Customer {id: 56, name: 'bob', workers: '100' }
+when:
+  let x = Customer[56].fks()
+then:
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vworkers:{100}
+}
+
+---
+title: add worker,query parent fetch
+given:
+  insert Customer {id: 56, name: 'bob', workers: '100' }
+when:
+  let x = Customer[56].fetch('workers')
+then:
+value:a:Customer {
+ vid:56
+ vname:'bob'
+ vworkers:{100:
+  {
+   vsid:'100'
+   vcity:'kingston'
+   vmanager:{56}
+  }
+ }
+ }
