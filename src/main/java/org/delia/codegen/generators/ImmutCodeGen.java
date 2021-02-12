@@ -59,6 +59,7 @@ public class ImmutCodeGen extends CodeGenBase {
 			if (ftype.isStructShape()) {
 				if (isList) {
 					doListOnes(g, sc, javaType, fieldName, ftype);
+					continue;
 				}
 				//t4(ftype,uname,fname) ::= <<
 				st = g.getInstanceOf("t4");

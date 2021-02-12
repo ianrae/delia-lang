@@ -3,6 +3,8 @@ t1() ::= <<
 import org.delia.type.DStructHelper;
 import org.delia.type.DValue;
 import org.delia.type.DRelation;
+import java.util.List;
+import java.util.ArrayList;
 
 >>
 
@@ -88,7 +90,7 @@ t5list(ftype,listpktype,uname,fname,pktype,asname) ::= <<
   @Override
   public <listpktype> get<uname>PK() {
     DValue inner = helper.getField("<fname>");
-    if (inner == null) return 0;
+    if (inner == null) return null;
     DRelation drel =  inner.asRelation();
     
     <listpktype> list = new ArrayList\<>();

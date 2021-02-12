@@ -29,6 +29,7 @@ public class GetterInterfaceCodeGen extends CodeGenBase {
 		addDoNotModifyComment(sc);
 		helper().addImports(sc, getImportList(structType));
 		sc.o("import org.delia.codegen.DeliaImmutable;");
+		sc.o("import java.util.List;");
 		sc.nl();
 		sc.nl();
 
