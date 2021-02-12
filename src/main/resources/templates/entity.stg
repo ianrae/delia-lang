@@ -7,6 +7,7 @@ import org.delia.type.DStructHelper;
 import org.delia.type.DValue;
 import org.delia.type.DRelation;
 import java.util.List;
+import java.util.ArrayList;
 
 >>
 
@@ -111,3 +112,54 @@ t5(ftype,uname,uname2,pktype,pkfield) ::= <<
 	set<uname>(entity);
   }
 >>
+
+t4list(ftype,listftype,fobjname,uname,fname,nullval) ::= <<
+    @Override
+    public <listftype> get<uname>() {  //t4
+      String fieldName = "<fname>";
+      if (setMap.containsKey(fieldName)) {
+        return (<listftype>)setMap.get(fieldName); //can return null
+      }
+      
+      if (helper == null) return <nullval>;
+      DValue inner = helper.getField("<fname>");
+	  if (inner == null) return null;
+      DRelation drel =  inner.asRelation();
+      if (drel.haveFetched()) {
+       <listftype> list = new ArrayList\<>();
+       for(DValue fetched: drel.getFetchedItems()) {
+         <ftype> immut = new <ftype>Immut(fetched);
+         list.add(immut);
+		}       
+         return list;
+       } else {
+         return null;
+       }
+    }
+    @Override
+    public void set<uname>(<listftype> val) {
+      setMap.put("<fname>", val);
+    }
+    
+>>
+
+t5list(ftype,listftype,listpktype,uname,uname2,pktype,pkfield) ::= <<
+  @Override
+  public <listpktype> get<uname>PK() {
+    <listftype> immutL = get<uname>();
+    <listpktype> list = new ArrayList<>();
+    for(<ftype> ff: immutL) {
+		<pktype> z = immut.get<pkfield>(); //t5
+		list.add(z);
+	}
+	return list;
+  }
+  @Override
+  public void set<uname>PK(<listpktype> pk) {
+	<uname2>Entity entity = new <uname2>Entity();
+	entity.set<pkfield>(pk);
+	set<uname>(entity);
+  }
+>>
+
+
