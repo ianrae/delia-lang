@@ -28,7 +28,7 @@ public class RelationFetchHelper {
 	public boolean fetchParentSide(DValue dval, String targetFieldName) {
 		DStructType structType = (DStructType) dval.getType();
 		RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, targetFieldName);
-		if (relinfo != null && relinfo.isParent && ! relinfo.isManyToMany()) {
+		if (relinfo != null && relinfo.notContainsFKOrIsManyToMany()) {
 			DValue inner = this.createRelation(dval, targetFieldName);
 			dval.asMap().put(targetFieldName, inner);
 			RelationOneRule oneRule = DRuleHelper.findOneRule(structType, targetFieldName);
@@ -53,6 +53,7 @@ public class RelationFetchHelper {
 				if (! qq.emptyResults()) {
 					drel.setFetchedItems(qq.dvalList);
 				}
+				return true;
 			}
 		}
 		return false;

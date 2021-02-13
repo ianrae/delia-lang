@@ -92,7 +92,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testR660() {
+		enableAllFileCheck = false;
 		runR660File("t0-rule-uniquefields.txt", 2);
+//		runR660File("t0-rule-uniquefields2.txt", 2);
+//		runR660File("t0-rule-uniquefields-migrate1.txt", 2);
+//		runR660File("t0-rule-uniquefields-migrate2.txt", 2);
+//		runR660File("t0-rule-uniquefields-migrate3.txt", 2);
 	}
 	
 	@Test
@@ -346,7 +351,9 @@ public class AllBDDTests extends BDDBase {
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
 //		runR700File("t0-insert-parent.txt", 5);
-		runR1300File("t0-let-query-implicit-fetch.txt", 1);
+//		runR1300File("t0-let-query-implicit-fetch.txt", 1);
+//		runR1600File("t0-fetch-mm.txt", 4);
+		runR700File("t0-insert-parent.txt", 5);
 	}
 	
 	//---
