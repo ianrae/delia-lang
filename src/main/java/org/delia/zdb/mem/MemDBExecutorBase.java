@@ -18,8 +18,10 @@ import org.delia.db.memdb.PrimaryKeyRowSelector;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
+import org.delia.hld.FetchSpec;
 import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.JoinElement;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
@@ -59,13 +61,20 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 		this.preSpecSvc = new PreSpecService(factorySvc, dbInterface);
 	}
 
-	protected QueryResponse doExecuteQuery(HLDQueryStatement hld, QueryContext qtx) {
+	protected QueryResponse doExecuteQuery(HLDQueryStatement hld, MemFunctionHelper helper, QueryContext qtx) {
 		if (qtx.existingQResp != null) {
 			return qtx.existingQResp;
 		}
 		QuerySpec spec = hld.querySpec;
-		if (!hld.hldquery.throughChain.isEmpty()) {
-			System.out.println("iiiii");
+		
+		//do any implicit fetches first so they are available when doing the filter
+		for(JoinElement el: hld.hldquery.joinL) {
+			if (el.isImplicitJoin) {
+				if (qtx.implicitFetchL == null) {
+					qtx.implicitFetchL = new ArrayList<>();
+				}
+				qtx.implicitFetchL.add(el);
+			}
 		}
 		
 		

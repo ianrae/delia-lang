@@ -18,6 +18,7 @@ public class JoinElement  {
 	public String aliasName;
 	public String srcAlias; //needed for JOIN ON. alias of table we're joining froms
 	public String aliasNameAdditional; //M:M we sometimes need to join assoctbl and fk table
+	public boolean isImplicitJoin; //eg filter does addr.city=='toronto'
 	
 	public boolean usedForFK() {
 		return fetchSpec != null && fetchSpec.isFK;

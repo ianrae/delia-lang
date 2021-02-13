@@ -272,9 +272,9 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 //	}
 	@Override
 	public QueryResponse executeHLDQuery(HLDQueryStatement hld, SqlStatementGroup stgrp, QueryContext qtx) {
-		QueryResponse qresp = doExecuteQuery(hld, qtx);
-		
 		MemFunctionHelper helper = new MemFunctionHelper(factorySvc, dbInterface, registry, createFetchRunner());
+		QueryResponse qresp = doExecuteQuery(hld, helper, qtx);
+		
 		qresp = helper.executeHLDQuery(hld, qresp);
 		return qresp;
 	}

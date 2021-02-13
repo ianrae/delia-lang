@@ -8,6 +8,7 @@ import org.delia.core.ServiceBase;
 import org.delia.hld.FetchSpec;
 import org.delia.hld.FinalField;
 import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.JoinElement;
 import org.delia.hld.QScope;
 import org.delia.hld.QueryFnSpec;
 import org.delia.hld.RelationField;

@@ -67,11 +67,11 @@ public class JoinTreeBuilder {
 	private void addImplicitJoin(DStructType fromType, FilterVal fval, List<JoinElement> resultL) {
 		if (fval.isSymbol()) {
 			String fieldName = fval.asSymbol();
-			addFieldJoinIfNeeded(fromType, fieldName, resultL);
+			addImplicitFieldJoinIfNeeded(fromType, fieldName, resultL, false);
 		} else if (fval.isSymbolChain()) {
 			String fieldName = fval.asString();
 			SymbolChain chain = fval.asSymbolChain();
-			chain.el = addFieldJoinIfNeeded(chain.fromType, fieldName, resultL, true);
+			chain.el = addImplicitFieldJoinIfNeeded(chain.fromType, fieldName, resultL, true);
 		} else if (fval.isFn()) {
 			//do args
 			FilterFunc filterFn = fval.asFunc();
@@ -81,6 +81,13 @@ public class JoinTreeBuilder {
 		}
 	}
 
+	private JoinElement addImplicitFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL, boolean forceAdd) {
+		JoinElement el = addFieldJoinIfNeeded(fromType, fieldName, resultL, forceAdd);
+		if (el != null) {
+			el.isImplicitJoin = true;
+		}
+		return el;
+	}
 	private void addFieldJoinIfNeeded(DStructType fromType, String fieldName, List<JoinElement> resultL) {
 		addFieldJoinIfNeeded(fromType, fieldName, resultL, false);
 	}
