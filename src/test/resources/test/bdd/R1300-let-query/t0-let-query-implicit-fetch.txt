@@ -19,13 +19,14 @@ when:
 then:
 value:a:Customer {
  vid:55
- vaddr:{100:
- { 
-  vid:100
-  vcust:{55}
-  vcity:'toronto'
-  }
-  }
+IF(MEM): vaddr:{100:
+IF(MEM): { 
+IF(MEM):  vid:100
+IF(MEM):  vcust:{55}
+IF(MEM):  vcity:'toronto'
+IF(MEM):  }
+IF(MEM):  }
+ELSE: vaddr:null
 }
 
 
