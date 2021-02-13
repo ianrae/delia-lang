@@ -19,6 +19,7 @@ import org.delia.db.memdb.RowSelector;
 import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
 import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDQueryStatement;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
@@ -58,11 +59,17 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 		this.preSpecSvc = new PreSpecService(factorySvc, dbInterface);
 	}
 
-	protected QueryResponse doExecuteQuery(QuerySpec spec, QueryContext qtx) {
+	protected QueryResponse doExecuteQuery(HLDQueryStatement hld, QueryContext qtx) {
 		if (qtx.existingQResp != null) {
 			return qtx.existingQResp;
 		}
+		QuerySpec spec = hld.querySpec;
+		if (!hld.hldquery.throughChain.isEmpty()) {
+			System.out.println("iiiii");
+		}
 		
+		
+		//TODO: delete this prequery. not needed now i think
 		//avoid infinite loop
 		int maxPreQueries = 10;
 		QuerySpec preQuerySpec = null;

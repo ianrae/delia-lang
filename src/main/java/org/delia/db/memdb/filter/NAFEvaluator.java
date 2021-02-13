@@ -3,8 +3,10 @@ package org.delia.db.memdb.filter;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.memdb.filter.filterfn.FilterFnRunner;
+import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.util.DeliaExceptionHelper;
 
 public class NAFEvaluator implements OpEvaluator {
 	private XNAFMultiExp op1;
@@ -33,11 +35,19 @@ public class NAFEvaluator implements OpEvaluator {
 		DValue dval = (DValue) left;
 		String fieldName = getFieldName();
 		DValue fieldval = dval.asStruct().getField(fieldName);
-
-		DValue resultVal = filterFnRunner.executeFilterFn(op1, fieldval);
-		if (resultVal != null) {
-			return inner.match(resultVal);
+		
+		if (fieldval != null && fieldval.getType().isRelationShape()) {
+			DRelation drel = fieldval.asRelation();
+			if (!drel.haveFetched()) {
+				DeliaExceptionHelper.throwError("implicit-fetch-needed", "Filter containing %s.%s needs in implicit fetch. This is a bug!", dval.getType().getName(), fieldName);
+			}
+		} else {
+			DValue resultVal = filterFnRunner.executeFilterFn(op1, fieldval);
+			if (resultVal != null) {
+				return inner.match(resultVal);
+			}
 		}
+
 		return false;
 	}
 
