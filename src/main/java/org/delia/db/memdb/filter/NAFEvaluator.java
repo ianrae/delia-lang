@@ -7,6 +7,8 @@ import org.delia.type.DRelation;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.zdb.mem.ImplicitFetchContext;
+import org.delia.zdb.mem.RelationFetchHelper;
 
 public class NAFEvaluator implements OpEvaluator {
 	private XNAFMultiExp op1;
@@ -14,6 +16,7 @@ public class NAFEvaluator implements OpEvaluator {
 	private DTypeRegistry registry;
 	private FilterFnRunner filterFnRunner;
 	private boolean negFlag;
+	private ImplicitFetchContext implicitCtx;
 
 	public NAFEvaluator(XNAFMultiExp op1, OpEvaluator inner, DTypeRegistry registry) {
 		this.op1 = op1;
@@ -37,9 +40,24 @@ public class NAFEvaluator implements OpEvaluator {
 		DValue fieldval = dval.asStruct().getField(fieldName);
 		
 		if (fieldval != null && fieldval.getType().isRelationShape()) {
+//				DeliaExceptionHelper.throwError("implicit-fetch-needed", "Filter containing %s.%s needs in implicit fetch. This is a bug!", dval.getType().getName(), fieldName);
 			DRelation drel = fieldval.asRelation();
 			if (!drel.haveFetched()) {
-				DeliaExceptionHelper.throwError("implicit-fetch-needed", "Filter containing %s.%s needs in implicit fetch. This is a bug!", dval.getType().getName(), fieldName);
+				RelationFetchHelper helper = new RelationFetchHelper(registry, implicitCtx.fetchRunner);
+				helper.fetchParentSide(dval, fieldName);
+				fieldval = dval.asStruct().getField(fieldName);
+				drel = fieldval.asRelation(); //is new drel object
+				XNAFSingleExp sexp = op1.qfeL.get(1);
+				String subFieldName = sexp.funcName;
+				
+				//Note. this works for addr.city (one deep) but not any deeper
+				//TODO: support deeper, such as addr.country.code
+				for(DValue fetchedVal: drel.getFetchedItems()) {
+					DValue targetval = fetchedVal.asStruct().getField(subFieldName);
+					if (inner.match(targetval)) {
+						return true;
+					}
+				}
 			}
 		} else {
 			DValue resultVal = filterFnRunner.executeFilterFn(op1, fieldval);
@@ -65,5 +83,9 @@ public class NAFEvaluator implements OpEvaluator {
 	@Override
 	public void setNegFlag(boolean negFlag) {
 		this.negFlag = negFlag;
+	}
+
+	public void setImplicitContext(ImplicitFetchContext implicitCtx) {
+		this.implicitCtx = implicitCtx;
 	}
 }

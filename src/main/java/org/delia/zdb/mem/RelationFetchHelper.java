@@ -4,7 +4,9 @@ import org.delia.relation.RelationInfo;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.runner.FetchRunner;
+import org.delia.runner.QueryResponse;
 import org.delia.type.BuiltInTypes;
+import org.delia.type.DRelation;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
@@ -44,6 +46,13 @@ public class RelationFetchHelper {
 				inner = null;
 				dval.asMap().put(targetFieldName, inner);
 				return true;
+			} else {
+				dval.asMap().put(targetFieldName, inner);
+				DRelation drel = inner.asRelation();
+				QueryResponse qq = fetchRunner.load(drel);
+				if (! qq.emptyResults()) {
+					drel.setFetchedItems(qq.dvalList);
+				}
 			}
 		}
 		return false;

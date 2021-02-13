@@ -13,6 +13,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
 import org.delia.db.memdb.filter.InEvaluator;
 import org.delia.db.memdb.filter.MultiOpEvaluator;
+import org.delia.db.memdb.filter.NAFEvaluator;
 import org.delia.db.memdb.filter.OpEvaluator;
 import org.delia.db.memdb.filter.OpFactory;
 import org.delia.error.ErrorTracker;
@@ -84,6 +85,11 @@ public class OpRowSelector extends RowSelectorBase {
 				evaluator.setRightVar(xop1);
 			} else {
 				evaluator.setRightVar(xop2);
+			}
+			
+			if (evaluator instanceof NAFEvaluator) {
+				NAFEvaluator nafeval = (NAFEvaluator) evaluator;
+				nafeval.setImplicitContext(implicitCtx);
 			}
 		}
 		private void initSingleInExpression(FilterOpFullExp fullexp, DStructType dtype) {

@@ -164,6 +164,7 @@ public class H2BDDTests extends BDDBase {
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
 		runR1300File("t0-let-varref.txt", 4); //TODO fix one
+		runR1300File("t0-let-query-implicit-fetch.txt", 1);
 	}
 	
 	@Test
@@ -367,13 +368,7 @@ public class H2BDDTests extends BDDBase {
 		HLDResultSetConverterBase.logResultSetDetails = true; 
 		
 //		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
-//		runR670File("t0-rule-index.txt", 2);
-//		runR670File("t0-rule-index2.txt", 1);
-//		runR670File("t0-rule-index-migrate1.txt", 2);
-//		runR670File("t0-rule-index-migrate2.txt", 2);
-//		runR670File("t0-rule-index-migrate3.txt", 2);
-//		runR670File("t0-rule-index2.txt", 1);
-		runR1700File("t0-let-field-single.txt", 3);
+		runR1300File("t0-let-query-implicit-fetch.txt", 1);
 	}
 	
 	//---

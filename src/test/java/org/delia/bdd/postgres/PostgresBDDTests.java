@@ -162,6 +162,7 @@ public class PostgresBDDTests extends BDDBase {
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
 		runR1300File("t0-let-varref.txt", 4); //TODO fix one
+		runR1300File("t0-let-query-implicit-fetch.txt", 1);
 	}
 
 	@Test

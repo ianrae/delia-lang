@@ -151,7 +151,7 @@ public class AllBDDTests extends BDDBase {
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
 		runR1300File("t0-let-varref.txt", 4); //TODO fix one
-		runR1300File("t0-let-query-implicit-fetch.txt", 3);
+		runR1300File("t0-let-query-implicit-fetch.txt", 1);
 	}
 	
 	@Test
@@ -346,7 +346,7 @@ public class AllBDDTests extends BDDBase {
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
 //		runR700File("t0-insert-parent.txt", 5);
-		runR1300File("t0-let-query-implicit-fetch.txt", 3);
+		runR1300File("t0-let-query-implicit-fetch.txt", 1);
 	}
 	
 	//---
