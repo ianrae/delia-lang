@@ -93,6 +93,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 			if (el.isImplicitJoin) {
 				if (implicitCtx == null) {
 					implicitCtx = new ImplicitFetchContext();
+					implicitCtx.fetchRunner = doCreateFetchRunner();
 				}
 				implicitCtx.implicitFetchL.add(el);
 			}
