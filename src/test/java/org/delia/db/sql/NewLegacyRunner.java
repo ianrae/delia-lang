@@ -1,15 +1,12 @@
 package org.delia.db.sql;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.api.DeliaImpl;
-import org.delia.api.DeliaSession;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
+import org.delia.base.DBTestHelper;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;
-import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.InternalCompileState;
@@ -24,9 +21,7 @@ public class NewLegacyRunner {
 	private Log log;
 
 	public NewLegacyRunner(Log log) {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).log(log).build();
-		this.delia = delia;
+		this.delia = DBTestHelper.createNewDelia();
 		this.log = delia.getLog();
 	}
 	public NewLegacyRunner(Delia delia) {

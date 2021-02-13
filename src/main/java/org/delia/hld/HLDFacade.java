@@ -3,7 +3,7 @@ package org.delia.hld;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.QueryExp;
@@ -24,6 +24,7 @@ import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
 import org.delia.log.LogLevel;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -103,21 +104,21 @@ public class HLDFacade extends ServiceBase {
 		logDebug(hlddel);
 		return hlddel;
 	}
-	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 		logDebug(hldupdate);
 		return hldupdate;
 	}
-	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
-		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator);
+		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 		logDebug(hldupsert);
 		return hldupsert;
 	}
-	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator) {
+	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
-		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator);
+		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator, blobLoader);
 		logDebug(hldins);
 		return hldins;
 	}

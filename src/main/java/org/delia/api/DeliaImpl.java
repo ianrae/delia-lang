@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.delia.Delia;
+import org.delia.DeliaOptions;
+import org.delia.DeliaSession;
 import org.delia.assoc.DatIdMap;
 import org.delia.compiler.DeliaCompiler;
 import org.delia.compiler.ast.Exp;
@@ -13,12 +16,16 @@ import org.delia.core.FactoryService;
 import org.delia.db.DBErrorConverter;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.MigrationService;
+import org.delia.db.schema.modify.SxMigrationServiceImpl;
+import org.delia.db.transaction.TransactionAdapter;
+import org.delia.db.transaction.TransactionProvider;
 import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.HLDFacade;
 import org.delia.hld.HLDFactory;
 import org.delia.log.Log;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DeliaException;
 import org.delia.runner.InternalCompileState;
 import org.delia.runner.ResultValue;
@@ -37,10 +44,8 @@ public class DeliaImpl implements Delia {
 		public DatIdMap datIdMap;
 	}
 	
-//	public static boolean useNewHLD = true;
-	
 	private Log log;
-	private DBInterfaceFactory dbInterface;
+	private DBInterfaceFactory mainDBInterface;
 	private FactoryService factorySvc;
 	private DeliaOptions deliaOptions = new DeliaOptions();
 	private MigrationService migrationSvc;
@@ -49,18 +54,19 @@ public class DeliaImpl implements Delia {
 	
 	public DeliaImpl(DBInterfaceFactory dbInterface, Log log, FactoryService factorySvc) {
 		this.log = log;
-		this.dbInterface = dbInterface;
+		this.mainDBInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		this.migrationSvc = new MigrationService(dbInterface, factorySvc);
+		this.migrationSvc = new SxMigrationServiceImpl(dbInterface, factorySvc);
 		this.errorAdjuster = new ErrorAdjuster();
 		this.hldFactory = dbInterface.getHLDFactory();
 	}
 
 	@Override
-	public ResultValue execute(String src) {
+	public ResultValue execute(String src, BlobLoader blobLoader) {
 		List<Exp> expL = compileDeliaSource(src, true);
 
-		Runner runner = createRunner(null);
+		TransactionProvider tpEIT = createTransactionProviderIfExecuteInTransaction();
+		Runner runner = createRunner(null, blobLoader, tpEIT);
 		execTypes(runner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, runner, null, extraInfo);
@@ -68,11 +74,24 @@ public class DeliaImpl implements Delia {
 			return migrationPlanRes;
 		}
 
-		return doExecute(runner, expL, extraInfo.datIdMap);
+		return doExecute(runner, expL, extraInfo.datIdMap, tpEIT);
 	}
 
 
-	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap) {
+	/**
+	 * One of the transaction modes is to run each Delia execute method in a transaction.
+	 * This is controlled by delia options flag: executeInTransaction
+	 * @return tpEIT (EIT means 'execute in transaction')
+	 */
+	private TransactionProvider createTransactionProviderIfExecuteInTransaction() {
+		if (deliaOptions.executeInTransaction) {
+			TransactionProvider tp = factorySvc.createTransactionProvider(mainDBInterface);
+			return tp;
+		}
+		return null;
+	}
+
+	private ResultValue doExecute(Runner runner, List<Exp> expL, DatIdMap datIdMap, TransactionProvider tpEIT) {
 		ResultValue res = null;
 		if (!deliaOptions.enableExecution) {
 			res = new ResultValue();
@@ -81,7 +100,18 @@ public class DeliaImpl implements Delia {
 		}
 
 		runner.setDatIdMap(datIdMap);
-		res = runner.executeProgram(expL);
+		if (deliaOptions.executeInTransaction) {
+			tpEIT.beginTransaction();
+			try {
+				res = runner.executeProgram(expL);
+				tpEIT.commitTransaction();
+			} catch (Exception e) {
+				tpEIT.rollbackTransaction();
+			}
+		} else {
+			//normal execution
+			res = runner.executeProgram(expL);
+		}
 		if (res != null && ! res.ok) {
 			List<DeliaError> errL = errorAdjuster.adjustErrors(res.errors);
 			throw new DeliaException(errL);
@@ -91,9 +121,12 @@ public class DeliaImpl implements Delia {
 
 
 	//only public for unit tests
-	public Runner createRunner(DeliaSession dbsess) {
+	public Runner createRunner(DeliaSession dbsess, BlobLoader blobLoader, TransactionProvider tp) {
 		ErrorTracker et = new SimpleErrorTracker(log);
-		Runner runner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
+		
+		//to support transactions use session dbInterface if there is one
+		DBInterfaceFactory dbinter = calcDBInterface(dbsess, tp); 
+		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
@@ -114,22 +147,44 @@ public class DeliaImpl implements Delia {
 		runner.setHLDFacade(hldFacade);
 
 		if (deliaOptions.dbObserverFactory != null) {
-			dbInterface.setObserverFactory(deliaOptions.dbObserverFactory);
-			dbInterface.setIgnoreSimpleSvcSql(deliaOptions.observeHLDSQLOnly);
+			dbinter.setObserverFactory(deliaOptions.dbObserverFactory);
+			dbinter.setIgnoreSimpleSvcSql(deliaOptions.observeHLDSQLOnly);
 		}
 		
 		return runner;
 	}
 
-	@Override
-	public DeliaSession beginSession(String src) {
-		return doBeginExecution(src, null);
+	private DBInterfaceFactory calcDBInterface(DeliaSession dbsess, TransactionProvider tp) {
+		//to support transactions use session dbInterface if there is one
+		if (dbsess != null) {
+			DeliaSessionImpl sessimpl = (DeliaSessionImpl) dbsess;
+			if (sessimpl.transactionProvider != null) {
+				//MEM db uses DoNothingTransactionProvider which does not implement TransactionAdapter
+				if (sessimpl.transactionProvider instanceof TransactionAdapter) {
+					TransactionAdapter ta = (TransactionAdapter) sessimpl.transactionProvider;
+					return ta.getTransactionAwareDBInterface();
+				}
+			}
+		} else if (tp != null) {
+			//MEM db uses DoNothingTransactionProvider which does not implement TransactionAdapter
+			if (tp instanceof TransactionAdapter) {
+				TransactionAdapter ta = (TransactionAdapter) tp;
+				return ta.getTransactionAwareDBInterface();
+			}
+		}
+		return mainDBInterface;
 	}
-	private DeliaSession doBeginExecution(String src, MigrationPlan plan) {
+
+	@Override
+	public DeliaSession beginSession(String src, BlobLoader blobLoader) {
+		return doBeginExecution(src, blobLoader, null);
+	}
+	private DeliaSession doBeginExecution(String src, BlobLoader blobLoader, MigrationPlan plan) {
 		List<Exp> expL =  compileDeliaSource(src, false);
 
 		//1st pass
-		Runner mainRunner = createRunner(null);
+		TransactionProvider tpEIT = createTransactionProviderIfExecuteInTransaction();
+		Runner mainRunner = createRunner(null, blobLoader, tpEIT);
 		execTypes(mainRunner, expL);
 		MigrationExtraInfo extraInfo = new MigrationExtraInfo();
 		ResultValue migrationPlanRes = doPass3AndDBMigration(src, expL, mainRunner, plan, extraInfo);
@@ -145,7 +200,7 @@ public class DeliaImpl implements Delia {
 			return session;
 		}
 
-		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap);
+		ResultValue res = doExecute(mainRunner, expL, extraInfo.datIdMap, tpEIT);
 
 		DeliaSessionImpl session = new DeliaSessionImpl(this);
 		session.execCtx = mainRunner.getExecutionState();
@@ -160,7 +215,7 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public DeliaSession executeMigrationPlan(String src, MigrationPlan plan) {
-		return doBeginExecution(src, plan);
+		return doBeginExecution(src, null, plan);
 	}
 
 	protected void execTypes(Runner mainRunner, List<Exp> extL) {
@@ -186,7 +241,7 @@ public class DeliaImpl implements Delia {
 		}
 		
 		//replace error converter with a registry aware one (better at parsing errors)
-		DBErrorConverter errorConverter = dbInterface.getDBErrorConverter();
+		DBErrorConverter errorConverter = mainDBInterface.getDBErrorConverter();
 		if (errorConverter != null) {
 //		RegistryAwareDBErrorConverter radbec = new RegistryAwareDBErrorConverter(errorConverter, registry);
 //		dbInterface.setDBErrorConverter(radbec);
@@ -215,7 +270,7 @@ public class DeliaImpl implements Delia {
 		
 		//now that we know the types, do a flyway-style schema migration
 		//if the db supports it.
-		if (dbInterface.getCapabilities().requiresSchemaMigration()) {
+		if (mainDBInterface.getCapabilities().requiresSchemaMigration()) {
 			migrationSvc.initPolicy(deliaOptions.useSafeMigrationPolicy, deliaOptions.enableAutomaticMigrations);
 			
 			switch(deliaOptions.migrationAction) {
@@ -223,10 +278,10 @@ public class DeliaImpl implements Delia {
 			{
 				boolean b;
 				if (deliaOptions.disableSQLLoggingDuringSchemaMigration) {
-					boolean prev = dbInterface.isSQLLoggingEnabled();
-					dbInterface.enableSQLLogging(false);
+					boolean prev = mainDBInterface.isSQLLoggingEnabled();
+					mainDBInterface.enableSQLLogging(false);
 					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
-					dbInterface.enableSQLLogging(prev);
+					mainDBInterface.enableSQLLogging(prev);
 				} else {
 					b = migrationSvc.autoMigrateDbIfNeeded(mainRunner.getRegistry(), mainRunner, datIdMap);
 				}
@@ -280,7 +335,7 @@ public class DeliaImpl implements Delia {
 	}
 
 	@Override
-	public ResultValue continueExecution(String src, DeliaSession session) {
+	public ResultValue continueExecution(String src, BlobLoader blobLoader, DeliaSession session) {
 		Runner mostRecentRunner = session.getMostRecentRunner();
 		InternalCompileState execCtx = mostRecentRunner == null ? null : mostRecentRunner.getCompileState();
 		if (execCtx != null) {
@@ -298,13 +353,14 @@ public class DeliaImpl implements Delia {
 			}
 		}
 
-		Runner runner = createRunner(session);
-		ResultValue res = doExecute(runner, expL, session.getDatIdMap());
+		Runner runner = createRunner(session, blobLoader, null);
+		ResultValue res = doExecute(runner, expL, session.getDatIdMap(), null);
 		
 		if (session instanceof DeliaSessionImpl) {
 			DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
 			sessimpl.mostRecentContinueExpL = deliaOptions.saveParseExpObjectsInSession ? expL : null;
 			sessimpl.mostRecentRunner = runner;
+			sessimpl.res = res;
 		}
 		return res;
 	}
@@ -345,7 +401,7 @@ public class DeliaImpl implements Delia {
 		return expL;
 	}
 	private CompilerHelper createCompilerHelper() {
-		return new CompilerHelper(dbInterface, log, factorySvc, deliaOptions);
+		return new CompilerHelper(mainDBInterface, log, factorySvc, deliaOptions);
 	}
 	
 	
@@ -367,11 +423,11 @@ public class DeliaImpl implements Delia {
 
 	@Override
 	public DBInterfaceFactory getDBInterface() {
-		return dbInterface;
+		return mainDBInterface;
 	}
 	//for internal use only - unit tests
 	public void setDbInterface(DBInterfaceFactory dbInterface) {
-		this.dbInterface = dbInterface;
+		this.mainDBInterface = dbInterface;
 	}
 	
 	private String readAllText(BufferedReader reader) {
@@ -400,11 +456,55 @@ public class DeliaImpl implements Delia {
 	@Override
 	public DeliaSession executeMigrationPlan(BufferedReader reader, MigrationPlan plan) {
 		String src = readAllText(reader);
-		return this.executeMigrationPlan(reader, plan);
+		return this.executeMigrationPlan(src, plan);
 	}
 
 	@Override
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
+	}
+
+	@Override
+	public DeliaSession beginSession(String src) {
+		return beginSession(src, null);
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(String src, BlobLoader blobLoader, MigrationPlan plan) {
+		return doBeginExecution(src, blobLoader, plan);
+	}
+
+	@Override
+	public ResultValue execute(BufferedReader reader, BlobLoader blobLoader) {
+		String src = readAllText(reader);
+		return execute(src, blobLoader);
+	}
+
+	@Override
+	public DeliaSession beginSession(BufferedReader reader, BlobLoader blobLoader) {
+		String src = readAllText(reader);
+		return beginSession(src, blobLoader);
+	}
+
+	@Override
+	public DeliaSession executeMigrationPlan(BufferedReader reader, BlobLoader blobLoader, MigrationPlan plan) {
+		String src = readAllText(reader);
+		return executeMigrationPlan(src, blobLoader, plan);
+	}
+
+	@Override
+	public ResultValue execute(String src) {
+		return execute(src, null);
+	}
+
+	@Override
+	public ResultValue continueExecution(String src, DeliaSession dbsess) {
+		return continueExecution(src, null, dbsess);
+	}
+
+	@Override
+	public ResultValue continueExecution(BufferedReader reader, BlobLoader blobLoader, DeliaSession dbsess) {
+		String src = readAllText(reader);
+		return continueExecution(src, blobLoader, dbsess);
 	}
 }

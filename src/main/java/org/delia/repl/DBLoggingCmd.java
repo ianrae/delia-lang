@@ -1,6 +1,6 @@
 package org.delia.repl;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.DBInterfaceFactory;
 

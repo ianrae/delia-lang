@@ -2,15 +2,13 @@ package org.delia.bdd.core.checker;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.delia.bdd.core.BDDHelper;
 import org.delia.bdd.core.ThenValue;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
-import org.delia.db.DBType;
 import org.delia.log.Log;
 import org.delia.type.DValue;
 
@@ -107,43 +105,8 @@ public class StructChecker extends ValueCheckerBase {
 	 * @return
 	 */
 	private List<String> adjustForDBType(List<String> thenL) {
-		String dbtype = this.sess.getDelia().getDBInterface().getDBType().name();
-		
-		List<String> resultL = new ArrayList<>();
-		boolean ignoreElse = false;
-		for(String line: thenL) {
-			String target = String.format("IF(%s):", dbtype);
-			if (line.startsWith(target)) {
-				line = StringUtils.substringAfter(line, target);
-				ignoreElse = true;
-			} else if (lineMatchesOtherDBType(line, dbtype)) {
-				line = null; //
-			}
-			
-			target = "ELSE:";
-			if (line != null && line.startsWith(target)) {
-				line = ignoreElse ? null : StringUtils.substringAfter(line, target);
-			}
-			
-			if (line != null) {
-				resultL.add(line);
-			}
-		}
-		return resultL;
-	}
-
-	private boolean lineMatchesOtherDBType(String line, String currentDBType) {
-
-		for(DBType dbtype: DBType.values()) {
-			if (!dbtype.name().equals(currentDBType)) {
-				String target = String.format("IF(%s):", dbtype);
-				if (line.startsWith(target)) {
-					return true;
-				}
-			}
-		}
-		
-		return false;
+		BDDHelper helper = new BDDHelper(this.sess.getDelia().getDBInterface().getDBType());
+		return helper.adjustForDBType(thenL);
 	}
 
 	private List<String> generateFromThen(ThenValue thenVal) {
@@ -155,6 +118,7 @@ public class StructChecker extends ValueCheckerBase {
 
 	private List<String> generateFromDVal(DValue dval) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.truncateLargeBlob = true;
 		// ErrorTracker et = new SimpleErrorTracker(log);
 		DeliaGeneratePhase phase = this.sess.getExecutionContext().generator;
 		boolean b = phase.generateValue(gen, dval, "a");
@@ -163,6 +127,7 @@ public class StructChecker extends ValueCheckerBase {
 	}
 	private List<String> generateFromMultiDVal(List<DValue> list) {
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
+		gen.truncateLargeBlob = true;
 		// ErrorTracker et = new SimpleErrorTracker(log);
 		DeliaGeneratePhase phase = this.sess.getExecutionContext().generator;
 		for(DValue dval: list) {

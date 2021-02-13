@@ -2,8 +2,8 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
 import org.delia.compiler.ast.Exp;
 
 /**

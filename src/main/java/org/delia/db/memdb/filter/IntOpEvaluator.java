@@ -16,7 +16,7 @@ public class IntOpEvaluator extends OpEvaluatorBase {
 		if (b != null) {
 			return b;
 		}
-		Integer n1 = getFieldValue(dval).asInt();
+		Integer n1 = resolveToInt(dval); 
 		Integer n2 = ((IntegerExp)rightVar).val;
 
 		switch(op) {

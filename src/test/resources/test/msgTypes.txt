@@ -1,0 +1,50 @@
+
+type Basic struct {
+  createTS date,
+  modTS date
+}
+end
+
+type User Basic {
+  id int primaryKey serial,
+  userName string unique, 
+  password string
+  relation sessions UserSession many optional,
+  relation plans Project many optional
+  } 
+end
+
+type UserSession Basic {
+  id int primaryKey serial,
+  sessionKey string unique,
+  active boolean,
+  relation user User one
+  } 
+end
+
+type Project Basic {
+  id int primaryKey serial,
+  title string,
+  relation user User one,
+  relation msgkeys MsgKey many optional
+  } 
+end
+
+type MsgKey Basic {
+  id int primaryKey serial,
+  name string,
+  relation proj Project one,
+  relation currents CurrentMsg many optional
+ }
+  uniqueFields(proj,name)
+end
+
+type CurrentMsg Basic {
+  id int primaryKey serial,
+  relation msgkey MsgKey one,
+  text string,
+  lang string
+ }
+ end
+
+

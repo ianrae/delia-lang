@@ -1,6 +1,6 @@
 package org.delia.compiler.ast;
 
-import org.codehaus.jparsec.Token;
+import org.jparsec.Token;
 
 /**
  * Only used during parsing to build a StructFieldExp. Not kept during runtime.

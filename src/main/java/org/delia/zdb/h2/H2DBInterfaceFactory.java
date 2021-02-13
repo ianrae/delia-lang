@@ -15,8 +15,9 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBConnectionObserverAdapter;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactoryInternal;
 
-public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
+public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFactory,DBInterfaceFactoryInternal {
 	private DBCapabilties capabilities;
 	private Log sqlLog;
 	private ConnectionFactory connFactory;
@@ -28,7 +29,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 
 	public H2DBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory, ConnectionFactory connFactory) {
 		super(factorySvc);
-		this.capabilities = new DBCapabilties(true, true, true, true);
+		this.capabilities = new DBCapabilties(true, true, true);
 		this.sqlLog = createNewLog();
 		this.connFactory = connFactory;
 		this.errorConverter = new H2ErrorConverter();
@@ -85,6 +86,11 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 	@Override
 	public DBExecutor createExecutor() {
 		DBConnection conn = (H2DBConnection) openConnection();
+		return createExecutorEx(conn);
+	}
+
+	@Override
+	public DBExecutor createExecutorEx(DBConnection conn) {
 		Log execLog = createNewLog();
 		execLog.setLevel(sqlLog.getLevel());
 		
@@ -101,6 +107,7 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 		}
 		return exec;
 	}
+
 
 	@Override
 	public DBErrorConverter getDBErrorConverter() {
@@ -130,5 +137,4 @@ public class H2DBInterfaceFactory extends ServiceBase implements DBInterfaceFact
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
 	}
-
 }

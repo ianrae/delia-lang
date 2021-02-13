@@ -47,7 +47,7 @@ public class TopoTestBase extends NewRelationTestBase {
 	
 	protected void chkSorting(String expected) {
 		DTypeRegistry reg = this.sess.getExecutionContext().registry;
-		assertEquals(9, reg.size());
+		assertEquals(DTypeRegistry.NUM_BUILTIN_TYPES + 2, reg.size());
 		assertEquals(true, reg.existsType("Customer"));
 		assertEquals(true, reg.existsType("Address"));
 		

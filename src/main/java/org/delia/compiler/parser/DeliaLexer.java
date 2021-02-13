@@ -1,7 +1,7 @@
 package org.delia.compiler.parser;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.pattern.Patterns;
+import org.jparsec.Parser;
+import org.jparsec.pattern.Patterns;
 
 /**
  * Lexer specific for the Delia language rules.

@@ -3,8 +3,10 @@ package org.delia.db.memdb.filter;
 import org.delia.compiler.ast.NullExp;
 import org.delia.db.InternalException;
 import org.delia.error.DeliaError;
-import org.delia.type.DStructType;
+import org.delia.type.DRelation;
+import org.delia.type.DType;
 import org.delia.type.DValue;
+import org.delia.type.Shape;
 import org.delia.util.DValueHelper;
 
 public abstract class OpEvaluatorBase implements OpEvaluator {
@@ -36,6 +38,16 @@ public abstract class OpEvaluatorBase implements OpEvaluator {
 		}
 		return null;
 	}
+	protected Boolean checkRelationNull(DValue dval, Object right) {
+//		DRelation drel = dval.asRelation();
+		if (dval == null || dval.asRelation() == null) {
+			return (right instanceof NullExp);
+		}
+		if (right instanceof NullExp) {
+			return false;
+		}
+		return null;
+	}
 	
 	private void throwIfNotFieldName(DValue dval) {
 		if (dval == null || ! dval.getType().isStructShape()) {
@@ -54,6 +66,26 @@ public abstract class OpEvaluatorBase implements OpEvaluator {
 		} else {
 			throwIfNotFieldName(dval);
 			return dval.asStruct().getField(fieldName);
+		}
+	}
+	protected Integer resolveToInt(DValue dval) {
+		DValue tmp = getFieldValue(dval);
+		DType dtype = tmp.getType();
+		if (dtype.isShape(Shape.NUMBER)) {
+			Double n = tmp.asNumber();
+			return n.intValue();
+		} else {
+			return tmp.asInt(); //will only work for int and long. others should never occur
+		}
+	}
+	protected Long resolveToLong(DValue dval) {
+		DValue tmp = getFieldValue(dval);
+		DType dtype = tmp.getType();
+		if (dtype.isShape(Shape.NUMBER)) {
+			Double n = tmp.asNumber();
+			return n.longValue();
+		} else {
+			return tmp.asLong(); //will only work for int and long. others should never occur
 		}
 	}
 	

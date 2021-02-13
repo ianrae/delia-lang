@@ -3,19 +3,15 @@ package org.delia.mem;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ImportGroupSpec;
 import org.delia.dataimport.ImportTool;
-import org.delia.db.DBType;
 import org.delia.runner.ResultValue;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.type.DValue;
@@ -147,13 +143,12 @@ public class FilmAndActor2Tests  extends BDDBase {
 	
 	
 	private Delia createDelia() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		return delia;
 	}
 	// --
-	private final String BASE_DIR = "src/main/resources/test/film2/";
-	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	private final String BASE_DIR = "src/test/resources/test/film2/";
+	public final String IMPORT_DIR = "src/test/resources/test/import/";
 
 	@Before
 	public void init() {

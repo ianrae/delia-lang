@@ -24,7 +24,6 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
-import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.DBExecutor;
@@ -58,10 +57,10 @@ public class UpdateStatementRunner extends ServiceBase {
 	}
 
 	private ValidationRunner createValidationRunner() {
-		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
+		return factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 	}
 
-	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+	public void executeUpdateStatement(UpdateStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2, BlobLoader blobLoader) {
 		this.hldFacade = hldFacade;
 		this.fetchRunner = fetchRunner2;
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
@@ -84,7 +83,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 			if (hldup.isEmpty()) {
 				res.ok = true;
 				res.shape = Shape.INTEGER;
@@ -134,7 +133,7 @@ public class UpdateStatementRunner extends ServiceBase {
 			return;
 		}
 	}
-	public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDFacade hldFacade2, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2) {
+	public void executeUpsertStatement(UpsertStatementExp exp, ResultValue res, HLDFacade hldFacade2, DBExecutor dbexecutor, FetchRunner fetchRunner2, DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc2, BlobLoader blobLoader) {
 		this.hldFacade = hldFacade2;
 		this.fetchRunner = fetchRunner2;
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
@@ -158,7 +157,7 @@ public class UpdateStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldup = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 			if (hldup.isEmpty()) {
 				res.ok = true;
 				res.shape = Shape.INTEGER;

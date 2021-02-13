@@ -3,7 +3,7 @@ package org.delia.repl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.api.MigrationAction;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.repl.migration.MigrationParser;

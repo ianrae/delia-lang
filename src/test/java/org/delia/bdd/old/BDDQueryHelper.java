@@ -3,7 +3,7 @@ package org.delia.bdd.old;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.compiler.ast.LetStatementExp;
-import org.delia.h2.DeliaInitializer;
+import org.delia.db.h2.DeliaInitializer;
 import org.delia.runner.CompilerHelper;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;

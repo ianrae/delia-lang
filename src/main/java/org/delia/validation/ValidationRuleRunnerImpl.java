@@ -19,11 +19,13 @@ import org.delia.runner.FetchRunner;
 import org.delia.runner.ResultValue;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
+import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.DValueInternal;
 import org.delia.type.TypePair;
 import org.delia.type.ValidationState;
 import org.delia.util.DValueHelper;
+import org.delia.zdb.DBInterfaceFactory;
 
 public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationRunner {
 
@@ -37,9 +39,14 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 		private DValueCompareService compareSvc;
 		private DValue upsertPKVal;
 		private boolean softMandatoryRelationFlag;
+		private DBInterfaceFactory dbInterface;
+		private DTypeRegistry registry;
 
-		public ValidationRuleRunnerImpl(FactoryService factorySvc, DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
+		public ValidationRuleRunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, 
+					DBCapabilties dbCapabilties, FetchRunner fetchRunner) {
 			super(factorySvc);
+			this.dbInterface = dbInterface;
+			this.registry = registry;
 			this.localET = new SimpleErrorTracker(log);
 			this.dbCapabilties = dbCapabilties;
 			this.fetchRunner = fetchRunner;
@@ -210,7 +217,8 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
 			}
 			
 			ErrorTracker tmpET = new SimpleErrorTracker(log);
-			DRuleContext ctx = new DRuleContext(tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, 
+			DRuleContext ctx = new DRuleContext(factorySvc, dbInterface, registry,
+					tmpET, rule.getName(), enableRelationModifierFlag, dbCapabilties, populateFKsFlag, 
 					fetchRunner, compareSvc, insertFlag, upsertFlag, upsertPKVal, softMandatoryRelationFlag); 
 			boolean b = rule.validate(dval, ctx);
 			if (!b) {

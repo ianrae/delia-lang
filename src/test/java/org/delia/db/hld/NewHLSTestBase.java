@@ -7,16 +7,15 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.assoc.CreateNewDatIdVisitor;
+import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.Exp;
+import org.delia.compiler.ast.InsertStatementExp;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.UpdateStatementExp;
@@ -28,7 +27,6 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.hld.HLDBuildService;
 import org.delia.hld.HLDBuildServiceImpl;
 import org.delia.hld.HLDQueryStatement;
-import org.delia.hld.HLDSQLGenerator;
 import org.delia.hld.cud.HLDDeleteStatement;
 import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;
@@ -185,6 +183,15 @@ public class NewHLSTestBase extends BDDBase {
 		}
 		return null;
 	}
+	protected InsertStatementExp findInsert(DeliaSession session) {
+		DeliaSessionImpl sessimpl = (DeliaSessionImpl) session;
+		for(Exp exp: sessimpl.mostRecentContinueExpL) {
+			if (exp instanceof InsertStatementExp) {
+				return (InsertStatementExp) exp;
+			}
+		}
+		return null;
+	}
 
 	//---
 	protected Delia delia;
@@ -201,8 +208,7 @@ public class NewHLSTestBase extends BDDBase {
 	//---
 
 	protected DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		this.delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		MemDBInterfaceFactory memDBinterface = (MemDBInterfaceFactory) delia.getDBInterface();
 		memDBinterface.createSingleMemDB();
 		CreateNewDatIdVisitor.hackFlag = true;
@@ -291,7 +297,7 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator(), null);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator(), null, null);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
@@ -307,7 +313,7 @@ public class NewHLSTestBase extends BDDBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpsertStatement hld = mgr.fullBuildUpsert(upsertExp, new DoNothingVarEvaluator(), null);
+		HLDUpsertStatement hld = mgr.fullBuildUpsert(upsertExp, new DoNothingVarEvaluator(), null, null);
 		log.log(hld.toString());
 		return hld;
 	}

@@ -58,6 +58,14 @@ public abstract class DBErrorConverterBase implements DBErrorConverter {
 		if (type.contains("DAT")) return true;
 		return false;
 	}
+	protected boolean isClass(SQLException e, String className) {
+		if (e.getClass().getSimpleName().equals(className)) {
+			return true;
+		}
+		return false;
+	}
 	
+	
+
 
 }

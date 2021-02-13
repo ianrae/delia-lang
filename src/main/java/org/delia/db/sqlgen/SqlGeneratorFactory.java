@@ -1,6 +1,7 @@
 package org.delia.db.sqlgen;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.db.SqlStatement;
 
 public interface SqlGeneratorFactory {
 
@@ -17,4 +18,5 @@ public interface SqlGeneratorFactory {
 	SqlMergeUsingStatement createMergeUsing();
 	void useDeleteIn(SqlDeleteStatement delStmt);
 
+	SqlConstraintStatement generateConstraint();
 }

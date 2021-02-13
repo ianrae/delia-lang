@@ -5,6 +5,8 @@ import org.delia.db.InsertContext;
 import org.delia.db.QueryContext;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
+import org.delia.db.schema.SchemaChangeAction;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDQueryStatement;
 import org.delia.hld.cud.HLDDeleteStatement;
@@ -163,6 +165,16 @@ public class InstrumentedDBExecutor implements DBExecutor {
 	@Override
 	public HLDFactory getHLDFactory() {
 		return zexec.getHLDFactory();
+	}
+
+	@Override
+	public void performSchemaChangeAction(SchemaChangeAction action) {
+		zexec.performSchemaChangeAction(action);
+	}
+
+	@Override
+	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
+		zexec.executeSchemaChangeOperation(op);
 	}
 
 }

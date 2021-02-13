@@ -2,7 +2,7 @@ package org.delia.runner;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.api.DeliaImpl;
 import org.delia.base.FakeTypeCreator;
 import org.delia.base.UnitTestLog;
@@ -25,7 +25,7 @@ public class RunnerHelper {
 		Delia delia = builder.buildEx(dbInterface, factorySvc);
 		
 		DeliaImpl impl = (DeliaImpl) delia;
-		currentRunner = impl.createRunner(null);
+		currentRunner = impl.createRunner(null, null, null);
 		LegacyRunner runner = new LegacyRunner(currentRunner, factorySvc);
 		
 //		runner.legacyTypeMode = true; //TODO: remove

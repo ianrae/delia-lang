@@ -17,6 +17,8 @@ import org.delia.db.SqlStatementGroup;
 import org.delia.db.memdb.AllRowSelector;
 import org.delia.db.memdb.MemDBTable;
 import org.delia.db.memdb.RowSelector;
+import org.delia.db.schema.SchemaChangeAction;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DeliaError;
 import org.delia.error.DetailedError;
@@ -411,6 +413,42 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	@Override
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
+	}
+	@Override
+	public void performSchemaChangeAction(SchemaChangeAction action) {
+		//TODO: i think nothing do do here
+	}
+
+	@Override
+	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
+		switch(op.opType) {
+		case TABLE_ADD:
+			this.createTable(op.typeName);
+			break;
+		case TABLE_DELETE:
+			this.deleteTable(op.typeName);
+			break;
+		case TABLE_RENAME:
+			this.renameTable(op.typeName, op.newName);
+			break;
+		case FIELD_ADD:
+			this.createField(op.typeName, op.fieldName, op.sizeof);
+			break;
+		case FIELD_DELETE:
+			this.deleteField(op.typeName, op.fieldName, op.fieldInfo.datId);
+			break;
+		case FIELD_RENAME:
+		case FIELD_ALTER: //flags
+		case FIELD_ALTER_TYPE: //includes size
+		case INDEX_ADD:
+		case INDEX_DELETE:
+		case INDEX_ALTER:
+		case CONSTRAINT_ADD:
+		case CONSTRAINT_DELETE:
+		case CONSTRAINT_ALTER:
+		default:
+			break;
+		}
 	}
 
 }

@@ -27,7 +27,7 @@ public class DTypeRegistry {
 	private DStructType schemaVersionType;
 	private DStructType datType;
 	
-	public static final int NUM_BUILTIN_TYPES = 7;
+	public static final int NUM_BUILTIN_TYPES = 8;
 	
 	public synchronized void add(String typeName, DType dtype) {
         if (dtype == null || typeName == null || typeName.isEmpty()) {

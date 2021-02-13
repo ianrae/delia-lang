@@ -3,15 +3,11 @@ package org.delia.inputfunction;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.dataimport.CSVImportService;
 import org.delia.dataimport.ExternalDataLoaderImpl;
 import org.delia.dataimport.ImportGroupSpec;
-import org.delia.db.DBType;
 import org.delia.runner.inputfunction.ExternalDataLoader;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.util.TextFileReader;
@@ -96,8 +92,7 @@ public class CSVImportServiceTests extends InputFunctionTestBase {
 	}
 	
 	private ExternalDataLoader createExternalLoader() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia externalDelia = DeliaBuilder.withConnection(info).build();
+		Delia externalDelia = createNewDelia();
 		
 		String srcPath = IMPORT_DIR + "product-and-category.txt";
 		TextFileReader reader = new TextFileReader();
@@ -130,15 +125,14 @@ public class CSVImportServiceTests extends InputFunctionTestBase {
 		CSVImportService csvSvc = new CSVImportService();
 		
 		//mem in this test but would normally be a real database
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = createNewDelia();
 		
 		List<InputFunctionResult> resultL = csvSvc.importIntoDatabase(groupList, deliaSrc, delia);
 		csvSvc.dumpReports(resultL);
 	}
 
 	// --
-	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	public final String IMPORT_DIR = "src/test/resources/test/import/";
 
 	@Before
 	public void init() {

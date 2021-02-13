@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.checker.BDDResult;
 import org.delia.bdd.core.checker.BoolChecker;
@@ -171,10 +171,10 @@ public class BDDTesterEx {
 		}
 	}
 
-	public BDDResult runIt(String delia, ThenValue thenVal) {
+	public BDDResult runIt(String deliaSrc, ThenValue thenVal) {
 		BDDResult bddres = new BDDResult();
 		try {
-			bddres.res = runDelia(delia);
+			bddres.res = runDelia(deliaSrc);
 			bddres.ok = true;
 		} catch (DeliaException e) {
 			String expectedErr = findExpectedError(thenVal);
@@ -185,6 +185,7 @@ public class BDDTesterEx {
 			
 			String id = e.getFirstError() == null ? "?" : e.getFirstError().getId();
 			if (expectedErr == null) {
+				e.printStackTrace();
 				log.logError("EXCEPTION(%s): %s", id, e.getMessage());
 				throw new RuntimeException("Exception occured, and can't find ERROR: value!");
 			}
@@ -209,7 +210,10 @@ public class BDDTesterEx {
 		if (thenVal.expected != null) {
 			return thenVal.expected;
 		} else {
-			for(String s: thenVal.expectedL) {
+			BDDHelper helper = new BDDHelper(dbInterface.getDBType());
+			List<String> list = helper.adjustForDBType(thenVal.expectedL);
+			
+			for(String s: list) {
 				if (s.startsWith("ERROR: ")) {
 					return s;
 				}
@@ -218,7 +222,7 @@ public class BDDTesterEx {
 		return null;
 	}
 
-	private int nextVarNum = 1;
+//	private int nextVarNum = 1;
 	private DeliaSession mostRecentSess;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
 

@@ -1,6 +1,6 @@
 package org.delia.bdd.core.checker;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 
 public abstract class ValueCheckerBase implements ValueChecker {
 	protected DeliaSession sess;

@@ -8,16 +8,14 @@ package org.delia.db;
 public class DBCapabilties {
 	private boolean requiresSchemaMigration;
 	private boolean supportsReferentialIntegrity; //on FKs
-	private boolean supportsOrderBy;
-	private boolean supportsOffsetAndLimit;
+	private boolean supportsUniqueConstraint;
 	
 	public DBCapabilties(boolean requiresSchemaMigration, boolean supportsReferentialIntegrity, 
-			boolean supportsOrderBy, boolean supportsOffsetAndLimit) {
+			boolean supportsUniqueConstraint) {
 		super();
 		this.requiresSchemaMigration = requiresSchemaMigration;
 		this.supportsReferentialIntegrity = supportsReferentialIntegrity;
-		this.supportsOrderBy = supportsOrderBy;
-		this.supportsOffsetAndLimit = supportsOffsetAndLimit;
+		this.supportsUniqueConstraint = supportsUniqueConstraint;
 	}
 
 	public boolean requiresSchemaMigration() {
@@ -31,12 +29,9 @@ public class DBCapabilties {
 		return supportsReferentialIntegrity;
 	}
 
-	public boolean supportsOrderBy() {
-		return supportsOrderBy;
+	public boolean supportsUniqueConstraint() {
+		return supportsUniqueConstraint;
 	}
 
-	public boolean supportsOffsetAndLimit() {
-		return supportsOffsetAndLimit;
-	}
 
 }

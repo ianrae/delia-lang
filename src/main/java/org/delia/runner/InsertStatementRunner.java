@@ -52,11 +52,11 @@ public class InsertStatementRunner extends ServiceBase {
 	}
 
 	private ValidationRunner createValidationRunner(FetchRunner fetchRunner) {
-		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
+		return factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 	}
 
 	public void executeInsertStatement(InsertStatementExp exp, ResultValue res, HLDFacade hldFacade, DBExecutor dbexecutor, FetchRunner fetchRunner, 
-			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc) {
+			DValueIterator insertPrebuiltValueIterator2, SprigService sprigSvc, BlobLoader blobLoader) {
 
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator2;
 		DType dtype = registry.findTypeOrSchemaVersionType(exp.getTypeName());
@@ -71,7 +71,7 @@ public class InsertStatementRunner extends ServiceBase {
 		SqlStatementGroup stmgrp = null;
 		if (hldFacade != null) {
 			VarEvaluator varEvaluator = new SprigVarEvaluator(factorySvc, runner);
-			hldins = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator);
+			hldins = hldFacade.buildHLD(exp, dbexecutor, varEvaluator, insertPrebuiltValueIterator, blobLoader);
 			if (hldins.hldinsert.cres.dval != null) {
 				stmgrp = hldFacade.generateSQL(hldins, dbexecutor);
 			} else if (hldins.hldinsert.cres.localET.areNoErrors()) {

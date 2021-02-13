@@ -28,6 +28,10 @@ public class DTypeRegistryBuilder {
 		type = new DType(Shape.DATE, name, null);
         registerType(name, type);
         
+		name = BuiltInTypes.BLOB_SHAPE.name();
+		type = new DType(Shape.BLOB, name, null);
+        registerType(name, type);
+        
         name = BuiltInTypes.RELATION_SHAPE.name();
         type = new DType(Shape.RELATION, name, null);
         registerType(name, type);

@@ -6,21 +6,26 @@ import org.delia.compiler.ast.LongExp;
 import org.delia.compiler.ast.NullExp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.astx.XNAFMultiExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
+import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
+import org.delia.util.DValueHelper;
 
 public class OpFactory {
 	
 	private DTypeRegistry registry;
 	private DateFormatService fmtSvc;
 	private FactoryService factorySvc;
+	private DStructType structType;
 
-	public OpFactory(DTypeRegistry registry, DateFormatService fmtSvc, FactoryService factorySvc) {
+	public OpFactory(DTypeRegistry registry, DateFormatService fmtSvc, FactoryService factorySvc, DStructType dtype) {
 		this.registry = registry;
 		this.fmtSvc = fmtSvc;
 		this.factorySvc = factorySvc;
+		this.structType = dtype; //may be null
 	}
 
 	public OpEvaluator create(String opStr, Object op1, Object op2, DType op1HintType, DType op2HintType, boolean negFlag) {
@@ -44,7 +49,11 @@ public class OpFactory {
 			return eval;
 		} else if (op1 instanceof XNAFMultiExp) {
 			XNAFMultiExp multiexp = (XNAFMultiExp) op1;
-			OpEvaluator inner = createFromExp(op, op2, OpEvaluatorBase.SCALAR_VAL);
+			
+			OpEvaluator inner = createUsingStructTypeIfPossible(op, multiexp);
+			if (inner == null) {
+				inner = createFromExp(op, op2, OpEvaluatorBase.SCALAR_VAL);
+			}
 			inner.setRightVar(op2);
 			OpEvaluator eval = new NAFEvaluator(multiexp, inner, registry);
 			return eval;
@@ -59,12 +68,33 @@ public class OpFactory {
 			return eval;
 		} else {
 			XNAFMultiExp multiexp = (XNAFMultiExp) op2;
-			OpEvaluator inner = createFromExp(op, op1, OpEvaluatorBase.SCALAR_VAL);
+			
+			OpEvaluator inner = createUsingStructTypeIfPossible(op, multiexp);
+			if (inner == null) {
+				inner = createFromExp(op, op1, OpEvaluatorBase.SCALAR_VAL);
+			}
 			inner.setRightVar(op1);
 			OpEvaluator eval = new NAFEvaluator(multiexp, inner, registry);
 			return eval;
 		}
 	}
+	private OpEvaluator createUsingStructTypeIfPossible(OP op, XNAFMultiExp multiexp) {
+		if (structType == null) return null;
+		if (multiexp.qfeL.size() == 1) {
+			XNAFSingleExp sexp = multiexp.qfeL.get(0);
+			if (sexp.isSimpleField()) {
+				String fieldName = sexp.funcName;
+				DType hintType = DValueHelper.findFieldType(structType, fieldName);
+				if (hintType.isStructShape()) {
+					return creatFromHint(op, fieldName, hintType);
+				} else {
+					return creatFromHint(op, OpEvaluatorBase.SCALAR_VAL, hintType);
+				}
+			}
+		}
+		return null;
+	}
+
 	private OpEvaluator createFromExp(OP op, Object op2, String fieldName) {
 		if (op2 instanceof IntegerExp) {
 			return new IntOpEvaluator(op, fieldName);

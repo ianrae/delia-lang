@@ -42,21 +42,28 @@ public class AssocTableCreator extends ServiceBase {
 		return DRuleHelper.isManyToManyRelation(pair, dtype);
 	}
 
-	public void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype) {
+	public void alterGenerateAssocTable(StrCreator sc, TypePair pair, DStructType dtype, boolean canCreateAssocTable) {
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(dtype, pair);
 		String tbl1 = info.nearType.getName();
 		String tbl2 = info.farType.getName();
 		
-		if (! haveCreatedTable(tbl1)) {
+		if (canCreateAssocTable) {
 			TableInfo tblinfo = new TableInfo(tbl1, null);
 			this.alreadyCreatedL.add(tblinfo);
-		}
-		if (! haveCreatedTable(tbl2)) {
-			TableInfo tblinfo = new TableInfo(tbl2, null);
+			tblinfo = new TableInfo(tbl2, null);
 			this.alreadyCreatedL.add(tblinfo);
+			generateAssocTable(sc, pair, dtype);
 		}
 		
-		generateAssocTable(sc, pair, dtype);
+//		if (! haveCreatedTable(tbl1)) {
+//			TableInfo tblinfo = new TableInfo(tbl1, null);
+//			this.alreadyCreatedL.add(tblinfo);
+//		}
+//		if (! haveCreatedTable(tbl2)) {
+//			TableInfo tblinfo = new TableInfo(tbl2, null);
+//			this.alreadyCreatedL.add(tblinfo);
+//		}
+		
 	}
 	
 	public String generateAssocTable(StrCreator sc, TypePair xpair, DStructType dtype) {

@@ -1,28 +1,25 @@
 package org.delia.db.hld;
 
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
+import org.delia.base.DBTestHelper;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.type.DTypeRegistry;
 import org.delia.zdb.CollectingObserverFactory;
 import org.delia.zdb.DBConnectionObserverAdapter;
-import org.delia.zdb.DBObserverAdapter;
-import org.delia.zdb.DBObserverFactory;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBObserverAdapter;
+import org.delia.zdb.DBObserverFactory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -120,9 +117,7 @@ public class DBObserverTests extends BDDBase {
 		this.delia = dao.getDelia();
 	}
 	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
+		return DBTestHelper.createDao();
 	}
 
 	private String buildSrc(String additionalSrc) {

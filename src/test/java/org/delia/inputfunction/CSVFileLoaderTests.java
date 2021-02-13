@@ -3,13 +3,8 @@ package org.delia.inputfunction;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.CSVFileLoader;
-import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.InputFunctionResult;
 import org.delia.runner.inputfunction.LineObj;
@@ -74,11 +69,6 @@ public class CSVFileLoaderTests extends InputFunctionTestBase {
 
 			return src;
 		}
-	}
-	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
 	}
 	private InputFunctionResult buildAndRun(boolean inOrder, LineObjIterator lineObjIter, int expectedNumRows) {
 		createDelia(inOrder);

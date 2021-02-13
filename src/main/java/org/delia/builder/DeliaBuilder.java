@@ -1,11 +1,10 @@
 package org.delia.builder;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaFactory;
+import org.delia.Delia;
+import org.delia.DeliaFactory;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
-import org.delia.db.DBType;
-import org.delia.db.sql.ConnectionString;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
@@ -21,21 +20,19 @@ import org.delia.zdb.DBInterfaceFactory;
  */
 public class DeliaBuilder {
 	private static DeliaBuilder theSingleton;
-	private ConnectionInfo info;
-	private ConnectionString connStr;
+//	private ConnectionInfo info;
+	private ConnectionDefinition connStr;
 	private Log log;
 	private LogFactory logFactory;
-	private DBType dbType;
 	
-	public static DeliaBuilder withConnection(ConnectionInfo info) {
-		theSingleton = new DeliaBuilder();
-		theSingleton.info = info;
-		return theSingleton;
-	}
-	public static DeliaBuilder withConnection(ConnectionString connStr, DBType dbType) {
+//	public static DeliaBuilder withConnection(ConnectionInfo info) {
+//		theSingleton = new DeliaBuilder();
+//		theSingleton.info = info;
+//		return theSingleton;
+//	}
+	public static DeliaBuilder withConnection(ConnectionDefinition connStr) {
 		theSingleton = new DeliaBuilder();
 		theSingleton.connStr = connStr;
-		theSingleton.dbType = dbType;
 		return theSingleton;
 	}
 	public DeliaBuilder log(Log log) {
@@ -57,13 +54,13 @@ public class DeliaBuilder {
 		}
 		ErrorTracker et = new SimpleErrorTracker(log);
 		FactoryService factorySvc = new FactoryServiceImpl(log, et, logFactory);
-		if (info != null) {
-			Delia delia = DeliaFactory.create(info, log, factorySvc);
+//		if (info != null) {
+//			Delia delia = DeliaFactory.create(info, log, factorySvc);
+//			return delia;
+//		} else {
+			Delia delia = DeliaFactory.create(connStr, log, factorySvc);
 			return delia;
-		} else {
-			Delia delia = DeliaFactory.create(connStr, dbType, log, factorySvc);
-			return delia;
-		}
+//		}
 	}
 
 	/**

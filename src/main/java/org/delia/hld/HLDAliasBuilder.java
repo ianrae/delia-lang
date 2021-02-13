@@ -123,6 +123,8 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			doFilterVal(ofc.val1, hld, registry);
 			doFilterVal(ofc.val2, hld, registry);
 			convertValueIfNeeded(ofc.val1, ofc.val2);
+			blobNotAllowed(ofc.val1, ofc);
+			blobNotAllowed(ofc.val2, ofc);
 		} else if (filter instanceof OpAndOrFilter) {
 			OpAndOrFilter ofc = (OpAndOrFilter) filter;
 			doInnerFilter(ofc.cond1, hld, registry); //** recursion **
@@ -158,9 +160,11 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 			OpFilterCond ofc = (OpFilterCond) filter;
 			if (ofc.val1.isSymbol()) {
 				doSpecialMMFieldVal(ofc.val1, hld, relinfo);
+				blobNotAllowed(ofc.val1, ofc);
 			}
 			if (ofc.val2.isSymbol()) {
 				doSpecialMMFieldVal(ofc.val2, hld, relinfo);
+				blobNotAllowed(ofc.val2, ofc);
 			}
 		} else if (filter instanceof OpAndOrFilter) {
 			OpAndOrFilter opfilter = (OpAndOrFilter) filter;
@@ -281,6 +285,20 @@ public class HLDAliasBuilder implements HLDAliasBuilderAdapter {
 				}						
 			}
 //			convertIfNeeded(val1);
+		}
+	}
+
+	private void blobNotAllowed(FilterVal val1, OpFilterCond ofc) {
+		if (val1.structField == null) {
+			return;
+		}
+		if (val1.structField.fieldType != null && val1.structField.fieldType.isBlobShape()) {
+			String opstr = ofc.op.toString();
+			if (opstr.equals("==") || opstr.equals("!")) {
+				//ok
+			} else {
+				DeliaExceptionHelper.throwError("blob-compare-not-allowed", "Field %s: filter compare '%s' not allowed for blob", val1.structField.fieldName, opstr);
+			}
 		}
 	}
 

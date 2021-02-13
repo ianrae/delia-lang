@@ -1,6 +1,6 @@
 package org.delia.bdd.core.checker;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.bdd.core.ThenValue;
 import org.delia.log.Log;
 import org.delia.type.DValue;

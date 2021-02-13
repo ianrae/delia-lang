@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.UserFuncHeaderExp;
@@ -27,7 +27,7 @@ public class UserFnParser extends ParserBase {
 	
 	public static Parser<UserFunctionBodyExp> fnBody() {
 		return Parsers.or(fnBodyStatements().many().sepBy(term(","))).
-				map(new org.codehaus.jparsec.functors.Map<List<List<Exp>>, UserFunctionBodyExp>() {
+				map(new org.jparsec.functors.Map<List<List<Exp>>, UserFunctionBodyExp>() {
 					@Override
 					public UserFunctionBodyExp map(List<List<Exp>> list) {
 						return new UserFunctionBodyExp(99, list);

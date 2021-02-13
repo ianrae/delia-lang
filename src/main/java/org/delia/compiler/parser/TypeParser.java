@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.FieldQualifierExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.RuleSetExp;
@@ -25,7 +25,7 @@ public class TypeParser extends ParserBase {
 	public static Parser<FieldQualifierExp> fieldQualifier() {
 		return Parsers.or(term("optional"), term("unique"), term("one"), term("many"), 
 				term("primaryKey"), term("parent"), term("serial"))
-				.map(new org.codehaus.jparsec.functors.Map<Token, FieldQualifierExp>() {
+				.map(new org.jparsec.functors.Map<Token, FieldQualifierExp>() {
 					@Override
 					public FieldQualifierExp map(Token tok) {
 						return new FieldQualifierExp(99, tok);
@@ -58,7 +58,7 @@ public class TypeParser extends ParserBase {
 	}
 	public static Parser<RuleSetExp> typeEnd() {
 		return Parsers.or(RuleParser.rules().optional()).
-				map(new org.codehaus.jparsec.functors.Map<RuleSetExp, RuleSetExp>() {
+				map(new org.jparsec.functors.Map<RuleSetExp, RuleSetExp>() {
 					@Override
 					public RuleSetExp map(RuleSetExp ruleSetExp) {
 						return ruleSetExp;

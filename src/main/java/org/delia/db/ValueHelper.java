@@ -25,18 +25,20 @@ import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.type.TypePair;
-import org.delia.type.WrappedDate;
+import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class ValueHelper extends ServiceBase {
-	private DateFormatService fmtSvc;
-	private DValueConverterService dvalConverter;
+	protected DateFormatService fmtSvc;
+	protected DValueConverterService dvalConverter;
+	protected BlobCreator blobCreator;
 
-	public ValueHelper(FactoryService factorySvc) {
+	public ValueHelper(FactoryService factorySvc, BlobCreator blobCreator) {
 		super(factorySvc);
 		this.fmtSvc = factorySvc.getDateFormatService();
 		this.dvalConverter = new DValueConverterService(factorySvc);
+		this.blobCreator = blobCreator;
 	}
 	
 	public PreparedStatement createPrepStatement(SqlStatement statement, Connection conn) throws SQLException {
@@ -47,7 +49,7 @@ public class ValueHelper extends ServiceBase {
 		PreparedStatement stm = conn.prepareStatement(statement.sql, Statement.RETURN_GENERATED_KEYS);
 		return xcreatePrepStatement(stm, statement, conn);
 	}
-	private PreparedStatement xcreatePrepStatement(PreparedStatement stm, SqlStatement statement, Connection conn) throws SQLException {
+	protected PreparedStatement xcreatePrepStatement(PreparedStatement stm, SqlStatement statement, Connection conn) throws SQLException {
 		int index = 1;
 		for(DValue dval: statement.paramL) {
 			index = doCreatePrepStatement(stm, dval, index);
@@ -55,7 +57,7 @@ public class ValueHelper extends ServiceBase {
 
 		return stm;
 	}
-	private int doCreatePrepStatement(PreparedStatement stm, DValue dval, int index) throws SQLException {
+	protected int doCreatePrepStatement(PreparedStatement stm, DValue dval, int index) throws SQLException {
 		if (dval == null) {
 			stm.setObject(index++, null);
 			return index;
@@ -87,6 +89,15 @@ public class ValueHelper extends ServiceBase {
 			Date dt = dval.asLegacyDate();
 			Timestamp ts = new Timestamp(dt.getTime()); //TODO find way that doesn't lose nano seconds
 			stm.setTimestamp(index++, ts, cal);
+		}
+		break;
+		case BLOB:
+		{
+			//h2 and postgres both use hex format
+			String base64Str = dval.asString();
+			String hex = BlobUtils.base64ToHexString(base64Str);
+			stm.setString(index++, hex);
+			//TODO: use stm.setBlob later
 		}
 		break;
 		case STRUCT:
@@ -188,6 +199,14 @@ public class ValueHelper extends ServiceBase {
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
 		}
+		case BLOB:
+		{
+			byte[] byteArr = rs.getBytes(pair.name);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildBlob(byteArr, pair.type);
+		}
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(pair.name);
@@ -257,6 +276,14 @@ public class ValueHelper extends ServiceBase {
 			//				this.log.log("x: %s", tmp.asString());
 			//				return tmp;
 		}
+		case BLOB:
+		{
+			byte[] byteArr = rs.getBytes(index);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildBlob(byteArr, pair.type);
+		}
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(index);
@@ -323,6 +350,14 @@ public class ValueHelper extends ServiceBase {
 			}
 			return dvalBuilder.buildLegacyDate(x, type);
 		}
+		case BLOB:
+		{
+			byte[] byteArr = rs.getBytes(rsIndex);
+			if (rs.wasNull()) {
+				return null;
+			}
+			return dvalBuilder.buildBlob(byteArr, type);
+		}
 		case BOOLEAN:
 		{
 			Boolean x = rs.getBoolean(rsIndex);
@@ -344,71 +379,72 @@ public class ValueHelper extends ServiceBase {
 		}
 	}
 	
-	public DValue valueInSql(Shape shape, Object value, DTypeRegistry registry) {
-		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(registry);
-		switch(shape) {
-		case INTEGER:
-			if (value instanceof String) {
-				return dvalBuilder.buildInt((String)value);
-			}
-			return dvalBuilder.buildInt((Integer)value);
-		case LONG:
-			if (value instanceof String) {
-				return dvalBuilder.buildLong((String)value);
-			} else if (value instanceof Integer) {
-				Integer n = (Integer) value;
-				return dvalBuilder.buildLong(n.longValue());
-			}
-			return dvalBuilder.buildLong((Long)value);
-		case NUMBER:
-			if (value instanceof String) {
-				return dvalBuilder.buildNumber((String)value);
-			} else if (value instanceof Integer) {
-				Integer n = (Integer) value;
-				return dvalBuilder.buildNumber(n.doubleValue());
-			} else if (value instanceof Long) {
-				Long n = (Long) value;
-				return dvalBuilder.buildNumber(n.doubleValue());
-			}
-			return dvalBuilder.buildNumber((Double)value);
-		case BOOLEAN:
-			if (value instanceof String) {
-				return dvalBuilder.buildBoolean((String)value);
-			}
-			return dvalBuilder.buildBoolean((Boolean)value);
-		case STRING:
-			return dvalBuilder.buildString(value.toString());
-		case DATE:
-			if (value instanceof String) {
-//				String s = convertDateStringToSQLTimestamp((String) value);
-				return dvalBuilder.buildDate((String)value);
-			} else if (value instanceof WrappedDate) {
-				WrappedDate wdt = (WrappedDate) value;
-				String s = convertDateToSQLTimestamp(wdt.getDate());
-				return dvalBuilder.buildString(s);
-			}
-			return dvalBuilder.buildString(value.toString());
-		case STRUCT:
-			if (value instanceof Integer) {
-				Integer n = (Integer) value;
-				return dvalBuilder.buildInt(n);
-			} else if (value instanceof Long) {
-				Long n = (Long) value;
-				return dvalBuilder.buildLong(n);
-			} else {
-				return dvalBuilder.buildString(value.toString());
-			}
-		default:
-			return dvalBuilder.buildString("");
-		}
-	}
+//	public DValue valueInSql(Shape shape, Object value, DTypeRegistry registry) {
+//		ScalarValueBuilder dvalBuilder = factorySvc.createScalarValueBuilder(registry);
+//		switch(shape) {
+//		case INTEGER:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildInt((String)value);
+//			}
+//			return dvalBuilder.buildInt((Integer)value);
+//		case LONG:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildLong((String)value);
+//			} else if (value instanceof Integer) {
+//				Integer n = (Integer) value;
+//				return dvalBuilder.buildLong(n.longValue());
+//			}
+//			return dvalBuilder.buildLong((Long)value);
+//		case NUMBER:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildNumber((String)value);
+//			} else if (value instanceof Integer) {
+//				Integer n = (Integer) value;
+//				return dvalBuilder.buildNumber(n.doubleValue());
+//			} else if (value instanceof Long) {
+//				Long n = (Long) value;
+//				return dvalBuilder.buildNumber(n.doubleValue());
+//			}
+//			return dvalBuilder.buildNumber((Double)value);
+//		case BOOLEAN:
+//			if (value instanceof String) {
+//				return dvalBuilder.buildBoolean((String)value);
+//			}
+//			return dvalBuilder.buildBoolean((Boolean)value);
+//		case STRING:
+//			return dvalBuilder.buildString(value.toString());
+//		case DATE:
+//			if (value instanceof String) {
+////				String s = convertDateStringToSQLTimestamp((String) value);
+//				return dvalBuilder.buildDate((String)value);
+//			} else if (value instanceof WrappedDate) {
+//				WrappedDate wdt = (WrappedDate) value;
+//				String s = convertDateToSQLTimestamp(wdt.getDate());
+//				return dvalBuilder.buildString(s);
+//			}
+//			return dvalBuilder.buildString(value.toString());
+//			//TODO: blob
+//		case STRUCT:
+//			if (value instanceof Integer) {
+//				Integer n = (Integer) value;
+//				return dvalBuilder.buildInt(n);
+//			} else if (value instanceof Long) {
+//				Long n = (Long) value;
+//				return dvalBuilder.buildLong(n);
+//			} else {
+//				return dvalBuilder.buildString(value.toString());
+//			}
+//		default:
+//			return dvalBuilder.buildString("");
+//		}
+//	}
 
 	/**
 	 * FUTURE: this probably needs to become db-specific
 	 * @param dt date
 	 * @return date as string in sql format
 	 */
-	private String convertDateToSQLTimestamp(ZonedDateTime zdt) {
+	protected String convertDateToSQLTimestamp(ZonedDateTime zdt) {
 		//TIMESTAMP '1999-01-31 10:00:00'
 		DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		String s = zdt.format(sdf);

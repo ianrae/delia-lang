@@ -15,8 +15,9 @@ import org.delia.zdb.DBConnection;
 import org.delia.zdb.DBConnectionObserverAdapter;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.delia.zdb.DBInterfaceFactoryInternal;
 
-public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory {
+public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfaceFactory,DBInterfaceFactoryInternal {
 	private DBCapabilties capabilities;
 	private SimpleLog sqlLog;
 	private ConnectionFactory connFactory;
@@ -28,7 +29,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 
 	public PostgresDBInterfaceFactory(FactoryService factorySvc, HLDFactory hldFactory, ConnectionFactory connFactory) {
 		super(factorySvc);
-		this.capabilities = new DBCapabilties(true, true, true, true);
+		this.capabilities = new DBCapabilties(true, true, true);
 		this.sqlLog = new SimpleLog();
 		this.connFactory = connFactory;
 		this.errorConverter = new PostgresErrorConverter(new SimpleSqlNameFormatter(true));
@@ -75,6 +76,11 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 	@Override
 	public DBExecutor createExecutor() {
 		DBConnection conn = (PostgresDBConnection) openConnection();
+		return createExecutorEx(conn);
+	}
+
+	@Override
+	public DBExecutor createExecutorEx(DBConnection conn) {
 		SimpleLog execLog = new SimpleLog();
 		execLog.setLevel(log.getLevel());
 		DBExecutor exec = new PostgresDBExecutor(factorySvc, execLog, this, hldFactory, conn, sessionCache);

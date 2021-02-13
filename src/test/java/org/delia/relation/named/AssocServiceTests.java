@@ -2,31 +2,14 @@ package org.delia.relation.named;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.delia.assoc.CreateNewDatIdVisitor;
-import org.delia.assoc.DatIdMap;
 import org.delia.assoc.ManyToManyEnumerator;
 import org.delia.assoc.ManyToManyVisitor;
-import org.delia.assoc.PopulateDatIdVisitor;
-import org.delia.db.schema.FieldInfo;
-import org.delia.db.schema.SchemaMigrator;
-import org.delia.db.schema.SchemaType;
-import org.delia.hld.HLDFactory;
-import org.delia.hld.HLDFactoryImpl;
 import org.delia.relation.RelationInfo;
-import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
 import org.delia.runner.DeliaException;
-import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
 import org.delia.util.StringTrail;
-import org.delia.zdb.DBExecutor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,71 +45,72 @@ public class AssocServiceTests extends NamedRelationTestBase {
 		assertEquals("", visitor.trail.getTrail());
 	}
 
-	@Test
-	public void testMM() {
-		createCustomerMMTypeWithRelations("joe", null, "joe");
-		RelationManyRule rr = getManyRule("Address", "cust");
-		chkRule(rr, true, "joe", "joe");
-
-		MyManyToManyVisitor visitor = new MyManyToManyVisitor();
-		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
-		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-		assertEquals("Customer.addr1;Address.cust", visitor.trail.getTrail());
-		
-		DTypeRegistry registry = sess.getExecutionContext().registry;
-		DatIdMap datIdMap = null; //TODO is this ok?
-		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator(), datIdMap);
-//		schemaMigrator.dbNeedsMigration();
-		String fingerprint = schemaMigrator.calcDBFingerprint();
-		log(fingerprint);
-		
-		Map<String,Integer> datMap = new HashMap<>();
-		List<SchemaType> list = schemaMigrator.parseFingerprint(fingerprint);
-		for(SchemaType sctype: list) {
-			List<FieldInfo> fieldInfoL = schemaMigrator.parseFields(sctype);
-			for(FieldInfo ff: fieldInfoL) {
-				DType dtype = registry.getType(ff.type);
-				if (dtype != null && dtype.isStructShape()) {
-					String key = String.format("%s.%s", sctype.typeName, ff.name);
-					int datId = ff.datId;
-					datMap.put(key, datId);
-					log(String.format("f %s %s", key, ff.type));
-				}
-			}
-		}
-		
-		schemaMigrator.close();
-	}
+//	@Test
+//	public void testMM() {
+//		createCustomerMMTypeWithRelations("joe", null, "joe");
+//		RelationManyRule rr = getManyRule("Address", "cust");
+//		chkRule(rr, true, "joe", "joe");
+//
+//		MyManyToManyVisitor visitor = new MyManyToManyVisitor();
+//		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
+//		enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
+//		assertEquals("Customer.addr1;Address.cust", visitor.trail.getTrail());
+//		
+//		DTypeRegistry registry = sess.getExecutionContext().registry;
+//		DatIdMap datIdMap = null; //TODO is this ok?
+//		SchemaMigrator schemaMigrator = new SchemaMigrator(delia.getFactoryService(), delia.getDBInterface(), registry, new DoNothingVarEvaluator(), datIdMap);
+////		schemaMigrator.dbNeedsMigration();
+//		String fingerprint = schemaMigrator.calcDBFingerprint();
+//		log(fingerprint);
+//		
+//		Map<String,Integer> datMap = new HashMap<>();
+//		List<SchemaType> list = schemaMigrator.parseFingerprint(fingerprint);
+//		for(SchemaType sctype: list) {
+//			List<FieldInfo> fieldInfoL = schemaMigrator.parseFields(sctype);
+//			for(FieldInfo ff: fieldInfoL) {
+//				DType dtype = registry.getType(ff.type);
+//				if (dtype != null && dtype.isStructShape()) {
+//					String key = String.format("%s.%s", sctype.typeName, ff.name);
+//					int datId = ff.datId;
+//					datMap.put(key, datId);
+//					log(String.format("f %s %s", key, ff.type));
+//				}
+//			}
+//		}
+//		
+//		schemaMigrator.close();
+//	}
 	
 	
-	@Test
-	public void testMM2() {
-		createCustomerMMTypeWithRelations("joe", null, "joe");
-		RelationManyRule rr = getManyRule("Address", "cust");
-		chkRule(rr, true, "joe", "joe");
-		//clear datIds
-		rr.relInfo.forceDatId(null);;
-		rr = getManyRule("Customer", "addr1");
-		rr.relInfo.forceDatId(null);;
-		
-		DTypeRegistry registry = sess.getExecutionContext().registry;
-		DatIdMap datIdMap = null; //TODO is this ok?
-
-		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator(), datIdMap)) {
-			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(migrator, registry, delia.getLog());
-			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
-			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
-			datIdMap = visitor.getDatIdMap();
-
-			DBExecutor rawExecutor = visitor.getSchemaMigrator().getZDBExecutor();
-			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);
-			enumerator = new ManyToManyEnumerator();
-			enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
-			
-			visitor.getSchemaMigrator().close();
-			
-		}
-	}
+//	@Test
+//	public void testMM2() {
+//		createCustomerMMTypeWithRelations("joe", null, "joe");
+//		RelationManyRule rr = getManyRule("Address", "cust");
+//		chkRule(rr, true, "joe", "joe");
+//		//clear datIds
+//		rr.relInfo.forceDatId(null);;
+//		rr = getManyRule("Customer", "addr1");
+//		rr.relInfo.forceDatId(null);;
+//		
+//		DTypeRegistry registry = sess.getExecutionContext().registry;
+//		DatIdMap datIdMap = null; //TODO is this ok?
+//
+//		try(SchemaMigrator migrator = new SchemaMigrator(factorySvc, dbInterface, registry, new DoNothingVarEvaluator(), datIdMap)) {
+//			DatMapBuilder datMapBuilder = new DatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor(), migrator);
+//			PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(datMapBuilder, registry, delia.getLog());
+//			ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
+//			enumerator.visitTypes(sess.getExecutionContext().registry, visitor);
+//			datIdMap = visitor.getDatIdMap();
+//
+//			DBExecutor rawExecutor = migrator.getZDBExecutor();
+//			CreateNewDatIdVisitor newIdVisitor = new CreateNewDatIdVisitor(delia.getFactoryService(), rawExecutor, registry, delia.getLog(), datIdMap);
+//			enumerator = new ManyToManyEnumerator();
+//			enumerator.visitTypes(sess.getExecutionContext().registry, newIdVisitor);
+//			
+//			migrator.close();
+//			
+//		}
+//	}
 
 	@Before
 	public void init() {

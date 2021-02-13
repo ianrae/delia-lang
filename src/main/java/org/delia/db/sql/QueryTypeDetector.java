@@ -9,14 +9,13 @@ import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.QuerySpec;
 import org.delia.db.memdb.filter.filterfn.FilterFnRunner;
 import org.delia.db.sql.where.InPhrase;
 import org.delia.db.sql.where.LogicalPhrase;
-import org.delia.db.sql.where.SqlWhereConverter;
 import org.delia.db.sql.where.WhereExpression;
 import org.delia.db.sql.where.WhereOperand;
 import org.delia.db.sql.where.WherePhrase;
@@ -207,7 +206,7 @@ public class QueryTypeDetector extends ServiceBase {
 		if (op1 instanceof XNAFMultiExp) {
 			XNAFMultiExp mexp = (XNAFMultiExp) op1;
 			if (!CollectionUtils.isEmpty(mexp.qfeL)) {
-				XNAFNameExp nexp = (XNAFNameExp) mexp.qfeL.get(0);
+				XNAFSingleExp nexp = mexp.qfeL.get(0);
 				String fieldName = nexp.funcName;
 				return fieldName;
 			}

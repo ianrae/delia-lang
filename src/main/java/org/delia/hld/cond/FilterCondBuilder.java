@@ -15,7 +15,6 @@ import org.delia.compiler.ast.QueryExp;
 import org.delia.compiler.ast.QueryInExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.hld.ValType;
 import org.delia.runner.VarEvaluator;
@@ -197,7 +196,8 @@ public class FilterCondBuilder {
 			XNAFSingleExp el = xnaf.qfeL.get(0);
 			return new FilterVal(ValType.SYMBOL, el);
 		} else {
-			XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
+			XNAFSingleExp el = (XNAFSingleExp) xnaf.qfeL.get(0);
+//			XNAFNameExp el = (XNAFNameExp) xnaf.qfeL.get(0);
 			XNAFSingleExp el2 = xnaf.qfeL.get(1); //TODO handle more than 2 later
 			//Note. addr.y is a field but will become a FUNCTION here
 			TypePair pair = DValueHelper.findField(fromType, el.strValue());

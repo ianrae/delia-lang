@@ -2,7 +2,7 @@ package org.delia.compiler;
 
 import java.util.List;
 
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.ParserException;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.parser.FullParser;
 import org.delia.core.FactoryService;

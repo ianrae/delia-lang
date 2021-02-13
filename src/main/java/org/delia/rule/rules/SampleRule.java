@@ -1,7 +1,9 @@
 package org.delia.rule.rules;
 
+import org.delia.error.ErrorTracker;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
+import org.delia.rule.FieldExistenceService;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.rule.RuleRuleOperand;
@@ -19,6 +21,13 @@ public class SampleRule extends DRuleBase {
 			this.op = op;
 			this.oper2 = oper2;
 		}
+		
+		@Override
+		public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
+			fieldExistSvc.checkRuleOperand(getName(), oper1, et);
+			fieldExistSvc.checkRuleOperand(getName(), oper2, et);
+		}
+		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		protected boolean onValidate(DValue dval, DRuleContext ctx) {

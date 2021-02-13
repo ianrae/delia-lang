@@ -17,7 +17,7 @@ public class LongOpEvaluator extends OpEvaluatorBase {
 	      if (b != null) {
 	        return b;
 	      }
-		Long n1 = getFieldValue(dval).asLong();
+		Long n1 = resolveToLong(dval);
 		Long n2;
 		//auto-promote int values
 		if (rightVar instanceof IntegerExp) {

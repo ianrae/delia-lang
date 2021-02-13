@@ -53,9 +53,10 @@ public class LetStatementRunner extends ServiceBase {
 	private HLDFacade hldFacade;
 	private HLDQueryStatement mostRecentStatment;
 	private HLDFactory hldFactory;
+	private BlobLoader blobLoader;
 
 	public LetStatementRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, DBExecutor zexec, DTypeRegistry registry, 
-			FetchRunner fetchRunner, HLDFacade hldFacade, RunnerImpl runner, DatIdMap datIdMap) {
+			FetchRunner fetchRunner, HLDFacade hldFacade, RunnerImpl runner, DatIdMap datIdMap, BlobLoader blobLoader) {
 		super(factorySvc);
 		this.dbInterface = dbInterface;
 		this.hldFactory = dbInterface.getHLDFactory();
@@ -66,10 +67,11 @@ public class LetStatementRunner extends ServiceBase {
 		this.hldFacade = hldFacade;
 		this.scalarBuilder = new ScalarBuilder(factorySvc, registry);
 		this.datIdMap = datIdMap;
+		this.blobLoader = blobLoader;
 	}
 
 	private ValidationRunner createValidationRunner() {
-		return factorySvc.createValidationRunner(dbInterface, fetchRunner);
+		return factorySvc.createValidationRunner(dbInterface, registry, fetchRunner);
 	}
 
 	private void addError(ResultValue res, String id, String msg) {
@@ -219,7 +221,7 @@ public class LetStatementRunner extends ServiceBase {
 		return spec;
 	}
 	private ResultValue invokeUserFunc(LetStatementExp exp, ResultValue resParam) {
-		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface, hldFactory);
+		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface, hldFactory, blobLoader);
 		ExecutionState execState = runner.getExecutionState();
 		execState.varMap.clear(); //user fn has its own variables
 

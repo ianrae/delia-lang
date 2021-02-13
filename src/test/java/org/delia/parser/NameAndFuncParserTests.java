@@ -1,11 +1,12 @@
 package org.delia.parser;
 
+import static org.junit.Assert.assertEquals;
+
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.parser.NameAndFuncParser;
 import org.delia.compiler.parser.TerminalParser;
 import org.junit.Test;
-
 
 
 public class NameAndFuncParserTests {
@@ -20,6 +21,11 @@ public class NameAndFuncParserTests {
 //		exp = parse1("Customer.foo(other.bar())");
 	}
 	
+	@Test
+	public void test1a() {
+		Exp exp = parse1("Customer.foo().bar()");
+		assertEquals("Customer.foo().bar()", exp.strValue());
+	}
 	
 	@Test
 	public void testDebug() {
@@ -47,6 +53,7 @@ public class NameAndFuncParserTests {
 
 	
 	private XNAFMultiExp parse(String src) {
+		log(src);
 		NameAndFuncParser.initLazy();
 		Exp exp = NameAndFuncParser.parseNameAndFuncs().from(TerminalParser.tokenizer, TerminalParser.ignored.skipMany()).parse(src);
 		return (XNAFMultiExp) exp;

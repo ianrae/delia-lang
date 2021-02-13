@@ -1,5 +1,6 @@
 package org.delia.bdd;
 
+import org.delia.api.DeliaImpl;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.core.BDDTesterEx;
 import org.delia.hld.HLDFactoryImpl;
@@ -90,10 +91,15 @@ public class AllBDDTests extends BDDBase {
 	}
 	
 	@Test
+	public void testR660() {
+		runR660File("t0-rule-uniquefields.txt", 2);
+	}
+	
+	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
 		runR700File("t0-insert-serial.txt", 1);
-		runR700File("t0-insert-parent.txt", 2);
+		runR700File("t0-insert-parent.txt", 5);
 		runR700File("t0-insert-parent2.txt", 1);
 	}
 	
@@ -333,16 +339,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 3;
+//		testIndexToRun = 4;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-//		runR1500File("t0-queryfn-offset.txt", 5);
-//		runR1600File("t0-fetch.txt", 4);
-//		runR560File("t0-self-11.txt", 3);
-//		runR560File("t0-self-N1.txt", 4);
-		runR1000File("t0-upsert-mm-id.txt", 4);
+		runR700File("t0-insert-parent.txt", 5);
 	}
 	
 	//---
@@ -350,7 +352,6 @@ public class AllBDDTests extends BDDBase {
 
 	@Before
 	public void init() {
-//		DeliaFactory.useHLSMEM = true;
 	}
 	@After
 	public void shutdown() {

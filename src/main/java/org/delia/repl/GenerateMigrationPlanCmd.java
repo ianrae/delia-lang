@@ -1,7 +1,7 @@
 package org.delia.repl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.api.MigrationAction;
 import org.delia.db.schema.MigrationPlan;
 import org.delia.db.schema.SchemaType;

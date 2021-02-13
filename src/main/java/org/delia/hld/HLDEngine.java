@@ -19,14 +19,20 @@ import org.delia.hld.cud.HLDUpdate;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsert;
 import org.delia.hld.simple.SimpleBase;
+import org.delia.hld.simple.SimpleSqlBuilder;
+import org.delia.hld.simple.SimpleUpdate;
+import org.delia.relation.RelationInfo;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 /**
  * Generates the lower-level HLD objects such as HLDQuery,HLDInsert,etc
@@ -40,6 +46,7 @@ import org.delia.util.DeliaExceptionHelper;
 public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	private HLDAliasManager aliasMgr;
 	private DValueIterator insertPrebuiltValueIterator;
+	private BlobLoader blobLoader;
 
 	public HLDEngine(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap, SprigService sprigSvc) {
 		super(registry, factorySvc, datIdMap, sprigSvc);
@@ -152,6 +159,7 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 	public HLDDsonBuilder getHldBuilder() {
 		HLDDsonBuilder builder = super.getHldBuilder();
 		builder.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		builder.setBlobLoader(blobLoader);
 		return builder;
 	}
 	
@@ -225,5 +233,33 @@ public class HLDEngine extends HLDEngineBase implements HLDQueryBuilderAdapter {
 
 	public void setInsertPrebuiltValueIterator(DValueIterator insertPrebuiltValueIterator) {
 		this.insertPrebuiltValueIterator = insertPrebuiltValueIterator;
+	}
+
+	public void setBlobLoader(BlobLoader blobLoader) {
+		this.blobLoader = blobLoader;
+	}
+
+	public SimpleUpdate getDATUpdate(RelationInfo relinfo, DatIdMap datIdMap) {
+		HLDDsonBuilder hldBuilder = getHldBuilder();
+		
+		String fld1 = datIdMap.getAssocFieldFor(relinfo);
+		fld1 = (fld1.equals("leftv")) ? "leftName" : "rightName";
+		DStructType structType = registry.getDATType(); 
+		
+		ScalarValueBuilder scalarBuilder = factorySvc.createScalarValueBuilder(registry);
+		DValue pkval = scalarBuilder.buildInt(relinfo.getDatId());
+		QueryExp queryExp = queryBuilderHelper.buildPKQueryExp(structType, pkval);
+		
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+		DValue strVal = scalarBuilder.buildString(String.format("%s.%s", relinfo.nearType.getName(), relinfo.fieldName));
+		HLDUpdate hld = hldBuilder.buildSimpleUpdate(structType, pkpair.name, pkval, fld1, strVal);
+		hld.hld = buildQuery(queryExp);
+		
+		HLDAliasBuilder aliasBuilder = createAliasBuilder();
+		aliasBuilder.assignAliases(hld);
+		
+		SimpleSqlBuilder simpleBuilder = new SimpleSqlBuilder();
+		SimpleUpdate simple = simpleBuilder.buildFrom(hld);
+		return simple;
 	}
 }

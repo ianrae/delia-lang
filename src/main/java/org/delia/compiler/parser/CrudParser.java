@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.CrudExp;
 import org.delia.compiler.ast.DeleteStatementExp;
 import org.delia.compiler.ast.DsonExp;
@@ -53,7 +53,7 @@ public class CrudParser extends ParserBase {
 	
 	public static Parser<StringExp> assocCrudAction() {
 		return Parsers.or(term("insert"), term("update"), term("delete"))
-				.map(new org.codehaus.jparsec.functors.Map<Token, StringExp>() {
+				.map(new org.jparsec.functors.Map<Token, StringExp>() {
 					@Override
 					public StringExp map(Token tok) {
 						return new StringExp(tok.index(), (String)tok.toString());

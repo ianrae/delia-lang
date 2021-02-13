@@ -2,9 +2,9 @@ package org.delia.parser;
 
 import static org.junit.Assert.*;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.NumberExp;
 import org.delia.compiler.parser.TerminalParser;
@@ -37,7 +37,7 @@ public class TerminalParserTests {
 
     public static Parser<NumberExp> xnumbervalueassign() {
         return Parsers.or(TerminalParser.numberSyntacticParser).
-                map(new org.codehaus.jparsec.functors.Map<String, NumberExp>() {
+                map(new org.jparsec.functors.Map<String, NumberExp>() {
                     @Override
                     public NumberExp map(String arg0) {
                         return new NumberExp(Double.parseDouble(arg0));

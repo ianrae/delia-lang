@@ -1,18 +1,20 @@
 package org.delia.repl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.api.MigrationAction;
-import org.delia.builder.ConnectionInfo;
 import org.delia.builder.DeliaBuilder;
 import org.delia.compiler.generate.DeliaGeneratePhase;
 import org.delia.compiler.generate.SimpleFormatOutputGenerator;
 import org.delia.db.schema.MigrationPlan;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.log.Log;
+import org.delia.log.LoggableBlob;
 import org.delia.log.SimpleLog;
 import org.delia.runner.DeliaException;
 import org.delia.runner.QueryResponse;
@@ -26,7 +28,6 @@ import org.delia.util.ResourceTextFileReader;
 import org.delia.util.StringUtil;
 import org.delia.util.TextFileReader;
 import org.delia.zdb.DBInterfaceFactory;
-import org.h2.store.fs.FileUtils;
 
 public class ReplRunner  {
 	private Log log = new SimpleLog();
@@ -42,21 +43,23 @@ public class ReplRunner  {
 
 	private MigrationPlan currentMigrationPlan;
 
-	private ConnectionInfo connectionInfo;
+//	private ConnectionInfo connectionInfo;
 
 	private String sessionName;
 
 	protected ReplOutputWriter outWriter;
+
+	private ConnectionDefinition connectionDef;
 	public static boolean disableSQLLoggingDuringSchemaMigration = true;
 
-	public ReplRunner(ConnectionInfo info, ReplOutputWriter outWriter) {
-		this.connectionInfo = info;
+	public ReplRunner(ConnectionDefinition connDef, ReplOutputWriter outWriter) {
+		this.connectionDef = connDef;
 		this.outWriter = outWriter;
 		addAllCmds();
 		restart(null);
 	}
 	public ReplRunner(DeliaSession externalDeliaSession, ReplOutputWriter outWriter) {
-		this.connectionInfo = null; //TODO: will this be a problem?
+		this.connectionDef = null; //TODO: will this be a problem?
 		this.outWriter = outWriter;
 		addAllCmds();
 		restart(externalDeliaSession);
@@ -79,7 +82,7 @@ public class ReplRunner  {
 
 	public void restart(DeliaSession externalDeliaSession) {
 		if (externalDeliaSession == null) {
-			this.delia = DeliaBuilder.withConnection(connectionInfo).build();
+			this.delia = DeliaBuilder.withConnection(connectionDef).build();
 		} else {
 			this.delia = externalDeliaSession.getDelia();
 			this.mostRecentSess = externalDeliaSession;
@@ -322,7 +325,13 @@ public class ReplRunner  {
 				}
 			}
 			DValue dval = (DValue) res.val;
-			String valStr = dval.getType().isShape(Shape.STRING) ? String.format("'%s'", dval.asString()) : dval.asString();
+			String valStr;
+			if (dval.getType().isBlobShape()) {
+				LoggableBlob lb = new LoggableBlob(dval.asBlob().getByteArray());
+				valStr = lb.toString();
+			} else {
+				valStr = dval.getType().isShape(Shape.STRING) ? String.format("'%s'", dval.asString()) : dval.asString();
+			}
 			//				String s = String.format("OK: %s (%s)", valStr, shapeStr(dval));
 			if (res.varName.equals("?")) {
 				return valStr;
@@ -352,6 +361,8 @@ public class ReplRunner  {
 		QueryResponse qresp = (QueryResponse) res.val;
 		SimpleFormatOutputGenerator gen = new SimpleFormatOutputGenerator();
 		gen.includeVPrefix = false;
+//		gen.truncateLargeBlob = true;
+
 		DeliaGeneratePhase phase = mostRecentSess.getExecutionContext().generator;
 
 		boolean multiple = qresp.dvalList.size() > 1;
@@ -407,7 +418,8 @@ public class ReplRunner  {
 	}
 
 	public boolean doesFileExist(String path) {
-		return FileUtils.exists(path);
+		File f = new File(path);
+		return f.exists();
 	}
 
 	public String getSessionName() {

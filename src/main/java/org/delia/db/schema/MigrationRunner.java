@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.schema.modify.OperationType;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
@@ -11,6 +13,7 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
+import org.stringtemplate.v4.compiler.Bytecode.OperandType;
 
 public class MigrationRunner extends ServiceBase {
 
@@ -25,10 +28,10 @@ public class MigrationRunner extends ServiceBase {
 		this.insertRunner = new MigrateInsertRunner(factorySvc, registry, dbexecutor, dbInterface);
 	}
 
-	public boolean performMigrations(String currentFingerprint, List<SchemaType> diffL, List<String> orderL) {
+	public boolean performMigrations(String currentFingerprint, MigrationPlan plan, List<String> orderL) {
 		log.log("running migration with %d steps:", orderL.size());
 		for(String typeName: orderL) {
-			for(SchemaType st: diffL) {
+			for(SchemaType st: plan.diffL) {
 				if (st.typeName.equals(typeName)) {
 					if (st.isTblInsert()) {
 						log.log("  create-table: %s", st.typeName);
@@ -56,7 +59,12 @@ public class MigrationRunner extends ServiceBase {
 			}
 		}
 		
-		for(SchemaType st: diffL) {
+		for(SchemaChangeAction action: plan.changeActionL) {
+			log.log("  change-action: %s, %s", action.typeName, action.changeType);
+			dbexecutor.performSchemaChangeAction(action);
+		}
+		
+		for(SchemaType st: plan.diffL) {
 			if (st.isTblDelete()) {
 				log.log("  delete-table: %s", st.typeName);
 				doSoftDelete(st.typeName);
@@ -121,5 +129,41 @@ public class MigrationRunner extends ServiceBase {
 		dval = structBuilder.getDValue();
 		return dval;
 	}
+	
+	//=new one
+	public boolean sxPerformMigrations(String currentFingerprint, List<SchemaChangeOperation> opList, List<String> orderL) {
+		log.log("running sxmigration with %d steps:", opList.size());
+		for(String typeName: orderL) {
+			for(SchemaChangeOperation op: opList) {
+				//when we rename a table, op will be the old name, so check op.newName
+				boolean isMatchToNewName = false;
+				if (op.opType.equals(OperationType.TABLE_RENAME)) {
+					isMatchToNewName = op.newName.equals(typeName);
+				}
+				
+				if (op.typeName.equals(typeName) || isMatchToNewName) {
+					log.log("  %s: %s. fld: %s", op.opType.name(), op.typeName, op.fieldName);
+					dbexecutor.executeSchemaChangeOperation(op);
+				}
+			}
+		}
+		
+		
+		
+		//write new schema to db
+		DStructType dtype = registry.getSchemaVersionType();
+		DValue dval = createSchemaObj(dtype, currentFingerprint);
+		if (dval == null) {
+			return false;
+		}
+
+//		InsertContext ictx = new InsertContext();
+//		dbexecutor.executeInsert(dval, ictx);
+		insertRunner.doInsert(dval);
+
+		return true;
+	}
+	
+	
 
 }

@@ -3,12 +3,11 @@ package org.delia.repl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.delia.ConnectionDefinitionBuilder;
 import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;
 import org.delia.bdd.BDDBase;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.db.DBType;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.log.Log;
 import org.delia.runner.ResultValue;
 import org.delia.zdb.DBInterfaceFactory;
@@ -144,8 +143,8 @@ public class ReplRunnerTests extends BDDBase {
 
 	@Before
 	public void init() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		runner = new ReplRunner(info, new ConsoleOutputWriter());
+		ConnectionDefinition connDef = ConnectionDefinitionBuilder.createMEM();
+		runner = new ReplRunner(connDef, new ConsoleOutputWriter());
 	}
 	
 	int currentLineNum = 0;

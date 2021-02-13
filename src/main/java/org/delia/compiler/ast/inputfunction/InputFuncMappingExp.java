@@ -5,7 +5,6 @@ import org.delia.compiler.ast.ExpBase;
 import org.delia.compiler.ast.IdentExp;
 import org.delia.compiler.ast.StringExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 
 public class InputFuncMappingExp extends ExpBase {
@@ -37,11 +36,8 @@ public class InputFuncMappingExp extends ExpBase {
 			return true;
 		} else {
 			XNAFSingleExp sexp = getSingleExp();
-			if (sexp instanceof XNAFNameExp) {
-				return true;
-			}
+			return !sexp.isRuleFn;
 		}
-		return false;
 	}
 	public XNAFSingleExp getSingleExp() {
 		if (inputField instanceof XNAFMultiExp) {

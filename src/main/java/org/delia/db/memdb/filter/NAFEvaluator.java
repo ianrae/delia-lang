@@ -11,6 +11,7 @@ public class NAFEvaluator implements OpEvaluator {
 	private OpEvaluator inner;
 	private DTypeRegistry registry;
 	private FilterFnRunner filterFnRunner;
+	private boolean negFlag;
 
 	public NAFEvaluator(XNAFMultiExp op1, OpEvaluator inner, DTypeRegistry registry) {
 		this.op1 = op1;
@@ -21,6 +22,14 @@ public class NAFEvaluator implements OpEvaluator {
 
 	@Override
 	public boolean match(Object left) {
+		boolean b = doMatch(left);
+		if (negFlag) {
+			return !b;
+		} else {
+			return b;
+		}
+	}
+	private boolean doMatch(Object left) {
 		DValue dval = (DValue) left;
 		String fieldName = getFieldName();
 		DValue fieldval = dval.asStruct().getField(fieldName);
@@ -29,7 +38,7 @@ public class NAFEvaluator implements OpEvaluator {
 		if (resultVal != null) {
 			return inner.match(resultVal);
 		}
-		return true;
+		return false;
 	}
 
 	private String getFieldName() {
@@ -45,6 +54,6 @@ public class NAFEvaluator implements OpEvaluator {
 
 	@Override
 	public void setNegFlag(boolean negFlag) {
-		//unused
+		this.negFlag = negFlag;
 	}
 }

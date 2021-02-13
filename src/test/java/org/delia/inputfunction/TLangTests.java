@@ -4,12 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 
-import org.delia.api.Delia;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
 import org.delia.dao.DeliaGenericDao;
-import org.delia.db.DBType;
 import org.delia.db.memdb.filter.OP;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.ResultValue;
@@ -208,11 +203,6 @@ public class TLangTests extends InputFunctionTestBase {
 		return src;
 	}
 
-	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
-	}
 	private TLangProgram createProgram() {
 		TLangProgram prog = new TLangProgram();
 		prog.statements.add(new ToUpperStatement(true));

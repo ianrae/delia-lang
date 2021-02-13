@@ -5,18 +5,14 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.dataimport.CSVFileLoader;
 import org.delia.dataimport.DataImportService;
 import org.delia.dataimport.ImportLevel;
-import org.delia.db.DBType;
 import org.delia.error.DeliaError;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.GroupPair;
@@ -124,11 +120,6 @@ public class DataImportGroupTests extends InputFunctionTestBase {
 		src += " }";
 
 		return src;
-	}
-	private DeliaGenericDao createDao() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
-		return new DeliaGenericDao(delia);
 	}
 	private InputFunctionResult buildAndRun(int which, String inFnName, LineObjIterator lineObjIter, int expectedRows) {
 		createDelia(which);

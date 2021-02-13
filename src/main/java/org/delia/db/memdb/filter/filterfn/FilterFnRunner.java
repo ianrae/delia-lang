@@ -26,6 +26,10 @@ public class FilterFnRunner {
 	}
 
 	public DValue executeFilterFn(XNAFMultiExp multiexp, DValue fieldval) {
+		if (multiexp.qfeL.size() == 1) {
+			return fieldval; //new for jparsec3
+		}
+		
 		XNAFSingleExp exp = multiexp.qfeL.get(1);
 		String fnName = exp.funcName;
 		

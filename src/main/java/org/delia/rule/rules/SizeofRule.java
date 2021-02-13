@@ -1,7 +1,9 @@
 package org.delia.rule.rules;
 
+import org.delia.error.ErrorTracker;
 import org.delia.rule.DRuleBase;
 import org.delia.rule.DRuleContext;
+import org.delia.rule.FieldExistenceService;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.type.DValue;
@@ -16,6 +18,12 @@ public class SizeofRule extends DRuleBase {
 		this.oper1 = oper1;
 		this.sizeofAmount = sizeofAmount;
 	}
+	
+	@Override
+	public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
+		fieldExistSvc.checkRuleOperand(getName(), oper1, et);
+	}
+	
 	@Override
 	protected boolean onValidate(DValue dval, DRuleContext ctx) {
 		String fieldName = oper1.getSubject();

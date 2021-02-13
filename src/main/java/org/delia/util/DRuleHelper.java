@@ -59,6 +59,10 @@ public class DRuleHelper {
 		}
 		return false;
 	}
+	public static RelationInfo findMatchingRuleInfo(DStructType structType, String fieldName) {
+		TypePair pair = new TypePair(fieldName, null);
+		return findMatchingRuleInfo(structType, pair);
+	}
 	public static RelationInfo findMatchingRuleInfo(DStructType structType, TypePair pair) {
 		for(DRule rule: structType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {

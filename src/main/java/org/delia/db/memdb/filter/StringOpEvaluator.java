@@ -1,6 +1,6 @@
 package org.delia.db.memdb.filter;
 
-import org.delia.compiler.ast.StringExp;
+import org.delia.compiler.ast.Exp;
 import org.delia.type.DValue;
 
 public class StringOpEvaluator extends OpEvaluatorBase {
@@ -18,12 +18,15 @@ public class StringOpEvaluator extends OpEvaluatorBase {
 			if (b != null) {
 				return b;
 			}
-		} else if (dval.asStruct().getField(fieldName) == null) {
+		}
+		DValue inner = getFieldValue(dval);
+		if (inner == null) {
 			return false; //SKIP when s1 is null
 		}
 
-		String s1 = getFieldValue(dval).asString();
-		String s2 = ((StringExp)rightVar).strValue();
+		String s1 = inner.asString();
+//		String s2 = ((StringExp)rightVar).strValue();
+		String s2 = ((Exp)rightVar).strValue(); //rightVar might not be StringExp.
 
 		switch(op) {
 		case LT:

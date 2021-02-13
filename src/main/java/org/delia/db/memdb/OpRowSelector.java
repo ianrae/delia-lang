@@ -73,7 +73,7 @@ public class OpRowSelector extends RowSelectorBase {
 				op2HintType = DValueHelper.findFieldType(dtype, fieldOrVarOrFn);
 			}
 			
-			OpFactory factory = new OpFactory(registry, fmtSvc, factorySvc);
+			OpFactory factory = new OpFactory(registry, fmtSvc, factorySvc, dtype);
 			this.evaluator = factory.create(foexp.op, xop1, xop2, op1HintType, op2HintType, fullexp.negFlag);
 			//support id < 10 and also 10 < id
 			boolean reversed = (xop2 instanceof IdentExp) || (xop2 instanceof XNAFMultiExp);

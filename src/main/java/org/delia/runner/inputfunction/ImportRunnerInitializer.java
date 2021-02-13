@@ -1,6 +1,6 @@
 package org.delia.runner.inputfunction;
 
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.api.RunnerInitializer;
 import org.delia.core.FactoryService;
 import org.delia.db.DBAccessContext;

@@ -1,13 +1,11 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
-import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.schema.SchemaMigrator;
-import org.delia.db.sqlgen.SqlGeneratorFactory;
+import org.delia.db.transaction.TransactionProvider;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
-import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.log.Log;
 import org.delia.log.LogFactory;
@@ -44,8 +42,9 @@ public interface FactoryService {
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();
 	DiagnosticService getDiagnosticService();
-	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner);
+	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner);
 	boolean getEnableMEMSqlGenerationFlag();
 	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
+	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
 }

@@ -2,21 +2,26 @@ package org.delia.db.schema;
 
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
+import org.delia.rule.rules.UniqueFieldsRule;
 import org.delia.type.BuiltInTypes;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
+import org.delia.util.StringUtil;
 
 public class SchemaFingerprintGenerator {
 	public static final int SCHEMA_VERSION = 2;
-	//v1 - may2020 - initial version
 	//v2 - feb2021 - add support for sizeof
+	//v1 - may2020 - initial version
 	
 	
 	private DTypeRegistry registry;
@@ -56,10 +61,26 @@ public class SchemaFingerprintGenerator {
 					i++;
 				}
 			}
+			
+			s += addUniqueFieldsConstraints(type);
 			s += "}\n";
 		}
 		
 		return s;
+	}
+
+	private String addUniqueFieldsConstraints(DType type) {
+		StringJoiner joiner = new StringJoiner(";");
+		for(DRule rule: type.getRawRules()) {
+			if (rule instanceof UniqueFieldsRule) {
+				UniqueFieldsRule ufr = (UniqueFieldsRule) rule;
+				List<String> list = ufr.getOperList().stream().map(x -> x.getSubject()).collect(Collectors.toList());
+				String s = String.format("UFR(%s)", StringUtil.flatten(list));
+				joiner.add(s);
+			}
+		}
+		String s = joiner.toString();
+		return s.isEmpty() ? s : "|" + s;
 	}
 
 	private String genField(DStructType dtype, TypePair pair) {

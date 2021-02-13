@@ -6,8 +6,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaSession;
 import org.delia.app.DaoTestBase;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.runner.ResultValue;

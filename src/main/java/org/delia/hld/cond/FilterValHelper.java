@@ -27,6 +27,8 @@ public class FilterValHelper {
 		case LONG:
 			return new LongFilterCond(new LongExp(dval.asLong()));
 		case STRING:
+		case DATE:
+		case BLOB:
 			return new StringFilterCond(new StringExp(dval.asString()));
 			default:
 				DeliaExceptionHelper.throwError("bad-filter-var-type", "Var '%s' used in filter has type '%s'. Not allowed", varName, dval.getType().getName());

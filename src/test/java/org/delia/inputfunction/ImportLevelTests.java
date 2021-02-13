@@ -5,12 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.delia.api.Delia;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
+import org.delia.Delia;
 import org.delia.dataimport.DataImportService;
-import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.delia.runner.inputfunction.ImportSpecBuilder;
 import org.delia.runner.inputfunction.InputFunctionRequest;
@@ -29,8 +25,7 @@ public class ImportLevelTests extends InputFunctionTestBase {
 
 	@Test
 	public void testLevel1() {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = createNewDelia();
 		buildSrc(delia, 0);
 
 		InputFunctionService inputFnSvc = new InputFunctionService(delia.getFactoryService());

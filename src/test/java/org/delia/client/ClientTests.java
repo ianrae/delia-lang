@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import org.delia.api.Delia;
-import org.delia.api.DeliaFactory;
-import org.delia.api.DeliaOptions;
-import org.delia.api.DeliaSession;
+import org.delia.Delia;
+import org.delia.DeliaFactory;
+import org.delia.DeliaOptions;
+import org.delia.DeliaSession;
 import org.delia.base.DBHelper;
 import org.delia.base.DBTestHelper;
 import org.delia.base.UnitTestLog;

@@ -6,7 +6,7 @@ import org.delia.base.UnitTestLog;
 import org.delia.bdd.old.BDDQueryHelper;
 import org.delia.compiler.ast.LetStatementExp;
 import org.delia.db.DBType;
-import org.delia.h2.DeliaInitializer;
+import org.delia.db.h2.DeliaInitializer;
 import org.delia.log.Log;
 import org.delia.runner.CompilerHelper;
 import org.delia.runner.LegacyRunner;

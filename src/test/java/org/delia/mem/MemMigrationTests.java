@@ -2,7 +2,7 @@ package org.delia.mem;
 
 import static org.junit.Assert.assertEquals;
 
-import org.delia.api.DeliaFactory;
+import org.delia.DeliaFactory;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.runner.ResultValue;

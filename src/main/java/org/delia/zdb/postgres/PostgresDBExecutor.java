@@ -17,9 +17,10 @@ import org.delia.db.RawStatementGenerator;
 import org.delia.db.SqlExecuteContext;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
-import org.delia.db.ValueHelper;
 import org.delia.db.hls.ResultTypeInfo;
 import org.delia.db.postgres.PostgresFieldgenFactory;
+import org.delia.db.schema.SchemaChangeAction;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.table.FieldGenFactory;
 import org.delia.hld.HLDFactory;
@@ -47,8 +48,8 @@ import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 import org.delia.zdb.DBListingType;
 import org.delia.zdb.TableCreator;
-import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 import org.delia.zdb.h2.DBExecutorBase;
+import org.delia.zdb.h2.H2DeliaSessionCache.CacheData;
 
 public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 
@@ -143,7 +144,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 			try {
 				SqlExecuteContext sqlctx = new SqlExecuteContext(registry, null);
 				sqlctx.genKeysL = dbctxMain.genKeysL;
-				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+				HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, conn.createValueHelper(), registry);
 				genVal = hldRSCconverter.extractGeneratedKey(ctx, sqlctx);
 			} catch (SQLException e) {
 				DeliaExceptionHelper.throwError("extract-generated-key-failed", e.getMessage());
@@ -281,7 +282,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 		HLDSelectHelper selectHelper = new HLDSelectHelper(factorySvc, registry);
 		ResultTypeInfo selectResultType = selectHelper.getSelectResultType(hld);
 		DBAccessContext dbactx = new DBAccessContext(registry, new DoNothingVarEvaluator());
-		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, new ValueHelper(factorySvc), registry);
+		HLDResultSetConverter hldRSCconverter = new HLDResultSetConverter(factorySvc, conn.createValueHelper(), registry);
 		if (selectResultType.isScalarShape()) {
 			QueryDetails details = new QueryDetails(); //TODO delete later
 			qresp.dvalList = hldRSCconverter.buildScalarResult(rs, selectResultType, details, dbactx);
@@ -335,9 +336,12 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 
 	@Override
 	public void createField(String typeName, String field, int sizeof) {
+		createFieldEx(typeName, field, sizeof, false);
+	}
+	public void createFieldEx(String typeName, String field, int sizeof, boolean canCreateAssocTable) {
 		failIfNotInit2(); 
 		DStructType dtype = registry.findTypeOrSchemaVersionType(typeName);
-		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof);
+		String sql = tableCreator.generateCreateField(typeName, dtype, field, sizeof, canCreateAssocTable);
 		execSqlStatement(sql);
 	}
 
@@ -391,5 +395,70 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	public HLDFactory getHLDFactory() {
 		return hldFactory;
 	}
+	@Override
+	public void performSchemaChangeAction(SchemaChangeAction action) {
+		DeliaExceptionHelper.throwNotImplementedError("sca!");
+	}
+
+	@Override
+	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
+		switch(op.opType) {
+		case TABLE_ADD:
+			this.createTable(op.typeName);
+			break;
+		case TABLE_DELETE:
+			this.deleteTable(op.typeName);
+			break;
+		case TABLE_RENAME:
+			this.renameTable(op.typeName, op.newName);
+			break;
+		case FIELD_ADD:
+			this.createFieldEx(op.typeName, op.fieldName, op.sizeof, op.canCreateAssocTable);
+			break;
+		case FIELD_DELETE:
+			this.deleteField(op.typeName, op.fieldName, op.fieldInfo.datId);
+			break;
+		case FIELD_RENAME:
+			this.renameField(op.typeName, op.fieldName, op.newName);
+			break;
+		case FIELD_RENAME_MANY_TO_MANY:
+		{
+			this.logSql(op.assocUpdateStm.sql);
+			DBExecuteContext dbctx = createContext();
+			int n = conn.executeCommandStatement(op.assocUpdateStm, dbctx);
+			if (n != 1) {
+				this.log.logError("FIELD_RENAME_MANY_TO_MANY failed!");
+			}
+		}
+			break;
+		case FIELD_ALTER: //flags
+			this.alterField(op.typeName, op.fieldName, op.flags);
+			break;
+		case FIELD_ALTER_TYPE: //includes size
+			this.alterFieldType(op.typeName, op.fieldName, op.fieldType, op.sizeof);
+			break;
+			
+		case INDEX_ADD:
+		case INDEX_DELETE:
+		case INDEX_ALTER:
+		case CONSTRAINT_ADD:
+		case CONSTRAINT_DELETE:
+		case CONSTRAINT_ALTER:
+			this.execSqlStatementEx(op.otherStm);
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void execSqlStatementEx(SqlStatement stm) {
+		logSql(stm.sql);
+		try {
+			DBExecuteContext dbctx = createContext();
+			conn.execStatement(stm, dbctx);
+		} catch (DBValidationException e) {
+			convertAndRethrow(e);
+		}
+	}		
 	
 }

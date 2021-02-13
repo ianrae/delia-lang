@@ -3,7 +3,6 @@ package org.delia.runner;
 import static org.junit.Assert.assertEquals;
 
 import org.delia.base.FakeTypeCreator;
-import org.delia.db.DBAccessContext;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.rule.AlwaysRuleGuard;
 import org.delia.rule.DRule;
@@ -90,16 +89,23 @@ public class ValidationRuleRunnerTests extends RunnerTestBase {
 	}
 
 	private void chkPass(DValue dval, DRule rule) {
-		FetchRunner fetchRunner = createFetchRunner();
-		DValueCompareService compareSvc = factorySvc.getDValueCompareService();
-		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc, false, false, null, false);
+		DRuleContext ctx = createCtx();
 		assertEquals(true, rule.validate(dval, ctx));
 		assertEquals(false, ctx.hasErrors());
 	}
-	private void chkFail(DValue dval, DRule rule) {
+	private DRuleContext createCtx() {
 		FetchRunner fetchRunner = createFetchRunner();
 		DValueCompareService compareSvc = factorySvc.getDValueCompareService();
-		DRuleContext ctx = new DRuleContext(et, "abc", false, dbInterface.getCapabilities(), true, fetchRunner, compareSvc, false, false, null, false);
+		DRuleContext ctx = new DRuleContext(runner.getFactoryService(),
+				dbInterface, runner.getRegistry(), et,
+				"abc", false, dbInterface.getCapabilities(), 
+				true, fetchRunner, compareSvc, 
+				false, false, null, false);
+		return ctx;
+	}
+
+	private void chkFail(DValue dval, DRule rule) {
+		DRuleContext ctx = createCtx();
 		assertEquals(false, rule.validate(dval, ctx));
 		assertEquals(true, ctx.hasErrors());
 	}

@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.StringJoiner;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.delia.api.DeliaSession;
+import org.delia.DeliaSession;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.inputfunction.IdentPairExp;
 import org.delia.compiler.ast.inputfunction.InputFuncMappingExp;

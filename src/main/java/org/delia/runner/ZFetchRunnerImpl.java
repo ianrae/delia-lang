@@ -11,7 +11,6 @@ import org.delia.core.ServiceBase;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryContext;
 import org.delia.db.QuerySpec;
-import org.delia.hld.HLDFactory;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.type.DRelation;
 import org.delia.type.DStructType;

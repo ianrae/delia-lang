@@ -184,6 +184,9 @@ public class HLDQueryBuilder {
 				TypePair pair = DValueHelper.findField(currentScope, exp.strValue());
 				if (pair == null) {
 					DeliaExceptionHelper.throwUnknownFieldError(currentScope.getName(), exp.strValue());
+				} else if (pair.type.isBlobShape()) {
+					DeliaExceptionHelper.throwError("blob-orderBy-not-allowed", "orderBy('%s'): not allowed for blob", pair.name);
+					
 				}
 			}
 			

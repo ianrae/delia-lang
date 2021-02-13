@@ -73,7 +73,7 @@ public class MultiOpEvaluator implements OpEvaluator {
 			op2HintType = DValueHelper.findFieldType(dtype, fieldOrVarOrFn);
 		}
 		
-		OpFactory factory = new OpFactory(registry, fmtSvc, factorySvc);
+		OpFactory factory = new OpFactory(registry, fmtSvc, factorySvc, dtype);
 		OpEvaluator evaluator = factory.create(foexp.op, xop1, xop2, op1HintType, op2HintType,negFlag);
 //		//TODO: this support id < 10. later support 10 < id too!!
 		evaluator.setRightVar(xop2);

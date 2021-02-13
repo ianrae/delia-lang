@@ -39,6 +39,8 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R560_self_relation,
 		R600_rules,
 		R650_rule_fns,
+		R660_rule_unique,
+		R670_rule_index,
 		R700_crud_insert,
 		R800_crud_delete,
 		R900_crud_update,
@@ -62,12 +64,14 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		R2300_multi_relation, 
 		R2400_log,
 		//R2500 input fn
-		R2600_sizeof
+		R2600_sizeof,
+		R2700_blob
 	}
 	public static class FileHelper {
 		
 		public String getDir(BDDGroup group) {
-			String path = "src/main/resources/test/bdd/";
+//			String path = "src/main/resources/test/bdd/";
+			String path = "src/test/resources/test/bdd/";
 			String s = group.name().replace('_', '-');
 			path += s;
 			return path;
@@ -91,7 +95,6 @@ public abstract class BDDBase implements DBInterfaceCreator {
 		filesExecutedL.add(filename);
 	}
 	
-
 	/**
 	 * When we want to run all unit tests but not have to wait
 	 * 15 minutes for H2 and Postgress BDD tests to run,
@@ -129,6 +132,12 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR650File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R650_rule_fns, filename, numTests);
+	}
+	protected int runR660File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R660_rule_unique, filename, numTests);
+	}
+	protected int runR670File(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R670_rule_index, filename, numTests);
 	}
 	protected int runR700File(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R700_crud_insert, filename, numTests);
@@ -198,6 +207,9 @@ public abstract class BDDBase implements DBInterfaceCreator {
 	}
 	protected int runR2600Sizeof(String filename, int numTests) {
 		return runBDDFile(BDDGroup.R2600_sizeof, filename, numTests);
+	}
+	protected int runR2700Blob(String filename, int numTests) {
+		return runBDDFile(BDDGroup.R2700_blob, filename, numTests);
 	}
 	protected int runBDDFile(BDDGroup group, String filename, int numTests) {
 		log.log("********* FILE: %s *********************", filename);

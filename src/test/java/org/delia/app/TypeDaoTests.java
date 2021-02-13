@@ -4,11 +4,8 @@ package org.delia.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.delia.api.Delia;
-import org.delia.builder.ConnectionBuilder;
-import org.delia.builder.ConnectionInfo;
-import org.delia.builder.DeliaBuilder;
-import org.delia.db.DBType;
+import org.delia.Delia;
+import org.delia.base.DBTestHelper;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
 import org.junit.Before;
@@ -65,8 +62,7 @@ public class TypeDaoTests extends DaoTestBase {
 	}
 
 	private TypeDao createDao(String typeName) {
-		ConnectionInfo info = ConnectionBuilder.dbType(DBType.MEM).build();
-		Delia delia = DeliaBuilder.withConnection(info).build();
+		Delia delia = DBTestHelper.createNewDelia();
 		return new TypeDao(typeName, delia);
 	}
 

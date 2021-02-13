@@ -3,24 +3,25 @@ package org.delia.repl;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.delia.api.DeliaSession;
-import org.delia.builder.ConnectionInfo;
+import org.delia.DeliaSession;
+import org.delia.db.sql.ConnectionDefinition;
 import org.delia.runner.ResultValue;
 
 public class DeliaRepl {
 	ReplRunner runner;
 	private boolean shouldQuit = false;
 	private String baseDir;
-	private ConnectionInfo connectionInfo;
-
-	public DeliaRepl(ConnectionInfo info, String baseDir) {
+//	private ConnectionInfo connectionInfo;
+	private ConnectionDefinition connectionDef;
+	
+	public DeliaRepl(ConnectionDefinition connectionDef, String baseDir) {
 		this.baseDir = baseDir;
-		this.connectionInfo = info;
-		this.runner = new ReplRunner(info, new ConsoleOutputWriter());
+		this.connectionDef = connectionDef;
+		this.runner = new ReplRunner(connectionDef, new ConsoleOutputWriter());
 	}
 
 	public void run()  {
-		log(String.format("Delia REPL - dbType: %s", connectionInfo.dbType.name()));
+		log(String.format("Delia REPL - dbType: %s", connectionDef.dbType.name()));
 		log("");
 		while(! shouldQuit) {
 			try {

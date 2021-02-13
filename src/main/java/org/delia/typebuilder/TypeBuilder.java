@@ -55,7 +55,14 @@ public class TypeBuilder extends ServiceBase {
 					fieldType = registry.getType(BuiltInTypes.LONG_SHAPE);
 					System.out.println("llllllllllllllllllllll " + fieldName);
 				}
+			} else if (fieldType.isShape(Shape.BLOB) && fieldExp.isUnique) {
+				String msg = String.format("blob field '%s': cannot be unique, in type '%s'", fieldName, typeStatementExp.typeName);
+				FutureDeclError future = new FutureDeclError("blob-unique-not-allowed", msg);
+				future.baseTypeName = typeStatementExp.baseTypeName;
+				et.addNoLog(future);
 			}
+			
+			
 			omap.add(fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial);
 		}
 		
@@ -189,6 +196,7 @@ public class TypeBuilder extends ServiceBase {
 		DType numberType = registry.getType(BuiltInTypes.NUMBER_SHAPE);
 		DType boolType = registry.getType(BuiltInTypes.BOOLEAN_SHAPE);
 		DType dateType = registry.getType(BuiltInTypes.DATE_SHAPE);
+		DType blobType = registry.getType(BuiltInTypes.BLOB_SHAPE);
 		
 		String s = fieldExp.typeName;
 		if (s.equals("string")) {
@@ -203,6 +211,8 @@ public class TypeBuilder extends ServiceBase {
 			return numberType;
 		} else if (s.equals("date")) {
 			return dateType;
+		} else if (s.equals("blob")) {
+			return blobType;
 		} else {
 			//this only works if subtypes defined _before_ they are used.
 			DType possibleStruct = registry.getType(fieldExp.typeName);

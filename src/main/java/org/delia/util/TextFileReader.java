@@ -57,6 +57,9 @@ public class TextFileReader {
     	Reader reader = new InputStreamReader(istr);
     	return doReadFile(reader);
     }
+    public List<String> ReadFileFromReader(Reader reader) throws IOException {
+    	return doReadFile(reader);
+    }
     
     /**
      *

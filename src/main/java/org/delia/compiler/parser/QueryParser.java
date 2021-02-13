@@ -2,9 +2,9 @@ package org.delia.compiler.parser;
 
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Token;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Token;
 import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterExp;
 import org.delia.compiler.ast.FilterOpExp;
@@ -33,7 +33,7 @@ public class QueryParser extends ParserBase {
 		//"==", "<", ">", ">=", "<=", "!="
 		return Parsers.or(term("!="), term("="), term("=="),
 				term(">"), term("<"), term(">="), term("<="), term("like"))
-				.map(new org.codehaus.jparsec.functors.Map<Token, StringExp>() {
+				.map(new org.jparsec.functors.Map<Token, StringExp>() {
 					@Override
 					public StringExp map(Token tok) {
 						return new StringExp(tok.index(), (String)tok.toString());
@@ -118,7 +118,7 @@ public class QueryParser extends ParserBase {
 	}
 	private static Parser<QueryFuncExp> queryFn1NoArg() {
 		return Parsers.or(ident()).
-		map(new org.codehaus.jparsec.functors.Map<IdentExp, QueryFuncExp>() {
+		map(new org.jparsec.functors.Map<IdentExp, QueryFuncExp>() {
 			@Override
 			public QueryFuncExp map(IdentExp exp) {
 				return new QueryFieldExp(99, exp);

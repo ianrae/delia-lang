@@ -9,6 +9,7 @@ import org.delia.hld.cond.SingleFilterCond;
 import org.delia.hld.simple.SimpleSqlBuilder;
 import org.delia.sprig.SprigService;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.TypePair;
@@ -54,9 +55,12 @@ public abstract class HLDServiceBase extends ServiceBase {
 	protected DValue getUpdatePK(HLDQuery hld) {
 		//Note. the dson body of update doesn't have pk, so we need to get it from the filter
 		SqlParamGenerator pgen = new SqlParamGenerator(registry, factorySvc);
+		TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(hld.fromType);
+		DType pktype = pkpair != null ? pkpair.type : null;
+		
 		if (hld.filter instanceof SingleFilterCond) {
 			SingleFilterCond sfc = (SingleFilterCond) hld.filter;
-			DValue pkval = pgen.convert(sfc.val1);
+			DValue pkval = pgen.convert(sfc.val1, pktype);
 			return pkval;
 		} else if (hld.filter instanceof OpFilterCond) {
 			OpFilterCond ofc = (OpFilterCond) hld.filter;
@@ -65,10 +69,10 @@ public abstract class HLDServiceBase extends ServiceBase {
 				return null;
 			}
 			if (ofc.val1.isScalar()) {
-				DValue pkval = pgen.convert(ofc.val1);
+				DValue pkval = pgen.convert(ofc.val1, pktype);
 				return pkval;
 			} else if (ofc.val2.isScalar()) {
-				DValue pkval = pgen.convert(ofc.val2);
+				DValue pkval = pgen.convert(ofc.val2, pktype);
 				return pkval;
 			} else {
 				return null;

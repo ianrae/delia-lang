@@ -1,9 +1,14 @@
 package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
+import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.transaction.DoNothingTransactionProvider;
+import org.delia.db.transaction.TransactionAwareDBInterface;
+import org.delia.db.transaction.TransactionProvider;
+import org.delia.db.transaction.TransactionProviderImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.hld.HLDSimpleQueryService;
@@ -107,8 +112,8 @@ public class FactoryServiceImpl implements FactoryService {
 		return logFactory;
 	}
 	@Override
-	public ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, FetchRunner fetchRunner) {
-		return new ValidationRuleRunnerImpl(this, dbInterface.getCapabilities(), fetchRunner);
+	public ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner) {
+		return new ValidationRuleRunnerImpl(this, dbInterface, registry, dbInterface.getCapabilities(), fetchRunner);
 	}
 //	@Override
 //	public HLSSimpleQueryService createSimpleQueryService(ZDBInterfaceFactory dbInterface, DTypeRegistry registry) {
@@ -129,6 +134,13 @@ public class FactoryServiceImpl implements FactoryService {
 	@Override
 	public RuleFunctionFactory createRuleFunctionFactory() {
 		return new RuleFuncFactoryImpl(this);
+	}
+	@Override
+	public TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface) {
+		if (dbInterface.getDBType().equals(DBType.MEM)) {
+			return new DoNothingTransactionProvider(log);
+		}
+		return new TransactionProviderImpl(dbInterface, log);
 	}
 
 }

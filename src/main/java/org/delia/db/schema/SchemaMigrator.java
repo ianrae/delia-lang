@@ -16,6 +16,7 @@ import org.delia.db.DBHelper;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QuerySpec;
+import org.delia.db.schema.modify.SchemaChangeOperation;
 import org.delia.hld.HLDSimpleQueryService;
 import org.delia.runner.QueryResponse;
 import org.delia.runner.VarEvaluator;
@@ -29,6 +30,7 @@ import org.delia.zdb.DBExecutor;
 import org.delia.zdb.DBInterfaceFactory;
 
 public class SchemaMigrator extends ServiceBase implements AutoCloseable {
+	
 	public static final String SCHEMA_TABLE = "DELIA_SCHEMA_VERSION";
 	public static final String DAT_TABLE = "DELIA_ASSOC"; //DAT = Delia Assoc Table
 
@@ -38,7 +40,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private String dbFingerprint;
 	private DBExecutor zexec;
 	private MigrationRunner migrationRunner;
-	private MigrationOptimizer optimizer;
+//	private MigrationOptimizer optimizer;
 
 	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		super(factorySvc);
@@ -61,30 +63,18 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		DStructType datType = fakeCreator.createDATType(registry, DAT_TABLE);
 		registry.setDATType(datType);
 		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
-		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
+//		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
 	}
 	
 	@Override
 	public void close() {
-//		try {
-//			rawExecutor.close();
-//		} catch (Exception e) {
-//			DBHelper.handleCloseFailure(e);
-//		}
-//		//and close 2nd one
-//		try {
-//			dbexecutor.close();
-//		} catch (Exception e) {
-//			DBHelper.handleCloseFailure(e);
-//		}
-		//and close 3rd one
 		try {
 			zexec.close();
 		} catch (Exception e) {
 			DBHelper.handleCloseFailure(e);
 		}
 	}
-
+	
 	public boolean createSchemaTableIfNeeded() {
 //		SchemaContext ctx = new SchemaContext();
 		if (!zexec.rawTableDetect(SCHEMA_TABLE)) {
@@ -98,26 +88,28 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return true;
 	}
 
-	public boolean dbNeedsMigration() {
-		this.currentFingerprint = fingerprintGenerator.createFingerprint(registry);
-		this.dbFingerprint = calcDBFingerprint();
-
-		return !currentFingerprint.equals(dbFingerprint);
-	}
+//	private boolean dbNeedsMigration() {
+//		this.currentFingerprint = fingerprintGenerator.createFingerprint(registry);
+//		this.dbFingerprint = calcDBFingerprint();
+//
+//		return !currentFingerprint.equals(dbFingerprint);
+//	}
 	/**
 	 * dbNeedsMigration MUST have been called before this.
 	 * @param doLowRiskChecks whether to do additional pre-migration checks
 	 * @return true if successful
 	 */
-	public boolean performMigrations(boolean doLowRiskChecks) {
-		List<SchemaType> list = parseFingerprint(dbFingerprint);
-		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
-		
-		List<SchemaType> diffL =  calcDiff(list, list2);
-		diffL = optimizer.optimizeDiffs(diffL);
-		boolean b = performMigrations(diffL, doLowRiskChecks);
-		return b;
-	}
+//	private boolean performMigrations(boolean doLowRiskChecks) {
+//		List<SchemaType> list = parseFingerprint(dbFingerprint);
+//		List<SchemaType> list2 = parseFingerprint(currentFingerprint);
+//		
+//		List<SchemaType> diffL =  calcDiff(list, list2);
+//		diffL = optimizer.optimizeDiffs(diffL);
+//		MigrationPlan plan = new MigrationPlan();
+//		plan.diffL = diffL;
+//		boolean b = performMigrations(plan, doLowRiskChecks);
+//		return b;
+//	}
 	
 	private FieldInfo parseFieldInfo(SchemaType st) {
 		List<FieldInfo> flist1 = parseFields(st);
@@ -141,35 +133,34 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	 * dbNeedsMigration MUST have been called before this.
 	 * @param plan migration plan
 	 */
-	public MigrationPlan runMigrationPlan(MigrationPlan plan) {
-		boolean b = performMigrations(plan.diffL, false);
-		plan.runResultFlag = b;
-		return plan;
-	}
+//	private MigrationPlan runMigrationPlan(MigrationPlan plan) {
+//		boolean b = performMigrations(plan, false);
+//		plan.runResultFlag = b;
+//		return plan;
+//	}
 	
 
-	public String calcDBFingerprint() {
-		//TODO: query just single record (most recent);
-		FilterExp filter = new FilterExp(99, new BooleanExp(true)); //query all
-		QuerySpec spec = new QuerySpec();
-		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
-		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(zexec.getDbInterface(), registry);
-		QueryResponse qresp = querySvc.execQuery(spec.queryExp, zexec);
-		//TODO: should specify orderby id!!
-		
-		
-		if (qresp.emptyResults()) {
-			return "";
-		}
-
-		//there may be multiple rows
-		int n = qresp.dvalList.size();
-		DValue dval = qresp.dvalList.get(n - 1); //last one
-		return dval.asStruct().getField("fingerprint").asString();
-	}
+//	private String calcDBFingerprint() {
+//		//TODO: query just single record (most recent);
+//		FilterExp filter = new FilterExp(99, new BooleanExp(true)); //query all
+//		QuerySpec spec = new QuerySpec();
+//		spec.queryExp = new QueryExp(99, new IdentExp(SCHEMA_TABLE), filter, null);
+//		HLDSimpleQueryService querySvc = factorySvc.createHLDSimpleQueryService(zexec.getDbInterface(), registry);
+//		QueryResponse qresp = querySvc.execQuery(spec.queryExp, zexec);
+//		//TODO: should specify orderby id!!
+//		
+//		if (qresp.emptyResults()) {
+//			return "";
+//		}
+//
+//		//there may be multiple rows
+//		int n = qresp.dvalList.size();
+//		DValue dval = qresp.dvalList.get(n - 1); //last one
+//		return dval.asStruct().getField("fingerprint").asString();
+//	}
 
 	//Customer:struct:{id:int::O,firstName:string::,lastName:string:O:,points:int:O:}\n
-	public List<SchemaType> parseFingerprint(String fingerprint) {
+	private List<SchemaType> parseFingerprint(String fingerprint) {
 		parseVersion(fingerprint);
 		//Note v2 is backwards compatible with v1 so we don't need any extra code here
 		
@@ -199,15 +190,15 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return version;
 	}
 
-	public String getCurrentFingerprint() {
-		return currentFingerprint;
-	}
+//	private String getCurrentFingerprint() {
+//		return currentFingerprint;
+//	}
+//
+//	private String getDbFingerprint() {
+//		return dbFingerprint;
+//	}
 
-	public String getDbFingerprint() {
-		return dbFingerprint;
-	}
-
-	public List<SchemaType> calcDiff(List<SchemaType> list1, List<SchemaType> list2Param) {
+	private List<SchemaType> calcDiff(List<SchemaType> list1, List<SchemaType> list2Param) {
 		List<SchemaType> diffList = new ArrayList<>();
 		List<SchemaType> list2 = new ArrayList<>(list2Param);
 		for(SchemaType schema1: list1) {
@@ -238,7 +229,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		//add fieldinfo.fieldIndex - index of field within dtype
 		//if I and D have same fieldIndex and same type and options then do a rename
 
-		//I/U/D/R/A/AT/AS[Z|N]
+		//I/U/D/R/A/AT/ASZ/ASN
 		for(FieldInfo finfo: flist1) {
 			FieldInfo f2 = findFieldIn(finfo, flist2);
 			if (f2 != null) {
@@ -352,11 +343,14 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public List<FieldInfo> parseFields(SchemaType schema1) {
+	private List<FieldInfo> parseFields(SchemaType schema1) {
 		//Customer:struct:{id:int:P,wid:int:}
 		List<FieldInfo> list = new ArrayList<>();
 		String s = StringUtils.substringAfter(schema1.line, "{");
 		s = StringUtils.substringBeforeLast(s, "}");
+		String strrules = StringUtils.substringAfterLast(s, "|");
+		s = StringUtils.substringBeforeLast(s, "|");
+		
 		String[] ar = s.split(",");
 		for(String ss: ar) {
 			FieldInfo finfo = new FieldInfo();
@@ -369,6 +363,19 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			finfo.datId = Integer.parseInt(tmp);
 			list.add(finfo);
 		}
+		
+		if (! strrules.isEmpty()) {
+			ar = strrules.split(";");
+			for(String ss: ar) {
+				FieldInfo finfo = new FieldInfo();
+				finfo.isField = false;
+				finfo.name = ss; //StringUtils.substringBefore(ss, "(");
+				finfo.type = StringUtils.substringBefore(ss, "(");
+				finfo.ruleStr = StringUtils.substringBetween(ss, "(", ")");
+				list.add(finfo);
+			}
+		}
+		
 		return list;
 	}
 
@@ -392,17 +399,24 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return null;
 	}
 
-	public boolean performMigrations(List<SchemaType> diffL, boolean doLowRiskChecks) {
+	private boolean performMigrations(MigrationPlan plan, boolean doLowRiskChecks) {
 		//create types in correct dependency order
 		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
 		List<String> orderL = typeSorter.topoSort(registry);
 		
-		if (! preRunCheck(diffL, orderL, doLowRiskChecks)) {
+		if (! preRunCheck(plan.diffL, orderL, doLowRiskChecks)) {
 			log.logError("migration halted due to pre-migration check errors. No schema changes were made.");
 			return false;
 		}
 		
-		return migrationRunner.performMigrations(currentFingerprint, diffL, orderL);
+		return migrationRunner.performMigrations(currentFingerprint, plan, orderL);
+	}
+	public boolean sxPerformMigrations(String fingerprintJson, List<SchemaChangeOperation> opList) {
+		//create types in correct dependency order
+		DeliaTypeSorter typeSorter = new DeliaTypeSorter();
+		List<String> orderL = typeSorter.topoSort(registry);
+		
+		return migrationRunner.sxPerformMigrations(fingerprintJson, opList, orderL);
 	}
 
 	private boolean preRunCheck(List<SchemaType> diffL, List<String> orderL, boolean doLowRiskChecks) {
@@ -496,7 +510,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		return true;
 	}
 
-//	public RawDBExecutor getRawExecutor() {
+//	private RawDBExecutor getRawExecutor() {
 //		return rawExecutor;
 //	}
 	public DBExecutor getZDBExecutor() {

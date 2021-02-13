@@ -26,7 +26,7 @@ public class OpEvaluatorTests {
 	public void testStr() {
 		DValue dval = createCustomer();
 		StringExp exp2 = new StringExp("def");
-		OpFactory factory = new OpFactory(null, fmtSvc, factorySvc); //don't need registry for this test
+		OpFactory factory = new OpFactory(null, fmtSvc, factorySvc, null); //don't need registry for this test
 		IdentExp exp = new IdentExp("firstName");
 		OpEvaluator eval = factory.create("<", exp, exp2, null, null, false);
 		evaluate(eval, false, dval, new StringExp("aob"));
@@ -59,7 +59,7 @@ public class OpEvaluatorTests {
 		DValue dval = createCustomer();
 		IntegerExp exp2 = new IntegerExp(55);
 		DateFormatService fmtSvc = new DateFormatServiceImpl(new TimeZoneServiceImpl());
-		OpFactory factory = new OpFactory(null, fmtSvc, factorySvc); //don't need registry for this test
+		OpFactory factory = new OpFactory(null, fmtSvc, factorySvc, null); //don't need registry for this test
 		IdentExp exp = new IdentExp("id");
 		OpEvaluator eval = factory.create("<", exp, exp2, null, null, false);
 		IntegerExp n43 = new IntegerExp(43);

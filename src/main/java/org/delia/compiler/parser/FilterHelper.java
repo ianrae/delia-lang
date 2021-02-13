@@ -5,7 +5,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.compiler.ast.FilterOpExp;
 import org.delia.compiler.ast.FilterOpFullExp;
 import org.delia.compiler.astx.XNAFMultiExp;
-import org.delia.compiler.astx.XNAFNameExp;
+import org.delia.compiler.astx.XNAFSingleExp;
 import org.delia.db.QuerySpec;
 
 public class FilterHelper {
@@ -41,11 +41,9 @@ public class FilterHelper {
 	public static String extractFieldNameFromFilterOp(Exp op1) {
 		if (op1 instanceof XNAFMultiExp) {
 			XNAFMultiExp xx = (XNAFMultiExp) op1;
-			if (!xx.qfeL.isEmpty() && xx.qfeL.get(0) instanceof XNAFNameExp) {
-				XNAFNameExp xne = (XNAFNameExp) xx.qfeL.get(0);
-				if (xne.argL.isEmpty()) {
-					return xne.funcName;
-				}
+			if (!xx.qfeL.isEmpty() && xx.qfeL.get(0).isSimpleField()) {
+				XNAFSingleExp sexp = xx.qfeL.get(0);
+				return sexp.funcName;
 			}
 		}
 		return null;

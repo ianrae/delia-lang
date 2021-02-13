@@ -16,7 +16,7 @@ import org.delia.hld.cud.HLDInsertStatement;
 import org.delia.hld.cud.HLDToSQLConverter;
 import org.delia.hld.cud.HLDUpdateStatement;
 import org.delia.hld.cud.HLDUpsertStatement;
-import org.delia.hld.cud.HLDToSQLConverter;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.VarEvaluator;
 import org.delia.sprig.SprigService;
@@ -80,11 +80,12 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 * @see org.delia.hld.HLDBuildService#fullBuildInsert(org.delia.compiler.ast.InsertStatementExp, org.delia.runner.VarEvaluator, org.delia.runner.DValueIterator)
 	 */
 	@Override
-	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDInsertStatement fullBuildInsert(InsertStatementExp insertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDInsertStatement stmt = new HLDInsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		engine.setBlobLoader(blobLoader);
 		stmt.hldinsert = engine.buildInsert(insertExp);
 		if (stmt.hldinsert.buildSuccessful()) {
 			engine.addParentUpdates(stmt.hldinsert, stmt.moreL);
@@ -98,11 +99,12 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 * @see org.delia.hld.HLDBuildService#fullBuildUpdate(org.delia.compiler.ast.UpdateStatementExp, org.delia.runner.VarEvaluator, org.delia.runner.DValueIterator)
 	 */
 	@Override
-	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpdateStatement fullBuildUpdate(UpdateStatementExp updateExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDUpdateStatement stmt = new HLDUpdateStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
 		engineAssoc.setVarEvaluator(varEvaluator);
+		engine.setBlobLoader(blobLoader);
 		stmt.hldupdate = engine.buildUpdate(updateExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 		stmt.assocBundleL = engine.addMoreAssoc(stmt.hldupdate, engineAssoc, updateExp.queryExp, stmt.moreL);
@@ -114,11 +116,12 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	 * @see org.delia.hld.HLDBuildService#fullBuildUpsert(org.delia.compiler.ast.UpsertStatementExp, org.delia.runner.VarEvaluator, org.delia.runner.DValueIterator)
 	 */
 	@Override
-	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator) {
+	public HLDUpsertStatement fullBuildUpsert(UpsertStatementExp upsertExp, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDUpsertStatement stmt = new HLDUpsertStatement();
 		engine.setVarEvaluator(varEvaluator);
 		engineAssoc.setVarEvaluator(varEvaluator);
 		engine.setInsertPrebuiltValueIterator(insertPrebuiltValueIterator);
+		engine.setBlobLoader(blobLoader);
 		stmt.hldupdate = engine.buildUpsert(upsertExp);
 		engine.addParentUpdatesForUpdate(stmt.hldupdate, stmt.moreL);
 		//		stmt.assocInsertL = engine.addAssocInserts(stmt.hldupdate);
@@ -146,9 +149,9 @@ public class HLDBuildServiceImpl extends HLDServiceBase implements HLDBuildServi
 	@Override
 	public SqlStatementGroup generateSql(HLDQueryStatement hld) {
 		SqlGeneratorFactory genfact = hldToSqlConverter.getSqlGeneratorFactory();
-		SqlSelectStatement sqlMergeInto = genfact.createSelect(datIdMap);
-		sqlMergeInto.init(hld.hldquery);
-		SqlStatement stm = sqlMergeInto.render();
+		SqlSelectStatement sqlSelect = genfact.createSelect(datIdMap);
+		sqlSelect.init(hld.hldquery);
+		SqlStatement stm = sqlSelect.render();
 		SqlStatementGroup stgrp = new SqlStatementGroup();
 		stgrp.add(stm);
 		return stgrp;

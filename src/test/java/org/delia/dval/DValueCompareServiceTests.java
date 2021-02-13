@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import org.delia.api.Delia;
+import org.delia.Delia;
 import org.delia.app.DaoTestBase;
 import org.delia.core.FactoryService;
 import org.delia.dao.DeliaGenericDao;

@@ -78,6 +78,12 @@ public class SqlGeneratorFactoryImpl extends ServiceBase implements SqlGenerator
 	public SqlMergeAllIntoStatement createMergeAllInto() {
 		return new SqlMergeAllIntoStatement(new SqlTableNameClause(), new SqlValueListClause());
 	}
+
+
+	@Override
+	public SqlConstraintStatement generateConstraint() {
+		return new SqlConstraintStatement();
+	}
 	
 	
 	

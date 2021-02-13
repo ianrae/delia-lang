@@ -29,9 +29,35 @@ public class XNAFSingleExp extends ExpBase {
 			argL = list;
 		}
 	}
+	public XNAFSingleExp(int pos, IdentExp nameExp,  XNAFTransientExp transientExp, boolean isRuleFn, String nothing) {
+		super(pos);
+		this.funcName = nameExp.name();
+		this.isRuleFn = isRuleFn;
+		
+		if (transientExp != null && transientExp.argL != null) {
+			List<Exp> list = new ArrayList<>();
+			if (! transientExp.argL.isEmpty()) {
+				for(Exp inner: transientExp.argL) {
+					list.add(inner);
+				}
+			}
+			argL = list;
+		}
+	}
+	
+	public boolean isSimpleField() {
+		if (! isRuleFn && argL.size() == 0) {
+			return true;
+		}
+		return false;
+	}
+	
 	
 	@Override
 	public String strValue() {
+		if (!isRuleFn) {
+			return funcName;
+		}
 		String ss = String.format("%s(", funcName);
 		int i = 0;
 		for(Exp exp : argL) {

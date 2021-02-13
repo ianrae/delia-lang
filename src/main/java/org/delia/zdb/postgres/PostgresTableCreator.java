@@ -56,7 +56,7 @@ public class PostgresTableCreator extends TableCreator {
 	}
 
 	@Override
-	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof) {
+	public String generateCreateField(String typeName, DStructType dtype, String fieldName, int sizeof, boolean canCreateAssocTable) {
 		if (dtype == null) {
 			dtype = (DStructType) registry.getType(typeName);
 		}
@@ -80,7 +80,9 @@ public class PostgresTableCreator extends TableCreator {
 		List<ConstraintGen> constraints = new ArrayList<>();
 		if (pair.type.isStructShape() && !isManyToManyRelation(pair, dtype)) {
 			constraint = generateFKConstraint(sc, pair, dtype, true);
-			constraints.add(constraint);
+			if (constraint != null) {
+				constraints.add(constraint);
+			}
 		}
 
 		haveFieldsVisitTheirConstrainsts(fieldL, constraints);
@@ -114,7 +116,7 @@ public class PostgresTableCreator extends TableCreator {
 			sc.nl();
 
 			if (isManyToManyRelation(pair, dtype)) {
-				alterGenerateAssocTable(sc, pair, dtype);
+				alterGenerateAssocTable(sc, pair, dtype, canCreateAssocTable);
 			}
 		}
 		return sc.toString();

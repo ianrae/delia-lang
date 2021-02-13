@@ -10,6 +10,7 @@ import org.delia.core.ServiceBase;
 import org.delia.error.DeliaError;
 import org.delia.hld.HLDFacade;
 import org.delia.hld.HLDFactory;
+import org.delia.runner.BlobLoader;
 import org.delia.runner.DValueIterator;
 import org.delia.runner.DoNothingVarEvaluator;
 import org.delia.runner.FetchRunner;
@@ -57,7 +58,8 @@ public class MigrateInsertRunner extends ServiceBase {
 		HLDFacade hldFacade = new  HLDFacade(factorySvc, dbInterface, registry, new DoNothingVarEvaluator());
 		DValueIterator dvalIter = new DValueIterator(dval);
 		
-		insertRunner.executeInsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, dvalIter, sprigSvc);
+		BlobLoader blobLoader = null; //TODO fix!
+		insertRunner.executeInsertStatement(exp, res, hldFacade, dbexecutor, fetchRunner, dvalIter, sprigSvc, blobLoader);
 		if (!res.isSuccess()) {
 			DeliaError err = res.getLastError();
 			DeliaExceptionHelper.throwError(err);

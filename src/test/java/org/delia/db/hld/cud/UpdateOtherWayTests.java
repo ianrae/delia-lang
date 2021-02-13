@@ -112,7 +112,7 @@ public class UpdateOtherWayTests extends NewHLSTestBase {
 		log.log(src);
 		
 		mgr = createManager(); 
-		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator(), null);
+		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, new DoNothingVarEvaluator(), null, null);
 		log.log(hldupdate.toString());
 		return hldupdate;
 	}
