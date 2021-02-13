@@ -160,11 +160,11 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	}
 
 //	@Override
-	private int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
+	private int executeUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, ImplicitFetchContext implicitCtx) {
 		int numRowsAffected = 0;
 
 		try {
-			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, assocCrudMap);
+			numRowsAffected = doExecuteUpdate(spec, dvalUpdate, assocCrudMap, implicitCtx);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
 		}
@@ -179,29 +179,30 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.queryExp = hld.hldupdate.hld.originalQueryExp;
 		spec.evaluator.init(spec.queryExp);
-		return executeUpdate(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap);
+		ImplicitFetchContext implicitCtx = buildImplicitContextIfNeeded(hld.hldupdate.hld);
+		return executeUpdate(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, implicitCtx);
 	}
 
-	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap) {
-		RowSelector selector = createSelector(spec); //may throw
+	private int doExecuteUpdate(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, ImplicitFetchContext implicitCtx) {
+		RowSelector selector = createSelector(spec, implicitCtx); //may throw
 		MemUpdateService memUpdate = new MemUpdateService(factorySvc, registry);
 		return memUpdate.doExecuteUpdate(spec, dvalUpdate, assocCrudMap, selector, this);
 	}
 
 //	@Override
 	private int executeUpsert(QuerySpec spec, DValue dvalFull, Map<String, String> assocCrudMap,
-			boolean noUpdateFlag) {
+			boolean noUpdateFlag, ImplicitFetchContext implicitCtx) {
 		int numRowsAffected = 0;
 
 		try {
-			numRowsAffected = doExecuteUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag);
+			numRowsAffected = doExecuteUpsert(spec, dvalFull, assocCrudMap, noUpdateFlag, implicitCtx);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
 		}
 		return numRowsAffected;
 	}
-	private int doExecuteUpsert(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, boolean noUpdateFlag) {
-		RowSelector selector = createSelector(spec); //may throw
+	private int doExecuteUpsert(QuerySpec spec, DValue dvalUpdate, Map<String, String> assocCrudMap, boolean noUpdateFlag, ImplicitFetchContext implicitCtx) {
+		RowSelector selector = createSelector(spec, implicitCtx); //may throw
 		if (selector instanceof AllRowSelector) {
 			DeliaError err = et.add("upsert-filter-error", String.format("upsert filter must specify one row (at most), for type '%s'", spec.queryExp.typeName));
 			throw new DBException(err);
@@ -220,21 +221,22 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.queryExp = hld.hldupdate.hld.originalQueryExp;
 		spec.evaluator.init(spec.queryExp);
-		return executeUpsert(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, noUpdateFlag);
+		ImplicitFetchContext implicitCtx = buildImplicitContextIfNeeded(hld.hldupdate.hld);
+		return executeUpsert(spec, hld.hldupdate.cres.dval, hld.hldupdate.cres.assocCrudMap, noUpdateFlag, implicitCtx);
 	}
 
 //	@Override
-	private void executeDelete(QuerySpec spec) {
+	private void executeDelete(QuerySpec spec, ImplicitFetchContext implicitCtx) {
 		QueryResponse qresp = new QueryResponse();
 		try {
-			qresp = doExecuteDelete(spec);
+			qresp = doExecuteDelete(spec, implicitCtx);
 		} catch (InternalException e) {
 			throw new DBException(e.getLastError());
 		}
 	}
-	private QueryResponse doExecuteDelete(QuerySpec spec) {
+	private QueryResponse doExecuteDelete(QuerySpec spec, ImplicitFetchContext implicitCtx) {
 		QueryResponse qresp = new QueryResponse();
-		RowSelector selector = createSelector(spec); //may throw
+		RowSelector selector = createSelector(spec, implicitCtx); //may throw
 		MemDBTable tbl = selector.getTbl();
 		List<DValue> dvalList = selector.match(tbl.rowL);
 		String typeName = spec.queryExp.getTypeName();
@@ -263,7 +265,8 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 		spec.evaluator = new FilterEvaluator(factorySvc, varEvaluator);
 		spec.queryExp = hld.hlddelete.hld.originalQueryExp;
 		spec.evaluator.init(spec.queryExp);
-		executeDelete(spec);
+		ImplicitFetchContext implicitCtx = buildImplicitContextIfNeeded(hld.hlddelete.hld);
+		executeDelete(spec, implicitCtx);
 	}
 
 //	@Override

@@ -22,17 +22,20 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
+import org.delia.zdb.mem.ImplicitFetchContext;
 
 public class OpRowSelector extends RowSelectorBase {
 		private OpEvaluator evaluator;
 		private DateFormatService fmtSvc;
 		private FactoryService factorySvc;
 		private FilterEvaluator filterEvaluator;
+		private ImplicitFetchContext implicitCtx;
 		
-		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc, FilterEvaluator evaluator2) {
+		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc, FilterEvaluator evaluator2, ImplicitFetchContext implicitCtx) {
 			this.fmtSvc = fmtSvc;
 			this.factorySvc = factorySvc;
 			this.filterEvaluator = evaluator2;
+			this.implicitCtx = implicitCtx;
 		}
 
 		@Override
