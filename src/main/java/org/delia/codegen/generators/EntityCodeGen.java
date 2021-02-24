@@ -28,7 +28,7 @@ public class EntityCodeGen extends CodeGenBase {
 		StrCreator sc = new StrCreator();
 		addDoNotModifyComment(sc);
 		helper().addImports(sc, structType);
-		STGroup g = new STGroupFile("templates/entity.stg");
+		STGroup g = loadTemplate();
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
 		sc.addStr(st.render());
@@ -131,6 +131,15 @@ public class EntityCodeGen extends CodeGenBase {
 			sc.addStr(st.render());
 		}
 		sc.nl();
-		
 	}
+
+	/**
+	 * Override this to use your own template file.
+	 * @return stringtemplate STGroup
+	 */
+	protected STGroup loadTemplate() {
+		STGroup g = new STGroupFile("templates/entity.stg");
+		return g;
+	}
+
 }

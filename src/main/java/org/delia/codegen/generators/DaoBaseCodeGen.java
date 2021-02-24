@@ -15,7 +15,7 @@ import org.stringtemplate.v4.STGroupFile;
 public class DaoBaseCodeGen extends CodeGenBase {
 
 	private String entityPackageName;
-
+	
 	public DaoBaseCodeGen(String entityPackageName) {
 		super(true);
 		this.entityPackageName = entityPackageName;
@@ -38,7 +38,7 @@ public class DaoBaseCodeGen extends CodeGenBase {
 		sc.nl();
 		
 		
-		STGroup g = new STGroupFile("templates/daoBase.stg");
+		STGroup g = loadTemplate(); 
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
 		sc.o(st.render());
@@ -90,6 +90,15 @@ public class DaoBaseCodeGen extends CodeGenBase {
 		}
 
 		return sc.toString();
+	}
+
+	/**
+	 * Override this to use your own template file.
+	 * @return stringtemplate STGroup
+	 */
+	protected STGroup loadTemplate() {
+		STGroup g = new STGroupFile("templates/daoBase.stg");
+		return g;
 	}
 
 	private Object getPKType(DStructType structType) {
