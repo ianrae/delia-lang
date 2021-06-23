@@ -1,0 +1,1 @@
+  type Flight struct {field1 int primaryKey, field2 int } end

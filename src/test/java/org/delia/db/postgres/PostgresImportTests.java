@@ -1,8 +1,10 @@
 package org.delia.db.postgres;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.Delia;
 import org.delia.DeliaSession;
 import org.delia.app.NorthwindHelper;
@@ -38,7 +40,7 @@ public class PostgresImportTests  extends BDDBase {
 		gspec.inputFnName = "product";
 		gspec.typeName = "Product";
 		groupList.add(gspec);
-		
+
 		String srcPath = IMPORT_DIR + "product-and-category.txt";
 		TextFileReader reader = new TextFileReader();
 		String deliaSrc = reader.readFileAsSingleString(srcPath);
@@ -113,7 +115,7 @@ public class PostgresImportTests  extends BDDBase {
 
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	public final String IMPORT_DIR = "src/test/resources/test/import/";
 
 	@Before
 	public void init() {
