@@ -47,13 +47,13 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         String getName();
         String getKey();
         String getTable();
-        List<String> getData();
+        List<DValue> getData();
     }
 
     public static class SdExistAction implements SdAction {
         private String name;
         private String table;
-        private List<String> dataL;
+        private List<DValue> dataL;
 
         public String getKey() {
             return key;
@@ -85,7 +85,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         }
 
         @Override
-        public List<String> getData() {
+        public List<DValue> getData() {
             return dataL;
         }
     }
@@ -281,7 +281,6 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             assertEquals("bob", dval.asStruct().getField("firstName").asString());
             assertEquals(44, dval.asStruct().getField("id").asInt());
         }
-
 
         SdScript script = new SdScript();
         SdExistAction action = new SdExistAction("Customer");
