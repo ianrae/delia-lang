@@ -44,12 +44,9 @@ public class SeedDValueBuilderTests extends DeliaClientTestBase {
         entity.fieldMap.put("id", 45);
         entity.fieldMap.put("firstName", "sue");
         String typeName = "Customer";
-        DTypeRegistry registry = sess.getExecutionContext().registry;
-        DStructType dtype = (DStructType) registry.getType(typeName);
-        StructValueBuilder sbbuild = new StructValueBuilder(dtype);
 
         SeedDValueBuilder builder = new SeedDValueBuilder(sess, typeName);
-        DValue dval = builder.buildFromEntity(entity, typeName, sbbuild);
+        DValue dval = builder.buildFromEntityEx(entity, typeName);
     }
 
 
