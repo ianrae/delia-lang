@@ -3,6 +3,11 @@ package org.delia.seed;
 
 import org.delia.app.DaoTestBase;
 import org.delia.other.StringTrail;
+import org.delia.runner.ResultValue;
+import org.delia.scope.scopetest.relation.DeliaClientTestBase;
+import org.delia.type.DStructType;
+import org.delia.type.DTypeRegistry;
+import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,7 +17,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 
-public class DeliaSeedTests extends DaoTestBase {
+public class DeliaSeedTests extends DeliaClientTestBase {
 
     public static class SbError {
         private String id;
@@ -42,11 +47,13 @@ public class DeliaSeedTests extends DaoTestBase {
         String getName();
         String getKey();
         String getTable();
+        List<String> getData();
     }
 
     public static class SdExistAction implements SdAction {
         private String name;
         private String table;
+        private List<String> dataL;
 
         public String getKey() {
             return key;
@@ -75,6 +82,11 @@ public class DeliaSeedTests extends DaoTestBase {
         @Override
         public String getTable() {
             return table;
+        }
+
+        @Override
+        public List<String> getData() {
+            return dataL;
         }
     }
 
@@ -258,12 +270,40 @@ public class DeliaSeedTests extends DaoTestBase {
         chkValFail(res, "key.unknown.column");
     }
 
+    @Test
+    public void testData() {
+        createCustomerType();
+        if (true) {
+            execStatement("insert Customer {id: 44, firstName:'bob'}");
+            ResultValue res = this.execStatement("let x = Customer[true]");
+            assertEquals(true, res.ok);
+            DValue dval = res.getAsDValue();
+            assertEquals("bob", dval.asStruct().getField("firstName").asString());
+            assertEquals(44, dval.asStruct().getField("id").asInt());
+        }
+
+
+        SdScript script = new SdScript();
+        SdExistAction action = new SdExistAction("Customer");
+        action.setKey("firstName");
+        script.addAction(action);
+
+        MyDBInterface dbInterface = new MyDBInterface();
+        dbInterface.knownTables = "Customer";
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script);
+        chkValFail(res, "key.unknown.column");
+    }
+
+
     //---
     private MyExecutor executor;
     private MyValidator validator;
 
     @Before
     public void init() {
+        super.init();
+        enableAutoCreateTables();
     }
 
     private void chkOK(SdExecutionResults res, String trail) {
@@ -281,7 +321,18 @@ public class DeliaSeedTests extends DaoTestBase {
         assertEquals(errId, res.errors.get(0).id);
     }
 
-    private void log(String s) {
-        System.out.println(s);
+    private String createCustomerSrc() {
+        String src = String.format("type %s struct { id int primaryKey, firstName string} end", "Customer");
+        src += "\n";
+        return src;
     }
+
+    private void createCustomerType() {
+        String src = createCustomerSrc();
+        execTypeStatement(src);
+        DTypeRegistry registry = sess.getExecutionContext().registry;
+        DStructType dtype = (DStructType) registry.getType("Customer");
+    }
+
+
 }
