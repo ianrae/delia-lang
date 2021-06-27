@@ -22,6 +22,14 @@ public class DeliaSeedTests extends DaoTestBase {
             this.id = id;
             this.msg = msg;
         }
+
+        @Override
+        public String toString() {
+            return "SbError{" +
+                    "id='" + id + '\'' +
+                    ", msg='" + msg + '\'' +
+                    '}';
+        }
     }
 
     public static class SdException extends RuntimeException {
@@ -32,13 +40,23 @@ public class DeliaSeedTests extends DaoTestBase {
 
     public interface SdAction {
         String getName();
-
+        String getKey();
         String getTable();
     }
 
     public static class SdExistAction implements SdAction {
         private String name;
         private String table;
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        private String key;
         //private String whereClause;
 
         public SdExistAction() {
@@ -91,7 +109,7 @@ public class DeliaSeedTests extends DaoTestBase {
                 trail.add(action.getName());
             }
 
-            res.ok = true;
+            res.ok = res.errors.isEmpty();
             return res;
         }
     }
@@ -99,6 +117,7 @@ public class DeliaSeedTests extends DaoTestBase {
     //-- valid
     public interface DBInterface {
         boolean tableExists(String table);
+        boolean columnExists(String table, String column);
     }
 
     public static class SdValidationResults {
@@ -133,23 +152,38 @@ public class DeliaSeedTests extends DaoTestBase {
                 }
             }
 
-            res.ok = true;
+            res.ok = res.errors.isEmpty();
             return res;
         }
 
         private void validateExist(SdAction action, SdValidationResults res) {
             if (!dbInterface.tableExists(action.getTable())) {
-                res.errors.add(new SbError("unknown-table", String.format("unknown table: '%s'", action.getTable())));
+                res.errors.add(new SbError("unknown.table", String.format("unknown table: '%s'", action.getTable())));
+            }
+
+            if (action.getKey() != null) {
+                if (!dbInterface.columnExists(action.getTable(), action.getKey())) {
+                    res.errors.add(new SbError("key.unknown.column", String.format("key references unknown column '%s' in table: '%s'", action.getKey(), action.getTable())));
+                }
             }
         }
     }
 
     public static class MyDBInterface implements DBInterface {
-        public String knownTables;
+        public String knownTables = "";
+        public String knownColumns = "";
 
         @Override
         public boolean tableExists(String table) {
             return knownTables.contains(table);
+        }
+
+        @Override
+        public boolean columnExists(String table, String column) {
+            if (!  knownTables.contains(table)) {
+                return false;
+            }
+            return knownColumns.contains(column);
         }
     }
 
@@ -158,7 +192,7 @@ public class DeliaSeedTests extends DaoTestBase {
         executor = new MyExecutor();
         SdScript script = new SdScript();
         SdExecutionResults res = executor.execute(script);
-        chkOk(res, "");
+        chkOK(res, "");
     }
 
     @Test
@@ -168,7 +202,7 @@ public class DeliaSeedTests extends DaoTestBase {
         script.addAction(new SdExistAction());
 
         SdExecutionResults res = executor.execute(script);
-        chkOk(res, "exist");
+        chkOK(res, "exist");
     }
 
     @Test
@@ -180,7 +214,7 @@ public class DeliaSeedTests extends DaoTestBase {
         dbInterface.knownTables = "Customer";
         validator = new MyValidator(dbInterface);
         SdValidationResults res = validator.validate(script);
-        chkValOk(res, "exist");
+        chkValOK(res, "exist");
     }
 
     @Test
@@ -192,7 +226,36 @@ public class DeliaSeedTests extends DaoTestBase {
         dbInterface.knownTables = "Address";
         validator = new MyValidator(dbInterface);
         SdValidationResults res = validator.validate(script);
-        chkValOk(res, "exist");
+        chkValFail(res, "unknown.table");
+    }
+
+
+    @Test
+    public void testValidateColumn() {
+        SdScript script = new SdScript();
+        SdExistAction action = new SdExistAction("Customer");
+        action.setKey("firstName");
+        script.addAction(action);
+
+        MyDBInterface dbInterface = new MyDBInterface();
+        dbInterface.knownTables = "Customer";
+        dbInterface.knownColumns = "firstName";
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script);
+        chkValOK(res, "exist");
+    }
+    @Test
+    public void testValidateUnknownColumn() {
+        SdScript script = new SdScript();
+        SdExistAction action = new SdExistAction("Customer");
+        action.setKey("firstName");
+        script.addAction(action);
+
+        MyDBInterface dbInterface = new MyDBInterface();
+        dbInterface.knownTables = "Customer";
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script);
+        chkValFail(res, "key.unknown.column");
     }
 
     //---
@@ -203,13 +266,22 @@ public class DeliaSeedTests extends DaoTestBase {
     public void init() {
     }
 
-    private void chkOk(SdExecutionResults res, String trail) {
+    private void chkOK(SdExecutionResults res, String trail) {
         assertEquals(true, res.ok);
         assertEquals(trail, executor.trail.getTrail());
     }
 
-    private void chkValOk(SdValidationResults res, String trail) {
+    private void chkValOK(SdValidationResults res, String trail) {
         assertEquals(true, res.ok);
         assertEquals(trail, validator.trail.getTrail());
+    }
+    private void chkValFail(SdValidationResults res, String errId) {
+        assertEquals(false, res.ok);
+        res.errors.forEach(err -> log(err.toString()));
+        assertEquals(errId, res.errors.get(0).id);
+    }
+
+    private void log(String s) {
+        System.out.println(s);
     }
 }
