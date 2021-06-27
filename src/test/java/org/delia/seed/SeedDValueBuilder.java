@@ -15,10 +15,7 @@ import org.delia.valuebuilder.PartialStructValueBuilder;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.valuebuilder.StructValueBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public abstract class SeedDValueBuilder extends ServiceBase {
+public class SeedDValueBuilder extends ServiceBase {
     private static class InsertExtraInfo {
         public DValue generatedSerialValue;
     }
@@ -43,17 +40,17 @@ public abstract class SeedDValueBuilder extends ServiceBase {
         this.scalarBuilder = factorySvc.createScalarValueBuilder(registry);
     }
 
-    public List<DValue> xxdoInsertOrUpdate(boolean isInsert, DeliaEntity entity, String src, InsertExtraInfo extraInfo) {
-        List<DValue> inputL = new ArrayList<>();
-        if (entity != null) {
-            if (isInsert) {
-                inputL.add(createDValue(entity));
-            } else {
-                inputL.add(createPartialDValue(entity));
-            }
-        }
-        return inputL;
-    }
+//    public List<DValue> xxdoInsertOrUpdate(boolean isInsert, DeliaEntity entity, String src, InsertExtraInfo extraInfo) {
+//        List<DValue> inputL = new ArrayList<>();
+//        if (entity != null) {
+//            if (isInsert) {
+//                inputL.add(createDValue(entity));
+//            } else {
+//                inputL.add(createPartialDValue(entity));
+//            }
+//        }
+//        return inputL;
+//    }
 
     private DValue createPartialDValue(DeliaEntity obj) {
         if (obj instanceof DeliaEntity) {
@@ -75,7 +72,15 @@ public abstract class SeedDValueBuilder extends ServiceBase {
         }
     }
 
-    protected DValue buildFromEntity(DeliaEntity entity, String typeName, StructValueBuilder builder) {
+    public DValue buildFromEntityEx(DeliaEntity entity, String typeName) {
+        DStructType dtype = (DStructType) registry.getType(typeName);
+        StructValueBuilder sbbuild = new StructValueBuilder(dtype);
+
+        DValue dval = buildFromEntity(entity, typeName, sbbuild);
+        return dval;
+    }
+
+    public DValue buildFromEntity(DeliaEntity entity, String typeName, StructValueBuilder builder) {
         if (entity.internalSetValueMap().isEmpty()) {
             DeliaImmutable immut = (DeliaImmutable) entity;
             return immut.internalDValue();

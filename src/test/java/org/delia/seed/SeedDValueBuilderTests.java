@@ -1,19 +1,32 @@
 package org.delia.seed;
 
 
+import org.delia.codegen.DeliaEntity;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
+import org.delia.valuebuilder.StructValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 
 public class SeedDValueBuilderTests extends DeliaClientTestBase {
 
+    public static class MyEntity implements DeliaEntity {
+        public Map<String, Object> fieldMap = new HashMap<>(); //TODO need concurrent map?
+
+        @Override
+        public Map<String, Object> internalSetValueMap() {
+            return fieldMap;
+        }
+    }
 
     @Test
     public void testData() {
@@ -27,6 +40,16 @@ public class SeedDValueBuilderTests extends DeliaClientTestBase {
             assertEquals(44, dval.asStruct().getField("id").asInt());
         }
 
+        MyEntity entity = new MyEntity();
+        entity.fieldMap.put("id", 45);
+        entity.fieldMap.put("firstName", "sue");
+        String typeName = "Customer";
+        DTypeRegistry registry = sess.getExecutionContext().registry;
+        DStructType dtype = (DStructType) registry.getType(typeName);
+        StructValueBuilder sbbuild = new StructValueBuilder(dtype);
+
+        SeedDValueBuilder builder = new SeedDValueBuilder(sess, typeName);
+        DValue dval = builder.buildFromEntity(entity, typeName, sbbuild);
     }
 
 
