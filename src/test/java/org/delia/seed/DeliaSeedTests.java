@@ -1,6 +1,8 @@
 package org.delia.seed;
 
 
+import org.delia.DeliaSession;
+import org.delia.db.sql.StrCreator;
 import org.delia.other.StringTrail;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
 import org.delia.scope.scopetest.relation.ValueBuilder;
@@ -134,6 +136,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         boolean columnExists(String table, String column);
 //        DStructType getTypeSchema(String table);
+        boolean isCascadingFk(String table, String column);
     }
 
     public interface SdTypeGenerator {
@@ -183,14 +186,28 @@ public class DeliaSeedTests extends DeliaClientTestBase {
                 res.errors.add(new SbError("unknown.table", String.format("unknown table: '%s'", action.getTable())));
             }
 
+            DStructType structType = (DStructType) registry.getType(action.getTable());
             if (action.getKey() != null) {
                 if (!dbInterface.columnExists(action.getTable(), action.getKey())) {
                     res.errors.add(new SbError("key.unknown.column", String.format("key references unknown column '%s' in table: '%s'", action.getKey(), action.getTable())));
                 }
+            } else if (structType.getPrimaryKey() == null) {
+                res.errors.add(new SbError("key.missing", String.format("table: '%s' has no primary key. Action.key must not be empty", action.getTable())));
+            } else {
+                TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
+                int missingCount = 0;
+                for(DValue dval: action.getData()) {
+                    if (! dval.asStruct().hasField(pkpair.name)) {
+                        missingCount++;
+                    }
+                }
+                if (missingCount > 0) {
+                    res.errors.add(new SbError("pk.missing", String.format("table: '%s'. Data rows must have a value for the primary key. %d rows are missing one", action.getTable(), missingCount)));
+                }
             }
 
 //            DStructType structType = dbInterface.getTypeSchema(action.getTable());
-            DStructType structType = (DStructType) registry.getType(action.getTable());
+
             for (DValue dval : action.getData()) {
                 validateDValue(dval, structType, res);
             }
@@ -244,6 +261,11 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             return knownColumns.contains(column);
         }
 
+        @Override
+        public boolean isCascadingFk(String table, String column) {
+            return false;
+        }
+
 //        @Override
 //        public DStructType getTypeSchema(String table) {
 //            return structType;
@@ -256,6 +278,47 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         @Override
         public DTypeRegistry findEntityTypes() {
             return registry;
+        }
+    }
+
+    public interface DeliaGenerator {
+        String generate(SdScript script, DeliaSession sess);
+    }
+    public static class MyDeliaGenerator implements DeliaGenerator {
+        private DeliaSession sess;
+
+        @Override
+        public String generate(SdScript script, DeliaSession sess) {
+            this.sess = sess;
+            StrCreator sc = new StrCreator();
+            for (SdAction action : script.getActions()) {
+                switch (action.getName()) {
+                    case "exist":
+                        genExist(action, sc);
+                        break;
+                    default:
+                        throw new SdException("unknown action: " + action.getName());
+                }
+            }
+
+            return sc.toString();
+        }
+
+        private void genExist(SdAction action, StrCreator sc) {
+            for(DValue dval: action.getData()) {
+                sc.o("upsert %s[%s] ", action.getTable(), getKey(dval, action));
+            }
+        }
+
+        private String getKey(DValue dval, SdAction action) {
+            if (action.getKey() != null) {
+                String fieldName = action.getKey(); //TODO handle multiple keys later
+                return String.format("%s==%s", fieldName, dval.asStruct().getField(fieldName).asString());
+            }
+            //TODO: support schema.table. parcels.address
+            DStructType structType = (DStructType) sess.getExecutionContext().registry.getType(action.getTable());
+            String fieldName = structType.getPrimaryKey().getFieldName(); //already validated that its not null
+            return dval.asStruct().getField(fieldName).asString();
         }
     }
 
@@ -373,6 +436,30 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         SdValidationResults res = validator.validate(script, dbRegistry);
         chkValFail(res, "data.wrong.type");
     }
+
+    @Test
+    public void testDeliaGen() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdExistAction action = new SdExistAction("Customer");
+        action.setKey("firstName");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
+        MyDBInterface dbInterface = new MyDBInterface();
+        dbInterface.knownTables = "Customer";
+        dbInterface.knownColumns = "firstName";
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry);
+        chkValOK(res, "exist");
+
+        MyDeliaGenerator gen = new MyDeliaGenerator();
+        String src = gen.generate(script, sess);
+        assertEquals("sdf", src);
+    }
+
 
     private DTypeRegistry createDbRegistry(String customer, String src) {
         MySdTypeGenerator generator = new MySdTypeGenerator();
