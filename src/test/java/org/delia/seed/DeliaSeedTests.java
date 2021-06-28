@@ -4,6 +4,7 @@ package org.delia.seed;
 import org.delia.other.StringTrail;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
+import org.delia.scope.scopetest.relation.ValueBuilder;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.junit.Before;
@@ -347,7 +348,9 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
     @Test
     public void testData() {
-        createCustomerType(createCustomerSrc());
+        ValueBuilder vb = new ValueBuilder();
+        vb.init();
+        vb.createCustomerType(createCustomerSrc());
         if (true) {
             execStatement("insert Customer {id: 44, firstName:'bob'}");
             ResultValue res = this.execStatement("let x = Customer[true]");
@@ -365,7 +368,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         SdExistAction action = new SdExistAction("Customer");
         action.setKey("firstName");
         script.addAction(action);
-        DValue dval = buildDVal(45, "sue");
+        DValue dval = vb.buildDVal(45, "sue");
         action.getData().add(dval);
 
         MyDBInterface dbInterface = new MyDBInterface();
@@ -379,31 +382,35 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
     @Test
     public void testDataWrongType() {
-        createCustomerType(createCustomerSrc());
+        ValueBuilder vb = new ValueBuilder();
+        vb.init();
+        vb.createCustomerType(createCustomerSrc());
         if (true) {
-            execStatement("insert Customer {id: 44, firstName:'bob'}");
-            ResultValue res = this.execStatement("let x = Customer[true]");
+            vb.execStatement("insert Customer {id: 44, firstName:'bob'}");
+            ResultValue res = vb.execStatement("let x = Customer[true]");
             assertEquals(true, res.ok);
             DValue dval = res.getAsDValue();
             assertEquals("bob", dval.asStruct().getField("firstName").asString());
             assertEquals(44, dval.asStruct().getField("id").asInt());
         }
 
+//        createCustomerType(createCustomerWrongSrc()); //db
         MySdTypeGenerator generator = new MySdTypeGenerator();
+        createCustomerType(createCustomerWrongSrc(), "Customer");
         generator.registry = sess.getExecutionContext().registry;
-        DTypeRegistry registry = generator.findEntityTypes();
+        DTypeRegistry registry = vb.getRegistry();
 
         SdScript script = new SdScript();
         SdExistAction action = new SdExistAction("Customer");
         action.setKey("firstName");
         script.addAction(action);
-        DValue dval = buildDVal(45, "sue");
+        DValue dval = vb.buildDVal(45, "sue");
         action.getData().add(dval);
 
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         dbInterface.knownColumns = "firstName";
-        dbInterface.structType = createCustomerType(createCustomerWrongSrc(), "Customer");
+        dbInterface.structType = (DStructType) registry.getType("Customer");
         validator = new MyValidator(dbInterface);
         SdValidationResults res = validator.validate(script, registry);
         chkValFail(res, "data.wrong.type");
@@ -457,15 +464,6 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         DTypeRegistry registry = sess.getExecutionContext().registry;
         DStructType dtype = (DStructType) registry.getType(typeName);
         return dtype;
-    }
-    private DValue buildDVal(int id, String firstName) {
-        SeedDValueBuilderTests.MyEntity entity = new SeedDValueBuilderTests.MyEntity();
-        entity.fieldMap.put("id", id);
-        entity.fieldMap.put("firstName", firstName);
-        String typeName = "Customer";
-
-        SeedDValueBuilder builder = new SeedDValueBuilder(sess, typeName);
-        return builder.buildFromEntityEx(entity, typeName);
     }
 
 
