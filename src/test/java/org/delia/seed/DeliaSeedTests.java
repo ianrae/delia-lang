@@ -282,15 +282,11 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         SdScript script = new SdScript();
         script.addAction(new SdExistAction("Customer"));
 
-        createCustomerType(createCustomerSrc());
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        generator.registry = sess.getExecutionContext().registry;
-        generator.registry = generator.findEntityTypes();
-
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, generator.registry);
+        SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
     }
 
@@ -299,15 +295,11 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         SdScript script = new SdScript();
         script.addAction(new SdExistAction("Customer"));
 
-        createCustomerType(createCustomerSrc());
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        generator.registry = sess.getExecutionContext().registry;
-        generator.registry = generator.findEntityTypes();
-
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Address";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, generator.registry);
+        SdValidationResults res = validator.validate(script, dbRegistry);
         chkValFail(res, "unknown.table");
     }
 
@@ -319,16 +311,12 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         action.setKey("firstName");
         script.addAction(action);
 
-        createCustomerType(createCustomerSrc());
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        generator.registry = sess.getExecutionContext().registry;
-        DTypeRegistry registry = generator.findEntityTypes();
-
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         dbInterface.knownColumns = "firstName";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, registry);
+        SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
     }
 
@@ -339,27 +327,17 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         action.setKey("firstName");
         script.addAction(action);
 
-        createCustomerType(createCustomerSrc());
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        generator.registry = sess.getExecutionContext().registry;
-        generator.registry = generator.findEntityTypes();
-
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, generator.registry);
+        SdValidationResults res = validator.validate(script, dbRegistry);
         chkValFail(res, "key.unknown.column");
     }
 
     @Test
     public void testData() {
         ValueBuilder vb = createValueBuilder(createCustomerSrc());
-
-        createCustomerType(createCustomerSrc(), "Customer");
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        generator.registry = sess.getExecutionContext().registry;
-        DTypeRegistry registry = generator.findEntityTypes();
-
         SdScript script = new SdScript();
         SdExistAction action = new SdExistAction("Customer");
         action.setKey("firstName");
@@ -367,12 +345,12 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         DValue dval = vb.buildDVal(45, "sue");
         action.getData().add(dval);
 
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         dbInterface.knownColumns = "firstName";
-        //dbInterface.structType = dval.asStruct().getType(); //create separate one later
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, registry);
+        SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
     }
 
@@ -387,18 +365,24 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         DValue dval = vb.buildDVal(45, "sue");
         action.getData().add(dval);
 
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        createCustomerType(createCustomerWrongSrc(), "Customer");
-        generator.registry = sess.getExecutionContext().registry;
-        DStructType ddd = (DStructType) generator.registry.getType("Customer");
-
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerWrongSrc());
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         dbInterface.knownColumns = "firstName";
-        //dbInterface.structType = (DStructType) registry.getType("Customer");
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, generator.registry);
+        SdValidationResults res = validator.validate(script, dbRegistry);
         chkValFail(res, "data.wrong.type");
+    }
+
+    private DTypeRegistry createDbRegistry(String customer, String src) {
+        MySdTypeGenerator generator = new MySdTypeGenerator();
+        createCustomerType(src, "Customer");
+        return sess.getExecutionContext().registry;
+    }
+    private DTypeRegistry createDbRegistry() {
+        MySdTypeGenerator generator = new MySdTypeGenerator();
+        generator.registry = sess.getExecutionContext().registry;
+        return sess.getExecutionContext().registry;
     }
 
     private ValueBuilder createValueBuilder(String src) {
