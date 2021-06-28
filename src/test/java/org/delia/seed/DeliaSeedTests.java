@@ -2,7 +2,6 @@ package org.delia.seed;
 
 
 import org.delia.other.StringTrail;
-import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
 import org.delia.scope.scopetest.relation.ValueBuilder;
 import org.delia.type.*;
@@ -44,8 +43,11 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
     public interface SdAction {
         String getName();
+
         String getKey();
+
         String getTable();
+
         List<DValue> getData();
     }
 
@@ -68,6 +70,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         public SdExistAction() {
             name = "exist";
         }
+
         public SdExistAction(String table) {
             this();
             this.table = table;
@@ -128,8 +131,9 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     //-- valid
     public interface DBInterface {
         boolean tableExists(String table);
+
         boolean columnExists(String table, String column);
-        DStructType getTypeSchema(String table);
+//        DStructType getTypeSchema(String table);
     }
 
     public interface SdTypeGenerator {
@@ -187,7 +191,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
 //            DStructType structType = dbInterface.getTypeSchema(action.getTable());
             DStructType structType = (DStructType) registry.getType(action.getTable());
-            for(DValue dval: action.getData()) {
+            for (DValue dval : action.getData()) {
                 validateDValue(dval, structType, res);
             }
         }
@@ -197,17 +201,17 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             //idea here is that dval's stype is simply a structural type built from the data provided
             //We compare against the actual db schema structType
             DStructHelper helper = dval.asStruct();
-            for(TypePair pair: helper.getType().getAllFields()) {
+            for (TypePair pair : helper.getType().getAllFields()) {
                 String fieldName = pair.name;
                 DValue fieldVal = helper.getField(fieldName);
                 if (fieldVal == null) {
-                    if (! structType.fieldIsOptional(fieldName)) {
+                    if (!structType.fieldIsOptional(fieldName)) {
                         res.errors.add(new SbError("data.missing.value", String.format("data column '%s': null not allowed", fieldName)));
                     }
                 } else {
                     DType dataType = pair.type;
                     DType typeInDB = DValueHelper.findFieldType(structType, fieldName);
-                    if (! areCompatible(dataType, typeInDB)) {
+                    if (!areCompatible(dataType, typeInDB)) {
                         res.errors.add(new SbError("data.wrong.type", String.format("data column '%s': wrong type in value: '%s'", fieldName, fieldVal.asString())));
                     }
 
@@ -225,7 +229,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     public static class MyDBInterface implements DBInterface {
         public String knownTables = "";
         public String knownColumns = "";
-        public DStructType structType;
+//        public DStructType structType;
 
         @Override
         public boolean tableExists(String table) {
@@ -234,16 +238,16 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         @Override
         public boolean columnExists(String table, String column) {
-            if (!  knownTables.contains(table)) {
+            if (!knownTables.contains(table)) {
                 return false;
             }
             return knownColumns.contains(column);
         }
 
-        @Override
-        public DStructType getTypeSchema(String table) {
-            return structType;
-        }
+//        @Override
+//        public DStructType getTypeSchema(String table) {
+//            return structType;
+//        }
     }
 
     public static class MySdTypeGenerator implements SdTypeGenerator {
@@ -327,6 +331,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         SdValidationResults res = validator.validate(script, registry);
         chkValOK(res, "exist");
     }
+
     @Test
     public void testValidateUnknownColumn() {
         SdScript script = new SdScript();
@@ -348,21 +353,12 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
     @Test
     public void testData() {
-        ValueBuilder vb = new ValueBuilder();
-        vb.init();
-        vb.createCustomerType(createCustomerSrc());
-        if (true) {
-            execStatement("insert Customer {id: 44, firstName:'bob'}");
-            ResultValue res = this.execStatement("let x = Customer[true]");
-            assertEquals(true, res.ok);
-            DValue dval = res.getAsDValue();
-            assertEquals("bob", dval.asStruct().getField("firstName").asString());
-            assertEquals(44, dval.asStruct().getField("id").asInt());
-        }
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+
+        createCustomerType(createCustomerSrc(), "Customer");
         MySdTypeGenerator generator = new MySdTypeGenerator();
         generator.registry = sess.getExecutionContext().registry;
         DTypeRegistry registry = generator.findEntityTypes();
-
 
         SdScript script = new SdScript();
         SdExistAction action = new SdExistAction("Customer");
@@ -374,7 +370,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         dbInterface.knownColumns = "firstName";
-        dbInterface.structType = dval.asStruct().getType(); //create separate one later
+        //dbInterface.structType = dval.asStruct().getType(); //create separate one later
         validator = new MyValidator(dbInterface);
         SdValidationResults res = validator.validate(script, registry);
         chkValOK(res, "exist");
@@ -382,23 +378,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
     @Test
     public void testDataWrongType() {
-        ValueBuilder vb = new ValueBuilder();
-        vb.init();
-        vb.createCustomerType(createCustomerSrc());
-        if (true) {
-            vb.execStatement("insert Customer {id: 44, firstName:'bob'}");
-            ResultValue res = vb.execStatement("let x = Customer[true]");
-            assertEquals(true, res.ok);
-            DValue dval = res.getAsDValue();
-            assertEquals("bob", dval.asStruct().getField("firstName").asString());
-            assertEquals(44, dval.asStruct().getField("id").asInt());
-        }
-
-//        createCustomerType(createCustomerWrongSrc()); //db
-        MySdTypeGenerator generator = new MySdTypeGenerator();
-        createCustomerType(createCustomerWrongSrc(), "Customer");
-        generator.registry = sess.getExecutionContext().registry;
-        DTypeRegistry registry = vb.getRegistry();
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
 
         SdScript script = new SdScript();
         SdExistAction action = new SdExistAction("Customer");
@@ -407,13 +387,25 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         DValue dval = vb.buildDVal(45, "sue");
         action.getData().add(dval);
 
+        MySdTypeGenerator generator = new MySdTypeGenerator();
+        createCustomerType(createCustomerWrongSrc(), "Customer");
+        generator.registry = sess.getExecutionContext().registry;
+        DStructType ddd = (DStructType) generator.registry.getType("Customer");
+
         MyDBInterface dbInterface = new MyDBInterface();
         dbInterface.knownTables = "Customer";
         dbInterface.knownColumns = "firstName";
-        dbInterface.structType = (DStructType) registry.getType("Customer");
+        //dbInterface.structType = (DStructType) registry.getType("Customer");
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, registry);
+        SdValidationResults res = validator.validate(script, generator.registry);
         chkValFail(res, "data.wrong.type");
+    }
+
+    private ValueBuilder createValueBuilder(String src) {
+        ValueBuilder vb = new ValueBuilder();
+        vb.init();
+        vb.createCustomerType(src);
+        return vb;
     }
 
 
@@ -436,6 +428,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         assertEquals(true, res.ok);
         assertEquals(trail, validator.trail.getTrail());
     }
+
     private void chkValFail(SdValidationResults res, String errId) {
         assertEquals(false, res.ok);
         res.errors.forEach(err -> log(err.toString()));
@@ -447,6 +440,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         src += "\n";
         return src;
     }
+
     private String createCustomerWrongSrc() {
         String src = String.format("type %s struct { id int primaryKey, firstName int} end", "Customer");
         src += "\n";
@@ -459,6 +453,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         DStructType dtype = (DStructType) registry.getType("Customer");
         return dtype;
     }
+
     private DStructType createCustomerType(String src, String typeName) {
         execTypeStatement(src);
         DTypeRegistry registry = sess.getExecutionContext().registry;
