@@ -62,7 +62,9 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         }
 
         @Override
-        public String getName() { return isNotExist ? "not exist" : "exist"; }
+        public String getName() {
+            return isNotExist ? "not exist" : "exist";
+        }
 
         @Override
         public String getTable() {
@@ -116,7 +118,8 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         boolean tableExists(String table);
 
         boolean columnExists(String table, String column);
-//        DStructType getTypeSchema(String table);
+
+        //        DStructType getTypeSchema(String table);
         boolean isCascadingFk(String table, String column);
     }
 
@@ -142,12 +145,13 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         public MyValidator(DBInterface dbInterface) {
             this.dbInterface = dbInterface;
             validatorMap.put("exist", new ExistActionValidator());
+            validatorMap.put("not exist", new NotExistActionValidator());
         }
 
         @Override
         public SdValidationResults validate(SdScript script, DTypeRegistry registry) {
             this.registry = registry;
-            for(String key: validatorMap.keySet()) {
+            for (String key : validatorMap.keySet()) {
                 ActionValidator av = validatorMap.get(key);
                 av.init(dbInterface, registry);
             }
@@ -155,13 +159,10 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
             for (SdAction action : script.getActions()) {
                 trail.add(action.getName());
-                switch (action.getName()) {
-                    case "exist":
-                        validateAction(action, res);
-                        break;
-                    default:
-                        throw new SdException("unknown action: " + action.getName());
+                if (!validatorMap.containsKey(action.getName())) {
+                    throw new SdException("unknown action: " + action.getName());
                 }
+                validateAction(action, res);
             }
 
             res.ok = res.errors.isEmpty();
@@ -244,6 +245,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     public interface DeliaGenerator {
         String generate(SdScript script, DeliaSession sess);
     }
+
     public static class MyDeliaGenerator implements DeliaGenerator {
         private DeliaSession sess;
 
@@ -265,7 +267,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         }
 
         private void genExist(SdAction action, StrCreator sc) {
-            for(DValue dval: action.getData()) {
+            for (DValue dval : action.getData()) {
                 sc.o("upsert %s[%s] ", action.getTable(), getKey(dval, action));
                 sc.o("{ %s } ", buildDataValues(dval));
                 sc.nl();
@@ -275,7 +277,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         private String buildDataValues(DValue dval) {
             StringJoiner joiner = new StringJoiner(", ");
             DStructType structType = dval.asStruct().getType(); //want in declared order
-            for(TypePair pair: structType.getAllFields()) {
+            for (TypePair pair : structType.getAllFields()) {
                 String fieldName = pair.name;
                 DValue inner = dval.asStruct().getField(fieldName);
                 String s = String.format("%s: %s", fieldName, SeedDValueHelper.renderAsDelia(inner));
@@ -507,6 +509,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         createCustomerType(src, "Customer");
         return sess.getExecutionContext().registry;
     }
+
     private DTypeRegistry createDbRegistry() {
         MySdTypeGenerator generator = new MySdTypeGenerator();
         generator.registry = sess.getExecutionContext().registry;
