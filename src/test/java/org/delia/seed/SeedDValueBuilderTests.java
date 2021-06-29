@@ -4,10 +4,10 @@ package org.delia.seed;
 import org.delia.codegen.DeliaEntity;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
+import org.delia.seed.code.SeedDValueBuilder;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
-import org.delia.valuebuilder.StructValueBuilder;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package org.delia.seed;
+package org.delia.seed.code;
 
 import org.delia.Delia;
 import org.delia.DeliaSession;

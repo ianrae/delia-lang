@@ -1,4 +1,4 @@
-package org.delia.scope.scopetest.relation;
+package org.delia.seed.code;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,8 +13,8 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
-import org.delia.seed.SeedDValueBuilder;
 import org.delia.seed.SeedDValueBuilderTests;
+import org.delia.seed.code.SeedDValueBuilder;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;

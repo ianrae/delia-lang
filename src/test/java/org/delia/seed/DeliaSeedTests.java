@@ -5,8 +5,10 @@ import org.delia.DeliaSession;
 import org.delia.db.sql.StrCreator;
 import org.delia.other.StringTrail;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
-import org.delia.scope.scopetest.relation.ValueBuilder;
+import org.delia.seed.code.SbError;
+import org.delia.seed.code.SdException;
 import org.delia.seed.code.SeedDValueHelper;
+import org.delia.seed.code.ValueBuilder;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.junit.Before;
@@ -20,30 +22,6 @@ import static org.junit.Assert.assertEquals;
 
 
 public class DeliaSeedTests extends DeliaClientTestBase {
-
-    public static class SbError {
-        private String id;
-        private String msg;
-
-        public SbError(String id, String msg) {
-            this.id = id;
-            this.msg = msg;
-        }
-
-        @Override
-        public String toString() {
-            return "SbError{" +
-                    "id='" + id + '\'' +
-                    ", msg='" + msg + '\'' +
-                    '}';
-        }
-    }
-
-    public static class SdException extends RuntimeException {
-        public SdException(String msg) {
-            super(msg);
-        }
-    }
 
     public interface SdAction {
         String getName();
@@ -397,10 +375,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         script.addAction(action);
 
         DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
-        MyDBInterface dbInterface = new MyDBInterface();
-        dbInterface.knownTables = "Customer";
-        dbInterface.knownColumns = "firstName";
-        validator = new MyValidator(dbInterface);
+        validator = new MyValidator(createDBInterface());
         SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
     }
@@ -431,10 +406,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         action.getData().add(dval);
 
         DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
-        MyDBInterface dbInterface = new MyDBInterface();
-        dbInterface.knownTables = "Customer";
-        dbInterface.knownColumns = "firstName";
-        validator = new MyValidator(dbInterface);
+        validator = new MyValidator(createDBInterface());
         SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
     }
@@ -451,10 +423,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         action.getData().add(dval);
 
         DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerWrongSrc());
-        MyDBInterface dbInterface = new MyDBInterface();
-        dbInterface.knownTables = "Customer";
-        dbInterface.knownColumns = "firstName";
-        validator = new MyValidator(dbInterface);
+        validator = new MyValidator(createDBInterface());
         SdValidationResults res = validator.validate(script, dbRegistry);
         chkValFail(res, "data.wrong.type");
     }
@@ -470,17 +439,13 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         action.getData().add(dval);
 
         DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
-        MyDBInterface dbInterface = new MyDBInterface();
-        dbInterface.knownTables = "Customer";
-        dbInterface.knownColumns = "firstName";
-        validator = new MyValidator(dbInterface);
+        validator = new MyValidator(createDBInterface());
         SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
 
         MyDeliaGenerator gen = new MyDeliaGenerator();
         String src = gen.generate(script, sess);
-        //TODO  insert Flight {id: 55, wid: 20 }
-        assertEquals("upsert Customer[firstName=='sue'] { firstName: 'sue',id: 45 }", src);
+        assertEquals("upsert Customer[firstName=='sue'] { id: 45, firstName: 'sue' }", src);
     }
 
     @Test
@@ -496,19 +461,40 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         action.getData().add(dval2);
 
         DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
-        MyDBInterface dbInterface = new MyDBInterface();
-        dbInterface.knownTables = "Customer";
-        dbInterface.knownColumns = "firstName";
-        validator = new MyValidator(dbInterface);
+        validator = new MyValidator(createDBInterface());
         SdValidationResults res = validator.validate(script, dbRegistry);
         chkValOK(res, "exist");
 
         MyDeliaGenerator gen = new MyDeliaGenerator();
         String src = gen.generate(script, sess);
-        //TODO  insert Flight {id: 55, wid: 20 }
         assertEquals("upsert Customer[firstName=='sue'] { id: 45, firstName: 'sue' }", getIthLine(src, 0));
         assertEquals("upsert Customer[firstName=='tom'] { id: 46, firstName: 'tom' }", getIthLine(src, 1));
-        //upsert Customer[firstName=='tom'] { firstName: 'tom',id: 46 }
+    }
+
+    @Test
+    public void testDeliaGenPK() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdExistAction action = new SdExistAction("Customer");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
+        validator = new MyValidator(createDBInterface());
+        SdValidationResults res = validator.validate(script, dbRegistry);
+        chkValOK(res, "exist");
+
+        MyDeliaGenerator gen = new MyDeliaGenerator();
+        String src = gen.generate(script, sess);
+        assertEquals("upsert Customer[45] { id: 45, firstName: 'sue' }", src);
+    }
+
+    private MyDBInterface createDBInterface() {
+        MyDBInterface dbInterface = new MyDBInterface();
+        dbInterface.knownTables = "Customer";
+        dbInterface.knownColumns = "firstName";
+        return dbInterface;
     }
 
     private String getIthLine(String src, int i) {
@@ -558,7 +544,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     private void chkValFail(SdValidationResults res, String errId) {
         assertEquals(false, res.ok);
         res.errors.forEach(err -> log(err.toString()));
-        assertEquals(errId, res.errors.get(0).id);
+        assertEquals(errId, res.errors.get(0).getId());
     }
 
     private String createCustomerSrc() {
