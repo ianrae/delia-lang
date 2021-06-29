@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static org.junit.Assert.assertEquals;
 
@@ -301,7 +302,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
                 }
             }
 
-            return sc.toString();
+            return sc.toString().trim();
         }
 
         private void genExist(SdAction action, StrCreator sc) {
@@ -313,13 +314,55 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         private String getKey(DValue dval, SdAction action) {
             if (action.getKey() != null) {
                 String fieldName = action.getKey(); //TODO handle multiple keys later
-                return String.format("%s==%s", fieldName, dval.asStruct().getField(fieldName).asString());
+                DType fieldType = DValueHelper.findFieldType(dval.getType(), fieldName);
+                String deliaStrExpr = getFieldAsDelia(dval, fieldName, fieldType);
+                return String.format("%s==%s", fieldName, deliaStrExpr);
             }
             //TODO: support schema.table. parcels.address
             DStructType structType = (DStructType) sess.getExecutionContext().registry.getType(action.getTable());
             String fieldName = structType.getPrimaryKey().getFieldName(); //already validated that its not null
-            return dval.asStruct().getField(fieldName).asString();
+            DType fieldType = DValueHelper.findFieldType(dval.getType(), fieldName);
+            return getFieldAsDelia(dval, fieldName, fieldType);
         }
+
+        private String getFieldAsDelia(DValue dvalParent, String fieldName, DType fieldType) {
+            DValue dval = dvalParent.asStruct().getField(fieldName);
+            if (dval == null) {
+                return "null";
+            }
+
+            String str = null;
+            switch(fieldType.getShape()) {
+                case RELATION:
+                {
+                    DRelation rel = dval.asRelation();
+                    if (rel.isMultipleKey()) {
+                        return buildMultipleRef(rel);
+                    }
+                    str = rel.getForeignKey().asString();
+                }
+                    break;
+                case STRING:
+                case DATE:
+                {
+                    String s = dval.asString();
+                    str = String.format("'%s'", s);
+                }
+                    break;
+                default:
+                    str = dval.asString();
+                    break;
+            }
+            return str.trim();
+        }
+        private String buildMultipleRef(DRelation rel) {
+            StringJoiner joiner = new StringJoiner(",");
+            for(DValue key: rel.getMultipleKeys()) {
+                joiner.add(key.asString());
+            }
+            return String.format("FIX!{[%s]}", joiner.toString()); //TODO fix!!
+        }
+
     }
 
     @Test
@@ -457,7 +500,8 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         MyDeliaGenerator gen = new MyDeliaGenerator();
         String src = gen.generate(script, sess);
-        assertEquals("sdf", src);
+        //TODO  insert Flight {id: 55, wid: 20 }
+        assertEquals("upsert Customer[firstName=='sue']", src);
     }
 
 
