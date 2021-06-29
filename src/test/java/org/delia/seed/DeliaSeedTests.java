@@ -6,6 +6,7 @@ import org.delia.db.sql.StrCreator;
 import org.delia.other.StringTrail;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
 import org.delia.scope.scopetest.relation.ValueBuilder;
+import org.delia.seed.code.SeedDValueHelper;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.junit.Before;
@@ -308,59 +309,37 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         private void genExist(SdAction action, StrCreator sc) {
             for(DValue dval: action.getData()) {
                 sc.o("upsert %s[%s] ", action.getTable(), getKey(dval, action));
+                sc.o("{ %s } ", buildDataValues(dval));
+                sc.nl();
             }
+        }
+
+        private String buildDataValues(DValue dval) {
+            StringJoiner joiner = new StringJoiner(", ");
+            DStructType structType = dval.asStruct().getType(); //want in declared order
+            for(TypePair pair: structType.getAllFields()) {
+                String fieldName = pair.name;
+                DValue inner = dval.asStruct().getField(fieldName);
+                String s = String.format("%s: %s", fieldName, SeedDValueHelper.renderAsDelia(inner));
+                joiner.add(s);
+            }
+            return joiner.toString();
         }
 
         private String getKey(DValue dval, SdAction action) {
             if (action.getKey() != null) {
                 String fieldName = action.getKey(); //TODO handle multiple keys later
-                DType fieldType = DValueHelper.findFieldType(dval.getType(), fieldName);
-                String deliaStrExpr = getFieldAsDelia(dval, fieldName, fieldType);
+                String deliaStrExpr = getFieldAsDelia(dval, fieldName);
                 return String.format("%s==%s", fieldName, deliaStrExpr);
             }
             //TODO: support schema.table. parcels.address
             DStructType structType = (DStructType) sess.getExecutionContext().registry.getType(action.getTable());
             String fieldName = structType.getPrimaryKey().getFieldName(); //already validated that its not null
-            DType fieldType = DValueHelper.findFieldType(dval.getType(), fieldName);
-            return getFieldAsDelia(dval, fieldName, fieldType);
+            return getFieldAsDelia(dval, fieldName);
         }
 
-        private String getFieldAsDelia(DValue dvalParent, String fieldName, DType fieldType) {
-            DValue dval = dvalParent.asStruct().getField(fieldName);
-            if (dval == null) {
-                return "null";
-            }
-
-            String str = null;
-            switch(fieldType.getShape()) {
-                case RELATION:
-                {
-                    DRelation rel = dval.asRelation();
-                    if (rel.isMultipleKey()) {
-                        return buildMultipleRef(rel);
-                    }
-                    str = rel.getForeignKey().asString();
-                }
-                    break;
-                case STRING:
-                case DATE:
-                {
-                    String s = dval.asString();
-                    str = String.format("'%s'", s);
-                }
-                    break;
-                default:
-                    str = dval.asString();
-                    break;
-            }
-            return str.trim();
-        }
-        private String buildMultipleRef(DRelation rel) {
-            StringJoiner joiner = new StringJoiner(",");
-            for(DValue key: rel.getMultipleKeys()) {
-                joiner.add(key.asString());
-            }
-            return String.format("FIX!{[%s]}", joiner.toString()); //TODO fix!!
+        private String getFieldAsDelia(DValue dvalParent, String fieldName) {
+            return SeedDValueHelper.getFieldAsDelia(dvalParent, fieldName);
         }
 
     }
@@ -501,9 +480,41 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         MyDeliaGenerator gen = new MyDeliaGenerator();
         String src = gen.generate(script, sess);
         //TODO  insert Flight {id: 55, wid: 20 }
-        assertEquals("upsert Customer[firstName=='sue']", src);
+        assertEquals("upsert Customer[firstName=='sue'] { firstName: 'sue',id: 45 }", src);
     }
 
+    @Test
+    public void testDeliaGenTwo() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdExistAction action = new SdExistAction("Customer");
+        action.setKey("firstName");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+        DValue dval2 = vb.buildDVal(46, "tom");
+        action.getData().add(dval2);
+
+        DTypeRegistry dbRegistry = createDbRegistry("Customer", createCustomerSrc());
+        MyDBInterface dbInterface = new MyDBInterface();
+        dbInterface.knownTables = "Customer";
+        dbInterface.knownColumns = "firstName";
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry);
+        chkValOK(res, "exist");
+
+        MyDeliaGenerator gen = new MyDeliaGenerator();
+        String src = gen.generate(script, sess);
+        //TODO  insert Flight {id: 55, wid: 20 }
+        assertEquals("upsert Customer[firstName=='sue'] { id: 45, firstName: 'sue' }", getIthLine(src, 0));
+        assertEquals("upsert Customer[firstName=='tom'] { id: 46, firstName: 'tom' }", getIthLine(src, 1));
+        //upsert Customer[firstName=='tom'] { firstName: 'tom',id: 46 }
+    }
+
+    private String getIthLine(String src, int i) {
+        String[] ar = src.split("\n");
+        return ar[i].trim();
+    }
 
     private DTypeRegistry createDbRegistry(String customer, String src) {
         MySdTypeGenerator generator = new MySdTypeGenerator();
