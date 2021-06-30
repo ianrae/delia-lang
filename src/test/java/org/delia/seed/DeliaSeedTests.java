@@ -31,19 +31,20 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         List<DValue> getData();
     }
 
-    public static class SdExistAction implements SdAction {
+    public static abstract class SdActionBase implements SdAction {
+        private String name;
         private String table;
         private List<DValue> dataL = new ArrayList<>();
+        private String key;
 
-        public boolean isNotExist() {
-            return isNotExist;
+        public SdActionBase(String name) {
+            this.name = name;
         }
 
-        public void setNotExist(boolean notExist) {
-            isNotExist = notExist;
+        public SdActionBase(String name, String table) {
+            this(name);
+            this.table = table;
         }
-
-        private boolean isNotExist;
 
         public String getKey() {
             return key;
@@ -53,20 +54,9 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             this.key = key;
         }
 
-        private String key;
-        //private String whereClause;
-
-        public SdExistAction() {
-        }
-
-        public SdExistAction(String table) {
-            this();
-            this.table = table;
-        }
-
         @Override
         public String getName() {
-            return isNotExist ? "not exist" : "exist";
+            return name;
         }
 
         @Override
@@ -77,6 +67,38 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         @Override
         public List<DValue> getData() {
             return dataL;
+        }
+    }
+
+    public static class SdExistAction extends SdActionBase {
+        private boolean isNotExist;
+
+        public SdExistAction() {
+            super("exist");
+        }
+        public SdExistAction(String table) {
+            super("exist", table);
+        }
+
+        public boolean isNotExist() {
+            return isNotExist;
+        }
+
+        public void setNotExist(boolean notExist) {
+            isNotExist = notExist;
+        }
+
+        @Override
+        public String getName() {
+            return isNotExist ? "not exist" : "exist";
+        }
+    }
+    public static class SdInsertAction extends SdActionBase {
+        public SdInsertAction() {
+            super("insert");
+        }
+        public SdInsertAction(String table) {
+            super("insert", table);
         }
     }
 
@@ -113,6 +135,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             this.registry = registry;
             executorMap.put("exist", new ExistActionExecutor());
             executorMap.put("not exist", new NotExistActionExecutor());
+            executorMap.put("insert", new InsertActionExecutor());
         }
 
         @Override
@@ -173,6 +196,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             this.dbInterface = dbInterface;
             validatorMap.put("exist", new ExistActionValidator());
             validatorMap.put("not exist", new NotExistActionValidator());
+            validatorMap.put("insert", new InsertActionValidator());
         }
 
         @Override
@@ -187,7 +211,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             for (SdAction action : script.getActions()) {
                 trail.add(action.getName());
                 if (!validatorMap.containsKey(action.getName())) {
-                    throw new SdException("unknown action: " + action.getName());
+                    throw new SdException("no validator for action: " + action.getName());
                 }
                 validateAction(action, res);
             }
@@ -431,7 +455,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     public void testInsertDeliaGenPK() {
         ValueBuilder vb = createValueBuilder(createCustomerSrc());
         SdScript script = new SdScript();
-        SdExistAction action = new SdExistAction("Customer");
+        SdInsertAction action = new SdInsertAction("Customer");
         script.addAction(action);
         DValue dval = vb.buildDVal(45, "sue");
         action.getData().add(dval);
@@ -439,10 +463,10 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         initDBAndReg();
         validator = new MyValidator(dbInterface);
         SdValidationResults res = validator.validate(script, dbRegistry);
-        chkValOK(res, "exist");
+        chkValOK(res, "insert");
 
         String src = runExec(script);
-        assertEquals("upsert Customer[45] { id: 45, firstName: 'sue' }", src);
+        assertEquals("insert Customer { id: 45, firstName: 'sue' }", src);
     }
 
 
