@@ -101,6 +101,30 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             super("insert", table);
         }
     }
+    public static class SdDeleteAction extends SdActionBase {
+        private boolean isDeleteAll;
+
+        public SdDeleteAction() {
+            super("delete");
+        }
+        public SdDeleteAction(String table) {
+            super("delete", table);
+        }
+
+        @Override
+        public String getName() {
+            return isDeleteAll ? "delete all" : "delete";
+        }
+
+        public boolean isDeleteAll() {
+            return isDeleteAll;
+        }
+
+        public void setDeleteAll(boolean deleteAll) {
+            isDeleteAll = deleteAll;
+        }
+
+    }
 
     public static class SdScript {
         private List<SdAction> actions = new ArrayList<>();
@@ -136,6 +160,8 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             executorMap.put("exist", new ExistActionExecutor());
             executorMap.put("not exist", new NotExistActionExecutor());
             executorMap.put("insert", new InsertActionExecutor());
+            executorMap.put("delete", new DeleteActionExecutor());
+            executorMap.put("delete all", new DeleteActionExecutor());
         }
 
         @Override
@@ -197,6 +223,8 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             validatorMap.put("exist", new ExistActionValidator());
             validatorMap.put("not exist", new NotExistActionValidator());
             validatorMap.put("insert", new InsertActionValidator());
+            validatorMap.put("delete", new DeleteActionValidator());
+            validatorMap.put("delete all", new DeleteActionValidator());
         }
 
         @Override
@@ -469,6 +497,61 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         assertEquals("insert Customer { id: 45, firstName: 'sue' }", src);
     }
 
+    @Test
+    public void testDeleteDeliaGenPK() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdDeleteAction action = new SdDeleteAction("Customer");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+
+        initDBAndReg();
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry);
+        chkValOK(res, "delete");
+
+        String src = runExec(script);
+        assertEquals("delete Customer[45]", src);
+    }
+    @Test
+    public void testDeleteDeliaGenKey() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdDeleteAction action = new SdDeleteAction("Customer");
+        action.setKey("firstName");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+
+        initDBAndReg();
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry);
+        chkValOK(res, "delete");
+
+        String src = runExec(script);
+        assertEquals("delete Customer[firstName=='sue']", src);
+    }
+
+    @Test
+    public void testDeleteAllDeliaGenKey() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdDeleteAction action = new SdDeleteAction("Customer");
+        action.setDeleteAll(true);
+        action.setKey("firstName");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+
+        initDBAndReg();
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry);
+        chkValOK(res, "delete all");
+
+        String src = runExec(script);
+        assertEquals("delete Customer[true]", src);
+    }
 
     //---
     private MyExecutor executor;

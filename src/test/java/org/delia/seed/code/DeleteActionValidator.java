@@ -4,7 +4,7 @@ import org.delia.seed.DeliaSeedTests;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
 
-public class ExistActionValidator extends ActionValidatorBase {
+public class DeleteActionValidator extends ActionValidatorBase {
 
     @Override
     public void validateAction(DeliaSeedTests.SdAction action, DeliaSeedTests.SdValidationResults res) {

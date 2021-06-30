@@ -13,6 +13,4 @@ public class InsertActionExecutor extends ActionExecutorBase {
             sc.nl();
         }
     }
-
-
 }
