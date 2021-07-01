@@ -2,6 +2,7 @@ package org.delia.seed.code;
 
 import org.delia.DeliaSession;
 import org.delia.error.DeliaError;
+import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
 import org.delia.seed.DeliaSeedTests;
 import org.delia.type.DStructType;
@@ -34,11 +35,17 @@ public class UpdateActionValidator extends ActionValidatorBase {
         String src = String.format("let x = %s[%s]", structType.getName(), action.getWhereClause());
 
         DeliaSession childSess = sess.createChildSession();
-        ResultValue resValue = childSess.getDelia().continueExecution(src, childSess);
-        if (!resValue.isSuccess()) {
-            //TODO: process all delia errors later
-            DeliaError err = resValue.errors.get(0);
-            res.errors.add(new SbError("whereClause.error", String.format("%s", err.toString())));
+        try {
+            ResultValue resValue = childSess.getDelia().continueExecution(src, childSess);
+            if (!resValue.isSuccess()) {
+                //TODO: process all delia errors later
+                DeliaError err = resValue.errors.get(0);
+                res.errors.add(new SbError("whereClause.error", String.format("%s", err.toString())));
+            }
+        } catch (DeliaException e) {
+                //TODO: process all delia errors later
+                DeliaError err = e.getFirstError();
+                res.errors.add(new SbError("whereClause.error", String.format("%s", err.toString())));
         }
     }
 

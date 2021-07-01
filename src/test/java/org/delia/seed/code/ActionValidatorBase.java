@@ -38,8 +38,8 @@ public abstract class ActionValidatorBase implements ActionValidator {
         } else {
             TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(structType);
             int missingCount = 0;
-            for(DValue dval: action.getData()) {
-                if (! dval.asStruct().hasField(pkpair.name)) {
+            for (DValue dval : action.getData()) {
+                if (!dval.asStruct().hasField(pkpair.name)) {
                     missingCount++;
                 }
             }
@@ -52,12 +52,14 @@ public abstract class ActionValidatorBase implements ActionValidator {
     protected void validateData(DeliaSeedTests.SdAction action, DeliaSeedTests.SdValidationResults res) {
         validateData(action, res, false);
     }
+
     protected void validateData(DeliaSeedTests.SdAction action, DeliaSeedTests.SdValidationResults res, boolean pkCanBeMissing) {
         DStructType structType = (DStructType) registry.getType(action.getTable());
         for (DValue dval : action.getData()) {
             validateDValue(dval, structType, res, pkCanBeMissing);
         }
     }
+
     protected void validateDValue(DValue dval, DStructType structType, DeliaSeedTests.SdValidationResults res, boolean pkCanBeMissing) {
         //dval will always be the correct dtype typeName
         //idea here is that dval's stype is simply a structural type built from the data provided

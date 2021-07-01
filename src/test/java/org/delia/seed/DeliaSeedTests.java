@@ -613,6 +613,22 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         assertEquals("update Customer[id < 10] { firstName: 'sue' }", src); //without pk
     }
 
+    @Test
+    public void testUpdateDeliaGenWhereInvalid() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdUpdateAction action = new SdUpdateAction("Customer");
+        action.setWhereClause("zzz < 10");
+        script.addAction(action);
+        DValue dval = vb.buildDValNoId("sue");
+        action.getData().add(dval);
+
+        initDBAndReg();
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
+        chkValFail(res, "whereClause.error");
+    }
+
     //---
     private MyExecutor executor;
     private MyValidator validator;
