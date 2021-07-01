@@ -11,13 +11,21 @@ public class UpdateActionValidator extends ActionValidatorBase {
     @Override
     public void validateAction(DeliaSeedTests.SdAction action, DeliaSeedTests.SdValidationResults res) {
         validateTableExists(action, res);
-        validateKeyOrPK(action, res);
-
-        validateData(action, res);
 
         DeliaSeedTests.SdUpdateAction updateAction = (DeliaSeedTests.SdUpdateAction) action;
         if (updateAction.getWhereClause() != null) {
             validateWhereClause(updateAction, res);
+            validateIsNoKey(updateAction, res);
+            validateData(action, res, true);
+        } else {
+            validateKeyOrPK(action, res);
+            validateData(action, res);
+        }
+    }
+
+    private void validateIsNoKey(DeliaSeedTests.SdUpdateAction action, DeliaSeedTests.SdValidationResults res) {
+        if (action.getKey() != null) {
+            res.errors.add(new SbError("key.not.allowed", String.format("update can have key or whereClause, but not both in table: '%s'", action.getTable())));
         }
     }
 

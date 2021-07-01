@@ -154,12 +154,10 @@ public class ValueBuilder {
     }
 
     public DValue buildDValNoId(String firstName) {
-        MyEntity entity = new MyEntity();
-        entity.fieldMap.put("firstName", firstName);
-        String typeName = "Customer";
-
-        SeedDValueBuilder builder = new SeedDValueBuilder(sess, typeName);
-        return builder.buildFromEntityEx(entity, typeName);
+        //TODO: this is hacky. rewrite this
+        DValue dval = buildDVal(0, firstName);
+        dval.asMap().remove("id");
+        return dval;
     }
 
 }

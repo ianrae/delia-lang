@@ -610,7 +610,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         chkValOK(res, "update");
 
         String src = runExec(script);
-        assertEquals("update xCustomer[id < 10] { firstName: 'sue' }", src); //without pk
+        assertEquals("update Customer[id < 10] { firstName: 'sue' }", src); //without pk
     }
 
     //---

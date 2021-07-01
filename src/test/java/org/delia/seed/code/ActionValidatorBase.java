@@ -50,12 +50,15 @@ public abstract class ActionValidatorBase implements ActionValidator {
     }
 
     protected void validateData(DeliaSeedTests.SdAction action, DeliaSeedTests.SdValidationResults res) {
+        validateData(action, res, false);
+    }
+    protected void validateData(DeliaSeedTests.SdAction action, DeliaSeedTests.SdValidationResults res, boolean pkCanBeMissing) {
         DStructType structType = (DStructType) registry.getType(action.getTable());
         for (DValue dval : action.getData()) {
-            validateDValue(dval, structType, res);
+            validateDValue(dval, structType, res, pkCanBeMissing);
         }
     }
-    protected void validateDValue(DValue dval, DStructType structType, DeliaSeedTests.SdValidationResults res) {
+    protected void validateDValue(DValue dval, DStructType structType, DeliaSeedTests.SdValidationResults res, boolean pkCanBeMissing) {
         //dval will always be the correct dtype typeName
         //idea here is that dval's stype is simply a structural type built from the data provided
         //We compare against the actual db schema structType
@@ -65,7 +68,12 @@ public abstract class ActionValidatorBase implements ActionValidator {
             DValue fieldVal = helper.getField(fieldName);
             if (fieldVal == null) {
                 if (!structType.fieldIsOptional(fieldName)) {
-                    res.errors.add(new SbError("data.missing.value", String.format("data column '%s': null not allowed", fieldName)));
+                    TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(helper.getType());
+                    if (pkCanBeMissing && fieldName.equals(pkpair.name)) {
+                        //ignore
+                    } else {
+                        res.errors.add(new SbError("data.missing.value", String.format("data column '%s': null not allowed", fieldName)));
+                    }
                 }
             } else {
                 DType dataType = pair.type;

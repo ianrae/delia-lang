@@ -7,11 +7,13 @@ import org.delia.type.DValue;
 public class DeleteActionExecutor extends ActionExecutorBase {
     @Override
     public void executeAction(DeliaSeedTests.SdAction action, StrCreator sc, DeliaSeedTests.SdExecutionResults res) {
-        DeliaSeedTests.SdDeleteAction deleteAction = (DeliaSeedTests.SdDeleteAction) action;
-        if (deleteAction.isDeleteAll()) {
-            sc.o("delete %s[true] ", action.getTable());
-            sc.nl();
-            return;
+        if (action instanceof DeliaSeedTests.SdDeleteAction) {
+            DeliaSeedTests.SdDeleteAction deleteAction = (DeliaSeedTests.SdDeleteAction) action;
+            if (deleteAction.isDeleteAll()) {
+                sc.o("delete %s[true] ", action.getTable());
+                sc.nl();
+                return;
+            }
         }
 
         for (DValue dval : action.getData()) {
