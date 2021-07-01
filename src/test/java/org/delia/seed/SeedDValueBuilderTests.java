@@ -1,9 +1,9 @@
 package org.delia.seed;
 
 
-import org.delia.codegen.DeliaEntity;
 import org.delia.runner.ResultValue;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
+import org.delia.seed.code.MyEntity;
 import org.delia.seed.code.SeedDValueBuilder;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
@@ -11,22 +11,10 @@ import org.delia.type.DValue;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 
 
 public class SeedDValueBuilderTests extends DeliaClientTestBase {
-
-    public static class MyEntity implements DeliaEntity {
-        public Map<String, Object> fieldMap = new HashMap<>(); //TODO need concurrent map?
-
-        @Override
-        public Map<String, Object> internalSetValueMap() {
-            return fieldMap;
-        }
-    }
 
     @Test
     public void testData() {

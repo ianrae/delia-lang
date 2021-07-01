@@ -1,5 +1,6 @@
 package org.delia.seed.code;
 
+import org.delia.DeliaSession;
 import org.delia.seed.DeliaSeedTests;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
@@ -7,11 +8,13 @@ import org.delia.util.DValueHelper;
 public abstract class ActionValidatorBase implements ActionValidator {
     protected DeliaSeedTests.DBInterface dbInterface;
     protected DTypeRegistry registry;
+    protected DeliaSession sess;
 
     @Override
-    public void init(DeliaSeedTests.DBInterface dbInterface, DTypeRegistry registry) {
+    public void init(DeliaSeedTests.DBInterface dbInterface, DTypeRegistry registry, DeliaSession sess) {
         this.dbInterface = dbInterface;
         this.registry = registry;
+        this.sess = sess;
     }
 
     @Override

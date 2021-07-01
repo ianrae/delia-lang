@@ -1,7 +1,5 @@
 package org.delia.seed.code;
 
-import static org.junit.Assert.assertEquals;
-
 import org.delia.Delia;
 import org.delia.DeliaFactory;
 import org.delia.DeliaSession;
@@ -13,12 +11,12 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.log.Log;
 import org.delia.runner.DeliaException;
 import org.delia.runner.ResultValue;
-import org.delia.seed.SeedDValueBuilderTests;
-import org.delia.seed.code.SeedDValueBuilder;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.zdb.DBInterfaceFactory;
+
+import static org.junit.Assert.assertEquals;
 
 public class ValueBuilder {
 
@@ -26,7 +24,7 @@ public class ValueBuilder {
     protected Delia delia;
     protected DeliaSession sess = null;
     protected boolean addIdFlag;
-    protected DBInterfaceFactory dbInterface ;
+    protected DBInterfaceFactory dbInterface;
     protected int nextVarNum = 1;
     protected Log log = new UnitTestLog();
     protected FactoryServiceImpl factorySvc;
@@ -39,6 +37,7 @@ public class ValueBuilder {
 //		DBHelper.createTable(dbInterface, "Address"); //!! fake schema
 //		DBHelper.createTable(dbInterface, "Customer"); //!! fake schema
     }
+
     protected void enableAutoCreateTables() {
 //		MemDBInterface memdb = (MemDBInterface) dbInterface;
 //		memdb.createTablesAsNeededFlag = true;
@@ -57,6 +56,7 @@ public class ValueBuilder {
         ResultValue res = execTypeStatement(src);
         chkResOK(res);
     }
+
     protected String createTypeSrc(String type, String relField) {
         String sid = addIdFlag ? String.format(" id int unique") : "";
         relField = sid.isEmpty() ? relField : ", " + relField;
@@ -64,6 +64,7 @@ public class ValueBuilder {
         src += "\n";
         return src;
     }
+
     protected ResultValue execTypeStatement(String src) {
         if (sess != null) {
             log("rebuilding..");
@@ -74,11 +75,13 @@ public class ValueBuilder {
         chkResOK(res);
         return res;
     }
+
     protected void createTypeFail(String initialSrc, String type, String rel, String errId) {
         String sid = addIdFlag ? String.format(" id int unique") : "";
         String src = String.format("type %s struct { %s %s }  end", type, sid, rel);
         execTypeStatementFail(initialSrc + src, errId);
     }
+
     protected void execTypeStatementFail(String src, String errId) {
         boolean pass = false;
         try {
@@ -90,12 +93,14 @@ public class ValueBuilder {
         }
         assertEquals(false, pass);
     }
+
     public ResultValue execStatement(String src) {
         assertEquals(true, sess != null);
         ResultValue res = delia.continueExecution(src, sess);
         chkResOK(res);
         return res;
     }
+
     protected void execStatementFail(String src, String errId) {
         assertEquals(true, sess != null);
         boolean pass = false;
@@ -119,6 +124,7 @@ public class ValueBuilder {
         assertEquals(true, res.ok);
         assertEquals(true, res.errors.isEmpty());
     }
+
     protected void log(String s) {
         log.log(s);
     }
@@ -138,8 +144,17 @@ public class ValueBuilder {
     }
 
     public DValue buildDVal(int id, String firstName) {
-        SeedDValueBuilderTests.MyEntity entity = new SeedDValueBuilderTests.MyEntity();
+        MyEntity entity = new MyEntity();
         entity.fieldMap.put("id", id);
+        entity.fieldMap.put("firstName", firstName);
+        String typeName = "Customer";
+
+        SeedDValueBuilder builder = new SeedDValueBuilder(sess, typeName);
+        return builder.buildFromEntityEx(entity, typeName);
+    }
+
+    public DValue buildDValNoId(String firstName) {
+        MyEntity entity = new MyEntity();
         entity.fieldMap.put("firstName", firstName);
         String typeName = "Customer";
 

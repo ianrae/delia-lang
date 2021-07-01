@@ -1,6 +1,7 @@
 package org.delia.seed;
 
 
+import org.delia.DeliaSession;
 import org.delia.db.sql.StrCreator;
 import org.delia.other.StringTrail;
 import org.delia.scope.scopetest.relation.DeliaClientTestBase;
@@ -101,6 +102,24 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             super("insert", table);
         }
     }
+    public static class SdUpdateAction extends SdActionBase {
+        private String whereClause;
+
+        public SdUpdateAction() {
+            super("update");
+        }
+        public SdUpdateAction(String table) {
+            super("update", table);
+        }
+        public String getWhereClause() {
+            return whereClause;
+        }
+
+        public void setWhereClause(String whereClause) {
+            this.whereClause = whereClause;
+        }
+
+    }
     public static class SdDeleteAction extends SdActionBase {
         private boolean isDeleteAll;
 
@@ -151,17 +170,20 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     public static class MyExecutor implements SdExecutor {
         private final DBInterface dbInterface;
         private final DTypeRegistry registry;
+        private final DeliaSession sess;
         public StringTrail trail = new StringTrail();
         private Map<String, ActionExecutor> executorMap = new HashMap<>();
 
-        public MyExecutor(DBInterface dbInterface, DTypeRegistry registry) {
+        public MyExecutor(DBInterface dbInterface, DTypeRegistry registry, DeliaSession sess) {
             this.dbInterface = dbInterface;
             this.registry = registry;
+            this.sess = sess;
             executorMap.put("exist", new ExistActionExecutor());
             executorMap.put("not exist", new NotExistActionExecutor());
             executorMap.put("insert", new InsertActionExecutor());
             executorMap.put("delete", new DeleteActionExecutor());
             executorMap.put("delete all", new DeleteActionExecutor());
+            executorMap.put("update", new UpdateActionExecutor());
         }
 
         @Override
@@ -170,7 +192,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
             for (String key : executorMap.keySet()) {
                 ActionExecutor av = executorMap.get(key);
-                av.init(dbInterface, registry);
+                av.init(dbInterface, registry, sess);
             }
 
             StrCreator sc = new StrCreator();
@@ -209,7 +231,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     }
 
     public interface SdValidator {
-        SdValidationResults validate(SdScript script, DTypeRegistry registry);
+        SdValidationResults validate(SdScript script, DTypeRegistry registry, DeliaSession sess);
     }
 
     public static class MyValidator implements SdValidator {
@@ -225,14 +247,15 @@ public class DeliaSeedTests extends DeliaClientTestBase {
             validatorMap.put("insert", new InsertActionValidator());
             validatorMap.put("delete", new DeleteActionValidator());
             validatorMap.put("delete all", new DeleteActionValidator());
+            validatorMap.put("update", new UpdateActionValidator());
         }
 
         @Override
-        public SdValidationResults validate(SdScript script, DTypeRegistry registry) {
+        public SdValidationResults validate(SdScript script, DTypeRegistry registry, DeliaSession sess) {
             this.registry = registry;
             for (String key : validatorMap.keySet()) {
                 ActionValidator av = validatorMap.get(key);
-                av.init(dbInterface, registry);
+                av.init(dbInterface, registry, sess);
             }
             SdValidationResults res = new SdValidationResults();
 
@@ -296,7 +319,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     @Test
     public void testEmpty() {
         initDBAndReg();
-        executor = new MyExecutor(dbInterface, dbRegistry);
+        executor = new MyExecutor(dbInterface, dbRegistry, sess);
         SdScript script = new SdScript();
         SdExecutionResults res = executor.execute(script);
         log("src: " + res.deliaSrc);
@@ -306,7 +329,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     @Test
     public void testOne() {
         initDBAndReg();
-        executor = new MyExecutor(dbInterface, dbRegistry);
+        executor = new MyExecutor(dbInterface, dbRegistry, sess);
         SdScript script = new SdScript();
         script.addAction(new SdExistAction());
 
@@ -323,7 +346,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         initDBAndReg();
         dbInterface.knownTables = "Customer";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "exist");
     }
 
@@ -335,7 +358,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         initDBAndReg();
         dbInterface.knownTables = "Address";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValFail(res, "unknown.table");
     }
 
@@ -349,7 +372,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "exist");
     }
 
@@ -363,7 +386,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         initDBAndReg();
         dbInterface.knownColumns = "";
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValFail(res, "key.unknown.column");
     }
 
@@ -379,7 +402,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "exist");
     }
 
@@ -397,7 +420,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
         initDBAndReg();
         dbRegistry = createDbRegistry("Customer", createCustomerWrongSrc());
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValFail(res, "data.wrong.type");
     }
 
@@ -413,7 +436,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "exist");
 
         String src = runExec(script);
@@ -434,7 +457,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "exist");
 
         String src = runExec(script);
@@ -453,7 +476,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "exist");
 
         String src = runExec(script);
@@ -472,7 +495,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "not exist");
 
         String src = runExec(script);
@@ -490,7 +513,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "insert");
 
         String src = runExec(script);
@@ -508,7 +531,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "delete");
 
         String src = runExec(script);
@@ -526,7 +549,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "delete");
 
         String src = runExec(script);
@@ -546,11 +569,48 @@ public class DeliaSeedTests extends DeliaClientTestBase {
 
         initDBAndReg();
         validator = new MyValidator(dbInterface);
-        SdValidationResults res = validator.validate(script, dbRegistry);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
         chkValOK(res, "delete all");
 
         String src = runExec(script);
         assertEquals("delete Customer[true]", src);
+    }
+
+    @Test
+    public void testUpdateDeliaGenPK() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdUpdateAction action = new SdUpdateAction("Customer");
+        script.addAction(action);
+        DValue dval = vb.buildDVal(45, "sue");
+        action.getData().add(dval);
+
+        initDBAndReg();
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
+        chkValOK(res, "update");
+
+        String src = runExec(script);
+        assertEquals("update Customer[45] { firstName: 'sue' }", src); //without pk
+    }
+
+    @Test
+    public void testUpdateDeliaGenWhere() {
+        ValueBuilder vb = createValueBuilder(createCustomerSrc());
+        SdScript script = new SdScript();
+        SdUpdateAction action = new SdUpdateAction("Customer");
+        action.setWhereClause("id < 10");
+        script.addAction(action);
+        DValue dval = vb.buildDValNoId("sue");
+        action.getData().add(dval);
+
+        initDBAndReg();
+        validator = new MyValidator(dbInterface);
+        SdValidationResults res = validator.validate(script, dbRegistry, sess);
+        chkValOK(res, "update");
+
+        String src = runExec(script);
+        assertEquals("update xCustomer[id < 10] { firstName: 'sue' }", src); //without pk
     }
 
     //---
@@ -571,7 +631,7 @@ public class DeliaSeedTests extends DeliaClientTestBase {
     }
 
     private String runExec(SdScript script) {
-        executor = new MyExecutor(dbInterface, dbRegistry);
+        executor = new MyExecutor(dbInterface, dbRegistry, sess);
         SdExecutionResults res = executor.execute(script);
         log("src: " + res.deliaSrc);
         return res.deliaSrc.trim();
