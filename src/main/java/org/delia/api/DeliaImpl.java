@@ -56,7 +56,7 @@ public class DeliaImpl implements Delia {
 		this.log = log;
 		this.mainDBInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		this.migrationSvc = new SxMigrationServiceImpl(dbInterface, factorySvc);
+		this.migrationSvc = factorySvc.createMigrationService(dbInterface);
 		this.errorAdjuster = new ErrorAdjuster();
 		this.hldFactory = dbInterface.getHLDFactory();
 	}

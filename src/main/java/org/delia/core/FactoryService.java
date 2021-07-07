@@ -2,6 +2,7 @@ package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
+import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.dval.compare.DValueCompareService;
@@ -47,4 +48,5 @@ public interface FactoryService {
 	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
 	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
+	MigrationService createMigrationService(DBInterfaceFactory dbInterface);
 }

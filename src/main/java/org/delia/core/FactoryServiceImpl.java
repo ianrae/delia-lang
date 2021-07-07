@@ -4,7 +4,9 @@ import org.delia.assoc.DatIdMap;
 import org.delia.db.DBType;
 import org.delia.db.QueryBuilderService;
 import org.delia.db.QueryBuilderServiceImpl;
+import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.SchemaMigrator;
+import org.delia.db.schema.modify.SxMigrationServiceImpl;
 import org.delia.db.transaction.DoNothingTransactionProvider;
 import org.delia.db.transaction.TransactionAwareDBInterface;
 import org.delia.db.transaction.TransactionProvider;
@@ -141,6 +143,11 @@ public class FactoryServiceImpl implements FactoryService {
 			return new DoNothingTransactionProvider(log);
 		}
 		return new TransactionProviderImpl(dbInterface, log);
+	}
+
+	@Override
+	public MigrationService createMigrationService(DBInterfaceFactory dbInterface) {
+		return new SxMigrationServiceImpl(dbInterface, this);
 	}
 
 }
