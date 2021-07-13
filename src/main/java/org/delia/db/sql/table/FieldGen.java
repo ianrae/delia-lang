@@ -41,7 +41,7 @@ public class FieldGen extends SqlElement {
 		if (dtype.fieldIsSerial(name)) {
 			suffix1a = " IDENTITY";
 		} else if (b || makeFieldUnique) {
-			suffix1 = " UNIQUE";
+			suffix1 = dtype.fieldIsPrimaryKey(name) ? " PRIMARY KEY" : " UNIQUE";
 		}
 		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";
 		sc.o("  %s %s%s%s%s", name, type, suffix1, suffix1a, suffix2);
