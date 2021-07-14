@@ -43,7 +43,13 @@ public class FieldGen extends SqlElement {
 		} else if (b || makeFieldUnique) {
 			suffix1 = dtype.fieldIsPrimaryKey(name) ? " PRIMARY KEY" : " UNIQUE";
 		}
-		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : "";
+		String suffix2 = "";
+		if (dtype.fieldIsOptional(name)) {
+			suffix2 = " NULL";
+		} else if (!dtype.fieldIsPrimaryKey(name) && suffix1a.isEmpty()) {
+			suffix2 = " NOT NULL";
+		}
+//		String suffix2 = dtype.fieldIsOptional(name) ? " NULL" : " NOT NULL";
 		sc.o("  %s %s%s%s%s", name, type, suffix1, suffix1a, suffix2);
 	}
 
