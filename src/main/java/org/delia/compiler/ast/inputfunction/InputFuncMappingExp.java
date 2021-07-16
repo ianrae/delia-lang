@@ -1,9 +1,6 @@
 package org.delia.compiler.ast.inputfunction;
 
-import org.delia.compiler.ast.Exp;
-import org.delia.compiler.ast.ExpBase;
-import org.delia.compiler.ast.IdentExp;
-import org.delia.compiler.ast.StringExp;
+import org.delia.compiler.ast.*;
 import org.delia.compiler.astx.XNAFMultiExp;
 import org.delia.compiler.astx.XNAFSingleExp;
 
@@ -25,12 +22,17 @@ public class InputFuncMappingExp extends ExpBase {
 		if (inputField instanceof StringExp) {
 			StringExp sexp = (StringExp) inputField;
 			return sexp.strValue();
+		} else if (inputField instanceof IntegerExp) {
+			IntegerExp nexp = (IntegerExp) inputField;
+			return nexp.strValue();
 		}
 		XNAFMultiExp multiExp = (XNAFMultiExp) inputField;
 		return multiExp.qfeL.get(0).funcName;
 	}
 	public boolean isValidInputField() {
 		if (inputField instanceof StringExp) {
+			return true;
+		} else if (inputField instanceof IntegerExp) {
 			return true;
 		} else if (isSyntheticInputField()) {
 			return true;

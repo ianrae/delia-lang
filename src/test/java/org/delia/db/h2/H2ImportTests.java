@@ -128,7 +128,7 @@ public class H2ImportTests  extends BDDBase {
 	}
 	// --
 	private final String BASE_DIR = NorthwindHelper.BASE_DIR;
-	public final String IMPORT_DIR = "src/main/resources/test/import/";
+	public final String IMPORT_DIR = "src/test/resources/test/import/";
 	private CollectingObserverFactory observerFactory;
 
 	@Before

@@ -328,6 +328,10 @@ public class InputFunctionRunner extends ServiceBase {
 			for(OutputFieldHandle ofh: ispec.ofhList) {
 				if (ofh.ifhIndex >= 0) {
 					InputFieldHandle ifh = ispec.ifhList.get(ofh.ifhIndex);
+					if (ifh.columnIndex >= lineObj.elements.length) {
+						DeliaExceptionHelper.throwError("bad-synthetic-value", "OFH %s bad. did you forget to use value()?", ofh.fieldName);
+					}
+
 					String inputValue = lineObj.elements[ifh.columnIndex];
 					inputData.put(ifh.columnName, inputValue);
 					log.logDebug("input: %d:%s = %s", ifh.columnIndex, ifh.columnName, inputValue);
