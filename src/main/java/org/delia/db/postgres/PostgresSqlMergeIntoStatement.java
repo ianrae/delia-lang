@@ -55,14 +55,15 @@ public class PostgresSqlMergeIntoStatement extends SqlMergeIntoStatement {
 
 		sc.o(" ON CONFLICT");
 		List<HLDField> conflictL = new ArrayList<>();
+		//postgres only wants pk field in the on-conflict target
 		for(HLDField field: hld.fieldL) {
 			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(field.structType);
-			String fld1 = calcIfFieldIsPKOrRelationField(field, pkpair, false);
-			if (fld1 != null) {
+			if (pkpair != null && pkpair.name.equals(field.fieldName)) {
 				conflictL.add(field);
+				break;
 			}
 		}
-		
+
 		ListWalker<HLDField> walker1 = new ListWalker<>(conflictL);
 		sc.addStr("(");
 		int index = 0;
