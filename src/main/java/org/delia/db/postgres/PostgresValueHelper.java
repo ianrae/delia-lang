@@ -39,15 +39,15 @@ public class PostgresValueHelper extends ValueHelper {
 			//https://jdbc.postgresql.org/documentation/head/binary-data.html
 			WrappedBlob wblob = dval.asBlob();
 			InputStream stream = BlobUtils.toInputStream(wblob.getByteArray());
-			try {
-				log.log("%d fffffffffff: %d", index, stream.available());
+//			try {
+//				log.log("%d fffffffffff: %d", index, stream.available());
 //				stm.setBinaryStream(index++, stream, stream.available()ilable());
 				stm.setBytes(index++, wblob.getByteArray());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			log.log("fffffffffff");
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			log.log("fffffffffff");
 			
 			//https://stackoverflow.com/questions/49110818/method-org-postgresql-jdbc-pgconnection-createclob-is-not-yet-implemented/52596666
 //			WrappedBlob wblob = dval.asBlob();
