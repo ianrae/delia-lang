@@ -177,7 +177,7 @@ public class H2BDDTests extends BDDBase {
 		runR1350File("t0-filter-op-date.txt", 13);
 		runR1350File("t0-filter-op-relation.txt", 14);
 		runR1350File("t0-filter-and-or.txt", 7);
-		runR1350File("t0-filter-in.txt", 3);
+		runR1350File("t0-filter-in.txt", 4);
 		runR1350File("t0-filter-like.txt", 6);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);

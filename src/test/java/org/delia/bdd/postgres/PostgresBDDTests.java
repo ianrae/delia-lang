@@ -175,7 +175,7 @@ public class PostgresBDDTests extends BDDBase {
 		runR1350File("t0-filter-op-date.txt", 13);
 		runR1350File("t0-filter-op-relation.txt", 14);
 		runR1350File("t0-filter-and-or.txt", 7);
-		runR1350File("t0-filter-in.txt", 3);
+		runR1350File("t0-filter-in.txt", 4);
 		runR1350File("t0-filter-like.txt", 6);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);
@@ -358,13 +358,13 @@ public class PostgresBDDTests extends BDDBase {
 
 	@Test
 	public void testDebug() {
-		//		testIndexToRun = 2;
+//		testIndexToRun = 2;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 
-		runR660File("t0-rule-uniquefields.txt", 1);
-//		runR660File("t0-rule-uniquefields2.txt", 2);
+//		runR660File("t0-rule-uniquefields.txt", 1);
+		runR1350File("t0-filter-in.txt", 4);
 	}
 
 	//---
