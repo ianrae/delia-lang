@@ -1,5 +1,6 @@
 package org.delia.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
 import org.delia.DeliaFactory;
@@ -64,6 +65,9 @@ public class DeliaGenericDao  {
 		mostRecentSess = null;
 		ResultValue res = new ResultValue();
 		res = beginExecution(src);
+		if (StringUtils.isBlank(src) && res == null) { //do-nothing src returns null
+			return true;
+		}
 		return res.ok;
 	}
 	
@@ -96,7 +100,7 @@ public class DeliaGenericDao  {
 	public long count(String type) {
 		String src = String.format("let $$ = %s[true].count()", type);
 		ResultValue res = execute(src);
-		if (res.ok) {
+		if (res != null && res.ok) {
 			Long n = res.getAsDValue().asLong();
 			return n;
 		} else {
