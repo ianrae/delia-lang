@@ -77,4 +77,25 @@ public class DRelationHelper {
 		DRelation drel = relValue.asRelation();
 		drel.addKey(pkval);
 	}
+
+	public static DValue findInFetchedItems(DRelation drel, DValue fkval) {
+		if (! drel.haveFetched()) {
+			return null;
+		}
+
+		for(DValue dval: drel.getFetchedItems()) {
+			DValue pkval = DValueHelper.findPrimaryKeyValue(dval);
+			if (pkval != null && fkval != null && isPKMatch(pkval, fkval)) {
+				return dval;
+			}
+		}
+		return null;
+	}
+	//TODO: rewrite to be faster
+	private static boolean isPKMatch(DValue pk1, DValue pk2) {
+		String s1 = pk1.asString();
+		String s2 = pk2.asString();
+		return s1.equals(s2);
+	}
+
 }
