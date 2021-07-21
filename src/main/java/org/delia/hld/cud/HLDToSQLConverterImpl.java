@@ -30,11 +30,13 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 	private SimpleSqlGenerator simpleSqlGenerator;
 
 	private SqlGeneratorFactory sqlFactory;
+	private DBType dbType;
 
 	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, DBType dbType, SqlGeneratorFactory sqlgen) {
 		super(factorySvc);
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 		this.sqlFactory = sqlgen;
+		this.dbType = dbType;
 	}
 
 	/* (non-Javadoc)
@@ -121,7 +123,17 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 				stmgrp.add(stmx);
 			}
 			if (bundle.hldupdate != null) {
-				SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
+				SqlStatement stmx;
+				//hack hack hack. Postgres should use INSERT ON CONFLICT
+				//produces this:INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO UPDATE SET rightv = ?
+				//TODO this would be more efficient INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO NOTHING
+				if (DBType.POSTGRES.equals(dbType)) {
+					SqlMergeIntoStatement sqlMergeInto = sqlFactory.createMergeInto();
+					sqlMergeInto.init(bundle.hldupdate);
+					stmx = sqlMergeInto.render();
+				} else {
+					stmx = genUpdateStatement(bundle.hldupdate);
+				}
 				stmgrp.add(stmx);
 			}
 		}

@@ -166,7 +166,7 @@ public class NewHLSTestBase extends BDDBase {
 		boolean b = dao.initialize(initialSrc);
 		assertEquals(true, b);
 
-		Delia delia = dao.getDelia();
+		delia = dao.getDelia();
 		this.session = dao.getMostRecentSession();
 		ResultValue res = delia.continueExecution(src, session);
 		
