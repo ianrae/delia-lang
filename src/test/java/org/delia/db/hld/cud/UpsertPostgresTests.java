@@ -132,7 +132,7 @@ public class UpsertPostgresTests extends NewHLSTestBase {
         dumpGrp(stmgrp);
         chkUpsertSql(stmgrp, 0, "INSERT INTO Address (id, y) VALUES(?, ?) ON CONFLICT(id) DO UPDATE SET y = ?", "100", "45", "45");
         chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.rightv = ? AND t1.leftv <> ?", "100", "55");
-        chkUpsertSql(stmgrp, 2, "UPDATE CustomerAddressDat1 SET leftv = ?, rightv = ? WHERE rightv=?", "55", "100", "100");
+        chkUpsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO UPDATE SET rightv = ?", "55", "100", "100");
     }
     //scenario2 not support by upsert
     //scenario3 not support by upsert
@@ -147,13 +147,12 @@ public class UpsertPostgresTests extends NewHLSTestBase {
         src = addSrc(src, "upsert Customer[56] { x:66, addr: ['100','101'] }");
 
         HLDUpsertStatement hldupsert = buildFromSrcUpsert(src, 0);
-        SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 5);
+        SqlStatementGroup stmgrp = genUpsertSql(hldupsert, 4);
         dumpGrp(stmgrp);
-        chkUpsertSql(stmgrp, 0, "MERGE INTO Customer KEY(cid) VALUES(?, ?)", "56", "66");
+        chkUpsertSql(stmgrp, 0, "INSERT INTO Customer (cid, x) VALUES(?, ?) ON CONFLICT(cid) DO UPDATE SET x = ?", "56", "66", "66");
         chkUpsertSql(stmgrp, 1, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "100");
-        chkUpsertSql(stmgrp, 2, "UPDATE CustomerAddressDat1 SET leftv = ?, rightv = ? WHERE leftv=?", "56", "100", "56");
-        chkUpsertSql(stmgrp, 3, "DELETE FROM CustomerAddressDat1 as t1 WHERE t1.leftv = ? AND t1.rightv <> ?", "56", "101");
-        chkUpsertSql(stmgrp, 4, "UPDATE CustomerAddressDat1 SET leftv = ?, rightv = ? WHERE leftv=?", "56", "101", "56");
+        chkUpsertSql(stmgrp, 2, "INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO UPDATE SET leftv = ?", "56", "100", "56");
+        chkUpsertSql(stmgrp, 3, "INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO UPDATE SET leftv = ?", "56", "101", "56");
         //TODO: the above is correct but not efficient. only need a single:
         //DELETE FROM CustomerAddressDat1 WHERE leftv = 56
     }
