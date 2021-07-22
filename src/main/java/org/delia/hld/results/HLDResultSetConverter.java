@@ -236,12 +236,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		//setting dval's relation (fieldName) to have subDVal
 		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
-		
-		if (jel.usedForFetch()) {
-			List<DValue> fetched = new ArrayList<>();
-			fetched.add(subDVal);
-			drel.setFetchedItems(fetched);
-		}
+
+		//do all fetch at merge-pool time
+//		if (jel.usedForFetch()) {
+//			List<DValue> fetched = new ArrayList<>();
+//			fetched.add(subDVal);
+//			drel.setFetchedItems(fetched);
+//		}
 //		sortFKsIfNeeded(subDVal);
 		
 		return drel; 
@@ -343,11 +344,11 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 							if (existing == null) {
 								DRelationHelper.addToFetchedItems(drel, foreignVal);
 							} else {
-								//TODO fix. for each object (eg Address.100) there should only be one instance
-								//but somehow there is two
-								//In this else we add the 2nd instance which results in #fetched > #fks
-								//But seede figures and removes the wrong one.
-								DRelationHelper.addToFetchedItems(drel, foreignVal);
+//								//TODO fix. for each object (eg Address.100) there should only be one instance
+//								//but somehow there is two
+//								//In this else we add the 2nd instance which results in #fetched > #fks
+//								//But seede figures and removes the wrong one.
+//								DRelationHelper.addToFetchedItems(drel, foreignVal);
 							}
 
 
