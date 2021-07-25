@@ -113,7 +113,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, factorySvc, dbType, datIdMap);
 		delta = optimizer.optimize(delta);
 		
-		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, factorySvc, dbType);
+		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, factorySvc, dbType, defaultSchema);
 		SxMigrationPlan sxplan = new SxMigrationPlan();
 		sxplan.opList = plangen.generate(delta);
 		sxplan.delta = delta;

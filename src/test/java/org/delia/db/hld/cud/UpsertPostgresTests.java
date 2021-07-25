@@ -182,7 +182,7 @@ public class UpsertPostgresTests extends NewHLSTestBase {
         SprigService sprigSvc = new SprigServiceImpl(delia.getFactoryService(), this.session.getExecutionContext().registry);
         HLDFactory hldFactory = new HLDFactoryImpl();
         //create Postgres-specific sql converter PostgresSqlGeneratorFactory
-        HLDToSQLConverter converter = hldFactory.createConverter(delia.getFactoryService(), session.getExecutionContext().registry, DBType.POSTGRES);
+        HLDToSQLConverter converter = hldFactory.createConverter(delia.getFactoryService(), session.getExecutionContext().registry, DBType.POSTGRES, null);
         return new HLDBuildServiceImpl(session.getExecutionContext().registry, delia.getFactoryService(), session.getDatIdMap(), sprigSvc, DBType.MEM, converter);
     }
 

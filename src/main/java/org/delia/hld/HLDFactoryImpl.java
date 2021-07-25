@@ -15,24 +15,24 @@ public class HLDFactoryImpl implements HLDFactory {
 
 	@Override
 	public HLDBuildService createHLDBuilderService(DTypeRegistry registry, FactoryService factorySvc, DatIdMap datIdMap,
-			SprigService sprigSvc, DBType dbType) {
+			SprigService sprigSvc, DBType dbType, String defaultSchema) {
 		
-		HLDToSQLConverter converter = this.createConverter(factorySvc, registry, dbType);
+		HLDToSQLConverter converter = this.createConverter(factorySvc, registry, dbType, defaultSchema);
 		return new HLDBuildServiceImpl(registry, factorySvc, datIdMap, sprigSvc, dbType, converter);
 	}
 
 	@Override
-	public HLDToSQLConverter createConverter(FactoryService factorySvc, DTypeRegistry registry, DBType dbType) {
-		SqlGeneratorFactory sqlgen = this.createSqlFactory(dbType, factorySvc, registry);
+	public HLDToSQLConverter createConverter(FactoryService factorySvc, DTypeRegistry registry, DBType dbType, String defaultSchema) {
+		SqlGeneratorFactory sqlgen = this.createSqlFactory(dbType, factorySvc, registry, defaultSchema);
 		return new HLDToSQLConverterImpl(factorySvc, registry, dbType, sqlgen);
 	}
 	
 	@Override
-	public SqlGeneratorFactory createSqlFactory(DBType dbtype, FactoryService factorySvc, DTypeRegistry registry) {
+	public SqlGeneratorFactory createSqlFactory(DBType dbtype, FactoryService factorySvc, DTypeRegistry registry, String defaultSchema) {
 		if (DBType.POSTGRES.equals(dbtype)) {
-			return new PostgresSqlGeneratorFactory(registry, factorySvc);
+			return new PostgresSqlGeneratorFactory(registry, factorySvc, defaultSchema);
 		}
-		return new SqlGeneratorFactoryImpl(registry, factorySvc);
+		return new SqlGeneratorFactoryImpl(registry, factorySvc, defaultSchema);
 	}
 
 }
