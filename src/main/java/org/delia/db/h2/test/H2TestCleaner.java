@@ -64,13 +64,13 @@ public class H2TestCleaner {
 	public void deleteSchemaGG(FactoryService factorySvc, DBInterfaceFactory innerInterface) {
 		List<String> tableL = new ArrayList<>();
 
-		tableL.add("Flight");
-		tableL.add("Flight2");
+		tableL.add("gg.Flight");
+		tableL.add("gg.Flight2");
 
 		String tbl = SchemaMigrator.SCHEMA_TABLE;
-		tableL.add(tbl.toLowerCase());
+		tableL.add("gg." + tbl.toLowerCase());
 		tbl = SchemaMigrator.DAT_TABLE;
-		tableL.add(tbl.toLowerCase());
+		tableL.add("gg." + tbl.toLowerCase());
 
 		tblRemover.deleteKnownTables(factorySvc, innerInterface, tableL);
 	}
