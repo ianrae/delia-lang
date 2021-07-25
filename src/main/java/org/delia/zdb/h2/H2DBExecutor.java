@@ -447,5 +447,14 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 			convertAndRethrow(e);
 		}
 	}
+	@Override
+	public String getDefaultSchema() {
+		return defaultSchema;
+	}
+
+	@Override
+	public void setDefaultSchema(String schema) {
+		defaultSchema = schema;
+	}
 
 }

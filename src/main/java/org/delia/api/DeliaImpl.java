@@ -126,7 +126,7 @@ public class DeliaImpl implements Delia {
 		
 		//to support transactions use session dbInterface if there is one
 		DBInterfaceFactory dbinter = calcDBInterface(dbsess, tp); 
-		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader);
+		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader, deliaOptions.defaultSchema);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);

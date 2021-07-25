@@ -70,12 +70,15 @@ public class RunnerImpl extends ServiceBase implements Runner {
 		private UpdateStatementRunner updateStatementRunner;
 		private HLDFactory hldFactory;
 		private BlobLoader blobLoader;
-		
-		public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory, BlobLoader blobLoader) {
+		private final String defaultSchema;
+
+	public RunnerImpl(FactoryService factorySvc, DBInterfaceFactory dbInterface, HLDFactory hldFactory,
+						  BlobLoader blobLoader, String defaultSchema) {
 			super(factorySvc);
 			this.dbInterface = dbInterface;
 			this.hldFactory = hldFactory;
 			this.blobLoader = blobLoader;
+			this.defaultSchema = defaultSchema;
 		}
 		@Override
 		public Log getLog() {
@@ -156,6 +159,7 @@ public class RunnerImpl extends ServiceBase implements Runner {
 //			this.zexec = factorySvc.hackGetZDB(registry, dbInterface.getDBType());
 			dbexecutor.init1(registry);
 			dbexecutor.init2(datIdMap, this);
+			dbexecutor.setDefaultSchema(defaultSchema);
 			
 			this.fetchRunner = prebuiltFetchRunnerToUse != null ? prebuiltFetchRunnerToUse : dbexecutor.createFetchRunner();
 //			this.qffRunner = new QueryFuncOrFieldRunner(factorySvc, registry, fetchRunner, dbInterface.getCapabilities());

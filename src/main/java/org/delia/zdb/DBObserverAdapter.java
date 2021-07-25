@@ -216,4 +216,14 @@ public class DBObserverAdapter implements DBExecutor {
 	public void executeSchemaChangeOperation(SchemaChangeOperation op) {
 		inner.executeSchemaChangeOperation(op);
 	}
+
+	@Override
+	public String getDefaultSchema() {
+		return inner.getDefaultSchema();
+	}
+
+	@Override
+	public void setDefaultSchema(String schema) {
+		inner.setDefaultSchema(schema);
+	}
 }

@@ -459,6 +459,15 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 		} catch (DBValidationException e) {
 			convertAndRethrow(e);
 		}
-	}		
-	
+	}
+	@Override
+	public String getDefaultSchema() {
+		return defaultSchema;
+	}
+
+	@Override
+	public void setDefaultSchema(String schema) {
+		defaultSchema = schema;
+	}
+
 }

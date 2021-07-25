@@ -27,6 +27,8 @@ public interface DBExecutor extends AutoCloseable {
 	//executor holds session data regarding db
 	void init1(DTypeRegistry registry);
 	void init2(DatIdMap datIdMap, VarEvaluator varEvaluator);
+	String getDefaultSchema();
+	void setDefaultSchema(String schema);
 	FetchRunner createFetchRunner();
 	DatIdMap getDatIdMap();
 

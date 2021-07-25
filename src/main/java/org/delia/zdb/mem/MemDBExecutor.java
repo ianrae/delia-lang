@@ -51,6 +51,7 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 	private VarEvaluator varEvaluator;
 	private DValueCompareService compareSvc;
 	private HLDSimpleQueryService querySvc;
+	private String defaultSchema; //not really supported for MEM
 
 	public MemDBExecutor(FactoryService factorySvc, MemDBInterfaceFactory dbInterface, HLDFactory hldFactory) {
 		super(factorySvc, dbInterface, hldFactory);
@@ -452,6 +453,16 @@ public class MemDBExecutor extends MemDBExecutorBase implements DBExecutor {
 		default:
 			break;
 		}
+	}
+
+	@Override
+	public String getDefaultSchema() {
+		return defaultSchema;
+	}
+
+	@Override
+	public void setDefaultSchema(String schema) {
+		defaultSchema = schema;
 	}
 
 }

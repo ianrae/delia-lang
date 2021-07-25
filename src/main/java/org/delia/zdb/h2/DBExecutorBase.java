@@ -42,6 +42,7 @@ public abstract class DBExecutorBase extends ServiceBase {
 	protected DBErrorConverter errorConverter;
 	protected TableCreator tableCreator;
 	protected Random random = new Random();
+	protected String defaultSchema;
 
 	public DBExecutorBase(FactoryService factorySvc, Log sqlLog, DBErrorConverter errorConverter) {
 		super(factorySvc);

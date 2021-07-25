@@ -53,6 +53,16 @@ public class InstrumentedDBExecutor implements DBExecutor {
 	}
 
 	@Override
+	public String getDefaultSchema() {
+		return zexec.getDefaultSchema();
+	}
+
+	@Override
+	public void setDefaultSchema(String schema) {
+		zexec.setDefaultSchema(schema);
+	}
+
+	@Override
 	public FetchRunner createFetchRunner() {
 		return zexec.createFetchRunner();
 	}
