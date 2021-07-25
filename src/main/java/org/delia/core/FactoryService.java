@@ -38,7 +38,7 @@ public interface FactoryService {
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
 	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry);
-	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
+	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap, String defaultSchema);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();

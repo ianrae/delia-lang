@@ -194,9 +194,9 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	 * @see org.delia.db.schema.MigrationService#loadDATData(org.delia.type.DTypeRegistry, org.delia.runner.VarEvaluator)
 	 */
 	@Override
-	public DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator) {
+	public DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator, String defaultSchema) {
 		DatIdMap datIdMap = null;
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null, defaultSchema)) {
 			migrator.createSchemaTableIfNeeded();
 			
 			DatMapBuilder datMapBuilder = new SxDatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor());

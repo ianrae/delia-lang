@@ -42,9 +42,11 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private MigrationRunner migrationRunner;
 //	private MigrationOptimizer optimizer;
 
-	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator,
+						  DatIdMap datIdMap, String defaultSchema) {
 		super(factorySvc);
 		this.zexec = dbInterface.createExecutor();
+		this.zexec.setDefaultSchema(defaultSchema);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		

@@ -31,6 +31,6 @@ public interface MigrationService {
 
 	void initPolicy(boolean useSafeMigrationPolicy, boolean enableAutomaticMigrations);
 
-	DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator);
+	DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator, String defaultSchema);
 
 }
