@@ -10,6 +10,7 @@ import org.delia.zdb.DBExecutor;
 
 public class AssocServiceImpl implements AssocService {
 
+	private final String defaultSchema;
 	private Log log;
 	private ErrorTracker et;
 	private FactoryService factorySvc;
@@ -27,11 +28,12 @@ public class AssocServiceImpl implements AssocService {
 			this.datMapBuilder = datMapBuilder;
 			this.zexec = schemaMigrator.getZDBExecutor();
 		}
+		this.defaultSchema = schemaMigrator.getDefaultSchema();
 	}
 	
 	@Override
 	public void assignDATIds(DTypeRegistry registry) {
-		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(datMapBuilder, registry, log);
+		PopulateDatIdVisitor visitor = new PopulateDatIdVisitor(datMapBuilder, registry, log, defaultSchema);
 		ManyToManyEnumerator enumerator = new ManyToManyEnumerator();
 		enumerator.visitTypes(registry, visitor);
 		int numLoaded = visitor.datIdCounter;

@@ -6,6 +6,8 @@ import org.delia.type.DTypeRegistry;
 
 public interface MigrationService {
 
+	void setDefaultSchema(String defaultSchema);
+
 	/**
 	 * Now that we know the types, compare against db schema and
 	 * perform schema migration if needed.
@@ -31,6 +33,6 @@ public interface MigrationService {
 
 	void initPolicy(boolean useSafeMigrationPolicy, boolean enableAutomaticMigrations);
 
-	DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator, String defaultSchema);
+	DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator);
 
 }

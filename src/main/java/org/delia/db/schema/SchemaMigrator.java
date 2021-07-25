@@ -41,6 +41,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private DBExecutor zexec;
 	private MigrationRunner migrationRunner;
 //	private MigrationOptimizer optimizer;
+	private String defaultSchema;
 
 	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator,
 						  DatIdMap datIdMap, String defaultSchema) {
@@ -66,6 +67,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setDATType(datType);
 		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
 //		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
+		this.defaultSchema = defaultSchema;
 	}
 	
 	@Override
@@ -517,6 +519,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 //	}
 	public DBExecutor getZDBExecutor() {
 		return zexec;
+	}
+
+	public String getDefaultSchema() {
+		return defaultSchema;
 	}
 
 }
