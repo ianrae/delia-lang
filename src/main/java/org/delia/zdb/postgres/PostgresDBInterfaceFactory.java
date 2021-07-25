@@ -32,7 +32,7 @@ public class PostgresDBInterfaceFactory extends ServiceBase implements DBInterfa
 		this.capabilities = new DBCapabilties(true, true, true);
 		this.sqlLog = new SimpleLog();
 		this.connFactory = connFactory;
-		this.errorConverter = new PostgresErrorConverter(new SimpleSqlNameFormatter(true));
+		this.errorConverter = new PostgresErrorConverter(new SimpleSqlNameFormatter(null,true));
 		this.connFactory.setErrorConverter(errorConverter);
 		this.sessionCache = new PostgresDeliaSessionCache();
 		this.hldFactory = hldFactory;

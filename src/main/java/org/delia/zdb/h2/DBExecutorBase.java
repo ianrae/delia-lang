@@ -56,7 +56,7 @@ public abstract class DBExecutorBase extends ServiceBase {
 	}
 
 	protected TableCreator createPartialTableCreator(DBExecutor zexec) {
-		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
+		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter(defaultSchema);
 		FieldGenFactory fieldGenFactory = createFieldGenFactory();
 		return createZTableCreator(fieldGenFactory, nameFormatter, null, zexec);
 	}
@@ -66,13 +66,13 @@ public abstract class DBExecutorBase extends ServiceBase {
 		this.datIdMap = datIdMap;
 		this.varEvaluator = varEvaluator;
 
-		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter();
+		SqlNameFormatter nameFormatter = new SimpleSqlNameFormatter(defaultSchema);
 		FieldGenFactory fieldGenFactory = createFieldGenFactory();
 		this.tableCreator = createZTableCreator(fieldGenFactory, nameFormatter, datIdMap, zexec);
 	}
 	
 	protected TableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
-		return  new TableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
+		return  new TableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec, defaultSchema);
 	}
 	
 	protected FieldGenFactory createFieldGenFactory() {

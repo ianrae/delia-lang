@@ -95,7 +95,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	
 	@Override
 	protected TableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
-		return  new PostgresTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
+		return  new PostgresTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec, defaultSchema);
 	}
 	@Override
 	protected FieldGenFactory createFieldGenFactory() {

@@ -22,9 +22,9 @@ import org.delia.zdb.TableCreator;
 
 public class PostgresTableCreator extends TableCreator {
 	
-	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
-		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec);
+	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory,
+                                SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec, String defaultSchema) {
+		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec, defaultSchema);
 	}
 	
 	@Override

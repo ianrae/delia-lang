@@ -16,11 +16,11 @@ public class RawStatementGenerator extends ServiceBase {
 		
 		switch(dbType) {
 		case H2:
-			nameFormatter = new SimpleSqlNameFormatter();
+			nameFormatter = new SimpleSqlNameFormatter(null);
 			contraintsTbl = "information_schema.constraints";
 			break;
 		case POSTGRES:
-			nameFormatter = new SimpleSqlNameFormatter(true);
+			nameFormatter = new SimpleSqlNameFormatter(null, true);
 			contraintsTbl = "information_schema.table_constraints";
 			break;
 		default:
