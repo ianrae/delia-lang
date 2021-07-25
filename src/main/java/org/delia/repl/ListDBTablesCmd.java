@@ -32,7 +32,7 @@ public class ListDBTablesCmd extends CmdBase {
 		Delia delia = runner.getDelia();
 		DBInterfaceFactory dbInterface = delia.getDBInterface();
 		
-		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType());
+		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), dbInterface.getDBType(), null);
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
 		try(DBExecutor zexec = dbInterface.createExecutor()) {
 			SqlStatement statement = new SqlStatement(null);

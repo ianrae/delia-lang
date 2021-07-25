@@ -7,6 +7,7 @@ public class TypeOrTable {
 	private String tblName; //a table that doesn't represent a DStructType, such as CustomerAddressDat1
 	public String alias;
 	public boolean isAssocTbl;
+	public String defaultSchema;
 	
 	public TypeOrTable(DStructType structType) {
 		this.structType = structType;
@@ -19,7 +20,15 @@ public class TypeOrTable {
 	public String getTblName() {
 		return (tblName != null) ? tblName : structType.getName();
 	}
-	
+	private String renderTblName() {
+		String tbl = (tblName != null) ? tblName : structType.getName();
+		if (defaultSchema != null) {
+			return String.format("%s.%s", defaultSchema, tbl);
+		} else {
+			return tbl;
+		}
+	}
+
 	//may return null
 	public DStructType getStructTypeEx() {
 		return structType;
@@ -30,9 +39,9 @@ public class TypeOrTable {
 	
 	public String render() {
 		if (alias == null) {
-			return String.format(" %s", getTblName());
+			return String.format(" %s", renderTblName());
 		} else {
-			return String.format(" %s as %s", getTblName(), alias);
+			return String.format(" %s as %s", renderTblName(), alias);
 		}
 	}
 	

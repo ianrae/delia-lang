@@ -8,11 +8,13 @@ import org.delia.db.sql.StrCreator;
 import org.delia.zdb.DBListingType;
 
 public class RawStatementGenerator extends ServiceBase {
+	private final String defaultSchema;
 	private SqlNameFormatter nameFormatter;
 	private String contraintsTbl;
 
-	public RawStatementGenerator(FactoryService factorySvc, DBType dbType) {
+	public RawStatementGenerator(FactoryService factorySvc, DBType dbType, String defaultSchem) {
 		super(factorySvc);
+		this.defaultSchema = defaultSchem;
 		
 		switch(dbType) {
 		case H2:
@@ -32,6 +34,10 @@ public class RawStatementGenerator extends ServiceBase {
 	private String tblName(String typeName) {
 		return nameFormatter.convert(typeName);
 	}
+
+	private String getSchema() {
+		return defaultSchema == null ? "PUBLIC" : defaultSchema;
+	}
 	
 	public String generateTableDetect(String tableName) {
 		StrCreator sc = new StrCreator();
@@ -39,7 +45,7 @@ public class RawStatementGenerator extends ServiceBase {
 		sc.o(" SELECT FROM information_schema.tables"); 
 		boolean b = false;
 		if (b) {
-			sc.o(" WHERE  table_schema = '%s'", "PUBLIC");
+			sc.o(" WHERE  table_schema = '%s'", getSchema());
 			sc.o(" AND    table_name   = '%s' )", tblName(tableName));
 		} else {
 //			sc.o(" WHERE  table_schema = '%s'", "PUBLIC");
@@ -57,7 +63,7 @@ public class RawStatementGenerator extends ServiceBase {
 			sc.o("SELECT * FROM information_schema.tables"); 
 			boolean b = true;
 			if (b) {
-				sc.o(" WHERE  table_schema = '%s'", tblName("PUBLIC"));
+				sc.o(" WHERE  table_schema = '%s'", tblName(getSchema()));
 			} else {
 			}
 		}
@@ -67,7 +73,7 @@ public class RawStatementGenerator extends ServiceBase {
 			sc.o("SELECT * FROM %s", contraintsTbl); 
 			boolean b = true;
 			if (b) {
-				sc.o(" WHERE  table_schema = '%s'", tblName("PUBLIC"));
+				sc.o(" WHERE  table_schema = '%s'", tblName(getSchema()));
 			} else {
 			}
 		}
@@ -82,7 +88,7 @@ public class RawStatementGenerator extends ServiceBase {
 		sc.o(" SELECT FROM information_schema.columns"); 
 		boolean b = false;
 		if (b) {
-			sc.o(" WHERE  table_schema = '%s'", "PUBLIC");
+			sc.o(" WHERE  table_schema = '%s'", getSchema());
 			sc.o(" AND    table_name   = '%s' ", tblName(tableName));
 			sc.o(" AND    column_name   = '%s' )", tblName(fieldName));
 		} else {

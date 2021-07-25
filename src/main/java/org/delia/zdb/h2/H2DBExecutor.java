@@ -159,7 +159,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public boolean rawTableDetect(String tableName) {
 		failIfNotInit1(); 
-		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType, defaultSchema);
 		String sql = sqlgen.generateTableDetect(tableName.toUpperCase()); //h2 tbls are UPPERCASE
 		SqlStatement statement = createSqlStatement(sql); 
 		return execResultBoolean(conn, statement);
@@ -169,7 +169,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public boolean rawFieldDetect(String tableName, String fieldName) {
 		failIfNotInit1(); 
-		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType, defaultSchema);
 		String sql = sqlgen.generateFieldDetect(tableName, fieldName);
 		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
@@ -358,7 +358,7 @@ public class H2DBExecutor extends DBExecutorBase implements DBExecutor {
 		failIfNotInit2(); 
 		String constraintName = null;
 		if (deltaFlags.contains("-U")) {
-			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType, defaultSchema);
 			String sql = sqlgen.generateSchemaListing(DBListingType.ALL_CONSTRAINTS);
 			constraintName = conn.findConstraint(sql, typeName, fieldName, "UNIQUE", true);
 		} else if (deltaFlags.contains("+U")) {

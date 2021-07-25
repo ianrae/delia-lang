@@ -107,18 +107,21 @@ public class HLDFacade extends ServiceBase {
 	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
+		hldupdate.hldupdate.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hldupdate);
 		return hldupdate;
 	}
 	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
+		hldupsert.hldupdate.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hldupsert);
 		return hldupsert;
 	}
 	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator, blobLoader);
+		hldins.hldinsert.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hldins);
 		return hldins;
 	}

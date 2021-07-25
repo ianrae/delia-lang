@@ -186,7 +186,7 @@ public class H2MigrationTests extends TopoTestBase {
 	}
 	
 	private void doEnumAllTables() {
-		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2);
+		RawStatementGenerator gen = new RawStatementGenerator(delia.getFactoryService(), DBType.H2, null);
 		String sql = gen.generateSchemaListing(DBListingType.ALL_TABLES);
 		try(DBExecutor zexec = dbInterface.createExecutor()) {
 			SqlStatement statement = new SqlStatement(null);

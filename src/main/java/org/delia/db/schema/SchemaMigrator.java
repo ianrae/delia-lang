@@ -59,6 +59,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			//hack. need some sort of DatIdMap for H2 and PG
 			zexec.init2(new DatIdMap(), varEvaluator);
 		}
+		zexec.setDefaultSchema(defaultSchema);
 
 		InternalTypeCreator fakeCreator = new InternalTypeCreator();
 		DStructType dtype = fakeCreator.createSchemaVersionType(registry, SCHEMA_TABLE);

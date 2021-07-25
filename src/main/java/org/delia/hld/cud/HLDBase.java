@@ -6,6 +6,7 @@ import org.delia.type.DStructType;
 public class HLDBase {
 	public TypeOrTable typeOrTbl;
 	public RelationInfo assocRelInfo; //null unless this is an assoc table 
+//	public String defaultSchema; //hack
 
     public HLDBase(TypeOrTable typeOrTbl) {
     	this.typeOrTbl = typeOrTbl;

@@ -26,6 +26,7 @@ public class HLDUpdate extends HLDBase {
 	public boolean isSubSelect;
 	public boolean isFlipped;
 
+
 	public HLDUpdate(TypeOrTable typeOrTbl, HLDQuery hld) {
 		super(typeOrTbl);
 		this.hld = hld;
