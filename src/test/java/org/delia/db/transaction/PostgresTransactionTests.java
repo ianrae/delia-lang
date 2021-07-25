@@ -142,6 +142,7 @@ public class PostgresTransactionTests extends DeliaTestBase {
 	private void cleanTables() {
 		H2TestCleaner cleaner = new H2TestCleaner(DBType.POSTGRES);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
+		cleaner.deleteSchemaGG(delia.getFactoryService(), delia.getDBInterface());
 	}
 
 }

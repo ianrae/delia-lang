@@ -7,6 +7,8 @@ import org.delia.db.sql.SqlNameFormatter;
 import org.delia.db.sql.StrCreator;
 import org.delia.zdb.DBListingType;
 
+import java.util.Locale;
+
 public class RawStatementGenerator extends ServiceBase {
 	private final String defaultSchema;
 	private SqlNameFormatter nameFormatter;
@@ -36,14 +38,14 @@ public class RawStatementGenerator extends ServiceBase {
 	}
 
 	private String getSchema() {
-		return defaultSchema == null ? "PUBLIC" : defaultSchema;
+		return defaultSchema == null ? "PUBLIC".toLowerCase(Locale.ROOT) : defaultSchema;
 	}
 	
 	public String generateTableDetect(String tableName) {
 		StrCreator sc = new StrCreator();
 		sc.o("SELECT EXISTS ( ");
 		sc.o(" SELECT FROM information_schema.tables"); 
-		boolean b = false;
+		boolean b = true;
 		if (b) {
 			sc.o(" WHERE  table_schema = '%s'", getSchema());
 			sc.o(" AND    table_name   = '%s' )", tblName(tableName));

@@ -84,6 +84,7 @@ public class HLDFacade extends ServiceBase {
 	public HLDQueryStatement buildHLD(QueryExp queryExp, DBExecutor zexec, VarEvaluator varEvaluator) {
 		HLDBuildService mgr = createManager(zexec);
 		HLDQueryStatement hld = mgr.fullBuildQuery(queryExp, varEvaluator);
+		hld.hldquery.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hld);
 		return hld;
 	}
@@ -101,27 +102,31 @@ public class HLDFacade extends ServiceBase {
 		
 		HLDBuildService mgr = createManager(zexec); 
 		HLDDeleteStatement hlddel = mgr.fullBuildDelete(queryExp);
+		hlddel.hlddelete.typeOrTbl.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hlddel);
 		return hlddel;
 	}
 	public HLDUpdateStatement buildHLD(UpdateStatementExp updateExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDUpdateStatement hldupdate = mgr.fullBuildUpdate(updateExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
-		hldupdate.hldupdate.defaultSchema = zexec.getDefaultSchema();
+//		hldupdate.hldupdate.defaultSchema = zexec.getDefaultSchema();
+		hldupdate.hldupdate.typeOrTbl.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hldupdate);
 		return hldupdate;
 	}
 	public HLDUpsertStatement buildHLD(UpsertStatementExp upsertExp, DBExecutor zexec, VarEvaluator varEvaluator, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDUpsertStatement hldupsert = mgr.fullBuildUpsert(upsertExp, varEvaluator, insertPrebuiltValueIterator, blobLoader);
-		hldupsert.hldupdate.defaultSchema = zexec.getDefaultSchema();
+//		hldupsert.hldupdate.defaultSchema = zexec.getDefaultSchema();
+		hldupsert.hldupdate.typeOrTbl.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hldupsert);
 		return hldupsert;
 	}
 	public HLDInsertStatement buildHLD(InsertStatementExp insertExp, DBExecutor zexec, VarEvaluator varEvaluator2, DValueIterator insertPrebuiltValueIterator, BlobLoader blobLoader) {
 		HLDBuildService mgr = createManager(zexec); 
 		HLDInsertStatement hldins = mgr.fullBuildInsert(insertExp, varEvaluator2, insertPrebuiltValueIterator, blobLoader);
-		hldins.hldinsert.defaultSchema = zexec.getDefaultSchema();
+		hldins.hldinsert.typeOrTbl.defaultSchema = zexec.getDefaultSchema();
+//		hldins.hldinsert.defaultSchema = zexec.getDefaultSchema();
 		logDebug(hldins);
 		return hldins;
 	}
