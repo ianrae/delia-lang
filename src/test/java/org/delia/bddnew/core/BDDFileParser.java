@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class BDDFileParser {
 
@@ -57,6 +58,10 @@ public class BDDFileParser {
 
         if (currentFeature != null) {
             currentFeature.startLineIndex = index;
+
+            currentFeature.backgroundsL = currentFeature.backgroundsL.stream()
+                    .filter(snip -> !snip.lines.isEmpty())
+                    .collect(Collectors.toList());;
         }
 
         return currentFeature;
@@ -110,11 +115,32 @@ public class BDDFileParser {
             if (line.startsWith("---")) {
                 currentTest = new BDDTest();
                 feature.testsL.add(currentTest);
-            } else if (isSnippetStart(line)) {
+            } else if (isSnippetStart(line) || isDefaultingToGiven(currentTest, inSnippet)) {
+                boolean isDefaultingToGiven = isDefaultingToGiven(currentTest, inSnippet);
                 snippet = new BDDSnippet();
                 snippet.type = getSnippetType(line);
                 inSnippet = true;
-                addSnippetToTest(currentTest, snippet, line);
+                if (isDefaultingToGiven) {
+                    addSnippetToTest(currentTest, snippet, "given:");
+                    //using ; is problematic is actual delia contains it
+                    //TOD replace ; with something else later
+                    if (line.contains(";")) {
+                        //single line form: ..delia...;..thenvalue...
+                        String s = StringUtils.substringBefore(line, ";").trim();
+                        snippet.lines.add(s);
+
+                        s = StringUtils.substringAfter(line, ";").trim();
+                        BDDSnippet thenSnippet = new BDDSnippet();
+                        thenSnippet.type = SnippetType.DELIA;
+                        addSnippetToTest(currentTest, thenSnippet, "then:");
+                        thenSnippet.lines.add(s);
+                        inSnippet = false;
+                    } else {
+                        snippet.lines.add(line);
+                    }
+                } else {
+                    addSnippetToTest(currentTest, snippet, line);
+                }
                 String extra = parseArg(line);
                 if (!extra.isEmpty()) {
                     snippet.lines.add(line);
@@ -135,6 +161,10 @@ public class BDDFileParser {
 
     }
 
+    private boolean isDefaultingToGiven(BDDTest currentTest, boolean inSnippet) {
+        return (currentTest != null && ! inSnippet);
+    }
+
     private void addSnippetToTest(BDDTest test, BDDSnippet snippet, String line) {
         if (line.startsWith("given")) {
             test.givenL.add(snippet);
@@ -146,7 +176,7 @@ public class BDDFileParser {
     }
 
     private boolean isSnippetStart(String line) {
-        List<String> list = Arrays.asList("given(", "when(", "then(");
+        List<String> list = Arrays.asList("given(", "when(", "then(", "given:", "when:", "then:");
         for (String s : list) {
             if (line.startsWith(s)) {
                 return true;
