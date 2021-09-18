@@ -10,8 +10,8 @@ public class PostgresConnectionHelper {
 		connStr.jdbcUrl = "jdbc:postgresql://localhost/delia";
 		
 		connStr.dbType = DBType.POSTGRES;
-		connStr.userName = "ian";
-		connStr.pwd = "admin";
+		connStr.userName = "postgres"; //"ian";
+		connStr.pwd = "somePassword"; //"admin";
 		
 		//TODO: add setting for choosing https://jdbc.postgresql.org/documentation/81/ds-ds.html
 		org.postgresql.ds.PGSimpleDataSource ds = new org.postgresql.ds.PGSimpleDataSource();
