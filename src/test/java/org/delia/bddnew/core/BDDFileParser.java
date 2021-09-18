@@ -115,32 +115,11 @@ public class BDDFileParser {
             if (line.startsWith("---")) {
                 currentTest = new BDDTest();
                 feature.testsL.add(currentTest);
-            } else if (isSnippetStart(line) || isDefaultingToGiven(currentTest, inSnippet)) {
-                boolean isDefaultingToGiven = isDefaultingToGiven(currentTest, inSnippet);
+            } else if (isSnippetStart(line)) {
                 snippet = new BDDSnippet();
                 snippet.type = getSnippetType(line);
                 inSnippet = true;
-                if (isDefaultingToGiven) {
-                    addSnippetToTest(currentTest, snippet, "given:");
-                    //using ; is problematic is actual delia contains it
-                    //TOD replace ; with something else later
-                    if (line.contains(";")) {
-                        //single line form: ..delia...;..thenvalue...
-                        String s = StringUtils.substringBefore(line, ";").trim();
-                        snippet.lines.add(s);
-
-                        s = StringUtils.substringAfter(line, ";").trim();
-                        BDDSnippet thenSnippet = new BDDSnippet();
-                        thenSnippet.type = SnippetType.DELIA;
-                        addSnippetToTest(currentTest, thenSnippet, "then:");
-                        thenSnippet.lines.add(s);
-                        inSnippet = false;
-                    } else {
-                        snippet.lines.add(line);
-                    }
-                } else {
-                    addSnippetToTest(currentTest, snippet, line);
-                }
+                addSnippetToTest(currentTest, snippet, line);
                 String extra = parseArg(line);
                 if (!extra.isEmpty()) {
                     snippet.lines.add(line);
@@ -155,13 +134,34 @@ public class BDDFileParser {
                 currentTest.chainNextTest = b;
             } else if (inSnippet && !line.startsWith("---")) {
                 snippet.lines.add(line);
+            } else if (isDefaultingToWhen(currentTest, inSnippet)) {
+                snippet = new BDDSnippet();
+                snippet.type = getSnippetType(line);
+                inSnippet = true;
+                addSnippetToTest(currentTest, snippet, "when:");
+                //using ; is problematic is actual delia contains it
+                //TOD replace ; with something else later
+                if (line.contains(";")) {
+                    //single line form: ..delia...;..thenvalue...
+                    String s = StringUtils.substringBefore(line, ";").trim();
+                    snippet.lines.add(s);
+
+                    s = StringUtils.substringAfter(line, ";").trim();
+                    BDDSnippet thenSnippet = new BDDSnippet();
+                    thenSnippet.type = SnippetType.VALUES;
+                    addSnippetToTest(currentTest, thenSnippet, "then:");
+                    thenSnippet.lines.add(s);
+                    inSnippet = false;
+                    currentTest = null;
+                } else {
+                    snippet.lines.add(line);
+                }
             } else {
             }
         }
-
     }
 
-    private boolean isDefaultingToGiven(BDDTest currentTest, boolean inSnippet) {
+    private boolean isDefaultingToWhen(BDDTest currentTest, boolean inSnippet) {
         return (currentTest != null && ! inSnippet);
     }
 

@@ -48,8 +48,10 @@ public class ValuesSnippetRunner implements SnippetRunner {
         StructChecker checker = new StructChecker();
         if (previousRes != null && previousRes.ok) {
             res.ok = checker.compareMultiObj(thenVal, valueL, log);
-        } else {
+        } else if (previousRes != null) {
             res.ok = checker.compareError(thenVal, previousRes.errors, log);
+//        } else {
+//            res.ok = checker.compareError(thenVal, res.errors, log);
         }
 
         return res;
