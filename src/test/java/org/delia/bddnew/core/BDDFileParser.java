@@ -40,7 +40,12 @@ public class BDDFileParser {
                 bgSnippet.type = getSnippetType(line);
                 currentFeature.backgroundsL.add(bgSnippet);
             } else if (inBackground && !line.startsWith("---")) {
-                bgSnippet.lines.add(line);
+                String thenType = parseThenTypeIfPresent(line);
+                if (thenType != null) {
+                    currentFeature.expectedType = thenType;
+                } else {
+                    bgSnippet.lines.add(line);
+                }
             } else {
                 if (line.startsWith("---")) {
                     break;
@@ -57,7 +62,19 @@ public class BDDFileParser {
         return currentFeature;
     }
 
+    private String parseThenTypeIfPresent(String line) {
+        if (! line.contains("thenType:")) {
+            return null;
+        }
+        String s = StringUtils.substringAfter(line, "thenType:");
+        s = s.trim();
+        return s;
+    }
+
     private SnippetType getSnippetType(String line) {
+        if (! line.contains("(")) {
+            return SnippetType.DELIA;
+        }
         String s = StringUtils.substringAfter(line, "(");
         s = StringUtils.substringBefore(s, ")");
         s = s.trim().toUpperCase(Locale.ROOT);
@@ -71,7 +88,7 @@ public class BDDFileParser {
     }
 
     private boolean isBackgroundLine(String line) {
-        List<String> list = Arrays.asList("background(sql):", "background(delia):", "background(seede):", "background(values):");
+        List<String> list = Arrays.asList("background(sql):", "background(delia):", "background(seede):", "background(values):", "background:");
         for (String s : list) {
             if (line.startsWith(s)) {
                 return true;

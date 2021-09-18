@@ -8,4 +8,5 @@ public class BDDFeature {
     public int startLineIndex; //where tests start
     public List<BDDSnippet> backgroundsL = new ArrayList<>();
     public List<BDDTest> testsL = new ArrayList<>();
+    public String expectedType; //thenType
 }

@@ -3,7 +3,6 @@ package org.delia.bddnew.core;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.error.DeliaError;
 import org.delia.log.Log;
-import org.delia.seede.error.SdError;
 
 import java.util.Collections;
 import java.util.List;

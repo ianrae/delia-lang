@@ -33,12 +33,12 @@ public class LoggingBDDTests extends BDDTestBase {
         UnitTestLog.disableLogging = false;
         UnitTestLog.defaultLogLevel = LogLevel.ERROR;
 //        super.init();
-        cleanDB(DBType.POSTGRES);
+        cleanDB(DBType.MEM);
     }
 
     @Override
     protected DBType getDBType() {
-        return DBType.POSTGRES;
+        return DBType.MEM;
     }
 
 

@@ -1,5 +1,6 @@
 package org.delia.bddnew;
 
+import org.delia.base.UnitTestLog;
 import org.delia.bddnew.core.*;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
@@ -18,7 +19,7 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
 
     protected Log seedeLog; //a custom log just for Seede execution
     protected Log deliaLog; //a custom log just for Delia execution
-    protected Log log;
+    protected Log log = new UnitTestLog();
 
     protected abstract DBType getDBType();
 
@@ -39,7 +40,7 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
         BDDFeatureRunner runner = new BDDFeatureRunner(new BDDConnectionProvider(dbType), log);
         runner.addRunner(SnippetType.DELIA, new DeliaSnippetRunner(log, deliaLog));
         runner.addRunner(SnippetType.SQL, new SqlSnippetRunner(log));
-        runner.addRunner(SnippetType.SEEDE, new SeedeSnippetRunner(log, seedeLog, deliaLog));
+//        runner.addRunner(SnippetType.SEEDE, new SeedeSnippetRunner(log, seedeLog, deliaLog));
         runner.addRunner(SnippetType.VALUES, new ValuesSnippetRunner(log));
         if (singleTestToRunIndex >= 0) {
             runner.setSingleTestToRunIndex(singleTestToRunIndex);

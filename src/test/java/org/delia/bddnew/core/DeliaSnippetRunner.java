@@ -45,6 +45,7 @@ public class DeliaSnippetRunner implements SnippetRunner {
         }
 
         String src = StringUtil.flattenEx(snippet.lines, "\n");
+        log.log("deliaSrc: %s", src);
         if (!src.isEmpty()) {
             if (sess == null) {
                 if (!dao.initialize(src)) {
