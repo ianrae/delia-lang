@@ -15,7 +15,7 @@ import org.delia.core.DateFormatter;
  * @author Ian Rae
  *
  */
-public class WrappedDate {
+public class WrappedDate implements Comparable<WrappedDate>{
 	private ZonedDateTime zdt;
 	private DateFormatter dateFormatter;
 
@@ -36,5 +36,11 @@ public class WrappedDate {
 	}
 	public ZoneId getTimeZone() {
 		return zdt.getZone();
+	}
+
+	@Override
+	public int compareTo(WrappedDate arg0) {
+		if (arg0 == null) return -1;
+		return zdt.compareTo(arg0.zdt);
 	}
 }

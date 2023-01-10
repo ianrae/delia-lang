@@ -44,7 +44,7 @@ public class NewSchemaDesignTests extends DeliaTestBase {
 		delta = optimizer.optimize(delta);
 		dumpObj("opt", delta);
 		
-		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, delia.getFactoryService(), dbType);
+		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, delia.getFactoryService(), dbType, null);
 		List<SchemaChangeOperation> ops = plangen.generate(delta);
 		dumpObj("op", ops);
 	}	

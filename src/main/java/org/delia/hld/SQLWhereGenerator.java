@@ -85,7 +85,8 @@ public class SQLWhereGenerator {
 			String s1 = renderVal(ifc.val1, fieldType, paramGen, stm);
 			
 			StrCreator sc = new StrCreator();
-			sc.o("%s IN (", s1);
+			String opStr = ifc.isNot ? "NOT IN" : "IN";
+			sc.o("%s %s (", s1, opStr);
 			ListWalker<FilterVal> walker = new ListWalker<>(ifc.list);
 			while(walker.hasNext()) {
 				FilterVal ff = walker.next();

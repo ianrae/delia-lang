@@ -84,10 +84,26 @@ public class PostgresTransactionTests extends DeliaTestBase {
 		DValue dval = session.getFinalResult().getAsDValue();
 		assertEquals(1, dval.asStruct().getField("field1").asInt());
 		assertEquals("abc", dval.asStruct().getField("field2").asString());
-	}	
-	
-	
-	
+	}
+
+	@Test
+	public void testSchema() {
+		defaultSchema = "gg"; //schema must already exist
+		execute("");
+
+		final String src = buildMoreSrc(3);
+		DeliaSession tmp = session.runInTransaction(() -> {
+			return continueExecution(src);
+		});
+
+		String src2 = "let x = Flight[true].count()";
+		tmp = continueExecution(src2);
+		ResultValue res = tmp.getFinalResult();
+		Long n = (Long) res.getAsDValue().asLong();
+		assertEquals(4, n.intValue());
+	}
+
+
 
 	//-------------------------
 	@Before
@@ -126,6 +142,7 @@ public class PostgresTransactionTests extends DeliaTestBase {
 	private void cleanTables() {
 		H2TestCleaner cleaner = new H2TestCleaner(DBType.POSTGRES);
 		cleaner.deleteKnownTables(delia.getFactoryService(), delia.getDBInterface());
+		cleaner.deleteSchemaGG(delia.getFactoryService(), delia.getDBInterface());
 	}
 
 }

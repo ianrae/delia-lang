@@ -20,14 +20,14 @@ public class SchemaMigrationPlanGenerator extends RegAwareServiceBase {
 	private boolean isMemDB;
 	private SqlGeneratorFactoryImpl sqlGen;
 
-	public SchemaMigrationPlanGenerator(DTypeRegistry registry, FactoryService factorySvc, DBType dbType) {
+	public SchemaMigrationPlanGenerator(DTypeRegistry registry, FactoryService factorySvc, DBType dbType, String defaultSchema) {
 		super(registry, factorySvc);
 		this.isMemDB = DBType.MEM.equals(dbType);
 		
 		if (DBType.POSTGRES.equals(dbType)) {
-			this.sqlGen = new PostgresSqlGeneratorFactory(registry, factorySvc);
+			this.sqlGen = new PostgresSqlGeneratorFactory(registry, factorySvc, defaultSchema);
 		} else {
-			this.sqlGen = new SqlGeneratorFactoryImpl(registry, factorySvc);
+			this.sqlGen = new SqlGeneratorFactoryImpl(registry, factorySvc, defaultSchema);
 		}
 	}
 	

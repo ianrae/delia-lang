@@ -20,4 +20,5 @@ public class DeliaOptions {
 	public DBObserverFactory dbObserverFactory;
 	public boolean observeHLDSQLOnly = true;
 	public boolean executeInTransaction = false; //use when want execute()/continueExeuction() in transaction
+	public String defaultSchema;
 }

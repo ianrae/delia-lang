@@ -41,10 +41,13 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 	private DBExecutor zexec;
 	private MigrationRunner migrationRunner;
 //	private MigrationOptimizer optimizer;
+	private String defaultSchema;
 
-	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
+	public SchemaMigrator(FactoryService factorySvc, DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator,
+						  DatIdMap datIdMap, String defaultSchema) {
 		super(factorySvc);
 		this.zexec = dbInterface.createExecutor();
+		this.zexec.setDefaultSchema(defaultSchema);
 		this.registry = registry;
 		this.fingerprintGenerator = new SchemaFingerprintGenerator();
 		
@@ -56,6 +59,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 			//hack. need some sort of DatIdMap for H2 and PG
 			zexec.init2(new DatIdMap(), varEvaluator);
 		}
+		zexec.setDefaultSchema(defaultSchema);
 
 		InternalTypeCreator fakeCreator = new InternalTypeCreator();
 		DStructType dtype = fakeCreator.createSchemaVersionType(registry, SCHEMA_TABLE);
@@ -64,6 +68,7 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 		registry.setDATType(datType);
 		this.migrationRunner = new MigrationRunner(factorySvc, registry, zexec, dbInterface);
 //		this.optimizer = new MigrationOptimizer(factorySvc, registry, dbInterface.getDBType());
+		this.defaultSchema = defaultSchema;
 	}
 	
 	@Override
@@ -515,6 +520,10 @@ public class SchemaMigrator extends ServiceBase implements AutoCloseable {
 //	}
 	public DBExecutor getZDBExecutor() {
 		return zexec;
+	}
+
+	public String getDefaultSchema() {
+		return defaultSchema;
 	}
 
 }

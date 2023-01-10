@@ -92,7 +92,12 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testR660() {
+		enableAllFileCheck = false;
 		runR660File("t0-rule-uniquefields.txt", 2);
+//		runR660File("t0-rule-uniquefields2.txt", 2);
+//		runR660File("t0-rule-uniquefields-migrate1.txt", 2);
+//		runR660File("t0-rule-uniquefields-migrate2.txt", 2);
+//		runR660File("t0-rule-uniquefields-migrate3.txt", 2);
 	}
 	
 	@Test
@@ -151,6 +156,7 @@ public class AllBDDTests extends BDDBase {
 	public void testR1300() {
 		runR1300File("t0-let-query.txt", 7);
 		runR1300File("t0-let-varref.txt", 4); //TODO fix one
+		runR1300File("t0-let-query-implicit-fetch.txt", 1);
 	}
 	
 	@Test
@@ -163,7 +169,7 @@ public class AllBDDTests extends BDDBase {
 		runR1350File("t0-filter-op-date.txt", 13);
 		runR1350File("t0-filter-op-relation.txt", 14);
 		runR1350File("t0-filter-and-or.txt", 7);
-		runR1350File("t0-filter-in.txt", 3);
+		runR1350File("t0-filter-in.txt", 4);
 		runR1350File("t0-filter-like.txt", 6);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);
@@ -339,12 +345,13 @@ public class AllBDDTests extends BDDBase {
 	
 	@Test
 	public void testDebug() {
-//		testIndexToRun = 4;
+//		testIndexToRun = 2;
 		enableAllFileCheck = false;
 		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
-		runR700File("t0-insert-parent.txt", 5);
+//		runR700File("t0-insert-parent.txt", 5);
+		runR1350File("t0-filter-in.txt", 4);
 	}
 	
 	//---

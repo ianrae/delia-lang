@@ -29,11 +29,12 @@ public class InputFieldTests extends InputFunctionTestBase {
 		chkCustomer(1, "bob");
 	}
 	
-	@Test(expected=DeliaException.class)
+	@Test
 	public void testSyntheticFieldIntBad() {
 		String src = buildSrcSynthetic("66", "extra int");
-		runImport(src);
-		chkCustomer(1, "bob");
+		InputFunctionResult res = runImportNoChk(src);
+		assertEquals(1, res.errors.size());
+		assertEquals("bad-synthetic-value", res.errors.get(0).getId());
 	}
 	@Test
 	public void testSyntheticFieldInt() {
@@ -101,9 +102,16 @@ public class InputFieldTests extends InputFunctionTestBase {
 		
 		LineObjIterator lineObjIter = createIter(1);
 		buildAndRun(lineObjIter);
-		
 	}
-	
+	private InputFunctionResult runImportNoChk(String src) {
+		this.delia.getLog().setLevel(LogLevel.DEBUG);
+		delia.getLog().log(src);
+		this.session = delia.beginSession(src);
+
+		LineObjIterator lineObjIter = createIter(1);
+		return buildAndRunNoChk(lineObjIter);
+	}
+
 	
 	// --
 
@@ -135,6 +143,12 @@ public class InputFieldTests extends InputFunctionTestBase {
 		assertEquals(0, result.errors.size());
 		assertEquals(1, result.numRowsProcessed);
 		assertEquals(1, result.numRowsInserted);
+		return result;
+	}
+	private InputFunctionResult buildAndRunNoChk(LineObjIterator lineObjIter) {
+		DataImportService importSvc = new DataImportService(session, 0);
+
+		InputFunctionResult result = importSvc.executeImport("foo", lineObjIter, ImportLevel.ONE);
 		return result;
 	}
 	private void chkCustomer(Integer id, String expected) {

@@ -77,7 +77,11 @@ public class SqlSelectStatement implements SqlStatementGenerator {
 		StringJoiner joiner = generateFields(hld);
 		sc.o(joiner.toString());
 
-		sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
+		if (hld.defaultSchema != null) {
+			sc.o(" FROM %s.%s as %s", hld.defaultSchema, hld.fromType.getName(), hld.fromAlias);
+		} else {
+			sc.o(" FROM %s as %s", hld.fromType.getName(), hld.fromAlias);
+		}
 
 		generateJoins(sc, hld, stm, paramGen);
 		generateWhere(sc, stm);

@@ -3,7 +3,7 @@ package org.delia.type;
 /**
  * 9 Shapes.
  * The shape represents the underlying type of data
- * (int, long, string, boolean, ectc)
+ * (int, long, string, boolean, etc)
  *
  */
 public enum Shape {

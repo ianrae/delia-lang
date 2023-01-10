@@ -143,7 +143,7 @@ public class H2Tests {
 		conn.execStatement(statement, null);
 	}
 	private boolean doTableDetect(H2DBConnection conn, String tblName) throws SQLException {
-		RawStatementGenerator gen = new RawStatementGenerator(factorySvc, DBType.H2);
+		RawStatementGenerator gen = new RawStatementGenerator(factorySvc, DBType.H2, null);
 		SqlStatement statement = new SqlStatement(null);
 		statement.sql = gen.generateTableDetect(tblName.toUpperCase());
 		ResultSet rs = conn.execQueryStatement(statement, null);

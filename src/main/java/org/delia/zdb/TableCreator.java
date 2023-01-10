@@ -32,14 +32,16 @@ public class TableCreator extends ServiceBase {
 	protected SqlNameFormatter nameFormatter;
 	private AssocTableCreator assocTblCreator;
 	public DatIdMap datIdMap;
+	private String defaultSchema;
 	
 	public TableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
+				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec, String defaultSchema) {
 		super(factorySvc);
 		this.registry = registry;
 		this.fieldgenFactory = fieldgenFactory;
 		this.nameFormatter = nameFormatter;
 		this.datIdMap = datIdMap;
+		this.defaultSchema = defaultSchema; //can be null
 		
 		TableExistenceService existSvc = new ZTableExistenceService();
 		this.assocTblCreator = createAssocTblCreator(existSvc); 

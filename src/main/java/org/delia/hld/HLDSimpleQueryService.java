@@ -51,6 +51,7 @@ public class HLDSimpleQueryService {
 		qtx.isSimpleSvc = true;
 		querySpec.queryExp = queryExp;
 		HLDQueryStatement hld = hldFacade.buildQueryStatement(querySpec, zexec, new DoNothingVarEvaluator());
+		hld.hldquery.defaultSchema = zexec.getDefaultSchema();
 		SqlStatementGroup stgroup = hldFacade.generateSqlForQuery(hld, zexec);
 
 		QueryResponse qresp = zexec.executeHLDQuery(hld, stgroup, qtx); //** calll the db **

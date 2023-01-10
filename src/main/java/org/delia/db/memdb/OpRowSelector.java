@@ -13,6 +13,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.QuerySpec;
 import org.delia.db.memdb.filter.InEvaluator;
 import org.delia.db.memdb.filter.MultiOpEvaluator;
+import org.delia.db.memdb.filter.NAFEvaluator;
 import org.delia.db.memdb.filter.OpEvaluator;
 import org.delia.db.memdb.filter.OpFactory;
 import org.delia.error.ErrorTracker;
@@ -22,17 +23,20 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
+import org.delia.zdb.mem.ImplicitFetchContext;
 
 public class OpRowSelector extends RowSelectorBase {
 		private OpEvaluator evaluator;
 		private DateFormatService fmtSvc;
 		private FactoryService factorySvc;
 		private FilterEvaluator filterEvaluator;
+		private ImplicitFetchContext implicitCtx;
 		
-		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc, FilterEvaluator evaluator2) {
+		public OpRowSelector(DateFormatService fmtSvc, FactoryService factorySvc, FilterEvaluator evaluator2, ImplicitFetchContext implicitCtx) {
 			this.fmtSvc = fmtSvc;
 			this.factorySvc = factorySvc;
 			this.filterEvaluator = evaluator2;
+			this.implicitCtx = implicitCtx;
 		}
 
 		@Override
@@ -81,6 +85,11 @@ public class OpRowSelector extends RowSelectorBase {
 				evaluator.setRightVar(xop1);
 			} else {
 				evaluator.setRightVar(xop2);
+			}
+			
+			if (evaluator instanceof NAFEvaluator) {
+				NAFEvaluator nafeval = (NAFEvaluator) evaluator;
+				nafeval.setImplicitContext(implicitCtx);
 			}
 		}
 		private void initSingleInExpression(FilterOpFullExp fullexp, DStructType dtype) {

@@ -6,13 +6,7 @@ import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.SqlStatementGroup;
 import org.delia.db.sql.StrCreator;
-import org.delia.db.sqlgen.SqlDeleteStatement;
-import org.delia.db.sqlgen.SqlGeneratorFactory;
-import org.delia.db.sqlgen.SqlInsertStatement;
-import org.delia.db.sqlgen.SqlMergeAllIntoStatement;
-import org.delia.db.sqlgen.SqlMergeIntoStatement;
-import org.delia.db.sqlgen.SqlMergeUsingStatement;
-import org.delia.db.sqlgen.SqlUpdateStatement;
+import org.delia.db.sqlgen.*;
 import org.delia.hld.simple.SimpleBase;
 import org.delia.hld.simple.SimpleSqlGenerator;
 import org.delia.type.DTypeRegistry;
@@ -30,11 +24,13 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 	private SimpleSqlGenerator simpleSqlGenerator;
 
 	private SqlGeneratorFactory sqlFactory;
+	private DBType dbType;
 
 	public HLDToSQLConverterImpl(FactoryService factorySvc, DTypeRegistry registry, DBType dbType, SqlGeneratorFactory sqlgen) {
 		super(factorySvc);
 		this.simpleSqlGenerator = new SimpleSqlGenerator(registry, factorySvc);
 		this.sqlFactory = sqlgen;
+		this.dbType = dbType;
 	}
 
 	/* (non-Javadoc)
@@ -70,19 +66,35 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
-		
+
+		//hack hack hack
+		int maxNumDeletes = hldupdate.assocBundleL.size();
+		if (DBType.POSTGRES.equals(dbType)) {
+			maxNumDeletes = 1; //only delete from DAT once per upsert
+		}
+
 		for(AssocBundle bundle: hldupdate.assocBundleL) {
 			if (bundle.hlddelete != null) {
-				if (bundle.hlddelete.useDeleteIn) {
-					SqlStatement stmx = genDeleteInStatement(bundle.hlddelete);
-					stmgrp.add(stmx);
-				} else {
-					SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
-					stmgrp.add(stmx);
+				if (maxNumDeletes-- > 0) {
+					if (bundle.hlddelete.useDeleteIn) {
+						SqlStatement stmx = genDeleteInStatement(bundle.hlddelete);
+						stmgrp.add(stmx);
+					} else {
+						SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
+						stmgrp.add(stmx);
+					}
 				}
 			}
 			if (bundle.hldupdate != null) {
-				if (bundle.hldupdate.isMergeInto) {
+				//hack hack hack. Postgres should use INSERT ON CONFLICT
+				//produces this:INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO UPDATE SET rightv = ?
+				//TODO this would be more efficient INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO NOTHING
+				if (DBType.POSTGRES.equals(dbType)) {
+					SqlMergeIntoStatement sqlMergeInto = sqlFactory.createMergeInto();
+					sqlMergeInto.init(bundle.hldupdate);
+					SqlStatement stmx = sqlMergeInto.render();
+					stmgrp.add(stmx);
+				} else if (bundle.hldupdate.isMergeInto) {
 					SqlStatement stmx = genMergeIntoStatement(bundle.hldupdate);
 					stmgrp.add(stmx);
 				} else if (bundle.hldupdate.isMergeAllInto) {
@@ -105,23 +117,41 @@ public class HLDToSQLConverterImpl extends ServiceBase implements HLDToSQLConver
 	@Override
 	public SqlStatementGroup generate(HLDUpsertStatement hldupsert) {
 		SqlStatementGroup stmgrp = new SqlStatementGroup();
-		
-		SqlStatement stm = genUpsertStatement((HLDUpsert)hldupsert.hldupdate);
+
+		SqlStatement stm = genUpsertStatement((HLDUpsert) hldupsert.hldupdate);
 		stmgrp.add(stm);
-		
-		for(SimpleBase simple: hldupsert.moreL) {
+
+		for (SimpleBase simple : hldupsert.moreL) {
 			SqlStatement stmx = new SqlStatement(simple);
 			stmx.sql = simpleSqlGenerator.genAny(simple, stmx);
 			stmgrp.add(stmx);
 		}
-		
-		for(AssocBundle bundle: hldupsert.assocBundleL) {
+
+		//hack hack hack
+		int maxNumDeletes = hldupsert.assocBundleL.size();
+		if (DBType.POSTGRES.equals(dbType)) {
+			maxNumDeletes = 1; //only delete from DAT once per upsert
+		}
+
+		for (AssocBundle bundle : hldupsert.assocBundleL) {
 			if (bundle.hlddelete != null) {
-				SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
-				stmgrp.add(stmx);
+				if (maxNumDeletes-- > 0) {
+					SqlStatement stmx = genDeleteStatement(bundle.hlddelete);
+					stmgrp.add(stmx);
+				}
 			}
 			if (bundle.hldupdate != null) {
-				SqlStatement stmx = genUpdateStatement(bundle.hldupdate);
+				SqlStatement stmx;
+				//hack hack hack. Postgres should use INSERT ON CONFLICT
+				//produces this:INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO UPDATE SET rightv = ?
+				//TODO this would be more efficient INSERT INTO CustomerAddressDat1 VALUES(?, ?) ON CONFLICT(leftv,rightv) DO NOTHING
+				if (DBType.POSTGRES.equals(dbType)) {
+					SqlMergeIntoStatement sqlMergeInto = sqlFactory.createMergeInto();
+					sqlMergeInto.init(bundle.hldupdate);
+					stmx = sqlMergeInto.render();
+				} else {
+					stmx = genUpdateStatement(bundle.hldupdate);
+				}
 				stmgrp.add(stmx);
 			}
 		}

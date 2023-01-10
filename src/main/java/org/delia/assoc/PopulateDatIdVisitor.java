@@ -7,6 +7,7 @@ import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 
 public class PopulateDatIdVisitor implements ManyToManyVisitor {
+	private final String defaultSchema;
 	private DTypeRegistry registry;
 //	private SchemaMigrator schemaMigrator;
 	private Log log;
@@ -16,10 +17,11 @@ public class PopulateDatIdVisitor implements ManyToManyVisitor {
 	private boolean haveLoadedSchemaFingerprint = false;
 	private DatMapBuilder datMapBuilder;
 
-	public PopulateDatIdVisitor(DatMapBuilder datMapBuilder, DTypeRegistry registry, Log log) {
+	public PopulateDatIdVisitor(DatMapBuilder datMapBuilder, DTypeRegistry registry, Log log, String defaultSchema) {
 		this.registry = registry;
 		this.log = log;
 		this.datMapBuilder = datMapBuilder;
+		this.defaultSchema = defaultSchema;
 	}
 	
 	@Override

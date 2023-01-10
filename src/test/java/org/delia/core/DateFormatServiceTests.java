@@ -32,11 +32,8 @@ public class DateFormatServiceTests {
 		String s = fmtSvc.format(zdt);
 		log(s);
 		ZonedDateTime zdt2 = fmtSvc.parseDateTime(s);
-		assertEquals(zdt, zdt2);
-	}
-	private ZonedDateTime getNow() {
-		ZonedDateTime zdt = ZonedDateTime.of(LocalDateTime.now(), tzSvc.getDefaultTimeZone());
-		return zdt;
+		ZonedDateTime zdt3 = clean(zdt);
+		assertEquals(zdt3, zdt2);
 	}
 	@Test
 	public void test2() {
@@ -47,7 +44,8 @@ public class DateFormatServiceTests {
 		String s = fmtSvc.format(zdt);
 		log(s);
 		ZonedDateTime zdt2 = fmtSvc.parseDateTime(s);
-		assertEquals(zdt, zdt2);
+		ZonedDateTime zdt3 = clean(zdt);
+		assertEquals(zdt3, zdt2);
 	}
 	
 	@Test
@@ -87,4 +85,14 @@ public class DateFormatServiceTests {
 		log.log(s);
 	}
 
+	private ZonedDateTime getNow() {
+		ZonedDateTime zdt = ZonedDateTime.of(LocalDateTime.now(), tzSvc.getDefaultTimeZone());
+		return zdt;
+	}
+	private ZonedDateTime clean(ZonedDateTime zdt) {
+		int nn = zdt.getNano(); //delia uses msec so remove sub-msec info
+		int nn2 = (nn - (nn % 1000000))/1000000;
+		ZonedDateTime zdt3 = zdt.withNano(nn2*1000000);
+		return zdt3;
+	}
 }

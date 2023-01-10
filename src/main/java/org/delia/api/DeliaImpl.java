@@ -56,7 +56,7 @@ public class DeliaImpl implements Delia {
 		this.log = log;
 		this.mainDBInterface = dbInterface;
 		this.factorySvc = factorySvc;
-		this.migrationSvc = new SxMigrationServiceImpl(dbInterface, factorySvc);
+		this.migrationSvc = factorySvc.createMigrationService(dbInterface);
 		this.errorAdjuster = new ErrorAdjuster();
 		this.hldFactory = dbInterface.getHLDFactory();
 	}
@@ -126,7 +126,7 @@ public class DeliaImpl implements Delia {
 		
 		//to support transactions use session dbInterface if there is one
 		DBInterfaceFactory dbinter = calcDBInterface(dbsess, tp); 
-		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader);
+		Runner runner = new RunnerImpl(factorySvc, dbinter, hldFactory, blobLoader, deliaOptions.defaultSchema);
 		RunnerInitializer runnerInitializer = dbsess == null ? null: dbsess.getRunnerIntiliazer();
 		if (runnerInitializer != null) {
 			runnerInitializer.initialize(runner);
@@ -265,6 +265,7 @@ public class DeliaImpl implements Delia {
 		compilerHelper.executePass3and4(execCtx, src, extL, mainRunner.getRegistry());
 		
 		//load or assign DAT ids. must do this even if don't do migration
+		migrationSvc.setDefaultSchema(deliaOptions.defaultSchema);
 		extraInfo.datIdMap = migrationSvc.loadDATData(mainRunner.getRegistry(), mainRunner);
 		DatIdMap datIdMap = extraInfo.datIdMap;
 		

@@ -29,7 +29,7 @@ public class ImmutCodeGen extends CodeGenBase {
 		addDoNotModifyComment(sc);
 		helper().addImports(sc, structType);
 		
-		STGroup g = new STGroupFile("templates/immut.stg");
+		STGroup g = loadTemplate();
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
 		sc.addStr(st.render());
@@ -117,5 +117,14 @@ public class ImmutCodeGen extends CodeGenBase {
 			st.add("asname", helper().getPKTypeAsFn(ftype));
 			sc.addStr(st.render());
 		}
+	}
+	
+	/**
+	 * Override this to use your own template file.
+	 * @return stringtemplate STGroup
+	 */
+	protected STGroup loadTemplate() {
+		STGroup g = new STGroupFile("templates/immut.stg");
+		return g;
 	}
 }

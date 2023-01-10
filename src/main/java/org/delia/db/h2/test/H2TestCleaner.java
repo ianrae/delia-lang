@@ -61,6 +61,19 @@ public class H2TestCleaner {
 		tblRemover.deleteKnownTables(factorySvc, innerInterface, tableL);
 	}
 
+	public void deleteSchemaGG(FactoryService factorySvc, DBInterfaceFactory innerInterface) {
+		List<String> tableL = new ArrayList<>();
+
+		tableL.add("gg.Flight");
+		tableL.add("gg.Flight2");
+
+		String tbl = SchemaMigrator.SCHEMA_TABLE;
+		tableL.add("gg." + tbl.toLowerCase());
+		tbl = SchemaMigrator.DAT_TABLE;
+		tableL.add("gg." + tbl.toLowerCase());
+
+		tblRemover.deleteKnownTables(factorySvc, innerInterface, tableL);
+	}
 	public void deleteTables(FactoryService factorySvc, DBInterfaceFactory innerInterface, String tables) {
 		String[] ar = tables.split(",");
 		List<String> tableL = Arrays.asList(ar);

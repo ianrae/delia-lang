@@ -34,7 +34,7 @@ public class DaoCodeGen extends CodeGenBase {
 		sc.nl();
 		
 		
-		STGroup g = new STGroupFile("templates/dao.stg");
+		STGroup g = loadTemplate();
 		//t1() ::= <<
 		ST st = g.getInstanceOf("t1");
 		sc.o(st.render());
@@ -59,4 +59,14 @@ public class DaoCodeGen extends CodeGenBase {
 
 		return sc.toString();
 	}
+	
+	/**
+	 * Override this to use your own template file.
+	 * @return stringtemplate STGroup
+	 */
+	protected STGroup loadTemplate() {
+		STGroup g = new STGroupFile("templates/dao.stg");
+		return g;
+	}
+	
 }

@@ -6,12 +6,14 @@ import org.delia.core.ServiceBase;
 import org.delia.type.DTypeRegistry;
 
 public class SqlGeneratorFactoryImpl extends ServiceBase implements SqlGeneratorFactory {
-	
+
+	private final String defaultSchema;
 	protected DTypeRegistry registry;
 	
-	public SqlGeneratorFactoryImpl(DTypeRegistry registry, FactoryService factorySvc) {
+	public SqlGeneratorFactoryImpl(DTypeRegistry registry, FactoryService factorySvc, String defaultSchema) {
 		super(factorySvc);
 		this.registry = registry;
+		this.defaultSchema = defaultSchema;
 	}
 	
 	

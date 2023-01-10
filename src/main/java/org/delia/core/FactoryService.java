@@ -2,6 +2,7 @@ package org.delia.core;
 
 import org.delia.assoc.DatIdMap;
 import org.delia.db.QueryBuilderService;
+import org.delia.db.schema.MigrationService;
 import org.delia.db.schema.SchemaMigrator;
 import org.delia.db.transaction.TransactionProvider;
 import org.delia.dval.compare.DValueCompareService;
@@ -37,7 +38,7 @@ public interface FactoryService {
 	ErrorTracker getErrorTracker();
 	QueryBuilderService getQueryBuilderService();
 	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry);
-	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap);
+	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap, String defaultSchema);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
 	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();
@@ -47,4 +48,5 @@ public interface FactoryService {
 	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
 	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
+	MigrationService createMigrationService(DBInterfaceFactory dbInterface);
 }

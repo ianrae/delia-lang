@@ -1,0 +1,3 @@
+  type Flight struct {field1 int primaryKey } end
+  insert Flight {field1: 55 }
+  let x = Flight[55]

@@ -15,8 +15,8 @@ import org.delia.type.DTypeRegistry;
 
 public class PostgresSqlGeneratorFactory extends SqlGeneratorFactoryImpl {
 	
-	public PostgresSqlGeneratorFactory(DTypeRegistry registry, FactoryService factorySvc) {
-		super(registry, factorySvc);
+	public PostgresSqlGeneratorFactory(DTypeRegistry registry, FactoryService factorySvc, String defaultSchema) {
+		super(registry, factorySvc, defaultSchema);
 	}
 
 	@Override

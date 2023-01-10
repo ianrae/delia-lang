@@ -36,6 +36,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	private String currentFingerprint;
 	private String dbFingerprint;
 	private SchemaDefinition currentSchema;
+	private String defaultSchema;
 
 	public SxMigrationServiceImpl(DBInterfaceFactory dbInterface, FactoryService factorySvc) {
 		super(factorySvc);
@@ -44,13 +45,18 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		this.policy = new SafeMigrationPolicy();
 	}
 
+	@Override
+	public void setDefaultSchema(String defaultSchema) {
+		this.defaultSchema = defaultSchema;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.delia.db.schema.MigrationService#autoMigrateDbIfNeeded(org.delia.type.DTypeRegistry, org.delia.runner.VarEvaluator, org.delia.assoc.DatIdMap)
 	 */
 	@Override
 	public boolean autoMigrateDbIfNeeded(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
 		
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap, defaultSchema)) {
 			migrator.createSchemaTableIfNeeded();
 			
 			boolean b = doNeedsMigration(registry, migrator);
@@ -107,7 +113,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 		SchemaDeltaOptimizer optimizer = new SchemaDeltaOptimizer(registry, factorySvc, dbType, datIdMap);
 		delta = optimizer.optimize(delta);
 		
-		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, factorySvc, dbType);
+		SchemaMigrationPlanGenerator plangen = new SchemaMigrationPlanGenerator(registry, factorySvc, dbType, defaultSchema);
 		SxMigrationPlan sxplan = new SxMigrationPlan();
 		sxplan.opList = plangen.generate(delta);
 		sxplan.delta = delta;
@@ -149,7 +155,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	 */
 	@Override
 	public MigrationPlan createMigrationPlan(DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap) {
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap, defaultSchema)) {
 			migrator.createSchemaTableIfNeeded();
 //			boolean b = migrator.dbNeedsMigration();
 			boolean b = this.doNeedsMigration(registry, migrator);
@@ -164,7 +170,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	 */
 	@Override
 	public MigrationPlan runMigrationPlan(DTypeRegistry registry, MigrationPlan plan, VarEvaluator varEvaluator, DatIdMap datIdMap) {
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, varEvaluator, datIdMap, defaultSchema)) {
 			migrator.createSchemaTableIfNeeded();
 //			boolean b = migrator.dbNeedsMigration();
 			boolean b = this.doNeedsMigration(registry, migrator);
@@ -196,7 +202,7 @@ public class SxMigrationServiceImpl extends ServiceBase implements MigrationServ
 	@Override
 	public DatIdMap loadDATData(DTypeRegistry registry, VarEvaluator varEvaluator) {
 		DatIdMap datIdMap = null;
-		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null)) {
+		try(SchemaMigrator migrator = factorySvc.createSchemaMigrator(dbInterface, registry, new DoNothingVarEvaluator(), null, defaultSchema)) {
 			migrator.createSchemaTableIfNeeded();
 			
 			DatMapBuilder datMapBuilder = new SxDatMapBuilderImpl(registry, factorySvc, migrator.getZDBExecutor());

@@ -18,7 +18,11 @@ import org.delia.db.memdb.PrimaryKeyRowSelector;
 import org.delia.db.memdb.RowSelector;
 import org.delia.db.sql.QueryType;
 import org.delia.error.DeliaError;
+import org.delia.hld.FetchSpec;
 import org.delia.hld.HLDFactory;
+import org.delia.hld.HLDQuery;
+import org.delia.hld.HLDQueryStatement;
+import org.delia.hld.JoinElement;
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
@@ -58,11 +62,14 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 		this.preSpecSvc = new PreSpecService(factorySvc, dbInterface);
 	}
 
-	protected QueryResponse doExecuteQuery(QuerySpec spec, QueryContext qtx) {
+	protected QueryResponse doExecuteQuery(HLDQueryStatement hld, MemFunctionHelper helper, QueryContext qtx) {
 		if (qtx.existingQResp != null) {
 			return qtx.existingQResp;
 		}
+		QuerySpec spec = hld.querySpec;
+		ImplicitFetchContext implicitCtx = buildImplicitContextIfNeeded(hld.hldquery); 
 		
+		//TODO: delete this prequery. not needed now i think
 		//avoid infinite loop
 		int maxPreQueries = 10;
 		QuerySpec preQuerySpec = null;
@@ -72,16 +79,31 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 			if (preQuerySpec == null) {
 				break;
 			}
-			qresp0 = doSingleQuery(preQuerySpec, qtx);
+			qresp0 = doSingleQuery(preQuerySpec, qtx, null);
 		}
 		
-		QueryResponse qresp = doSingleQuery(spec, qtx);
+		QueryResponse qresp = doSingleQuery(spec, qtx, implicitCtx);
 		return qresp;
 	}
 
-	private QueryResponse doSingleQuery(QuerySpec spec, QueryContext qtx) {
+	protected ImplicitFetchContext buildImplicitContextIfNeeded(HLDQuery hldquery) {
+		//do any implicit fetches first so they are available when doing the filter
+		ImplicitFetchContext implicitCtx = null;
+		for(JoinElement el: hldquery.joinL) {
+			if (el.isImplicitJoin) {
+				if (implicitCtx == null) {
+					implicitCtx = new ImplicitFetchContext();
+					implicitCtx.fetchRunner = doCreateFetchRunner();
+				}
+				implicitCtx.implicitFetchL.add(el);
+			}
+		}
+		return implicitCtx;
+	}
+
+	private QueryResponse doSingleQuery(QuerySpec spec, QueryContext qtx, ImplicitFetchContext implicitCtx) {
 		QueryResponse qresp = new QueryResponse();
-		RowSelector selector = createSelector(spec); 
+		RowSelector selector = createSelector(spec, implicitCtx); 
 		if (selector == null) {
 			//err!!
 			return qresp;
@@ -162,7 +184,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 		ruleRunner.validateRelationRules(dval);
 	}
 
-	protected RowSelector createSelector(QuerySpec spec) {
+	protected RowSelector createSelector(QuerySpec spec, ImplicitFetchContext implicitCtx) {
 		String typeName = spec.queryExp.getTypeName();
 		MemDBTable tbl = tableMap.get(typeName);
 		if (tbl == null) {
@@ -177,7 +199,7 @@ public abstract class MemDBExecutorBase extends ServiceBase implements DBInterna
 			selector = new AllRowSelector();
 			break;
 		case OP:
-			selector = new OpRowSelector(fmtSvc, factorySvc, spec.evaluator);
+			selector = new OpRowSelector(fmtSvc, factorySvc, spec.evaluator, implicitCtx);
 			break;
 		case PRIMARY_KEY:
 		default:

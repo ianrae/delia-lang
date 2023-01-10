@@ -5,21 +5,24 @@ import org.delia.type.DType;
 public class SimpleSqlNameFormatter implements SqlNameFormatter {
 
 	private boolean convertToLowerCase;
+	private String schema;
 	
-	public SimpleSqlNameFormatter() {
-		this(false);
+	public SimpleSqlNameFormatter(String schema) {
+		this(schema, false);
 	}
-	public SimpleSqlNameFormatter(boolean convertToLowerCase) {
+	public SimpleSqlNameFormatter(String schema, boolean convertToLowerCase) {
 		this.convertToLowerCase = convertToLowerCase;
+		this.schema = schema;
 	}
 	
 	@Override
 	public String convert(String tblName) {
+		String prefix = schema == null ? "" : String.format("%s.", schema);
 		if (convertToLowerCase) {
 			String s = tblName.toLowerCase();
-			return s;
+			return prefix + s;
 		} else {
-			return tblName;
+			return prefix + tblName;
 		}
 	}
 	@Override

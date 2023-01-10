@@ -22,16 +22,21 @@ import org.delia.zdb.TableCreator;
 
 public class PostgresTableCreator extends TableCreator {
 	
-	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory, 
-				SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
-		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec);
+	public PostgresTableCreator(FactoryService factorySvc, DTypeRegistry registry, FieldGenFactory fieldgenFactory,
+                                SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec, String defaultSchema) {
+		super(factorySvc, registry, fieldgenFactory, nameFormatter, datIdMap, zexec, defaultSchema);
 	}
 	
 	@Override
 	protected AssocTableCreator createAssocTblCreator(TableExistenceService existSvc) {
 		return new PostgresAssocTableCreator(factorySvc, registry, fieldgenFactory, nameFormatter, existSvc, alreadyCreatedL, datIdMap);
 	}
-	
+
+	@Override
+	public String generateCreateTable(String typeName, DStructType dtype) {
+		return super.generateCreateTable(typeName, dtype);
+	}
+
 
 	@Override
 	public String generateRenameField(String tableName, String fieldName, String newName) {

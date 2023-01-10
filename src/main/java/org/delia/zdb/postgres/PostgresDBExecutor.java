@@ -95,7 +95,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	
 	@Override
 	protected TableCreator createZTableCreator(FieldGenFactory fieldGenFactory, SqlNameFormatter nameFormatter, DatIdMap datIdMap, DBExecutor zexec) {
-		return  new PostgresTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec);
+		return  new PostgresTableCreator(factorySvc, registry, fieldGenFactory, nameFormatter, datIdMap, zexec, defaultSchema);
 	}
 	@Override
 	protected FieldGenFactory createFieldGenFactory() {
@@ -160,7 +160,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public boolean rawTableDetect(String tableName) {
 		failIfNotInit1(); 
-		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType, defaultSchema);
 		String sql = sqlgen.generateTableDetect(tableName); //postgres tbls are lowercase
 		SqlStatement statement = createSqlStatement(sql); 
 		return execResultBoolean(conn, statement);
@@ -170,7 +170,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 	@Override
 	public boolean rawFieldDetect(String tableName, String fieldName) {
 		failIfNotInit1(); 
-		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+		RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType, defaultSchema);
 		String sql = sqlgen.generateFieldDetect(tableName, fieldName);
 		SqlStatement statement = new SqlStatement(null);
 		statement.sql = sql;
@@ -372,7 +372,7 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 		failIfNotInit2(); 
 		String constraintName = null;
 		if (deltaFlags.contains("-U")) {
-			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType);
+			RawStatementGenerator sqlgen = new RawStatementGenerator(factorySvc, dbType,deltaFlags);
 			String sql = sqlgen.generateSchemaListing(DBListingType.ALL_CONSTRAINTS);
 			constraintName = conn.findConstraint(sql, typeName, fieldName, "UNIQUE", false);
 		} else if (deltaFlags.contains("+U")) {
@@ -459,6 +459,15 @@ public class PostgresDBExecutor extends DBExecutorBase implements DBExecutor {
 		} catch (DBValidationException e) {
 			convertAndRethrow(e);
 		}
-	}		
-	
+	}
+	@Override
+	public String getDefaultSchema() {
+		return defaultSchema;
+	}
+
+	@Override
+	public void setDefaultSchema(String schema) {
+		defaultSchema = schema;
+	}
+
 }

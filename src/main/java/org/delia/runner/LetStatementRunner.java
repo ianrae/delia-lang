@@ -221,7 +221,7 @@ public class LetStatementRunner extends ServiceBase {
 		return spec;
 	}
 	private ResultValue invokeUserFunc(LetStatementExp exp, ResultValue resParam) {
-		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface, hldFactory, blobLoader);
+		RunnerImpl innerRunner = new RunnerImpl(factorySvc, dbInterface, hldFactory, blobLoader, zexec.getDefaultSchema());
 		ExecutionState execState = runner.getExecutionState();
 		execState.varMap.clear(); //user fn has its own variables
 

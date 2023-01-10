@@ -24,6 +24,9 @@ import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
+import org.delia.type.TypePair;
+import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.zdb.DBExecutor;
@@ -146,10 +149,18 @@ public class UpdateStatementRunner extends ServiceBase {
 		} else if (failIfNotStruct(dtype, exp.typeName, res)) {
 			return;
 		}
-
+		
 		if (dtype == null) {
 			addError(res, "type.not.found", String.format("can't find type '%s'", exp.getTypeName()));
 			return;
+		} else {
+			TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(dtype);
+			if (pkpair != null) {
+				DStructType structType = (DStructType) dtype;
+				if (structType.fieldIsSerial(pkpair.name)) {
+					DeliaExceptionHelper.throwError("upsert-not-supported-for-serial-pk-types", "Type %s: upsert is not supported on types with a serial primary key", dtype.getName());
+				}
+			}
 		}
 
 		ConversionResult cres = null;
@@ -194,17 +205,6 @@ public class UpdateStatementRunner extends ServiceBase {
 			if (! ruleRunner.validateDVal(cres.dval)) {
 				ruleRunner.propogateErrors(res);
 			}
-
-			//				if (! ruleRunner.validateFieldsOnly(cres.dval)) {
-			//					ruleRunner.propogateErrors(res);
-			//				}
-			//				
-			//				//then validate the affected rules (of the struct)
-			//				//We determine the rules dependent on each field in partial dval
-			//				//and execute those rules only
-			//				if (! ruleRunner.validateDependentRules(cres.dval)) {
-			//					ruleRunner.propogateErrors(res);
-			//				}
 
 			if (!res.errors.isEmpty()) {
 				res.ok = false;

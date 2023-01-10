@@ -27,6 +27,18 @@ then:
 null
 
 ---
+title: not in
+given:
+  insert Flight {id: 55, wid: 'battle' }
+when:
+  let x = Flight[!(id in [56])]
+then:
+value:a:Flight {
+ vid:55
+ vwid:'battle'
+}
+
+---
 title: in multi
 given:
   insert Flight {id: 55, wid: 'battle' }

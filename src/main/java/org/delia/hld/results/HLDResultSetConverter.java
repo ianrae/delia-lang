@@ -236,12 +236,13 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 		
 		//setting dval's relation (fieldName) to have subDVal
 		DRelation drel = getOrCreateRelation(dval, fieldName, subDVal, dbctx);
-		
-		if (jel.usedForFetch()) {
-			List<DValue> fetched = new ArrayList<>();
-			fetched.add(subDVal);
-			drel.setFetchedItems(fetched);
-		}
+
+		//do all fetch at merge-pool time
+//		if (jel.usedForFetch()) {
+//			List<DValue> fetched = new ArrayList<>();
+//			fetched.add(subDVal);
+//			drel.setFetchedItems(fetched);
+//		}
 //		sortFKsIfNeeded(subDVal);
 		
 		return drel; 
@@ -335,13 +336,22 @@ public class HLDResultSetConverter extends HLDResultSetConverterBase {
 						continue;
 					}
 					
-//					System.out.println(dval.toString());
-					
 					List<DValue> fkList = new ArrayList<>(drel.getMultipleKeys()); //avoid concurrent modification exception
 					for(DValue pkval: fkList) {
 						DValue foreignVal = pool.findMatch(pair.type, pkval);
 						if (foreignVal != null) { //can be null if only doing fks()
-							DRelationHelper.addToFetchedItems(drel, foreignVal);
+							DValue existing = DRelationHelper.findInFetchedItems(drel, pkval);
+							if (existing == null) {
+								DRelationHelper.addToFetchedItems(drel, foreignVal);
+							} else {
+//								//TODO fix. for each object (eg Address.100) there should only be one instance
+//								//but somehow there is two
+//								//In this else we add the 2nd instance which results in #fetched > #fks
+//								//But seede figures and removes the wrong one.
+//								DRelationHelper.addToFetchedItems(drel, foreignVal);
+							}
+
+
 							if (doInner) {
 								fillInFetchedItems(foreignVal, pool, false, columnRunL, hld); //** recursion **
 							}
