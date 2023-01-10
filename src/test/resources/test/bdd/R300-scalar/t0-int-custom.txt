@@ -17,9 +17,9 @@ let x Grade = 2147483647;2147483647
 ---
 let x Grade = -2147483648;-2147483648
 ---
-let x Grade = 2147483648;ERROR: wrong-type: int value is not an int - 2147483648
+let x Grade = 2147483648;ERROR: int-too-large-for-effective-shape: int value 2147483648 too large to fit in java.int
 ---
-let x Grade = -2147483649;ERROR: wrong-type: int value is not an int
+let x Grade = -2147483649;ERROR: int-too-large-for-effective-shape
 ---
 let x Grade = null;null
 ---

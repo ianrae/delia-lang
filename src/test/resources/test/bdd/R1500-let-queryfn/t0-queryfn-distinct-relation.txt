@@ -27,12 +27,42 @@ value:a:int:102
 title: distinct
 when:
   update Customer[true] {wid: 333}
-  let x = Customer[true].fks().addr.id.distinct()
+  let x = Customer[true].fks().addr.id.distinct().orderBy('id')
 then:
-IF(POSTGRES):value:a:int:101
-IF(POSTGRES):value:a:int:102
-IF(POSTGRES):value:a:int:100
-ELSE:value:a:int:100
-ELSE:value:a:int:101
-ELSE:value:a:int:102
+value:a:int:100
+value:a:int:101
+value:a:int:102
 
+---
+title: distinct2. transitory query
+when:
+  let x = Customer[wid > 30].fks().addr.id.distinct().orderBy('id')
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102
+
+---
+title: distinct2a. transitory query (other-way)
+when:
+  let x = Address[z > 3].fks().cust.id.distinct().orderBy('id')
+then:
+value:a:int:55
+value:a:int:56
+
+---
+title: distinct3a. transitory query (other-way), query by id
+when:
+  let x = Address[id > 3].fks().cust.id.distinct().orderBy('id')
+then:
+value:a:int:55
+value:a:int:56
+
+---
+title: distinct3. transitory query, query by id
+when:
+  let x = Customer[id > 30].fks().addr.id.distinct().orderBy('id')
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102

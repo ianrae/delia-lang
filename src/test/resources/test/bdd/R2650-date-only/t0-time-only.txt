@@ -1,0 +1,21 @@
+# isTimeOnly tests
+
+FEATURE: isTimeOnly
+background:
+  type Flight struct {id int primaryKey, wid date optional } wid.isTimeOnly() end
+thenType: struct
+
+---
+title: isTimeOnly ok
+given:
+  insert Flight {id: 55, wid: '09:30' }
+  insert Flight {id: 56, wid: '2017' }
+  log 'hello'
+when:
+  let x = Flight[true].ith(0)
+then:
+value:a:Flight {
+ vid:55
+ vwid:1970-01-01T09:30:00.000+0000
+}
+

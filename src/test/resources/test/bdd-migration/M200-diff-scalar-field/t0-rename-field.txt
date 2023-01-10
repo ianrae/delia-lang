@@ -1,0 +1,7 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+GIVEN2
+type Customer struct {id int primaryKey, wid int, name2 string } wid.maxlen(4) end
+
+THEN
++FLD(Customer.name2)::NNN:string:0;-FLD(Customer.name)

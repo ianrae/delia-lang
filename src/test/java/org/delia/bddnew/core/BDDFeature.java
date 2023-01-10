@@ -9,4 +9,5 @@ public class BDDFeature {
     public List<BDDSnippet> backgroundsL = new ArrayList<>();
     public List<BDDTest> testsL = new ArrayList<>();
     public String expectedType; //thenType
+    public boolean runBackgroundPerTest = true;
 }

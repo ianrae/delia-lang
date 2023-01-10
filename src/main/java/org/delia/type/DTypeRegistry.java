@@ -20,17 +20,21 @@ import org.delia.util.DeliaExceptionHelper;
  *
  */
 public class DTypeRegistry {
-	private Map<String,DType> map = new ConcurrentHashMap<>(); 
+	private Map<DTypeName,DType> map = new ConcurrentHashMap<>();
 	private List<DType> orderedList = new ArrayList<>();
 	private static AtomicInteger nextBitIndex = new AtomicInteger(0); //thread-safe
 	private DTypeHierarchy th;
 	private DStructType schemaVersionType;
 	private DStructType datType;
 	
-	public static final int NUM_BUILTIN_TYPES = 8;
+	public static final int NUM_BUILTIN_TYPES = 7; //8;
+
+	public static DTypeName createDTypeName(String typeName) {
+		return new DTypeName(null, typeName);
+	}
 	
-	public synchronized void add(String typeName, DType dtype) {
-        if (dtype == null || typeName == null || typeName.isEmpty()) {
+	public synchronized void registerType(DTypeName typeName, DType dtype) {
+        if (dtype == null || typeName == null || typeName.getTypeName().isEmpty()) {
             throw new IllegalArgumentException("name or type were null");
         }
 		
@@ -58,7 +62,7 @@ public class DTypeRegistry {
 	    return th;
 	}
 
-	public Set<String> getAll() {
+	public Set<DTypeName> getAll() {
 		return map.keySet();
 	}
 
@@ -66,15 +70,25 @@ public class DTypeRegistry {
 		return map.size();
 	}
 	
-	public boolean existsType(String name) {
+	public boolean existsType(DTypeName name) {
 	    return getType(name) != null;
 	}
 
-	public DType getType(String name) {
-		return map.get(name);
+//	public DType getType(String name) {
+//		return map.get(createDTypeName(name));
+//	}
+	public DType getType(DTypeName typeName) {
+		return map.get(typeName);
+	}
+	public DStructType getStructType(DTypeName typeName) {
+		DType dtype = map.get(typeName);
+		if (dtype != null && !dtype.isStructShape()) {
+			DeliaExceptionHelper.throwError("not-struct-type", "Type '%s' is not a struct", typeName);
+		}
+		return (DStructType) dtype;
 	}
 	public DType getType(BuiltInTypes builtInType) {
-		return map.get(builtInType.name());
+		return map.get(createDTypeName(builtInType.name()));
 	}
 	
     public List<DType> getChildTypes(DType type) {
@@ -102,11 +116,13 @@ public class DTypeRegistry {
 	public DStructType getDATType() {
 		return datType;
 	}
-	public DStructType findTypeOrSchemaVersionType(String typeName) {
-		if (schemaVersionType != null && schemaVersionType.getName().equals(typeName)) {
+	public DStructType findTypeOrSchemaVersionType(DTypeName typeName) {
+		String schema = typeName.getSchema();
+		//TODO for now schemaVersionType and DatType are in null schema
+		if (schema == null && schemaVersionType != null && schemaVersionType.getName().equals(typeName)) {
 			return schemaVersionType;
 		}
-		if (datType != null && datType.getName().equals(typeName)) {
+		if (schema == null && datType != null && datType.getName().equals(typeName)) {
 			return datType;
 		}
 		
@@ -120,10 +136,10 @@ public class DTypeRegistry {
 	
 	public Set<String> getAllCustomTypes() {
 		Set<String> list = new HashSet<>();
-		for(String typeName: map.keySet()) {
-			String s = BuiltInTypes.convertDTypeNameToDeliaName(typeName);
+		for(DTypeName typeName: map.keySet()) {
+			String s = BuiltInTypes.convertDTypeNameToDeliaName(typeName.getTypeName());
 			if (s.equals(typeName)) {
-				list.add(typeName);
+				list.add(typeName.getTypeName());
 			}
 		}
 		return list;

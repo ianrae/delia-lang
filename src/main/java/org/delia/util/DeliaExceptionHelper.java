@@ -1,10 +1,19 @@
 package org.delia.util;
 
+import org.delia.compiler.ast.AST;
 import org.delia.error.DeliaError;
 import org.delia.runner.DeliaException;
 
+import java.util.List;
+
 public class DeliaExceptionHelper {
 
+	public static void throwError(AST.Loc loc, String id, String fmt, Object... args) {
+		String msg = String.format(fmt, args);
+		DeliaError err = new DeliaError(id, msg);
+		err.setLoc(loc);
+		throw new DeliaException(err);
+	}
 	public static void throwError(String id, String fmt, Object... args) {
 		String msg = String.format(fmt, args);
 		DeliaError err = new DeliaError(id, msg);
@@ -13,6 +22,11 @@ public class DeliaExceptionHelper {
 	public static void throwError(DeliaError err) {
 		throw new DeliaException(err);
 	}
+	public static void throwErrors(String id, List<DeliaError> errors) {
+//		String msg = String.format(fmt, args);
+		throw new DeliaException(errors);
+	}
+
 	public static DeliaError buildError(String id, String fmt, Object... args) {
 		String msg = String.format(fmt, args);
 		DeliaError err = new DeliaError(id, msg);
@@ -33,7 +47,7 @@ public class DeliaExceptionHelper {
 		DeliaError err = new DeliaError("unknown-field", msg);
 		throw new DeliaException(err);
 	}
-	
-	
+
+
 
 }

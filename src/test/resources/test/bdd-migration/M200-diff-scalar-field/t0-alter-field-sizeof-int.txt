@@ -1,0 +1,7 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.sizeof(64) end
+GIVEN2
+type Customer struct {id int primaryKey, wid int, name string } wid.sizeof(32) end
+
+THEN
+mFLD(Customer.wid)::NNN:int:32

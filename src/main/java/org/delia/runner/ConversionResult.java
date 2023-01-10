@@ -1,10 +1,10 @@
 package org.delia.runner;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.delia.error.ErrorTracker;
 import org.delia.type.DValue;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConversionResult {
 	public DValue dval;

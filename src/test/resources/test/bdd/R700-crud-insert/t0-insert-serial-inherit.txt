@@ -1,0 +1,20 @@
+# CRUD insert tests
+
+FEATURE: CRUD insert _serial
+background:
+type EBase struct {
+ createdAt date,
+ modAt date
+} end
+
+type Flight EBase {id int primaryKey serial, wid int optional }  end
+thenType: struct
+
+---
+title: insert
+when:
+  insert Flight {wid: 20, createdAt:'2022-05-10T18:27:25.172+0000', modAt:'2022-05-10T18:27:25.172+0000' }
+  let x = _serial
+then:
+value:a:int:1
+

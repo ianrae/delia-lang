@@ -87,7 +87,7 @@ when:
   let x = Customer[55].fks()
 then:
 ERROR: rule-relationOne
-}
+
 
 # --- Child Mandatory ---
 ---
@@ -119,7 +119,7 @@ when:
   insert Address {id: 100 }
   let x = Customer[55].fks()
 then:
-ERROR: rule-relationOne
+ERROR: value-missing-for-non-optional-field
 
 ---
 title: bad-ref
@@ -133,7 +133,7 @@ when:
   let x = Customer[55].fks()
 then:
 ERROR: rule-relationOne
-}
+
 
 ---
 title: mandatory-normal-other-way

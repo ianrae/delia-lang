@@ -1,12 +1,12 @@
 package org.delia.valuebuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorType;
 import org.delia.type.DType;
 import org.delia.type.DValue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class DValueBuilder {

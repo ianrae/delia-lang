@@ -13,13 +13,13 @@ import java.util.List;
 public class DRelation {
 	private List<DValue> foreignKeyL = new ArrayList<>();
 	private List<DValue> fetchL = null;
-	private String typeName;
+	private DTypeName typeName;
 
-	public DRelation(String typeName, DValue key) {
+	public DRelation(DTypeName typeName, DValue key) {
 		this.typeName = typeName;
 		this.foreignKeyL.add(key);
 	}
-	public DRelation(String typeName, List<DValue> keyL) {
+	public DRelation(DTypeName typeName, List<DValue> keyL) {
 		this.typeName = typeName;
 		this.foreignKeyL.addAll(keyL);
 	}
@@ -43,6 +43,9 @@ public class DRelation {
 		}
 		return null;
 	}
+	public void clearKeys() {
+		foreignKeyL.clear();
+	}
 	
 	public DValue getForeignKey() {
 //		if (foreignKeyL.size() == 0) {
@@ -54,7 +57,7 @@ public class DRelation {
 		return foreignKeyL.get(0);
 	}
 
-	public String getTypeName() {
+	public DTypeName getTypeName() {
 		return typeName;
 	}
 	
@@ -74,4 +77,16 @@ public class DRelation {
 		String s = String.format("%s %s (%d keys)", typeName, key, foreignKeyL.size());
 		return s;
 	}
+
+    public void removeKeyIfPresent(DValue sourcePK) {
+		if (foreignKeyL.isEmpty()) return;
+		String srcStr = sourcePK.asString(); //TODO: use compare svc later
+		for(DValue fk: foreignKeyL) {
+			String fkStr = fk.asString();
+			if (srcStr.equals(fkStr)) {
+				foreignKeyL.remove(fk);
+				return;
+			}
+		}
+    }
 }

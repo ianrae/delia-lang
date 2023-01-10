@@ -1,7 +1,10 @@
 package org.delia.bddnew.core;
 
+import org.delia.base.DbTableCleaner;
 import org.delia.error.DeliaError;
-import org.delia.log.Log;
+import org.delia.log.DeliaLog;
+import org.delia.runner.ResultValue;
+import org.delia.type.DTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,13 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 public class BDDFeatureRunner {
-    private final Log log;
+    private final DeliaLog log;
     private Map<SnippetType, SnippetRunner> runnerMap = new HashMap<>();
     private BDDSnippetResult mostRecentRes;
     private ConnectionProvider connectionProvider;
+    private boolean runBackgroundPerTest; //false means run background once per feature
     private int singleTestToRunIndex = -1;
 
-    public BDDFeatureRunner(ConnectionProvider connProvider, Log log) {
+    public BDDFeatureRunner(ConnectionProvider connProvider, DeliaLog log) {
         this.connectionProvider = connProvider;
         this.log = log;
     }
@@ -26,17 +30,24 @@ public class BDDFeatureRunner {
     }
 
     public BDDFeatureResult runTests(BDDFeature feature, String fileName) {
+        runBackgroundPerTest = feature.runBackgroundPerTest;
         BDDFeatureResult res = new BDDFeatureResult();
         log.log("=============== FEATURE: %s (%s) ======================", feature.name, fileName);
-        if (!executeBackground(feature.backgroundsL)) {
-            return res;
+        boolean haveCleandedDB = false;
+        if (!runBackgroundPerTest) {
+            DbTableCleaner cleaner = new DbTableCleaner();
+            cleaner.cleanDB(connectionProvider.getDBType());
+            haveCleandedDB = true;
+            if (!executeBackground(feature.backgroundsL)) {
+                return res;
+            }
         }
 
         int index = 0;
         for (BDDTest test : feature.testsL) {
             if (singleTestToRunIndex >= 0) {
                 if (index == singleTestToRunIndex) {
-                    boolean b = executeTest(test, index);
+                    boolean b = executeTest(test, index, feature, haveCleandedDB);
                     if (b) {
                         res.numPass++;
                     } else {
@@ -46,10 +57,10 @@ public class BDDFeatureRunner {
                 }
             } else {
                 if (test.skip) {
-                    log.log("SKIP: %s", test.title);
+                    log.log("SKIP: %s", getTestTitle(test));
                     res.numSkip++;
                 } else {
-                    boolean b = executeTest(test, index);
+                    boolean b = executeTest(test, index, feature, haveCleandedDB);
                     if (b) {
                         res.numPass++;
                     } else {
@@ -62,17 +73,29 @@ public class BDDFeatureRunner {
 
         String strFail = res.numFail == 0 ? "FAIL" : "**FAIL**";
         int total = res.numPass + res.numFail + res.numSkip;
-        log.log("PASS:%d, %s:%d, SKIPPED:%d tests (%d)", res.numPass, strFail, res.numFail, res.numSkip, total);
+        log.log("");
+        log.log("*** PASS:%d, %s:%d, SKIPPED:%d tests (%d) ***", res.numPass, strFail, res.numFail, res.numSkip, total);
         return res;
     }
 
     private boolean executeBackground(List<BDDSnippet> backgroundsL) {
+        BDDSnippetResult lastRes = null;
         for (BDDSnippet snippet : backgroundsL) {
             BDDSnippetResult tres = executeSnippet(snippet, mostRecentRes);
+            lastRes = tres;
             if (!tres.ok) {
                 return false;
             }
         }
+        //TODO: fix later. this is hacky
+        if (lastRes != null) {
+            if (lastRes.sess != null) {
+                if (lastRes.sess.getExecutionContext().registry.getAll().size() == DTypeRegistry.NUM_BUILTIN_TYPES) {
+                    mostRecentRes = null;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -89,21 +112,40 @@ public class BDDFeatureRunner {
         return res;
     }
 
-    private boolean executeTest(BDDTest test, int index) {
+    private boolean executeTest(BDDTest test, int index, BDDFeature feature, boolean haveCleandedDB) {
         log.log("");
-        log.log("---------------------------------------");
-        log.log(String.format("Test%d: %s...", index, test.title));
+        log.log("-------------------------------------------------------");
+        log.log(String.format("Test%d: %s...", index, getTestTitle(test)));
+        if (!haveCleandedDB && (index == 0 || singleTestToRunIndex == index || !test.chainNextTest)) {
+//            log.log("clearrecentRes");
+            if (! test.chainNextTest) {
+                mostRecentRes = null;
+            }
+            DbTableCleaner cleaner = new DbTableCleaner();
+            cleaner.cleanDB(connectionProvider.getDBType());
+        }
+
+        if (runBackgroundPerTest) {
+            if (!executeBackground(feature.backgroundsL)) {
+                return false;
+            }
+        }
+
+        //given
         BDDSnippetResult failingTRes = null;
         for (BDDSnippet snippet : test.givenL) {
+            snippet.thenType = feature.expectedType;
             BDDSnippetResult tres = executeSnippet(snippet, mostRecentRes);
             if (!tres.ok) {
                 failingTRes = tres;
             }
         }
 
+        //when
         BDDSnippetResult whenRes = null;
         if (failingTRes == null) {
             for (BDDSnippet snippet : test.whenL) {
+                snippet.thenType = feature.expectedType;
                 BDDSnippetResult tres = executeSnippet(snippet, mostRecentRes);
                 whenRes = tres;
                 //the when part may have the expected error so keep going
@@ -119,7 +161,16 @@ public class BDDFeatureRunner {
             whenRes.errors = new ArrayList<>(failingTRes.errors);
         }
 
+        //propogate if needed
+        if (whenRes != null && whenRes.resValue == null && !whenRes.errors.isEmpty()) {
+            whenRes.resValue = new ResultValue();
+            whenRes.resValue.ok = false;
+            whenRes.resValue.errors.addAll(whenRes.errors);
+        }
+
+        //then
         for (BDDSnippet snippet : test.thenL) {
+            snippet.thenType = feature.expectedType;
             BDDSnippetResult tres = executeSnippet(snippet, whenRes);
             if (!tres.ok) {
                 if (failingTRes == null) {
@@ -137,11 +188,16 @@ public class BDDFeatureRunner {
         }
 
         if (failingTRes != null && !failingTRes.ok) {
-            log.log("**Test%d: %s FAILED!** (in given)", index, test.title);
+            log.log("**Test%d: %s FAILED!** (in given)", index, getTestTitle(test));
             return false;
         }
 
         return true;
+    }
+
+    private String getTestTitle(BDDTest test) {
+        String title = test.title == null ? "" : test.title;
+        return title;
     }
 
     public int getSingleTestToRunIndex() {

@@ -2,7 +2,7 @@
 
 FEATURE: queryfn-min-long
 background:
-  type Flight struct {id int primaryKey, wid long optional }  end
+  type Flight struct {id int primaryKey, wid int optional } wid.sizeof(64)  end
 thenType: struct
 
 ---
@@ -13,7 +13,7 @@ given:
 when:
   let x = Flight[true].wid.min()
 then:
-value:a:long:3
+value:a:int:3
 
 ---
 title: min empty
@@ -21,7 +21,7 @@ given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight[id=100].wid.min()
+  let x = Flight[id==100].wid.min()
 then:
 null
 
@@ -34,7 +34,7 @@ given:
 when:
   let x = Flight[true].wid.min()
 then:
-value:a:long:3
+value:a:int:3
 
 ---
 title: bad field name

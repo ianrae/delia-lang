@@ -1,12 +1,13 @@
 package org.delia.util.render;
 
-import org.delia.type.DType;
+//import org.delia.type.DType;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.delia.type.DType;
 
 public class ObjectRendererImpl implements ObjectRenderer {
 	private ObjectMapper mapper = new ObjectMapper();

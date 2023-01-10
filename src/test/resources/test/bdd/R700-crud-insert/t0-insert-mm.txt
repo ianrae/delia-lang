@@ -1,0 +1,57 @@
+# crud insert many-to-many
+#TODO: fix this when support insert from parent side!
+
+FEATURE: insert a parent fk (many to one)
+background:
+type Customer struct {
+  id int primaryKey,
+  firstName string optional,
+  relation addr Address many optional
+} end
+type Address struct {
+  id int primaryKey,
+  city string optional,
+  relation cust Customer many
+} end
+thenType: struct
+
+---
+title: mm null
+given:
+  insert Customer { id: 55, firstName: 'bob', addr: null }
+when:
+  let x = Customer[55]
+then:
+ value:a:Customer {
+  vid:55
+  vfirstName:'bob'
+  vaddr:null
+}
+
+---
+title: mm not-null
+given:
+  insert Customer { id: 55, firstName: 'bob', addr: null }
+  insert Address { id: 100, city: 'paris', cust: 55 }
+when:
+  let x = Address[100].fks()
+then:
+ value:a:Address {
+  vid:100
+  vcity:'paris'
+  vcust:{55}
+}
+
+---
+title: mm not-null and fk
+given:
+  insert Customer { id: 55, firstName: 'bob', addr: null }
+  insert Address { id: 100, city: 'paris', cust: 55 }
+when:
+  let x = Address[100].fks()
+then:
+ value:a:Address {
+  vid:100
+  vcity:'paris'
+  vcust:{55}
+}

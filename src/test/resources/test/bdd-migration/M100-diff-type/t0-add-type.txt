@@ -1,0 +1,8 @@
+GIVEN1
+
+GIVEN2
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+
+THEN
++TBL(Customer):id,wid,name
+

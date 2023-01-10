@@ -1,0 +1,106 @@
+
+
+type EBase struct {
+ createdAt date,
+ modAt date
+}
+
+end
+//used by plat-delia
+type SystemEvent EBase {
+ id int primaryKey serial,
+ level string,
+ message string
+}
+end
+
+type SystemTrail EBase {
+ id int primaryKey serial,
+ group string,
+ key string,
+ trail string
+}
+end
+
+type Config struct {
+ id int primaryKey,
+ name string unique,
+ value string
+} end
+
+
+type User EBase {
+ id int serial primaryKey,
+ name string unique,
+ passwordEnc string,
+ relation projects ProjectMember many optional
+ } end
+
+type Project EBase {
+  id int serial primaryKey,
+  userId int,
+  name string,
+  relation env ProjectEnvironment many optional,
+  relation users ProjectMember many optional
+  }
+   uniqueFields(userId,name)
+end
+
+type ProjectEnvironment EBase {
+  id int serial primaryKey,
+  name string,
+  relation proj Project one
+  }
+end
+
+type ProjectMember EBase {
+ id int serial primaryKey,
+ relation userId User one,
+ relation projId Project one
+ } end
+
+type Session EBase {
+ id int serial primaryKey,
+ userId int
+} end
+
+type aaJobResults struct {
+ id int serial primaryKey
+}
+end
+
+//id instanceId projId
+type CSession EBase {
+ id int serial primaryKey,
+ userId int,
+ instanceId int,
+ projId int,
+ active boolean
+} end
+
+// *  -File id projId type data
+type SeedAction EBase {
+ id int serial primaryKey,
+ projId int,
+ name string,
+ data string
+}
+ data.maxlen(64000)
+end
+
+
+// *  -Job id csessionid sessionId seedActionId
+type Job EBase {
+ id int serial primaryKey,
+ userId int,
+ seedActionId int,
+ name string,
+ env string,
+ projId int,
+ state string,
+ clientSessId int,
+ deliaTypeSrc string optional
+}
+ deliaTypeSrc.sizeof(10240)
+end
+

@@ -34,10 +34,14 @@ package org.delia.sort.topo;
 * expand out the cycle.
 */
 
-import java.util.*; // For List, Map.
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class TopologicalSort {
-   /**
+
+    /**
     * Given a directed acyclic graph, returns a topological sorting of the
     * nodes in the graph.  If the input graph is not a DAG, throws an
     * IllegalArgumentException.

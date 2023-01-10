@@ -1,0 +1,66 @@
+# queryfn tests
+
+FEATURE: queryfn-distint relation many-to-one
+background:
+	type Customer struct {id int primaryKey, wid int, relation addr Address optional many } end
+	type Address struct {id int primaryKey, z int, relation cust Customer optional one } end
+	insert Customer {id: 55, wid: 33}
+	insert Customer {id: 56, wid: 34}
+	insert Address {id: 100, z:5, cust: 55 }
+	insert Address {id: 101, z:6, cust: 55 }
+	insert Address {id: 102, z:6, cust: 56 }
+thenType: struct
+
+---
+title: without distinct
+when:
+  update Customer[true] {wid: 333}
+  let x = Customer[true].orderBy('id').fks().addr.id
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102
+
+---
+title: distinct
+when:
+  update Customer[true] {wid: 333}
+  let x = Customer[true].fks().addr.id.distinct().orderBy('id')
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102
+
+---
+title: distinct2. transitory query
+when:
+  let x = Customer[wid > 30].fks().addr.id.distinct().orderBy('id')
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102
+
+---
+title: distinct2a. transitory query (other-way)
+when:
+  let x = Address[z > 3].fks().cust.id.distinct().orderBy('id')
+then:
+value:a:int:55
+value:a:int:56
+
+---
+title: distinct3a. transitory query (other-way), query by id
+when:
+  let x = Address[id > 3].fks().cust.id.distinct().orderBy('id')
+then:
+value:a:int:55
+value:a:int:56
+
+---
+title: distinct3. transitory query, query by id
+when:
+  let x = Customer[id > 30].fks().addr.id.distinct().orderBy('id')
+then:
+value:a:int:100
+value:a:int:101
+value:a:int:102

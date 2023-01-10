@@ -2,7 +2,7 @@ package org.delia.bddnew.core;
 
 import org.apache.commons.lang3.StringUtils;
 import org.delia.error.DeliaError;
-import org.delia.log.Log;
+import org.delia.log.DeliaLog;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +22,7 @@ public class StructChecker {
 //
 //		return compareStringLists(genL, thenL, log);
 //	}
-	public boolean compareMultiObj(ThenValue thenVal, List<String> actualL, Log log) {
+	public boolean compareMultiObj(ThenValue thenVal, List<String> actualL, DeliaLog log) {
 		if (thenVal.isEmpty()) {
 			String err = String.format("value-mismatch: struct must use then: clause");
 			log.logError(err);
@@ -36,7 +36,7 @@ public class StructChecker {
 		return pass;
 	}
 	
-	private boolean compareStringLists(List<String> genL, List<String> thenL, Log log) {
+	private boolean compareStringLists(List<String> genL, List<String> thenL, DeliaLog log) {
 		thenL = adjustForDBType(thenL);
 		int index = 0;
 		for (String actualLine : genL) {
@@ -79,6 +79,18 @@ public class StructChecker {
 		if (genL.size() != thenL.size()) {
 			String err = String.format("value-mismatch: resultList has %d but thenL has %d", genL.size(), thenL.size());
 			log.logError(err);
+			boolean once = true;
+			int k = 0;
+			for(String x: genL) {
+				if (once) {
+					log.log("actual%d: %s", k, x);
+					once = false;
+				} else {
+					log.log("%d: %s", k, x);
+				}
+				k++;
+			}
+
 			return false;
 		}		
 		return true;
@@ -107,9 +119,17 @@ public class StructChecker {
 		return thenVal.expectedL;
 	}
 
-	public boolean compareError(ThenValue thenVal, List<DeliaError> errors, Log log) {
+	public boolean compareError(ThenValue thenVal, List<DeliaError> errors, DeliaLog log) {
 		List<String> thenL = generateFromThen(thenVal);
 		thenL = thenL.stream().map(s -> StringUtils.substringAfter(s, "ERROR:").trim()).collect(Collectors.toList());
+		//remove error description too
+		thenL = thenL.stream().map(s -> {
+			if (! s.contains(":")) {
+				return s;
+			}
+			return StringUtils.substringBefore(s, ":").trim();
+		}).collect(Collectors.toList());
+
 		List<String> simpleErrorL = errors.stream().map(err -> err.getId()).collect(Collectors.toList());
 		return compareStringLists(simpleErrorL, thenL, log);
 	}

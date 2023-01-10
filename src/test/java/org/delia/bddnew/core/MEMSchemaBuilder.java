@@ -1,4 +1,4 @@
-//package org.delia.bddnew.core;
+package org.delia.bddnew.core;//package org.delia.bddnew.core;
 //
 //import org.delia.DeliaSession;
 //import org.delia.seede.db.DBSchemaBuilder;

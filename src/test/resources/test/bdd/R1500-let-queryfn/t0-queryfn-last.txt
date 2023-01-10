@@ -25,7 +25,7 @@ given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight[id=100].last()
+  let x = Flight[id==100].last()
 then:
 null
 

@@ -1,0 +1,25 @@
+# insert optional field
+
+FEATURE: filter- like expression
+background:
+  type Flight struct {id int primaryKey, wid string optional }  end
+thenType: struct
+
+---
+title: like missing. DValue map will not contain entry for wid
+given:
+  insert Flight {id: 55 }
+when:
+  let x = Flight[wid == 'at']
+then:
+null
+
+---
+title: like missing null. DValue map will contain entry for wid whose value is null
+given:
+  insert Flight {id: 55, wid: null  }
+when:
+  let x = Flight[wid == 'at']
+then:
+null
+

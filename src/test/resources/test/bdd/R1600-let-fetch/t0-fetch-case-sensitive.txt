@@ -1,0 +1,26 @@
+# struct tests
+# tests to do
+#  normal
+#  bad field name
+#  null addr values
+# new scope fetch("addr").id  should get Address id
+# double fetch allowed  fetch('addr')...fetch('cust') -- will be messy!
+
+FEATURE: fetch
+background:
+ configure loadFKs = true
+thenType: struct
+
+
+---
+title: typename wrong-case
+given:
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, wid int, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55, wid:40 }
+  let x = customer[true].fetch("addr").orderBy('id')
+then:
+ERROR: type.not.found

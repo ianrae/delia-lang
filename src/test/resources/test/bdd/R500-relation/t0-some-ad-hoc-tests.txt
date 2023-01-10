@@ -1,0 +1,59 @@
+# fetch tests
+# tests to do
+#  normal
+#  bad field name
+#  null addr values
+# new scope fetch("addr").id  should get Address id
+# double fetch allowed  fetch('addr')...fetch('cust') -- will be messy!
+
+FEATURE: fetch-field
+background:
+ configure loadFKs = true
+thenType: struct
+
+# --- Single ---
+---
+title: single, scalar field
+given:
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {aid int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {aid: 100, cust: 55 }
+  let x = Customer[55].addr.aid
+then:
+value:a:int:100
+
+
+---
+title: single, struct field, no fks
+given:
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {aid int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {aid: 100, cust: 55 }
+  let x = Customer[55].addr
+then:
+value:a:Address {
+ vaid:100
+ vcust:null
+}
+
+---
+title: single, struct field, with fks
+given:
+ type Customer struct {id int primaryKey, relation addr Address optional parent one } end
+ type Address struct {aid int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {aid: 100, cust: 55 }
+  let x = Customer[55].fks().addr
+then:
+value:a:Address {
+ vaid:100
+ vcust:null
+}

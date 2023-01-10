@@ -1,0 +1,18 @@
+# sizeof tests
+
+FEATURE: sizeof int
+background:
+thenType: struct
+
+---
+title: int ok
+given:
+when:
+  type Flight struct {id int primaryKey, wid int optional } wid.sizeof(13) end
+  insert Flight {id: 55, wid: 4 }
+  insert Flight {id: 56, wid: 3 }
+  log 'hello'
+  let x = Flight[true].ith(0)
+then:
+ERROR: sizeof-wrong-amount
+

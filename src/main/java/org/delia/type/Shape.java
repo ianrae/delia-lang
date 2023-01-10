@@ -1,14 +1,14 @@
 package org.delia.type;
 
 /**
- * 9 Shapes.
- * The shape represents the underlying type of data
- * (int, long, string, boolean, etc)
+ * 8 Shapes.
+ * The shape represents the semantic type of data
+ * (int, string, boolean, date, etc)
  *
  */
 public enum Shape {
 	INTEGER,
-	LONG,
+//	LONG,
 	NUMBER,
 	BOOLEAN,
 	STRING,
@@ -20,7 +20,7 @@ public enum Shape {
 	public static Shape createFromDeliaType(String deliaType) {
 		switch(deliaType) {
 		case "int": return INTEGER;
-		case "long": return LONG;
+//		case "long": return LONG;
 		case "number": return NUMBER;
 		case "string": return STRING;
 		case "boolean": return BOOLEAN;
@@ -34,7 +34,7 @@ public enum Shape {
 	public static int getScalarIndex(Shape shape) {
 		switch(shape) {
 		case INTEGER: return 0;
-		case LONG: return 1;
+//		case LONG: return 1;
 		case NUMBER: return 2;
 		case STRING: return 3;
 		case BOOLEAN: return 4;

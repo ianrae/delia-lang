@@ -1,22 +1,16 @@
 package org.delia.core;
 
-import org.delia.assoc.DatIdMap;
-import org.delia.db.QueryBuilderService;
-import org.delia.db.schema.MigrationService;
-import org.delia.db.schema.SchemaMigrator;
-import org.delia.db.transaction.TransactionProvider;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
-import org.delia.hld.HLDSimpleQueryService;
-import org.delia.log.Log;
+import org.delia.log.DeliaLog;
 import org.delia.log.LogFactory;
 import org.delia.rule.RuleFunctionFactory;
-import org.delia.runner.FetchRunner;
-import org.delia.runner.VarEvaluator;
+import org.delia.transaction.TransactionProvider;
 import org.delia.type.DTypeRegistry;
 import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
-import org.delia.zdb.DBInterfaceFactory;
+import org.delia.db.DBInterfaceFactory;
+import org.delia.runner.DeliaRunner;
 
 /**
  * To allow multiple clients of Delia to each
@@ -33,20 +27,20 @@ public interface FactoryService {
 	ConfigureService getConfigureService();
 	TimeZoneService getTimeZoneService();
 	DateFormatService getDateFormatService();
-	Log getLog();
+	DeliaLog getLog();
 	LogFactory getLogFactory(); //may return null if not set in DeliaBuilder
 	ErrorTracker getErrorTracker();
-	QueryBuilderService getQueryBuilderService();
-	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry);
-	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap, String defaultSchema);
+//	QueryBuilderService getQueryBuilderService();
+//	HLDSimpleQueryService createHLDSimpleQueryService(DBInterfaceFactory dbInterface, DTypeRegistry registry);
+//	SchemaMigrator createSchemaMigrator(DBInterfaceFactory dbInterface, DTypeRegistry registry, VarEvaluator varEvaluator, DatIdMap datIdMap, String defaultSchema);
 	ScalarValueBuilder createScalarValueBuilder(DTypeRegistry registry);
-	int getNextGeneratedRuleId();
+//	int getNextGeneratedRuleId();
 	DValueCompareService getDValueCompareService();
-	DiagnosticService getDiagnosticService();
-	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, DTypeRegistry registry, FetchRunner fetchRunner);
-	boolean getEnableMEMSqlGenerationFlag();
-	void setEnableMEMSqlGenerationFlag(boolean flag);
+//	DiagnosticService getDiagnosticService();
+	ValidationRunner createValidationRunner(DBInterfaceFactory dbInterface, DTypeRegistry registry, DeliaRunner deliaRunner);
+//	boolean getEnableMEMSqlGenerationFlag();
+//	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
 	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
-	MigrationService createMigrationService(DBInterfaceFactory dbInterface);
+//	MigrationService createMigrationService(DBInterfaceFactory dbInterface);
 }

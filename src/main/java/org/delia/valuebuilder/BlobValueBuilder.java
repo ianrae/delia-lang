@@ -8,7 +8,6 @@ import org.delia.type.WrappedBlob;
 import org.delia.util.BlobUtils;
 
 public class BlobValueBuilder extends DValueBuilder {
-	
 
 	public BlobValueBuilder(FactoryService factorySvc, DType type) {
 		if (!type.isShape(Shape.BLOB)) {

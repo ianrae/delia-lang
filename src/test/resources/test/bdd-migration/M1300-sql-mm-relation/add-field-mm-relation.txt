@@ -1,0 +1,18 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int}  end
+
+GIVEN2
+// comment
+ALTERATIONS:
+ALTER Customer ADD relation addr Address many optional
+ALTER Address ADD relation cust Customer many
+ADDITIONS:
+
+THEN
+CREATE TABLE IF NOT EXISTS CustomerAddressDat1 (
+leftv INTEGER NOT NULL,
+rightv INTEGER,
+CONSTRAINT FK_CUSTOMERADDRESSDAT1_LEFTV FOREIGN KEY (leftv) REFERENCES Customer (id),
+CONSTRAINT FK_CUSTOMERADDRESSDAT1_RIGHTV FOREIGN KEY (rightv) REFERENCES Address (id)
+);

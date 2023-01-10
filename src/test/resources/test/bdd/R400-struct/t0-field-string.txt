@@ -1,0 +1,55 @@
+# struct tests
+
+FEATURE: struct-field-string various string sizes
+background:
+thenType: struct
+
+
+---
+title: default string size
+given:
+  type Flight struct {field1 int primaryKey, name string } end
+  insert Flight {field1: 55, name:'abc' }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vname:'abc'
+}
+
+---
+title: small string size
+given:
+  type Flight struct {field1 int primaryKey, name string } name.sizeof(4) end
+  insert Flight {field1: 55, name:'abc' }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vname:'abc'
+}
+
+---
+title: large string size
+given:
+  type Flight struct {field1 int primaryKey, name string } name.sizeof(65537) end
+  insert Flight {field1: 55, name:'abc' }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vname:'abc'
+}
+
+---
+title: negative string size
+given:
+  type Flight struct {field1 int primaryKey, name string } name.sizeof(0) end
+  insert Flight {field1: 55, name:'abc' }
+when:
+  let x = Flight[55]
+then:
+ERROR: sizeof-wrong-amount

@@ -22,8 +22,8 @@ value:a:Flight {
 ---
 title: fail
 given:
-  insert Flight {id: 55, name: 'bobby' }
 when:
+  insert Flight {id: 55, name: 'bobby' }
   let x = Flight[55];ERROR: rule-maxlen
 
 # -- Optional --
@@ -42,8 +42,8 @@ value:a:Flight2 {
 ---
 title: optional-fail
 given:
-  insert Flight2 {id: 55, name: 'bobby' }
 when:
+  insert Flight2 {id: 55, name: 'bobby' }
   let x = Flight2[55];ERROR: rule-maxlen
 
 ---

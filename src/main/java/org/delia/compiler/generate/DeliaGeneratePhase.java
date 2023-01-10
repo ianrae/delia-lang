@@ -2,12 +2,7 @@ package org.delia.compiler.generate;
 
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.type.DRelation;
-import org.delia.type.DStructHelper;
-import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
-import org.delia.type.TypePair;
+import org.delia.type.*;
 
 /**
  * Converter for converting a DValue type into some other format, such as JSON.

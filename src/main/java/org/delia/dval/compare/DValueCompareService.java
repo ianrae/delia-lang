@@ -1,12 +1,12 @@
 package org.delia.dval.compare;
 
-import java.time.ZonedDateTime;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.type.DValue;
 import org.delia.type.Shape;
 import org.delia.util.DeliaExceptionHelper;
+
+import java.time.ZonedDateTime;
 
 public class DValueCompareService extends ServiceBase {
 		private Handler[][] dvalHandlerArray = new Handler[6][6];
@@ -79,11 +79,19 @@ public class DValueCompareService extends ServiceBase {
 			if (i < 0 || j < 0) {
 				DeliaExceptionHelper.throwError("cannot-compare-dval", "Can only compare scalar DValues");
 			}
-			
+
 			Handler handler = dvalHandlerArray[i][j];
 			if (handler == null) {
 				DeliaExceptionHelper.throwError("cannot-compare-dval", "Cannot compare scalar shaped %d and %d", i, j);
 			}
+
+			//dvalue Shape.INTEGER can be either int or long (because we may be dealing with not-yet-in-the-corrall data)
+			if (i == 0 && j == 0) {
+				if (dval1.getObject() instanceof Long || dval2.getObject() instanceof Long) {
+					handler = dvalHandlerArray[0][1]; //ToLongHandler
+				}
+			}
+
 			int n = handler.compareDVal(dval1, dval2);
 			return n;
 		}

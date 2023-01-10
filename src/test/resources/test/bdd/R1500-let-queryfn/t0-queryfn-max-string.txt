@@ -21,7 +21,7 @@ given:
   insert Flight {id: 55, wid: 'bet' }
   insert Flight {id: 56, wid: 'bat' }
 when:
-  let x = Flight[id=100].wid.max()
+  let x = Flight[id==100].wid.max()
 then:
 null
 

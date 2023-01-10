@@ -4,7 +4,6 @@ package org.delia.log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.LoggerContext;
 
 /**
  * Logs to slf4j
@@ -12,8 +11,8 @@ import ch.qos.logback.classic.LoggerContext;
  * @author Ian Rae
  *
  */
-public class StandardLog implements Log {
-	private LogLevel level = LogLevel.INFO;
+public class StandardLog implements DeliaLog {
+	private LogLevel logLevel = LogLevel.INFO;
 	private Logger logger;
 	private String logName;
 	private Class<?> logNameClazz;
@@ -21,8 +20,6 @@ public class StandardLog implements Log {
 	public StandardLog(String name) {
 		this.logName = name;
 		logger = LoggerFactory.getLogger(name);
-		//		ch.qos.logback.classic.Logger appLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("org.dnal");
-
 	}
 	public StandardLog(Class<?> clazz) {
 		this.logNameClazz = clazz;
@@ -38,34 +35,15 @@ public class StandardLog implements Log {
 
 	@Override
 	public void setLevel(LogLevel level) {
-		this.level = level;
-		//https://stackoverflow.com/questions/21368757/sl4j-and-logback-is-it-possible-to-programmatically-set-the-logging-level-for/21601319
-		LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
-		ch.qos.logback.classic.Logger logbackLogger = null;
-		if (logName != null) {
-			logbackLogger = loggerContext.getLogger(logName);
-		} else {
-			logbackLogger = loggerContext.getLogger(logNameClazz);
-		}
-
-		switch(level) {
-		case DEBUG:
-			logbackLogger.setLevel(ch.qos.logback.classic.Level.DEBUG);		
-			break;
-		case ERROR:
-			logbackLogger.setLevel(ch.qos.logback.classic.Level.ERROR);		
-			break;
-		case INFO:
-			logbackLogger.setLevel(ch.qos.logback.classic.Level.INFO);		
-			break;
-		case OFF:
-			logbackLogger.setLevel(ch.qos.logback.classic.Level.OFF);		
-			break;
-		}
+		this.logLevel = level;
+		//this only sets logLevel field, not the underlying SLF4J logger's level. SLF4J doesn't support setLevel so if you want to
+		//programmatically set its log level you need to create a sub-class of StandardLog (or Log) and implement it using
+		//the actual logger library. For example:
+//		//https://stackoverflow.com/questions/21368757/sl4j-and-logback-is-it-possible-to-programmatically-set-the-logging-level-for/21601319
 	}
 	@Override
 	public LogLevel getLevel() {
-		return level;
+		return logLevel;
 	}
 
 	@Override
@@ -99,7 +77,7 @@ public class StandardLog implements Log {
 	}
 
 	protected boolean exceeds(LogLevel info) {
-		return (level.getLevelNum() >= info.getLevelNum());
+		return (logLevel.getLevelNum() >= info.getLevelNum());
 	}
 
 	@Override

@@ -1,152 +1,61 @@
 package org.delia.type;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.delia.rule.DRule;
-import org.delia.util.NameUtils;
+
+import java.util.List;
 
 /**
  * A delia type.  In addition to the  * built-in types (int, boolean, etc),
  * any custom scalar or struct types will have a corresponding DType objects.
- * 
+ * <p>
  * Types are registered in DTypeRegistry.
- * 
- * @author Ian Rae
  *
+ * @author Ian Rae
  */
-public class DType implements DTypeInternal {
-	private Shape shape;
-	private String name;
-	private String packageName;
-	private String completeName;
-	protected DType baseType; //can be null
-	private List<DRule> rules = new ArrayList<>();
-	private int bitIndex;
+public interface DType {
 
-	public DType(Shape shape, String name, DType baseType) {
-		this.shape = shape;
-		this.name = name;
-		this.completeName = name;
-		this.baseType = baseType;
-	}
-	@Override
-	public void finishScalarInitialization(Shape shape, String typeName, DType baseType) {
-		this.shape = shape;
-		this.name = typeName;
-		this.completeName = name;
-		this.baseType = baseType;
-	}
+    boolean isShape(Shape target);
 
-	public boolean isShape(Shape target) {
-		return (target != null && target.equals(shape));
-	}
-	public boolean isScalarShape() {
-		switch(shape) {
-//		case LIST:
-		case STRUCT:
-//		case MAP:
-			return false;
-		default:
-			return true;
-		}
-	}
-    public boolean isNumericShape() {
-        switch(shape) {
-        case INTEGER:
-        case LONG:
-        case NUMBER:
-            return true;
-        default:
-            return false;
-        }
-    }
-    public boolean isRelationShape() {
-        switch(shape) {
-        case RELATION:
-            return true;
-        default:
-            return false;
-        }
-    }
-    public boolean isBlobShape() {
-    	return shape.equals(Shape.BLOB);
-    }
+    boolean isScalarShape();
 
-	public Shape getShape() {
-		return shape;
-	}
+    boolean isNumericShape();
 
-	public String getName() {
-		return name;
-	}
+    boolean isRelationShape();
 
-	public DType getBaseType() {
-		return baseType;
-	}
-	
-	/**
-	 * Can type2 be used where this is expected.
-	 * @param type2  derived class
-	 * @return true if type2 is assignment compatible to this object
-	 */
-	public boolean isAssignmentCompatible(DType type2) {
-		if (this == type2) {
-			return true;
-		}
-		DType current = type2.getBaseType();
-		
-		//!!add runaway check
-		while(current != null) {
-			if (current == this) {
-				return true;
-			}
-			current = current.getBaseType();
-		}
-		return false;
-	}
-	
-	public List<DRule> getRules() {
-		List<DRule> copy = new ArrayList<>(rules);
-		return copy;
-	}
-	public List<DRule> getRawRules() {
-		return rules;
-	}
-	public boolean hasRules() {
-		return rules.size() > 0;
-	}
+    boolean isBlobShape();
 
-    public String getPackageName() {
-        return packageName;
-    }
+    Shape getShape();
 
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
-        this.completeName = NameUtils.completeName(packageName, name);
-    }
-    
-    public String getCompleteName() {
-        return completeName;
-    }
+    String getName(); //TODO probably remove all uses of this because of schema
 
-    public int getBitIndex() {
-        return bitIndex;
-    }
+    String getSchema();
 
-    public void setBitIndex(int bitIndex) {
-        this.bitIndex = bitIndex;
-    }
-    
-    public boolean isStructShape() {
-    	return Shape.STRUCT.equals(shape);
-    }
+    DTypeName getTypeName();
 
-    //helps see typename in debugger
-	@Override
-	public String toString() {
-		return name;
-	}
-	
+    DType getBaseType();
+
+    EffectiveShape getEffectiveShape();
+
+    boolean isAssignmentCompatible(DType type2);
+
+    List<DRule> getRules();
+
+    List<DRule> getRawRules();
+
+    boolean hasRules();
+
+    String getPackageName();
+
+    void setPackageName(String packageName);
+
+    String getCompleteName();
+
+    int getBitIndex();
+
+    void setBitIndex(int bitIndex);
+
+    boolean isStructShape();
+
+
 }
 

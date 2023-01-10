@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BDDFileParser {
@@ -42,8 +43,14 @@ public class BDDFileParser {
                 currentFeature.backgroundsL.add(bgSnippet);
             } else if (inBackground && !line.startsWith("---")) {
                 String thenType = parseThenTypeIfPresent(line);
+                String expectDVal = parseExpectDValueIfPresent(line);
+                Boolean runBGPerTest = parseRunBGPerTest(line);
                 if (thenType != null) {
                     currentFeature.expectedType = thenType;
+                } else if (runBGPerTest != null) {
+                    currentFeature.runBackgroundPerTest = runBGPerTest;
+                } else if (expectDVal != null) {
+                    //TODO
                 } else {
                     bgSnippet.lines.add(line);
                 }
@@ -68,16 +75,40 @@ public class BDDFileParser {
     }
 
     private String parseThenTypeIfPresent(String line) {
-        if (! line.contains("thenType:")) {
+        String target = "thenType:";
+        if (! line.contains(target)) {
             return null;
         }
-        String s = StringUtils.substringAfter(line, "thenType:");
+        String s = StringUtils.substringAfter(line, target);
         s = s.trim();
         return s;
     }
+    private String parseExpectDValueIfPresent(String line) {
+        String target = "expectDVal:";
+        if (! line.contains(target)) {
+            return null;
+        }
+        String s = StringUtils.substringAfter(line, target);
+        s = s.trim();
+        return s;
+    }
+    private Boolean parseRunBGPerTest(String line) {
+        String target = "runBackgroundPerTest:";
+        if (! line.contains(target)) {
+            return null;
+        }
+        String s = StringUtils.substringAfter(line, target);
+        s = s.trim();
+        return Boolean.parseBoolean(s);
+    }
+
+
 
     private SnippetType getSnippetType(String line) {
         if (! line.contains("(")) {
+            return line.startsWith("then:") ? SnippetType.VALUES : SnippetType.DELIA;
+        }
+        if (line.contains(";date(")) {
             return SnippetType.DELIA;
         }
         String s = StringUtils.substringAfter(line, "(");
@@ -112,6 +143,11 @@ public class BDDFileParser {
             if (line.isEmpty() || line.startsWith("#")) {
                 continue;
             }
+
+//            if (line.contains("then:")) {
+//                System.out.println("sedf");
+//            }
+
             if (line.startsWith("---")) {
                 currentTest = new BDDTest();
                 feature.testsL.add(currentTest);
@@ -119,6 +155,7 @@ public class BDDFileParser {
                 snippet = new BDDSnippet();
                 snippet.type = getSnippetType(line);
                 inSnippet = true;
+
                 addSnippetToTest(currentTest, snippet, line);
                 String extra = parseArg(line);
                 if (!extra.isEmpty()) {
@@ -126,39 +163,61 @@ public class BDDFileParser {
                 }
             } else if (currentTest != null && line.startsWith("title:")) {
                 currentTest.title = parseArg(line);
-            } else if (currentTest != null && line.startsWith("skip:")) {
-                Boolean b = Boolean.parseBoolean(parseArg(line));
+            } else if (currentTest != null && line.startsWith("allowSemiColons:")) {
+                currentTest.allowSemiColons = true;
+            } else if (currentTest != null && line.startsWith("SKIP:")) {
+                Boolean b = true; //Boolean.parseBoolean(parseArg(line));
                 currentTest.skip = b;
+            } else if (currentTest != null && line.startsWith("thenType:")) {
+                String thenType = parseThenTypeIfPresent(line);
+                currentTest.expectedType = thenType;
+            } else if (currentTest != null && line.startsWith("expectDVal:")) {
+                boolean b = (parseExpectDValueIfPresent(line) != null);
+                currentTest.expectDValFlag = b;
             } else if (currentTest != null && line.startsWith("chainNextTest:")) {
                 Boolean b = Boolean.parseBoolean(parseArg(line));
                 currentTest.chainNextTest = b;
             } else if (inSnippet && !line.startsWith("---")) {
-                snippet.lines.add(line);
+                inSnippet = addLineOrSplitLine(snippet, line, currentTest);
+                if (! inSnippet) {
+                    currentTest = null;
+                }
             } else if (isDefaultingToWhen(currentTest, inSnippet)) {
                 snippet = new BDDSnippet();
                 snippet.type = getSnippetType(line);
                 inSnippet = true;
                 addSnippetToTest(currentTest, snippet, "when:");
-                //using ; is problematic is actual delia contains it
-                //TOD replace ; with something else later
-                if (line.contains(";")) {
-                    //single line form: ..delia...;..thenvalue...
-                    String s = StringUtils.substringBefore(line, ";").trim();
-                    snippet.lines.add(s);
 
-                    s = StringUtils.substringAfter(line, ";").trim();
-                    BDDSnippet thenSnippet = new BDDSnippet();
-                    thenSnippet.type = SnippetType.VALUES;
-                    addSnippetToTest(currentTest, thenSnippet, "then:");
-                    thenSnippet.lines.add(s);
-                    inSnippet = false;
+                inSnippet = addLineOrSplitLine(snippet, line, currentTest);
+                if (! inSnippet) {
                     currentTest = null;
-                } else {
-                    snippet.lines.add(line);
                 }
             } else {
             }
         }
+    }
+
+    private boolean addLineOrSplitLine(BDDSnippet snippet, String line, BDDTest currentTest) {
+        //using ; is problematic is actual delia contains it
+        //TOD replace ; with something else later
+        if (! currentTest.allowSemiColons && line.contains(";")) {
+            //single line form: ..delia...;..thenvalue...
+            String s = StringUtils.substringBefore(line, ";").trim();
+            snippet.lines.add(s);
+
+            s = StringUtils.substringAfter(line, ";").trim();
+            BDDSnippet thenSnippet = new BDDSnippet();
+            thenSnippet.type = SnippetType.VALUES;
+            addSnippetToTest(currentTest, thenSnippet, "then:");
+            thenSnippet.lines.add(s);
+//            inSnippet = false;
+//            currentTest = null;
+            return false; //snippet has ended
+        } else {
+            snippet.lines.add(line);
+            return true; //still in snippet
+        }
+
     }
 
     private boolean isDefaultingToWhen(BDDTest currentTest, boolean inSnippet) {

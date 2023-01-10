@@ -1,21 +1,13 @@
 package org.delia.core;
 
-import java.time.DateTimeException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.MonthDay;
-import java.time.Year;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import org.delia.error.DeliaError;
+import org.delia.runner.DeliaException;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
-
-import org.delia.error.DeliaError;
-import org.delia.runner.DeliaException;
 
 
 public class DateFormatServiceImpl implements DateFormatService {
@@ -111,6 +103,20 @@ public class DateFormatServiceImpl implements DateFormatService {
 			return zdt;
 		}
 	}
+	//time-only
+	public static class LocalTimeParseSpec extends ParseSpec {
+		public LocalTimeParseSpec(String pattern) {
+			super(pattern);
+		}
+		@Override
+		public ZonedDateTime parse(String input, TimeZoneService tzSvc) {
+			LocalTime lt = null;
+			lt = LocalTime.parse(input, formatter);
+			ZoneId zone = tzSvc.getDefaultTimeZone();
+			LocalDate ld = LocalDate.of(1970,1,1); //TODO is this a good value?
+			return ZonedDateTime.of(ld, lt, zone);
+		}
+	}
 
 
 	//new version using Java 8 time
@@ -137,6 +143,12 @@ public class DateFormatServiceImpl implements DateFormatService {
 	private ParseSpec pspec6a = new ZonedDateTimeParseSpec("yyyy-MM-dd'T'HH:mm:ssZ");
 	private ParseSpec pspec7 = new LocalDateTimeParseSpec("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	private ParseSpec pspecFull = new ZonedDateTimeParseSpec("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+	//time-only
+	private ParseSpec pspecTime1 = new LocalTimeParseSpec("HH");
+	private ParseSpec pspecTime2 = new LocalTimeParseSpec("HH:mm");
+	private ParseSpec pspecTime3 = new LocalTimeParseSpec("HH:mm:ss");
+	private ParseSpec pspecTimeFull = new LocalTimeParseSpec("HH:mm:ss.SSS");
+	//TODO add timezone one for time-only
 
 	public DateFormatServiceImpl(TimeZoneService tzSvc) {
 		this.tzSvc = tzSvc;
@@ -148,7 +160,7 @@ public class DateFormatServiceImpl implements DateFormatService {
 		try {
 			ParseSpec parseSpec = getDateFormat(input);
 			ZonedDateTime zdt = parseSpec.parse(input, tzSvc);
-			return java.util.Date.from(zdt.toInstant());
+			return Date.from(zdt.toInstant());
 		} catch (DateTimeParseException  e) {
 			DeliaError err = new DeliaError("date-parse-error", e.getMessage());
 			throw new DeliaException(err);
@@ -249,6 +261,42 @@ public class DateFormatServiceImpl implements DateFormatService {
 			throw new DeliaException(err);
 		}  
 	}
+	@Override
+	public ZonedDateTime parseTime(String input) {
+		try {
+			ParseSpec pspec = getTimeFormat(input);
+			ZonedDateTime zdt = pspec.parse(input, tzSvc);
+			return zdt;
+		} catch (DateTimeParseException  e) {
+			DeliaError err = new DeliaError("date-parse-error", e.getMessage());
+			throw new DeliaException(err);
+		}
+	}
+	@Override
+	public boolean isTimeOnly(String input) {
+		try {
+			ParseSpec pspec = getTimeFormat(input);
+			ZonedDateTime zdt = pspec.parse(input, tzSvc);
+			return true;
+		} catch (DateTimeParseException  e) {
+			return false;
+		}
+	}
+
+	private ParseSpec getTimeFormat(String input) {
+		int len = input.length();
+		//TODO: should support when no leading 0, such as 9:30
+		switch(len) {
+			case 2:
+				return this.pspecTime1;
+			case 5:
+				return pspecTime2;
+			case 8:
+				return pspecTime3;
+			default:
+				return pspecTimeFull;
+		}
+	}
 
 	@Override
 	public String format(ZonedDateTime ldt) {
@@ -265,4 +313,5 @@ public class DateFormatServiceImpl implements DateFormatService {
 	public TimeZoneService getTimezoneService() {
 		return tzSvc;
 	}
+
 }

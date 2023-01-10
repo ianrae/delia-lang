@@ -1,0 +1,11 @@
+# let scalar tests
+# note. we've already tested all scalar types in R300
+
+FEATURE: let scalar-int
+background:
+thenType: int
+
+---
+let $$ int = 5;5
+---
+let $$ = 10;10

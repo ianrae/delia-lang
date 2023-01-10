@@ -1,8 +1,10 @@
 package org.delia.sprig;
 
-import java.util.Map;
-
+import org.delia.type.DStructType;
+import org.delia.type.DTypeName;
 import org.delia.type.DValue;
+
+import java.util.Map;
 
 /**
  * Sprig is a well-known ruby library for seeding databases.
@@ -12,10 +14,11 @@ import org.delia.type.DValue;
  */
 public interface SprigService {
 
-	void registerSyntheticId(String typeName, String syntheticIdName);
-	boolean haveEnabledFor(String typeName);
-	boolean haveEnabledFor(String typeName, String syntheticIdName);
-	void setGeneratedId(String typeName, DValue idVal);
-	DValue resolveSyntheticId(String typeName, String idValue);
-	void rememberSynthId(String typeName, DValue dval, DValue generatedId, Map<String, DValue> extraMap);
+	void registerSyntheticId(DTypeName typeName, String syntheticIdName);
+	boolean haveEnabledFor(DTypeName typeName);
+	boolean haveEnabledFor(DStructType structType);
+	boolean haveEnabledFor(DTypeName typeName, String syntheticIdName);
+	void setGeneratedId(DTypeName typeName, DValue idVal);
+	DValue resolveSyntheticId(DStructType structType, String idValue);
+	void rememberSynthId(DTypeName typeName, DValue dval, DValue generatedId, DValue synId);
 }

@@ -48,9 +48,9 @@ value:a:Flight {
  vfield1:'55'
 }
 ---
-title: long-primary-key
+title: long-primary-key (use sizeof(64))
 given:
-  type Flight struct {field1 long primaryKey } end
+  type Flight struct {field1 int primaryKey } field1.sizeof(64) end
   insert Flight {field1: 55 }
 when:
   let x = Flight[55]
@@ -93,7 +93,7 @@ given:
   type Flight struct {field1 struct primaryKey } end
   insert Flight {field1: '2019' }
 when:
-  let x = Flight['2019'];ERROR: parse-error
+  let x = Flight['2019'];ERROR: undefined-type: Can't find definition of type 'struct' mentioned in type 'Flight'
 #IDENTIFIER expected, struct encountered.
 
 #don't test RELATION. too strange

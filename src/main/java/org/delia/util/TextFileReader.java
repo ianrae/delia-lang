@@ -53,11 +53,11 @@ public class TextFileReader {
         return null;
     }
 
-    public List<String> ReadFileStream(InputStream istr) throws IOException {
+    public List<String> readFileStream(InputStream istr) throws IOException {
     	Reader reader = new InputStreamReader(istr);
     	return doReadFile(reader);
     }
-    public List<String> ReadFileFromReader(Reader reader) throws IOException {
+    public List<String> readFileFromReader(Reader reader) throws IOException {
     	return doReadFile(reader);
     }
     

@@ -29,4 +29,5 @@ public class DeliaException extends RuntimeException {
 	public int getErrorCount() {
 		return errorL.size();
 	}
+	public List<DeliaError> getErrors() { return errorL; }
 }

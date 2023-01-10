@@ -1,1 +1,0 @@
-  type Customer struct {field1 int primaryKey } end

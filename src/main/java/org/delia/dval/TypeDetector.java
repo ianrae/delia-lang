@@ -15,7 +15,7 @@ public class TypeDetector {
 			if (tryInt(input)) {
 				return "int";
 			}
-			return "long";
+			return "int"; //"long";
 		} else if (tryInt(input)) {
 			return "int";
 		} else {

@@ -5,6 +5,7 @@ import org.delia.type.DValueImpl;
 import org.delia.type.Shape;
 
 public class BooleanValueBuilder extends DValueBuilder {
+
 	public BooleanValueBuilder(DType type) {
 		if (!type.isShape(Shape.BOOLEAN)) {
 			addWrongTypeError("expection boolean");

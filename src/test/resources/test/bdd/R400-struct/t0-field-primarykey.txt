@@ -51,10 +51,11 @@ title: optional-dup
 given:
   type Flight struct {field1 int primaryKey } end
   insert Flight {field1: 55 }
-  insert Flight {field1: 55 }
 when:
-  let x = Flight[55];ERROR: duplicate-unique-value
-  
+  insert Flight {field1: 55 }
+then:
+ERROR: duplicate-unique-value
+
 ---
 SKIP: multiple-keys
 given:

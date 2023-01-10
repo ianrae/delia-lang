@@ -27,7 +27,7 @@ public class ScalarRuleOperand implements RuleOperand {
 		} else if (val instanceof Integer) {
 			return Shape.INTEGER;
 		} else if (val instanceof Long) {
-			return Shape.LONG;
+			return Shape.INTEGER;
 		} else if (val instanceof Double) {
 			return Shape.NUMBER;
 		} else if (val instanceof Boolean) {

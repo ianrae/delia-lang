@@ -9,4 +9,5 @@ public class BDDSnippet {
     public DBType dbType;
     public SnippetType type;
     public List<String> lines = new ArrayList<>();
+    public String thenType; //only used by value snippet
 }

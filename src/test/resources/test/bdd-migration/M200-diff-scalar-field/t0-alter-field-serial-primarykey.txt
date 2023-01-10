@@ -1,0 +1,7 @@
+GIVEN1
+type Customer struct {id int, wid int, name string } wid.maxlen(4) end
+GIVEN2
+type Customer struct {id int serial primaryKey, wid int, name string } wid.maxlen(4) end
+
+THEN
+mFLD(Customer.id):+P+S:NNN:int:64

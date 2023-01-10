@@ -6,22 +6,21 @@ import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
-import org.delia.db.sql.SimpleSqlNameFormatter;
-import org.delia.db.sql.StrCreator;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.log.Log;
+import org.delia.h2.H2ErrorConverter;
+import org.delia.log.DeliaLog;
 import org.delia.log.LogLevel;
-import org.delia.zdb.DBConnection;
-import org.delia.zdb.h2.H2DBConnection;
-import org.delia.zdb.h2.H2ErrorConverter;
-import org.delia.zdb.postgres.PostgresDBConnection;
-import org.delia.zdb.postgres.PostgresErrorConverter;
+import org.delia.util.StrCreator;
+import org.delia.db.DBConnection;
+import org.delia.dbimpl.h2.H2DBConnection;
+import org.delia.dbimpl.postgres.PostgresDBConnection;
+import org.delia.dbimpl.postgres.PostgresErrorConverter;
 
 public class SqlSnippetRunner implements SnippetRunner {
-    private final Log log;
+    private final DeliaLog log;
     private ConnectionProvider connProvider;
 
-    public SqlSnippetRunner(Log log) {
+    public SqlSnippetRunner(DeliaLog log) {
         this.log = log;
     }
 
@@ -67,7 +66,7 @@ public class SqlSnippetRunner implements SnippetRunner {
             case H2:
                 return new H2DBConnection(factorySvc, connFact, new H2ErrorConverter());
             case POSTGRES:
-                return new PostgresDBConnection(factorySvc, connFact, new PostgresErrorConverter(new SimpleSqlNameFormatter(null, true) ));
+                return new PostgresDBConnection(factorySvc, connFact, new PostgresErrorConverter()); //new SimpleSqlNameFormatter(null, true) ));
             default:
                 throw new RuntimeException(String.format("unknown dbType %s", dbType));
         }

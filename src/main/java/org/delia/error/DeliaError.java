@@ -1,5 +1,7 @@
 package org.delia.error;
 
+import org.delia.compiler.ast.AST;
+
 import java.time.LocalDateTime;
 
 /**
@@ -16,17 +18,15 @@ public class DeliaError {
 	private String arg1;
 	private String arg2;
 	private String arg3;
-	private int lineNum;
-	private int pos;
+	private AST.Loc loc;
 
 	public DeliaError(String id, String msg) {
 		this.id = id;
 		this.msg = msg;
 	}
 	
-	public void setLineAndPos(int lineNum, int pos) {
-		this.lineNum = lineNum;
-		this.pos = pos;
+	public void setLoc(AST.Loc loc) {
+		this.loc = loc;
 	}
 	
 	@Override
@@ -69,12 +69,9 @@ public class DeliaError {
 	public void setMessage(String msg) {
 		this.msg = msg;
 	}
-
-	public int getLineNum() {
-		return lineNum;
+	public AST.Loc getLoc() {
+		return loc;
 	}
 
-	public int getPos() {
-		return pos;
-	}
+
 }

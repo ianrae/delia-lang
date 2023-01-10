@@ -3,11 +3,8 @@ package org.delia.bddnew;
 import org.delia.base.UnitTestLog;
 import org.delia.bddnew.core.*;
 import org.delia.db.DBType;
-import org.delia.util.TextFileReader;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 

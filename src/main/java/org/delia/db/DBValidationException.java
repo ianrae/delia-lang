@@ -18,4 +18,5 @@ public class DBValidationException extends DeliaException {
 	public DBValidationException(DeliaError err) {
 		super(err);
 	}
+
 }

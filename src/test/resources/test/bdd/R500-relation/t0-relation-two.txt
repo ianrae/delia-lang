@@ -1,0 +1,101 @@
+# struct tests
+
+FEATURE: relation when with two relations
+background:
+ configure loadFKs = true
+ type Address struct {
+  id int primaryKey,
+  city string optional,
+  relation customeraddressdat11 Customeraddressdat1 one optional   parent
+} end
+type Customer struct {
+  id int primaryKey,
+  firstName string optional,
+  relation customeraddressdat11 Customeraddressdat1 one optional   parent
+} end
+type Customeraddressdat1 struct {
+  id int primaryKey,
+  relation leftv Customer one optional,
+  relation rightv Address one optional
+} end
+
+thenType: struct
+
+
+---
+title: normal
+given:
+  insert Customer {id: 55, firstName:'bob' }
+when:
+  insert Address {id: 100, city:'toronto' }
+  insert Customeraddressdat1 {id:40, leftv:55, rightv:100 }
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vfirstName:'bob'
+ vcustomeraddressdat11:{40}
+}
+
+---
+title: type with 2 relations
+given:
+  insert Customer {id: 55, firstName:'bob' }
+when:
+  insert Address {id: 100, city:'toronto' }
+  insert Customeraddressdat1 {id:40, leftv:55, rightv:100 }
+  let x = Customeraddressdat1[true]
+then:
+value:a:Customeraddressdat1 {
+ vid:40
+ vleftv:{55}
+ vrightv:{100}
+}
+
+---
+title: fetch
+given:
+  insert Customer {id: 55, firstName:'bob' }
+when:
+  insert Address {id: 100, city:'toronto' }
+  insert Customeraddressdat1 {id:40, leftv:55, rightv:100 }
+  let x = Customeraddressdat1[true].fetch('leftv')
+then:
+value:a:Customeraddressdat1 {
+ vid:40
+  vleftv:{55:
+  {
+   vid:55
+   vfirstName:'bob'
+   vcustomeraddressdat11:{40}
+  }
+ }
+ vrightv:{100}
+}
+
+---
+title: fetch2
+given:
+  insert Customer {id: 55, firstName:'bob' }
+when:
+  insert Address {id: 100, city:'toronto' }
+  insert Customeraddressdat1 {id:40, leftv:55, rightv:100 }
+  let x = Customeraddressdat1[true].fetch('leftv').fetch('rightv')
+then:
+value:a:Customeraddressdat1 {
+ vid:40
+  vleftv:{55:
+  {
+   vid:55
+   vfirstName:'bob'
+   vcustomeraddressdat11:{40}
+  }
+ }
+ vrightv:{100:
+   {
+  vid:100
+  vcity:'toronto'
+  vcustomeraddressdat11:{40}
+   }
+}
+}

@@ -21,8 +21,8 @@ value:a:Flight2 {
 ---
 title: fail
 given:
-  insert Flight2 {id: 55, wid: 10 }
 when:
+  insert Flight2 {id: 55, wid: 10 }
   let x = Flight2[55];ERROR: rule-compare
 
 

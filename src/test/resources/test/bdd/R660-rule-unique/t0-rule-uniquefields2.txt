@@ -28,11 +28,11 @@ value:a:Flight {
 ---
 title: should fail
 given:
+when:
   insert Flight {id: 55, field1: 10, field2: 10, field3: 'a', field4: 'a' }
   insert Flight {id: 56, field1: 10, field2: 10, field3: 'a', field4: 'a' }
   log 'hello'
-when:
   let x = Flight[true].ith(0)
 then:
-ERROR:duplicate-unique-value
+ERROR: rule-uniqueFields
 

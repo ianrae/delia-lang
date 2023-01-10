@@ -1,0 +1,56 @@
+# orderBy of a relation field
+
+FEATURE: queryfn-orderby-relation
+background:
+ configure loadFKs = true
+thenType: struct
+
+
+# --- Optional ---
+---
+title: normal. we only support orderBy on pk field of relation, and you must include .fetch('cust' !!
+given:
+ type Customer struct {id int primaryKey, x int, relation addr Address optional many } end
+ type Address struct {id int primaryKey, y int, relation cust Customer optional one } end
+
+  insert Customer {id: 55, x:10 }
+  insert Customer {id: 56, x:11 }
+  insert Address {id: 100, y:21, cust: 55 }
+  insert Address {id: 101, y:22, cust: 55 }
+  insert Address {id: 102, y:23, cust: 56 }
+when:
+  let x = Address[true].fetch('cust').orderBy('cust')
+then:
+value:a:Address {
+ vid:100
+ vy:21
+ vcust:{55:
+   {
+   vid:55
+   vx:10
+   vaddr:{[100,101]}
+  }
+}
+ }
+ value:a:Address {
+  vid:101
+  vy:22
+  vcust:{55:
+    {
+    vid:55
+    vx:10
+    vaddr:{[100,101]}
+   }
+ }
+ }
+ value:a:Address {
+  vid:102
+  vy:23
+  vcust:{56:
+    {
+    vid:56
+    vx:11
+    vaddr:{102}
+   }
+ }
+}

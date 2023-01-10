@@ -1,0 +1,11 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int, cust int}  end
+
+GIVEN2
+type Customer struct {id int primaryKey, wid int, name string, relation addr Address many optional parent } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int, relation cust Customer many}  end
+
+THEN
++FLD(Customer.addr):O:NYN:Address:0;mFLD(Address.cust)::NYN:Customer:0;+TBL(CustomerAddressDat1):leftv,rightv
+

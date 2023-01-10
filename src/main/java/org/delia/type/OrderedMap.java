@@ -14,12 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class OrderedMap {
-    public Map<String,DType> map = new ConcurrentHashMap<>();
+    public Map<String,DType> map = new ConcurrentHashMap<>(); //fieldName,dtype
     public List<String> orderedList = new ArrayList<>();  //ordered by when added
-    private Map<String,Boolean> optionalMap = new ConcurrentHashMap<>();
-    private Map<String,Boolean> uniqueMap = new ConcurrentHashMap<>();
-    private Map<String,Boolean> primaryKeyMap = new ConcurrentHashMap<>();
-    private Map<String,Boolean> serialMap = new ConcurrentHashMap<>();
+    private Map<String,Boolean> optionalMap = new ConcurrentHashMap<>(); //fieldname,isOptional
+    private Map<String,Boolean> uniqueMap = new ConcurrentHashMap<>(); //fieldname,isUnique
+    private Map<String,Boolean> primaryKeyMap = new ConcurrentHashMap<>(); //fieldname,isPrimaryKey
+    private Map<String,Boolean> serialMap = new ConcurrentHashMap<>(); //fieldname,isSerial
     
     public void add(String fieldName, DType type, boolean optional, boolean unique, boolean primaryKey, boolean serial) {
     	//ConcurrentHashMap doesn't allow null key
@@ -59,4 +59,5 @@ public class OrderedMap {
         Boolean bb = serialMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
+
 }

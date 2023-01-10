@@ -1,18 +1,12 @@
 package org.delia.compiler.generate;
 
+import org.delia.log.LoggableBlob;
+import org.delia.type.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
-
-import org.delia.log.LoggableBlob;
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DRelation;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DValue;
-import org.delia.type.Shape;
-import org.delia.type.WrappedBlob;
 
 /**
  * Converts a DValue into a very simple text format. Used by unit tests.
@@ -106,9 +100,13 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
         } else if (dval.getType().isShape(Shape.RELATION)) {
         	DRelation rel = dval.asRelation();
         	if (rel.isMultipleKey()) {
-        		return buildMultipleRef(rel);
+        		return buildMultipleRef(rel, genctx);
         	}
-        	String keyStr = rel.getForeignKey().asString();
+        	DValue fkval = rel.getMultipleKeys().isEmpty() ? null : rel.getMultipleKeys().get(0);
+        	String keyStr = DValToString(fkval, genctx); //*** recursion ***
+			if ("null".equals(keyStr)) {
+				return keyStr;
+			}
         	boolean b = genctx.expandSubOjectsFlag ? rel.haveFetched() : false;
         	String suffix = b ? ":" : "}";
         	return String.format("{%s%s", keyStr, suffix);
@@ -126,10 +124,11 @@ public class SimpleFormatOutputGenerator implements ValueGenerator {
         
         return dval.asString();
     }
-	private String buildMultipleRef(DRelation rel) {
+	private String buildMultipleRef(DRelation rel, GeneratorContext genctx) {
 		StringJoiner joiner = new StringJoiner(",");
 		for(DValue key: rel.getMultipleKeys()) {
-			joiner.add(key.asString());
+			String keyStr = DValToString(key, genctx); //*** recursion ***
+			joiner.add(keyStr);
 		}
 		return String.format("{[%s]}", joiner.toString());
 	}

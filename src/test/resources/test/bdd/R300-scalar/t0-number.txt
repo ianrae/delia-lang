@@ -5,7 +5,7 @@ background:
 thenType: number
 
 ---
-let x number = 5;5
+let x number = 5;5.0
 ---
 let x number = 5.234;5.234
 ---
@@ -15,14 +15,14 @@ let x number = 0;0.0
 ---
 let x number = 0.0;0.0
 ---
-let x number = -1;-1
+let x number = -1;-1.0
 ---
 SKIP:later use Terminals.ScientificNumberLiteral
 let x number = 1.2e3;1200.0
 ---
-let x number = 9223372036854775807;9223372036854775807
+let x number = 9223372036854775807;9.223372036854776E18
 ---
-let x number = -9223372036854775808;-9223372036854775808
+let x number = -9223372036854775808;-9.223372036854776E18
 ---
 let x number = 922337203685.4775808;9.223372036854775E11
 ---

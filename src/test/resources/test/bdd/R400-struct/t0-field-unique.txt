@@ -59,7 +59,7 @@ title: optional-dup
 given:
   type Flight struct {field1 int primaryKey, field2 int optional unique } end
   insert Flight {field1: 55, field2: 10 }
-  insert Flight {field1: 56, field2: 10 }
 when:
+  insert Flight {field1: 56, field2: 10 }
   let x = Flight[55];ERROR: duplicate-unique-value
   

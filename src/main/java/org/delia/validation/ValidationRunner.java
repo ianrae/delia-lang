@@ -1,9 +1,10 @@
 package org.delia.validation;
 
-import java.util.List;
-
+import org.delia.error.ErrorTracker;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
+
+import java.util.List;
 
 public interface ValidationRunner {
 
@@ -14,6 +15,7 @@ public interface ValidationRunner {
 	void validateRelationRules(DValue dval);
 
 	void propogateErrors(ResultValue res);
+	void propogateErrors(ErrorTracker errorTracker);
 
 	boolean validateDVals(List<DValue> dvalList);
 

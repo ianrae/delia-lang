@@ -1,33 +1,37 @@
 # scalar tests
 
 FEATURE: scalar-long
+# long implemented as int with sizeof(64)
 background:
-thenType: long
+ type MyLong int sizeof(64) end
+thenType: int
+
+
 
 ---
-let x long = 5;5
+let x MyLong = 5;5
 ---
-let x long = 0;0
+let x MyLong = 0;0
 ---
-let x long = -1;-1
+let x MyLong = -1;-1
 ---
-let x long = 9223372036854775807;9223372036854775807
+let x MyLong = 9223372036854775807;9223372036854775807
 ---
-let x long = -9223372036854775808;-9223372036854775808
+let x MyLong = -9223372036854775808;-9223372036854775808
 ---
-let x long = 9223372036854775808;ERROR: parse-error: long value is not an long - 2147483648
+let x MyLong = 9223372036854775808;ERROR: wrong-type: long value is not an long - 9223372036854775808
 ---
-let x long = -9223372036854775809;ERROR: parse-error: long value is not an long
+let x MyLong = -9223372036854775809;ERROR: wrong-type: long value is not an long - -9223372036854775809
 ---
-let x long = null;null
----
-given:
- let z long = 5
-when:
- let x long = z;5
+let x MyLong = null;null
 ---
 given:
- let z long = null
+ let z MyLong = 5
 when:
- let x long = z;null
+ let x MyLong = z;5
+---
+given:
+ let z MyLong = null
+when:
+ let x MyLong = z;null
 

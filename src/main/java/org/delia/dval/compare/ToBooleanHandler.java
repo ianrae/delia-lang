@@ -3,6 +3,7 @@ package org.delia.dval.compare;
 import org.delia.type.DValue;
 
 public class ToBooleanHandler implements Handler {
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public int compareDVal(DValue dval1, DValue dval2) {

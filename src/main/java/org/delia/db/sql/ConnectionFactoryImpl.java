@@ -1,13 +1,12 @@
 package org.delia.db.sql;
 
+import org.delia.db.DBErrorConverter;
+import org.delia.log.DeliaLog;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
-import org.delia.db.DBErrorConverter;
-import org.delia.log.Log;
 
 /**
  * A sample connection factory.  
@@ -18,11 +17,11 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	
 	public ConnectionDefinition connectionString;
 	private DBErrorConverter errorConverter;
-	private Log log;
+	private DeliaLog log;
 	private boolean haveLoggedJDBC = false;
 	private DataSource ds;
 	
-	public ConnectionFactoryImpl(ConnectionDefinition connStr, Log log) {
+	public ConnectionFactoryImpl(ConnectionDefinition connStr, DeliaLog log) {
 		this.connectionString = connStr;
 		this.ds = connStr.ds; //if null then use jdbcUrl
 		this.log = log;
@@ -44,7 +43,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 				conn = DriverManager.getConnection(connectionString.jdbcUrl, connectionString.userName, connectionString.pwd);
 			}
 		} catch (SQLException e) {
-			errorConverter.convertAndRethrowException(e);
+			errorConverter.convertAndRethrowException(e, null);
 		}      
 		return conn;
 	}

@@ -8,8 +8,8 @@ import java.util.List;
  *
  */
 public interface LogFactory {
-	Log create(String name);
-	Log create(Class<?> clazz);
+	DeliaLog create(String name);
+	DeliaLog create(Class<?> clazz);
 	void setDefaultLogLevel(LogLevel level);
 	LogLevel getDefaultLogLevel();
 	void setLogLevelMap(List<String> levelMapList);

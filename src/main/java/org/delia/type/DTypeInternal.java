@@ -7,4 +7,5 @@ package org.delia.type;
  */
 public interface DTypeInternal {
 	void finishScalarInitialization(Shape shape, String typeName, DType baseType);
+	void setEffectiveShape(EffectiveShape effectiveShape);
 }

@@ -1,0 +1,21 @@
+# CRUD update tests
+FEATURE: upsert multiple MM values
+background:
+	type Customer struct {id int primaryKey, wid int, relation addr Address optional many } end
+	type Address struct {id int primaryKey, z int, relation cust Customer optional many } end
+	insert Customer {id: 55, wid: 33}
+	insert Customer {id: 56, wid: 34}
+thenType: struct
+
+---
+title: update with addr
+when:
+ upsert Address[100] {z:5, cust: [55,56] }
+ let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+ vwid:33
+ vaddr:{100}
+}
+

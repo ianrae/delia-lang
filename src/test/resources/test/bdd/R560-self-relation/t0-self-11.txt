@@ -4,7 +4,7 @@ FEATURE: self-join
 background:
   type Customer struct {id int primaryKey, name string,
       relation manager Customer 'r1' one optional parent,
-      relation worker Customer 'r1' one optional,
+      relation worker Customer 'r1' one optional
   }  end
   insert Customer {id: 55, name: 'art' }
 thenType: struct
@@ -41,15 +41,7 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
- IF(MEM):vworker:{55}
-ELSE:  vworker:{55:
-ELSE:  {
-ELSE:   vid:55
-ELSE:   vname:'art'
-ELSE:   vmanager:{56}
-ELSE:   vworker:null
-ELSE:   }
-ELSE: }
+  vworker:{55}
 }
 
 ---
@@ -69,13 +61,5 @@ value:a:Customer {
  vid:56
  vname:'bob'
  vmanager:null
- IF(MEM):vworker:{55}
- ELSE:vworker:{55:
- ELSE: {
- ELSE:  vid:55
- ELSE:  vname:'art'
-ELSE:   vmanager:null
-ELSE:   vworker:null
-ELSE:   }
-ELSE: }
+ vworker:{55}
 }
