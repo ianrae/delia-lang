@@ -3,20 +3,19 @@ package org.delia.dao;
 import org.apache.commons.lang3.StringUtils;
 import org.delia.ConnectionDefinitionBuilder;
 import org.delia.Delia;
-import org.delia.DeliaFactory;
 import org.delia.DeliaSession;
-import org.delia.builder.DeliaBuilder;
 import org.delia.core.FactoryService;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
-import org.delia.log.Log;
-import org.delia.runner.BlobLoader;
+import org.delia.log.DeliaLog;
+import org.delia.log.SimpleLog;
 import org.delia.runner.ResultValue;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
-import org.delia.zdb.DBInterfaceFactory;
+import org.delia.db.DBInterfaceFactory;
+import org.delia.DeliaFactory;
 
 /**
  * Represents delia access to a single database through its Delia types.
@@ -26,18 +25,19 @@ import org.delia.zdb.DBInterfaceFactory;
  * @author Ian Rae
  *
  */
-public class DeliaGenericDao  {
+public class DeliaGenericDao {
 	private Delia delia;
 	private DBInterfaceFactory dbInterface;
 	private DeliaSession mostRecentSess;
 	private FactoryService factorySvc;
-	private BlobLoader blobLoader;
-	
+
 	public DeliaGenericDao() {
 		ConnectionDefinition connStr = ConnectionDefinitionBuilder.createMEM();
-		this.delia = DeliaBuilder.withConnection(connStr).build();
+		DeliaLog log = new SimpleLog();
+		ErrorTracker et = new SimpleErrorTracker(log);
+		this.factorySvc = new FactoryServiceImpl(log, et);
+		delia = DeliaFactory.create(connStr, log, factorySvc);
 		this.dbInterface = delia.getDBInterface();
-		this.factorySvc = delia.getFactoryService();
 	}
 	
 //	public DeliaGenericDao(ConnectionInfo info) {
@@ -55,10 +55,11 @@ public class DeliaGenericDao  {
 		this.mostRecentSess = session;
 	}
 
-	public DeliaGenericDao(ConnectionDefinition connString, Log log) {
+	public DeliaGenericDao(ConnectionDefinition connString, DeliaLog log) {
 		ErrorTracker et = new SimpleErrorTracker(log);
 		this.factorySvc = new FactoryServiceImpl(log, et);
 		delia = DeliaFactory.create(connString, log, factorySvc);
+		dbInterface = delia.getDBInterface();
 	}
 
 	public boolean initialize(String src) {
@@ -75,12 +76,12 @@ public class DeliaGenericDao  {
 		if (mostRecentSess != null) {
 			DeliaExceptionHelper.throwError("dao-init-error", "can't start a Dao more than once");
 		}
-		mostRecentSess = delia.beginSession(src, blobLoader);
+		mostRecentSess = delia.beginSession(src);
 		return mostRecentSess.getFinalResult();
 	}
 
 	public ResultValue execute(String src) {
-		ResultValue res = delia.continueExecution(src, blobLoader, mostRecentSess);
+		ResultValue res = delia.continueExecution(src, mostRecentSess);
 		return res;
 	}
 	
@@ -153,13 +154,5 @@ public class DeliaGenericDao  {
 			DeliaExceptionHelper.throwError("dao-registry-not-created-yet", "you must call initialize() before calling this method");
 		}
 		return this.mostRecentSess.getExecutionContext().registry;
-	}
-
-	public BlobLoader getBlobLoader() {
-		return blobLoader;
-	}
-
-	public void setBlobLoader(BlobLoader blobLoader) {
-		this.blobLoader = blobLoader;
 	}
 }

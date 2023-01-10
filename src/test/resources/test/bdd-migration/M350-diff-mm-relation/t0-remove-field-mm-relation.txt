@@ -1,0 +1,10 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string, relation addr Address many optional } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int, relation cust Customer many}  end
+
+GIVEN2
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int}  end
+
+THEN
+-FLD(Customer.addr);-FLD(Address.cust);-TBL(CustomerAddressDat1)

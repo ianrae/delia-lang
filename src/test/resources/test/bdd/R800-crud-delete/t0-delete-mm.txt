@@ -1,0 +1,109 @@
+# CRUD delete tests
+
+FEATURE: CRUD delete
+background:
+type Customer struct {
+  id int primaryKey,
+  firstName string optional,
+  relation addr Address many optional
+} end
+type Address struct {
+  id int primaryKey,
+  city string optional,
+  relation cust Customer many
+} end
+thenType: struct
+
+---
+title: delete customer not allowed (mandatory)
+when:
+insert Customer { id: 7, firstName: 'bob', addr: null }
+insert Customer { id: 8, firstName: 'xbob', addr: null }
+insert Address { id: 100, city: 'paris', cust: [7,8] }
+insert Address { id: 101, city: 'toronto', cust: 8 }
+
+  delete Customer[7]
+  let x = Customer[7]
+then:
+ERROR: rule-relationMany
+
+---
+title: delete address
+when:
+insert Customer { id: 7, firstName: 'bob', addr: null }
+insert Customer { id: 8, firstName: 'xbob', addr: null }
+insert Address { id: 100, city: 'paris', cust: [7,8] }
+insert Address { id: 101, city: 'toronto', cust: 8 }
+
+  delete Address[100]
+  let x = Customer[7]
+then:
+value:a:Customer {
+  vid:7
+  vfirstName:'bob'
+  vaddr:null
+}
+
+---
+title: delete address all
+when:
+insert Customer { id: 7, firstName: 'bob', addr: null }
+insert Customer { id: 8, firstName: 'xbob', addr: null }
+insert Address { id: 100, city: 'paris', cust: [7,8] }
+insert Address { id: 101, city: 'toronto', cust: 8 }
+
+  delete Address[true]
+  let x = Customer[7]
+then:
+value:a:Customer {
+  vid:7
+  vfirstName:'bob'
+  vaddr:null
+}
+
+---
+title: delete address op (not yet implemented)
+when:
+insert Customer { id: 7, firstName: 'bob', addr: null }
+insert Customer { id: 8, firstName: 'xbob', addr: null }
+insert Address { id: 100, city: 'paris', cust: [7,8] }
+insert Address { id: 101, city: 'toronto', cust: 8 }
+
+  delete Address[city=='paris']
+  let x = Customer[7]
+then:
+ERROR: not-implemented
+
+---
+title: delete address using in and leftv or rightv
+when:
+insert Customer { id: 7, firstName: 'bob', addr: null }
+insert Customer { id: 8, firstName: 'xbob', addr: null }
+insert Address { id: 100, city: 'paris', cust: [7,8] }
+insert Address { id: 101, city: 'toronto', cust: 8 }
+
+  delete Address[id in [100]]
+  let x = Customer[7]
+then:
+value:a:Customer {
+  vid:7
+  vfirstName:'bob'
+  vaddr:null
+}
+
+---
+title: delete address using in and leftv or rightv when multiple
+when:
+insert Customer { id: 7, firstName: 'bob', addr: null }
+insert Customer { id: 8, firstName: 'xbob', addr: null }
+insert Address { id: 100, city: 'paris', cust: [7,8] }
+insert Address { id: 101, city: 'toronto', cust: 8 }
+
+  delete Address[id in [100,101]]
+  let x = Customer[7]
+then:
+value:a:Customer {
+  vid:7
+  vfirstName:'bob'
+  vaddr:null
+}

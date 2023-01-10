@@ -3,9 +3,9 @@ package org.delia.bddnew.core;
 import org.delia.ConnectionDefinitionBuilder;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
+import org.delia.postgres.PostgresConnectionHelper;
 
 public class BDDConnectionProvider implements ConnectionProvider {
-
     private final DBType dbType;
     private ConnectionDefinition currentConnDef;
 
@@ -27,8 +27,8 @@ public class BDDConnectionProvider implements ConnectionProvider {
                 return ConnectionDefinitionBuilder.createMEM();
 //            case H2:
 //                return H2ConnectionHelper.getTestDB();
-//            case POSTGRES:
-//                return PostgresConnectionHelper.getTestDB();
+            case POSTGRES:
+                return PostgresConnectionHelper.getTestDB();
         }
         return null;
     }

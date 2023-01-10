@@ -6,7 +6,7 @@ background:
 thenType: struct
 
 ---
-title: log1
+title: int ok
 given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
@@ -18,4 +18,12 @@ value:a:Flight {
  vid:55
  vwid:4
 }
+
+---
+title: int out-of-range
+given:
+when:
+  insert Flight {id: 55, wid: 256 }
+then:
+ERROR: rule-sizeof
 

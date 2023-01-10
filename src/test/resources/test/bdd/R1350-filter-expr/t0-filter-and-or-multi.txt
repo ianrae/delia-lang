@@ -1,0 +1,71 @@
+# let query filter tests
+
+FEATURE: filter-expr and/or/not
+background:
+  type Flight struct {id int primaryKey, wid int optional, h int optional, points int }  end
+thenType: struct
+
+---
+title: three ands
+given:
+  insert Flight {id: 55, wid: 1, h: 10, points: 100 }
+when:
+  let x = Flight[wid < 10 and h < 100 and points > 10]
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+ vh:10
+ vpoints:100
+}
+
+---
+title: three ands, returns nothing
+given:
+  insert Flight {id: 55, wid: 1, h: 10, points: 100 }
+when:
+  let x = Flight[wid < 10 and h < 100 and points < 10]
+then:
+null
+
+---
+title: ands and ors
+given:
+  insert Flight {id: 55, wid: 1, h: 10, points: 100 }
+when:
+  let x = Flight[(wid < 10 and h < 100) or points > 10]
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+ vh:10
+ vpoints:100
+}
+
+---
+title: and and in
+given:
+  insert Flight {id: 55, wid: 1, h: 10, points: 100 }
+when:
+  let x = Flight[wid < 10 and points in [100,101]]
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+ vh:10
+ vpoints:100
+}
+
+---
+title: and and in, other was
+given:
+  insert Flight {id: 55, wid: 1, h: 10, points: 100 }
+when:
+  let x = Flight[points in [100,101] and wid < 10]
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+ vh:10
+ vpoints:100
+}

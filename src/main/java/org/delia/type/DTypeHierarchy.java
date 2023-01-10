@@ -11,9 +11,9 @@ public class DTypeHierarchy {
     private Map<DType, BitSet> parentsMap = new ConcurrentHashMap<>();
     private Map<DType, BitSet> childMap = new ConcurrentHashMap<>();
     
-    public void build(Map<String,DType> allTypes) {
+    public void build(Map<DTypeName,DType> allTypes) {
         
-        for(String typeName: allTypes.keySet()) {
+        for(DTypeName typeName: allTypes.keySet()) {
             DType dtype = allTypes.get(typeName);
             BitSet parentBS = new BitSet();
             BitSet childBS = new BitSet();
@@ -23,8 +23,8 @@ public class DTypeHierarchy {
         }
     }
 
-    private void buildBS(DType target, BitSet parentBS, BitSet childBS, Map<String, DType> allTypes) {
-        for(String typeName: allTypes.keySet()) {
+    private void buildBS(DType target, BitSet parentBS, BitSet childBS, Map<DTypeName, DType> allTypes) {
+        for(DTypeName typeName: allTypes.keySet()) {
             DType dtype = allTypes.get(typeName);
             if (calcIsParent(target, dtype)) {
                 //dtype is a base-class of target
@@ -68,14 +68,14 @@ public class DTypeHierarchy {
         return bs.get(child.getBitIndex());
     }
 
-    public List<DType> findParentTypes(Map<String, DType> allTypes, DType type) {
+    public List<DType> findParentTypes(Map<DTypeName, DType> allTypes, DType type) {
         BitSet bs = parentsMap.get(type);
         if (bs == null) {
             return null;
         }
         return findInBitSet(bs, allTypes);
     }
-    public List<DType> findChildTypes(Map<String, DType> allTypes, DType type) {
+    public List<DType> findChildTypes(Map<DTypeName, DType> allTypes, DType type) {
         BitSet bs = childMap.get(type);
         if (bs == null) {
             return null;
@@ -83,9 +83,9 @@ public class DTypeHierarchy {
         return findInBitSet(bs, allTypes);
     }
 
-    private List<DType> findInBitSet(BitSet bs, Map<String, DType> allTypes) {
+    private List<DType> findInBitSet(BitSet bs, Map<DTypeName, DType> allTypes) {
         List<DType> resultList = new ArrayList<>();
-        for(String typeName: allTypes.keySet()) {
+        for(DTypeName typeName: allTypes.keySet()) {
             DType dtype = allTypes.get(typeName);
             if (bs.get(dtype.getBitIndex())) {
                 resultList.add(dtype);

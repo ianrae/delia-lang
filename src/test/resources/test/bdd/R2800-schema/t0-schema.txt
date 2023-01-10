@@ -1,0 +1,74 @@
+# struct tests
+
+FEATURE: schema
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: let
+given:
+ schema s2
+ type Customer struct {id int primaryKey, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+when:
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+---
+title: update
+given:
+ schema s2
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55, wid:222 }
+when:
+  update Customer[55] { wid:333 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vwid:333
+ vaddr:null
+}
+
+---
+title: upsert
+given:
+ schema s2
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55, wid:222 }
+when:
+  upsert Customer[55] { wid:333 }
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vwid:333
+ vaddr:null
+}
+
+---
+title: delete
+given:
+ schema s2
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55, wid:222 }
+when:
+  delete Customer[55]
+  let x = Customer[55]
+then:
+null
+
+

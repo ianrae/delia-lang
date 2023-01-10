@@ -10,7 +10,7 @@ public class TimeZoneServiceImpl implements TimeZoneService {
 	public TimeZoneServiceImpl() {
 		this.defaultTz = ZoneId.of(DEFAULT_TIMEZONE);
 	}
-	
+
 	@Override
 	public void setDefaultTimeZone(ZoneId tz) {
 		defaultTz = tz;

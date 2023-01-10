@@ -62,7 +62,7 @@ ERROR: serial-value-cannot-be-provided
 ---
 title: serial long
 given:
-  type Flight struct {field1 long primaryKey serial, field2 int  } end
+  type Flight struct {field1 int primaryKey serial, field2 int  } field1.sizeof(64) end
   insert Flight {field2: 57 }
 when:
   let x = Flight[1]

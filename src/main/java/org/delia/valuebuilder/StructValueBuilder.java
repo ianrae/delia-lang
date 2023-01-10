@@ -1,16 +1,11 @@
 package org.delia.valuebuilder;
 
+import org.delia.error.DetailedError;
+import org.delia.type.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.delia.error.DetailedError;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DValue;
-import org.delia.type.DValueImpl;
-import org.delia.type.Shape;
-import org.delia.type.TypePair;
 
 
 /**
@@ -22,6 +17,9 @@ public class StructValueBuilder extends DValueBuilder {
 	private DStructType structType;
     public Map<String,DValue> map = new TreeMap<>();
     public List<TypePair>  allFields;
+	private boolean ignoreMissingFields; //advanced use
+
+	private String ignoreThisField; //used for upsert
 
 	public StructValueBuilder(DStructType type) {
 		if (!type.isShape(Shape.STRUCT)) {
@@ -73,7 +71,11 @@ public class StructValueBuilder extends DValueBuilder {
 		DType target = pair.type; 
 		boolean isRelation = target.isStructShape();
 		if (!isRelation && !isOptional && ! target.isAssignmentCompatible(dval.getType())) {
-			this.addWrongTypeError(String.format("field %s", fieldName)); //!!
+			if (target.isShape(Shape.INTEGER) && BuiltInSizeofIntTypes.isSizeofType(target.getName())) {
+				//not an error. ignore
+			} else {
+				this.addWrongTypeError(String.format("field %s", fieldName)); //!!
+			}
 		}
 		
 		map.put(fieldName, dval);
@@ -105,19 +107,28 @@ public class StructValueBuilder extends DValueBuilder {
 	@Override
 	protected void onFinish() {
 		if (wasSuccessful()) {
-			for(TypePair pair : allFields) {
-			    String fieldName = pair.name;
-				if (! map.containsKey(fieldName) && ! isOptionalOrRelationOrSerial(pair)) {
-					addMissingFieldError(String.format("value for field '%s' not added to struct", fieldName), fieldName);
+			if (!ignoreMissingFields) {
+				for(TypePair pair : allFields) {
+					String fieldName = pair.name;
+					if (! map.containsKey(fieldName) && ! isOptionalOrRelationOrSerial(pair) && !isIgnoringThisField(pair)) {
+						addMissingFieldError(String.format("value for field '%s' not added to struct", fieldName), fieldName);
+					}
 				}
 			}
-			
+
 			newDVal = new DValueImpl(type, map);
 		}
 		
 		for(DetailedError err : getValidationErrors()){
 			err.setTypeName(structType.getName());
 		}
+	}
+
+	private boolean isIgnoringThisField(TypePair pair) {
+		if (ignoreThisField != null && ignoreThisField.equals(pair.name)) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -133,6 +144,21 @@ public class StructValueBuilder extends DValueBuilder {
 		}
 		return false;
 	}
-	
-	
+
+	public boolean isIgnoreMissingFields() {
+		return ignoreMissingFields;
+	}
+
+	public void setIgnoreMissingFields(boolean ignoreMissingFields) {
+		this.ignoreMissingFields = ignoreMissingFields;
+	}
+	public String getIgnoreThisField() {
+		return ignoreThisField;
+	}
+
+	public void setIgnoreThisField(String ignoreThisField) {
+		this.ignoreThisField = ignoreThisField;
+	}
+
+
 }

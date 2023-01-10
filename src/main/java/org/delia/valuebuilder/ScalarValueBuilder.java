@@ -1,30 +1,34 @@
 package org.delia.valuebuilder;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.log.LoggableBlob;
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
+import org.delia.type.*;
 import org.delia.util.DeliaExceptionHelper;
+
+import java.time.ZonedDateTime;
+import java.util.Date;
 
 public class ScalarValueBuilder extends ServiceBase {
 
-	private DTypeRegistry registry;
+	protected DTypeRegistry registry;
 
 	public ScalarValueBuilder(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
 		this.registry = registry;
 	}
-	
+
+	public DType getTypeForShape(Shape shape) {
+		return registry.getType(BuiltInTypes.getBuiltInTypeOf(shape));
+	}
+
 	public DValue buildInt(String input) {
 		return buildInt(input, registry.getType(BuiltInTypes.INTEGER_SHAPE));
 	}
 	public DValue buildInt(Integer value) {
+		return buildInt(value, registry.getType(BuiltInTypes.INTEGER_SHAPE));
+	}
+	public DValue buildInt(Long value) {
 		return buildInt(value, registry.getType(BuiltInTypes.INTEGER_SHAPE));
 	}
 	public DValue buildInt(String input, DType dtype) {
@@ -37,23 +41,28 @@ public class ScalarValueBuilder extends ServiceBase {
 		builder.buildFrom(value); 
 		return finish(builder, "int", value);
 	}
-	
-	public DValue buildLong(String input) {
-		return buildLong(input, registry.getType(BuiltInTypes.LONG_SHAPE));
+	public DValue buildInt(Long value, DType dtype) {
+		IntegerValueBuilder builder = new IntegerValueBuilder(dtype);
+		builder.buildFrom(value);
+		return finish(builder, "int", value);
 	}
-	public DValue buildLong(Long value) {
-		return buildLong(value, registry.getType(BuiltInTypes.LONG_SHAPE));
-	}
-	public DValue buildLong(String input, DType dtype) {
-		LongValueBuilder builder = new LongValueBuilder(dtype);
-		builder.buildFromString(input); 
-		return finish(builder, "long", input);
-	}
-	public DValue buildLong(Long value, DType dtype) {
-		LongValueBuilder builder = new LongValueBuilder(dtype);
-		builder.buildFrom(value); 
-		return finish(builder, "long", value);
-	}
+
+//	public DValue buildLong(String input) {
+//		return buildLong(input, registry.getType(BuiltInTypes.LONG_SHAPE));
+//	}
+//	public DValue buildLong(Long value) {
+//		return buildLong(value, registry.getType(BuiltInTypes.LONG_SHAPE));
+//	}
+//	public DValue buildLong(String input, DType dtype) {
+//		LongValueBuilder builder = new LongValueBuilder(dtype);
+//		builder.buildFromString(input);
+//		return finish(builder, "long", input);
+//	}
+//	public DValue buildLong(Long value, DType dtype) {
+//		LongValueBuilder builder = new LongValueBuilder(dtype);
+//		builder.buildFrom(value);
+//		return finish(builder, "long", value);
+//	}
 
 	public DValue buildNumber(String input) {
 		return buildNumber(input, registry.getType(BuiltInTypes.NUMBER_SHAPE));
@@ -137,12 +146,27 @@ public class ScalarValueBuilder extends ServiceBase {
 	protected DValue finish(DValueBuilder builder, String typeStr, Object value) {
 		boolean b = builder.finish();
 		if (!b) {
-			//FUTURE propogate errors from inner builder
-			String s = value == null ? "NULL" : value.toString();
-			DeliaExceptionHelper.throwError("value-builder-failed", "Failed to create %s from '%s'", typeStr, s);
+			throwOnFail(builder, typeStr, value);
 		}
 		DValue dval = builder.getDValue();
 		return dval;
 	}
-	
+
+	protected void throwOnFail(DValueBuilder builder, String typeStr, Object value) {
+		//FUTURE propogate errors from inner builder
+		String s = value == null ? "NULL" : value.toString();
+		DeliaExceptionHelper.throwError("value-builder-failed", "Failed to create %s from '%s'", typeStr, s);
+	}
+
+	public boolean checkIntegerEffectiveShape(DValue dval) {
+		EffectiveShape effectiveShape = dval.getType().getEffectiveShape();
+		if (EffectiveShape.EFFECTIVE_INT.equals(effectiveShape)) {
+			long longVal = dval.asLong();
+			int nval = dval.asInt();
+			if (nval != longVal) { //doesn't fit in int?
+				return false;
+			}
+		}
+		return true;
+	}
 }

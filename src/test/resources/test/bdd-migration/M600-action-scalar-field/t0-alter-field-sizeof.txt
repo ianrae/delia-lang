@@ -1,0 +1,12 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int optional, name string } wid.maxlen(4) end
+
+GIVEN2
+// comment
+ALTERATIONS:
+ALTER Customer ALTER wid int sizeof(32)
+ADDITIONS:
+
+THEN
+mFLD(Customer.wid):-O:NNN:int:32
+

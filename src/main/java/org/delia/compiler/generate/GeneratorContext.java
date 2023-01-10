@@ -3,12 +3,12 @@ package org.delia.compiler.generate;
 import java.util.Stack;
 
 public class GeneratorContext {
-	public final static String LIST = "L";
+    public final static String LIST = "L";
 	public final static String STRUCT = "S";
 	public final static String MAP = "M";
 	
     private Stack<String> shapeStack = new Stack<>();
-    public boolean expandSubOjectsFlag = true;
+    public boolean expandSubOjectsFlag = true; //was true;
     public int indentLevel = 0;
     
     public void pushShapeCode(String shape) {

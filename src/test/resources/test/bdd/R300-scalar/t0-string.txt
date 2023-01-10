@@ -7,13 +7,13 @@ thenType: string
 ---
 let x string = null;null
 ---
-let x string = "";""
+let x string = "";''
 ---
-let x string = '';""
+let x string = '';''
 ---
-let x string = "abc";"abc"
+let x string = "abc";'abc'
 ---
-let x string = "a'b";"a'b"
+let x string = "a'b";'a'b'
 ---
 let x string = 'a"b';"a"b"
 ---
@@ -29,7 +29,7 @@ allowSemiColons:true
 when:
 let x string = 'this;that'
 then:
-this;that
+'this;that'
 
 ---
 given:

@@ -3,6 +3,7 @@ package org.delia.bddnew.core;
 import java.util.List;
 
 public class ThenValue {
+
 	public String expected;
 	public List<String> expectedL = null;
 

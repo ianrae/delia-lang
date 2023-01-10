@@ -1,22 +1,22 @@
 package org.delia.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.delia.relation.RelationInfo;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.RelationManyRule;
 import org.delia.rule.rules.RelationOneRule;
 import org.delia.rule.rules.RelationRuleBase;
+//import org.delia.rule.rules.SizeofRule;
 import org.delia.rule.rules.SizeofRule;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.TypePair;
+import org.delia.type.*;
 
 
 public class DRuleHelper {
-	
+
 	public static TypePair findMatchingPair(DStructType structType, String fieldName) {
 		for(TypePair pair: structType.getAllFields()) {
 			if (fieldName.equals(pair.name)) {
@@ -44,13 +44,13 @@ public class DRuleHelper {
 		}
 		return list;
 	}
-	
+
 	public static boolean typesAreEqual(DType type1, DType type2) {
-		String s1 = type1.getName();
-		String s2 = type2.getName();
+		DTypeName s1 = type1.getTypeName();
+		DTypeName s2 = type2.getTypeName();
 		return s1.equals(s2);
 	}
-	
+
 	public static boolean isParentRelation(DStructType structType, TypePair pair) {
 		//key goes in child only
 		RelationInfo info = DRuleHelper.findMatchingRuleInfo(structType, pair);
@@ -84,7 +84,7 @@ public class DRuleHelper {
 			return null;
 		}
 		String name = rrTarget.getRelationName();
-		
+
 		for(DRule rule: farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
@@ -103,11 +103,11 @@ public class DRuleHelper {
 	//needed due to self-join
 	public static List<RelationInfo> findAllMatchingByName(RelationRuleBase rrTarget, DStructType farType) {
 		if (rrTarget.getRelationName() == null) {
-			return null;
+			return Collections.emptyList();
 		}
 		String name = rrTarget.getRelationName();
 		List<RelationInfo> resultL = new ArrayList<>();
-		
+
 		for(DRule rule: farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
 				RelationOneRule rr = (RelationOneRule) rule;
@@ -124,10 +124,6 @@ public class DRuleHelper {
 		return resultL;
 	}
 
-	public static RelationOneRule findOneRule(String typeName, String fieldName, DTypeRegistry registry) {
-		DStructType dtype = (DStructType) registry.getType(typeName);
-		return findOneRule(dtype, fieldName);
-	}
 	public static RelationOneRule findOneRule(DStructType dtype, String fieldName) {
 		for(DRule rule: dtype.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
@@ -137,10 +133,6 @@ public class DRuleHelper {
 			}
 		}
 		return null;
-	}
-	public static RelationManyRule findManyRule(String typeName, String fieldName, DTypeRegistry registry) {
-		DStructType dtype = (DStructType) registry.getType(typeName);
-		return findManyRule(dtype, fieldName);
 	}
 	public static RelationManyRule findManyRule(DStructType dtype, String fieldName) {
 		for(DRule rule: dtype.getRawRules()) {
@@ -152,7 +144,7 @@ public class DRuleHelper {
 		}
 		return null;
 	}
-	
+
 	public static RelationInfo findOtherSideOne(RelationInfo relinfo) {
 		for(DRule rule: relinfo.farType.getRawRules()) {
 			if (rule instanceof RelationOneRule) {
@@ -222,17 +214,36 @@ public class DRuleHelper {
 		}
 		return null;
 	}
-	public static int getSizeofField(DStructType dtype, String fieldName) {
-		for(DRule rule: dtype.getRawRules()) {
-			if (rule instanceof SizeofRule) {
-				SizeofRule szrule = (SizeofRule) rule;
-				if (szrule.getSubject().equals(fieldName)) {
-					return szrule.getSizeofAmount();
-				}
+//	public static int getSizeofField(DStructType dtype, String fieldName) {
+//		for(DRule rule: dtype.getRawRules()) {
+//			if (rule instanceof SizeofRule) {
+//				SizeofRule szrule = (SizeofRule) rule;
+//				if (szrule.getSubject().equals(fieldName)) {
+//					return szrule.getSizeofAmount();
+//				}
+//			}
+//		}
+//		return 0;
+//	}
+
+	public static DRule findSizeofRule(DType dtype, List<DRule> structRules, String fieldName) {
+		List<DRule> possibleRules = dtype.getRawRules().stream().filter(x -> x instanceof SizeofRule).collect(Collectors.toList());
+		possibleRules.addAll(structRules.stream().filter(x -> x instanceof SizeofRule).collect(Collectors.toList()));
+
+		//TODO: what if > 1 possibleRules. is this an error or does one have priority?
+		for (DRule rule : possibleRules) {
+			String subject = rule.getSubject();
+			if (subject == null) {
+				return rule;
+			} else if (subject.equals(fieldName)) {
+				return rule;
 			}
 		}
-		return 0;
+		return null;
 	}
 
-
+	public static int getSizeofAmount(DRule rule, int defaultVal) {
+		int sizeof = rule instanceof SizeofRule ? ((SizeofRule)rule).getSizeofAmount(): defaultVal;
+		return sizeof;
+	}
 }

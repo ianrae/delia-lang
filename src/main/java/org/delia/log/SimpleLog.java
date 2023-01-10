@@ -6,10 +6,15 @@ package org.delia.log;
  * @author Ian Rae
  *
  */
-public class SimpleLog implements Log {
+public class SimpleLog implements DeliaLog {
 	private LogLevel level = LogLevel.INFO;
+	private boolean usePrefix = true;
 	
 	public SimpleLog() {
+	}
+
+	public void enablePrefix(boolean flag) {
+		this.usePrefix = flag;
 	}
 
 	@Override
@@ -51,6 +56,9 @@ public class SimpleLog implements Log {
 		}
 	}
 	protected String createPrefix(LogLevel info) {
+		if (! usePrefix) {
+			return "";
+		}
 		long threadId = Thread.currentThread().getId();
 		String prefix = String.format("[%d] ", threadId);
 		return prefix;

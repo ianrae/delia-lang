@@ -21,14 +21,15 @@ value:a:Flight {
 }
 
 ---
+#postgres error was duplicate-unique-value
 title: should fail
 given:
+when:
   insert Flight {id: 55, field1: 10, field2: 11 }
   insert Flight {id: 56, field1: 10, field2: 11 }
   log 'hello'
-when:
   let x = Flight[true].ith(0)
 then:
-IF(MEM):ERROR: rule-uniqueFields
-ELSE:ERROR: duplicate-unique-value
+ERROR: rule-uniqueFields
+
 

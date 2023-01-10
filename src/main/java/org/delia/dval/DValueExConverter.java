@@ -1,16 +1,12 @@
 package org.delia.dval;
 
-import java.time.ZonedDateTime;
-
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
-import org.delia.type.Shape;
+import org.delia.type.*;
 import org.delia.valuebuilder.ScalarValueBuilder;
+
+import java.time.ZonedDateTime;
 
 public class DValueExConverter extends ServiceBase {
 
@@ -37,9 +33,9 @@ public class DValueExConverter extends ServiceBase {
 		case INTEGER:
 			dtype = registry.getType(BuiltInTypes.INTEGER_SHAPE);
 			break;
-		case LONG:
-			dtype = registry.getType(BuiltInTypes.LONG_SHAPE);
-			break;
+//		case LONG:
+//			dtype = registry.getType(BuiltInTypes.LONG_SHAPE);
+//			break;
 		case NUMBER:
 			dtype = registry.getType(BuiltInTypes.NUMBER_SHAPE);
 			break;
@@ -62,7 +58,6 @@ public class DValueExConverter extends ServiceBase {
 	/**
 	 * handles custom scalar types as well as built-in types.
 	 * @param input input string or java primitive
-	 * @param shape shape of dvalue to bulid
 	 * @param dtype type or null (if want built-in type)
 	 * @return dvalue
 	 */
@@ -72,9 +67,9 @@ public class DValueExConverter extends ServiceBase {
 		case INTEGER:
 			inner = buildInt(input, dtype);
 			break;
-		case LONG:
-			inner = buildLong(input, dtype);
-			break;
+//		case LONG:
+//			inner = buildLong(input, dtype);
+//			break;
 		case NUMBER:
 			inner = buildNumber(input, dtype);
 			break;
@@ -107,19 +102,19 @@ public class DValueExConverter extends ServiceBase {
 			return builder.buildInt(s, dtype);
 		}
 	}
-	private DValue buildLong(Object input, DType dtype) {
-		if (input == null) {
-			return null;
-		}
-
-		if (input instanceof Long) {
-			Long value = (Long) input; 
-			return builder.buildLong(value, dtype);
-		} else {
-			String s = input.toString();
-			return builder.buildLong(s, dtype);
-		}
-	}
+//	private DValue buildLong(Object input, DType dtype) {
+//		if (input == null) {
+//			return null;
+//		}
+//
+//		if (input instanceof Long) {
+//			Long value = (Long) input;
+//			return builder.buildLong(value, dtype);
+//		} else {
+//			String s = input.toString();
+//			return builder.buildLong(s, dtype);
+//		}
+//	}
 	private DValue buildNumber(Object input, DType dtype) {
 		if (input == null) {
 			return null;

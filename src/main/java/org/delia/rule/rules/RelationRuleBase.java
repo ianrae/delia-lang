@@ -7,6 +7,7 @@ import org.delia.rule.FieldExistenceService;
 import org.delia.rule.RuleGuard;
 import org.delia.rule.RuleOperand;
 import org.delia.type.DStructType;
+import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 
 public abstract class RelationRuleBase extends DRuleBase {
@@ -25,9 +26,9 @@ public abstract class RelationRuleBase extends DRuleBase {
 		this.registry = registry;
 		this.relationName = relationName;
 	}
-	
+
 	@Override
-	public void performCompilerPass4Checks(FieldExistenceService fieldExistSvc, ErrorTracker et) {
+	public void performCompilerPass4Checks(DType dtype, FieldExistenceService fieldExistSvc, ErrorTracker et) {
 		fieldExistSvc.checkRuleOperand(getName(), oper1, et);
 	}
 	

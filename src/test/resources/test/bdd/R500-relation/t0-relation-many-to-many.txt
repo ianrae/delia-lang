@@ -124,7 +124,7 @@ when:
   let x = Customer[55].fks()
 then:
 ERROR: rule-relationMany
-}
+
 
 # --- Child Mandatory ---
 ---
@@ -156,7 +156,7 @@ when:
   insert Address {id: 100 }
   let x = Customer[55].fks()
 then:
-ERROR: rule-mandatory
+ERROR: value-missing-for-non-optional-field
 
 ---
 title: child-mandatory-bad-ref
@@ -170,7 +170,7 @@ when:
   let x = Customer[55].fks()
 then:
 ERROR: rule-relationMany
-}
+
 
 ---
 title: mandatory-normal-other-way

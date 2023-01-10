@@ -1,4 +1,4 @@
-//package org.delia.bddnew.core;
+package org.delia.bddnew.core;//package org.delia.bddnew.core;
 //
 //import org.delia.db.sql.ConnectionDefinition;
 //import org.delia.log.Log;

@@ -13,7 +13,7 @@ thenType: struct
 
 # --- Single ---
 ---
-title: single
+title: single (.fks() not needed because of implicit join)
 given:
  type Customer struct {id int primaryKey, relation addr Address optional parent one } end
  type Address struct {id int primaryKey, relation cust Customer optional one } end

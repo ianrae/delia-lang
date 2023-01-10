@@ -1,7 +1,7 @@
 package org.delia.core;
 
 import org.delia.error.ErrorTracker;
-import org.delia.log.Log;
+import org.delia.log.DeliaLog;
 
 /**
  * Base class for many services. Holds a log and error tracker.
@@ -10,8 +10,8 @@ import org.delia.log.Log;
  *
  */
 public class ServiceBase {
-	protected Log log;
-	protected ErrorTracker et;
+	protected DeliaLog log;
+	protected ErrorTracker et; //TODO get rid of factoryservice.et. need local one per session or even local per use
 	protected FactoryService factorySvc;
 
 	public ServiceBase(FactoryService factorySvc) {

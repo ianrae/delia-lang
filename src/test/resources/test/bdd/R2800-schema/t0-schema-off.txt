@@ -1,0 +1,25 @@
+# struct tests
+
+FEATURE: schema-explicit
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: let
+given:
+ //type statement must use schema statement
+ schema s2
+ type Customer struct {id int primaryKey, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+ schema off
+
+ insert s2.Customer {id: 55 }
+when:
+  let x = s2.Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+

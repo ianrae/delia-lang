@@ -7,7 +7,8 @@ package org.delia.sort.topo;
 * A class representing a directed graph.  Internally, the class is represented
 * by an adjacency list.
 */
-import java.util.*; // For HashMap, HashSet
+
+import java.util.*;
 
 public final class DirectedGraph<T> implements Iterable<T> {
    /* A map from nodes in the graph to sets of outgoing edges.  Each
@@ -15,7 +16,7 @@ public final class DirectedGraph<T> implements Iterable<T> {
     */
    private final Map<T, Set<T>> mGraph = new HashMap<T, Set<T>>(); //ok for thread-safety
 
-   /**
+    /**
     * Adds a new node to the graph.  If the node already exists, this
     * function is a no-op.
     *

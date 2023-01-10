@@ -13,7 +13,7 @@ given:
 when:
   let x = Flight[true].count()
 then:
-value:a:long:2
+value:a:int:2
 
 ---
 title: empty
@@ -22,6 +22,6 @@ given:
   insert Flight {id: 55, wid: 4 }
   insert Flight {id: 56, wid: 3 }
 when:
-  let x = Flight[id=100].count()
+  let x = Flight[id==100].count()
 then:
-value:a:long:0
+value:a:int:0

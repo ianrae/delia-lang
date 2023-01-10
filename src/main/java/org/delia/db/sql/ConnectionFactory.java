@@ -1,8 +1,8 @@
 package org.delia.db.sql;
 
-import java.sql.Connection;
-
 import org.delia.db.DBErrorConverter;
+
+import java.sql.Connection;
 
 /**
  * Factory that creates jdbc connections.

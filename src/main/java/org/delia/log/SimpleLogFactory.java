@@ -7,15 +7,15 @@ public class SimpleLogFactory implements LogFactory {
 	private LogLevelMapBuilder levelMapBuilder = new LogLevelMapBuilder();
 
 	@Override
-	public Log create(String name) {
-		Log log = new SimpleLog();
+	public DeliaLog create(String name) {
+		DeliaLog log = new SimpleLog();
 		log.setLevel(calcLevel(name));
 		return log;
 	}
 
 	@Override
-	public Log create(Class<?> clazz) {
-		Log log = new SimpleLog();
+	public DeliaLog create(Class<?> clazz) {
+		DeliaLog log = new SimpleLog();
 		log.setLevel(calcLevel(clazz.getName()));
 		return log;
 	}

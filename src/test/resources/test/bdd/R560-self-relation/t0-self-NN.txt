@@ -4,7 +4,7 @@ FEATURE: self-join N to N
 background:
   type Customer struct {id int primaryKey, name string,
       relation manager Customer 'r1' many optional,
-      relation workers Customer 'r1' many optional,
+      relation workers Customer 'r1' many optional
   }  end
   insert Customer {id: 55, name: 'art' }
 thenType: struct

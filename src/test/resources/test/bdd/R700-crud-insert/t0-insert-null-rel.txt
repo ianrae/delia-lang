@@ -1,0 +1,45 @@
+# crud insert many-to-one
+#Note. DValue map for structType can be empty in 3 ways
+#a) no entry for fieldname in the map
+#b) entry in map for fieldname, whose value is null
+#c) entry in map for fieldname, whose value is an empy DRelation
+
+FEATURE: insert a parent fk (many to one)
+background:
+type Customer struct {
+  id int primaryKey,
+  firstName string optional,
+  relation addr Address many optional
+} end
+type Address struct {
+  id int primaryKey,
+  city string optional,
+  relation cust Customer one
+} end
+thenType: struct
+
+---
+title: mm addr missing
+given:
+  insert Customer { id: 55, firstName: 'bob' }
+when:
+  let x = Customer[55]
+then:
+ value:a:Customer {
+  vid:55
+  vfirstName:'bob'
+  vaddr:null
+}
+
+---
+title: mm null
+given:
+  insert Customer { id: 55, firstName: 'bob', addr: null }
+when:
+  let x = Customer[55]
+then:
+ value:a:Customer {
+  vid:55
+  vfirstName:'bob'
+  vaddr:null
+}

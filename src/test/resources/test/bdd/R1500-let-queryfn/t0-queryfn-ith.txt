@@ -38,7 +38,7 @@ given:
 when:
   let x = Flight[id==100].ith()
 then:
-ERROR: queryfn-bad-index
+ERROR: ith-invalid-index
 
 ---
 title: ith bad index

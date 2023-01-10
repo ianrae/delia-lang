@@ -1,8 +1,8 @@
 package org.delia.db.sql;
 
-import javax.sql.DataSource;
-
 import org.delia.db.DBType;
+
+import javax.sql.DataSource;
 
 /**
  * Information required to connect to a database.

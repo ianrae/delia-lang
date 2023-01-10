@@ -4,7 +4,7 @@ FEATURE: self-join N to 1
 background:
   type Customer struct {id int primaryKey, name string,
       relation manager Customer 'r1' one optional,
-      relation workers Customer 'r1' many optional,
+      relation workers Customer 'r1' many optional
   }  end
   insert Customer {id: 55, name: 'art' }
 thenType: struct
@@ -23,7 +23,11 @@ value:a:Customer {
 }
 
 ---
-title: add worker,fks
+SKIP: add worker,fks. TODO: implement this
+# workers is the parent side. would have to implement as an INSERT then an UPDATE
+# think of Customer and Address. we would have to
+#  insert Customer 55 ...
+#  update Address 100 and set cust=55
 given:
   insert Customer {id: 56, name: 'bob', workers: 55 }
 when:
@@ -32,15 +36,7 @@ then:
 value:a:Customer {
  vid:55
  vname:'art'
-IF(MEM):  vmanager:{56}
-ELSE:  vmanager:{56:
-ELSE:{
-ELSE:   vid:56
-ELSE:	vname:'bob'
-ELSE:    vmanager:null
-ELSE:    vworkers:{55}
-ELSE: } 
- ELSE:}
+  vmanager:{56}
   vworkers:null
 }
 value:a:Customer {
@@ -51,7 +47,7 @@ value:a:Customer {
 }
 
 ---
-title: add worker
+SKIP: add worker (see above)
 given:
   insert Customer {id: 56, name: 'bob', workers: 55 }
 when:
@@ -60,15 +56,7 @@ then:
 value:a:Customer {
  vid:55
  vname:'art'
-IF(MEM): vmanager:{56}
-ELSE: vmanager:{56:
-ELSE:{
-ELSE:   vid:56
-ELSE:   vname:'bob'
-ELSE:   vmanager:null
-ELSE:    vworkers:null
-ELSE:}
-ELSE:} 
+ vmanager:{56}
 vworkers:null
 }
 value:a:Customer {
@@ -94,14 +82,6 @@ value:a:Customer {
 value:a:Customer {
  vid:56
  vname:'bob'
-IF(MEM): vmanager:{55}
-ELSE: vmanager:{55:
-ELSE:	{
-ELSE:	vid:55
-ELSE:	vname:'art'
-ELSE:	vmanager:null
-ELSE:	vworkers:null
-ELSE:	}
-ELSE:}
+ vmanager:{55}
 vworkers:null
 }

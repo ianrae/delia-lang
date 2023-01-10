@@ -10,11 +10,11 @@ title: basic. mix one many-to-one and one-to-one
 chainNextTest:true
 given:
  type Customer struct {
- id long primaryKey, 
+ id int primaryKey,
  name string, 
  relation addrHome Address 'home' optional many,
  relation addrBiz Address 'biz' optional one parent  
- } end
+ } id.sizeof(64) end
  type Address struct {
   aid string primaryKey, 
   city string,
@@ -27,28 +27,28 @@ when:
   insert Customer { id: 2, name:'bob' }
   insert Customer { id: 3, name:'carol' }
   
-  insert Address { aid: 100, city:'athens', cust1:1, cust2:2 }
-  insert Address { aid: 101, city:'boston', cust1:3, cust2:3 }
-  insert Address { aid: 102, city:'cornwall', cust1:1 }
+  insert Address { aid: '100', city:'athens', cust1:1, cust2:2 }
+  insert Address { aid: '101', city:'boston', cust1:3, cust2:3 }
+  insert Address { aid: '102', city:'cornwall', cust1:1 }
   
   let x = Customer[true].orderBy('id').fks()
 then:
 value:a:Customer {
  vid:1
  vname:'art'
- vaddrHome:{[100,102]}
+ vaddrHome:{['100','102']}
    vaddrBiz:null
   }
 value:a:Customer {
  vid:2
  vname:'bob'
  vaddrHome:null
- vaddrBiz:{100}
+ vaddrBiz:{'100'}
   }
 value:a:Customer {
  vid:3
  vname:'carol'
- vaddrHome:{101}
-   vaddrBiz:{101}
+ vaddrHome:{'101'}
+   vaddrBiz:{'101'}
 }
 

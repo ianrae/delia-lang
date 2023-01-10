@@ -26,7 +26,7 @@ public class FindEmptyClassesTests  {
 		log("--list--");
 		for(String path: list) {
 			if (fileIsCommentedOut(path)) {
-				log(path);
+//				log(path);
 			}
 		}
 	}	
@@ -58,10 +58,13 @@ public class FindEmptyClassesTests  {
 		}
 		
 		maxAdjacentCount = Integer.max(maxAdjacentCount, adjacentCount);
-		
-		
-//		log(String.format("  %d", maxAdjacentCount));
-		return maxAdjacentCount > 20;
+
+
+		boolean tooMany = maxAdjacentCount > 20;
+		if (tooMany) {
+			log(String.format("%s:  %d", path, maxAdjacentCount));
+		}
+		return tooMany;
 	}
 
 	@Before

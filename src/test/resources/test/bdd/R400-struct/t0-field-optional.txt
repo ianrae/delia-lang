@@ -23,7 +23,7 @@ given:
   type Flight struct {field1 int primaryKey, field2 int  } end
   insert Flight {field1: 55 }
 when:
-  let x = Flight[55];ERROR: MISSINGFIELD
+  let x = Flight[55];ERROR: value-missing-for-non-optional-field
 
 ---
 title: optional-supplied

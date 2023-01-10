@@ -1,0 +1,13 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int}  end
+
+GIVEN2
+// comment
+ALTERATIONS:
+ALTER Customer ADD relation addr Address many optional
+ALTER Address ADD relation cust Customer many
+ADDITIONS:
+
+THEN
++FLD(Customer.addr):O:NYN:Address:0;+FLD(Address.cust)::NYN:Customer:0;+TBL(CustomerAddressDat1):leftv,rightv

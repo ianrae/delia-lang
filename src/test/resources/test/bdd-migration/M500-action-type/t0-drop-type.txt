@@ -1,0 +1,13 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+
+GIVEN2
+// comment
+ALTERATIONS:
+DROP Customer
+ADDITIONS:
+
+
+THEN
+-TBL(Customer)
+

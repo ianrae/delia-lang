@@ -1,95 +1,70 @@
 package org.delia.compiler;
 
-import java.util.List;
-
-import org.jparsec.error.ParserException;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.InputMismatchException;
+import org.delia.compiler.antlr.deliaLexer;
+import org.delia.compiler.antlr.deliaParser;
 import org.delia.compiler.ast.Exp;
-import org.delia.compiler.parser.FullParser;
+import org.delia.compiler.impl.CompileScalarValueBuilder;
+import org.delia.compiler.impl.CompilerResults;
+import org.delia.compiler.impl.DeliaAntlrVisitor;
+import org.delia.compiler.impl.ThrowingErrorListener;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.error.DeliaError;
-import org.delia.runner.DeliaException;
-import org.delia.runner.InternalCompileState;
 import org.delia.type.DTypeRegistry;
+import org.delia.type.DTypeRegistryBuilder;
+import org.delia.util.DeliaExceptionHelper;
 
-/**
- * Compiles Delia source code into an AST (Abstract Syntax Tree) object
- * repesented by an Exp object.
- * For example, a let statement is represented by a LetStatementExp.
- * 
- * @author Ian Rae
- *
- */
 public class DeliaCompiler extends ServiceBase {
-	private InternalCompileState execCtx;
-	private boolean doPass3Flag = true;
-	
-	public DeliaCompiler(FactoryService factorySvc) {
-		super(factorySvc);
-	}
-	public DeliaCompiler(FactoryService factorySvc, InternalCompileState execCtx) {
-		super(factorySvc);
-		this.execCtx = execCtx;
-	}
 
-	public  List<Exp> parse(String input) {
-		List<Exp> list = null;
-		ErrorLineFinder errorLineFinder = new ErrorLineFinder(input);
-		
-		try {
-			list = FullParser.parse(input);
-		} catch (ParserException e) {
-			log.logError("ERR: %s", input);
-			DeliaError err = et.add("parse-error", e.getMessage());
-			throw new DeliaException(err);
-		} catch (Exception e) {
-			DeliaError err = et.add("pass2-error", e.getMessage());
-			throw new DeliaException(err);
-		}
-		
-		if (list != null) {
-			Pass2Compiler pass2 = new Pass2Compiler(factorySvc, errorLineFinder, execCtx);
-			CompilerResults pass2Res = pass2.process(list);
-			if (! pass2Res.success()) {
-				throw new DeliaException(pass2Res.errors);
-			}
-		}
-		
-		if (list != null && doPass3Flag) {
-			Pass3Compiler pass3 = new Pass3Compiler(factorySvc, errorLineFinder, execCtx);
-			CompilerResults pass3Res = pass3.process(list);
-			if (! pass3Res.success()) {
-				throw new DeliaException(pass3Res.errors);
-			}
-		}
-		
-		return list;
-	}
-	public void executePass3(String input, List<Exp> list) {
-		ErrorLineFinder errorLineFinder = new ErrorLineFinder(input);
-		if (list != null && doPass3Flag) {
-			Pass3Compiler pass3 = new Pass3Compiler(factorySvc, errorLineFinder, execCtx);
-			pass3.setBuildTypeMapFlag(false);
-			CompilerResults pass3Res = pass3.process(list);
-			if (! pass3Res.success()) {
-				throw new DeliaException(pass3Res.errors);
-			}
-		}
-	}
-	public void executePass4(String input, List<Exp> list, DTypeRegistry registry) {
-		ErrorLineFinder errorLineFinder = new ErrorLineFinder(input);
-		if (list != null) {
-			Pass4Compiler pass4 = new Pass4Compiler(factorySvc, errorLineFinder, execCtx, registry);
-			CompilerResults pass3Res = pass4.process(list);
-			if (! pass3Res.success()) {
-				throw new DeliaException(pass3Res.errors);
-			}
-		}
-	}
-	public boolean isDoPass3Flag() {
-		return doPass3Flag;
-	}
-	public void setDoPass3Flag(boolean doPass3Flag) {
-		this.doPass3Flag = doPass3Flag;
-	}
+    public DeliaCompiler(FactoryService factorySvc) {
+        super(factorySvc);
+    }
+
+    public CompilerResults compile(String src) {
+        if (src.trim().isEmpty()) {
+            return new CompilerResults((Exp.ElementExp) null);
+        }
+
+        //step 1. create basic registry (built-in types)
+        DTypeRegistryBuilder registryBuilder = new DTypeRegistryBuilder();
+        registryBuilder.init();
+        DTypeRegistry registry = registryBuilder.getRegistry();
+
+        CharStream chstr = CharStreams.fromString(src);
+        deliaLexer lexer = new deliaLexer(chstr);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
+
+        CommonTokenStream cts = new CommonTokenStream(lexer);
+        deliaParser dp = new deliaParser(cts);
+        dp.removeErrorListeners();
+        dp.addErrorListener(ThrowingErrorListener.INSTANCE);
+
+        DeliaAntlrVisitor visitor = new DeliaAntlrVisitor();
+        visitor.builder = new CompileScalarValueBuilder(factorySvc, registry);
+
+        CompilerResults zoo = null;
+        try {
+            deliaParser.DeliaStatementContext parseTree = dp.deliaStatement();
+            visitor.builder = new CompileScalarValueBuilder(factorySvc, registry);
+            zoo = visitor.visit(parseTree);
+        } catch (InputMismatchException e) {
+            String msg = e.getMessage();
+            if (msg == null) {
+                msg = "something";
+            }
+            DeliaExceptionHelper.throwError("parse-error", msg);
+//        } catch(DeliaParseException e) {
+//            String msg = e.getMessage();
+//            if (msg == null) {
+//                msg = "something";
+//            }
+//            DeliaExceptionHelper.throwError("xparse-error", msg);
+        }
+        return zoo;
+    }
+
 }

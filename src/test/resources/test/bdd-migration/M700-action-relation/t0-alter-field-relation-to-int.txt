@@ -1,0 +1,14 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string, relation addr Address one parent optional } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int, relation cust Customer one}  end
+
+GIVEN2
+// comment
+ALTERATIONS:
+ALTER Customer DROP addr
+ALTER Address ALTER cust int
+ADDITIONS:
+
+THEN
+-FLD(Customer.addr);mFLD(Address.cust)::NNN:int:0
+

@@ -1,10 +1,9 @@
 package org.delia.db;
 
-import java.sql.SQLException;
-import java.util.List;
-
-import org.delia.db.sql.table.TableInfo;
+import org.delia.type.DTypeName;
 import org.delia.type.DTypeRegistry;
+
+import java.sql.SQLException;
 
 /**
  * It's important that db errors get converted into standard delia errors.
@@ -17,7 +16,7 @@ public abstract class DBErrorConverterBase implements DBErrorConverter {
 
 	
 	@Override
-	public abstract void convertAndRethrowException(SQLException e);
+	public abstract void convertAndRethrowException(SQLException e, DBExecuteContext dbctx);
 	
 	protected void printStackTraceIfEnabled(SQLException e) {
 		if (printStackTraceFlag) {
@@ -26,8 +25,8 @@ public abstract class DBErrorConverterBase implements DBErrorConverter {
 	}
 	
 
-	@Override
-	public abstract void convertAndRethrow(DBValidationException e, List<TableInfo> tblinfo);
+//	@Override
+//	public abstract void convertAndRethrow(DBValidationException e, List<TableInfo> tblinfo);
 
 	@Override
 	public boolean isPrintStackTraceEnabled() {
@@ -44,18 +43,18 @@ public abstract class DBErrorConverterBase implements DBErrorConverter {
 		this.registry = registry;
 	}
 	
-	protected boolean findTypeOfType(String type) {
-		for(String typeName: registry.getAll()) {
-			if (typeName.equalsIgnoreCase(type)) {
+	protected boolean findTypeOfType(DTypeName type) {
+		for(DTypeName typeName: registry.getAll()) {
+			if (typeName.equals(type)) {
 				return false; 
 			}
 		}
 		
-		if (registry.getSchemaVersionType().getName().equalsIgnoreCase(type)) {
+		if (type.isEqual(registry.getSchemaVersionType().getName())) {
 			return false;
 		}
 		
-		if (type.contains("DAT")) return true;
+		if (type.getTypeName().contains("DAT")) return true;
 		return false;
 	}
 	protected boolean isClass(SQLException e, String className) {

@@ -13,8 +13,6 @@ import org.junit.Test;
  */
 public class LoggingBDDTests extends BDDTestBase {
 
-
-
     @Test
     public void testRunDebug() {
 //        singleTestToRunIndex = 0;
@@ -23,7 +21,7 @@ public class LoggingBDDTests extends BDDTestBase {
         seedeLog.setLevel(LogLevel.ERROR);
         deliaLog = new SimpleLog();
         deliaLog.setLevel(LogLevel.ERROR);
-        runR300("t0-bool.txt", 1);
+//        runR300File("t0-bool.txt", 1);
 //        runR1800("t0-northwind-medium.txt", 1);
     }
 

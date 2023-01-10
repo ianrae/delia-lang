@@ -2,9 +2,9 @@
 
 FEATURE: scalar-long-custom
 background:
-thenType: long
+thenType: int
 
-type Grade long end
+type Grade int sizeof(64) end
 
 ---
 let x Grade = 5;5
@@ -17,14 +17,14 @@ let x Grade = 9223372036854775807;9223372036854775807
 ---
 let x Grade = -9223372036854775808;-9223372036854775808
 ---
-let x Grade = 9223372036854775808;ERROR: parse-error: long value is not an long - 2147483648
+let x Grade = 9223372036854775808;ERROR: wrong-type: long value is not an long - 9223372036854775808
 ---
-let x Grade = -9223372036854775809;ERROR: parse-error: long value is not an long
+let x Grade = -9223372036854775809;ERROR: wrong-type: long value is not an long - -9223372036854775809
 ---
 let x Grade = null;null
 ---
 given:
- let z long = 5
+ let z int = 5
 when:
  let x Grade = z;5
 ---

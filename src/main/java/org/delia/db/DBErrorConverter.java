@@ -1,10 +1,8 @@
 package org.delia.db;
 
-import java.sql.SQLException;
-import java.util.List;
-
-import org.delia.db.sql.table.TableInfo;
 import org.delia.type.DTypeRegistry;
+
+import java.sql.SQLException;
 
 /**
  * It's important that db errors get converted into standard delia errors.
@@ -15,8 +13,8 @@ import org.delia.type.DTypeRegistry;
  *
  */
 public interface DBErrorConverter {
-	void convertAndRethrowException(SQLException e);
-	void convertAndRethrow(DBValidationException e,  List<TableInfo> tblinfo);
+	void convertAndRethrowException(SQLException e, DBExecuteContext dbctx);
+//	void convertAndRethrow(DBValidationException e,  List<TableInfo> tblinfo);
 	boolean isPrintStackTraceEnabled();
 	void setPrintStackTraceEnabled(boolean b);
 	void setRegistry(DTypeRegistry registry);

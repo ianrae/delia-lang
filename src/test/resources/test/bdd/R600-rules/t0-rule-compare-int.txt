@@ -4,12 +4,12 @@
 FEATURE: rules
 background:
   type Flight struct {id int primaryKey, wid int optional }  end
+  type Flight2 Flight {} wid < 10 end
 thenType: struct
 
 ---
 title: pass
 given:
-  type Flight2 Flight {} wid < 10 end
   insert Flight2 {id: 55, wid: 1 }
 when:
   let x = Flight2[55]
@@ -22,16 +22,14 @@ value:a:Flight2 {
 ---
 title: fail
 given:
-  type Flight2 Flight {} wid < 10 end
-  insert Flight2 {id: 55, wid: 10 }
 when:
+  insert Flight2 {id: 55, wid: 10 }
   let x = Flight2[55];ERROR: rule-compare
 
 
 ---
 title: optional-null
 given:
-  type Flight2 Flight {} wid < 10 end
   insert Flight2 {id: 55 }
 when:
   let x = Flight2[55]
@@ -43,7 +41,6 @@ value:a:Flight2 {
 ---
 title: Flight-null2
 given:
-  type Flight2 Flight {} wid < 10 end
   insert Flight2 {id: 55, wid: null }
 when:
   let x = Flight2[55]

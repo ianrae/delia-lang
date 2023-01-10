@@ -1,0 +1,13 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string, relation addr Address many optional } wid.maxlen(4) end
+type Address struct {id int primaryKey, wid int, relation cust Customer many optional}  end
+
+GIVEN2
+// comment
+ALTERATIONS:
+ALTER Customer RENAME addr TO addr2
+ADDITIONS:
+
+THEN
+rFLD(Customer.addr:addr2)
+

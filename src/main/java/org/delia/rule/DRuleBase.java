@@ -55,5 +55,9 @@ public abstract class DRuleBase implements DRule {
 		boolean b = guard.shouldExecRule(dval);
 		return b;
 	}
-	
+
+//	protected String getOperAsDelia(RuleOperand oper1) {
+//		return oper1.getSubject() == null ? "" : String.format("%s.", oper1.getSubject());
+//	}
+
 }

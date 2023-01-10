@@ -1,8 +1,8 @@
 package org.delia.dval;
 
-import java.util.Comparator;
-
 import org.delia.type.DValue;
+
+import java.util.Comparator;
 
 
 public class FKSorter implements Comparator<DValue> {

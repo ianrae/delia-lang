@@ -1,19 +1,14 @@
 package org.delia.dval;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DRelation;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
-import org.delia.type.TypePair;
+import org.delia.dval.compare.DValueCompareService;
+import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.RelationValueBuilder;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DRelationHelper {
 
@@ -98,4 +93,12 @@ public class DRelationHelper {
 		return s1.equals(s2);
 	}
 
+	public static void addIfNotExist(DRelation drel, DValue pkval, DValueCompareService compareSvc) {
+		for(DValue fkval: drel.getMultipleKeys()) {
+			if (compareSvc.compare(fkval, pkval) == 0) {
+				return; //already in fks
+			}
+		}
+		drel.addKey(pkval);
+	}
 }

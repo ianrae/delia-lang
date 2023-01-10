@@ -42,7 +42,7 @@ when:
 ---
 title: all-types-1
 given:
-  type Flight struct {field1 int primaryKey, sfield string, lfield long, nfield number } end
+  type Flight struct {field1 int primaryKey, sfield string, lfield int, nfield number } lfield.sizeof(64) end
   insert Flight {field1: 55, sfield: 'abc', lfield: 444, nfield: -56.3 }
 when:
   let x = Flight[55]

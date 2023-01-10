@@ -4,12 +4,12 @@
 FEATURE: rules
 background:
   type Flight struct {id int primaryKey, wid string optional }  end
+  type Flight2 Flight {} wid < 'bet' end
 thenType: struct
 
 ---
 title: pass
 given:
-  type Flight2 Flight {} wid < 'bet' end
   insert Flight2 {id: 55, wid: 'bat' }
 when:
   let x = Flight2[55]
@@ -22,9 +22,8 @@ value:a:Flight2 {
 ---
 title: fail
 given:
-  type Flight2 Flight {} wid < 'bet' end
-  insert Flight2 {id: 55, wid: 'bet' }
 when:
+  insert Flight2 {id: 55, wid: 'bet' }
   let x = Flight2[55];ERROR: rule-compare
 
 

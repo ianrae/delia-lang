@@ -22,10 +22,10 @@ value:a:Flight {
 ---
 title: insert too big a string
 given:
+when:
   insert Flight {id: 55, wid: '12345678' }
   insert Flight {id: 56, wid: '123456789' }
   log 'hello'
-when:
   let x = Flight[true].ith(0)
 then:
 ERROR: rule-sizeof

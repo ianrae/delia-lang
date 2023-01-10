@@ -29,6 +29,8 @@ given:
   insert Flight {id: 57, wid: 4 }
   insert Flight {id: 58, wid: 3 }
 when:
+  //TODO later use DISTINCT ON to allow orderBy to contain a field other than wid
+  //let x = Flight[true].wid.distinct().orderBy('id',desc)
   let x = Flight[true].wid.distinct().orderBy('wid',desc)
 then:
 value:a:int:4

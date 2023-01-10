@@ -61,3 +61,20 @@ value:a:Flight {
  vid:55
  vwid:'battle'
 }
+
+---
+SKIP: in using var (TODO: support this)
+given:
+  insert Flight {id: 55, wid: 'battle' }
+  insert Flight {id: 56, wid: 'bottle' }
+  insert Flight {id: 57, wid: 'bet' }
+when:
+  let x = Flight[id in [55,56]]
+  let y = Flight[id in [x.id]]
+then:
+value:a:Flight {
+ vid:55
+ vwid:'battle'
+}
+
+

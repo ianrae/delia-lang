@@ -28,7 +28,7 @@ given:
   insert Customer {id: 55 }
 when:
   insert Address {id: 100, cust: null }
-  let x = Customer[id=99].id
+  let x = Customer[id==99].id
 then:
 null
 

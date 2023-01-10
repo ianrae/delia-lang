@@ -41,7 +41,7 @@ title: insert-mandatory-missing
 when:
   insert Flight2 {id: 55 }
 then:
-ERROR: MISSINGFIELD
+ERROR: value-missing-for-non-optional-field
 
 ---
 title: insert-unknown-class

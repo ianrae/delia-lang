@@ -2,7 +2,6 @@
 
 FEATURE: sprig 
 background:
- configure loadFKs = true
 thenType: struct
 
 ---
@@ -25,7 +24,7 @@ value:a:Customer {
 ---
 title: using-sprig long
 given:
- type Customer struct {id long unique serial, relation addr Address optional one parent } end
+ type Customer struct {id int primaryKey serial, relation addr Address optional one parent } id.sizeof(64) end
  type Address struct {id int primaryKey, relation cust Customer optional one } end
  configure Customer.synthetic_id='sid'
 

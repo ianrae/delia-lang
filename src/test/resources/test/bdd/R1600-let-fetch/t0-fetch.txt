@@ -16,11 +16,11 @@ thenType: struct
 title: normal single
 given:
  type Customer struct {id int primaryKey, relation addr Address optional parent one } end
- type Address struct {id int primaryKey, relation cust Customer optional one } end
+ type Address struct {id int primaryKey, wid int, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
-  insert Address {id: 100, cust: 55 }
+  insert Address {id: 100, cust: 55, wid:40 }
   let x = Customer[55].fetch('addr')
 then:
 value:a:Customer {
@@ -28,6 +28,7 @@ value:a:Customer {
  vaddr:{100:
   {
   vid:100
+  vwid:40
   vcust:{55}
   }
  }
@@ -37,11 +38,11 @@ value:a:Customer {
 title: normal missing
 given:
  type Customer struct {id int primaryKey, relation addr Address optional parent one } end
- type Address struct {id int primaryKey, relation cust Customer optional one } end
+ type Address struct {id int primaryKey, wid int, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
-  insert Address {id: 100 }
+  insert Address {id: 100, wid:40 }
   let x = Customer[55].fetch('addr')
 then:
 value:a:Customer {
@@ -53,33 +54,56 @@ value:a:Customer {
 title: bad ref
 given:
  type Customer struct {id int primaryKey, relation addr Address optional parent one } end
- type Address struct {id int primaryKey, relation cust Customer optional one } end
+ type Address struct {id int primaryKey, wid int, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
-  insert Address {id: 100 }
+  insert Address {id: 100, wid:40 }
   let x = Customer[55].fetch('zzz')
 then:
 ERROR: unknown-field
 
 ---
-title: normal child
+title: normal child (special case - no other fields other than id)
 given:
  type Customer struct {id int primaryKey, relation addr Address optional parent one } end
- type Address struct {id int primaryKey, relation cust Customer optional one } end
+ type Address struct {id int primaryKey, wid int, relation cust Customer optional one } end
 
   insert Customer {id: 55 }
 when:
-  insert Address {id: 100, cust: 55 }
+  insert Address {id: 100, wid:40, cust: 55 }
   let x = Address[100].fetch('cust')
 then:
 value:a:Address {
  vid:100
+ vwid:40
  vcust:{55:
   {
   vid:55
-IF(MEM):vaddr:{100}
-ELSE:vaddr:null
+  vaddr:{100}
+  }
+ }
+}
+
+---
+title: normal child
+given:
+ type Customer struct {id int primaryKey, wid int, relation addr Address optional parent one } end
+ type Address struct {id int primaryKey, wid int, relation cust Customer optional one } end
+
+  insert Customer {id: 55, wid: 10 }
+when:
+  insert Address {id: 100, wid:40, cust: 55 }
+  let x = Address[100].fetch('cust')
+then:
+value:a:Address {
+ vid:100
+ vwid:40
+ vcust:{55:
+  {
+  vid:55
+  vwid:10
+  vaddr:{100}
   }
  }
 }

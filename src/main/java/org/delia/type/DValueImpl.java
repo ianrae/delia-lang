@@ -157,9 +157,11 @@ public class DValueImpl implements DValue, DValueInternal {
 		} else if (object != null && type.isNumericShape()) {
 			s = ": " + object.toString();
 		} else if (object != null && type.isShape(Shape.BLOB)) {
-			WrappedBlob wblob = new WrappedBlob((byte[]) object);
-			LoggableBlob lb = new LoggableBlob(wblob.getByteArray());
-			s = ": " + lb.toString();
+		    if (object instanceof WrappedBlob) {
+                WrappedBlob wblob = (WrappedBlob) object;
+                LoggableBlob lb = new LoggableBlob(wblob.getByteArray());
+                s = ": " + lb.toString();
+            }
 		}
 		return type.toString() + s ;
 	}

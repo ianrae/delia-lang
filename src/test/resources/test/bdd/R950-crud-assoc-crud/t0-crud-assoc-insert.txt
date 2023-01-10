@@ -24,12 +24,12 @@ value:a:Customer {
 title: assoc-crud insert
 when:
   update Address[100] { insert cust:56}
-  let x = Customer[55].fks()
+  let x = Customer[56].fks()
 then:
 value:a:Customer {
- vid:55
- vwid:33
- vaddr:{[100,101]}
+ vid:56
+ vwid:34
+ vaddr:{100}
 }
 
 ---

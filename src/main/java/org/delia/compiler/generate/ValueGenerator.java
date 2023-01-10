@@ -9,7 +9,6 @@ import org.delia.type.DValue;
  *
  */
 public interface ValueGenerator {
-
 	void startStruct(ValuePlacement placement, DValue dval, DStructType structType, GeneratorContext genctx, int index);
 	void endStruct(ValuePlacement placement, DValue dval, DStructType structType, GeneratorContext genctx);
 

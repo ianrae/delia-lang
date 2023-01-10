@@ -1,0 +1,18 @@
+# CRUD insert tests when type has one field (the pk)
+
+FEATURE: CRUD insert
+background:
+  type Flight struct {id int primaryKey }  end
+thenType: struct
+
+
+---
+title: insert
+when:
+  insert Flight {id: 55 }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+}
+

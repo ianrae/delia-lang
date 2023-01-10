@@ -2,7 +2,7 @@
 
 FEATURE: filter-expr op long
 background:
-  type Flight struct {id long unique, wid long optional }  end
+  type Flight struct {id int unique, wid int optional } id.sizeof(64), wid.sizeof(64)  end
 thenType: struct
 
 ---

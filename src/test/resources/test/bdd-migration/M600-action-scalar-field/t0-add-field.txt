@@ -1,0 +1,13 @@
+GIVEN1
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+
+GIVEN2
+// comment
+ALTERATIONS:
+ALTER Customer ADD f int optional
+ADDITIONS:
+
+
+THEN
++FLD(Customer.f):O:NNN:int:0
+

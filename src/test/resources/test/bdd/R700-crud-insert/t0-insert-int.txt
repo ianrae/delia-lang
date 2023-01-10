@@ -1,0 +1,43 @@
+# CRUD insert tests
+# note. t0-struct.txt tests insert of each data type
+
+FEATURE: CRUD insert
+background:
+  type Flight struct {id int primaryKey, wid1 int, wid2 int, wid3 int, wid4 int }
+    wid1.sizeof(8),
+    wid2.sizeof(16),
+    wid3.sizeof(32),
+    wid4.sizeof(64)
+  end
+thenType: struct
+
+
+---
+title: insert
+when:
+  insert Flight {id: 55, wid1: 21, wid2: 22, wid3: 23, wid4: 24}
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid1:21
+ vwid2:22
+ vwid3:23
+ vwid4:24
+}
+
+---
+title: insert2
+when:
+  insert Flight {id: 55, wid1: -128, wid2: -32768, wid3: -2147483648, wid4: -9223372036854775808}
+
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid1:-128
+ vwid2:-32768
+ vwid3:-2147483648
+ vwid4:-9223372036854775808
+}
+

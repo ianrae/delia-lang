@@ -3,10 +3,10 @@
 FEATURE: same as 11 but without self join
 background:
   type Customer struct {id int primaryKey, name string,
-      relation manager Address 'r1' one optional parent,
+      relation manager Address 'r1' one optional parent
   }  end
   type Address struct {id int primaryKey, city string,
-      relation worker Customer 'r1' one optional,
+      relation worker Customer 'r1' one optional
   }  end
   insert Customer {id: 55, name: 'art' }
 thenType: struct

@@ -1,0 +1,16 @@
+GIVEN1
+
+GIVEN2
+// comment
+ALTERATIONS:
+ADDITIONS:
+type Customer struct {id int primaryKey, wid int, name string } wid.maxlen(4) end
+
+
+THEN
+CREATE TABLE IF NOT EXISTS customer (
+id INTEGER PRIMARY KEY,
+wid INTEGER NOT NULL,
+name VARCHAR(200) NOT NULL
+);
+

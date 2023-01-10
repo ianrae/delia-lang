@@ -1,0 +1,27 @@
+# rule tests
+
+FEATURE: rules
+background:
+ type Flight struct {id int primaryKey, name string } !(name.contains('bb')) end
+thenType: struct
+
+# -- Mandatory --
+---
+title: pass
+given:
+  insert Flight {id: 55, name: 'barney' }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vname:'barney'
+}
+
+---
+title: fail
+given:
+when:
+  insert Flight {id: 55, name: 'bobby' }
+  let x = Flight[55];ERROR: rule-contains
+

@@ -23,6 +23,7 @@ public interface ErrorTracker {
 	void dump();
 	List<DeliaError> getErrors();
 	DeliaError getLastError();
+	DeliaError getFirstError();
 	List<ValidationError> getValidationErrors();
 	void copyErrorsFrom(ErrorTracker et, ErrorCopyFilter filter);
 }

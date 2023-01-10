@@ -1,15 +1,13 @@
 package org.delia.sprig;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
-import org.delia.type.TypePair;
+import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SprigServiceImpl extends ServiceBase implements SprigService {
 
@@ -18,11 +16,11 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 		public DValue synId;
 	}
 	public static class SynthInfo {
-		public String synthFieldName;
-		public Map<String, SynthInstanceDetails> instanceMap = new ConcurrentHashMap<>(); 
+		public String synthFieldName; //eg. sid
+		public Map<String, SynthInstanceDetails> instanceMap = new ConcurrentHashMap<>();
 	}
 	private DTypeRegistry registry;
-	private Map<String,SynthInfo> map = new ConcurrentHashMap<>();
+	private Map<DTypeName,SynthInfo> map = new ConcurrentHashMap<>(); //typeName,synthInfo
 
 	public SprigServiceImpl(FactoryService factorySvc, DTypeRegistry registry) {
 		super(factorySvc);
@@ -30,7 +28,7 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 	}
 
 	@Override
-	public void registerSyntheticId(String typeName, String syntheticIdName) {
+	public void registerSyntheticId(DTypeName typeName, String syntheticIdName) {
 		if (! registry.existsType(typeName)) {
 			DeliaExceptionHelper.throwError("synthetic-id-unknown-type", "Cannot configure synthetic type for unknown type '%s'", typeName);
 		}
@@ -44,8 +42,8 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 	}
 
 	@Override
-	public DValue resolveSyntheticId(String typeName, String idValue) {
-		SynthInfo info = map.get(typeName);
+	public DValue resolveSyntheticId(DStructType structType, String idValue) {
+		SynthInfo info = map.get(structType.getTypeName());
 		if (info == null) {
 			return null; //not sfund
 		}
@@ -60,13 +58,18 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 	}
 
 	@Override
-	public boolean haveEnabledFor(String typeName) {
+	public boolean haveEnabledFor(DTypeName typeName) {
 		SynthInfo info = map.get(typeName);
 		return info != null;
 	}
 
 	@Override
-	public boolean haveEnabledFor(String typeName, String syntheticIdName) {
+	public boolean haveEnabledFor(DStructType structType) {
+		return haveEnabledFor(structType.getTypeName());
+	}
+
+	@Override
+	public boolean haveEnabledFor(DTypeName typeName, String syntheticIdName) {
 		SynthInfo info = map.get(typeName);
 		if (info == null) {
 			return false;
@@ -76,15 +79,15 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 	}
 
 	@Override
-	public void setGeneratedId(String typeName, DValue idVal) {
+	public void setGeneratedId(DTypeName typeName, DValue idVal) {
 		SynthInfo info = map.get(typeName);
 		if (info != null) {
-			//info.mostRecentInsertedPrimaryKey = idVal;
+//			info.mostRecentInsertedPrimaryKey = idVal;
 		}
 	}
 
 	@Override
-	public void rememberSynthId(String typeName, DValue dval, DValue generatedId, Map<String, DValue> extraMap) {
+	public void rememberSynthId(DTypeName typeName, DValue dval, DValue generatedId, DValue synId) {
 		SynthInfo info = map.get(typeName);
 		if (info != null) {
 			DValue keyVal = generatedId;
@@ -92,14 +95,15 @@ public class SprigServiceImpl extends ServiceBase implements SprigService {
 				TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 				keyVal = dval.asStruct().getField(pair.name);
 			}
-			String key = keyVal.asString();
+			String key = synId.asString(); //keyVal.asString();
 			SynthInstanceDetails details = info.instanceMap.get(key);
 			if (details == null) {
 				details = new SynthInstanceDetails();
 				info.instanceMap.put(key, details);
 			}
 			details.mostRecentInsertedPrimaryKey = keyVal;
-			details.synId = extraMap.get(info.synthFieldName);
+			details.synId = synId;
+			log.log("sprig '%s': %s -> %s", typeName, key, keyVal.asString());
 		}
 	}
 }

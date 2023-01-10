@@ -9,7 +9,7 @@ public class FieldExistenceServiceImpl implements FieldExistenceService {
 
 	private DTypeRegistry registry;
 	private DType dtype;
-	
+
 	public FieldExistenceServiceImpl(DTypeRegistry registry, DType dtype) {
 		this.registry = registry;
 		this.dtype = dtype;

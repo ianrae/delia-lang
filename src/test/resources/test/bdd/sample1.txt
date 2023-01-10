@@ -1,0 +1,34 @@
+# let field value tests
+
+FEATURE: let field value
+background(delia):
+ configure loadFKs = true
+
+# --- Multiple ---
+---
+title: function
+given(delia):
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when(delia):
+  let x = Customer[true].id.max()
+then(values):
+value:a:int:56
+
+---
+title: func missing
+given(delia):
+ type Customer struct {id int primaryKey, relation addr Address optional many } end
+ type Address struct {id int primaryKey, relation cust Customer optional one } end
+
+  insert Customer {id: 55 }
+  insert Customer {id: 56 }
+when(delia):
+  let x = Customer[id=99].id.max()
+then(delia):
+null
+
+

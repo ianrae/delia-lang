@@ -15,6 +15,8 @@ public interface DateFormatService {
 
     Date parseLegacy(String input);
     ZonedDateTime parseDateTime(String input);
+    ZonedDateTime parseTime(String input);
+    boolean isTimeOnly(String input);
     String format(Date dt); //legacy
     String format(ZonedDateTime ldt);
     String format(LocalDateTime ldt, ZoneId zoneId);

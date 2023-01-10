@@ -1,26 +1,19 @@
 package org.delia.valuebuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.collections.CollectionUtils;
-import org.delia.type.BuiltInTypes;
-import org.delia.type.DRelation;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
-import org.delia.type.DValueImpl;
-import org.delia.type.Shape;
-import org.delia.type.TypePair;
+import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RelationValueBuilder extends DValueBuilder {
-	private String foreignTypeName;
+	private DTypeName foreignTypeName;
 	private DTypeRegistry registry;
 	private DType idType;
 
-	public RelationValueBuilder(DType type, String foreignTypeName, DTypeRegistry registry) {
+	public RelationValueBuilder(DType type, DTypeName foreignTypeName, DTypeRegistry registry) {
 		if (!type.isShape(Shape.RELATION)) {
 			addWrongTypeError("expecting relation");
 			return;
@@ -39,7 +32,7 @@ public class RelationValueBuilder extends DValueBuilder {
 			return;
 		}
 		this.type = type;
-		this.foreignTypeName = farType.getName();
+		this.foreignTypeName = farType.getTypeName();
 		this.registry = registry;
 		
 		DType idType = farType;
@@ -56,8 +49,8 @@ public class RelationValueBuilder extends DValueBuilder {
 		
 		if (idType.isShape(Shape.INTEGER)) {
 			doInt(input);
-		} else if (idType.isShape(Shape.LONG)) {
-			doLong(input);
+//		} else if (idType.isShape(Shape.LONG)) {
+//			doLong(input);
 		} else if (idType.isShape(Shape.STRING)) {
 			doString(input);
 		} else {
@@ -78,20 +71,20 @@ public class RelationValueBuilder extends DValueBuilder {
 			addParsingError(String.format("'%s' is not an integer", input), input);
 		}
 	}
-	private void doLong(String input) {
-		Long nval = null;
-		try {
-			nval = Long.parseLong(input);
-			
-			//use .valueOf to save memory. it re-uses the same instances for common values.
-			nval = Long.valueOf(nval.longValue());
-			
-			DType keyType = registry.getType(BuiltInTypes.LONG_SHAPE);
-			setNewDVal(keyType, nval);
-		} catch (NumberFormatException e) {
-			addParsingError(String.format("'%s' is not an long", input), input);
-		}
-	}
+//	private void doLong(String input) {
+//		Long nval = null;
+//		try {
+//			nval = Long.parseLong(input);
+//
+//			//use .valueOf to save memory. it re-uses the same instances for common values.
+//			nval = Long.valueOf(nval.longValue());
+//
+//			DType keyType = registry.getType(BuiltInTypes.LONG_SHAPE);
+//			setNewDVal(keyType, nval);
+//		} catch (NumberFormatException e) {
+//			addParsingError(String.format("'%s' is not an long", input), input);
+//		}
+//	}
 	private void doString(String input) {
 		try {
 			DType keyType = registry.getType(BuiltInTypes.STRING_SHAPE);

@@ -15,7 +15,7 @@ import org.delia.type.PrimaryKeyValue;
 import org.delia.type.TypePair;
 
 public class DValueHelper {
-	
+
 	public static boolean typesAreSame(DType type1, DType type2) {
 		if (type1 == type2) {
 			return true;
@@ -35,16 +35,16 @@ public class DValueHelper {
 		if (primaryKey == null) {
 			return null;
 		}
-		
+
 		PrimaryKeyValue pkv = new PrimaryKeyValue(dval);
 		return pkv.getKeyValue();
-//		
+//
 ////		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 //		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
 //		DValue inner = dval.asStruct().getField(keyPair.name);
 //		return inner;
 	}
-	
+
 	public static TypePair findPrimaryKeyFieldPair(DType inner) {
 		if (! inner.isStructShape()) {
 			return null;
@@ -57,9 +57,9 @@ public class DValueHelper {
 		if (! inner.isStructShape()) {
 			return null;
 		}
-		
+
 		List<TypePair> resultL = new ArrayList<>();
-		
+
 		//first, look for primaryKey fields
 		DStructType dtype = (DStructType) inner;
 		for(TypePair pair: dtype.getAllFields()) {
@@ -67,7 +67,7 @@ public class DValueHelper {
 				resultL.add(pair);
 			}
 		}
-		
+
 		//otherwise, look for unique fields (and possibly unique and optional)
 		for(TypePair pair: dtype.getAllFields()) {
 			if (dtype.fieldIsUnique(pair.name)) {
@@ -80,7 +80,7 @@ public class DValueHelper {
 		if (! dtype.isStructShape()) {
 			return null;
 		}
-		
+
 		DStructType structType = (DStructType) dtype;
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.name.equals(fieldName)) {
@@ -93,7 +93,7 @@ public class DValueHelper {
 		if (! dtype.isStructShape()) {
 			return null;
 		}
-		
+
 		DStructType structType = (DStructType) dtype;
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.name.equals(fieldName)) {
@@ -106,7 +106,7 @@ public class DValueHelper {
 		if (! dtype.isStructShape()) {
 			return false;
 		}
-		
+
 		DStructType structType = (DStructType) dtype;
 		for(TypePair pair: structType.getAllFields()) {
 			if (pair.name.equals(fieldName)) {
@@ -119,23 +119,23 @@ public class DValueHelper {
 //		if (! inner.isStructShape()) {
 //			return null;
 //		}
-//		
-//		TypePair pair = findPrimaryKeyFieldPair(inner); 
+//
+//		TypePair pair = findPrimaryKeyFieldPair(inner);
 //		if (pair == null) {
 //			return null;
 //		} else {
 //			return pair.type;
 //		}
 //	}
-	
+
 	public static DValue getFieldValue(DValue dval, String fieldName) {
 		if (dval == null || ! dval.getType().isStructShape()) {
 			return null;
 		}
-		
+
 		return dval.asStruct().getField(fieldName);
 	}
-	
+
 	/**
 	 * Return a new DValue that combines dvalPartial into existingDVal
 	 * @param dvalPartial  value contains some of the type's fields
@@ -144,8 +144,8 @@ public class DValueHelper {
 	 */
 	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal) {
 		return mergeOne(dvalPartial, existingDVal, null);
-	}	
-	
+	}
+
 	/**
 	 * Return a new DValue that combines dvalPartial into existingDVal
 	 * @param dvalPartial  value contains some of the type's fields
@@ -156,13 +156,13 @@ public class DValueHelper {
 	public static DValue mergeOne(DValue dvalPartial, DValue existingDVal, Map<String,String> skipMap) {
 	    Map<String,DValue> srcMap = new HashMap<>(dvalPartial.asMap()); //make a copy
 	    Map<String,DValue> existingMap = existingDVal.asMap();
-	    
+
 	    Map<String,DValue> newMap = existingDVal.asMap();
-	    
+
 	    //merge or copy fields in existingDVal
 	    for(String fieldName: existingMap.keySet()) {
 	    	boolean skip = skipMap != null && skipMap.containsKey(fieldName);
-	    	
+
 			DValue inner;
 			if (skip) {
 				inner = existingMap.get(fieldName);
@@ -175,7 +175,7 @@ public class DValueHelper {
 			DValue clone = cloneField(inner);
 			newMap.put(fieldName, clone);
 	    }
-	    
+
 	    //add fields in dvalPartial but not in existingDVal (ie. are null in existingDVal)
 	    for(String fieldName: srcMap.keySet()) {
 	    	boolean skip = skipMap != null && skipMap.containsKey(fieldName);
@@ -186,7 +186,7 @@ public class DValueHelper {
 			DValue clone = cloneField(inner);
 			newMap.put(fieldName, clone);
 	    }
-	    
+
 	    DValue newVal = new DValueImpl(existingDVal.getType(), newMap);
 		return newVal;
 	}

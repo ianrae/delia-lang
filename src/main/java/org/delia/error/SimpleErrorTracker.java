@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.delia.log.Log;
+import org.delia.log.DeliaLog;
 
 
 public class SimpleErrorTracker implements ErrorTracker {
 	private List<DeliaError> errL = Collections.synchronizedList(new ArrayList<>());
-	private Log log;
+	private DeliaLog log;
 
-	public SimpleErrorTracker(Log log) {
+	public SimpleErrorTracker(DeliaLog log) {
 		this.log = log;
 	}
 	@Override
@@ -113,6 +113,13 @@ public class SimpleErrorTracker implements ErrorTracker {
 			return null;
 		}
 		return errL.get(errL.size() - 1);
+	}
+	@Override
+	public DeliaError getFirstError() {
+		if (errL.isEmpty()) {
+			return null;
+		}
+		return errL.get(0);
 	}
 	@Override
 	public void addAll(List<DeliaError> errL) {
