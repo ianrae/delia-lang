@@ -14,6 +14,7 @@ import org.delia.log.DeliaLog;
 import org.delia.runner.DeliaRunner;
 import org.delia.runner.DeliaRunnerImpl;
 import org.delia.runner.ExpHelper;
+import org.delia.runner.ResultValue;
 import org.delia.type.DStructType;
 import org.delia.type.DTypeName;
 import org.delia.type.DValue;
@@ -68,6 +69,57 @@ public class ImporterTests extends TestBase {
         DValue dval = list.get(1);
         assertEquals("bobby", dval.asStruct().getField("firstName").asString());
     }
+
+    @Test
+    public void testChildSessionFix() {
+        DeliaSession session = initSession();
+
+        DeliaRunner deliaRunner1 = new DeliaRunnerImpl(session, true);
+        ScalarValueBuilder valueBuilder = deliaRunner1.createValueBuilder();
+
+        DTypeName dtypeName = new DTypeName("alpha", "Person");
+        DStructType structType = session.getRegistry().getStructType(dtypeName); //createType("Person", session);
+
+        List<DValue> values = new ArrayList<>();
+        ExpHelper helper = new ExpHelper(session.getDelia().getFactoryService());
+        StructValueBuilder builder = new StructValueBuilder(structType);
+        builder.addField("id", valueBuilder.buildInt(10));
+        builder.addField("firstName", helper.buildDValueString("bobby"));
+        boolean b = builder.finish();
+        values.add(builder.getDValue());
+
+        builder = new StructValueBuilder(structType);
+        builder.addField("id", valueBuilder.buildInt(11));
+        builder.addField("firstName", helper.buildDValueString("sue"));
+        builder.finish();
+        values.add(builder.getDValue());
+
+        //session doesn't have value for 'x'
+        ResultValue res = session.getDelia().continueExecution("let x = Person[10]", session);
+        ResultValue tmpval = session.getExecutionContext().varMap.get("x");
+        assertEquals(null, tmpval.getAsDValue());
+
+        session.getExecutionContext().currentSchema = "alpha";
+        DeliaSession childSess = session.createChildSession();
+        DeliaRunner deliaRunner2 = new DeliaRunnerImpl(childSess, false);
+        ImporterService importSvc = new ImporterService(childSess.getDelia().getFactoryService(), deliaRunner2);
+        List<DValue> list = importSvc.insertValues(structType, values);
+        assertEquals(null, list);
+
+        QueryService querySvc = new QueryService(factorySvc, deliaRunner2);
+        dtypeName = new DTypeName("alpha", "Person");
+        list = querySvc.queryAll(dtypeName);
+        assertEquals(3, list.size());
+        DValue dval = list.get(1);
+        assertEquals("bobby", dval.asStruct().getField("firstName").asString());
+
+        //session still doesn't have value for 'x'
+        tmpval = session.getExecutionContext().varMap.get("x");
+        assertEquals(null, tmpval.getAsDValue());
+
+
+    }
+
 
     //---
 
