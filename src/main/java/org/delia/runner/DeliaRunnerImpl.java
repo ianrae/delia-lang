@@ -132,7 +132,7 @@ public class DeliaRunnerImpl implements DeliaRunner {
     public DeliaExecutable buildExecutable(AST.DeliaScript script) {
         VarEvaluator varEvaluator = createVarEvaluator();
         SyntheticDatService datSvc = new SyntheticDatService();
-        Map<String,String> syntheticIdMap = new HashMap<>(); //TODO do we need a real one?
+        Map<String, String> syntheticIdMap = new HashMap<>(); //TODO do we need a real one?
 
         DBCapabilties capabilties = dbInterface.getCapabilities();
         ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, delia.getOptions(), syntheticIdMap, capabilties.getDefaultSchema());
@@ -166,7 +166,7 @@ public class DeliaRunnerImpl implements DeliaRunner {
             session.execCtx = existingSession.getExecutionContext();
         }
         session.execCtx.deliaRunner = this;
-        session.mostRecentExecutable= executable;
+        session.mostRecentExecutable = executable;
 
         // ** run it **
         executable.inTransaction = false;
@@ -175,10 +175,10 @@ public class DeliaRunnerImpl implements DeliaRunner {
             final DeliaSessionImpl sessFinal = session;
             session.runInTransactionVoid(() -> {
                 executable.inTransaction = true;
-                runExecutable(runner, executable, sessFinal, isNewSession );
+                runExecutable(runner, executable, sessFinal, isNewSession);
             });
         } else {
-            runExecutable(runner, executable, session, isNewSession );
+            runExecutable(runner, executable, session, isNewSession);
         }
 
         return session;
