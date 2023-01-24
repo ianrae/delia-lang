@@ -4,6 +4,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.DBCapabilties;
 import org.delia.dval.compare.DValueCompareService;
+import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.rule.AlwaysRuleGuard;
@@ -323,5 +324,10 @@ public class ValidationRuleRunnerImpl extends ServiceBase implements ValidationR
     @Override
     public void setSoftMandatoryRelationFlag(boolean b) {
         this.softMandatoryRelationFlag = b;
+    }
+
+    @Override
+    public List<DeliaError> getErrors() {
+        return localET.getErrors();
     }
 }
