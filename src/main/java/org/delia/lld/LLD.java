@@ -519,7 +519,7 @@ public class LLD {
         }
         @Override
         public String toString() {
-            String s = String.format("LLBulkInsert %s. %d fields", first.table.toString(), first.fieldL.size());
+            String s = String.format("LLBulkInsert %s. %d fields. %d inserts", first.table.toString(), first.fieldL.size(), insertStatements.size());
             return s;
         }
 

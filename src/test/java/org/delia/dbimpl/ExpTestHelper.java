@@ -54,10 +54,10 @@ public class ExpTestHelper extends ServiceBase {
     }
 
     public AST.DeliaScript buildScriptStart(ScalarValueBuilder scalarBuilder) {
-        return buildScriptStart(true);
+        return buildScriptStart(true, false);
     }
 
-    public AST.DeliaScript buildScriptStart(boolean withSchema) {
+    public AST.DeliaScript buildScriptStart(boolean withSchema, boolean addOtherType) {
         AST.DeliaScript script = new AST.DeliaScript();
         if (withSchema) {
             script.add(new AST.SchemaAst("alpha"));
@@ -74,6 +74,20 @@ public class ExpTestHelper extends ServiceBase {
         field.typeName = "string";
         type.fields.add(field);
         script.add(type);
+
+        if (addOtherType) {
+            type = new AST.TypeAst("Other");
+            type.baseName = "struct";
+            field = new AST.TypeFieldAst("id");
+            field.isPrimaryKey = true;
+            field.typeName = "int";
+            type.fields.add(field);
+            field = new AST.TypeFieldAst("name");
+            field.isOptional = true;
+            field.typeName = "string";
+            type.fields.add(field);
+            script.add(type);
+        }
 
         AST.InsertStatementAst ins = new AST.InsertStatementAst();
         ins.typeName = "Person";

@@ -140,26 +140,34 @@ public class BulkInsertTests extends TestBase {
 
     }
 
-
     @Test
-    public void test() {
-        DeliaExecutable executable = parseIntoHLD();
-
-        SyntheticDatService datSvc = new SyntheticDatService();
-        LLDBuilder builder = new LLDBuilder(factorySvc, datSvc, new DeliaOptions());
-        builder.buildLLD(executable);
-        dumpLL(executable.lldStatements);
-
-        log.log("and..");
-        BulkInsertBuilder bulkInsertBuilder = new BulkInsertBuilder();
-        List<LLD.LLStatement> list2 = bulkInsertBuilder.process(executable.lldStatements);
+    public void test1() {
+        DeliaExecutable executable = parseIntoHLD(1);
+        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 2);
+        dumpLL(list2);
+        chkInsert(list2, 1);
+    }
+    @Test
+    public void test2() {
+        DeliaExecutable executable = parseIntoHLD(2);
+        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 2);
         dumpLL(list2);
         chkBulk(list2, 1, 2);
     }
+    @Test
+    public void test3() {
+        DeliaExecutable executable = parseIntoHLD(3);
+        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 2);
+        dumpLL(list2);
+        chkBulk(list2, 1, 3);
+    }
 
-    private void chkBulk(List<LLD.LLStatement> list, int i, int size) {
-        LLD.LLBulkInsert bulkInsert = (LLD.LLBulkInsert) list.get(i);
-        assertEquals(size, bulkInsert.insertStatements.size());
+    @Test
+    public void test3a() {
+        DeliaExecutable executable = parseIntoHLD(3, "Other");
+        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 5);
+        dumpLL(list2);
+        chkBulk(list2, 3, 2);
     }
 
     //---
@@ -169,8 +177,11 @@ public class BulkInsertTests extends TestBase {
         super.init();
     }
 
-    private DeliaExecutable parseIntoHLD() {
-        AST.DeliaScript script = buildTwo();
+    private DeliaExecutable parseIntoHLD(int n) {
+        return parseIntoHLD(n, "Person");
+    }
+    private DeliaExecutable parseIntoHLD(int n, String tableName) {
+        AST.DeliaScript script = buildInserts(n, tableName);
         DeliaExecutable exec = HLDTestHelper.parseIntoHLD(script, factorySvc, new DeliaOptions());
         return exec;
     }
@@ -183,17 +194,46 @@ public class BulkInsertTests extends TestBase {
         log.log("--LL end.--");
     }
 
-    protected AST.DeliaScript buildTwo() {
+    protected AST.DeliaScript buildInserts(int n, String tableName) {
         ExpTestHelper expHelper = new ExpTestHelper(factorySvc);
-        AST.DeliaScript script = expHelper.buildScriptStart(false);
+        AST.DeliaScript script = expHelper.buildScriptStart(false, !tableName.equals("Person"));
 
-        AST.InsertStatementAst ins = new AST.InsertStatementAst();
-        ins.typeName = "Person";
-        ins.fields = Arrays.asList(expHelper.buildInsertFieldInt("id", 8),
-                expHelper.buildInsertField("firstName", "sue"));
-        script.add(ins);
+        if (n >= 2) {
+            AST.InsertStatementAst ins = new AST.InsertStatementAst();
+            ins.typeName = tableName;
+            ins.fields = Arrays.asList(expHelper.buildInsertFieldInt("id", 8),
+                    expHelper.buildInsertField("firstName", "sue"));
+            script.add(ins);
+        }
+        if (n >= 3) {
+            AST.InsertStatementAst ins = new AST.InsertStatementAst();
+            ins.typeName = tableName;
+            ins.fields = Arrays.asList(expHelper.buildInsertFieldInt("id", 8),
+                    expHelper.buildInsertField("firstName", "sue"));
+            script.add(ins);
+        }
 
         return script;
     }
 
+    private List<LLD.LLStatement> runBulkBuilder(DeliaExecutable executable, int expectedSize) {
+        SyntheticDatService datSvc = new SyntheticDatService();
+        LLDBuilder builder = new LLDBuilder(factorySvc, datSvc, new DeliaOptions());
+        builder.buildLLD(executable);
+        dumpLL(executable.lldStatements);
+
+        log.log("and..");
+        BulkInsertBuilder bulkInsertBuilder = new BulkInsertBuilder();
+        List<LLD.LLStatement> list2 = bulkInsertBuilder.process(executable.lldStatements);
+        assertEquals(expectedSize, list2.size());
+        return list2;
+    }
+
+    private void chkBulk(List<LLD.LLStatement> list, int i, int size) {
+        LLD.LLBulkInsert bulkInsert = (LLD.LLBulkInsert) list.get(i);
+        assertEquals(size, bulkInsert.insertStatements.size());
+    }
+    private void chkInsert(List<LLD.LLStatement> list, int i) {
+        LLD.LLInsert insert = (LLD.LLInsert) list.get(i);
+    }
 }
