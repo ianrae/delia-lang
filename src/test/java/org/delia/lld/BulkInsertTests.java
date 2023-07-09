@@ -25,9 +25,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class BulkInsertTests extends TestBase {
 
+    //holds a contiguous set of LLInserts that may be candidates for bulk insert
     public static class SpanHolder {
         public List<LLD.LLInsert> statements = new ArrayList<>();
-
     }
 
     public static class BulkInsertBuilder {
@@ -100,25 +100,29 @@ public class BulkInsertTests extends TestBase {
                         bulkInsert.insertStatements.add(stmt);
                     } else {
                         addBulkIfNeeded(bulkInsert, resultL);
-                        resultL.add(stmt);
 
-                        candidate = null;
-                        bulkInsert = null;
+                        candidate = stmt;
+                        bulkInsert = new LLD.LLBulkInsert(stmt.loc);
+                        bulkInsert.first = stmt;
+                        bulkInsert.insertStatements.add(stmt);
                     }
                 }
             }
 
             addBulkIfNeeded(bulkInsert, resultL);
-
             return resultL;
         }
 
         private boolean isMatch(LLD.LLInsert candidate, LLD.LLInsert stmt) {
+            if (candidate.subQueryInfo != null || stmt.subQueryInfo != null) {
+                return false;
+            }
             String fingerprint = buildFingerprint(candidate);
             String fingerprint2 = buildFingerprint(stmt);
             return fingerprint.equals(fingerprint2);
         }
 
+        //TODO: do we need to include fields in fingerprint?
         private String buildFingerprint(LLD.LLInsert candidate) {
             StrCreator sc = new StrCreator();
             sc.o("%s;", candidate.getTableName());
@@ -165,7 +169,7 @@ public class BulkInsertTests extends TestBase {
     @Test
     public void test3a() {
         DeliaExecutable executable = parseIntoHLD(3, "Other");
-        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 5);
+        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 4);
         dumpLL(list2);
         chkBulk(list2, 3, 2);
     }
