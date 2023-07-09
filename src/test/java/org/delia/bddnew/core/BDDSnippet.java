@@ -10,4 +10,5 @@ public class BDDSnippet {
     public SnippetType type;
     public List<String> lines = new ArrayList<>();
     public String thenType; //only used by value snippet
+    public boolean bulkInsertEnabled;
 }

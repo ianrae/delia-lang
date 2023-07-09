@@ -8,7 +8,23 @@ background:
 thenType: struct
 
 ---
-title: insert returns null
+title: insert bulkInsert disabled
+when:
+  insert Flight {id: 55, wid: 20 }
+  insert Flight {id: 56, wid: 21 }
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+value:a:Flight {
+  vid:56
+  vwid:21
+}
+
+title: insert bulkInsert endabled
+bulkInsert:true
 when:
   insert Flight {id: 55, wid: 20 }
   insert Flight {id: 56, wid: 21 }

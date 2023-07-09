@@ -13,4 +13,5 @@ public class BDDTest {
     public List<BDDSnippet> givenL = new ArrayList<>();
     public List<BDDSnippet> thenL = new ArrayList<>();
     public List<BDDSnippet> whenL = new ArrayList<>();
+    public boolean bulkInsertEnabled;
 }
