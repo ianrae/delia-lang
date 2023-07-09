@@ -28,4 +28,6 @@ public class DeliaOptions {
     public int defaultStringColumnLength = 200;
     public CustomVarEvaluatorFactory customVarEvaluatorFactory;
     public boolean generateSqlWhenMEMDBType = false; //we don't need the sql, but it can be useful
+    public boolean bulkInsertEnabled = false;
+    public int bulkInsertMaxBulkSize = 10;
 }
