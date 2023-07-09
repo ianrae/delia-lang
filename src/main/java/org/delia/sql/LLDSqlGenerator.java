@@ -1,6 +1,5 @@
 package org.delia.sql;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.delia.DeliaOptions;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -31,6 +30,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
     private final SqlTypeConverter sqlTypeConverter;
     private final LetSqlGenerator letSqlGenerator;
     private final CreateAssocTableSqlGenerator createAssocTableSqlGenerator;
+    private final LLDInsertGenerator insertGenerator;
 
     public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc) {
         super(factorySvc);
@@ -44,6 +44,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
+        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc);
     }
 
     public SqlStatement generateSql(LLD.LLStatement statement) {
@@ -163,55 +164,12 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
 
     @Override
     public SqlStatement render(LLD.LLInsert statement) {
-        if (statement.subQueryInfo != null) {
-            return assocSqlGenerator.renderInsertSubQuery(statement);
-        }
-
-        /* INSERT INTO table_name(column1, column2, …) VALUES (value1, value2, …); */
-        //the fieldL is all the logical fields involved.
-        //Because of ManyToMany relations, some of those fields may be in an assoc table, not in the statement's table
-        List<LLD.LLFieldValue> fieldsToInsert = statement.fieldL.stream()
-                .filter(fld -> !fld.field.isAssocField).collect(Collectors.toList());
-        if (fieldsToInsert.isEmpty() && !statement.areFieldsToInsert()) {
-            return null;
-        }
-
-        SqlStatement sqlStatement = new SqlStatement();
-        StrCreator sc = new StrCreator();
-        if (fieldsToInsert.isEmpty()) {
-            sc.o("INSERT INTO %s  VALUES(DEFAULT", statement.getTableName());
-        } else {
-            sc.o("INSERT INTO %s (", statement.getTableName());
-            ListWalker<LLD.LLFieldValue> walker = new ListWalker<>(fieldsToInsert);
-            while (walker.hasNext()) {
-                LLD.LLFieldValue field = walker.next();
-                sc.o("%s", field.field.getFieldName());
-                walker.addIfNotLast(sc, ", ");
-            }
-            sc.o(")");
-            sc.nl();
-            sc.o(" VALUES(");
-
-            walker = new ListWalker<>(fieldsToInsert);
-            while (walker.hasNext()) {
-                LLD.LLFieldValue field = walker.next();
-//            sc.o("%s", renderAsSql(field.dval, field.field.physicalPair.type, field.field.physicalTable.physicalType));
-                sc.o("?");
-                DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
-                sqlStatement.paramL.add(realVal);
-                walker.addIfNotLast(sc, ", ");
-            }
-        }
-        sc.o(");");
-
-        sqlStatement.sql = sc.toString();
-        return sqlStatement;
+        return insertGenerator.render(statement);
     }
 
     @Override
     public SqlStatement render(LLD.LLBulkInsert statement) {
-        throw new NotImplementedException("impl this!");
-//        return null;
+        return insertGenerator.render(statement);
     }
 
     @Override
