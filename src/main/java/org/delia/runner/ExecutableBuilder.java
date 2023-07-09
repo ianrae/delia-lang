@@ -88,8 +88,7 @@ public class ExecutableBuilder extends ServiceBase {
         if (!deliaOptions.bulkInsertEnabled) return;
 
         BulkInsertBuilder bulkInsertBuilder = new BulkInsertBuilder(deliaOptions);
-        List<LLD.LLStatement> list2 = bulkInsertBuilder.process(exec.lldStatements);
-
+        exec.lldStatements  = bulkInsertBuilder.process(exec.lldStatements);
     }
 
     private boolean shouldGenerateSQL(DBType dbType) {

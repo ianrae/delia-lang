@@ -85,7 +85,7 @@ public class BulkInsertBuilder {
                 bulkInsert.first = stmt;
                 bulkInsert.insertStatements.add(stmt);
             } else {
-                if (isMatch(candidate, stmt)) {
+                if (isMatch(candidate, stmt, bulkInsert)) {
                     bulkInsert.insertStatements.add(stmt);
                 } else {
                     addBulkIfNeeded(bulkInsert, resultL);
@@ -102,7 +102,12 @@ public class BulkInsertBuilder {
         return resultL;
     }
 
-    private boolean isMatch(LLD.LLInsert candidate, LLD.LLInsert stmt) {
+    private boolean isMatch(LLD.LLInsert candidate, LLD.LLInsert stmt, LLD.LLBulkInsert bulkInsert) {
+        //only bulk at most bulkInsertMaxBulkSize inserts
+        if (bulkInsert != null && bulkInsert.insertStatements.size() >= deliaOptions.bulkInsertMaxBulkSize) {
+            return false;
+        }
+
         if (candidate.subQueryInfo != null || stmt.subQueryInfo != null) {
             return false;
         }

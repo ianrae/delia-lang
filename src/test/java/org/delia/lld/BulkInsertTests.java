@@ -51,6 +51,14 @@ public class BulkInsertTests extends TestBase {
         dumpLL(list2);
         chkBulk(list2, 1, 3);
     }
+    @Test
+    public void test3Reduce() {
+        options.bulkInsertMaxBulkSize = 2;
+        DeliaExecutable executable = parseIntoHLD(3);
+        List<LLD.LLStatement> list2 = runBulkBuilder(executable, 3);
+        dumpLL(list2);
+        chkBulk(list2, 1, 2);
+    }
 
     @Test
     public void test3a() {
