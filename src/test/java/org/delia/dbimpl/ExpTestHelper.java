@@ -70,6 +70,7 @@ public class ExpTestHelper extends ServiceBase {
         script.add(type);
 
         AST.InsertStatementAst ins = new AST.InsertStatementAst();
+//        ins.schemaName = "alpha";
         ins.typeName = "Person";
         ins.fields = Arrays.asList(buildInsertFieldInt("id", 7), buildInsertField("firstName", "bob"));
         script.add(ins);

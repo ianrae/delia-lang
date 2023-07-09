@@ -387,12 +387,13 @@ public class PostgresBDDTests extends BDDTestBase {
 
 	@Test
 	public void testDebug() {
-//		singleTestToRunIndex = 0;
+		singleTestToRunIndex = 0;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
+//		runR700File("t0-insert.txt", 6);
 
-//		runR700File("t0-insert-serial.txt", 1);
-		runR700File("t0-insert-serial-inherit.txt", 1);
+		runR700File("t0-insert-serial.txt", 1);
+//		runR700File("t0-insert-serial-inherit.txt", 1);
 	}
 
 	//---

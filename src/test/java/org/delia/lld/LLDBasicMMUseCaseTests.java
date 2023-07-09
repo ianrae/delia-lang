@@ -36,7 +36,7 @@ public class LLDBasicMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Customer.id.CustomerAddressDat1.leftv", 0);
         chkWhere(lld, "[b.rightv < 10]"); //has been rewritten!
-        chkSql(lld, "SELECT a.id, a.firstName FROM customer as a LEFT JOIN customeraddressdat1 as b ON a.id=b.leftv WHERE b.rightv < ?", "10");
+        chkSql(lld, "SELECT a.id, a.firstName FROM alpha.customer as a LEFT JOIN customeraddressdat1 as b ON a.id=b.leftv WHERE b.rightv < ?", "10");
     }
 
     @Test
@@ -52,7 +52,7 @@ public class LLDBasicMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Address.id.CustomerAddressDat1.rightv", 0);
         chkWhere(lld, "[b.leftv < 7]");
-        chkSql(lld, "SELECT a.id, a.city FROM address as a LEFT JOIN customeraddressdat1 as b ON a.id=b.rightv WHERE b.leftv < ?", "7");
+        chkSql(lld, "SELECT a.id, a.city FROM alpha.address as a LEFT JOIN customeraddressdat1 as b ON a.id=b.rightv WHERE b.leftv < ?", "7");
     }
 
     //TODO * 6 Customer[addr.city = 'toronto']
@@ -70,7 +70,7 @@ public class LLDBasicMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Customer.id.CustomerAddressDat1.leftv", 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT a.id, a.firstName, b.rightv FROM customer as a LEFT JOIN customeraddressdat1 as b ON a.id=b.leftv");
+        chkSql(lld, "SELECT a.id, a.firstName, b.rightv FROM alpha.customer as a LEFT JOIN customeraddressdat1 as b ON a.id=b.leftv");
     }
 
     //TODO: 8
@@ -90,7 +90,7 @@ public class LLDBasicMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Address.id.CustomerAddressDat1.rightv", 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT a.id, a.city FROM address as a LEFT JOIN customeraddressdat1 as b ON a.id=b.rightv");
+        chkSql(lld, "SELECT a.id, a.city FROM alpha.address as a LEFT JOIN customeraddressdat1 as b ON a.id=b.rightv");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class LLDBasicMMUseCaseTests extends LLDBasicTestBase {
         chkLetStmt(lld, "count");
         chkJoins(lld, 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT count(*) FROM customer as a");
+        chkSql(lld, "SELECT count(*) FROM alpha.customer as a");
     }
 
     //---
