@@ -1,5 +1,6 @@
 package org.delia.sql;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.delia.DeliaOptions;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -207,9 +208,11 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         return sqlStatement;
     }
 
-//    private String renderAsSql(DValue dval, DType dtype, DStructType parentType) {
-//        return sqlValueRenderer.renderAsSql(dval, dtype, parentType);
-//    }
+    @Override
+    public SqlStatement render(LLD.LLBulkInsert statement) {
+        throw new NotImplementedException("impl this!");
+//        return null;
+    }
 
     @Override
     public SqlStatement render(LLD.LLCreateSchema statement) {

@@ -207,6 +207,7 @@ public class LLD {
         SqlStatement render(LLUpsert statement);
 
         SqlStatement render(LLInsert statement);
+        SqlStatement render(LLBulkInsert statement);
 
         SqlStatement render(LLCreateTable statement);
         SqlStatement render(LLCreateAssocTable statement);
@@ -478,6 +479,53 @@ public class LLD {
         @Override
         public LLTable getTable() {
             return table;
+        }
+    }
+
+    public static class LLBulkInsert extends LLStatementBase implements HasLLTable {
+        public LLInsert first;
+        public List<LLInsert> insertStatements = new ArrayList<>(); //contains first
+
+        public LLBulkInsert(AST.Loc loc) {
+            super(loc);
+        }
+
+        public String getTableName() {
+            return first.table.getSQLName();
+        }
+        public boolean isSerialPK() {
+            TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(first.table.physicalType);
+            if (pkpair == null) return false;
+            return first.table.physicalType.fieldIsSerial(pkpair.name);
+        }
+        public TypePair getSerialPKPair() {
+            return DValueHelper.findPrimaryKeyFieldPair(first.table.physicalType);
+        }
+
+        public boolean areFieldsToInsert() {
+            if (!first.fieldL.isEmpty()) {
+                return true;
+            }
+            if (first.syntheticField != null) {
+                return true;
+            }
+            DStructType structType = first.table.physicalType;
+            List<TypePair> serialFields = structType.getAllFields().stream().filter(x -> structType.fieldIsSerial(x.name)).collect(Collectors.toList());
+            return !serialFields.isEmpty();
+        }
+        @Override
+        public SqlStatement render(LLStatementRenderer renderer) {
+            return renderer.render(this);
+        }
+        @Override
+        public String toString() {
+            String s = String.format("LLBulkInsert %s. %d fields", first.table.toString(), first.fieldL.size());
+            return s;
+        }
+
+        @Override
+        public LLTable getTable() {
+            return first.table;
         }
     }
 

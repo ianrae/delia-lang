@@ -7,10 +7,10 @@ import org.delia.core.ServiceBase;
 import org.delia.hld.DeliaExecutable;
 import org.delia.hld.HLD;
 import org.delia.log.DeliaLog;
-import org.delia.tok.Tok;
-import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.runner.ExpHelper;
 import org.delia.runner.SimpleDValueBuilder;
+import org.delia.tok.Tok;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 import java.util.Arrays;
 
@@ -54,8 +54,14 @@ public class ExpTestHelper extends ServiceBase {
     }
 
     public AST.DeliaScript buildScriptStart(ScalarValueBuilder scalarBuilder) {
+        return buildScriptStart(true);
+    }
+
+    public AST.DeliaScript buildScriptStart(boolean withSchema) {
         AST.DeliaScript script = new AST.DeliaScript();
-        script.add(new AST.SchemaAst("alpha"));
+        if (withSchema) {
+            script.add(new AST.SchemaAst("alpha"));
+        }
 
         AST.TypeAst type = new AST.TypeAst("Person");
         type.baseName = "struct";
@@ -70,7 +76,6 @@ public class ExpTestHelper extends ServiceBase {
         script.add(type);
 
         AST.InsertStatementAst ins = new AST.InsertStatementAst();
-//        ins.schemaName = "alpha";
         ins.typeName = "Person";
         ins.fields = Arrays.asList(buildInsertFieldInt("id", 7), buildInsertField("firstName", "bob"));
         script.add(ins);
