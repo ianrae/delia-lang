@@ -38,6 +38,7 @@ public class OuterRunner extends ServiceBase {
     private SqlValueRenderer sqlValueRenderer;
     private ExecutionState execState;
     private QueryResponse hackQResp; //TOD: remove this by fixing code!
+    private OuterRunnerInsertHelper insertHelper;
 
     public OuterRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, DatService datSvc) {
         super(factorySvc);
@@ -49,6 +50,8 @@ public class OuterRunner extends ServiceBase {
         //clear error tracker.
         factorySvc.getErrorTracker().clear();
         //TODO fix this so don't have shared error tracker -- too many leftover errors!
+
+        this.insertHelper = new OuterRunnerInsertHelper(factorySvc, dbInterface, datSvc);
     }
 
     public BasicRunnerResults executeOnDBInterface(DeliaExecutable executable, ExecutionState execState, DeliaOptions options, boolean isNewSession) {
@@ -372,80 +375,12 @@ public class OuterRunner extends ServiceBase {
         return exec.getDbInterface().getDBType().equals(DBType.MEM);
     }
 
-
     private DValue doExecBulkInsert(LLD.LLBulkInsert stmt, DBExecutor exec, DeliaExecutable executable, Map<String, ResultValue> varMap, ExecutionState execState) {
-        DValue resultVal = null;
-        for(LLD.LLInsert insertStmt: stmt.insertStatements) {
-            resultVal = doExecInsert(insertStmt, exec, executable, varMap, execState);
-        }
-        return resultVal;
+        return insertHelper.execBulkInsert(stmt, exec, executable, varMap, execState, varEvaluator);
     }
 
     private DValue doExecInsert(LLD.LLInsert stmt, DBExecutor exec, DeliaExecutable executable, Map<String, ResultValue> varMap, ExecutionState execState) {
-        ErrorTracker localET = new SimpleErrorTracker(log);
-        resolveSprigRefs(stmt, execState);
-        DsonToDValueConverter dsonConverter = new DsonToDValueConverter(factorySvc, localET, executable.registry, varEvaluator);
-        DStructType structType = stmt.table.physicalType;
-        ConversionResult cres = new ConversionResult();
-        DValue dval = dsonConverter.convertOne(structType.getTypeName(), new DsonExp(stmt.fieldL), cres);
-        DValue generatedId = null;
-        if (dval != null) {
-            if (exec instanceof DBExecutorEx) {
-                DBExecutorEx execEx = (DBExecutorEx) exec;
-                generatedId = execEx.execPreInsert(stmt, dval);
-            }
-            if (et.errorCount() > 0) {
-                return null;
-            }
-            validateDValue(dval, localET, executable.registry);
-        }
-        if (!localET.areNoErrors()) {
-            et.addAll(localET.getErrors());
-            return null;
-        }
-
-        //resolve all vars (which exist as DeferredDValues)
-        resolveAllVars(stmt.fieldL, executable.registry);
-
-        //Note. postgres doesn't use dval at all, since we've already generated stmt.sql
-        DValue generatedId2 = exec.execInsert(stmt, dval);
-        DValue finalGeneratedId = generatedId == null ? generatedId2 : generatedId;
-        assignVar(SERIAL_VAR, finalGeneratedId, varMap);
-
-        if (stmt.syntheticField != null) {
-            if (finalGeneratedId == null) {
-                //error!
-            } else {
-                execState.sprigSvc.rememberSynthId(stmt.table.physicalType.getTypeName(), dval, finalGeneratedId, stmt.syntheticField.dval);
-            }
-        }
-
-        return finalGeneratedId;
-    }
-
-    private void resolveSprigRefs(LLD.LLInsert stmt, ExecutionState execState) {
-        int index = 0;
-        for (LLD.LLFieldValue field : stmt.fieldL) {
-            if (field.field.physicalPair.type.isStructShape()) {
-                DStructType structType = (DStructType) field.field.physicalPair.type;
-                if (execState.sprigSvc.haveEnabledFor(structType)) {
-                    DValue resolvedValue = execState.sprigSvc.resolveSyntheticId(structType, field.dval.asString());
-                    field.dval = resolvedValue; //actual PK
-                    if (stmt.getSql() != null) {
-                        List<DValue> newlist = new ArrayList<>();
-                        for (int k = 0; k < stmt.getSql().paramL.size(); k++) {
-                            if (k == index) {
-                                newlist.add(resolvedValue);
-                            } else {
-                                newlist.add(stmt.getSql().paramL.get(k));
-                            }
-                        }
-                        stmt.getSql().paramL = newlist;
-                    }
-                }
-            }
-            index++;
-        }
+        return insertHelper.execInsert(stmt, exec, executable, varMap, execState, varEvaluator);
     }
 
     //TODO: later move this to a base class so postgresInsert will use same code
