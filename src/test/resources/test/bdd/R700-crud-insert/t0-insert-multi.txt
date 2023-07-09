@@ -23,7 +23,8 @@ value:a:Flight {
   vwid:21
 }
 
-title: insert bulkInsert endabled
+---
+title: insert bulkInsert enabled
 bulkInsert:true
 when:
   insert Flight {id: 55, wid: 20 }

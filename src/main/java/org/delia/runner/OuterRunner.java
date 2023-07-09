@@ -96,6 +96,9 @@ public class OuterRunner extends ServiceBase {
             if (stmt instanceof LLD.LLInsert) {
                 insertOrOtherDval = doExecInsert((LLD.LLInsert) stmt, exec, executable, varMap, execState);
                 assignVar(DOLLAR_DOLLAR, insertOrOtherDval, varMap);
+            } else if (stmt instanceof LLD.LLBulkInsert) {
+                insertOrOtherDval = doExecBulkInsert((LLD.LLBulkInsert) stmt, exec, executable, varMap, execState);
+                assignVar(DOLLAR_DOLLAR, insertOrOtherDval, varMap);
             } else if (stmt instanceof LLD.LLSelect) {
                 qresp = doExecSelect((LLD.LLSelect) stmt, exec, executable, execState);
                 LLD.LLSelect llsel = (LLD.LLSelect) stmt;
@@ -367,6 +370,15 @@ public class OuterRunner extends ServiceBase {
 
     private boolean isMEMDb(DBExecutor exec) {
         return exec.getDbInterface().getDBType().equals(DBType.MEM);
+    }
+
+
+    private DValue doExecBulkInsert(LLD.LLBulkInsert stmt, DBExecutor exec, DeliaExecutable executable, Map<String, ResultValue> varMap, ExecutionState execState) {
+        DValue resultVal = null;
+        for(LLD.LLInsert insertStmt: stmt.insertStatements) {
+            resultVal = doExecInsert(insertStmt, exec, executable, varMap, execState);
+        }
+        return resultVal;
     }
 
     private DValue doExecInsert(LLD.LLInsert stmt, DBExecutor exec, DeliaExecutable executable, Map<String, ResultValue> varMap, ExecutionState execState) {

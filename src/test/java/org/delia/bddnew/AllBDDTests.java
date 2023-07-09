@@ -413,8 +413,6 @@ public class AllBDDTests extends BDDTestBase {
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
         runR700File("t0-insert-multi.txt", 2);
-
-
     }
 
     //---
