@@ -109,7 +109,7 @@ public class PostgresBDDTests extends BDDTestBase {
 	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
-		runR700File("t0-insert-date-var.txt", 2);
+		runR700File("t0-insert-date-var.txt", 3);
 		runR700File("t0-insert-multi.txt", 2);
 		runR700File("t0-insert-serial.txt", 1);
 		runR700File("t0-insert-serial-inherit.txt", 1);
@@ -188,7 +188,7 @@ public class PostgresBDDTests extends BDDTestBase {
 		runR1350File("t0-filter-and-or.txt", 7);
 		runR1350File("t0-filter-and-or-multi.txt", 5);
 		runR1350File("t0-filter-in.txt", 4);
-		runR1350File("t0-filter-like.txt", 6);
+		runR1350File("t0-filter-like.txt", 7);
 		runR1350File("t0-filter-ilike.txt", 0);
 		runR1350File("t0-filter-rlike.txt", 0);
 		//TODO: fix runR1350File("t0-filter-in-twitter.txt", 2); //TODO fix two
