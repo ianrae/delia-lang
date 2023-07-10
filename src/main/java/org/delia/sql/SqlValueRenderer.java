@@ -12,6 +12,7 @@ import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.varevaluator.VarEvaluator;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class SqlValueRenderer extends ServiceBase {
     private final DateFormatService dateFormatSvc;
@@ -109,7 +110,8 @@ public class SqlValueRenderer extends ServiceBase {
         return dval;
     }
 
-    public DValue noRenderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {
+    public DValue noRenderSqlParam(DValue dval, DType dtype, List<DType> typeHintL) {
+        typeHintL.add(dtype);
         return dval;
     }
     public DValue actualRenderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {

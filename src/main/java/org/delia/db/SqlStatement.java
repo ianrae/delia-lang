@@ -4,6 +4,7 @@ package org.delia.db;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.delia.type.DType;
 import org.delia.type.DValue;
 
 public class SqlStatement {
@@ -17,6 +18,7 @@ public class SqlStatement {
     public Object owner;
     public String sql;
     public List<DValue> paramL = new ArrayList<>();
+    public List<DType>  typeHintL = new ArrayList<>(); //parallel list. can contain nulls
 
     public SqlStatement() {
         this.owner = null;

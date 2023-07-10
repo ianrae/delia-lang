@@ -159,25 +159,25 @@ public class OuterRunner extends ServiceBase {
         return res;
     }
 
+    //Sometimes (in a let statement) the param is a string value that represents a date
+    //Here we look at qlStatement.typeHintL. Normally this is null or the same as dval.getType()
+    //but if dval is a string and hint is date then we need to do a conversion
     private void handleDateSqlParamFixup(LLD.LLStatementBase stmt, DTypeRegistry registry) {
         if (stmt.getSql() == null) return;
         ScalarValueBuilder valueBuilder = new ScalarValueBuilder(factorySvc, registry);
 
         //replace elements in place
-        for(int i = 0; i < stmt.getSql().paramL.size(); i++) {
-            DValue dval = stmt.getSql().paramL.get(i);
+        SqlStatement sqlStatement = stmt.getSql();
+        for(int i = 0; i < sqlStatement.paramL.size(); i++) {
+            DValue dval = sqlStatement.paramL.get(i);
             if (dval != null) {
-                DValue newVal = sqlValueRenderer.actualRenderSqlParam(dval, dval.getType(), valueBuilder);
+                DType dtype = sqlStatement.typeHintL.get(i);
+                DValue newVal = sqlValueRenderer.actualRenderSqlParam(dval, dtype, valueBuilder);
                 if (newVal != dval) {
-                    stmt.getSql().paramL.set(i, newVal);
+                    sqlStatement.paramL.set(i, newVal);
                 }
             }
         }
-//        for(DValue dval: stmt.getSql().paramL) {
-//            if (dval != null) {
-//                this.sqlValueRenderer.actualRenderSqlParam(dval, dval.getType(), valueBuilder);
-//            }
-//        }
     }
 
     private DValue doAssign(LLD.LLAssign stmt, DTypeRegistry registry, Map<String, ResultValue> varMap) {
