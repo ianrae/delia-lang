@@ -6,7 +6,7 @@ import org.delia.db.DBExecutor;
 import org.delia.db.DBExecutorEx;
 import org.delia.db.DBInterfaceFactory;
 import org.delia.db.DBType;
-import org.delia.dval.DValueConverterService;
+import org.delia.dval.DeferredValueService;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.DeliaExecutable;
@@ -16,7 +16,6 @@ import org.delia.type.DStructType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.validation.ValidationRunner;
-import org.delia.valuebuilder.ScalarValueBuilder;
 import org.delia.varevaluator.VarEvaluator;
 
 import java.util.ArrayList;
@@ -25,14 +24,14 @@ import java.util.Map;
 
 public class OuterRunnerInsertHelper extends ServiceBase {
     private final DBInterfaceFactory dbInterface;
-    private final DValueConverterService dvalConverterService;
     private VarEvaluator varEvaluator;
     private ExecutionState execState;
+    private DeferredValueService deferredValueService;
 
     public OuterRunnerInsertHelper(FactoryService factorySvc, DBInterfaceFactory dbInterface, DatService datSvc) {
         super(factorySvc);
         this.dbInterface = dbInterface;
-        this.dvalConverterService = new DValueConverterService(factorySvc);
+        this.deferredValueService = new DeferredValueService(factorySvc);
     }
 
     public DValue execBulkInsert(LLD.LLBulkInsert stmt, DBExecutor exec, DeliaExecutable executable,
@@ -133,22 +132,7 @@ public class OuterRunnerInsertHelper extends ServiceBase {
     }
 
     private void resolveAllVars(List<LLD.LLFieldValue> fieldL, DTypeRegistry registry) {
-        ScalarValueBuilder valueBuilder = new ScalarValueBuilder(factorySvc, registry);
-        for (LLD.LLFieldValue field : fieldL) {
-            if (field.dval != null) {
-                resolveSingleDeferredVar(field.dval, valueBuilder);
-            } else if (field.dvalList != null) {
-                field.dvalList.forEach(d -> resolveSingleDeferredVar(d, valueBuilder));
-            }
-        }
-    }
-
-    private void resolveSingleDeferredVar(DValue dval, ScalarValueBuilder valueBuilder) {
-        if (dval != null) {
-            DValue realVal = DeferredDValueHelper.preResolveDeferredDval(dval, varEvaluator);
-            realVal = dvalConverterService.normalizeValue(realVal, dval.getType(), valueBuilder);
-            DeferredDValueHelper.resolveTo(dval, realVal); //note. realVal can be null
-        }
+        deferredValueService.resolveAllVars(fieldL, registry, varEvaluator);
     }
 
     private void resolveSprigRefs(LLD.LLInsert stmt, ExecutionState execState) {

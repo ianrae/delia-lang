@@ -6,6 +6,7 @@ import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
 import org.delia.db.*;
 import org.delia.dval.DValueConverterService;
+import org.delia.dval.DeferredValueService;
 import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.hld.DeliaExecutable;
@@ -34,6 +35,7 @@ public class OuterRunner extends ServiceBase {
     private final ConfigureService configSvc;
     private final DatService datSvc;
     private final DValueConverterService dvalConverterService;
+    private final DeferredValueService deferredValueService;
     private VarEvaluator varEvaluator;
     private SqlValueRenderer sqlValueRenderer;
     private ExecutionState execState;
@@ -47,6 +49,8 @@ public class OuterRunner extends ServiceBase {
         this.datSvc = datSvc;
         this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.dvalConverterService = new DValueConverterService(factorySvc);
+        this.deferredValueService = new DeferredValueService(factorySvc);
+
         //clear error tracker.
         factorySvc.getErrorTracker().clear();
         //TODO fix this so don't have shared error tracker -- too many leftover errors!
@@ -269,22 +273,7 @@ public class OuterRunner extends ServiceBase {
     }
 
     private void resolveAllVars(List<LLD.LLFieldValue> fieldL, DTypeRegistry registry) {
-        ScalarValueBuilder valueBuilder = new ScalarValueBuilder(factorySvc, registry);
-        for (LLD.LLFieldValue field : fieldL) {
-            if (field.dval != null) {
-                resolveSingleDeferredVar(field.dval, valueBuilder);
-            } else if (field.dvalList != null) {
-                field.dvalList.forEach(d -> resolveSingleDeferredVar(d, valueBuilder));
-            }
-        }
-    }
-
-    private void resolveSingleDeferredVar(DValue dval, ScalarValueBuilder valueBuilder) {
-        if (dval != null) {
-            DValue realVal = DeferredDValueHelper.preResolveDeferredDval(dval, varEvaluator);
-            realVal = dvalConverterService.normalizeValue(realVal, dval.getType(), valueBuilder);
-            DeferredDValueHelper.resolveTo(dval, realVal); //note. realVal can be null
-        }
+        deferredValueService.resolveAllVars(fieldL, registry, varEvaluator);
     }
 
     private void resolveAllVars(SqlStatement sql, DTypeRegistry registry) {

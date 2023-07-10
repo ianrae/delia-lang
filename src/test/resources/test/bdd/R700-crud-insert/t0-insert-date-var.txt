@@ -8,7 +8,7 @@ thenType: struct
 
 
 ---
-title: insert-using-date-var
+title: insert-using-string-var
 when:
   let y string = '2022-03-31'
   insert Flight {id: 55, wid: y }
@@ -19,3 +19,15 @@ value:a:Flight {
  vwid:'2022-03-31'
 }
 
+---
+#TODO: fix this. we should resolve vars before we gen sql params
+title: insert-using-date-var
+when:
+  let y date = '2022-03-31'
+  insert Flight {id: 55, wid: y }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:'2022-03-31'
+}

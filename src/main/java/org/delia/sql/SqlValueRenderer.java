@@ -4,6 +4,7 @@ import org.delia.compiler.ast.Exp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueConverterService;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
@@ -13,10 +14,12 @@ import java.time.ZonedDateTime;
 
 public class SqlValueRenderer extends ServiceBase {
     private final DateFormatService dateFormatSvc;
+    private final DValueConverterService dvalConverterService;
 
     public SqlValueRenderer(FactoryService factorySvc) {
         super(factorySvc);
         this.dateFormatSvc = factorySvc.getDateFormatService();
+        this.dvalConverterService =  new DValueConverterService(factorySvc);
     }
 
     public String opToSql(String op) {
@@ -88,6 +91,8 @@ public class SqlValueRenderer extends ServiceBase {
         return dateFormatSvc.format(dval.asDate());
     }
     private DValue renderDateParam(DValue dval, ScalarValueBuilder valueBuilder) {
+
+        
         //1999-01-08 04:05:06
         if (dval.getType().isShape(Shape.STRING)) {
             DValue nval = valueBuilder.buildDate(dval.asString());
