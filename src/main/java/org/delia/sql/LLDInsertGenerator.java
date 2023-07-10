@@ -1,6 +1,5 @@
 package org.delia.sql;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.delia.DeliaOptions;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
@@ -12,6 +11,7 @@ import org.delia.type.DValue;
 import org.delia.util.ListWalker;
 import org.delia.util.StrCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.varevaluator.VarEvaluator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,9 +23,9 @@ public class LLDInsertGenerator extends ServiceBase {
     private final ScalarValueBuilder valueBuilder;
     private final AssocSqlGenerator assocSqlGenerator;
 
-    public LLDInsertGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc) {
+    public LLDInsertGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
-        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc, varEvaluator);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
         this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);

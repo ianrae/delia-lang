@@ -31,7 +31,7 @@ public class DeferredValueService {
         }
     }
 
-    private void resolveSingleDeferredVar(DValue dval, ScalarValueBuilder valueBuilder, VarEvaluator varEvaluator) {
+    public void resolveSingleDeferredVar(DValue dval, ScalarValueBuilder valueBuilder, VarEvaluator varEvaluator) {
         if (dval != null) {
             DValue realVal = DeferredDValueHelper.preResolveDeferredDval(dval, varEvaluator);
             realVal = dvalConverterService.normalizeValue(realVal, dval.getType(), valueBuilder);

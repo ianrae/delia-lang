@@ -7,6 +7,8 @@ import org.delia.tok.TokVisitorUtils;
 import org.delia.type.TypePair;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.util.StrCreator;
+import org.delia.varevaluator.DoNothingVarEvaluator;
+import org.delia.varevaluator.VarEvaluator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +38,8 @@ public class NewWhereSqlVisitor implements Tok.TokVisitor {
 
     public NewWhereSqlVisitor(FactoryService factorySvc) {
         this.factorySvc = factorySvc;
-        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
+        //Note. we don't use sqlValueRender methods that require varEvaluator so a DoNothing one is fine
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc, new DoNothingVarEvaluator());
     }
 
     @Override

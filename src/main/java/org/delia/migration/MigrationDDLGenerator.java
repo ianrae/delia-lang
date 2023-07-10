@@ -19,6 +19,7 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 import org.delia.util.StrCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.varevaluator.DoNothingVarEvaluator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,7 +88,8 @@ public class MigrationDDLGenerator {
 
     private void createTablSqlGenIfNeeded(DeliaSession sess) {
         if (createTableSqlGenerator != null) return;
-        SqlValueRenderer sqlValueRenderer = new SqlValueRenderer(factorySvc);
+        //TODO i don't think any vars exist when we do migration so a DoNothingVarEvaluator() should be fine
+        SqlValueRenderer sqlValueRenderer = new SqlValueRenderer(factorySvc, new DoNothingVarEvaluator());
         ScalarValueBuilder valueBuilder = new ScalarValueBuilder(factorySvc, sess.getRegistry());
         DatService datSvc = sess.getDatIdMap();
         this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions());

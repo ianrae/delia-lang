@@ -69,7 +69,7 @@ public class ExecutableBuilder extends ServiceBase {
         reOrderStatements(exec);
 
         //and now gen sql
-        LLDSqlGenerator gen = new LLDSqlGenerator(factorySvc, deliaOptions, exec.registry, datSvc);
+        LLDSqlGenerator gen = new LLDSqlGenerator(factorySvc, deliaOptions, exec.registry, datSvc, varEvaluator);
         boolean genSql = shouldGenerateSQL(dbType);
         if (genSql) {
             for (LLD.LLStatement lldStatement : exec.lldStatements) {

@@ -14,6 +14,7 @@ import org.delia.util.DValueHelper;
 import org.delia.util.ListWalker;
 import org.delia.util.StrCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.varevaluator.VarEvaluator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,10 +32,11 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
     private final LetSqlGenerator letSqlGenerator;
     private final CreateAssocTableSqlGenerator createAssocTableSqlGenerator;
     private final LLDInsertGenerator insertGenerator;
+    private final VarEvaluator varEvaluator;
 
-    public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc) {
+    public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
-        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc, varEvaluator);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
         this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
@@ -44,7 +46,8 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
-        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc);
+        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator);
+        this.varEvaluator = varEvaluator;
     }
 
     public SqlStatement generateSql(LLD.LLStatement statement) {

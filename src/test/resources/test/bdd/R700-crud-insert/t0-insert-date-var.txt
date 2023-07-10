@@ -20,7 +20,6 @@ value:a:Flight {
 }
 
 ---
-#TODO: fix this. we should resolve vars before we gen sql params
 title: insert-using-date-var
 when:
   let y date = '2022-03-31'
@@ -29,5 +28,5 @@ when:
 then:
 value:a:Flight {
  vid:55
- vwid:'2022-03-31'
+ vwid:'2022-03-31T00:00:00.000+0000'
 }
