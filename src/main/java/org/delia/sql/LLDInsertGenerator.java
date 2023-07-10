@@ -25,7 +25,7 @@ public class LLDInsertGenerator extends ServiceBase {
 
     public LLDInsertGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
-        this.sqlValueRenderer = new SqlValueRenderer(factorySvc, varEvaluator);
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
         this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
@@ -66,7 +66,7 @@ public class LLDInsertGenerator extends ServiceBase {
                 LLD.LLFieldValue field = walker.next();
 //            sc.o("%s", renderAsSql(field.dval, field.field.physicalPair.type, field.field.physicalTable.physicalType));
                 sc.o("?");
-                DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
+                DValue realVal = this.sqlValueRenderer.preRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
                 walker.addIfNotLast(sc, ", ");
             }
@@ -112,21 +112,21 @@ public class LLDInsertGenerator extends ServiceBase {
                 LLD.LLFieldValue field = walker.next();
 //            sc.o("%s", renderAsSql(field.dval, field.field.physicalPair.type, field.field.physicalTable.physicalType));
                 sc.o("?");
-                DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
+                DValue realVal = this.sqlValueRenderer.preRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
                 walker.addIfNotLast(sc, ", ");
             }
         }
         sc.o(")");
         //and the rest
-        for(int i = 1; i < statement.insertStatements.size(); i++) {
+        for (int i = 1; i < statement.insertStatements.size(); i++) {
             sc.o(", (");
             LLD.LLInsert stmt = statement.insertStatements.get(i);
             ListWalker<LLD.LLFieldValue> walker = new ListWalker<>(stmt.fieldL);
             while (walker.hasNext()) {
                 LLD.LLFieldValue field = walker.next();
                 sc.o("?");
-                DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
+                DValue realVal = this.sqlValueRenderer.preRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
                 walker.addIfNotLast(sc, ", ");
             }

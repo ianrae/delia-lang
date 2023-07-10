@@ -47,7 +47,7 @@ public class OuterRunner extends ServiceBase {
         this.dbInterface = dbInterface;
         this.configSvc = factorySvc.getConfigureService();
         this.datSvc = datSvc;
-        this.sqlValueRenderer = new SqlValueRenderer(factorySvc, varEvaluator);
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.dvalConverterService = new DValueConverterService(factorySvc);
         this.deferredValueService = new DeferredValueService(factorySvc);
 

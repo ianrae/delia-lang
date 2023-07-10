@@ -58,7 +58,7 @@ public class AssocSqlGenerator extends ServiceBase {
         }
 
         SqlStatement sqlStatement = new SqlStatement();
-        DValue realVal = this.sqlValueRenderer.noRenderSqlParam(value, valueType, sqlStatement.typeHintL);
+        DValue realVal = this.sqlValueRenderer.preRenderSqlParam(value, valueType, sqlStatement.typeHintL);
         sqlStatement.paramL.add(realVal);
 
         boolean isFlipped = assocSpec.isFlipped(subQueryInfo.relinfo);
@@ -72,7 +72,7 @@ public class AssocSqlGenerator extends ServiceBase {
         }
         if (subQueryInfo.whereTok != null && QueryType.PRIMARY_KEY.equals(subQueryInfo.queryType)) {
             DValue pkval = TokWhereClauseUtils.extractPKWhereClause(subQueryInfo.whereTok);
-            pkval = this.sqlValueRenderer.noRenderSqlParam(pkval, valueType, sqlStatement.typeHintL);
+            pkval = this.sqlValueRenderer.preRenderSqlParam(pkval, valueType, sqlStatement.typeHintL);
             sqlStatement.paramL.add(pkval);
             sc.o(" WHERE %s=?", pkpair.name);
         }

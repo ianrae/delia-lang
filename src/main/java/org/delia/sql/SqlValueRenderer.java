@@ -16,14 +16,10 @@ import java.util.List;
 
 public class SqlValueRenderer extends ServiceBase {
     private final DateFormatService dateFormatSvc;
-    private final DeferredValueService deferredValueService;
-    private final VarEvaluator varEvaluator;
 
-    public SqlValueRenderer(FactoryService factorySvc, VarEvaluator varEvaluator) {
+    public SqlValueRenderer(FactoryService factorySvc) {
         super(factorySvc);
         this.dateFormatSvc = factorySvc.getDateFormatService();
-        this.deferredValueService = new DeferredValueService(factorySvc);
-        this.varEvaluator = varEvaluator;
     }
 
     public String opToSql(String op) {
@@ -95,10 +91,6 @@ public class SqlValueRenderer extends ServiceBase {
         return dateFormatSvc.format(dval.asDate());
     }
     private DValue renderDateParam(DValue dval, ScalarValueBuilder valueBuilder) {
-        //this is a bit messy. but we were resolving deferred values in OuterRunner which won't
-        //work if var is a Date because we return a different dval here.
-        //So we need to resolve the var here
-        //deferredValueService.resolveSingleDeferredVar(dval, valueBuilder, varEvaluator);
         //1999-01-08 04:05:06
         if (dval.getType().isShape(Shape.STRING)) {
             DValue nval = valueBuilder.buildDate(dval.asString());
@@ -110,7 +102,7 @@ public class SqlValueRenderer extends ServiceBase {
         return dval;
     }
 
-    public DValue noRenderSqlParam(DValue dval, DType dtype, List<DType> typeHintL) {
+    public DValue preRenderSqlParam(DValue dval, DType dtype, List<DType> typeHintL) {
         typeHintL.add(dtype);
         return dval;
     }

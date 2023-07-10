@@ -36,7 +36,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
 
     public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
-        this.sqlValueRenderer = new SqlValueRenderer(factorySvc, varEvaluator);
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
         this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
@@ -90,7 +90,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.noRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, sqlStatement.typeHintL);
+                DValue realVal = sqlValueRenderer.preRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
             }
         }
@@ -121,7 +121,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             sc.o("%s=", field.field.getFieldName());
             sc.o("?");
             //TODO: what about field.dvallist??
-            DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
+            DValue realVal = this.sqlValueRenderer.preRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
             sqlStatement.paramL.add(realVal);
             walker.addIfNotLast(sc, ", ");
         }
@@ -151,7 +151,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.noRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, sqlStatement.typeHintL);
+                DValue realVal = sqlValueRenderer.preRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
             }
         }

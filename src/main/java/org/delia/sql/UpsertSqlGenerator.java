@@ -68,7 +68,7 @@ public class UpsertSqlGenerator extends ServiceBase {
         while (walker.hasNext()) {
             LLD.LLFieldValue field = walker.next();
             sc.o("?");
-            DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
+            DValue realVal = this.sqlValueRenderer.preRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
             sqlStatement.paramL.add(realVal);
             walker.addIfNotLast(sc, ", ");
         }
