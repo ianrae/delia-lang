@@ -109,6 +109,7 @@ public class PostgresBDDTests extends BDDTestBase {
 	@Test
 	public void testR700() {
 		runR700File("t0-insert.txt", 6);
+		runR700File("t0-insert-date-var.txt", 1);
 		runR700File("t0-insert-multi.txt", 2);
 		runR700File("t0-insert-serial.txt", 1);
 		runR700File("t0-insert-serial-inherit.txt", 1);
@@ -388,13 +389,14 @@ public class PostgresBDDTests extends BDDTestBase {
 
 	@Test
 	public void testDebug() {
-		singleTestToRunIndex = 1;
+//		singleTestToRunIndex = 1;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 //		runR700File("t0-insert.txt", 6);
 
 //		runR700File("t0-insert-serial.txt", 1);
-		runR700File("t0-insert-multi.txt", 2);
+//		runR700File("t0-insert-multi.txt", 2);
+		runR700File("t0-insert-date-var.txt", 1);
 	}
 
 	//---

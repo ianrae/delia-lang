@@ -1,0 +1,21 @@
+# CRUD insert tests
+
+FEATURE: CRUD insert
+background:
+  type Flight struct {id int primaryKey, wid string optional }  end
+  type Flight2 struct {id int primaryKey, wid string }  end
+thenType: struct
+
+
+---
+title: insert-using-date-var
+when:
+  let y string = '2022-03-31'
+  insert Flight {id: 55, wid: y }
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vid:55
+ vwid:'2022-03-31'
+}
+

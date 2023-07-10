@@ -120,7 +120,7 @@ public class LLDInsertGenerator extends ServiceBase {
         sc.o(")");
         //and the rest
         for(int i = 1; i < statement.insertStatements.size(); i++) {
-            sc.o(", VALUES(");
+            sc.o(", (");
             LLD.LLInsert stmt = statement.insertStatements.get(i);
             ListWalker<LLD.LLFieldValue> walker = new ListWalker<>(stmt.fieldL);
             while (walker.hasNext()) {
