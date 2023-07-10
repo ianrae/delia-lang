@@ -119,7 +119,7 @@ public class AllBDDTests extends BDDTestBase {
     @Test
     public void testR700() {
         runR700File("t0-insert.txt", 6);
-        runR700File("t0-insert-date-var.txt", 2);
+        runR700File("t0-insert-date-var.txt", 3);
         runR700File("t0-insert-multi.txt", 2);
         runR700File("t0-insert-mm.txt", 3);
         runR700File("t0-insert-serial.txt", 1);
@@ -408,13 +408,13 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 1;
+        singleTestToRunIndex = 2;
         enableAllFileCheck = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 //		diagnosticFilter = "I"; //log insert statements
 //        runR700File("t0-insert-multi.txt", 2);
-        runR700File("t0-insert-date-var.txt", 2);
+        runR700File("t0-insert-date-var.txt", 3);
     }
 
     //---

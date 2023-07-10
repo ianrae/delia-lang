@@ -99,6 +99,11 @@ public class OuterRunner extends ServiceBase {
                 continue; //nothing to do
             }
 
+            //July2023. Render date to sql fix
+            if (stmt instanceof LLD.LLStatementBase) {
+                handleDateSqlParamFixup((LLD.LLStatementBase)stmt, executable.registry);
+            }
+
             log.log(stmt.toString());
             if (stmt instanceof LLD.LLInsert) {
                 insertOrOtherDval = doExecInsert((LLD.LLInsert) stmt, exec, executable, varMap, execState);
@@ -152,6 +157,27 @@ public class OuterRunner extends ServiceBase {
         res.insertResultVal = insertOrOtherDval;
         res.qresp = qresp;
         return res;
+    }
+
+    private void handleDateSqlParamFixup(LLD.LLStatementBase stmt, DTypeRegistry registry) {
+        if (stmt.getSql() == null) return;
+        ScalarValueBuilder valueBuilder = new ScalarValueBuilder(factorySvc, registry);
+
+        //replace elements in place
+        for(int i = 0; i < stmt.getSql().paramL.size(); i++) {
+            DValue dval = stmt.getSql().paramL.get(i);
+            if (dval != null) {
+                DValue newVal = sqlValueRenderer.actualRenderSqlParam(dval, dval.getType(), valueBuilder);
+                if (newVal != dval) {
+                    stmt.getSql().paramL.set(i, newVal);
+                }
+            }
+        }
+//        for(DValue dval: stmt.getSql().paramL) {
+//            if (dval != null) {
+//                this.sqlValueRenderer.actualRenderSqlParam(dval, dval.getType(), valueBuilder);
+//            }
+//        }
     }
 
     private DValue doAssign(LLD.LLAssign stmt, DTypeRegistry registry, Map<String, ResultValue> varMap) {

@@ -66,7 +66,7 @@ public class LLDInsertGenerator extends ServiceBase {
                 LLD.LLFieldValue field = walker.next();
 //            sc.o("%s", renderAsSql(field.dval, field.field.physicalPair.type, field.field.physicalTable.physicalType));
                 sc.o("?");
-                DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
+                DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
                 sqlStatement.paramL.add(realVal);
                 walker.addIfNotLast(sc, ", ");
             }
@@ -112,7 +112,7 @@ public class LLDInsertGenerator extends ServiceBase {
                 LLD.LLFieldValue field = walker.next();
 //            sc.o("%s", renderAsSql(field.dval, field.field.physicalPair.type, field.field.physicalTable.physicalType));
                 sc.o("?");
-                DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
+                DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
                 sqlStatement.paramL.add(realVal);
                 walker.addIfNotLast(sc, ", ");
             }
@@ -126,7 +126,7 @@ public class LLDInsertGenerator extends ServiceBase {
             while (walker.hasNext()) {
                 LLD.LLFieldValue field = walker.next();
                 sc.o("?");
-                DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
+                DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
                 sqlStatement.paramL.add(realVal);
                 walker.addIfNotLast(sc, ", ");
             }

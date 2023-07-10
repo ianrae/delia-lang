@@ -192,7 +192,7 @@ public class LetSqlGenerator extends ServiceBase {
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.renderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
+                DValue realVal = sqlValueRenderer.noRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
                 sqlStatement.paramL.add(realVal);
             }
         }

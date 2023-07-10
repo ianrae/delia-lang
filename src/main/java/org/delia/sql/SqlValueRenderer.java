@@ -97,7 +97,7 @@ public class SqlValueRenderer extends ServiceBase {
         //this is a bit messy. but we were resolving deferred values in OuterRunner which won't
         //work if var is a Date because we return a different dval here.
         //So we need to resolve the var here
-        deferredValueService.resolveSingleDeferredVar(dval, valueBuilder, varEvaluator);
+        //deferredValueService.resolveSingleDeferredVar(dval, valueBuilder, varEvaluator);
         //1999-01-08 04:05:06
         if (dval.getType().isShape(Shape.STRING)) {
             DValue nval = valueBuilder.buildDate(dval.asString());
@@ -109,7 +109,10 @@ public class SqlValueRenderer extends ServiceBase {
         return dval;
     }
 
-    public DValue renderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {
+    public DValue noRenderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {
+        return dval;
+    }
+    public DValue actualRenderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {
         if (dval == null) {
             return null;
         }

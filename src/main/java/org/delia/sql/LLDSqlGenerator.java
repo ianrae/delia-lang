@@ -90,7 +90,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.renderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
+                DValue realVal = sqlValueRenderer.noRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
                 sqlStatement.paramL.add(realVal);
             }
         }
@@ -121,7 +121,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             sc.o("%s=", field.field.getFieldName());
             sc.o("?");
             //TODO: what about field.dvallist??
-            DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
+            DValue realVal = this.sqlValueRenderer.noRenderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
             sqlStatement.paramL.add(realVal);
             walker.addIfNotLast(sc, ", ");
         }
@@ -151,7 +151,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.renderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
+                DValue realVal = sqlValueRenderer.noRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
                 sqlStatement.paramL.add(realVal);
             }
         }
