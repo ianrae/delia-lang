@@ -45,7 +45,7 @@ public class DeliaSessionImpl implements DeliaSession {
     public ZoneId zoneId;
 //	public DBInterfaceFactory currentDBInterface;
 	public TransactionProvider transactionProvider; //at most one
-    private DeliaOptions sessionOptions; //private copy of delia options
+    public DeliaOptions sessionOptions; //private copy of delia options
 
     public DeliaSessionImpl(Delia delia) {
         this.delia = delia;

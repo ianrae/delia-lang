@@ -172,6 +172,12 @@ public class DeliaRunnerImpl implements DeliaRunner {
             session = (DeliaSessionImpl) existingSession;
             session.execCtx = existingSession.getExecutionContext();
         }
+
+        //copy over sessionOptions if detached
+        if (runDetached && existingSession != null) {
+            session.sessionOptions = ((DeliaSessionImpl)existingSession).sessionOptions;
+        }
+
         session.execCtx.deliaRunner = this;
         session.mostRecentExecutable = executable;
 
