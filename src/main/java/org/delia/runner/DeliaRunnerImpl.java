@@ -2,6 +2,7 @@ package org.delia.runner;
 
 import org.delia.Delia;
 import org.delia.DeliaFactory;
+import org.delia.DeliaOptions;
 import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.AST;
@@ -135,7 +136,7 @@ public class DeliaRunnerImpl implements DeliaRunner {
         Map<String, String> syntheticIdMap = new HashMap<>(); //TODO do we need a real one?
 
         DBCapabilties capabilties = dbInterface.getCapabilities();
-        ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, delia.getOptions(), syntheticIdMap, capabilties.getDefaultSchema());
+        ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, getOptions(delia, existingSession), syntheticIdMap, capabilties.getDefaultSchema());
         HLDFirstPassResults firstPassResults = buildFirstPassResults(script);
 
         String currentSchema = calcCurentSchema();
@@ -143,6 +144,12 @@ public class DeliaRunnerImpl implements DeliaRunner {
 
         DeliaExecutable executable = execBuilder.buildFromScript(script, firstPassResults, dbInterface.getDBType());
         return executable;
+    }
+    private DeliaOptions getOptions(Delia delia, DeliaSession sessionParam) {
+        if (sessionParam != null && sessionParam.getSessionOptions() != null) {
+            return sessionParam.getSessionOptions();
+        }
+        return delia.getOptions();
     }
 
     private String calcCurentSchema() {

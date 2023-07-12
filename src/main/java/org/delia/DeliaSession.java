@@ -47,4 +47,6 @@ public interface DeliaSession {
     <T> T runInTransaction(TransactionBody<T> body);
 
     void runInTransactionVoid(VoidTransactionBody body);
+
+    DeliaOptions getSessionOptions(); //null except in child sessions
 }

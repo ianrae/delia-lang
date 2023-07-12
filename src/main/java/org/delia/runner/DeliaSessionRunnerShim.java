@@ -215,10 +215,17 @@ public class DeliaSessionRunnerShim extends ServiceBase {
 
         additionalCompilerPasses.runAdditionalCompilerPasses(script, firstPassResults, currentSchema, dbType, capabilties.getDefaultSchema());
 
-        ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, delia.getOptions(), syntheticIdMaps, capabilties.getDefaultSchema());
+        ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, getOptions(delia, sessionParam), syntheticIdMaps, capabilties.getDefaultSchema());
         DeliaExecutable executable = execBuilder.buildFromScript(script, firstPassResults, dbType);
         executable.datSvc = datSvc;
         return executable;
+    }
+
+    private DeliaOptions getOptions(Delia delia, DeliaSession sessionParam) {
+        if (sessionParam != null && sessionParam.getSessionOptions() != null) {
+            return sessionParam.getSessionOptions();
+        }
+        return delia.getOptions();
     }
 
     private String calcCurrentSchema(DeliaSession sessionParam, Delia delia) {

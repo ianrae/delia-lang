@@ -1,6 +1,7 @@
 package org.delia.api;
 
 import org.delia.Delia;
+import org.delia.DeliaOptions;
 import org.delia.DeliaSession;
 import org.delia.compiler.ast.AST;
 import org.delia.compiler.ast.Exp;
@@ -44,6 +45,7 @@ public class DeliaSessionImpl implements DeliaSession {
     public ZoneId zoneId;
 //	public DBInterfaceFactory currentDBInterface;
 	public TransactionProvider transactionProvider; //at most one
+    private DeliaOptions sessionOptions; //private copy of delia options
 
     public DeliaSessionImpl(Delia delia) {
         this.delia = delia;
@@ -104,6 +106,7 @@ public class DeliaSessionImpl implements DeliaSession {
         child.mostRecentContinueScript = delia.getOptions().saveParseScriptInSession ? this.mostRecentContinueScript : null;
         child.datSvc = datSvc;
         child.zoneId = zoneId;
+        child.sessionOptions = delia.getOptions().clone();
 
 //		child.runnerInitializer = null;
 //		child.datIdMap = this.datIdMap;
@@ -207,8 +210,13 @@ public class DeliaSessionImpl implements DeliaSession {
 		endTransProvider();
 	}
 
+    @Override
+    public DeliaOptions getSessionOptions() {
+        return sessionOptions;
+    }
 
-	private TransactionProvider initTransProvider() {
+
+    private TransactionProvider initTransProvider() {
 		if (transactionProvider != null) {
 			DeliaExceptionHelper.throwError("nested-transactions-not-supported", "Not allowed to run a transaction within a transaction");
 		}
