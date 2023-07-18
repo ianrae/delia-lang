@@ -46,7 +46,8 @@ public class DeliaSnippetRunner implements SnippetRunner {
             ConnectionDefinition connDef = connProvider.getConnectionDef();
             dao = new DeliaGenericDao(connDef, deliaLog);
             if (DBType.MEM.equals(dao.getDelia().getDBInterface().getDBType())) {
-                dao.getDelia().getFactoryService().setMemDBFactory(new FastMemDBFactory(log));
+                //uncomment this if you want to use fast MEM db
+//                dao.getDelia().getFactoryService().setMemDBFactory(new FastMemDBFactory(log));
             }
 
             }
