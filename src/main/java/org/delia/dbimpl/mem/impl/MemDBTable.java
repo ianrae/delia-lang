@@ -5,11 +5,8 @@ import org.delia.type.DValue;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemDBTable {
-	public String name;
-	public List<DValue> rowL = new ArrayList<>();
+public interface MemDBTable {
+	String getName();
+	List<DValue> getList();
 
-	public MemDBTable(String name) {
-		this.name = name;
-	}
 }

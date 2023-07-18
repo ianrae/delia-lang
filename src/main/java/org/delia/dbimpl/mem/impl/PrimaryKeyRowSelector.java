@@ -57,7 +57,8 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
     }
 
     @Override
-    public List<DValue> match(List<DValue> list) {
+    public List<DValue> match(MemDBTable tbl) {
+        List<DValue> list = tbl.getList();
         if (keyField == null) {
             wasError = true;
             //err!!

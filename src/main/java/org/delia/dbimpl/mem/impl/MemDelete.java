@@ -30,7 +30,7 @@ public class MemDelete extends MemFilterBase {
             //err!!
             return qresp;
         } else {
-            List<DValue> dvalList = selector.match(selector.getTbl().rowL);
+            List<DValue> dvalList = selector.match(selector.getTbl());
             if (selector.wasError()) {
                 //err!!
                 qresp.ok = false;
@@ -41,7 +41,7 @@ public class MemDelete extends MemFilterBase {
             List<RelationInfo> relationFields = fkResolver.findRelationsNeedingFK(structType);
 
             for (DValue dval : dvalList) {
-                tbl.rowL.remove(dval);
+                tbl.getList().remove(dval);
                 //remove dval from far side of any relations
                 //TODO: what about one-sided relations??
                 for (RelationInfo relinfo : relationFields) {

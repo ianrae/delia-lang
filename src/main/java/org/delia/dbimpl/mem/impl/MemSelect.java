@@ -55,7 +55,7 @@ public class MemSelect extends MemFilterBase {
     }
 
     private List<DValue> execSpec(SelectSpec spec, LLD.LLSelect stmt) {
-        List<DValue> dvalList = spec.selector.match(spec.selector.getTbl().rowL);
+        List<DValue> dvalList = spec.selector.match(spec.selector.getTbl());
 //        if (spec.isTable(stmt.getTableName())) { //normal case?
 //        } else {
 //        }

@@ -126,7 +126,7 @@ public class ScopedFunctionExecutor extends ServiceBase {
         MemDBTable tbl = tableFinder.findMemTable(dtype);
         TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(dtype);
         for (DValue pkval : pkList) {
-            for (DValue rowval : tbl.rowL) {
+            for (DValue rowval : tbl.getList()) {
                 DValue pkinner = rowval.asStruct().getField(pkpair.name);
                 if (compareSvc.compare(pkval, pkinner) == 0) {
                     dvalList.add(rowval);

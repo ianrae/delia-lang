@@ -34,7 +34,7 @@ public class MemUpdate extends MemFilterBase {
             //err!!
             return qresp;
         } else {
-            List<DValue> dvalList = selector.match(selector.getTbl().rowL);
+            List<DValue> dvalList = selector.match(selector.getTbl());
             if (selector.wasError()) {
                 //err!!
                 qresp.ok = false;

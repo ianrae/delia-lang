@@ -198,7 +198,8 @@ public class OpRowSelector extends RowSelectorBase {
     }
 
     @Override
-    public List<DValue> match(List<DValue> list) {
+    public List<DValue> match(MemDBTable tbl) {
+        List<DValue> list = tbl.getList();
         List<DValue> resultL = new ArrayList<>();
         for (DValue dval : list) {
             boolean b = evaluator.match(dval);

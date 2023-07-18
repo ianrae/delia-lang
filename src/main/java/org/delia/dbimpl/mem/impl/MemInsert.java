@@ -41,7 +41,7 @@ public class MemInsert extends ServiceBase {
             generatedId = addSerialValuesIfNeeded(dval, tbl, stuff, localET);
 
             //TODO: fldvalue.field is a physical field. will this be a problem if we look it up in DStructType?
-            if (!tbl.rowL.isEmpty()) { //perf thing. don't bother checking if rowL is empty
+            if (!tbl.getList().isEmpty()) { //perf thing. don't bother checking if rowL is empty
                 for (LLD.LLFieldValue fldValue : fieldL) {
                     String fieldName = fldValue.field.getFieldName();
                     if (structType.fieldIsUnique(fieldName) || structType.fieldIsPrimaryKey(fieldName)) {
@@ -70,7 +70,7 @@ public class MemInsert extends ServiceBase {
 
         DValue generatedId = null; //created in preInsert
         if (dval != null) {
-            tbl.rowL.add(dval);
+            tbl.getList().add(dval);
         }
 
         //add child side of relation (even if empty relation)
@@ -132,7 +132,7 @@ public class MemInsert extends ServiceBase {
             return true; //nothing to do TODO: does uniqueness include null (i.e. 2 null values...)
         }
 
-        for (DValue existing : tbl.rowL) {
+        for (DValue existing : tbl.getList()) {
             if (existing != null && existing != insertedDVal) {
                 DValue oldVal = DValueHelper.getFieldValue(existing, uniqueField);
                 if (oldVal != null) {

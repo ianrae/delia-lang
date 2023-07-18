@@ -1,6 +1,7 @@
 package org.delia.dbimpl.mem;
 
 import org.delia.dbimpl.mem.impl.MemDBTable;
+import org.delia.dbimpl.mem.impl.MemDBTableFastImpl;
 import org.delia.type.DStructType;
 import org.delia.type.DType;
 import org.delia.type.DTypeName;
@@ -18,7 +19,7 @@ public class MemTableMap {
     }
 
     public void addTable(String sqlTblName) {
-        tableMap.put(sqlTblName, new MemDBTable(sqlTblName));
+        tableMap.put(sqlTblName, new MemDBTableFastImpl(sqlTblName));
     }
 
     public MemDBTable getTable(String sqlTblName) {
