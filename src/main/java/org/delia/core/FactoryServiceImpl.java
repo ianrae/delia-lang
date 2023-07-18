@@ -24,14 +24,14 @@ public class FactoryServiceImpl implements FactoryService {
     protected DeliaLog log;
     protected ErrorTracker et;
     protected TimeZoneService tzSvc;
-    	private ConfigureService configSvc;
+    private ConfigureService configSvc;
     private DateFormatServiceImpl fmtSvc;
-//	private int nextGeneratedRuleId = 1;
+    //	private int nextGeneratedRuleId = 1;
     private DValueCompareService compareSvc;
     //	private DiagnosticServiceImpl diagnosticSvc;
     private LogFactory logFactory;
     private boolean enableMEMSqlGenerationFlag; //normally false. no need with MEM. unless client code wants to see what sql would be
-    protected MemDBFactoryImpl memDBFactory;
+    protected MemDBFactory memDBFactory;
 
     public FactoryServiceImpl(DeliaLog log, ErrorTracker et) {
         this(log, et, null);
@@ -41,7 +41,7 @@ public class FactoryServiceImpl implements FactoryService {
         this.log = log;
         this.et = et;
         this.tzSvc = new TimeZoneServiceImpl();
-		this.configSvc = new ConfigureServiceImpl(this);
+        this.configSvc = new ConfigureServiceImpl(this);
         this.fmtSvc = new DateFormatServiceImpl(tzSvc);
         this.compareSvc = new DValueCompareService(this);
 //		this.diagnosticSvc = new DiagnosticServiceImpl(this);
@@ -116,7 +116,7 @@ public class FactoryServiceImpl implements FactoryService {
         return new RuleFuncFactoryImpl(this);
     }
 
-//	@Override
+    //	@Override
 //	public boolean getEnableMEMSqlGenerationFlag() {
 //		return enableMEMSqlGenerationFlag;
 //	}
@@ -128,17 +128,22 @@ public class FactoryServiceImpl implements FactoryService {
 //	public RuleFunctionFactory createRuleFunctionFactory() {
 //		return new RuleFuncFactoryImpl(this);
 //	}
-	@Override
-	public TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface) {
-		if (dbInterface.getDBType().equals(DBType.MEM)) {
-			return new DoNothingTransactionProvider(log);
-		}
-		return new TransactionProviderImpl(dbInterface, log);
-	}
+    @Override
+    public TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface) {
+        if (dbInterface.getDBType().equals(DBType.MEM)) {
+            return new DoNothingTransactionProvider(log);
+        }
+        return new TransactionProviderImpl(dbInterface, log);
+    }
 
     @Override
     public MemDBFactory getMemDBFactory() {
         return memDBFactory;
+    }
+
+    @Override
+    public void setMemDBFactory(MemDBFactory factory) {
+        memDBFactory = factory;
     }
 
 //	@Override

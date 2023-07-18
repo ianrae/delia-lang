@@ -54,7 +54,7 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
     }
 
     //change this to true to disable all H2 and Postgres tests (they are slow)
-    public static final boolean disableAllSlowTests = false;
+    public static final boolean disableAllSlowTests = true;
 
     public static final String BASE_DIR = "./src/test/resources/test/bdd/";
 

@@ -45,5 +45,6 @@ public interface FactoryService {
 	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
 
     MemDBFactory getMemDBFactory();
+    void setMemDBFactory(MemDBFactory factory);
 //	MigrationService createMigrationService(DBInterfaceFactory dbInterface);
 }
