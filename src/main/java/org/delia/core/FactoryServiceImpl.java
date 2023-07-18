@@ -3,6 +3,8 @@ package org.delia.core;
 import org.delia.db.DBCapabilties;
 import org.delia.db.DBInterfaceFactory;
 import org.delia.db.DBType;
+import org.delia.dbimpl.mem.impl.MemDBFactory;
+import org.delia.dbimpl.mem.impl.MemDBFactoryImpl;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.DeliaLog;
@@ -19,6 +21,7 @@ import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class FactoryServiceImpl implements FactoryService {
+    private final MemDBFactoryImpl memDBFactory;
     protected DeliaLog log;
     protected ErrorTracker et;
     protected TimeZoneService tzSvc;
@@ -43,6 +46,7 @@ public class FactoryServiceImpl implements FactoryService {
         this.compareSvc = new DValueCompareService(this);
 //		this.diagnosticSvc = new DiagnosticServiceImpl(this);
         this.logFactory = logFactory;
+        this.memDBFactory = new MemDBFactoryImpl();
     }
 
     @Override
@@ -131,6 +135,11 @@ public class FactoryServiceImpl implements FactoryService {
 		}
 		return new TransactionProviderImpl(dbInterface, log);
 	}
+
+    @Override
+    public MemDBFactory getMemDBFactory() {
+        return memDBFactory;
+    }
 
 //	@Override
 //	public MigrationService createMigrationService(DBInterfaceFactory dbInterface) {

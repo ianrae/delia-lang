@@ -29,7 +29,7 @@ public class MemDBInterfaceFactory extends ServiceBase implements DBInterfaceFac
 
     public MemTableMap createSingleMemDB() {
         if (tableMap == null) {
-            tableMap = new MemTableMap();
+            tableMap = new MemTableMap(factorySvc.getMemDBFactory());
             fkResolver = new FKResolver(factorySvc, tableMap);
         }
         return tableMap;

@@ -1,5 +1,6 @@
 package org.delia.dbimpl.mem;
 
+import org.delia.dbimpl.mem.impl.MemDBFactory;
 import org.delia.dbimpl.mem.impl.MemDBTable;
 import org.delia.dbimpl.mem.impl.MemDBTableFastImpl;
 import org.delia.type.DStructType;
@@ -12,14 +13,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemTableMap {
+    private final MemDBFactory factory;
     private Map<String, MemDBTable> tableMap = new ConcurrentHashMap<>(); //key is schema.typeName (lower-case)
+
+    public MemTableMap(MemDBFactory factory) {
+        this.factory = factory;
+    }
 
     public boolean containsTable(String sqlTblName) {
         return tableMap.containsKey(sqlTblName);
     }
 
     public void addTable(String sqlTblName) {
-        tableMap.put(sqlTblName, new MemDBTableFastImpl(sqlTblName));
+        MemDBTable tbl = factory.create(sqlTblName);
+        tableMap.put(sqlTblName, tbl);
     }
 
     public MemDBTable getTable(String sqlTblName) {
