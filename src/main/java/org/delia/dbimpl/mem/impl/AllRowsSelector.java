@@ -18,6 +18,7 @@ class AllRowsSelector extends RowSelectorBase {
     @Override
     public List<DValue> match(MemDBTable tbl) {
         List<DValue> list = tbl.getList();
+        //all rows match. return a copy.
         List<DValue> copy = new ArrayList<>(list);
         return copy;
     }

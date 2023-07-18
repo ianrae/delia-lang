@@ -28,4 +28,9 @@ public class MemDBTableFastImpl implements MemDBTable  {
     public List<DValue> getList() {
         return rowL;
     }
+
+    @Override
+    public boolean needsSynchronizationOnTraverse() {
+        return false;
+    }
 }

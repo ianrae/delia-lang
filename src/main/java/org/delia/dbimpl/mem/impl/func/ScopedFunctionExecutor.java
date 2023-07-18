@@ -126,14 +126,26 @@ public class ScopedFunctionExecutor extends ServiceBase {
         MemDBTable tbl = tableFinder.findMemTable(dtype);
         TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(dtype);
         for (DValue pkval : pkList) {
-            for (DValue rowval : tbl.getList()) {
-                DValue pkinner = rowval.asStruct().getField(pkpair.name);
-                if (compareSvc.compare(pkval, pkinner) == 0) {
-                    dvalList.add(rowval);
+            List<DValue> list = tbl.getList();
+            if (tbl.needsSynchronizationOnTraverse()) {
+                synchronized (list) {
+                    traverseList(list, pkpair, dvalList, compareSvc, pkval);
                 }
+            } else {
+                traverseList(list, pkpair, dvalList, compareSvc, pkval);
             }
+
         }
         return dvalList;
+    }
+
+    private void traverseList(List<DValue> list, TypePair pkpair, List<DValue> dvalList, DValueCompareService compareSvc, DValue pkval) {
+        for (DValue rowval : list) {
+            DValue pkinner = rowval.asStruct().getField(pkpair.name);
+            if (compareSvc.compare(pkval, pkinner) == 0) {
+                dvalList.add(rowval);
+            }
+        }
     }
 
     private List<DValue> extractScalarFieldValues(QScope scope, List<DValue> dvalList) {

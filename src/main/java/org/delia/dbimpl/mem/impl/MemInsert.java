@@ -132,7 +132,21 @@ public class MemInsert extends ServiceBase {
             return true; //nothing to do TODO: does uniqueness include null (i.e. 2 null values...)
         }
 
-        for (DValue existing : tbl.getList()) {
+        boolean b;
+        List<DValue> list = tbl.getList();
+        if (tbl.needsSynchronizationOnTraverse()) {
+            synchronized (list) {
+                b = traverseList(list, insertedDVal, uniqueField, compareSvc, inner, localET, structType);
+            }
+        } else {
+            b = traverseList(list, insertedDVal, uniqueField, compareSvc, inner, localET, structType);
+        }
+
+        return b;
+    }
+
+    private boolean traverseList(List<DValue> list, DValue insertedDVal, String uniqueField, DValueCompareService compareSvc, DValue inner, ErrorTracker localET, DStructType structType) {
+        for (DValue existing : list) {
             if (existing != null && existing != insertedDVal) {
                 DValue oldVal = DValueHelper.getFieldValue(existing, uniqueField);
                 if (oldVal != null) {

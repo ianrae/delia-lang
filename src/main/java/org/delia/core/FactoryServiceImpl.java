@@ -21,7 +21,6 @@ import org.delia.validation.ValidationRunner;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 public class FactoryServiceImpl implements FactoryService {
-    private final MemDBFactoryImpl memDBFactory;
     protected DeliaLog log;
     protected ErrorTracker et;
     protected TimeZoneService tzSvc;
@@ -32,6 +31,7 @@ public class FactoryServiceImpl implements FactoryService {
     //	private DiagnosticServiceImpl diagnosticSvc;
     private LogFactory logFactory;
     private boolean enableMEMSqlGenerationFlag; //normally false. no need with MEM. unless client code wants to see what sql would be
+    protected MemDBFactoryImpl memDBFactory;
 
     public FactoryServiceImpl(DeliaLog log, ErrorTracker et) {
         this(log, et, null);

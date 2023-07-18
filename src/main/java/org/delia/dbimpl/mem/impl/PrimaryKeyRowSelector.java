@@ -65,21 +65,31 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
             return null;
         } else {
             List<DValue> resultL = new ArrayList<>();
-            for(DValue dval: list) {
-                DValue key = dval.asStruct().getField(keyField);
-                if (key == null) {
-                    wasError = true;
-                    //err!!
-                    return resultL;
+            if (tbl.needsSynchronizationOnTraverse()) {
+                synchronized (list) {
+                    return traverseList(list, resultL);
                 }
-
-                if (evaluator.isEqualTo(key)) {
-                    resultL.add(dval); //only one row
-                    break;
-                }
+            } else {
+                return traverseList(list, resultL);
             }
-            return resultL;
         }
+    }
+
+    private List<DValue> traverseList(List<DValue> list, List<DValue> resultL) {
+        for(DValue dval: list) {
+            DValue key = dval.asStruct().getField(keyField);
+            if (key == null) {
+                wasError = true;
+                //err!!
+                return resultL;
+            }
+
+            if (evaluator.isEqualTo(key)) {
+                resultL.add(dval); //only one row
+                break;
+            }
+        }
+        return resultL;
     }
 
     private String findKeyField(TypePair pair) {
