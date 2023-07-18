@@ -14,6 +14,7 @@ import org.delia.util.DValueHelper;
 import org.delia.util.ListWalker;
 import org.delia.util.StrCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.varevaluator.VarEvaluator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,8 +31,10 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
     private final SqlTypeConverter sqlTypeConverter;
     private final LetSqlGenerator letSqlGenerator;
     private final CreateAssocTableSqlGenerator createAssocTableSqlGenerator;
+    private final LLDInsertGenerator insertGenerator;
+    private final VarEvaluator varEvaluator;
 
-    public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc) {
+    public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
         this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
@@ -43,6 +46,8 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
+        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator);
+        this.varEvaluator = varEvaluator;
     }
 
     public SqlStatement generateSql(LLD.LLStatement statement) {
@@ -85,7 +90,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.renderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
+                DValue realVal = sqlValueRenderer.preRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
             }
         }
@@ -116,7 +121,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             sc.o("%s=", field.field.getFieldName());
             sc.o("?");
             //TODO: what about field.dvallist??
-            DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
+            DValue realVal = this.sqlValueRenderer.preRenderSqlParam(field.dval, field.field.physicalPair.type, sqlStatement.typeHintL);
             sqlStatement.paramL.add(realVal);
             walker.addIfNotLast(sc, ", ");
         }
@@ -146,7 +151,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             int i = 0;
             for (DValue dval : visitor2.sqlParams) {
                 Tok.ValueTok vexp = visitor2.fieldValues.get(i++);
-                DValue realVal = sqlValueRenderer.renderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, valueBuilder);
+                DValue realVal = sqlValueRenderer.preRenderSqlParam(dval, vexp.hintPair == null ? null : vexp.hintPair.type, sqlStatement.typeHintL);
                 sqlStatement.paramL.add(realVal);
             }
         }
@@ -162,54 +167,13 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
 
     @Override
     public SqlStatement render(LLD.LLInsert statement) {
-        if (statement.subQueryInfo != null) {
-            return assocSqlGenerator.renderInsertSubQuery(statement);
-        }
-
-        /* INSERT INTO table_name(column1, column2, …) VALUES (value1, value2, …); */
-        //the fieldL is all the logical fields involved.
-        //Because of ManyToMany relations, some of those fields may be in an assoc table, not in the statement's table
-        List<LLD.LLFieldValue> fieldsToInsert = statement.fieldL.stream()
-                .filter(fld -> !fld.field.isAssocField).collect(Collectors.toList());
-        if (fieldsToInsert.isEmpty() && !statement.areFieldsToInsert()) {
-            return null;
-        }
-
-        SqlStatement sqlStatement = new SqlStatement();
-        StrCreator sc = new StrCreator();
-        if (fieldsToInsert.isEmpty()) {
-            sc.o("INSERT INTO %s  VALUES(DEFAULT", statement.getTableName());
-        } else {
-            sc.o("INSERT INTO %s (", statement.getTableName());
-            ListWalker<LLD.LLFieldValue> walker = new ListWalker<>(fieldsToInsert);
-            while (walker.hasNext()) {
-                LLD.LLFieldValue field = walker.next();
-                sc.o("%s", field.field.getFieldName());
-                walker.addIfNotLast(sc, ", ");
-            }
-            sc.o(")");
-            sc.nl();
-            sc.o(" VALUES(");
-
-            walker = new ListWalker<>(fieldsToInsert);
-            while (walker.hasNext()) {
-                LLD.LLFieldValue field = walker.next();
-//            sc.o("%s", renderAsSql(field.dval, field.field.physicalPair.type, field.field.physicalTable.physicalType));
-                sc.o("?");
-                DValue realVal = this.sqlValueRenderer.renderSqlParam(field.dval, field.field.physicalPair.type, valueBuilder);
-                sqlStatement.paramL.add(realVal);
-                walker.addIfNotLast(sc, ", ");
-            }
-        }
-        sc.o(");");
-
-        sqlStatement.sql = sc.toString();
-        return sqlStatement;
+        return insertGenerator.render(statement);
     }
 
-//    private String renderAsSql(DValue dval, DType dtype, DStructType parentType) {
-//        return sqlValueRenderer.renderAsSql(dval, dtype, parentType);
-//    }
+    @Override
+    public SqlStatement render(LLD.LLBulkInsert statement) {
+        return insertGenerator.render(statement);
+    }
 
     @Override
     public SqlStatement render(LLD.LLCreateSchema statement) {

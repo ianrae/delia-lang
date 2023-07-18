@@ -140,7 +140,7 @@ public class MigrationDDLGenerator {
 
     private void doRemoveField(RemoveFieldAction action, DeliaSession sess, List<SqlStatement> list) {
         createTablSqlGenIfNeeded(sess);
-        if (! action.isPhysicalField) {
+        if (!action.isPhysicalField) {
             return;
         }
 //        TypePair pair = DValueHelper.findField(action.structType, action.fieldName);

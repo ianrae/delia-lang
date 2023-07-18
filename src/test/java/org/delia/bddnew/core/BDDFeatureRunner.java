@@ -135,6 +135,7 @@ public class BDDFeatureRunner {
         BDDSnippetResult failingTRes = null;
         for (BDDSnippet snippet : test.givenL) {
             snippet.thenType = feature.expectedType;
+            snippet.bulkInsertEnabled = test.bulkInsertEnabled;
             BDDSnippetResult tres = executeSnippet(snippet, mostRecentRes);
             if (!tres.ok) {
                 failingTRes = tres;
@@ -146,6 +147,7 @@ public class BDDFeatureRunner {
         if (failingTRes == null) {
             for (BDDSnippet snippet : test.whenL) {
                 snippet.thenType = feature.expectedType;
+                snippet.bulkInsertEnabled = test.bulkInsertEnabled;
                 BDDSnippetResult tres = executeSnippet(snippet, mostRecentRes);
                 whenRes = tres;
                 //the when part may have the expected error so keep going

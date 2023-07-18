@@ -2,6 +2,7 @@ package org.delia.runner;
 
 import org.delia.Delia;
 import org.delia.DeliaFactory;
+import org.delia.DeliaOptions;
 import org.delia.DeliaSession;
 import org.delia.api.DeliaSessionImpl;
 import org.delia.compiler.ast.AST;
@@ -132,10 +133,10 @@ public class DeliaRunnerImpl implements DeliaRunner {
     public DeliaExecutable buildExecutable(AST.DeliaScript script) {
         VarEvaluator varEvaluator = createVarEvaluator();
         SyntheticDatService datSvc = new SyntheticDatService();
-        Map<String,String> syntheticIdMap = new HashMap<>(); //TODO do we need a real one?
+        Map<String, String> syntheticIdMap = new HashMap<>(); //TODO do we need a real one?
 
         DBCapabilties capabilties = dbInterface.getCapabilities();
-        ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, delia.getOptions(), syntheticIdMap, capabilties.getDefaultSchema());
+        ExecutableBuilder execBuilder = new ExecutableBuilder(factorySvc, datSvc, varEvaluator, getOptions(delia, existingSession), syntheticIdMap, capabilties.getDefaultSchema());
         HLDFirstPassResults firstPassResults = buildFirstPassResults(script);
 
         String currentSchema = calcCurentSchema();
@@ -143,6 +144,12 @@ public class DeliaRunnerImpl implements DeliaRunner {
 
         DeliaExecutable executable = execBuilder.buildFromScript(script, firstPassResults, dbInterface.getDBType());
         return executable;
+    }
+    private DeliaOptions getOptions(Delia delia, DeliaSession sessionParam) {
+        if (sessionParam != null && sessionParam.getSessionOptions() != null) {
+            return sessionParam.getSessionOptions();
+        }
+        return delia.getOptions();
     }
 
     private String calcCurentSchema() {
@@ -165,8 +172,14 @@ public class DeliaRunnerImpl implements DeliaRunner {
             session = (DeliaSessionImpl) existingSession;
             session.execCtx = existingSession.getExecutionContext();
         }
+
+        //copy over sessionOptions if detached
+        if (runDetached && existingSession != null) {
+            session.sessionOptions = ((DeliaSessionImpl)existingSession).sessionOptions;
+        }
+
         session.execCtx.deliaRunner = this;
-        session.mostRecentExecutable= executable;
+        session.mostRecentExecutable = executable;
 
         // ** run it **
         executable.inTransaction = false;
@@ -175,10 +188,10 @@ public class DeliaRunnerImpl implements DeliaRunner {
             final DeliaSessionImpl sessFinal = session;
             session.runInTransactionVoid(() -> {
                 executable.inTransaction = true;
-                runExecutable(runner, executable, sessFinal, isNewSession );
+                runExecutable(runner, executable, sessFinal, isNewSession);
             });
         } else {
-            runExecutable(runner, executable, session, isNewSession );
+            runExecutable(runner, executable, session, isNewSession);
         }
 
         return session;

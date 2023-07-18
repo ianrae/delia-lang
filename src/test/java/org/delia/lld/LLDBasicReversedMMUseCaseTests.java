@@ -37,7 +37,7 @@ public class LLDBasicReversedMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Customer.id.AddressCustomerDat1.rightv", 0);
         chkWhere(lld, "[b.leftv < 10]"); //has been rewritten!
-        chkSql(lld, "SELECT a.id, a.firstName FROM customer as a LEFT JOIN addresscustomerdat1 as b ON a.id=b.rightv WHERE b.leftv < ?", "10");
+        chkSql(lld, "SELECT a.id, a.firstName FROM alpha.customer as a LEFT JOIN addresscustomerdat1 as b ON a.id=b.rightv WHERE b.leftv < ?", "10");
     }
 
     @Test
@@ -53,7 +53,7 @@ public class LLDBasicReversedMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Address.id.AddressCustomerDat1.leftv", 0);
         chkWhere(lld, "[b.rightv < 7]");
-        chkSql(lld, "SELECT a.id, a.city FROM address as a LEFT JOIN addresscustomerdat1 as b ON a.id=b.leftv WHERE b.rightv < ?", "7");
+        chkSql(lld, "SELECT a.id, a.city FROM alpha.address as a LEFT JOIN addresscustomerdat1 as b ON a.id=b.leftv WHERE b.rightv < ?", "7");
     }
 
     //TODO * 6 Customer[addr.city = 'toronto']
@@ -71,7 +71,7 @@ public class LLDBasicReversedMMUseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Customer.id.AddressCustomerDat1.rightv", 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT a.id, a.firstName, b.leftv FROM customer as a LEFT JOIN addresscustomerdat1 as b ON a.id=b.rightv");
+        chkSql(lld, "SELECT a.id, a.firstName, b.leftv FROM alpha.customer as a LEFT JOIN addresscustomerdat1 as b ON a.id=b.rightv");
     }
 
     //TODO: 8

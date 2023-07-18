@@ -35,6 +35,7 @@ package org.delia.bddnew;
  *  DONE -tests for syntax errors
  *  DONE -give line#
  *  DONE -blob
+ *  DONE July2023 -bulk import
  *
  *  use VARCHAR and TEXT when large
  *   DValueConverterService: 			//TODO we already have normalized DValues. Why build again?
@@ -56,7 +57,6 @@ package org.delia.bddnew;
  *   -use PreparedStatements so db caches them (and doesn't need to reparse)
  *     -can we just do this always? or only sometimes?
  *  -improve SQL
- *   -bulk import
  *   -CTEs
  *  -move code over to main delia repo
  *  -docs

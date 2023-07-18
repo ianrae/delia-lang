@@ -74,14 +74,3 @@ value:a:Flight {
  vwid:20
 }
 
----
-SKIP: insert-muliple -TODO: implement this
-when:
-  let y int = 20
-  insert Flight [{id: 55, wid: y }, {id: 56, wid: y }]
-  let x = Flight[55]
-then:
-value:a:Flight {
- vid:55
- vwid:20
-}

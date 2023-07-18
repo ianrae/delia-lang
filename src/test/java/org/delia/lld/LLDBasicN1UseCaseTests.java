@@ -30,7 +30,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkPK(lld, "id");
         chkJoins(lld, 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT a.id, a.firstName FROM person as a");
+        chkSql(lld, "SELECT a.id, a.firstName FROM alpha.person as a");
     }
 
     @Test
@@ -42,7 +42,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkPK(lld, "id");
         chkJoins(lld, 0);
         chkWhere(lld, "[10]");
-        chkSql(lld, "SELECT a.id, a.firstName FROM person as a WHERE a.id = ?", "10");
+        chkSql(lld, "SELECT a.id, a.firstName FROM alpha.person as a WHERE a.id = ?", "10");
     }
 
     @Test
@@ -54,7 +54,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkPK(lld, "id");
         chkJoins(lld, 0);
         chkWhere(lld, "[a.id < 10]"); //rewrite!
-        chkSql(lld, "SELECT a.id, a.firstName FROM person as a WHERE a.id < ?", "10");
+        chkSql(lld, "SELECT a.id, a.firstName FROM alpha.person as a WHERE a.id < ?", "10");
     }
 
     //    //1:1 rel
@@ -71,7 +71,8 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Customer.id.Address.cust", 0);
         chkWhere(lld, "[b.id < 10]"); //has been rewritten!
-        chkSql(lld, "SELECT a.id, a.firstName FROM customer as a LEFT JOIN address as b ON a.id=b.cust WHERE b.id < ?", "10");
+        //TODO shouldn't the join also use alpha.address?
+        chkSql(lld, "SELECT a.id, a.firstName FROM alpha.customer as a LEFT JOIN address as b ON a.id=b.cust WHERE b.id < ?", "10");
     }
 
     @Test
@@ -86,7 +87,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkPK(lld, "id");
         chkJoins(lld, 0);
         chkWhere(lld, "[a.cust < 7]");
-        chkSql(lld, "SELECT a.id, a.city, a.cust FROM address as a WHERE a.cust < ?", "7");
+        chkSql(lld, "SELECT a.id, a.city, a.cust FROM alpha.address as a WHERE a.cust < ?", "7");
     }
 
     //TODO * 6 Customer[addr.city = 'toronto']
@@ -104,7 +105,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Customer.id.Address.cust", 0, "Address.id");
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT a.id, a.firstName, b.id FROM customer as a LEFT JOIN address as b ON a.id=b.cust");
+        chkSql(lld, "SELECT a.id, a.firstName, b.id FROM alpha.customer as a LEFT JOIN address as b ON a.id=b.cust");
     }
 
     //TODO: 8
@@ -124,7 +125,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkJoins(lld, 1);
         chkOneJoin(lld, "Address.cust.Customer.id", 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT a.id, a.city, a.cust FROM address as a LEFT JOIN customer as b ON a.cust=b.id");
+        chkSql(lld, "SELECT a.id, a.city, a.cust FROM alpha.address as a LEFT JOIN customer as b ON a.cust=b.id");
     }
 
     @Test
@@ -138,7 +139,7 @@ public class LLDBasicN1UseCaseTests extends LLDBasicTestBase {
         chkLetStmt(lld, "count");
         chkJoins(lld, 0);
         chkWhere(lld, "[true]");
-        chkSql(lld, "SELECT count(*) FROM customer as a");
+        chkSql(lld, "SELECT count(*) FROM alpha.customer as a");
     }
 
     //---

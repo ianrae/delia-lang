@@ -1,0 +1,41 @@
+# CRUD insert tests
+# note. t0-struct.txt tests insert of each data type
+
+FEATURE: CRUD insert
+background:
+  type Flight struct {id int primaryKey, wid int optional }  end
+  type Flight2 struct {id int primaryKey, wid int }  end
+thenType: struct
+
+---
+title: insert bulkInsert disabled
+when:
+  insert Flight {id: 55, wid: 20 }
+  insert Flight {id: 56, wid: 21 }
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+value:a:Flight {
+  vid:56
+  vwid:21
+}
+
+---
+title: insert bulkInsert enabled
+bulkInsert:true
+when:
+  insert Flight {id: 55, wid: 20 }
+  insert Flight {id: 56, wid: 21 }
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vid:55
+ vwid:20
+}
+value:a:Flight {
+  vid:56
+  vwid:21
+}

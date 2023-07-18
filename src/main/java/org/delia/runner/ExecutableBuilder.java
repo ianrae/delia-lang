@@ -13,6 +13,7 @@ import org.delia.hld.HLDFirstPassResults;
 import org.delia.hld.dat.DatService;
 import org.delia.lld.LLD;
 import org.delia.lld.processor.LLDBuilder;
+import org.delia.runner.bulkinsert.BulkInsertBuilder;
 import org.delia.sort.table.ListRearranger;
 import org.delia.sort.topo.DeliaTypeSorter;
 import org.delia.sql.LLDSqlGenerator;
@@ -60,12 +61,15 @@ public class ExecutableBuilder extends ServiceBase {
         LLDBuilder builder = new LLDBuilder(factorySvc, datSvc, deliaOptions);
         builder.buildLLD(exec);
 
+        //apply any optimizations
+        generateBulkInsertsIfEnabled(exec);
+
         //do create-table re-ordering. If Address has an fk to Customer then must
         //create Customer before Address
         reOrderStatements(exec);
 
         //and now gen sql
-        LLDSqlGenerator gen = new LLDSqlGenerator(factorySvc, deliaOptions, exec.registry, datSvc);
+        LLDSqlGenerator gen = new LLDSqlGenerator(factorySvc, deliaOptions, exec.registry, datSvc, varEvaluator);
         boolean genSql = shouldGenerateSQL(dbType);
         if (genSql) {
             for (LLD.LLStatement lldStatement : exec.lldStatements) {
@@ -78,6 +82,13 @@ public class ExecutableBuilder extends ServiceBase {
         exec.datSvc = datSvc;
 
         return exec;
+    }
+
+    private void generateBulkInsertsIfEnabled(DeliaExecutable exec) {
+        if (!deliaOptions.bulkInsertEnabled) return;
+
+        BulkInsertBuilder bulkInsertBuilder = new BulkInsertBuilder(deliaOptions);
+        exec.lldStatements  = bulkInsertBuilder.process(exec.lldStatements);
     }
 
     private boolean shouldGenerateSQL(DBType dbType) {

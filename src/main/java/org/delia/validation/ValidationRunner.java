@@ -1,5 +1,6 @@
 package org.delia.validation;
 
+import org.delia.error.DeliaError;
 import org.delia.error.ErrorTracker;
 import org.delia.runner.ResultValue;
 import org.delia.type.DValue;
@@ -34,5 +35,7 @@ public interface ValidationRunner {
 	void setUpsertPKVal(DValue keyval);
 
 	void setSoftMandatoryRelationFlag(boolean b);
+
+	List<DeliaError> getErrors();
 
 }

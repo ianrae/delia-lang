@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BDDFileParser {
@@ -171,6 +170,8 @@ public class BDDFileParser {
             } else if (currentTest != null && line.startsWith("thenType:")) {
                 String thenType = parseThenTypeIfPresent(line);
                 currentTest.expectedType = thenType;
+            } else if (currentTest != null && line.startsWith("bulkInsert:")) {
+                currentTest.bulkInsertEnabled = true;
             } else if (currentTest != null && line.startsWith("expectDVal:")) {
                 boolean b = (parseExpectDValueIfPresent(line) != null);
                 currentTest.expectDValFlag = b;

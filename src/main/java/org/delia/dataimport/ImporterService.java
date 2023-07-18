@@ -5,6 +5,7 @@ import org.delia.compiler.ast.AST;
 import org.delia.compiler.ast.Exp;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.error.DeliaError;
 import org.delia.hld.DeliaExecutable;
 import org.delia.runner.DeliaRunner;
 import org.delia.type.DStructType;
@@ -15,6 +16,7 @@ import java.util.List;
 public class ImporterService extends ServiceBase {
 
     private final DeliaRunner deliaRunner;
+    private DeliaSession mostRecentSession;
 
     public ImporterService(FactoryService factorySvc, DeliaRunner deliaRunner) {
         super(factorySvc);
@@ -53,7 +55,15 @@ public class ImporterService extends ServiceBase {
     protected List<DValue> buildAndRun(DStructType structType, List<DValue> values) {
         DeliaExecutable executable = buildStatement(structType, values);
         DeliaSession session = deliaRunner.execute(executable);
+        mostRecentSession = session;
         return session.getFinalResult().getAsDValueList();
     }
 
+    public DeliaRunner getDeliaRunner() {
+        return deliaRunner;
+    }
+
+    public DeliaSession getMostRecentSession() {
+        return mostRecentSession;
+    }
 }

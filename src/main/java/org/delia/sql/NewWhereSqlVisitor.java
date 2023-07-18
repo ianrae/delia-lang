@@ -54,8 +54,8 @@ public class NewWhereSqlVisitor implements Tok.TokVisitor {
             if (exp instanceof Tok.ValueTok) {
                 Tok.ValueTok vexp = (Tok.ValueTok) exp;
                 if (vexp.strValue().equals("true")) {
-                     return ""; //done
-                 }
+                    return ""; //done
+                }
             } else if (exp instanceof Tok.OperandTok) {
                 if (exp instanceof Tok.PKWhereTok) {
                     Tok.PKWhereTok pktok = (Tok.PKWhereTok) exp;

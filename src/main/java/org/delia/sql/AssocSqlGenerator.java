@@ -6,7 +6,6 @@ import org.delia.db.SqlStatement;
 import org.delia.hld.dat.AssocSpec;
 import org.delia.hld.dat.DatService;
 import org.delia.lld.LLD;
-import org.delia.lld.processor.WhereClauseUtils;
 import org.delia.tok.TokWhereClauseUtils;
 import org.delia.type.DType;
 import org.delia.type.DValue;
@@ -59,7 +58,7 @@ public class AssocSqlGenerator extends ServiceBase {
         }
 
         SqlStatement sqlStatement = new SqlStatement();
-        DValue realVal = this.sqlValueRenderer.renderSqlParam(value, valueType, valueBuilder);
+        DValue realVal = this.sqlValueRenderer.preRenderSqlParam(value, valueType, sqlStatement.typeHintL);
         sqlStatement.paramL.add(realVal);
 
         boolean isFlipped = assocSpec.isFlipped(subQueryInfo.relinfo);
@@ -73,7 +72,7 @@ public class AssocSqlGenerator extends ServiceBase {
         }
         if (subQueryInfo.whereTok != null && QueryType.PRIMARY_KEY.equals(subQueryInfo.queryType)) {
             DValue pkval = TokWhereClauseUtils.extractPKWhereClause(subQueryInfo.whereTok);
-            pkval = this.sqlValueRenderer.renderSqlParam(pkval, valueType, valueBuilder);
+            pkval = this.sqlValueRenderer.preRenderSqlParam(pkval, valueType, sqlStatement.typeHintL);
             sqlStatement.paramL.add(pkval);
             sc.o(" WHERE %s=?", pkpair.name);
         }

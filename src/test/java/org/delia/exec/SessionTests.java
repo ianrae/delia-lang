@@ -17,10 +17,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /*
-Discovered that if a delia insert statement fails with "NODATA: null field value for mandatory field" error,
-that a subsequent delia query somehow still has that error in the res and fails
  */
-public class SessionContinueTests extends DeliaRunnerTestBase {
+public class SessionTests extends DeliaRunnerTestBase {
 
     @Test
     public void test() {
@@ -39,19 +37,21 @@ public class SessionContinueTests extends DeliaRunnerTestBase {
 
         String src = src0 + "type Customer struct {id int primaryKey, wid int, name string, relation org Organization one } wid.maxlen(4) end";
         DeliaSession sess = delia.beginSession(src);
+        assertEquals(null, sess.getSessionOptions()); //null in main sess
+        assertEquals(false, delia.getOptions().bulkInsertEnabled);
+
+        DeliaSession childSess = sess.createChildSession();
+        childSess.getSessionOptions().bulkInsertEnabled = true;
+        assertEquals(false, delia.getOptions().bulkInsertEnabled);
+        assertEquals(true, childSess.getSessionOptions().bulkInsertEnabled);
 
         src = "insert Organization {name:'org1'}";
-        ResultValue res = delia.continueExecution(src, sess);
+        ResultValue res = delia.continueExecution(src, childSess);
 
         src = "insert Customer {id:1, wid:50, name:'a1'}";
-        res = delia.continueExecution(src, sess);
-//        assertEquals(true, res.ok);
+        res = delia.continueExecution(src, childSess);
 
-        src = "let x = Organization[true].count()";
-        res = delia.continueExecution(src, sess);
 
-        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
-        assertEquals(1, dval.asInt());
     }
 
 

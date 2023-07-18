@@ -47,6 +47,9 @@ public class DeliaSnippetRunner implements SnippetRunner {
         }
         //auto-sort results by id (makes bdd files simpler)
         dao.getDelia().getOptions().autoSortByPK = true;
+        if (snippet.bulkInsertEnabled) {
+            dao.getDelia().getOptions().bulkInsertEnabled = true;
+        }
 
         String src = StringUtil.flattenEx(snippet.lines, "\n");
         log.log("deliaSrc: %s", src);

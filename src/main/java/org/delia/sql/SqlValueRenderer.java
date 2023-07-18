@@ -4,12 +4,15 @@ import org.delia.compiler.ast.Exp;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DeferredValueService;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
+import org.delia.varevaluator.VarEvaluator;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class SqlValueRenderer extends ServiceBase {
     private final DateFormatService dateFormatSvc;
@@ -99,7 +102,11 @@ public class SqlValueRenderer extends ServiceBase {
         return dval;
     }
 
-    public DValue renderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {
+    public DValue preRenderSqlParam(DValue dval, DType dtype, List<DType> typeHintL) {
+        typeHintL.add(dtype);
+        return dval;
+    }
+    public DValue actualRenderSqlParam(DValue dval, DType dtype, ScalarValueBuilder valueBuilder) {
         if (dval == null) {
             return null;
         }
