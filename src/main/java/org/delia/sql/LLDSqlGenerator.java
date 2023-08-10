@@ -3,11 +3,11 @@ package org.delia.sql;
 import org.delia.DeliaOptions;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.hld.dat.DatService;
 import org.delia.lld.LLD;
 import org.delia.tok.Tok;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
@@ -225,7 +225,13 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
 //        return sqlTypeConverter.getSqlType(dtype);
 //    }
 
-    public void prepare(List<LLD.LLStatement> lldStatements) {
+    public void prepare(List<LLD.LLStatement> lldStatements, DBType dbType) {
+        if (DBType.MEM.equals(dbType)) {
+            //The MEM implementation assumes tblName equals DStruct type name, so don't set LLTable.sqlTableNameToUse
+            //Note. this means if you generate SQL statements when MEM they won't use correct sql table names if
+            //you've used tableName rule (see deliaOptions.generateSqlWhenMEMDBType)
+            return;
+        }
         sqlTableNameMapper.prepare(lldStatements);
     }
 }

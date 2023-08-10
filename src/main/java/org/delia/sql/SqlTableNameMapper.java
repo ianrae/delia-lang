@@ -5,7 +5,6 @@ import org.delia.log.DeliaLog;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.SqlTableNameRule;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +50,7 @@ public class SqlTableNameMapper {
             if (stmt instanceof LLD.LLCreateTable) {
                 LLD.LLCreateTable llCreateTable = (LLD.LLCreateTable) stmt;
                 processTable(llCreateTable.table);
-                for(LLD.LLField llField: llCreateTable.fields) {
+                for (LLD.LLField llField : llCreateTable.fields) {
                     doLLEx(llField);
                 }
 
