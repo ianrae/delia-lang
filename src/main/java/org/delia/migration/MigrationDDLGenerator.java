@@ -92,7 +92,7 @@ public class MigrationDDLGenerator {
         DatService datSvc = sess.getDatIdMap();
         SqlTableNameMapper sqlTableNameMapper = new SqlTableNameMapper(log); //TODO should create a full one!!
         this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions(), sqlTableNameMapper);
-        this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions());
+        this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions(), sqlTableNameMapper);
         this.fieldGen = new FieldSqlGenerator(factorySvc, delia.getOptions(), sqlTableNameMapper);
     }
 

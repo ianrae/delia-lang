@@ -41,14 +41,14 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
         this.sqlTableNameMapper = new SqlTableNameMapper(factorySvc.getLog());
-        this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
+        this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, sqlTableNameMapper);
         this.upsertSqlGenerator = new UpsertSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
         this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
-        this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
-        this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
+        this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
+        this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
-        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator);
+        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator, sqlTableNameMapper);
         this.varEvaluator = varEvaluator;
     }
 

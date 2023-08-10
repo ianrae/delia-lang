@@ -24,13 +24,15 @@ public class LetSqlGenerator extends ServiceBase {
     private final ScalarValueBuilder valueBuilder;
     private final DatService datSvc;
     private final DeliaOptions deliaOptions;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
-    public LetSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, DeliaOptions deliaOptions) {
+    public LetSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper) {
         super(factorySvc);
         this.sqlValueRenderer = sqlValueRenderer;
         this.valueBuilder = valueBuilder;
         this.datSvc = datSvc;
         this.deliaOptions = deliaOptions;
+        this.sqlTableNameMapper = sqlTableNameMapper;
     }
 
     public SqlStatement render(LLD.LLSelect statement) {
@@ -71,6 +73,7 @@ public class LetSqlGenerator extends ServiceBase {
             }
             walker.addIfNotLast(sc, ", ");
         }
+
         sc.o(" FROM %s", statement.table.getSQLName());
         sc.o(" as %s", statement.table.alias);
 
