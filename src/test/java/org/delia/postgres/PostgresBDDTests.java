@@ -385,20 +385,18 @@ public class PostgresBDDTests extends BDDTestBase {
 		runR2800File("t0-schema-public.txt", 4);
 		runR2800File("t0-schema-off.txt", 1);
 		runR2800File("t0-schema-same-name.txt", 1);
+		runR2800File("t0-sqltable-name.txt", 1);
 	}
 
 	@Test
 	public void testDebug() {
-		singleTestToRunIndex = 7;
+//		singleTestToRunIndex = 7;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 //		runR700File("t0-insert.txt", 6);
 
 //		runR700File("t0-insert-serial.txt", 1);
-//		runR700File("t0-insert-multi.txt", 2);
-//		runR700File("t0-insert-date-var.txt", 3);
-//		runR700File("t0-insert-serial-inherit.txt", 1);
-		runR400File("t0-struct-key.txt", 9);
+		runR2800File("t0-sqltable-name.txt", 1);
 	}
 
 	//---

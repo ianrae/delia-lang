@@ -404,6 +404,7 @@ public class AllBDDTests extends BDDTestBase {
         runR2800File("t0-schema-public.txt", 4);
         runR2800File("t0-schema-off.txt", 1);
         runR2800File("t0-schema-same-name.txt", 1);
+        runR2800File("t0-sqltable-name.txt", 1);
 	}
 
     @Test
@@ -411,12 +412,13 @@ public class AllBDDTests extends BDDTestBase {
         singleTestToRunIndex = 0;
         enableAllFileCheck = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
-        UnitTestLog.defaultLogLevel = LogLevel.OFF;
-        log.setLevel(LogLevel.OFF);
+//        UnitTestLog.defaultLogLevel = LogLevel.OFF;
+//        log.setLevel(LogLevel.OFF);
 //		diagnosticFilter = "I"; //log insert statements
 //        runR700File("t0-insert-multi.txt", 2);
 //        runR700File("t0-insert-date-var.txt", 3);
-        runR700File("t0-insert.txt", 6);
+//        runR700File("t0-insert.txt", 6);
+        runR2800File("t0-sqltable-name.txt", 1);
     }
 
     //---
