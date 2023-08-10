@@ -1,6 +1,5 @@
 package org.delia.util;
 
-import org.delia.dbimpl.mem.MemTableMap;
 import org.delia.type.DTypeName;
 
 import java.util.List;
@@ -12,13 +11,13 @@ public class DTypeNameUtil {
     public static String flatten(List<DTypeName> list) {
         StringJoiner joiner = new StringJoiner(",");
         for(DTypeName typeName: list) {
-            String s = formatSqlTableName(typeName);
+            String s = formatLowerCaseTableName(typeName);
             joiner.add(s.trim());
         }
         return joiner.toString();
     }
 
-    public static String formatSqlTableName(DTypeName typeName) {
+    public static String formatLowerCaseTableName(DTypeName typeName) {
         String s = (typeName.getSchema() == null) ? typeName.getTypeName() :
                 String.format("%s.%s", typeName.getSchema(), typeName.getTypeName());
         s = s.toLowerCase(Locale.ROOT); //our sql tablename is lowercase

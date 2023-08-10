@@ -70,7 +70,7 @@ class ObjectPool {
 	}
 	private String makeKey(DType dtype, DValue pkval, String relationName) {
 		String srel = relationName == null ? "" : relationName;
-		String tbl1 = DTypeNameUtil.formatSqlTableName(dtype.getTypeName());
+		String tbl1 = DTypeNameUtil.formatLowerCaseTableName(dtype.getTypeName());
 		String key = String.format("%s.%s:%s", tbl1, pkval.asString(), srel);
 		return key;
 	}

@@ -2,13 +2,9 @@ package org.delia.dbimpl.mem;
 
 import org.delia.dbimpl.mem.impl.MemDBFactory;
 import org.delia.dbimpl.mem.impl.MemDBTable;
-import org.delia.dbimpl.mem.impl.MemDBTableFastImpl;
 import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DTypeName;
 import org.delia.util.DTypeNameUtil;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,7 +35,7 @@ public class MemTableMap {
     }
 
     public static String formatSqlTableName(DStructType structType) {
-        return DTypeNameUtil.formatSqlTableName(structType.getTypeName());
+        return DTypeNameUtil.formatLowerCaseTableName(structType.getTypeName());
     }
 
 }

@@ -1,6 +1,5 @@
 package org.delia.runner;
 
-import org.delia.dbimpl.mem.MemTableMap;
 import org.delia.lld.LLD;
 import org.delia.sort.table.SubListSorter;
 import org.delia.type.DTypeName;
@@ -41,7 +40,7 @@ public class MyCreateTableSorter implements SubListSorter<LLD.LLStatement> {
             if (stmt instanceof  LLD.LLCreateTable) {
                 LLD.LLCreateTable createTable = (LLD.LLCreateTable) stmt;
                 String tbl1 = createTable.getTableName();
-                String tbl2 = DTypeNameUtil.formatSqlTableName(typeName);
+                String tbl2 = DTypeNameUtil.formatLowerCaseTableName(typeName);
                 if (tbl1.equals(tbl2)) {
                     return createTable;
                 }

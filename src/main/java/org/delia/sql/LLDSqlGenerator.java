@@ -221,9 +221,9 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         return createAssocTableSqlGenerator.render(statement);
     }
 
-    private String getSqlType(DType dtype) {
-        return sqlTypeConverter.getSqlType(dtype);
-    }
+//    private String getSqlType(DType dtype) {
+//        return sqlTypeConverter.getSqlType(dtype);
+//    }
 
     public void prepare(List<LLD.LLStatement> lldStatements) {
         sqlTableNameMapper.prepare(lldStatements);
