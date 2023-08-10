@@ -90,9 +90,10 @@ public class MigrationDDLGenerator {
         SqlValueRenderer sqlValueRenderer = new SqlValueRenderer(factorySvc);
         ScalarValueBuilder valueBuilder = new ScalarValueBuilder(factorySvc, sess.getRegistry());
         DatService datSvc = sess.getDatIdMap();
-        this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions());
+        SqlTableNameMapper sqlTableNameMapper = new SqlTableNameMapper(log); //TODO should create a full one!!
+        this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions(), sqlTableNameMapper);
         this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, delia.getOptions());
-        this.fieldGen = new FieldSqlGenerator(factorySvc, delia.getOptions());
+        this.fieldGen = new FieldSqlGenerator(factorySvc, delia.getOptions(), sqlTableNameMapper);
     }
 
     private void doDeleteTable(DeleteTableAction action, List<SqlStatement> list) {

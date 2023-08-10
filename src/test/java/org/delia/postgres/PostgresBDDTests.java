@@ -1,7 +1,9 @@
 package org.delia.postgres;
 
+import org.delia.base.UnitTestLog;
 import org.delia.bddnew.BDDTestBase;
 import org.delia.db.DBType;
+import org.delia.log.LogLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -393,6 +395,8 @@ public class PostgresBDDTests extends BDDTestBase {
 //		singleTestToRunIndex = 7;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
+		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
+		log.setLevel(LogLevel.DEBUG);
 //		runR700File("t0-insert.txt", 6);
 
 //		runR700File("t0-insert-serial.txt", 1);

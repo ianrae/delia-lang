@@ -4,6 +4,8 @@ import org.delia.lld.LLD;
 import org.delia.log.DeliaLog;
 import org.delia.rule.DRule;
 import org.delia.rule.rules.SqlTableNameRule;
+import org.delia.type.DStructType;
+import org.delia.type.DTypeName;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SqlTableNameMapper {
     private DeliaLog log;
     private Map<String, String> tableNameMap = new ConcurrentHashMap<>();
+    private LLD.LLNameFormatter formatter;
 
     public SqlTableNameMapper(DeliaLog log) {
         this.log = log;
@@ -24,6 +27,7 @@ public class SqlTableNameMapper {
                 LLD.HasLLTable stmtWithTable = (LLD.HasLLTable) stmt;
                 LLD.LLTable llTable = stmtWithTable.getTable();
                 processTable(llTable);
+                this.formatter = llTable.formatter; //grab any one
             }
 
             if (stmt instanceof LLD.LLSelect) {
@@ -62,8 +66,10 @@ public class SqlTableNameMapper {
         Optional<String> tableNameToUse = getFromRule(llTable);
         if (tableNameToUse.isPresent()) {
             String defaultTableName = llTable.formatter.formatName(llTable.physicalType.getName()); //without schema
-            tableNameMap.put(defaultTableName, tableNameToUse.get());
-            log.logDebug("SQL-TABLE-NAME %s -> %s", defaultTableName, tableNameToUse.get());
+            if (!tableNameMap.containsKey(defaultTableName)) {
+                tableNameMap.put(defaultTableName, tableNameToUse.get());
+                log.logDebug("SQL-TABLE-NAME %s -> %s", defaultTableName, tableNameToUse.get());
+            }
             llTable.sqlTableNameToUse = tableNameToUse.get();
         }
     }
@@ -99,5 +105,25 @@ public class SqlTableNameMapper {
 
     public String getSQLTableName(LLD.LLTable llTable) {
         return llTable.getSQLName();
+    }
+
+    public String resolveSqlTableName(String tableNameRaw) {
+        String tableName = formatter.formatName(tableNameRaw); //without schema
+        if (tableNameMap.containsKey(tableName)) {
+            return tableNameMap.get(tableName);
+        }
+        return tableName;
+    }
+
+    public String buildTableNameToUse(String schema, String tableName) {
+        String sqlTblName = formatter.formatName(schema, tableName);
+        return sqlTblName;
+    }
+
+    public String calcSqlTableName(DStructType structType) {
+        DTypeName dTypeName = structType.getTypeName();
+        String tblName = dTypeName.getTypeName();
+        tblName = resolveSqlTableName(tblName);
+        return buildTableNameToUse(dTypeName.getSchema(), tblName);
     }
 }
