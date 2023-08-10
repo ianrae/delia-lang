@@ -392,7 +392,7 @@ public class PostgresBDDTests extends BDDTestBase {
 
 	@Test
 	public void testDebug() {
-		singleTestToRunIndex = 3;
+		singleTestToRunIndex = 2;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
@@ -401,7 +401,8 @@ public class PostgresBDDTests extends BDDTestBase {
 
 //		runR700File("t0-insert-serial.txt", 1);
 //		runR2800File("t0-sqltable-name.txt", 1);
-		runR1000File("t0-upsert-mm-id.txt", 4);
+//		runR1500File("t0-queryfn-distinct-relation.txt", 6);
+		runR2800File("t0-schema.txt", 4);
 	}
 
 	//---

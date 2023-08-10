@@ -60,13 +60,13 @@ public class FieldSqlGenerator extends ServiceBase {
     public void renderFKConstraint(StrCreator sc, DStructType structType, TypePair pair) {
         TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pair.type);
         String constraintName = buildFKConstraintName(structType, pair);
-        String tblName2 = calcTableName((DStructType) pair.type);
+        String tblName2 = sqlTableNameMapper.calcSqlTableName((DStructType) pair.type);
         sc.o(" CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)", constraintName, pair.name,
                 tblName2, pkpair.name);
     }
 
     private String calcTableName(DStructType structType) {
-        return sqlTableNameMapper.calcSqlTableName(structType);
+        return sqlTableNameMapper.calcSqlTableNameOnly(structType); //name w/o schema
     }
 
     public String buildFKConstraintName(DStructType structType, TypePair pair) {

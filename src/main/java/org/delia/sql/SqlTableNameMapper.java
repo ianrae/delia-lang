@@ -57,6 +57,9 @@ public class SqlTableNameMapper {
                 for (LLD.LLField llField : llCreateTable.fields) {
                     doLLEx(llField);
                 }
+                if (formatter == null) {
+                    this.formatter = llCreateTable.table.formatter; //grab any one
+                }
 
             }
         }
@@ -120,10 +123,19 @@ public class SqlTableNameMapper {
         return sqlTblName;
     }
 
+    //name will include schema (if present)
     public String calcSqlTableName(DStructType structType) {
         DTypeName dTypeName = structType.getTypeName();
         String tblName = dTypeName.getTypeName();
         tblName = resolveSqlTableName(tblName);
         return buildTableNameToUse(dTypeName.getSchema(), tblName);
+    }
+
+    //name will not include schema
+    public String calcSqlTableNameOnly(DStructType structType) {
+        DTypeName dTypeName = structType.getTypeName();
+        String tblName = dTypeName.getTypeName();
+        tblName = resolveSqlTableName(tblName);
+        return buildTableNameToUse(null, tblName);
     }
 }

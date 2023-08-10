@@ -209,7 +209,7 @@ public class LetSqlGenerator extends ServiceBase {
                 String leftTable = join.physicalLeft.physicalTable.getSQLTableNameOnly();
                 sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", leftTable, aliasRight,
                         join.physicalRight.physicalTable.alias, join.physicalRight.physicalPair.name,
-                        aliasRight, join.physicalRight.physicalPair.name);
+                        aliasRight, join.physicalLeft.physicalPair.name);
                 walker2.addIfNotLast(sc, " ");
             } else {
                 String aliasRight = join.logicalJoin.alias;
