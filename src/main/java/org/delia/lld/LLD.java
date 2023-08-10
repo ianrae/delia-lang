@@ -126,6 +126,13 @@ public class LLD {
             }
             return formatter.formatName(physicalType.getSchema(), physicalType.getName());
         }
+        //tableName w/o schema
+        public String getSQLTableNameOnly() {
+            if (sqlTableNameToUse != null) {
+                return formatter.formatName(sqlTableNameToUse);
+            }
+            return formatter.formatName(physicalType.getName());
+        }
 
         @Override
         public String toString() {

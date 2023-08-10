@@ -45,7 +45,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         this.upsertSqlGenerator = new UpsertSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
         this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
         this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
-        this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
+        this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
         this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator, sqlTableNameMapper);

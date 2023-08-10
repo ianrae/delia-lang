@@ -24,15 +24,13 @@ public class LetSqlGenerator extends ServiceBase {
     private final ScalarValueBuilder valueBuilder;
     private final DatService datSvc;
     private final DeliaOptions deliaOptions;
-    private final SqlTableNameMapper sqlTableNameMapper;
 
-    public LetSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper) {
+    public LetSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, DeliaOptions deliaOptions) {
         super(factorySvc);
         this.sqlValueRenderer = sqlValueRenderer;
         this.valueBuilder = valueBuilder;
         this.datSvc = datSvc;
         this.deliaOptions = deliaOptions;
-        this.sqlTableNameMapper = sqlTableNameMapper;
     }
 
     public SqlStatement render(LLD.LLSelect statement) {
@@ -208,13 +206,15 @@ public class LetSqlGenerator extends ServiceBase {
             LLD.LLJoin join = walker2.next();
             if (join.logicalJoin.isTransitive) {
                 String aliasRight = join.logicalJoin.alias;
-                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", join.physicalLeft.getSQLName(), aliasRight,
+                String leftTable = join.physicalLeft.physicalTable.getSQLTableNameOnly();
+                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", leftTable, aliasRight,
                         join.physicalRight.physicalTable.alias, join.physicalRight.physicalPair.name,
-                        aliasRight, join.physicalLeft.physicalPair.name);
+                        aliasRight, join.physicalRight.physicalPair.name);
                 walker2.addIfNotLast(sc, " ");
             } else {
                 String aliasRight = join.logicalJoin.alias;
-                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", join.physicalRight.getSQLName(), aliasRight,
+                String rightTable = join.physicalRight.physicalTable.getSQLTableNameOnly();
+                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", rightTable, aliasRight,
                         join.physicalLeft.physicalTable.alias, join.physicalLeft.physicalPair.name,
                         aliasRight, join.physicalRight.physicalPair.name);
                 walker2.addIfNotLast(sc, " ");
