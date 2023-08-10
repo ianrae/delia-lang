@@ -21,6 +21,11 @@ public class SqlTableNameRule extends DRuleBase {
         super("sqlTableName", guard);
         this.tableName = tableName;
     }
+
+    public String getTableName() {
+        return tableName;
+    }
+
     @Override
     public String renderAsDelia(RuleGeneratorContext ctx) {
         return String.format(""); //not used

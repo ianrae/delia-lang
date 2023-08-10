@@ -106,6 +106,7 @@ public class LLD {
         public String alias; //can be null
         @JsonIgnore
         public LLNameFormatter formatter;
+        public String sqlTableNameToUse; //optional. set if tableName rule is present.
 
         public LLTable(DStructType logicalType, DStructType physicalType, LLNameFormatter formatter) {
             this.logicalType = logicalType;
@@ -120,6 +121,9 @@ public class LLD {
 
         @Override
         public String getSQLName() {
+            if (sqlTableNameToUse != null) {
+                return formatter.formatName(physicalType.getSchema(), sqlTableNameToUse);
+            }
             return formatter.formatName(physicalType.getSchema(), physicalType.getName());
         }
 

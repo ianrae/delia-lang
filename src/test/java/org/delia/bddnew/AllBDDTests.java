@@ -412,8 +412,8 @@ public class AllBDDTests extends BDDTestBase {
         singleTestToRunIndex = 0;
         enableAllFileCheck = false;
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
-//        UnitTestLog.defaultLogLevel = LogLevel.OFF;
-//        log.setLevel(LogLevel.OFF);
+        UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
+        log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
 //        runR700File("t0-insert-multi.txt", 2);
 //        runR700File("t0-insert-date-var.txt", 3);

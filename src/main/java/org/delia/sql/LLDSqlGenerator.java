@@ -33,6 +33,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
     private final CreateAssocTableSqlGenerator createAssocTableSqlGenerator;
     private final LLDInsertGenerator insertGenerator;
     private final VarEvaluator varEvaluator;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
     public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
@@ -48,6 +49,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
         this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator);
         this.varEvaluator = varEvaluator;
+        this.sqlTableNameMapper = new SqlTableNameMapper(factorySvc.getLog());
     }
 
     public SqlStatement generateSql(LLD.LLStatement statement) {
@@ -221,5 +223,9 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
 
     private String getSqlType(DType dtype) {
         return sqlTypeConverter.getSqlType(dtype);
+    }
+
+    public void prepare(List<LLD.LLStatement> lldStatements) {
+        sqlTableNameMapper.prepare(lldStatements);
     }
 }
