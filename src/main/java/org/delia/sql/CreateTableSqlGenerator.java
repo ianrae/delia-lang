@@ -22,15 +22,18 @@ public class CreateTableSqlGenerator extends ServiceBase {
     private final SqlTypeConverter sqlTypeConverter;
     private final DeliaOptions options;
     private final FieldSqlGenerator fieldGen;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
-    public CreateTableSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, DeliaOptions deliaOptions) {
+    public CreateTableSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, 
+                                   DatService datSvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper) {
         super(factorySvc);
         this.sqlValueRenderer = sqlValueRenderer;
         this.valueBuilder = valueBuilder;
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
         this.options = deliaOptions;
-        this.fieldGen = new FieldSqlGenerator(factorySvc, deliaOptions);
+        this.fieldGen = new FieldSqlGenerator(factorySvc, deliaOptions, sqlTableNameMapper);
+        this.sqlTableNameMapper = sqlTableNameMapper;
     }
 
     public SqlStatement render(LLD.LLCreateTable statement) {

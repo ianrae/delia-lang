@@ -1,0 +1,28 @@
+# struct tests
+
+FEATURE: schema
+background:
+ configure loadFKs = true
+thenType: struct
+
+---
+title: let
+given:
+ type Customer struct {id int primaryKey, relation addr Address optional one parent }
+  tableName('Customer22')
+ end
+ type Address struct {id int primaryKey, relation cust Customer optional one }
+  tableName('Address22')
+ end
+
+  insert Customer {id: 55 }
+when:
+  let x = Customer[55]
+then:
+value:a:Customer {
+ vid:55
+ vaddr:null
+}
+
+
+

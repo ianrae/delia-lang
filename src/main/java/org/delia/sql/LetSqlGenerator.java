@@ -71,6 +71,7 @@ public class LetSqlGenerator extends ServiceBase {
             }
             walker.addIfNotLast(sc, ", ");
         }
+
         sc.o(" FROM %s", statement.table.getSQLName());
         sc.o(" as %s", statement.table.alias);
 
@@ -205,13 +206,15 @@ public class LetSqlGenerator extends ServiceBase {
             LLD.LLJoin join = walker2.next();
             if (join.logicalJoin.isTransitive) {
                 String aliasRight = join.logicalJoin.alias;
-                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", join.physicalLeft.getSQLName(), aliasRight,
+                String leftTable = join.physicalLeft.physicalTable.getSQLTableNameOnly();
+                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", leftTable, aliasRight,
                         join.physicalRight.physicalTable.alias, join.physicalRight.physicalPair.name,
                         aliasRight, join.physicalLeft.physicalPair.name);
                 walker2.addIfNotLast(sc, " ");
             } else {
                 String aliasRight = join.logicalJoin.alias;
-                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", join.physicalRight.getSQLName(), aliasRight,
+                String rightTable = join.physicalRight.physicalTable.getSQLTableNameOnly();
+                sc.o(" LEFT JOIN %s as %s ON %s.%s=%s.%s", rightTable, aliasRight,
                         join.physicalLeft.physicalTable.alias, join.physicalLeft.physicalPair.name,
                         aliasRight, join.physicalRight.physicalPair.name);
                 walker2.addIfNotLast(sc, " ");

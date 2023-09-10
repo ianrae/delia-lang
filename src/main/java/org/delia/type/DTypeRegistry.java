@@ -138,7 +138,7 @@ public class DTypeRegistry {
 		Set<String> list = new HashSet<>();
 		for(DTypeName typeName: map.keySet()) {
 			String s = BuiltInTypes.convertDTypeNameToDeliaName(typeName.getTypeName());
-			if (s.equals(typeName)) {
+			if (s.equals(typeName.getTypeName())) {
 				list.add(typeName.getTypeName());
 			}
 		}

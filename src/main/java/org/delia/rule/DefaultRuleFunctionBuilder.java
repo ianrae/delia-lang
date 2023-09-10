@@ -95,6 +95,12 @@ public class DefaultRuleFunctionBuilder implements RuleFunctionBulder {
                 rule = new UniqueFieldsRule(guard, operL);
                 break;
             }
+            case "tableName": {
+                Tok.ValueTok vexp = (Tok.ValueTok) funcTok.argsL.get(0);
+                DValue arg = vexp.value;
+                rule = new SqlTableNameRule(guard, arg.asString());
+                break;
+            }
 //		case "index":
 //		{
 //			boolean haveSetGuard = false;

@@ -67,7 +67,7 @@ public class MemFilterBase extends ServiceBase {
 
         if (details.targetType == null || details.targetType.getTypeName().equals(typeName)) {
             DStructType dtype = whereAllType != null ? whereAllType : findType(typeName);
-            if (!dtype.getName().equals(tbl.name)) {
+            if (!dtype.getName().equals(tbl.getName())) {
                 tbl = tableFinder.findMemTable(dtype);
             }
             initSelector(selector, whereClause, tbl, dtype); //normal query

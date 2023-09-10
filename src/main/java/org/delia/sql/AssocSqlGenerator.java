@@ -20,12 +20,14 @@ public class AssocSqlGenerator extends ServiceBase {
     private final SqlValueRenderer sqlValueRenderer;
     private final ScalarValueBuilder valueBuilder;
     private final DatService datSvc;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
-    public AssocSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc) {
+    public AssocSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, SqlTableNameMapper sqlTableNameMapper) {
         super(factorySvc);
         this.sqlValueRenderer = sqlValueRenderer;
         this.valueBuilder = valueBuilder;
         this.datSvc = datSvc;
+        this.sqlTableNameMapper = sqlTableNameMapper;
     }
 
     public SqlStatement renderInsertSubQuery(LLD.LLInsert statement) {
@@ -62,7 +64,7 @@ public class AssocSqlGenerator extends ServiceBase {
         sqlStatement.paramL.add(realVal);
 
         boolean isFlipped = assocSpec.isFlipped(subQueryInfo.relinfo);
-        String selectFromType = subQueryInfo.subQueryStructType.getName();
+        String selectFromType = sqlTableNameMapper.calcSqlTableName(subQueryInfo.subQueryStructType);
         if (isFlipped) {
             //               100,id
             sc.o(" select ?,%s from %s", fieldName, selectFromType);

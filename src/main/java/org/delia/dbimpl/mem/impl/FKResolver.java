@@ -60,7 +60,7 @@ public class FKResolver extends ServiceBase {
 
         List<DValue> matches = new ArrayList<>();
         DValue pkval = DValueHelper.findPrimaryKeyValue(sourceVal);
-        List<DValue> dvalList = selector.match(tbl.rowL);
+        List<DValue> dvalList = selector.match(tbl);
         for (DValue dval : dvalList) {
             DValue inner = dval.asStruct().getField(targetFieldName);
             if (inner != null) {
@@ -99,7 +99,7 @@ public class FKResolver extends ServiceBase {
         selector.init(null, null, null, null); //null is ok
 
         int failCount = 0;
-        List<DValue> dvalList = selector.match(tbl.rowL);
+        List<DValue> dvalList = selector.match(tbl);
         for (DValue fkval : drel.getMultipleKeys()) {
             if (!findInList(fkval, dvalList)) {
                 String msg = String.format("relation field '%s' one - no value found for foreign key '%s'", fieldName, fkval.asString());
@@ -163,7 +163,7 @@ public class FKResolver extends ServiceBase {
             return;
         }
 
-        List<DValue> otherSideDvalList = selector.match(tbl.rowL);
+        List<DValue> otherSideDvalList = selector.match(tbl);
         for (DValue fkval : fks) {
             if (fkval == null || isOneWay) {
                 continue;
@@ -240,7 +240,7 @@ public class FKResolver extends ServiceBase {
 
         DValue sourcePK = DValueHelper.findPrimaryKeyValue(sourceVal);
 //        List<DValue> fks = fieldVal.dval != null ? Collections.singletonList(fieldVal.dval) : fieldVal.dvalList;
-        List<DValue> otherSideDvalList = selector.match(tbl.rowL);
+        List<DValue> otherSideDvalList = selector.match(tbl);
         for (DValue otherSideDVal : otherSideDvalList) {
             DValue inner = otherSideDVal.asStruct().getField(relinfo.otherSide.fieldName);
             DRelation drelOther = inner.asRelation();

@@ -12,7 +12,7 @@ import java.util.List;
 public interface RowSelector {
     void init(ErrorTracker et, Tok.WhereTok whereClause, DStructType dtype, DTypeRegistry registry);
 
-    List<DValue> match(List<DValue> dval);
+    List<DValue> match(MemDBTable tbl);
 
     boolean wasError();
 

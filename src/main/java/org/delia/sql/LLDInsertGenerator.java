@@ -23,12 +23,12 @@ public class LLDInsertGenerator extends ServiceBase {
     private final ScalarValueBuilder valueBuilder;
     private final AssocSqlGenerator assocSqlGenerator;
 
-    public LLDInsertGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
+    public LLDInsertGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator, SqlTableNameMapper sqlTableNameMapper) {
         super(factorySvc);
         this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
-        this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
+        this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, sqlTableNameMapper);
     }
 
     public SqlStatement render(LLD.LLInsert statement) {

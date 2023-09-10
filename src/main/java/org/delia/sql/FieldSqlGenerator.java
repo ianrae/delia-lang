@@ -19,10 +19,12 @@ import java.util.Locale;
 public class FieldSqlGenerator extends ServiceBase {
 
     private final SqlTypeConverter sqlTypeConverter;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
-    public FieldSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions) {
+    public FieldSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper) {
         super(factorySvc);
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
+        this.sqlTableNameMapper = sqlTableNameMapper;
     }
 
     public void renderField(StrCreator sc, DStructType structType, TypePair pair) {
@@ -40,7 +42,7 @@ public class FieldSqlGenerator extends ServiceBase {
                 doScalarField(sc, structType, pair.name, sqlType, isUnique, changeFlags);
             }
         } else {
-            int n = isNewField ? sizeofAmount: 0;
+            int n = isNewField ? sizeofAmount : 0;
             if (isNewField && n == 0) {
                 n = 1; //hack to force .getSqlType(pair, sizeofAmount) which will return "INTEGER"
             }
@@ -58,12 +60,17 @@ public class FieldSqlGenerator extends ServiceBase {
     public void renderFKConstraint(StrCreator sc, DStructType structType, TypePair pair) {
         TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pair.type);
         String constraintName = buildFKConstraintName(structType, pair);
-        String tblName2 = DTypeNameUtil.formatSqlTableName(pair.type.getTypeName());
+        String tblName2 = sqlTableNameMapper.calcSqlTableName((DStructType) pair.type);
         sc.o(" CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)", constraintName, pair.name,
                 tblName2, pkpair.name);
     }
+
+    private String calcTableName(DStructType structType) {
+        return sqlTableNameMapper.calcSqlTableNameOnly(structType); //name w/o schema
+    }
+
     public String buildFKConstraintName(DStructType structType, TypePair pair) {
-        String tblName = DTypeNameUtil.formatNoDots(structType.getTypeName());
+        String tblName = calcTableName(structType);
         String constraintName = String.format("FK_%s_%s", tblName, pair.name).toUpperCase(Locale.ROOT);
         return constraintName;
     }
@@ -127,6 +134,7 @@ public class FieldSqlGenerator extends ServiceBase {
         }
         return false;
     }
+
     public boolean isPhysicalField(RelationDetails relDetails, TypePair pair) {
         if (pair.type.isStructShape()) {
             //NOTE: isMany could be M:1 or M:N. In this case (of checking if field is physical field in db)

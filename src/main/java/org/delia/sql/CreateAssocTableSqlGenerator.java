@@ -22,13 +22,16 @@ public class CreateAssocTableSqlGenerator extends ServiceBase {
     private final ScalarValueBuilder valueBuilder;
     private final DatService datSvc;
     private final SqlTypeConverter sqlTypeConverter;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
-    public CreateAssocTableSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder, DatService datSvc, DeliaOptions deliaOptions) {
+    public CreateAssocTableSqlGenerator(FactoryService factorySvc, SqlValueRenderer sqlValueRenderer, ScalarValueBuilder valueBuilder,
+                                        DatService datSvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper) {
         super(factorySvc);
         this.sqlValueRenderer = sqlValueRenderer;
         this.valueBuilder = valueBuilder;
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
+        this.sqlTableNameMapper = sqlTableNameMapper;
     }
 
     public SqlStatement render(LLD.LLCreateAssocTable statement) {
@@ -73,7 +76,7 @@ public class CreateAssocTableSqlGenerator extends ServiceBase {
 
     private void addAssocConstraint(StrCreator sc, String field, LLD.LLCreateAssocTable statement, DStructType leftType, TypePair pkpair, String extra) {
         String constraintName = String.format("FK_%s_%s", statement.getTableName(), field).toUpperCase(Locale.ROOT);
-        String tblName = DTypeNameUtil.formatNoDots(leftType.getTypeName());
+        String tblName = sqlTableNameMapper.calcSqlTableName(leftType);
         sc.o(" CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s", constraintName, field,
                 tblName, pkpair.name, extra);
         sc.nl();

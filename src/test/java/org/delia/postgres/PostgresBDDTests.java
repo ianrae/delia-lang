@@ -1,7 +1,9 @@
 package org.delia.postgres;
 
+import org.delia.base.UnitTestLog;
 import org.delia.bddnew.BDDTestBase;
 import org.delia.db.DBType;
+import org.delia.log.LogLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -385,20 +387,20 @@ public class PostgresBDDTests extends BDDTestBase {
 		runR2800File("t0-schema-public.txt", 4);
 		runR2800File("t0-schema-off.txt", 1);
 		runR2800File("t0-schema-same-name.txt", 1);
+		runR2800File("t0-sqltable-name.txt", 1);
 	}
 
 	@Test
 	public void testDebug() {
-		singleTestToRunIndex = 7;
+		singleTestToRunIndex = 0;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
+		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
+		log.setLevel(LogLevel.DEBUG);
 //		runR700File("t0-insert.txt", 6);
 
-//		runR700File("t0-insert-serial.txt", 1);
-//		runR700File("t0-insert-multi.txt", 2);
-//		runR700File("t0-insert-date-var.txt", 3);
-//		runR700File("t0-insert-serial-inherit.txt", 1);
-		runR400File("t0-struct-key.txt", 9);
+//		runR2800File("t0-schema.txt", 4);
+		runR1500File("t0-queryfn-max-string.txt", 4);
 	}
 
 	//---

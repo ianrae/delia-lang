@@ -6,6 +6,7 @@ import org.delia.base.DBHelper;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
+import org.delia.dbimpl.mem.impl.FastMemDBFactory;
 import org.delia.log.DeliaLog;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.ResultValue;
@@ -44,7 +45,12 @@ public class DeliaSnippetRunner implements SnippetRunner {
         } else {
             ConnectionDefinition connDef = connProvider.getConnectionDef();
             dao = new DeliaGenericDao(connDef, deliaLog);
-        }
+            if (DBType.MEM.equals(dao.getDelia().getDBInterface().getDBType())) {
+                //uncomment this if you want to use fast MEM db
+//                dao.getDelia().getFactoryService().setMemDBFactory(new FastMemDBFactory(log));
+            }
+
+            }
         //auto-sort results by id (makes bdd files simpler)
         dao.getDelia().getOptions().autoSortByPK = true;
         if (snippet.bulkInsertEnabled) {

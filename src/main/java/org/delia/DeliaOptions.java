@@ -30,6 +30,7 @@ public class DeliaOptions {
     public boolean generateSqlWhenMEMDBType = false; //we don't need the sql, but it can be useful
     public boolean bulkInsertEnabled = false;
     public int bulkInsertMaxBulkSize = 10;
+    public boolean executeSQLDDLStatements = true; //if truen then create table and create schema will be executed on db
 
 
     /**

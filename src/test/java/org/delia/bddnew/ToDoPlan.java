@@ -37,6 +37,8 @@ package org.delia.bddnew;
  *  DONE -blob
  *  DONE July2023 -bulk import
  *
+ *  query with unknown field should be an error: rawDataSetId==%d and xxrowIndex=%d
+ *
  *  use VARCHAR and TEXT when large
  *   DValueConverterService: 			//TODO we already have normalized DValues. Why build again?
  *   schema handling

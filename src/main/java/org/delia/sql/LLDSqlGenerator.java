@@ -3,11 +3,11 @@ package org.delia.sql;
 import org.delia.DeliaOptions;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.db.DBType;
 import org.delia.db.SqlStatement;
 import org.delia.hld.dat.DatService;
 import org.delia.lld.LLD;
 import org.delia.tok.Tok;
-import org.delia.type.DType;
 import org.delia.type.DTypeRegistry;
 import org.delia.type.DValue;
 import org.delia.util.DValueHelper;
@@ -33,20 +33,22 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
     private final CreateAssocTableSqlGenerator createAssocTableSqlGenerator;
     private final LLDInsertGenerator insertGenerator;
     private final VarEvaluator varEvaluator;
+    private final SqlTableNameMapper sqlTableNameMapper;
 
     public LLDSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, DTypeRegistry registry, DatService datSvc, VarEvaluator varEvaluator) {
         super(factorySvc);
         this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
         this.valueBuilder = new ScalarValueBuilder(factorySvc, registry);
         this.deliaOptions = deliaOptions;
-        this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
+        this.sqlTableNameMapper = new SqlTableNameMapper(factorySvc.getLog());
+        this.assocSqlGenerator = new AssocSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, sqlTableNameMapper);
         this.upsertSqlGenerator = new UpsertSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc);
-        this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
-        this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
+        this.createTableSqlGenerator = new CreateTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
+        this.createAssocTableSqlGenerator = new CreateAssocTableSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions, sqlTableNameMapper);
         this.letSqlGenerator = new LetSqlGenerator(factorySvc, sqlValueRenderer, valueBuilder, datSvc, deliaOptions);
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
-        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator);
+        this.insertGenerator = new LLDInsertGenerator(factorySvc, deliaOptions, registry, datSvc, varEvaluator, sqlTableNameMapper);
         this.varEvaluator = varEvaluator;
     }
 
@@ -219,7 +221,17 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
         return createAssocTableSqlGenerator.render(statement);
     }
 
-    private String getSqlType(DType dtype) {
-        return sqlTypeConverter.getSqlType(dtype);
+//    private String getSqlType(DType dtype) {
+//        return sqlTypeConverter.getSqlType(dtype);
+//    }
+
+    public void prepare(List<LLD.LLStatement> lldStatements, DBType dbType) {
+        if (DBType.MEM.equals(dbType)) {
+            //The MEM implementation assumes tblName equals DStruct type name, so don't set LLTable.sqlTableNameToUse
+            //Note. this means if you generate SQL statements when MEM they won't use correct sql table names if
+            //you've used tableName rule (see deliaOptions.generateSqlWhenMEMDBType)
+            return;
+        }
+        sqlTableNameMapper.prepare(lldStatements);
     }
 }

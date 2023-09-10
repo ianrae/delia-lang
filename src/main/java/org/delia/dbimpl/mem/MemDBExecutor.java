@@ -9,11 +9,10 @@ import org.delia.lld.LLD;
 import org.delia.log.DeliaLog;
 import org.delia.runner.DeliaRunner;
 import org.delia.runner.QueryResponse;
-import org.delia.type.DStructType;
-import org.delia.type.DType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
+import org.delia.type.*;
 import org.delia.util.DeliaExceptionHelper;
+
+import java.util.List;
 
 public class MemDBExecutor extends ServiceBase implements DBExecutor, DBExecutorEx, MemTableFinder {
 
@@ -110,6 +109,7 @@ public class MemDBExecutor extends ServiceBase implements DBExecutor, DBExecutor
 
     @Override
     public void execUpdate(LLD.LLUpdate stmt) {
+        doEffectiveIntSizeFixup(stmt.fieldL);
         String tblName = stmt.getTableName();
         MemDBTable memTbl = tableMap.getTable(tblName);
         MemUpdate memUpdate = new MemUpdate(factorySvc, registry, fkResolver, this);
@@ -117,8 +117,36 @@ public class MemDBExecutor extends ServiceBase implements DBExecutor, DBExecutor
         //TODO what to do with errors?
     }
 
+    /**
+     *  Shape.INTEGER can physically store a Long or an Integer in the dvalue.
+     *  This is a problem for MEM orderByFunction which tries to use a TreeMap to sort, but fails when
+     *   it sees a mixture of Long and Integer.
+     *   See UpdateLongIssueTests.java
+     **/
+    private void doEffectiveIntSizeFixup(List<LLD.LLFieldValue> fieldL) {
+        for(LLD.LLFieldValue field: fieldL) {
+            DType dtype = field.field.physicalPair.type;
+            if (Shape.INTEGER.equals(dtype.getShape())) {
+                if (EffectiveShape.EFFECTIVE_INT.equals(dtype.getEffectiveShape())) {
+                    if (field.dval.getObject() instanceof Long) {
+                        Long longvalue = (Long) field.dval.getObject();
+                        DValueImpl dvalimpl = (DValueImpl) field.dval;
+                        dvalimpl.forceObject(longvalue.intValue());
+                    }
+                } else if (EffectiveShape.EFFECTIVE_LONG.equals(dtype.getEffectiveShape())) {
+                    if (field.dval.getObject() instanceof Integer) {
+                        Integer longvalue = (Integer) field.dval.getObject();
+                        DValueImpl dvalimpl = (DValueImpl) field.dval;
+                        dvalimpl.forceObject(longvalue.longValue());
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void execUpsert(LLD.LLUpsert stmt, DValue dval) {
+        doEffectiveIntSizeFixup(stmt.fieldL);
         String tblName = stmt.getTableName();
         MemDBTable memTbl = tableMap.getTable(tblName);
         MemUpsert memUpsert = new MemUpsert(factorySvc, registry, fkResolver, this);

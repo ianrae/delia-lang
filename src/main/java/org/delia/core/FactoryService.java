@@ -1,5 +1,6 @@
 package org.delia.core;
 
+import org.delia.dbimpl.mem.impl.MemDBFactory;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.ErrorTracker;
 import org.delia.log.DeliaLog;
@@ -42,5 +43,8 @@ public interface FactoryService {
 //	void setEnableMEMSqlGenerationFlag(boolean flag);
 	RuleFunctionFactory createRuleFunctionFactory();
 	TransactionProvider createTransactionProvider(DBInterfaceFactory dbInterface);
+
+    MemDBFactory getMemDBFactory();
+    void setMemDBFactory(MemDBFactory factory);
 //	MigrationService createMigrationService(DBInterfaceFactory dbInterface);
 }

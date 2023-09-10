@@ -41,6 +41,7 @@ public class OuterRunner extends ServiceBase {
     private ExecutionState execState;
     private QueryResponse hackQResp; //TOD: remove this by fixing code!
     private OuterRunnerInsertHelper insertHelper;
+    private boolean executeSQLDDLStatements;
 
     public OuterRunner(FactoryService factorySvc, DBInterfaceFactory dbInterface, DatService datSvc) {
         super(factorySvc);
@@ -60,6 +61,7 @@ public class OuterRunner extends ServiceBase {
 
     public BasicRunnerResults executeOnDBInterface(DeliaExecutable executable, ExecutionState execState, DeliaOptions options, boolean isNewSession) {
         this.execState = execState;
+        this.executeSQLDDLStatements = options.executeSQLDDLStatements;
         BasicRunnerResults res = null;
         try (DBExecutor exec = dbInterface.createExecutor()) {
             res = doExecuteOnDBInterface(exec, executable, execState, options, isNewSession);
@@ -346,7 +348,10 @@ public class OuterRunner extends ServiceBase {
     }
 
     private void doExecCreateSchema(LLD.LLCreateSchema stmt, DBExecutor exec, ExecutionState execState) {
-        exec.execCreateSchema(stmt);
+        //only execute if we want Delia to do DDL
+        if (executeSQLDDLStatements) {
+            exec.execCreateSchema(stmt);
+        }
         execState.currentSchema = stmt.schema;
     }
 
@@ -355,11 +360,17 @@ public class OuterRunner extends ServiceBase {
     }
 
     private void doExecCreateTable(LLD.LLCreateTable stmt, DBExecutor exec) {
-        exec.execCreateTable(stmt);
+        //only execute if we want Delia to do DDL
+        if (executeSQLDDLStatements) {
+            exec.execCreateTable(stmt);
+        }
     }
 
     private void doExecCreateAssocTable(LLD.LLCreateAssocTable stmt, DBExecutor exec) {
-        exec.execCreateAssocTable(stmt);
+        //only execute if we want Delia to do DDL
+        if (executeSQLDDLStatements) {
+            exec.execCreateAssocTable(stmt);
+        }
     }
 
     private QueryResponse doExecSelect(LLD.LLSelect stmt, DBExecutor exec, DeliaExecutable executable, ExecutionState execState) {

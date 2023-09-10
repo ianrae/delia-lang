@@ -58,6 +58,7 @@ public class DbTableCleaner {
             deleteTable(conn, "Territory");
             deleteTable(conn, "Region");
             deleteTable(conn, "Customer");
+            deleteTable(conn, "Customer22");
             deleteTable(conn, "Employee");
 
             //bdd
@@ -68,6 +69,7 @@ public class DbTableCleaner {
             deleteTable(conn, "Person2");
             deleteTable(conn, "Person2__BAK");
             deleteTable(conn, "Address");
+            deleteTable(conn, "Address22");
             deleteTable(conn, "alpha.Person");
             deleteTable(conn, "Person");
             deleteTable(conn, "Person__BAK");
