@@ -435,6 +435,7 @@ public class AllBDDTests extends BDDTestBase {
     public void shutdown() {
 //TODO		chkAllFiles();
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = true;
+        DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = false;
     }
 
     @Override

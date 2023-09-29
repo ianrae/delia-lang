@@ -92,6 +92,11 @@ public class FieldSqlGenerator extends ServiceBase {
             sc.o("  %s %s", fieldName, sqlType);
         }
 
+        //TODO delete!!!!!!!!
+        if (fieldName.equals("cust")) {
+            System.out.println("sdf");
+        }
+
         if (!isPrimaryKey) {
             boolean isOptional = physicalType.fieldIsOptional(fieldName);
             if (hasFlag(changeFlags, "O")) {
@@ -168,8 +173,7 @@ public class FieldSqlGenerator extends ServiceBase {
         while (walker1.hasNext()) {
             sc.o(" UNIQUE(");
             UniqueFieldsRule rawRule = walker1.next();
-            ;
-            UniqueFieldsRule rule = (UniqueFieldsRule) rawRule;
+            UniqueFieldsRule rule = rawRule;
             ListWalker<RuleOperand> walker = new ListWalker<>(rule.getOperList());
             while (walker.hasNext()) {
                 RuleOperand oper = walker.next();
