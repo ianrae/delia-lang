@@ -2,11 +2,13 @@ package org.delia.bddnew.core;
 
 import org.delia.Delia;
 import org.delia.DeliaSession;
+import org.delia.api.DeliaSessionImpl;
 import org.delia.base.DBHelper;
 import org.delia.dao.DeliaGenericDao;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.dbimpl.mem.impl.FastMemDBFactory;
+import org.delia.lld.LLD;
 import org.delia.log.DeliaLog;
 import org.delia.relation.RelationInfo;
 import org.delia.runner.ResultValue;
@@ -22,6 +24,9 @@ public class DeliaSnippetRunner implements SnippetRunner {
     private final DeliaLog deliaLog;
     private DeliaSession sess;
     private ConnectionProvider connProvider;
+
+    public static boolean generateSqlWhenMEMDBTypeFlag = false;
+
 
     public DeliaSnippetRunner(DeliaLog log, DeliaLog deliaLog) {
         this.log = log;
@@ -55,6 +60,9 @@ public class DeliaSnippetRunner implements SnippetRunner {
         dao.getDelia().getOptions().autoSortByPK = true;
         if (snippet.bulkInsertEnabled) {
             dao.getDelia().getOptions().bulkInsertEnabled = true;
+        }
+        if (generateSqlWhenMEMDBTypeFlag) {
+            dao.getDelia().getOptions().generateSqlWhenMEMDBType = true;
         }
 
         String src = StringUtil.flattenEx(snippet.lines, "\n");
@@ -106,6 +114,17 @@ public class DeliaSnippetRunner implements SnippetRunner {
                         RelationInfo relinfo = DRuleHelper.findMatchingRuleInfo(structType, pair);
                         String key = String.format("%s.%s", relinfo.otherSide.nearType.getName(), relinfo.otherSide.fieldName);
                         res.nameHintMap.put(key, relinfo.fieldName);
+                    }
+                }
+            }
+        }
+
+        if (generateSqlWhenMEMDBTypeFlag) {
+            DeliaSessionImpl sessimpl = (DeliaSessionImpl) sess;
+            if (sessimpl.mostRecentExecutable != null) {
+                for(LLD.LLStatement lldStatement: sessimpl.mostRecentExecutable.lldStatements) {
+                    if (lldStatement.getSql() != null) {
+                        log.log("sql: %s", lldStatement.getSql().sql);
                     }
                 }
             }

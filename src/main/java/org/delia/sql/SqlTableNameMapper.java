@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Objects.isNull;
+
 public class SqlTableNameMapper {
     private DeliaLog log;
     private Map<String, String> tableNameMap = new ConcurrentHashMap<>();
@@ -111,6 +113,7 @@ public class SqlTableNameMapper {
     }
 
     public String resolveSqlTableName(String tableNameRaw) {
+        resolveFormatterIfNeeded();
         String tableName = formatter.formatName(tableNameRaw); //without schema
         if (tableNameMap.containsKey(tableName)) {
             return tableNameMap.get(tableName);
@@ -118,7 +121,15 @@ public class SqlTableNameMapper {
         return tableName;
     }
 
+    //TODO fix this so gets initialized by higher layer, even for LLCreateTable statements
+    private void resolveFormatterIfNeeded() {
+        if (isNull(formatter)) {
+            formatter = new LLD.DefaultLLNameFormatter();
+        }
+    }
+
     public String buildTableNameToUse(String schema, String tableName) {
+        resolveFormatterIfNeeded();
         String sqlTblName = formatter.formatName(schema, tableName);
         return sqlTblName;
     }

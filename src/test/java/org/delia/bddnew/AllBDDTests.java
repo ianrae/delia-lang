@@ -1,6 +1,7 @@
 package org.delia.bddnew;
 
 import org.delia.base.UnitTestLog;
+import org.delia.bddnew.core.DeliaSnippetRunner;
 import org.delia.db.DBType;
 import org.delia.log.LogLevel;
 import org.junit.After;
@@ -409,8 +410,9 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 0;
+        singleTestToRunIndex = 5;
         enableAllFileCheck = false;
+        DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
         log.setLevel(LogLevel.DEBUG);
@@ -418,7 +420,8 @@ public class AllBDDTests extends BDDTestBase {
 //        runR700File("t0-insert-multi.txt", 2);
 //        runR700File("t0-insert-date-var.txt", 3);
 //        runR700File("t0-insert.txt", 6);
-        runR2800File("t0-sqltable-name.txt", 1);
+//        runR2800File("t0-sqltable-name.txt", 1);
+        runR500File("t0-relation-one-to-many.txt", 9);
     }
 
     //---
