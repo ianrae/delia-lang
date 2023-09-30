@@ -38,7 +38,8 @@ public class FieldSqlGenerator extends ServiceBase {
             } else {
                 TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pair.type);
                 String sqlType = sqlTypeConverter.getSqlType(pair.type, pkpair.name); //Address.id
-                boolean isUnique = relinfo.cardinality.equals(RelationCardinality.ONE_TO_ONE);
+                //30Sep2023:fix bug. one-way relation is not UNIQUE
+                boolean isUnique = relinfo.cardinality.equals(RelationCardinality.ONE_TO_ONE) && !relinfo.isOneWayRelation();
                 doScalarField(sc, structType, pair.name, sqlType, isUnique, changeFlags);
             }
         } else {

@@ -129,3 +129,20 @@ value:a:Customer {
  vid:55
  vaddr:{100}
 }
+
+---
+title: mandatory-not-unique
+#the sql table should not use UNIQUE
+given:
+ type Customer struct {id int primaryKey } end
+ type Address struct {id int primaryKey, relation cust Customer one } end
+
+  insert Customer {id: 55 }
+when:
+  insert Address {id: 100, cust: 55 }
+  insert Address {id: 101, cust: 55 }
+  let x = Customer[55].fks()
+then:
+value:a:Customer {
+ vid:55
+}

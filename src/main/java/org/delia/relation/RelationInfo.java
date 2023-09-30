@@ -22,6 +22,9 @@ public class RelationInfo {
 	public boolean isOneToMany() {
 		return RelationCardinality.ONE_TO_MANY.equals(cardinality);
 	}
+	public boolean isOneWayRelation() {
+		return otherSide == null;
+	}
 	public Integer getDatId() {
 		return datId;
 	}
