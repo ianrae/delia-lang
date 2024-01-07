@@ -1,5 +1,6 @@
 package org.delia;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,13 @@ public class OtherTests {
     @Test
     public void test() {
         assertEquals(1, 1);
+        String s = StringUtils.substringBefore("abc:88", ":");
+        assertEquals("abc", s);
+
+        s = StringUtils.substringBefore("abc", ":");
+        assertEquals("abc", s);
+
+        String url = "http://localhost:8080/_api/v1/subscri";
     }
 
     @Test

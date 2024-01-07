@@ -5,6 +5,7 @@ import org.delia.core.FactoryService;
 import org.delia.db.sql.ConnectionDefinition;
 import org.delia.db.sql.ConnectionFactory;
 import org.delia.db.sql.ConnectionFactoryImpl;
+import org.delia.dbimpl.mysql.MySqlDBInterfaceFactory;
 import org.delia.log.DeliaLog;
 import org.delia.util.DeliaExceptionHelper;
 import org.delia.db.DBInterfaceFactory;
@@ -43,6 +44,9 @@ public class DeliaFactory {
             //                break;
             case POSTGRES:
                 dbInterface = new PostgresDBInterfaceFactory(factorySvc, connFactory); //, hldFactory, connFactory);
+                break;
+            case MYSQL:
+                dbInterface = new MySqlDBInterfaceFactory(factorySvc, connFactory); //, hldFactory, connFactory);
                 break;
             default:
                 DeliaExceptionHelper.throwError("unsupported-db-type", "Unknown DBType %s.", connectionDef.dbType == null ? "null" : connectionDef.dbType.name());
