@@ -13,6 +13,7 @@ import org.delia.error.SimpleErrorTracker;
 import org.delia.h2.H2ConnectionHelper;
 import org.delia.h2.H2ErrorConverter;
 import org.delia.log.DeliaLog;
+import org.delia.mysql.MySqlConnectionHelper;
 import org.delia.postgres.PostgresConnectionHelper;
 import org.delia.db.DBConnection;
 import org.delia.dbimpl.h2.H2DBConnection;
@@ -32,6 +33,8 @@ public class DbTableCleaner {
             clean(H2ConnectionHelper.getTestDB(), "PUBLIC");
         } else if (DBType.POSTGRES.equals(dbType)) {
             clean(PostgresConnectionHelper.getTestDB(), "public");
+        } else if (DBType.MYSQL.equals(dbType)) {
+            clean(MySqlConnectionHelper.getTestDB(), "public");
         }
     }
 

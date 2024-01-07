@@ -27,7 +27,7 @@ public class MySqlDBInterfaceFactory extends ServiceBase implements DBInterfaceF
 
     @Override
     public DBType getDBType() {
-        return DBType.POSTGRES;
+        return DBType.MYSQL;
     }
 
     @Override
