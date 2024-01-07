@@ -3,6 +3,7 @@ package org.delia.bddnew.core;
 import org.delia.ConnectionDefinitionBuilder;
 import org.delia.db.DBType;
 import org.delia.db.sql.ConnectionDefinition;
+import org.delia.mysql.MySqlConnectionHelper;
 import org.delia.postgres.PostgresConnectionHelper;
 
 public class BDDConnectionProvider implements ConnectionProvider {
@@ -29,6 +30,8 @@ public class BDDConnectionProvider implements ConnectionProvider {
 //                return H2ConnectionHelper.getTestDB();
             case POSTGRES:
                 return PostgresConnectionHelper.getTestDB();
+            case MYSQL:
+                return MySqlConnectionHelper.getTestDB();
         }
         return null;
     }

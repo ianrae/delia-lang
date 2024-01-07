@@ -49,8 +49,8 @@ public class MySqlBasicTests extends DeliaRunnerTestBase {
 
     @Before
     public void init() {
-        DbTableCleaner cleaner = new DbTableCleaner();
-        cleaner.cleanDB(DBType.MYSQL);
+//        DbTableCleaner cleaner = new DbTableCleaner();
+//        cleaner.cleanDB(DBType.MYSQL);
     }
 
     private DValue executeInNewRunner(AST.DeliaScript script, DeliaSession session) {
@@ -71,7 +71,7 @@ public class MySqlBasicTests extends DeliaRunnerTestBase {
     }
 
     private DeliaSession initSession() {
-        DeliaRunnerImpl deliaRunner = createRunner(DBType.POSTGRES);
+        DeliaRunnerImpl deliaRunner = createRunner(DBType.MYSQL);
         delia = deliaRunner.getDelia();
 
         //build AST script for types
