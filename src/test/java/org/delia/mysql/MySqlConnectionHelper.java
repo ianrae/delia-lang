@@ -15,8 +15,8 @@ public class MySqlConnectionHelper {
 		connStr.jdbcUrl = "jdbc:mysql://localhost:3306/delia";
 		
 		connStr.dbType = DBType.MYSQL;
-		connStr.userName = "ezclockerMaster";
-		connStr.pwd = "41d70562.4400_43";
+		connStr.userName = "root"; //"ezclockerMaster";
+		connStr.pwd = "rootdelia"; //"41d70562.4400_43";
 
 //        try {
 //            Connection z = DriverManager.getConnection("sdf");
