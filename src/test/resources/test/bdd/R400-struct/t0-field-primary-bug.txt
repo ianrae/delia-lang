@@ -1,0 +1,55 @@
+# Jan2024. NewTypeBuilder looks first in base class and sees unique field,
+# then sees primaryKey in main type (Product)
+# creates PrimaryKey with 2 keys!   -this is wrong
+# fix. if find multiple possible keys but only one is marked primaryKey  then use it alone.
+
+FEATURE: struct-field-primarykey
+background:
+thenType: struct
+
+
+---
+title: insert and filter expr works
+given:
+  type Flight struct {
+     field1 string unique, //natural key, needed for seeding
+     title string
+     }  end
+  type Flight2 Flight {
+     id int primaryKey serial,
+     wid int
+     }  end
+
+  insert Flight2 {field1: 'key1', title:'title1', wid: 55 }
+when:
+  let x = Flight2[field1 == 'key1']
+then:
+value:a:Flight2 {
+vfield1:'key1'
+vtitle:'title1'
+vid:1
+vwid:55
+}
+
+---
+title: fails with query by primary key //because the bug it that there are two
+given:
+  type Flight struct {
+     field1 string unique, //natural key, needed for seeding
+     title string
+     }  end
+  type Flight2 Flight {
+     id int primaryKey serial,
+     wid int
+     }  end
+
+  insert Flight2 {field1: 'key1', title:'title1', wid: 55 }
+when:
+  let x = Flight2[1]
+then:
+value:a:Flight2 {
+vfield1:'key1'
+vtitle:'title1'
+vid:1
+vwid:55
+}

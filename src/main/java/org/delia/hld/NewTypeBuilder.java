@@ -11,8 +11,24 @@ import org.delia.typebuilder.PreTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NewTypeBuilder extends ServiceBase {
+
+    static class PossiblePrimaryKeyInfo {
+        TypePair pair;
+        boolean isPrimaryKey;
+
+        public PossiblePrimaryKeyInfo(TypePair pair, boolean isPrimaryKey) {
+            this.pair = pair;
+            this.isPrimaryKey = isPrimaryKey;
+        }
+
+        public PrimaryKey createPrimaryKey() {
+            PrimaryKey prikey = new PrimaryKey(pair);
+            return prikey;
+        }
+    }
 
     private DTypeRegistry registry;
     private NewRelationRuleBuilder ruleBuilder; //TODO: later add full rule builder
@@ -95,16 +111,16 @@ public class NewTypeBuilder extends ServiceBase {
         DTypeName dtypeName = new DTypeName(schema, typeName);
         DType dtype = preRegistry.getType(dtypeName);
 
-        List<TypePair> possibleL = new ArrayList<>();
-        TypePair pair = baseType == null ? null : findPrimaryKeyFieldPair(baseType);
-        if (pair != null) {
-            possibleL.add(pair);
+        List<PossiblePrimaryKeyInfo> possibleL = new ArrayList<>();
+        PossiblePrimaryKeyInfo priInfo = baseType == null ? null : findPrimaryKeyFieldPair(baseType);
+        if (priInfo != null) {
+            possibleL.add(priInfo);
         }
 
         for (String fieldName : omap.orderedList) {
             if (omap.isPrimaryKey(fieldName)) {
-                pair = new TypePair(fieldName, omap.map.get(fieldName));
-                possibleL.add(pair);
+                TypePair pair = new TypePair(fieldName, omap.map.get(fieldName));
+                possibleL.add(new PossiblePrimaryKeyInfo(pair, true));
             }
         }
 
@@ -112,8 +128,8 @@ public class NewTypeBuilder extends ServiceBase {
         if (possibleL.isEmpty()) {
             for (String fieldName : omap.orderedList) {
                 if (omap.isUnique(fieldName)) {
-                    pair = new TypePair(fieldName, omap.map.get(fieldName));
-                    possibleL.add(pair);
+                    TypePair pair = new TypePair(fieldName, omap.map.get(fieldName));
+                    possibleL.add(new PossiblePrimaryKeyInfo(pair, false));
                 }
             }
         }
@@ -122,9 +138,16 @@ public class NewTypeBuilder extends ServiceBase {
         if (possibleL.isEmpty()) {
             prikey = null;
         } else if (possibleL.size() == 1) {
-            prikey = new PrimaryKey(possibleL.get(0));
+            prikey = possibleL.get(0).createPrimaryKey();
         } else {
-            prikey = new PrimaryKey(possibleL);
+            //jan2024: fix. if find multiple possible keys but only one is marked primaryKey  then use it alone.
+            List<PossiblePrimaryKeyInfo> list = possibleL.stream().filter(x -> x.isPrimaryKey).collect(Collectors.toList());
+            if (list.size() == 1) {
+                prikey = list.get(0).createPrimaryKey();
+            } else {
+                List<TypePair> pairL = possibleL.stream().map(x -> x.pair).collect(Collectors.toList());
+                prikey = new PrimaryKey(pairL);
+            }
         }
 
         if (dtype == null) {
@@ -137,7 +160,7 @@ public class NewTypeBuilder extends ServiceBase {
         }
     }
 
-    private static TypePair findPrimaryKeyFieldPair(DType inner) {
+    private static PossiblePrimaryKeyInfo findPrimaryKeyFieldPair(DType inner) {
         if (!inner.isStructShape()) {
             return null;
         }
@@ -146,14 +169,14 @@ public class NewTypeBuilder extends ServiceBase {
         DStructType dtype = (DStructType) inner;
         for (TypePair pair : dtype.getAllFields()) {
             if (dtype.fieldIsPrimaryKey(pair.name)) {
-                return pair;
+                return new PossiblePrimaryKeyInfo(pair, true);
             }
         }
 
         //otherwise, look for unique fields
         for (TypePair pair : dtype.getAllFields()) {
             if (dtype.fieldIsUnique(pair.name) && !dtype.fieldIsOptional(pair.name)) {
-                return pair;
+                return new PossiblePrimaryKeyInfo(pair, false);
             }
         }
         return null;

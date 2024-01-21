@@ -40,6 +40,7 @@ public class AllBDDTests extends BDDTestBase {
         runR400File("t0-field-optional.txt", 4);
         runR400File("t0-field-primarykey.txt", 6);
         runR400File("t0-field-serial.txt", 7);
+        runR400File("t0-field-primary-bug.txt", 1);
     }
 
     @Test
@@ -410,15 +411,15 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 8;
+        singleTestToRunIndex = 1;
         enableAllFileCheck = false;
         DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
-//        runR500File("t0-relation-one-to-many.txt", 9);
-        runR500File("t0-relation-one-to-one-oneway.txt", 9);
+//        runR500File("t0-relation-one-to-one-oneway.txt", 9);
+        runR400File("t0-field-primary-bug.txt", 2);
     }
 
     //---
