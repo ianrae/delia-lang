@@ -5,7 +5,7 @@
     <groupId>org.delia-lang</groupId>
     <artifactId>delia</artifactId>
     <packaging>jar</packaging>
-    <version>0.4.6</version>
+    <version>0.4.7</version>
 
     <name>delia</name>
     <url>http://delia-lang.org</url>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.9.2</version>
+            <version>4.13.1</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>ST4</artifactId>
-            <version>4.3</version>
+            <version>4.3.4</version>
         </dependency>
 
         <!-- test dependencies -->

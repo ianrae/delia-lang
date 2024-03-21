@@ -5,7 +5,6 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
-
 import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -111,7 +110,7 @@ public class listParser extends Parser {
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof listVisitor) return ((listVisitor<? extends T>)visitor).visitList(this);
+			if ( visitor instanceof listVisitor ) return ((listVisitor<? extends T>)visitor).visitList(this);
 			else return visitor.visitChildren(this);
 		}
 	}
