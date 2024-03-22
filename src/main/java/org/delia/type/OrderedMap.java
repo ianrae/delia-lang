@@ -3,6 +3,7 @@ package org.delia.type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,8 +21,10 @@ public class OrderedMap {
     private Map<String,Boolean> uniqueMap = new ConcurrentHashMap<>(); //fieldname,isUnique
     private Map<String,Boolean> primaryKeyMap = new ConcurrentHashMap<>(); //fieldname,isPrimaryKey
     private Map<String,Boolean> serialMap = new ConcurrentHashMap<>(); //fieldname,isSerial
-    
-    public void add(String fieldName, DType type, boolean optional, boolean unique, boolean primaryKey, boolean serial) {
+    private Map<String,DValue> defaultMap = new ConcurrentHashMap<>(); //fieldname,DValue scalar value
+
+    public void add(String fieldName, DType type, boolean optional, boolean unique, boolean primaryKey, boolean serial,
+                    DValue defaultValue) {
     	//ConcurrentHashMap doesn't allow null key
     	if (fieldName == null) {
     		throw new IllegalArgumentException("OrderedMap doesn't allow null key");
@@ -38,6 +41,9 @@ public class OrderedMap {
         uniqueMap.put(fieldName, unique);
         primaryKeyMap.put(fieldName, primaryKey);
         serialMap.put(fieldName, serial);
+        if (defaultValue != null) {
+            defaultMap.put(fieldName, defaultValue);
+        }
         orderedList.add(fieldName);
     }
     public boolean containsKey(String fieldName) {
@@ -58,6 +64,10 @@ public class OrderedMap {
     public boolean isSerial(String fieldName) {
         Boolean bb = serialMap.get(fieldName);
         return (bb == null) ? false : bb;
+    }
+    public Optional<DValue> getDefaultValue(String fieldName) {
+        DValue dval = defaultMap.get(fieldName);
+        return Optional.of(dval);
     }
 
 }

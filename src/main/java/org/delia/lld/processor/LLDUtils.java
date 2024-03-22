@@ -23,8 +23,8 @@ public class LLDUtils {
         TypePair pkvalRight = DValueHelper.findPrimaryKeyFieldPair(assoc.rightType);
 
         OrderedMap omap = new OrderedMap();
-        omap.add(assoc.leftColumn, pkvalLeft.type, false, false, false, false);
-        omap.add(assoc.rightColumn, pkvalRight.type, false, false, false, false);
+        omap.add(assoc.leftColumn, pkvalLeft.type, false, false, false, false, null);
+        omap.add(assoc.rightColumn, pkvalRight.type, false, false, false, false, null);
         String schema = null; //TODO this should be same schema as leftv,right??
         DStructType dtype = new DStructTypeImpl(Shape.STRUCT, schema, assoc.assocTblName, null, omap, null);
         return dtype;

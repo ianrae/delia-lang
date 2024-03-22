@@ -96,7 +96,8 @@ public class ChangeFieldAST extends AlterFieldASTBase {
                 throwAnExeption(String.format("unknown field modifier '%s'", s));
             }
         }
-        omapex.omap.add(fieldName, dtype, isOptional, isUnique, isPrimaryKey, isSerial);
+        DValue defaultVal = null; //TODO do we need to support this here?
+        omapex.omap.add(fieldName, dtype, isOptional, isUnique, isPrimaryKey, isSerial, defaultVal);
         omapex.parentMap.put(fieldName, isParent);
         omapex.oneMap.put(fieldName, isOne);
         omapex.manyMap.put(fieldName, isMany);

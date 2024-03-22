@@ -70,8 +70,8 @@ public class ExpTests {
 
         OrderedMap omap = new OrderedMap();
         //normally not optional but sometimes for MERGE INTO it is
-        omap.add("leftv", pkpair1.type, true, false, false, false);
-        omap.add("rightv", pkpair2.type, true, false, false, false);
+        omap.add("leftv", pkpair1.type, true, false, false, false, null);
+        omap.add("rightv", pkpair2.type, true, false, false, false, null);
         DStructType structType = new DStructTypeImpl(Shape.STRUCT, null, assocTbl, null, omap, null);
         //we don't register this type
         return structType;

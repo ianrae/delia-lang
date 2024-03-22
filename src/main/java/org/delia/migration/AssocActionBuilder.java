@@ -155,8 +155,8 @@ public class AssocActionBuilder {
         boolean rightOptional = mminfo.relinfo.otherSide.nearType.fieldIsOptional(mminfo.relinfo.otherSide.fieldName);
 
         OrderedMap omap = new OrderedMap();
-        omap.add("leftv", leftPK, leftOptional, false, false, false);
-        omap.add("rightv", rightPK, rightOptional, false, false, false);
+        omap.add("leftv", leftPK, leftOptional, false, false, false, null);
+        omap.add("rightv", rightPK, rightOptional, false, false, false, null);
         PrimaryKey prikey = null; //no pk
 
         Integer datId = mminfo.relinfo.getDatId(); //Integer.valueOf(nextDatId++);
