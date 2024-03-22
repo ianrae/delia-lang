@@ -169,4 +169,8 @@ public class ScalarValueBuilder extends ServiceBase {
 		}
 		return true;
 	}
+
+	public DTypeRegistry getRegistry() {
+		return registry;
+	}
 }

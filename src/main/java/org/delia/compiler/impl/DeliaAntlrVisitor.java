@@ -898,9 +898,14 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
     private Exp.ValueExp buildStringDVal(ParseTree ctx) {
         Exp.ValueExp vexp = new Exp.ValueExp();
         int pos = ctx.getText().indexOf('\'');
-        int posEnd = ctx.getText().lastIndexOf('\'');
-        String str = ctx.getText().substring(pos + 1, posEnd);
-        vexp.value = builder.buildString(str);
+        if (pos >= 0) {
+            int posEnd = ctx.getText().lastIndexOf('\'');
+            String str = ctx.getText().substring(pos + 1, posEnd);
+            vexp.value = builder.buildString(str);
+        } else {
+            String str = ctx.getText();
+            vexp.value = builder.buildString(str);
+        }
         return vexp;
     }
 

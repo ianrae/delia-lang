@@ -32,7 +32,7 @@ public class CreateTableSqlGenerator extends ServiceBase {
         this.datSvc = datSvc;
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
         this.options = deliaOptions;
-        this.fieldGen = new FieldSqlGenerator(factorySvc, deliaOptions, sqlTableNameMapper);
+        this.fieldGen = new FieldSqlGenerator(factorySvc, deliaOptions, sqlTableNameMapper, valueBuilder);
         this.sqlTableNameMapper = sqlTableNameMapper;
     }
 

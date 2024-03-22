@@ -3,6 +3,7 @@ package org.delia.sql;
 import org.delia.DeliaOptions;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueExConverter;
 import org.delia.lld.LLD;
 import org.delia.migrationparser.RelationDetails;
 import org.delia.relation.RelationCardinality;
@@ -10,21 +11,32 @@ import org.delia.relation.RelationInfo;
 import org.delia.rule.RuleOperand;
 import org.delia.rule.rules.UniqueFieldsRule;
 import org.delia.type.DStructType;
+import org.delia.type.DValue;
 import org.delia.type.TypePair;
-import org.delia.util.*;
+import org.delia.util.DRuleHelper;
+import org.delia.util.DValueHelper;
+import org.delia.util.ListWalker;
+import org.delia.util.StrCreator;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 public class FieldSqlGenerator extends ServiceBase {
 
     private final SqlTypeConverter sqlTypeConverter;
     private final SqlTableNameMapper sqlTableNameMapper;
+    private final SqlValueRenderer sqlValueRenderer;
+    private final ScalarValueBuilder valueBuilder;
 
-    public FieldSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper) {
+    public FieldSqlGenerator(FactoryService factorySvc, DeliaOptions deliaOptions, SqlTableNameMapper sqlTableNameMapper,
+                             ScalarValueBuilder valueBuilder) {
         super(factorySvc);
         this.sqlTypeConverter = new SqlTypeConverter(deliaOptions);
         this.sqlTableNameMapper = sqlTableNameMapper;
+        this.sqlValueRenderer = new SqlValueRenderer(factorySvc);
+        this.valueBuilder = valueBuilder;
     }
 
     public void renderField(StrCreator sc, DStructType structType, TypePair pair) {
@@ -86,6 +98,7 @@ public class FieldSqlGenerator extends ServiceBase {
         if (hasFlag(changeFlags, "P")) {
             isPrimaryKey = true;
         }
+        Optional<String> defaultValue = physicalType.fieldHasDefaultValue(fieldName);
 
         if (isSerial) {
             sc.o("  %s", fieldName);
@@ -94,9 +107,9 @@ public class FieldSqlGenerator extends ServiceBase {
         }
 
         //TODO delete!!!!!!!!
-        if (fieldName.equals("cust")) {
-            System.out.println("sdf");
-        }
+//        if (fieldName.equals("cust")) {
+//            System.out.println("sdf");
+//        }
 
         if (!isPrimaryKey) {
             boolean isOptional = physicalType.fieldIsOptional(fieldName);
@@ -113,6 +126,13 @@ public class FieldSqlGenerator extends ServiceBase {
             }
             if (isUniqueOverride || isUnique) {
                 sc.o(" UNIQUE");
+            }
+            if (defaultValue.isPresent()) {
+                DValueExConverter converter = new DValueExConverter(factorySvc, valueBuilder.getRegistry());
+                TypePair pair = DValueHelper.findField(physicalType, fieldName);
+                DValue inner = converter.buildFromObject(defaultValue.get(), pair.type);
+                String ss = sqlValueRenderer.renderAsSql(inner, pair.type, physicalType);
+                sc.o(" DEFAULT %s", ss);
             }
         }
         if (isSerial) {
