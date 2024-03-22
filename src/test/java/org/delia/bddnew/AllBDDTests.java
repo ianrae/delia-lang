@@ -40,7 +40,7 @@ public class AllBDDTests extends BDDTestBase {
         runR400File("t0-field-optional.txt", 4);
         runR400File("t0-field-primarykey.txt", 6);
         runR400File("t0-field-serial.txt", 7);
-        runR400File("t0-field-primary-bug.txt", 1);
+        runR400File("t0-field-primary-bug.txt", 2);
     }
 
     @Test

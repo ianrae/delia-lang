@@ -45,7 +45,7 @@ structFields
  ;
 
 structField
- : 'relation'? SYMBOL name relationName? fieldModifiers?
+ : 'relation'? SYMBOL name relationName? fieldModifiers? defaultValue?
  ;
 
 relationName
@@ -55,6 +55,15 @@ relationName
 
 fieldModifiers
  : fieldModifier (fieldModifier)*
+ ;
+
+defaultValue
+ : 'default' BEGPAREN defargs? ENDPAREN
+ ;
+
+defargs
+ : scalar
+ | name
  ;
 
 fieldModifier
