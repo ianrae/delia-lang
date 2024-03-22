@@ -127,7 +127,7 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
         List<Exp.RuleClause> rules = new ArrayList<>();
         if (child instanceof deliaParser.DrulesContext) {
             deliaParser.DrulesContext dctx = (deliaParser.DrulesContext) child;
-            for(int i = 0; i < dctx.getChildCount(); i++) {
+            for (int i = 0; i < dctx.getChildCount(); i++) {
                 ParseTree inner = dctx.getChild(i);
                 if (inner.getText().equals(",")) {
                     continue;
@@ -225,11 +225,23 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
         }
 
         List<String> modifiers = new ArrayList<>();
+        String defaultValue = null;
         if (ctx.getChildCount() > (offset + 2)) {
             child = ctx.getChild(offset + 2);
             for (int i = 0; i < child.getChildCount(); i++) {
-                String modifier = child.getChild(i).getText();
-                modifiers.add(modifier);
+                ParseTree xchild = child.getChild(i);
+                if (xchild instanceof deliaParser.DefaultValueContext) {
+                    defaultValue = parseDefaultValue((deliaParser.DefaultValueContext)xchild);
+                } else {
+                    String modifier = child.getChild(i).getText();
+                    modifiers.add(modifier);
+                }
+            }
+        }
+        if (ctx.getChildCount() > (offset + 3)) {
+            child = ctx.getChild(offset + 3);
+            if (child instanceof deliaParser.DefaultValueContext) {
+                defaultValue = parseDefaultValue((deliaParser.DefaultValueContext)child);
             }
         }
 
@@ -269,6 +281,9 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
                 }
             }
         }
+        if (defaultValue != null) {
+            fieldAST.defaultVal = defaultValue;
+        }
 
         CompilerResults zoo = new CompilerResults((Exp.OperandExp) null);
         AST.TypeAst typeAST = new AST.TypeAst("");
@@ -277,6 +292,12 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
 
         typeAST.fields.add(fieldAST);
         return zoo;
+    }
+
+    private String parseDefaultValue(deliaParser.DefaultValueContext dvctx) {
+        ParseTree zzr = dvctx.getChild(2); //default ( someValue )
+        return zzr.getText();
+//        defaultValue = "88";
     }
 
     @Override
@@ -404,7 +425,7 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
         if ("-noUpdate".equals(child.getText())) {
             noUpdateFlag = true;
             offset = 1;
-            child = ctx.getChild(1+offset);
+            child = ctx.getChild(1 + offset);
         }
         String typeName = child.getText();
 
@@ -646,7 +667,7 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
                 Exp.FieldExp fexp = (Exp.FieldExp) zoo.elem;
                 String[] ar = fexp.fieldName.split("\\.");
                 if (ar.length > 1) {
-                    for(String ff: ar) {
+                    for (String ff : ar) {
                         fexp = new Exp.FieldExp(ff, null);
                         dottedExp = addToDotted(fexp, dottedExp);
                     }
@@ -686,8 +707,8 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
         if (n == 4) {
             String tmp = getIthChildText(ctx, 1);
             if ("in".equals(tmp)) {
-              return doInExpression(ctx);  
-            } 
+                return doInExpression(ctx);
+            }
             tmp = getIthChildText(ctx, 0);
             isNegg = "!".equals(tmp);
         }

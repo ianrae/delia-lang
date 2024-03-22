@@ -42,6 +42,7 @@ public class AST {
         public boolean isPrimaryKey;
         public boolean isUnique;
         public boolean isSerial;
+        public String defaultVal;
 
         public boolean isRelation;
         public boolean isOne;

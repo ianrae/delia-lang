@@ -21,10 +21,10 @@ public class OrderedMap {
     private Map<String,Boolean> uniqueMap = new ConcurrentHashMap<>(); //fieldname,isUnique
     private Map<String,Boolean> primaryKeyMap = new ConcurrentHashMap<>(); //fieldname,isPrimaryKey
     private Map<String,Boolean> serialMap = new ConcurrentHashMap<>(); //fieldname,isSerial
-    private Map<String,DValue> defaultMap = new ConcurrentHashMap<>(); //fieldname,DValue scalar value
+    private Map<String,String> defaultMap = new ConcurrentHashMap<>(); //fieldname,String scalar value
 
     public void add(String fieldName, DType type, boolean optional, boolean unique, boolean primaryKey, boolean serial,
-                    DValue defaultValue) {
+                    String defaultValue) {
     	//ConcurrentHashMap doesn't allow null key
     	if (fieldName == null) {
     		throw new IllegalArgumentException("OrderedMap doesn't allow null key");
@@ -65,9 +65,9 @@ public class OrderedMap {
         Boolean bb = serialMap.get(fieldName);
         return (bb == null) ? false : bb;
     }
-    public Optional<DValue> getDefaultValue(String fieldName) {
-        DValue dval = defaultMap.get(fieldName);
-        return Optional.of(dval);
+    public Optional<String> getDefaultValue(String fieldName) {
+        String str = defaultMap.get(fieldName);
+        return Optional.ofNullable(str);
     }
 
 }

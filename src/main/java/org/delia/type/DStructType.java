@@ -2,6 +2,7 @@ package org.delia.type;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface DStructType extends DType {
 
@@ -12,6 +13,8 @@ public interface DStructType extends DType {
     boolean fieldIsPrimaryKey(String fieldName);
 
     boolean fieldIsSerial(String fieldName);
+
+    Optional<String> fieldHasDefaultValue(String fieldName); //if field has default value, it's string representation is returned here
 
     Map<String, DType> getDeclaredFields();
 

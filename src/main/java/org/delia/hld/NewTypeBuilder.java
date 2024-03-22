@@ -71,8 +71,7 @@ public class NewTypeBuilder extends ServiceBase {
                 et.addNoLog(future);
             }
 
-            DValue defaultVal = null;
-            omap.add(fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial, defaultVal);
+            omap.add(fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial, fieldExp.defaultVal);
         }
 
         DType baseType = null;

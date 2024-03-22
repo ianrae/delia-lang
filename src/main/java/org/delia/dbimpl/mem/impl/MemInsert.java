@@ -4,6 +4,7 @@ package org.delia.dbimpl.mem.impl;
 import org.delia.core.DateFormatService;
 import org.delia.core.FactoryService;
 import org.delia.core.ServiceBase;
+import org.delia.dval.DValueExConverter;
 import org.delia.dval.compare.DValueCompareService;
 import org.delia.error.DetailedError;
 import org.delia.error.ErrorTracker;
@@ -16,6 +17,7 @@ import org.delia.type.DValue;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.valuebuilder.ScalarValueBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,11 +52,6 @@ public class MemInsert extends ServiceBase {
                 }
             }
 
-            //handle default()
-            for(TypePair pair: structType.getAllFields()) {
-                if (structType.fieldIsUnique())
-            }
-
             for (String fieldName : dval.asStruct().getFieldNames()) {
                 DValue tmp = dval.asStruct().getField(fieldName);
                 if (tmp != null && tmp.getType().isRelationShape()) {
@@ -76,6 +73,14 @@ public class MemInsert extends ServiceBase {
         DValue generatedId = null; //created in preInsert
         if (dval != null) {
             tbl.getList().add(dval);
+
+            //handle default()
+            for(TypePair pair: structType.getAllFields()) {
+                Optional<String> opt = structType.fieldHasDefaultValue(pair.name);
+                if (opt.isPresent()) {
+                    addDefaultValueToDValue(dval, pair, opt.get());
+                }
+            }
         }
 
         //add child side of relation (even if empty relation)
@@ -102,6 +107,12 @@ public class MemInsert extends ServiceBase {
             et.addAll(localET.getErrors());
         }
         return generatedId;
+    }
+
+    private void addDefaultValueToDValue(DValue dval, TypePair pair, String s) {
+        DValueExConverter converter = new DValueExConverter(factorySvc, registry);
+        DValue inner = converter.buildFromObject(s, pair.type);
+        dval.asMap().put(pair.name, inner);
     }
 
     private List<RelationInfo> getChildOrMMRelationFields(DStructType structType) {

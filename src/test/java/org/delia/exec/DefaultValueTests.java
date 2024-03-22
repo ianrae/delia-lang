@@ -36,6 +36,7 @@ public class DefaultValueTests extends DeliaRunnerTestBase {
 
     @Test
     public void test2() {
+//        String src = "type Customer struct {id int primaryKey, wid int optional parent, name string } wid.maxlen(4) end";
         String src = "type Customer struct {id int primaryKey, wid int optional default(5), name string } wid.maxlen(4) end";
         DeliaSession sess =  initDelia(src);
 

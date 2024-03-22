@@ -3,6 +3,7 @@ package org.delia.type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.delia.util.DeliaExceptionHelper;
 
@@ -113,6 +114,29 @@ public class DStructTypeImpl extends DTypeImpl implements DStructType, DStructTy
         }
         DeliaExceptionHelper.throwError("struct-type-runaway", "Too many base types for field: %s", fieldName);
         return false;
+    }
+
+    @Override
+    public Optional<String> fieldHasDefaultValue(String fieldName) {
+        Optional<String> opt = orderedMap.getDefaultValue(fieldName);
+        if (opt.isPresent()) {
+            return opt;
+        }
+
+        DStructType baseType = (DStructType) this.getBaseType();
+        for(int k = 0; k < MAX_INHERITANCE_DEPTH; k++) { //don't try forever
+            if (baseType == null) {
+                return Optional.empty();
+            }
+            DStructTypeImpl baseimpl = (DStructTypeImpl) baseType;
+            opt = baseimpl.orderedMap.getDefaultValue(fieldName);
+            if (opt.isPresent()) {
+                return opt;
+            }
+            baseType = (DStructType) baseType.getBaseType();
+        }
+        DeliaExceptionHelper.throwError("struct-type-runaway", "Too many base types for field: %s", fieldName);
+        return Optional.empty();
     }
 
     @Override

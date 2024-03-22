@@ -78,8 +78,7 @@ public class NewTypePreRunner extends ServiceBase {
             DTypeName dtypeName = new DTypeName(typeStatementExp.schemaName, typeStatementExp.typeName);
             DType fieldType = getTypeForField(fieldExp, dtypeName);
 //			omap.add(fieldExp.name, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial);
-            DValue defaultVal = null;
-            omap.add(fieldExp.fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial, defaultVal);
+            omap.add(fieldExp.fieldName, fieldType, fieldExp.isOptional, fieldExp.isUnique, fieldExp.isPrimaryKey, fieldExp.isSerial, fieldExp.defaultVal);
         }
 
         DType dtype = new DStructTypeImpl(Shape.STRUCT, typeStatementExp.schemaName, typeStatementExp.typeName, null, omap, null);
