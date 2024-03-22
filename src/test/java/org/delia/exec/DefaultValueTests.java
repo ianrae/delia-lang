@@ -19,15 +19,9 @@ import static org.junit.Assert.assertEquals;
 public class DefaultValueTests extends DeliaRunnerTestBase {
 
     @Test
-    public void test2() {
-        DeliaLog log = new UnitTestLog();
-        factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
-        ConnectionDefinition connDef = ConnectionDefinitionBuilder.createMEM();
-
-        Delia delia = DeliaFactory.create(connDef, log, factorySvc);
-        String src = "type Customer struct {id int primaryKey, wid int default(5), name string } wid.maxlen(4) end";
-
-        DeliaSession sess = delia.beginSession(src);
+    public void test() {
+        String src = "type Customer struct {id int primaryKey, wid int optional default(5), name string } wid.maxlen(4) end";
+        DeliaSession sess =  initDelia(src);
 
         src = "insert Customer {id:1, wid:50, name:'a1'}";
         ResultValue res = delia.continueExecution(src, sess);
@@ -40,10 +34,35 @@ public class DefaultValueTests extends DeliaRunnerTestBase {
         assertEquals(50, dval.asStruct().getField("wid").asInt());
     }
 
+    @Test
+    public void test2() {
+        String src = "type Customer struct {id int primaryKey, wid int optional default(5), name string } wid.maxlen(4) end";
+        DeliaSession sess =  initDelia(src);
+
+        src = "insert Customer {id:1, name:'a1'}";
+        ResultValue res = delia.continueExecution(src, sess);
+        assertEquals(true, res.ok);
+
+        src = "let x = Customer[1]";
+        res = delia.continueExecution(src, sess);
+
+        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
+        assertEquals(5, dval.asStruct().getField("wid").asInt());
+    }
 
     //---
 
     @Before
     public void init() {
+    }
+
+    private DeliaSession initDelia(String src) {
+        DeliaLog log = new UnitTestLog();
+        factorySvc = new FactoryServiceImpl(log, new SimpleErrorTracker(log));
+        ConnectionDefinition connDef = ConnectionDefinitionBuilder.createMEM();
+        delia = DeliaFactory.create(connDef, log, factorySvc);
+
+        DeliaSession sess = delia.beginSession(src);
+        return sess;
     }
 }

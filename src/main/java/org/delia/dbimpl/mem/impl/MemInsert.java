@@ -50,6 +50,11 @@ public class MemInsert extends ServiceBase {
                 }
             }
 
+            //handle default()
+            for(TypePair pair: structType.getAllFields()) {
+                if (structType.fieldIsUnique())
+            }
+
             for (String fieldName : dval.asStruct().getFieldNames()) {
                 DValue tmp = dval.asStruct().getField(fieldName);
                 if (tmp != null && tmp.getType().isRelationShape()) {

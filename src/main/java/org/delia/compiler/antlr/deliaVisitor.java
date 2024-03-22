@@ -102,6 +102,18 @@ public interface deliaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFieldModifiers(deliaParser.FieldModifiersContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link deliaParser#defaultValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefaultValue(deliaParser.DefaultValueContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link deliaParser#defargs}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDefargs(deliaParser.DefargsContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link deliaParser#fieldModifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

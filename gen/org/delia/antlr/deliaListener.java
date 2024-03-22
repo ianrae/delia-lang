@@ -162,6 +162,26 @@ public interface deliaListener extends ParseTreeListener {
 	 */
 	void exitFieldModifiers(deliaParser.FieldModifiersContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link deliaParser#defaultValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterDefaultValue(deliaParser.DefaultValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link deliaParser#defaultValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitDefaultValue(deliaParser.DefaultValueContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link deliaParser#defargs}.
+	 * @param ctx the parse tree
+	 */
+	void enterDefargs(deliaParser.DefargsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link deliaParser#defargs}.
+	 * @param ctx the parse tree
+	 */
+	void exitDefargs(deliaParser.DefargsContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link deliaParser#fieldModifier}.
 	 * @param ctx the parse tree
 	 */
