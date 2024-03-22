@@ -245,7 +245,7 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
             }
         }
 
-        //TODO support realtion later
+        //TODO support relation later
 
         AST.TypeFieldAst fieldAST = new AST.TypeFieldAst(fieldName);
         fieldAST.loc = LocHelper.genLoc(ctx.getStart(), ctx.getStop());
@@ -295,9 +295,12 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
     }
 
     private String parseDefaultValue(deliaParser.DefaultValueContext dvctx) {
-        ParseTree zzr = dvctx.getChild(2); //default ( someValue )
-        return zzr.getText();
-//        defaultValue = "88";
+        ParseTree argCtx = dvctx.getChild(2); //default ( someValue )
+        Exp.ValueExp vexp = buildStringDVal(argCtx); //removes ' or " delims
+        if (vexp == null) {
+            return null;
+        }
+        return vexp.value == null ? null : vexp.value.asString();
     }
 
     @Override
@@ -889,12 +892,16 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
     }
 
     private CompilerResults doVisitStr2(ParseTree ctx) {
+        Exp.ValueExp vexp = buildStringDVal(ctx);
+        return new CompilerResults(vexp);
+    }
+    private Exp.ValueExp buildStringDVal(ParseTree ctx) {
         Exp.ValueExp vexp = new Exp.ValueExp();
         int pos = ctx.getText().indexOf('\'');
         int posEnd = ctx.getText().lastIndexOf('\'');
         String str = ctx.getText().substring(pos + 1, posEnd);
         vexp.value = builder.buildString(str);
-        return new CompilerResults(vexp);
+        return vexp;
     }
 
     @Override

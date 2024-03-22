@@ -16,6 +16,12 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * TODO
+ *  -build BDD tests
+ *    -error if field not optional
+ *  -postgres: add sql default in ddl
+ */
 public class DefaultValueTests extends DeliaRunnerTestBase {
 
     @Test
@@ -36,7 +42,6 @@ public class DefaultValueTests extends DeliaRunnerTestBase {
 
     @Test
     public void test2() {
-//        String src = "type Customer struct {id int primaryKey, wid int optional parent, name string } wid.maxlen(4) end";
         String src = "type Customer struct {id int primaryKey, wid int optional default(5), name string } wid.maxlen(4) end";
         DeliaSession sess =  initDelia(src);
 
@@ -51,6 +56,21 @@ public class DefaultValueTests extends DeliaRunnerTestBase {
         assertEquals(5, dval.asStruct().getField("wid").asInt());
     }
 
+    @Test
+    public void testString() {
+        String src = "type Customer struct {id int primaryKey, wid string optional default('able'), name string } wid.maxlen(4) end";
+        DeliaSession sess =  initDelia(src);
+
+        src = "insert Customer {id:1, name:'a1'}";
+        ResultValue res = delia.continueExecution(src, sess);
+        assertEquals(true, res.ok);
+
+        src = "let x = Customer[1]";
+        res = delia.continueExecution(src, sess);
+
+        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
+        assertEquals("able", dval.asStruct().getField("wid").asString());
+    }
     //---
 
     @Before

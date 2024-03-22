@@ -78,7 +78,10 @@ public class MemInsert extends ServiceBase {
             for(TypePair pair: structType.getAllFields()) {
                 Optional<String> opt = structType.fieldHasDefaultValue(pair.name);
                 if (opt.isPresent()) {
-                    addDefaultValueToDValue(dval, pair, opt.get());
+                    boolean alreadyInDVal = dval.asMap().containsKey(pair.name);
+                    if (! alreadyInDVal) {
+                        addDefaultValueToDValue(dval, pair, opt.get());
+                    }
                 }
             }
         }
