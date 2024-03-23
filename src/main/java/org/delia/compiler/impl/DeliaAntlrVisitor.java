@@ -699,11 +699,14 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
 
     @Override
     public CompilerResults visitFilter(deliaParser.FilterContext ctx) {
-        CompilerResults zoo = this.visitCexpr(ctx.cexpr());
+        CompilerResults zoo = this.visitFilterexpr(ctx.filterexpr());
         return zoo;
     }
+//    @Override
+//    public CompilerResults visitFilterexpr(deliaParser.FilterexprContext ctx) {
+//    }
 
-    @Override
+        @Override
     public CompilerResults visitCexpr(deliaParser.CexprContext ctx) {
         int n = ctx.getChildCount();
         boolean isNegg = false;

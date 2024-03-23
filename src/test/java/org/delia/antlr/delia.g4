@@ -140,7 +140,12 @@ fnChainArg
 
 
 filter
- : BEGF cexpr ENDF
+ : BEGF filterexpr ENDF
+ ;
+
+filterexpr
+ : cexpr
+ | '{' elem ( SEP elem )* '}'
  ;
 
 cexpr

@@ -414,6 +414,16 @@ public interface deliaListener extends ParseTreeListener {
 	 */
 	void exitFilter(deliaParser.FilterContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link deliaParser#filterexpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterFilterexpr(deliaParser.FilterexprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link deliaParser#filterexpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitFilterexpr(deliaParser.FilterexprContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link deliaParser#cexpr}.
 	 * @param ctx the parse tree
 	 */

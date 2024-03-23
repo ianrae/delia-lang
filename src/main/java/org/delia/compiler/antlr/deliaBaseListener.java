@@ -461,6 +461,18 @@ public class deliaBaseListener implements deliaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFilterexpr(deliaParser.FilterexprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFilterexpr(deliaParser.FilterexprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCexpr(deliaParser.CexprContext ctx) { }
 	/**
 	 * {@inheritDoc}

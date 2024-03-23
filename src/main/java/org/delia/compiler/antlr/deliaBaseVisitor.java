@@ -277,6 +277,13 @@ public class deliaBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitFilterexpr(deliaParser.FilterexprContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitCexpr(deliaParser.CexprContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}

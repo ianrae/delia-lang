@@ -52,7 +52,7 @@ public class DeliaAntlrTests extends TestBase {
 
         @Override
         public FilterCompileResults visitFilter(deliaParser.FilterContext ctx) {
-            FilterCompileResults zoo = this.visitCexpr(ctx.cexpr());
+            FilterCompileResults zoo = this.visitFilterexpr(ctx.filterexpr());
             return zoo;
         }
 

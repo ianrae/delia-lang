@@ -251,6 +251,12 @@ public interface deliaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFilter(deliaParser.FilterContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link deliaParser#filterexpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFilterexpr(deliaParser.FilterexprContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link deliaParser#cexpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
