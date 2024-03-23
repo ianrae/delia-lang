@@ -45,7 +45,9 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testR420() {
-        runR420File("t0-default.txt", 1);
+        runR420File("t0-default.txt", 2);
+        runR420File("t0-default-types.txt", 6);
+        runR420File("t0-default-mismatch.txt", 1);
     }
 
     @Test
@@ -416,7 +418,7 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 4;
+//        singleTestToRunIndex = 5;
         enableAllFileCheck = false;
         DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
@@ -424,7 +426,8 @@ public class AllBDDTests extends BDDTestBase {
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
 //        runR420File("t0-default.txt", 2);
-        runR420File("t0-default-types.txt", 5);
+//        runR420File("t0-default-types.txt", 6);
+        runR420File("t0-default-mismatch.txt", 1);
     }
 
     //---

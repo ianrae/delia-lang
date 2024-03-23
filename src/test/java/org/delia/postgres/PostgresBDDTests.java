@@ -41,6 +41,14 @@ public class PostgresBDDTests extends BDDTestBase {
 		runR400File("t0-field-primarykey.txt", 6);
 		runR400File("t0-field-serial.txt", 7);
 	}
+
+	@Test
+	public void testR420() {
+		runR420File("t0-default.txt", 2);
+		runR420File("t0-default-types.txt", 6);
+		runR420File("t0-default-mismatch.txt", 1);
+	}
+
 	@Test
 	public void testR500() {
 		runR500File("t0-relation.txt", 2);
@@ -392,16 +400,13 @@ public class PostgresBDDTests extends BDDTestBase {
 
 	@Test
 	public void testDebug() {
-		singleTestToRunIndex = 8;
+		singleTestToRunIndex = 0;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		log.setLevel(LogLevel.DEBUG);
-//		runR700File("t0-insert.txt", 6);
-
-//		runR2800File("t0-schema.txt", 4);
-//		runR1500File("t0-queryfn-max-string.txt", 4);
-		runR500File("t0-relation-one-to-one-oneway.txt", 9);
+//		runR500File("t0-relation-one-to-one-oneway.txt", 9);
+        runR420File("t0-default.txt", 2);
 	}
 
 	//---

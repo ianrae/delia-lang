@@ -64,7 +64,14 @@ given:
 when:
   let x = Flight[55]
 then:
-value:a:Flight {
- vfield1:55
- vfield2:'4E/QIA=='
-}
+ERROR:default-not-supported
+
+---
+title: default-relation
+given:
+ type Customer struct {id int primaryKey, relation addr Address optional one parent } end
+ type Address struct {id int primaryKey, relation cust Customer optional one default(5) } end
+when:
+  let x = Customer[55]
+then:
+ERROR:default-error

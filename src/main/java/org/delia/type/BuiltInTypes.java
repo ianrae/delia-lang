@@ -163,6 +163,8 @@ public enum BuiltInTypes {
 //    	case "long": return true;
             case "string":
                 return true;
+            case "blob":
+                return true;
             default:
                 return false;
         }

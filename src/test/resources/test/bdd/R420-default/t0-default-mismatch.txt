@@ -1,0 +1,17 @@
+# struct tests
+
+FEATURE: default-type-mismatch
+background:
+thenType: struct
+
+
+---
+title: default-mismatch
+given:
+  type Flight struct {field1 int primaryKey, field2 int optional default('toronto')  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+ERROR:value-builder-failed
+
