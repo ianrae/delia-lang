@@ -223,6 +223,7 @@ public class Tok {
 
     public static class PKWhereTok implements Tok.OperandTok {
         public Tok.ValueTok value;
+        public Tok.ListTok listValue; //for composite keys
         public DStructType pkOwnerType;
         public String alias;
         public String physicalFieldName; //usually Customer.id but in MM can be CustomerAddressDat1.leftv
@@ -233,8 +234,16 @@ public class Tok {
             value.visit(visitor, this);
         }
 
+        public boolean isCompositeKey() {
+            return listValue != null;
+        }
+
         @Override
         public String strValue() {
+            if (isCompositeKey()) {
+                String s = listValue.strValue();
+                return s;
+            }
             String s = String.format("%s", value.strValue());
             return s;
         }

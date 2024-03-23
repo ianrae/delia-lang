@@ -702,9 +702,34 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
         CompilerResults zoo = this.visitFilterexpr(ctx.filterexpr());
         return zoo;
     }
-//    @Override
-//    public CompilerResults visitFilterexpr(deliaParser.FilterexprContext ctx) {
-//    }
+    @Override
+    public CompilerResults visitFilterexpr(deliaParser.FilterexprContext ctx) {
+        ParseTree child = ctx.getChild(0);
+        if (child instanceof deliaParser.CexprContext) {
+            return visitCexpr((deliaParser.CexprContext) child);
+        } else {
+            //compositeKeys
+            int n = ctx.getChildCount();
+            int numKeys = (n - 1) / 2;
+            List<CompilerResults> list = new ArrayList<>();
+            for(int i = 0; i < numKeys; i++) {
+                int index = (2*i) + 1;
+                ParseTree inner = ctx.getChild(index);
+                if (inner instanceof deliaParser.ElemContext) {
+                    deliaParser.ElemContext ectx = (deliaParser.ElemContext) inner;
+                    CompilerResults zz = visitElem(ectx);
+                    list.add(zz);
+                }
+            }
+            //TODO handle empty list
+            Exp.ListExp listExp = new Exp.ListExp();
+            CompilerResults finalzz = new CompilerResults(listExp);
+            for (CompilerResults tmp: list) {
+                listExp.listL.add(tmp.elem);
+            }
+            return finalzz;
+        }
+    }
 
         @Override
     public CompilerResults visitCexpr(deliaParser.CexprContext ctx) {

@@ -55,6 +55,9 @@ public class TokClauseBuilder extends ServiceBase {
             whereClause.visit(visitor);
 
             if (visitor.fieldStack.isEmpty()) {
+                if (visitor.oneVal == null) {
+                    return doCompositeKey(whereClause, visitor);
+                }
                 Tok.DToken tok = visitor.oneVal;
                 if (tok instanceof Tok.ValueTok) {
                     Tok.ValueTok vexp = (Tok.ValueTok) tok;
@@ -106,6 +109,13 @@ public class TokClauseBuilder extends ServiceBase {
             DeliaExceptionHelper.throwNotImplementedError("x454");
             return null;
         }
+    }
+
+    private Tok.WhereTok doCompositeKey(Exp.WhereClause whereClause, FieldChainVisitor visitor) {
+        Tok.PKWhereTok pkWhereTok = new Tok.PKWhereTok();
+        pkWhereTok.listValue = visitor.listTok;
+        Tok.WhereTok whereTok = new Tok.WhereTok(pkWhereTok);
+        return whereTok;
     }
 
     public Tok.DottedTok buildFieldsAndFuncs(Exp.DottedExp dexp) {
