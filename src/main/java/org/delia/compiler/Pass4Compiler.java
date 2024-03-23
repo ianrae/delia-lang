@@ -15,6 +15,7 @@ import org.delia.util.DValueHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Pass4Compiler extends CompilerPassBase {
 
@@ -102,6 +103,7 @@ public class Pass4Compiler extends CompilerPassBase {
         boolean isPrimaryKey = structType.fieldIsPrimaryKey(fieldName);
         boolean isSerial = structType.fieldIsSerial(fieldName);
         boolean isUnique = structType.fieldIsUnique(fieldName);
+        Optional<String> defaultValue = structType.fieldHasDefaultValue(fieldName);
 
         if (isOptional && isPrimaryKey) {
             String msg = String.format("optional and primaryKey cannot be used together - field '%s'", fieldName);
@@ -115,6 +117,21 @@ public class Pass4Compiler extends CompilerPassBase {
         if (isUnique && isPrimaryKey) {
             String msg = String.format("unique and primaryKey cannot be used together - field '%s'", fieldName);
             addError(results, "unique-primarykey-not-allowed", msg, typeExp);
+        }
+
+        if (defaultValue.isPresent()) {
+            TypePair pair = DValueHelper.findField(structType, fieldName);
+            switch(pair.type.getShape()) {
+                case BLOB:
+                case STRUCT:
+                case RELATION: {
+                    String msg = String.format("default not supported for field type '%s' - field '%s'", pair.type.getName(), fieldName);
+                    addError(results, "default-not-supported", msg, typeExp);
+                }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

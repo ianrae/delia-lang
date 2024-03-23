@@ -381,6 +381,10 @@ public class Pass2Compiler extends CompilerPassBase {
                         String msg = String.format("cannot use 'serial' on relation fields - field '%s'", sfe.fieldName);
                         addError(results, "serial-error", msg, sfe);
                     }
+                    if (sfe.defaultVal != null) {
+                        String msg = String.format("cannot use 'default' on relation fields - field '%s'", sfe.fieldName);
+                        addError(results, "default-error", msg, sfe);
+                    }
                 }
             }
         }
@@ -406,6 +410,10 @@ public class Pass2Compiler extends CompilerPassBase {
         if (qfe.isUnique && qfe.isPrimaryKey) {
             String msg = String.format("unique and primaryKey cannot be used together - field '%s'", qfe.fieldName);
             addError(results, "unique-primarykey-not-allowed", msg, qfe);
+        }
+        if (!qfe.isOptional && qfe.defaultVal != null) {
+            String msg = String.format("default can only be used with optional fields - field '%s'", qfe.fieldName);
+            addError(results, "default-non-optional-not-allowed", msg, qfe);
         }
     }
 

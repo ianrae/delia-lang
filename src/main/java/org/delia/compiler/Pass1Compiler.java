@@ -1,10 +1,7 @@
 package org.delia.compiler;
 
-import org.delia.Delia;
-import org.delia.DeliaSession;
 import org.delia.compiler.ast.AST;
 import org.delia.core.FactoryService;
-import org.delia.db.DBCapabilties;
 import org.delia.db.DBType;
 import org.delia.error.ErrorFormatter;
 import org.delia.hld.HLDFirstPassResults;

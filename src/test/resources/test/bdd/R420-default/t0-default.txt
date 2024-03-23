@@ -1,0 +1,31 @@
+# struct tests
+
+FEATURE: struct-field-default
+background:
+thenType: struct
+
+---
+title: not-used-when-value-provided-in-insert
+given:
+  type Flight struct {field1 int primaryKey, field2 int optional default(5)  } end
+  insert Flight {field1: 55, field2: 57 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:57
+}
+
+---
+title: used-when-no-value-provided-in-insert
+given:
+  type Flight struct {field1 int primaryKey, field2 int optional default(5)  } end
+  insert Flight {field1: 55  }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:5
+}

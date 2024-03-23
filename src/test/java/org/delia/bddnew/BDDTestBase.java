@@ -17,6 +17,7 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
         R200_package,
         R300_scalar,
         R400_struct,
+        R420_default,
         R500_relation,
         R550_multi_relation,
         R560_self_relation,
@@ -147,6 +148,9 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
     }
     protected int runR400File(String filename, int numTests) {
         return runBBBTest(BDDGroup.R400_struct, filename, numTests);
+    }
+    protected int runR420File(String filename, int numTests) {
+        return runBBBTest(BDDGroup.R420_default, filename, numTests);
     }
     protected int runR500File(String filename, int numTests) {
         return runBBBTest(BDDGroup.R500_relation, filename, numTests);

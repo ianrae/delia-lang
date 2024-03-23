@@ -44,6 +44,11 @@ public class AllBDDTests extends BDDTestBase {
     }
 
     @Test
+    public void testR420() {
+        runR420File("t0-default.txt", 1);
+    }
+
+    @Test
     public void testR500() {
         runR500File("t0-relation.txt", 2);
         runR500File("t0-relation-one-to-one-oneway.txt", 9);
@@ -411,15 +416,15 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 1;
+        singleTestToRunIndex = 4;
         enableAllFileCheck = false;
         DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
-//        runR500File("t0-relation-one-to-one-oneway.txt", 9);
-        runR400File("t0-field-primary-bug.txt", 2);
+//        runR420File("t0-default.txt", 2);
+        runR420File("t0-default-types.txt", 5);
     }
 
     //---

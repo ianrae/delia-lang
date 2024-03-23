@@ -1,0 +1,70 @@
+# struct tests
+
+FEATURE: struct-field-default-types. int already tested in t0-default.txt
+background:
+thenType: struct
+
+---
+title: default-number
+given:
+  type Flight struct {field1 int primaryKey, field2 number optional default(5.7)  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:5.7
+}
+
+---
+title: default-boolean
+given:
+  type Flight struct {field1 int primaryKey, field2 boolean optional default(true)  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:true
+}
+
+---
+title: default-string
+given:
+  type Flight struct {field1 int primaryKey, field2 string optional default('toronto')  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:'toronto'
+}
+
+---
+title: default-date
+given:
+  type Flight struct {field1 int primaryKey, field2 date optional default('2022')  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:2022-01-01T00:00:00.000+0000
+}
+
+---
+title: default-blob
+given:
+  type Flight struct {field1 int primaryKey, field2 blob optional default('4E/QIA==')  } end
+  insert Flight {field1: 55 }
+when:
+  let x = Flight[55]
+then:
+value:a:Flight {
+ vfield1:55
+ vfield2:'4E/QIA=='
+}
