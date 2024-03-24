@@ -13,6 +13,8 @@ import org.delia.type.DTypeName;
 import org.delia.type.DTypeRegistry;
 import org.delia.util.DeliaExceptionHelper;
 
+import static java.util.Objects.isNull;
+
 public class MemFilterBase extends ServiceBase {
     public static class SelectSpec {
 
@@ -62,7 +64,7 @@ public class MemFilterBase extends ServiceBase {
                 break;
             case PRIMARY_KEY:
             default:
-                selector = new PrimaryKeyRowSelector(evaluator);
+                selector = createPrimaryKeySelector(whereClause);
         }
 
         if (details.targetType == null || details.targetType.getTypeName().equals(typeName)) {
@@ -81,6 +83,19 @@ public class MemFilterBase extends ServiceBase {
         spec.selector = selector;
         spec.details = details;
         return spec;
+    }
+
+    private RowSelector createPrimaryKeySelector(Tok.WhereTok whereClause) {
+        if (whereClause.where instanceof Tok.PKWhereTok) {
+            Tok.PKWhereTok pkWhereTok = (Tok.PKWhereTok) whereClause.where;
+            if (pkWhereTok.isCompositeKey()) {
+                return new CompositePrimaryKeyRowSelector(evaluator);
+            }
+            return new PrimaryKeyRowSelector(evaluator);
+        } else {
+            DeliaExceptionHelper.throwError("struct-unknown-type-in-query", "unknown .where value");
+            return null;
+        }
     }
 
     private void initSelector(RowSelector selector, Tok.WhereTok whereClause, MemDBTable tbl, DStructType dtype) {

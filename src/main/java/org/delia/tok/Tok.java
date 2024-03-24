@@ -4,6 +4,7 @@ package org.delia.tok;
 import org.delia.compiler.ast.Exp;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.StrCreator;
 
@@ -227,11 +228,15 @@ public class Tok {
         public DStructType pkOwnerType;
         public String alias;
         public String physicalFieldName; //usually Customer.id but in MM can be CustomerAddressDat1.leftv
+        public PrimaryKey primaryKey; //used for composite keys
 
         @Override
         public void visit(Tok.TokVisitor visitor, Tok.TokBase parent) {
             visitor.visit(this, parent);
-            value.visit(visitor, this);
+            if (value != null) {
+                value.visit(visitor, this);
+            }
+            //TODO compositekey:implement defeferred dval
         }
 
         public boolean isCompositeKey() {

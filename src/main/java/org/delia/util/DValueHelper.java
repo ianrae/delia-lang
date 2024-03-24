@@ -45,6 +45,7 @@ public class DValueHelper {
 //		return inner;
 	}
 
+	//TODO:compositekey-fox
 	public static TypePair findPrimaryKeyFieldPair(DType inner) {
 		if (! inner.isStructShape()) {
 			return null;
@@ -52,6 +53,14 @@ public class DValueHelper {
 		DStructType dtype = (DStructType) inner;
 		PrimaryKey prikey = dtype.getPrimaryKey();
 		return prikey == null ? null : prikey.getKey();
+	}
+	public static PrimaryKey findPrimaryKeyField(DType inner) {
+		if (! inner.isStructShape()) {
+			return null;
+		}
+		DStructType dtype = (DStructType) inner;
+		PrimaryKey prikey = dtype.getPrimaryKey();
+		return prikey;
 	}
 	public static List<TypePair> findAllUniqueFieldPair(DType inner) {
 		if (! inner.isStructShape()) {

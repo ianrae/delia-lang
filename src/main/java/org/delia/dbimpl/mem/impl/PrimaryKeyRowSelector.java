@@ -12,7 +12,7 @@ import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
 public class PrimaryKeyRowSelector extends RowSelectorBase {
-    private FilterEvaluator evaluator;
+    protected FilterEvaluator evaluator;
 
     public PrimaryKeyRowSelector(FilterEvaluator evaluator) {
         super();
@@ -24,6 +24,10 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
         super.init(et, whereClause, dtype, registry);
         evaluator.init(whereClause);
 
+        doInnerInit();
+    }
+
+    protected void doInnerInit() {
         TypePair pair = DValueHelper.findPrimaryKeyFieldPair(dtype);
         this.keyField = findKeyField(pair);
         if (this.keyField == null) {
@@ -40,7 +44,7 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
         }
     }
 
-    private boolean keyFieldIsAllowedType(TypePair pair) {
+    protected boolean keyFieldIsAllowedType(TypePair pair) {
         switch(pair.type.getShape()) {
             case INTEGER:
 //            case LONG:
@@ -75,7 +79,7 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
         }
     }
 
-    private List<DValue> traverseList(List<DValue> list, List<DValue> resultL) {
+    protected List<DValue> traverseList(List<DValue> list, List<DValue> resultL) {
         for(DValue dval: list) {
             DValue key = dval.asStruct().getField(keyField);
             if (key == null) {
@@ -92,7 +96,7 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
         return resultL;
     }
 
-    private String findKeyField(TypePair pair) {
+    protected String findKeyField(TypePair pair) {
         if (pair == null) {
             return null;
         } else {

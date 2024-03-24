@@ -2,6 +2,7 @@ package org.delia.hld;
 
 import org.delia.tok.Tok;
 import org.delia.type.DStructType;
+import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DValueHelper;
 
@@ -27,8 +28,13 @@ public class HLDTokVisitor implements Tok.TokVisitor {
             } else if (exp instanceof Tok.PKWhereTok) {
                 Tok.PKWhereTok pkexp = (Tok.PKWhereTok) exp;
                 pkexp.pkOwnerType = ownerType;
-                TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pkexp.pkOwnerType);
-                pkexp.physicalFieldName = pkpair.name;
+
+               pkexp.primaryKey = DValueHelper.findPrimaryKeyField(pkexp.pkOwnerType);
+                if (pkexp.primaryKey.isMultiple()) {
+                } else {
+                    TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pkexp.pkOwnerType);
+                    pkexp.physicalFieldName = pkpair.name;
+                }
             }
         }
     }
