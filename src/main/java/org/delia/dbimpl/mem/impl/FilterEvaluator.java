@@ -40,8 +40,9 @@ public class FilterEvaluator extends ServiceBase {
 //        }
     }
 
-    public boolean isEqualTo(DValue dval) {
-        Object target = whereClause.strValue(); //.filter.cond.strValue();
+    public boolean isEqualTo(DValue dval, Object target) {
+//        Object target = whereClause.strValue();
+        //TODO fix resolvedFilterVars for composite keys
         if (resolvedFilterVars != null) {
             //string comparison should work for int,long,string (PKs)
             target = resolvedFilterVars.asString();

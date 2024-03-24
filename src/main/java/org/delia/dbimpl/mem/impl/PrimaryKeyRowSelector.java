@@ -88,7 +88,8 @@ public class PrimaryKeyRowSelector extends RowSelectorBase {
                 return resultL;
             }
 
-            if (evaluator.isEqualTo(key)) {
+            Object target = whereClause.strValue();
+            if (evaluator.isEqualTo(key, target)) {
                 resultL.add(dval); //only one row
                 break;
             }
