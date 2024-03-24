@@ -13,6 +13,14 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
     public Stack<Tok.FieldTok> fieldStack = new Stack<>();
     public Tok.DToken oneVal; //val or null
     public Tok.ListTok listTok;
+    private boolean isWhereClause = false;
+
+    public FieldChainVisitor() {
+    }
+
+    public FieldChainVisitor(boolean isWhereClause) {
+        this.isWhereClause = isWhereClause;
+    }
 
     @Override
     public void visit(Exp.ExpBase exp) {
@@ -73,9 +81,21 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
         }
 
         if (!fieldStack.isEmpty()) {
-            Tok.FieldTok field = fieldStack.peek();
-            Tok.FunctionTok func = field.funcL.get(field.funcL.size() - 1);
-            func.argsL.add(tok);
+            if (isWhereClause) {
+                Tok.FieldTok field = fieldStack.peek();
+                Tok.FunctionTok func;
+                if (field.funcL.isEmpty()) {
+                    func = new Tok.FunctionTok("");
+                    field.funcL.add(func);
+                } else {
+                    func = field.funcL.get(0);
+                }
+                func.argsL.add(tok);
+            } else {
+                Tok.FieldTok field = fieldStack.peek();
+                Tok.FunctionTok func = field.funcL.get(field.funcL.size() - 1);
+                func.argsL.add(tok);
+            }
         } else if (listTok != null) {
             listTok.listL.add(tok);
         } else {

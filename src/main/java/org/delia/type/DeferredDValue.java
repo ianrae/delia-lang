@@ -1,8 +1,5 @@
 package org.delia.type;
 
-import org.delia.type.DType;
-import org.delia.type.DValue;
-import org.delia.type.DValueImpl;
 import org.delia.util.DeliaExceptionHelper;
 
 /**

@@ -49,7 +49,7 @@ public class TokClauseBuilder extends ServiceBase {
 
     public Tok.WhereTok buildWhere(Exp.WhereClause whereClause) {
         if (whereClause.where instanceof Exp.DottedExp) {
-            FieldChainVisitor visitor = new FieldChainVisitor();
+            FieldChainVisitor visitor = new FieldChainVisitor(true);
             Exp.DottedExp dexp = (Exp.DottedExp) whereClause.where;
             visitor.top = dexp;
             whereClause.visit(visitor);

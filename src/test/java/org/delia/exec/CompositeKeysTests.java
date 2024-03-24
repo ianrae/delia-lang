@@ -68,6 +68,40 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
         assertEquals(50, dval.asStruct().getField("wid").asInt());
     }
 
+    @Test
+    public void testSinglePKDeferred() {
+        String src = "type Customer struct {id int primaryKey, wid int optional, name string } wid.maxlen(4) end";
+        DeliaSession sess =  initDelia(src);
+
+        src = "let c = 1\n";
+        src += "insert Customer {id:1, wid:50, name:'a1'}";
+        ResultValue res = delia.continueExecution(src, sess);
+        assertEquals(true, res.ok);
+
+        src = "let x = Customer[c]";
+        res = delia.continueExecution(src, sess);
+
+        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
+        assertEquals(50, dval.asStruct().getField("wid").asInt());
+    }
+
+    @Test
+    public void testMultiplePKDeferred() {
+        String src = "type Customer struct {id int primaryKey, id2 string primaryKey, wid int optional, name string } wid.maxlen(4) end";
+        DeliaSession sess =  initDelia(src);
+
+        src = "let c = 1\n";
+        src += "insert Customer {id:1, id2:'abc', wid:50, name:'a1'}";
+        ResultValue res = delia.continueExecution(src, sess);
+        assertEquals(true, res.ok);
+
+        src = "let x = Customer[{c,'abc'}]";
+        res = delia.continueExecution(src, sess);
+
+        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
+        assertEquals(50, dval.asStruct().getField("wid").asInt());
+    }
+
     //---
 
     @Before
