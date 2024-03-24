@@ -7,6 +7,8 @@ import java.util.Stack;
 public class FieldChainVisitor implements Exp.ExpVisitor {
     public static final String SCALAR_FIELD = "$__scalar__";
 
+    public static final String IS_DEFERRED_WHERE_CLAUSE = "$$WHERE$$";
+
     public Exp.ExpBase top;
     public Exp.ExpBase prev;
     private int argCountdown = -1;
@@ -85,7 +87,7 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
                 Tok.FieldTok field = fieldStack.peek();
                 Tok.FunctionTok func;
                 if (field.funcL.isEmpty()) {
-                    func = new Tok.FunctionTok("");
+                    func = new Tok.FunctionTok(IS_DEFERRED_WHERE_CLAUSE);
                     field.funcL.add(func);
                 } else {
                     func = field.funcL.get(0);
