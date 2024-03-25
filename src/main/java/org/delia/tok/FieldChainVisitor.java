@@ -84,8 +84,8 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
         if (compositeKeyTok != null) {
             //drain listTok into func args
             compositeKeyTok.listL.add(tok);
+            return;
         }
-
 
         if (tok instanceof Tok.FieldTok && argCountdown < 0) {
             Tok.FieldTok field = (Tok.FieldTok)tok;

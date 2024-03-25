@@ -28,12 +28,22 @@ public class HLDTokVisitor implements Tok.TokVisitor {
             } else if (exp instanceof Tok.PKWhereTok) {
                 Tok.PKWhereTok pkexp = (Tok.PKWhereTok) exp;
                 pkexp.pkOwnerType = ownerType;
+                if (pkexp.isCompositeKey()) {
+                    for(Tok.DToken tok: pkexp.compositeKeyTok.listL) {
+                        if (tok instanceof Tok.FieldTok) {
+                            Tok.FieldTok fieldTok = (Tok.FieldTok) tok;
+                            //TODO:currently we only support one deferred value per composite key. fix later
+                            deferredFieldTok = fieldTok;
+                        }
+                    }
 
-               pkexp.primaryKey = DValueHelper.findPrimaryKeyField(pkexp.pkOwnerType);
-                if (pkexp.primaryKey.isMultiple()) {
                 } else {
-                    TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pkexp.pkOwnerType);
-                    pkexp.physicalFieldName = pkpair.name;
+                    pkexp.primaryKey = DValueHelper.findPrimaryKeyField(pkexp.pkOwnerType);
+                    if (pkexp.primaryKey.isMultiple()) {
+                    } else {
+                        TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pkexp.pkOwnerType);
+                        pkexp.physicalFieldName = pkpair.name;
+                    }
                 }
             }
         }

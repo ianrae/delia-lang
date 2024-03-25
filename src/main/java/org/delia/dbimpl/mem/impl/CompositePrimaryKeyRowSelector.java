@@ -64,7 +64,7 @@ public class CompositePrimaryKeyRowSelector extends PrimaryKeyRowSelector {
                 return false;
             }
 
-            String target = pkWhereTok.listValue.listL.get(keyIndex++).strValue();
+            String target = pkWhereTok.compositeKeyTok.listL.get(keyIndex++).strValue();
             if (evaluator.isEqualTo(key, target)) {
                 matchCount++;
             } else {

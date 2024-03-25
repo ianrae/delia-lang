@@ -6,6 +6,7 @@ import org.delia.dval.DValueConverterService;
 import org.delia.tok.Tok;
 import org.delia.type.*;
 import org.delia.util.DValueHelper;
+import org.delia.util.DeliaExceptionHelper;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class HLDWhereHelper extends ServiceBase {
             DStructType structType = ownerType;
             PrimaryKey primaryKey = DValueHelper.findPrimaryKeyField(structType);
             if (primaryKey.isMultiple()) {
-                return createDeferredComposite(tokVisitor, primaryKey, ctx);
+                return createDeferredComposite(tokVisitor, primaryKey, where, ctx);
             } else {
                 TypePair pkpair = primaryKey.getKey();
                 DValue dval = createDeferredDValue(pkpair, tokVisitor.deferredFieldTok.fieldName, ctx);
@@ -45,13 +46,23 @@ public class HLDWhereHelper extends ServiceBase {
         }
     }
 
-    private Tok.OperandTok createDeferredComposite(HLDTokVisitor tokVisitor, PrimaryKey primaryKey, HLDBuilderContext ctx) {
+    private Tok.OperandTok createDeferredComposite(HLDTokVisitor tokVisitor, PrimaryKey primaryKey, Tok.OperandTok where, HLDBuilderContext ctx) {
         int n = primaryKey.getKeys().size();
+
+        Tok.CompositeKeyTok compositeKeyTok = null;
+        if (where instanceof Tok.PKWhereTok) {
+            Tok.PKWhereTok pktok = (Tok.PKWhereTok) where;
+            compositeKeyTok = pktok.compositeKeyTok;
+        }
+        if (compositeKeyTok == null) {
+            DeliaExceptionHelper.throwError("bad-composite-key", "Failed composite key!");
+            return null;
+        }
 
         List<Tok.ValueTok> list = new ArrayList<>();
         for(int i = 0; i < n; i++) {
             TypePair pkpair = primaryKey.getKeys().get(i);
-            Tok.DToken tok = tokVisitor.deferredFieldTok.funcL.get(0).argsL.get(i);
+            Tok.DToken tok = compositeKeyTok.listL.get(i);
 
             if (tok instanceof Tok.FieldTok) {
                 Tok.FieldTok ftok = (Tok.FieldTok) tok;
@@ -69,10 +80,10 @@ public class HLDWhereHelper extends ServiceBase {
                 list.add(valueTok);
             }
         }
-        Tok.ListTok vexp = new Tok.ListTok();
+        Tok.CompositeKeyTok vexp = new Tok.CompositeKeyTok();
         vexp.listL.addAll(list);
         Tok.PKWhereTok pktok = new Tok.PKWhereTok();
-        pktok.listValue = vexp;
+        pktok.compositeKeyTok = vexp;
         pktok.pkOwnerType = null;
         pktok.physicalFieldName = null;
         pktok .primaryKey = primaryKey;

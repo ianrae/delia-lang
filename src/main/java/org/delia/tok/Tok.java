@@ -250,7 +250,7 @@ public class Tok {
 
     public static class PKWhereTok implements Tok.OperandTok {
         public Tok.ValueTok value;
-        public Tok.ListTok listValue; //for composite keys
+        public Tok.CompositeKeyTok compositeKeyTok; //for composite keys
         public DStructType pkOwnerType;
         public String alias;
         public String physicalFieldName; //usually Customer.id but in MM can be CustomerAddressDat1.leftv
@@ -262,19 +262,19 @@ public class Tok {
             if (value != null) {
                 value.visit(visitor, this);
             }
-            if (listValue != null) {
-                listValue.visit(visitor, this);
+            if (compositeKeyTok != null) {
+                compositeKeyTok.visit(visitor, this);
             }
         }
 
         public boolean isCompositeKey() {
-            return listValue != null;
+            return compositeKeyTok != null;
         }
 
         @Override
         public String strValue() {
             if (isCompositeKey()) {
-                String s = listValue.strValue();
+                String s = compositeKeyTok.strValue();
                 return s;
             }
             String s = String.format("%s", value.strValue());

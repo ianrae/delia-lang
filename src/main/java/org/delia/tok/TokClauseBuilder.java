@@ -112,7 +112,7 @@ public class TokClauseBuilder extends ServiceBase {
 
     private Tok.WhereTok doCompositeKey(Exp.WhereClause whereClause, FieldChainVisitor visitor) {
         Tok.PKWhereTok pkWhereTok = new Tok.PKWhereTok();
-        pkWhereTok.listValue = visitor.listTok;
+        pkWhereTok.compositeKeyTok = visitor.compositeKeyTok;
         Tok.WhereTok whereTok = new Tok.WhereTok(pkWhereTok);
         return whereTok;
     }
