@@ -30,7 +30,7 @@ public class HLDWhereHelper extends ServiceBase {
                 return createDeferredComposite(tokVisitor, primaryKey, ctx);
             } else {
                 TypePair pkpair = primaryKey.getKey();
-                DValue dval = createDeferredDValue(pkpair, tokVisitor.deferredFieldTok, ctx);
+                DValue dval = createDeferredDValue(pkpair, tokVisitor.deferredFieldTok.fieldName, ctx);
 
                 Tok.ValueTok vexp = new Tok.ValueTok();
                 vexp.value = dval;
@@ -50,17 +50,19 @@ public class HLDWhereHelper extends ServiceBase {
 
         List<Tok.ValueTok> list = new ArrayList<>();
         for(int i = 0; i < n; i++) {
-            TypePair pkpair = primaryKey.getKeys().get(0);
-            if (i == 0) {
-                DValue dval = createDeferredDValue(pkpair, tokVisitor.deferredFieldTok, ctx);
+            TypePair pkpair = primaryKey.getKeys().get(i);
+            Tok.DToken tok = tokVisitor.deferredFieldTok.funcL.get(0).argsL.get(i);
+
+            if (tok instanceof Tok.FieldTok) {
+                Tok.FieldTok ftok = (Tok.FieldTok) tok;
+                DValue dval = createDeferredDValue(pkpair, ftok.fieldName, ctx);
                 Tok.ValueTok valueTok = new Tok.ValueTok();
                 valueTok.value = dval;
                 list.add(valueTok);
             } else {
-                Tok.DToken tok = tokVisitor.deferredFieldTok.funcL.get(0).argsL.get(i - 1);
+                //ValueTok
                 ScalarValueBuilder valueBuilder = factorySvc.createScalarValueBuilder(ctx.registry);
                 DType typeToUse = dvalConverterService.getType(null, pkpair.type.getShape(), ctx.registry);
-                //TODO fix. this is broken!
                 DValue dval = dvalConverterService.buildFromObject(tok.strValue(), pkpair.type.getShape(), valueBuilder,typeToUse);
                 Tok.ValueTok valueTok = new Tok.ValueTok();
                 valueTok.value = dval;
@@ -73,13 +75,14 @@ public class HLDWhereHelper extends ServiceBase {
         pktok.listValue = vexp;
         pktok.pkOwnerType = null;
         pktok.physicalFieldName = null;
+        pktok .primaryKey = primaryKey;
         return pktok;
     }
 
-    protected DValue createDeferredDValue(TypePair pair, Tok.FieldTok varExp, HLDBuilderContext ctx) {
+    protected DValue createDeferredDValue(TypePair pair, String fieldName, HLDBuilderContext ctx) {
         Shape shape = pair.type.getShape();
         DValue dval = dvalConverterService.buildDefaultValue(shape, ctx.valueBuilder);
-        DeferredDValue deferredDValue = new DeferredDValue(dval.getType(), dval.getObject(), varExp.fieldName);
+        DeferredDValue deferredDValue = new DeferredDValue(dval.getType(), dval.getObject(), fieldName);
         return deferredDValue;
     }
 

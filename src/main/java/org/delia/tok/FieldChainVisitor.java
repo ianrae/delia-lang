@@ -89,6 +89,8 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
                 if (field.funcL.isEmpty()) {
                     func = new Tok.FunctionTok(IS_DEFERRED_WHERE_CLAUSE);
                     field.funcL.add(func);
+                    Tok.FieldTok firstArg = new Tok.FieldTok(field.fieldName);
+                    func.argsL.add(firstArg);
                 } else {
                     func = field.funcL.get(0);
                 }

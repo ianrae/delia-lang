@@ -67,6 +67,8 @@ public class CompositePrimaryKeyRowSelector extends PrimaryKeyRowSelector {
             String target = pkWhereTok.listValue.listL.get(keyIndex++).strValue();
             if (evaluator.isEqualTo(key, target)) {
                 matchCount++;
+            } else {
+                break; //not a match - no need to check further
             }
         }
         return matchCount == compositeKeyFields.size();
