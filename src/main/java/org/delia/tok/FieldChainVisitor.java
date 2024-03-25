@@ -7,8 +7,6 @@ import java.util.Stack;
 public class FieldChainVisitor implements Exp.ExpVisitor {
     public static final String SCALAR_FIELD = "$__scalar__";
 
-//    public static final String IS_DEFERRED_WHERE_CLAUSE = "$$WHERE$$";
-
     public Exp.ExpBase top;
     public Exp.ExpBase prev;
     private int argCountdown = -1;
@@ -16,14 +14,9 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
     public Tok.DToken oneVal; //val or null
     public Tok.ListTok listTok;
     public Tok.CompositeKeyTok compositeKeyTok;
-//    private boolean isWhereClause = false;
 
     public FieldChainVisitor() {
     }
-
-//    public FieldChainVisitor(boolean isWhereClause) {
-//        this.isWhereClause = isWhereClause;
-//    }
 
     @Override
     public void visit(Exp.ExpBase exp) {
@@ -88,45 +81,15 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
         }
 
         if (tok instanceof Tok.FieldTok && argCountdown < 0) {
-            Tok.FieldTok field = (Tok.FieldTok)tok;
+            Tok.FieldTok field = (Tok.FieldTok) tok;
             fieldStack.push(field);
-
-//            //handle {1, c} case
-//            if (isWhereClause && listTok != null && !listTok.listL.isEmpty()) {
-//                Tok.FunctionTok func;
-//                if (field.funcL.isEmpty()) {
-//                    func = new Tok.FunctionTok(IS_DEFERRED_WHERE_CLAUSE);
-//                    field.funcL.add(func);
-//                    //drain listTok into func args
-//                    func.argsL.addAll(listTok.listL);
-//                    listTok.listL.clear();
-//                    Tok.FieldTok arg = new Tok.FieldTok(field.fieldName);
-//                    func.argsL.add(arg);
-//                } else {
-//                    func = field.funcL.get(0);
-//                }
-//            }
             return;
         }
 
         if (!fieldStack.isEmpty()) {
-//            if (isWhereClause) { //handles {c, 1} case
-//                Tok.FieldTok field = fieldStack.peek();
-//                Tok.FunctionTok func;
-//                if (field.funcL.isEmpty()) {
-//                    func = new Tok.FunctionTok(IS_DEFERRED_WHERE_CLAUSE);
-//                    field.funcL.add(func);
-//                    Tok.FieldTok firstArg = new Tok.FieldTok(field.fieldName);
-//                    func.argsL.add(firstArg);
-//                } else {
-//                    func = field.funcL.get(0);
-//                }
-//                func.argsL.add(tok);
-//            } else {
-                Tok.FieldTok field = fieldStack.peek();
-                Tok.FunctionTok func = field.funcL.get(field.funcL.size() - 1);
-                func.argsL.add(tok);
-//            }
+            Tok.FieldTok field = fieldStack.peek();
+            Tok.FunctionTok func = field.funcL.get(field.funcL.size() - 1);
+            func.argsL.add(tok);
         } else if (listTok != null) {
             listTok.listL.add(tok);
         } else {

@@ -28,6 +28,7 @@ public class HLDTokVisitor implements Tok.TokVisitor {
             } else if (exp instanceof Tok.PKWhereTok) {
                 Tok.PKWhereTok pkexp = (Tok.PKWhereTok) exp;
                 pkexp.pkOwnerType = ownerType;
+                pkexp.primaryKey = DValueHelper.findPrimaryKeyField(pkexp.pkOwnerType);
                 if (pkexp.isCompositeKey()) {
                     for(Tok.DToken tok: pkexp.compositeKeyTok.listL) {
                         if (tok instanceof Tok.FieldTok) {
@@ -36,9 +37,7 @@ public class HLDTokVisitor implements Tok.TokVisitor {
                             deferredFieldTok = fieldTok;
                         }
                     }
-
                 } else {
-                    pkexp.primaryKey = DValueHelper.findPrimaryKeyField(pkexp.pkOwnerType);
                     if (pkexp.primaryKey.isMultiple()) {
                     } else {
                         TypePair pkpair = DValueHelper.findPrimaryKeyFieldPair(pkexp.pkOwnerType);
