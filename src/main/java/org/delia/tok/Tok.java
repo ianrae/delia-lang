@@ -236,7 +236,9 @@ public class Tok {
             if (value != null) {
                 value.visit(visitor, this);
             }
-            //TODO compositekey:implement defeferred dval
+            if (listValue != null) {
+                listValue.visit(visitor, this);
+            }
         }
 
         public boolean isCompositeKey() {

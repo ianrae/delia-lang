@@ -79,11 +79,27 @@ public class FieldChainVisitor implements Exp.ExpVisitor {
         if (tok instanceof Tok.FieldTok && argCountdown < 0) {
             Tok.FieldTok field = (Tok.FieldTok)tok;
             fieldStack.push(field);
+
+            //handle {1, c} case
+            if (isWhereClause && listTok != null && !listTok.listL.isEmpty()) {
+                Tok.FunctionTok func;
+                if (field.funcL.isEmpty()) {
+                    func = new Tok.FunctionTok(IS_DEFERRED_WHERE_CLAUSE);
+                    field.funcL.add(func);
+                    //drain listTok into func args
+                    func.argsL.addAll(listTok.listL);
+                    listTok.listL.clear();
+                    Tok.FieldTok arg = new Tok.FieldTok(field.fieldName);
+                    func.argsL.add(arg);
+                } else {
+                    func = field.funcL.get(0);
+                }
+            }
             return;
         }
 
         if (!fieldStack.isEmpty()) {
-            if (isWhereClause) {
+            if (isWhereClause) { //handles {c, 1} case
                 Tok.FieldTok field = fieldStack.peek();
                 Tok.FunctionTok func;
                 if (field.funcL.isEmpty()) {
