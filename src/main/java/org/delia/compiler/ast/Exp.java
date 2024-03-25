@@ -230,6 +230,32 @@ public class Exp {
         }
     }
 
+    public static class CompositeKeyExp implements ElementExp {
+        public List<ElementExp> listL = new ArrayList<>();
+
+        @Override
+        public void visit(ExpVisitor visitor) {
+            visitor.visit(this);
+            for (ElementExp exp : listL) {
+                exp.visit(visitor);
+            }
+        }
+
+        @Override
+        public String strValue() {
+            StringJoiner joiner = new StringJoiner(",");
+            listL.forEach(exp -> joiner.add(exp.strValue()));
+            return joiner.toString();
+        }
+
+        @Override
+        public String toString() {
+            StringJoiner joiner = new StringJoiner(",");
+            listL.forEach(exp -> joiner.add(exp.toString()));
+            return joiner.toString();
+        }
+    }
+
     public interface OperandExp extends ExpBase {
         String strValue();
     }

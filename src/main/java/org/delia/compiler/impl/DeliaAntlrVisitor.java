@@ -722,7 +722,7 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
                 }
             }
             //TODO handle empty list
-            Exp.ListExp listExp = new Exp.ListExp();
+            Exp.CompositeKeyExp listExp = new Exp.CompositeKeyExp();
             CompilerResults finalzz = new CompilerResults(listExp);
             for (CompilerResults tmp: list) {
                 listExp.listL.add(tmp.elem);

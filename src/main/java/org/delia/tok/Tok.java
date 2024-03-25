@@ -184,6 +184,32 @@ public class Tok {
         }
     }
 
+    public static class CompositeKeyTok implements Tok.DToken {
+        public List<Tok.DToken> listL = new ArrayList<>();
+
+        @Override
+        public void visit(Tok.TokVisitor visitor, Tok.TokBase parent) {
+            visitor.visit(this, parent);
+            for (Tok.DToken exp : listL) {
+                exp.visit(visitor, this);
+            }
+        }
+
+        @Override
+        public String strValue() {
+            StringJoiner joiner = new StringJoiner(",");
+            listL.forEach(exp -> joiner.add(exp.strValue()));
+            return joiner.toString();
+        }
+
+        @Override
+        public String toString() {
+            StringJoiner joiner = new StringJoiner(",");
+            listL.forEach(exp -> joiner.add(exp.toString()));
+            return joiner.toString();
+        }
+    }
+
     public interface OperandTok extends Tok.TokBase {
         String strValue();
     }
