@@ -11,15 +11,15 @@ import org.delia.error.ErrorTracker;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.lld.LLD;
 import org.delia.relation.RelationInfo;
-import org.delia.type.DStructType;
-import org.delia.type.DTypeRegistry;
-import org.delia.type.DValue;
-import org.delia.type.TypePair;
+import org.delia.type.*;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
+import org.delia.util.StrCreator;
+import org.delia.util.StringTrail;
 import org.delia.valuebuilder.ScalarValueBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,11 +43,24 @@ public class MemInsert extends ServiceBase {
             generatedId = addSerialValuesIfNeeded(dval, tbl, stuff, localET);
 
             //TODO: fldvalue.field is a physical field. will this be a problem if we look it up in DStructType?
+            PrimaryKey primaryKey = structType.getPrimaryKey();
+            List<String> alreadyChecked = new ArrayList<>();
+            if (primaryKey.isMultiple()) {
+                for(TypePair pair: primaryKey.getKeys()) {
+                    alreadyChecked.add(pair.name);
+                }
+                checkUniqueness(dval, tbl, alreadyChecked, structType, localET);
+            }
+
             if (!tbl.getList().isEmpty()) { //perf thing. don't bother checking if rowL is empty
                 for (LLD.LLFieldValue fldValue : fieldL) {
                     String fieldName = fldValue.field.getFieldName();
-                    if (structType.fieldIsUnique(fieldName) || structType.fieldIsPrimaryKey(fieldName)) {
-                        checkUniqueness(dval, tbl, fieldName, structType, localET);
+                    if (alreadyChecked.contains(fieldName)) {
+                        continue;
+                    }
+                    alreadyChecked.add(fieldName);
+                    if (structType.fieldIsUnique(fieldName)) {
+                        checkUniqueness(dval, tbl, Collections.singletonList(fieldName), structType, localET);
                     }
                 }
             }
@@ -143,28 +156,64 @@ public class MemInsert extends ServiceBase {
      * @param localET
      * @return
      */
-    private boolean checkUniqueness(DValue insertedDVal, MemDBTable tbl, String fieldName, DStructType structType, ErrorTracker localET) {
+    private boolean checkUniqueness(DValue insertedDVal, MemDBTable tbl, List<String> uniqueFields, DStructType structType, ErrorTracker localET) {
         DValueCompareService compareSvc = factorySvc.getDValueCompareService();
-        String uniqueField = fieldName;
-        DValue inner = DValueHelper.getFieldValue(insertedDVal, uniqueField);
-        if (inner == null) {
-            return true; //nothing to do TODO: does uniqueness include null (i.e. 2 null values...)
+        List<DValue> innerVals = new ArrayList<>();
+        for(String fieldName: uniqueFields) {
+            DValue inner = DValueHelper.getFieldValue(insertedDVal, fieldName);
+            if (inner == null) {
+                return true; //nothing to do TODO: does uniqueness include null (i.e. 2 null values...)
+            }
+            innerVals.add(inner);
         }
 
         boolean b;
         List<DValue> list = tbl.getList();
         if (tbl.needsSynchronizationOnTraverse()) {
             synchronized (list) {
-                b = traverseList(list, insertedDVal, uniqueField, compareSvc, inner, localET, structType);
+                b = traverseList(list, insertedDVal, uniqueFields, compareSvc, innerVals, localET, structType);
             }
         } else {
-            b = traverseList(list, insertedDVal, uniqueField, compareSvc, inner, localET, structType);
+            b = traverseList(list, insertedDVal, uniqueFields, compareSvc, innerVals, localET, structType);
         }
 
         return b;
     }
 
-    private boolean traverseList(List<DValue> list, DValue insertedDVal, String uniqueField, DValueCompareService compareSvc, DValue inner, ErrorTracker localET, DStructType structType) {
+    private boolean traverseList(List<DValue> list, DValue insertedDVal, List<String> uniqueFields, DValueCompareService compareSvc, List<DValue> innerVals, ErrorTracker localET, DStructType structType) {
+        if (uniqueFields.size() == 1) {
+            DValue inner = innerVals.get(0);
+            return traverseListSingle(list, insertedDVal, uniqueFields.get(0), compareSvc, inner, localET, structType);
+        }
+
+        for (DValue existing : list) {
+            if (existing != null && existing != insertedDVal) {
+
+                int sameCount = 0;
+                StringTrail trail = new StringTrail();
+                for(int k = 0; k < uniqueFields.size(); k++) {
+                    String uniqueField = uniqueFields.get(k);
+                    DValue inner = innerVals.get(k);
+                    DValue oldVal = DValueHelper.getFieldValue(existing, uniqueField);
+                    if (oldVal != null) {
+                        int n = compareSvc.compare(oldVal, inner);
+                        if (n == 0) {
+                            sameCount++;
+                            trail.add(String.format("'%s' = '%s'", uniqueField, inner.asString()));
+                        }
+                    }
+                }
+                if (sameCount == uniqueFields.size()) {
+                    DetailedError err = new DetailedError("duplicate-unique-value", String.format("%s. row with unique field %s already exists", structType.getName(), trail.getTrail()));
+                    err.setFieldName(uniqueFields.get(0)); //there are multiple but we'll just use the first one here
+                    localET.add(err);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    private boolean traverseListSingle(List<DValue> list, DValue insertedDVal, String uniqueField, DValueCompareService compareSvc, DValue inner, ErrorTracker localET, DStructType structType) {
         for (DValue existing : list) {
             if (existing != null && existing != insertedDVal) {
                 DValue oldVal = DValueHelper.getFieldValue(existing, uniqueField);
