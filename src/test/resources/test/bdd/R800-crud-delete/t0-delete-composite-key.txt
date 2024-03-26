@@ -1,0 +1,32 @@
+# delete with composite keys
+
+FEATURE: delete
+background:
+  type Flight struct {id int primaryKey, id2 string primaryKey, wid int optional }  end
+thenType: struct
+
+---
+title: delete1
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  delete Flight[{55, 'abc'}]
+  let x = Flight[{55, 'abc'}]
+then:
+null
+
+---
+title: delete and requery
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  delete Flight[{55, 'abc'}]
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vid:56
+ vid2:'abc'
+ vwid:3
+}

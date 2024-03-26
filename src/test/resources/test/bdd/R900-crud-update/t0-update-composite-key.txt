@@ -1,0 +1,31 @@
+# update with composite keys
+
+FEATURE: update
+background:
+  type Flight struct {id int primaryKey, id2 string primaryKey, wid int optional }  end
+thenType: struct
+
+---
+title: update1
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  update Flight[{55, 'abc'}] {wid:12}
+  let x = Flight[{55, 'abc'}]
+then:
+value:a:Flight {
+ vid:55
+ vid2:'abc'
+ vwid:12
+}
+
+---
+title: update res
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  update Flight[{55, 'abc'}] {wid:12}
+then:
+1

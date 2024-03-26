@@ -144,6 +144,7 @@ public class AllBDDTests extends BDDTestBase {
     @Test
     public void testR800() {
         runR800File("t0-delete.txt", 4);
+        runR800File("t0-delete-composite-key.txt", 2);
     }
 
     @Test
@@ -156,6 +157,7 @@ public class AllBDDTests extends BDDTestBase {
         runR900File("t0-update-mm-other.txt", 2); //TODO: fix two
         runR900File("t0-update-mm-other-othertbl.txt", 0); //TODO: fix two
         runR900File("t0-update-one-field.txt", 1);
+        runR900File("t0-update-composite-key.txt", 2);
 
         //TODO: !!!need tests for 1:1 and 1:N especially update Customer[55] { addr:[100,101]}
         //TODO: need tests for [true] and [something op something] for 1:1,1:N,M:N
@@ -422,15 +424,15 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 1;
+        singleTestToRunIndex = 5;
         enableAllFileCheck = false;
         DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
-//        runR420File("t0-default-mismatch.txt", 1);
-        runR1320File("t0-let-composite-key.txt", 4);
+//        runR900File("t0-update-composite-key.txt", 2);
+        runR400File("t0-field-primarykey.txt", 6);
     }
 
     //---

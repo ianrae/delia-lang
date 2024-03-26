@@ -134,6 +134,7 @@ public class PostgresBDDTests extends BDDTestBase {
 	public void testR800() {
 		runR800File("t0-delete.txt", 4);
 		runR800File("t0-delete-mm.txt", 6);
+		runR800File("t0-delete-composite-key.txt", 2);
 	}
 
 	@Test
@@ -146,6 +147,7 @@ public class PostgresBDDTests extends BDDTestBase {
 		runR900File("t0-update-mm-other.txt", 2); //TODO: fix two
 		runR900File("t0-update-mm-other-othertbl.txt", 0); //TODO: fix two
 		runR900File("t0-update-one-field.txt", 1);
+		runR900File("t0-update-composite-key.txt", 2);
 
 		//TODO: !!!need tests for 1:1 and 1:N especially update Customer[55] { addr:[100,101]}
 	}
@@ -184,6 +186,10 @@ public class PostgresBDDTests extends BDDTestBase {
 		runR1300File("t0-let-query.txt", 7);
 		runR1300File("t0-let-varref.txt", 4); //TODO fix one
 		runR1300File("t0-let-query-implicit-fetch.txt", 0);
+	}
+	@Test
+	public void testR1320() {
+		runR1320File("t0-let-composite-key.txt", 4);
 	}
 
 	@Test

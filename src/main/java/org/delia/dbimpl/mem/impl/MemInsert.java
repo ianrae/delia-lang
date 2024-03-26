@@ -45,7 +45,7 @@ public class MemInsert extends ServiceBase {
             //TODO: fldvalue.field is a physical field. will this be a problem if we look it up in DStructType?
             PrimaryKey primaryKey = structType.getPrimaryKey();
             List<String> alreadyChecked = new ArrayList<>();
-            if (primaryKey.isMultiple()) {
+            if (primaryKey != null && primaryKey.isMultiple()) {
                 for(TypePair pair: primaryKey.getKeys()) {
                     alreadyChecked.add(pair.name);
                 }
@@ -59,7 +59,7 @@ public class MemInsert extends ServiceBase {
                         continue;
                     }
                     alreadyChecked.add(fieldName);
-                    if (structType.fieldIsUnique(fieldName)) {
+                    if (structType.fieldIsUnique(fieldName) || structType.fieldIsPrimaryKey(fieldName)) {
                         checkUniqueness(dval, tbl, Collections.singletonList(fieldName), structType, localET);
                     }
                 }
