@@ -15,12 +15,56 @@ when:
 then:
 value:a:Flight {
  vid:55
- vid2:abc
+ vid2:'abc'
  vwid:1
 }
 value:a:Flight {
  vid:56
- vid2:abc
+ vid2:'abc'
  vwid:3
 }
 
+---
+title: query one
+#Note. the then value renders string primaryKey with quotes, but normal fields rendered without quotes. wierd.
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  let x = Flight[{55, 'abc'}]
+then:
+value:a:Flight {
+ vid:55
+ vid2:'abc'
+ vwid:1
+}
+
+---
+title: query by one key
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  let x = Flight[id2 == 'abc']
+then:
+value:a:Flight {
+ vid:55
+ vid2:'abc'
+ vwid:1
+}
+value:a:Flight {
+ vid:56
+ vid2:'abc'
+ vwid:3
+}
+
+---
+title: query none
+#Note. a then value of 'null' means x returned an empty list in the query
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  let x = Flight[{55, 'def'}]
+then:
+null

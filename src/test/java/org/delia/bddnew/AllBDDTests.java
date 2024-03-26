@@ -198,7 +198,7 @@ public class AllBDDTests extends BDDTestBase {
     }
     @Test
     public void testR1320() {
-        runR1320File("t0-let-composite-key.txt", 1);
+        runR1320File("t0-let-composite-key.txt", 4);
     }
 
     @Test
@@ -422,7 +422,7 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-//        singleTestToRunIndex = 5;
+        singleTestToRunIndex = 1;
         enableAllFileCheck = false;
         DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
@@ -430,7 +430,7 @@ public class AllBDDTests extends BDDTestBase {
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
 //        runR420File("t0-default-mismatch.txt", 1);
-        runR1320File("t0-let-composite-key.txt", 1);
+        runR1320File("t0-let-composite-key.txt", 4);
     }
 
     //---

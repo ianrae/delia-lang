@@ -74,7 +74,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             NewWhereSqlVisitor visitor = new NewWhereSqlVisitor(factorySvc);
             //visitor.sc = new StrCreator(); //local one
             visitor.top = statement.whereTok.where;
-            visitor.pkpair = DValueHelper.findPrimaryKeyFieldPair(statement.table.physicalType);
+            visitor.pkpair = DValueHelper.findPrimaryKeyFieldPair(statement.table.physicalType);  //will be ignored for composite keys
             visitor.mainAlias = statement.table.alias;
 //            visitor.statement = statement;
             statement.whereTok.visit(visitor, null);
@@ -134,7 +134,7 @@ public class LLDSqlGenerator extends ServiceBase implements LLD.LLStatementRende
             NewWhereSqlVisitor visitor = new NewWhereSqlVisitor(factorySvc);
             //visitor.sc = new StrCreator(); //local one
             visitor.top = statement.whereTok.where;
-            visitor.pkpair = DValueHelper.findPrimaryKeyFieldPair(statement.table.physicalType);
+            visitor.pkpair = DValueHelper.findPrimaryKeyFieldPair(statement.table.physicalType);  //will be ignored for composite keys
             visitor.mainAlias = statement.table.alias;
 //            visitor.statement = statement;
             statement.whereTok.visit(visitor, null);

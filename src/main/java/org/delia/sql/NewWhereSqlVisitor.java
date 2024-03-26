@@ -61,9 +61,23 @@ public class NewWhereSqlVisitor implements Tok.TokVisitor {
                     Tok.PKWhereTok pktok = (Tok.PKWhereTok) exp;
                     String tmp = "?"; //sqlValueRenderer.renderAsSql(vexp.value, pkpair.type, null);
                     String alias = pktok.alias != null ? pktok.alias : mainAlias;
-                    String fieldName = pktok.physicalFieldName != null ? pktok.physicalFieldName : pkpair.name;
-                    sc.o("%s = %s", genField(alias, fieldName), tmp);
-                    return sc.toString();
+                    if (pktok.primaryKey != null && pktok.isCompositeKey()) {
+                        int index = 0;
+                        for(TypePair pair: pktok.primaryKey.getKeys()) {
+                            String fieldName = pair.name;
+                            if (index > 0) {
+                                sc.addStr(" and ");
+                            }
+                            sc.o("%s = %s", genField(alias, fieldName), tmp);
+                            index++;
+                        }
+                        return sc.toString();
+
+                    } else {
+                        String fieldName = pktok.physicalFieldName != null ? pktok.physicalFieldName : pkpair.name;
+                        sc.o("%s = %s", genField(alias, fieldName), tmp);
+                        return sc.toString();
+                    }
                 }
 
                 Tok.ValueTok vexp = TokVisitorUtils.getSingleChainValue((Tok.OperandTok) exp);
