@@ -33,6 +33,7 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
         R1100_userfn,
         R1200_let_scalar,
         R1300_let_query,
+        R1320_let_composite_keys,
         R1350_filter_expr,
         R1400_let_filterfn,
         R1500_let_queryfn,
@@ -196,6 +197,9 @@ public abstract class BDDTestBase { //extends SeedeTestBase {
     }
     protected int runR1300File(String filename, int numTests) {
         return runBBBTest(BDDGroup.R1300_let_query, filename, numTests);
+    }
+    protected int runR1320File(String filename, int numTests) {
+        return runBBBTest(BDDGroup.R1320_let_composite_keys, filename, numTests);
     }
     protected int runR1350File(String filename, int numTests) {
         return runBBBTest(BDDGroup.R1350_filter_expr, filename, numTests);

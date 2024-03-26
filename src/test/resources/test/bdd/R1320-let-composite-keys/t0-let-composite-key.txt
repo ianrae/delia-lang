@@ -1,0 +1,24 @@
+# let query tests with composite keys
+
+FEATURE: let-query
+background:
+  type Flight struct {id int primaryKey, id2 string primaryKey, wid int optional }  end
+thenType: struct
+
+---
+title: query all
+given:
+  insert Flight {id: 55, id2:'abc', wid: 1 }
+  insert Flight {id: 56, id2:'abc', wid: 3 }
+when:
+  let x = Flight[true]
+then:
+value:a:Flight {
+ vid:55
+ vwid:1
+}
+value:a:Flight {
+ vid:56
+ vwid:3
+}
+

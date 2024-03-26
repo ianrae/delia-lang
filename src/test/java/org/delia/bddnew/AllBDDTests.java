@@ -196,6 +196,10 @@ public class AllBDDTests extends BDDTestBase {
         runR1300File("t0-let-varref.txt", 4); //TODO fix one
         runR1300File("t0-let-query-implicit-fetch.txt", 0);
     }
+    @Test
+    public void testR1320() {
+        runR1320File("t0-let-composite-key.txt", 1);
+    }
 
     @Test
     public void testR1350() {
@@ -425,9 +429,8 @@ public class AllBDDTests extends BDDTestBase {
         UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
-//        runR420File("t0-default.txt", 2);
-//        runR420File("t0-default-types.txt", 6);
-        runR420File("t0-default-mismatch.txt", 1);
+//        runR420File("t0-default-mismatch.txt", 1);
+        runR1320File("t0-let-composite-key.txt", 1);
     }
 
     //---
