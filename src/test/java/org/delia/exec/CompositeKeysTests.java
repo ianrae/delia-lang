@@ -6,6 +6,7 @@ import org.delia.DeliaSession;
 import org.delia.base.UnitTestLog;
 import org.delia.core.FactoryServiceImpl;
 import org.delia.db.sql.ConnectionDefinition;
+import org.delia.error.DeliaError;
 import org.delia.error.SimpleErrorTracker;
 import org.delia.log.DeliaLog;
 import org.delia.runner.ResultValue;
@@ -33,13 +34,9 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
         ResultValue res = delia.continueExecution(src, sess);
         assertEquals(true, res.ok);
 
-        src = "let x = Customer[1]";
-        res = delia.continueExecution(src, sess);
-
-        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
-        assertEquals(50, dval.asStruct().getField("wid").asInt());
+        chkFound(sess, "1");
+        chkNotFound(sess, "2");
     }
-
 
     @Test
     public void testMultiplePK() {
@@ -50,11 +47,9 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
         ResultValue res = delia.continueExecution(src, sess);
         assertEquals(true, res.ok);
 
-        src = "let x = Customer[{1,'abc'}]";
-        res = delia.continueExecution(src, sess);
-
-        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
-        assertEquals(50, dval.asStruct().getField("wid").asInt());
+        chkFound(sess, "{1,'abc'}");
+        chkNotFound(sess, "{2,'abc'}");
+        chkNotFound(sess, "{1,'def'}");
     }
 
     @Test
@@ -63,15 +58,13 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
         DeliaSession sess = initDelia(src);
 
         src = "let c = 1\n";
+        src += "let c2 = 2\n";
         src += "insert Customer {id:1, wid:50, name:'a1'}";
         ResultValue res = delia.continueExecution(src, sess);
         assertEquals(true, res.ok);
 
-        src = "let x = Customer[c]";
-        res = delia.continueExecution(src, sess);
-
-        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
-        assertEquals(50, dval.asStruct().getField("wid").asInt());
+        chkFound(sess, "c");
+        chkNotFound(sess, "c2");
     }
 
     @Test
@@ -80,15 +73,14 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
         DeliaSession sess = initDelia(src);
 
         src = "let c = 1\n";
+        src += "let c2 = 2\n";
         src += "insert Customer {id:1, id2:'abc', wid:50, name:'a1'}";
         ResultValue res = delia.continueExecution(src, sess);
         assertEquals(true, res.ok);
 
-        src = "let x = Customer[{c,'abc'}]";
-        res = delia.continueExecution(src, sess);
-
-        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
-        assertEquals(50, dval.asStruct().getField("wid").asInt());
+        chkFound(sess, "{c,'abc'}");
+        chkNotFound(sess, "{c,'def'}");
+        chkNotFound(sess, "{c2,'abc'}");
     }
 
     @Test
@@ -98,15 +90,14 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
 
         //this time we'll use var in 2nd arg
         src = "let c = 'abc'\n";
+        src += "let c2 = 2\n";
         src += "insert Customer {id:1, id2:'abc', wid:50, name:'a1'}";
         ResultValue res = delia.continueExecution(src, sess);
         assertEquals(true, res.ok);
 
-        src = "let x = Customer[{1, c}]";
-        res = delia.continueExecution(src, sess);
-
-        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
-        assertEquals(50, dval.asStruct().getField("wid").asInt());
+        chkFound(sess, "{1, c}");
+        chkNotFound(sess, "{2, c}");
+        chkNotFound(sess, "{1, c2}");
     }
 
     //---
@@ -123,5 +114,35 @@ public class CompositeKeysTests extends DeliaRunnerTestBase {
 
         DeliaSession sess = delia.beginSession(src);
         return sess;
+    }
+
+    private void chkFound(DeliaSession sess, String arg) {
+        String src = String.format("let x = Customer[%s]", arg);
+        ResultValue res = delia.continueExecution(src, sess);
+
+        if (! res.errors.isEmpty()) {
+            log("errors: ");
+            for(DeliaError err: res.errors) {
+                log(err.toString());
+            }
+        }
+        assertEquals(true, res.ok);
+
+        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
+        assertEquals(50, dval.asStruct().getField("wid").asInt());
+    }
+    private void chkNotFound(DeliaSession sess, String arg) {
+        String src = String.format("let x = Customer[%s]", arg);
+        ResultValue res = delia.continueExecution(src, sess);
+
+        if (! res.errors.isEmpty()) {
+            log("errors: ");
+            for(DeliaError err: res.errors) {
+                log(err.toString());
+            }
+        }
+        assertEquals(true, res.ok);
+        DValue dval = sess.getExecutionContext().varMap.get("x").getAsDValue();
+        assertEquals(null, dval);
     }
 }
