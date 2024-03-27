@@ -23,6 +23,9 @@ public class OtherTests {
         assertEquals("abc", s);
 
         String url = "http://localhost:8080/_api/v1/subscri";
+
+        String x2 = null;
+assertEquals(false, url.equals(x2));
     }
 
     @Test

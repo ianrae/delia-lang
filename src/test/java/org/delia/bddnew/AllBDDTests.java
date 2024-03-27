@@ -424,7 +424,7 @@ public class AllBDDTests extends BDDTestBase {
 
     @Test
     public void testDebug() {
-        singleTestToRunIndex = 5;
+//        singleTestToRunIndex = 5;
         enableAllFileCheck = false;
         DeliaSnippetRunner.generateSqlWhenMEMDBTypeFlag = true; //gen sql
 //		BDDTesterEx.disableSQLLoggingDuringSchemaMigration = false;
@@ -432,7 +432,12 @@ public class AllBDDTests extends BDDTestBase {
         log.setLevel(LogLevel.DEBUG);
 //		diagnosticFilter = "I"; //log insert statements
 //        runR900File("t0-update-composite-key.txt", 2);
-        runR400File("t0-field-primarykey.txt", 6);
+//        runR400File("t0-field-primarykey.txt", 6);
+
+        runR500File("t0-relation.txt", 2);
+        runR500File("t0-relation-one-to-one-oneway.txt", 9);
+        runR500File("t0-relation-one-to-many.txt", 9);
+
     }
 
     //---
