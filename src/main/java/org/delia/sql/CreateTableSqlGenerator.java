@@ -7,6 +7,7 @@ import org.delia.db.SqlStatement;
 import org.delia.hld.dat.DatService;
 import org.delia.lld.LLD;
 import org.delia.rule.rules.UniqueFieldsRule;
+import org.delia.util.DValueHelper;
 import org.delia.util.ListWalker;
 import org.delia.util.StrCreator;
 import org.delia.valuebuilder.ScalarValueBuilder;
@@ -42,7 +43,7 @@ public class CreateTableSqlGenerator extends ServiceBase {
         sc.nl();
         List<LLD.LLField> fieldsNeedingConstraints = buildConstraintList(statement);
         List<UniqueFieldsRule> uniqueFieldsList = fieldGen.buildUniqueFields(statement);
-        boolean hasCompositePK = statement.table.physicalType.getPrimaryKey().isMultiple();
+        boolean hasCompositePK = DValueHelper.isCompositePK(statement.table.physicalType);
         boolean isMoreAfterFields = fieldsNeedingConstraints.size() > 0 || uniqueFieldsList.size() > 0 || hasCompositePK;
 
         ListWalker<LLD.LLField> walker = new ListWalker<>(buildFieldList(statement));

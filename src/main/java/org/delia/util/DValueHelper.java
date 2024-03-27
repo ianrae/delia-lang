@@ -38,11 +38,6 @@ public class DValueHelper {
 
 		PrimaryKeyValue pkv = new PrimaryKeyValue(dval);
 		return pkv.getKeyValue();
-//
-////		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-//		TypePair keyPair = DValueHelper.findPrimaryKeyFieldPair(dval.getType());
-//		DValue inner = dval.asStruct().getField(keyPair.name);
-//		return inner;
 	}
 
 	//TODO:compositekey-fox
@@ -61,6 +56,14 @@ public class DValueHelper {
 		DStructType dtype = (DStructType) inner;
 		PrimaryKey prikey = dtype.getPrimaryKey();
 		return prikey;
+	}
+	public static boolean isCompositePK(DType inner) {
+		if (! inner.isStructShape()) {
+			return false;
+		}
+		DStructType dtype = (DStructType) inner;
+		PrimaryKey prikey = dtype.getPrimaryKey();
+		return prikey.isMultiple();
 	}
 	public static List<TypePair> findAllUniqueFieldPair(DType inner) {
 		if (! inner.isStructShape()) {

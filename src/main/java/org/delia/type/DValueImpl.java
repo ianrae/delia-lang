@@ -7,6 +7,8 @@ import java.util.Map;
 import org.delia.log.LoggableBlob;
 import org.delia.util.BlobUtils;
 import org.delia.util.DValueHelper;
+import org.delia.util.ListWalker;
+import org.delia.util.StrCreator;
 
 
 public class DValueImpl implements DValue, DValueInternal {
@@ -150,10 +152,27 @@ public class DValueImpl implements DValue, DValueInternal {
 	public String toString() {
 		String s = "";
 		if (object != null && type.isStructShape()) {
-			DValue pkval = DValueHelper.findPrimaryKeyValue(this);
-			if (pkval != null) {
-				s = "." + pkval.toString();
-			}
+            PrimaryKey primaryKey = DValueHelper.findPrimaryKeyField(getType());
+            String str = "";
+            if (primaryKey.isMultiple()) {
+                ListWalker<TypePair> walker1 = new ListWalker<>(primaryKey.getKeys());
+                StrCreator sc = new StrCreator();
+                sc.addStr("{");
+                while (walker1.hasNext()) {
+                    TypePair pair = walker1.next();
+                    sc.o("%s", pair.name);
+                    walker1.addIfNotLast(sc, ",");
+                }
+                sc.addStr("}");
+                str = sc.toString();
+            } else {
+                DValue pkval = DValueHelper.findPrimaryKeyValue(this);
+                if (pkval != null) {
+                    str = pkval.toString();
+                }
+            }
+
+			s = "." + str;
 		} else if (object != null && type.isNumericShape()) {
 			s = ": " + object.toString();
 		} else if (object != null && type.isShape(Shape.BLOB)) {
