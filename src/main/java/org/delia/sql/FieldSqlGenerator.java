@@ -12,6 +12,7 @@ import org.delia.rule.RuleOperand;
 import org.delia.rule.rules.UniqueFieldsRule;
 import org.delia.type.DStructType;
 import org.delia.type.DValue;
+import org.delia.type.PrimaryKey;
 import org.delia.type.TypePair;
 import org.delia.util.DRuleHelper;
 import org.delia.util.DValueHelper;
@@ -92,6 +93,7 @@ public class FieldSqlGenerator extends ServiceBase {
                               String changeFlags) {
         boolean isSerial = physicalType.fieldIsSerial(fieldName);
         boolean isPrimaryKey = physicalType.fieldIsPrimaryKey(fieldName);
+        boolean isCompositePK = physicalType.getPrimaryKey().isMultiple();
         if (hasFlag(changeFlags, "S")) {
             isSerial = true;
         }
@@ -138,7 +140,7 @@ public class FieldSqlGenerator extends ServiceBase {
         if (isSerial) {
             sc.o(" SERIAL");
         }
-        if (isPrimaryKey) {
+        if (isPrimaryKey && !isCompositePK) {
             sc.o(" PRIMARY KEY");
         }
     }
@@ -206,5 +208,28 @@ public class FieldSqlGenerator extends ServiceBase {
             walker1.addIfNotLast(sc, ", ");
             sc.nl();
         }
+    }
+
+    public void generateCompositePrimaryKey(StrCreator sc, DStructType physicalType) {
+        if (!physicalType.getPrimaryKey().isMultiple()) {
+            return;
+        }
+
+        /* CONSTRAINT constraint_name PRIMARY KEY(column_1, column_2,...);
+         */
+        String constraintName = String.format("pk_constraint");
+        sc.o("CONSTRAINT %s PRIMARY KEY(", constraintName);
+
+        PrimaryKey primaryKey = physicalType.getPrimaryKey();
+
+        ListWalker<TypePair> walker1 = new ListWalker<>(primaryKey.getKeys());
+        while (walker1.hasNext()) {
+            TypePair pair = walker1.next();
+            sc.o(" %s", pair.name);
+            walker1.addIfNotLast(sc, ", ");
+        }
+
+        sc.o(")");
+        sc.nl();
     }
 }

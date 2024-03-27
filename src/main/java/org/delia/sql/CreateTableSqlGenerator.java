@@ -42,7 +42,8 @@ public class CreateTableSqlGenerator extends ServiceBase {
         sc.nl();
         List<LLD.LLField> fieldsNeedingConstraints = buildConstraintList(statement);
         List<UniqueFieldsRule> uniqueFieldsList = fieldGen.buildUniqueFields(statement);
-        boolean isMoreAfterFields = fieldsNeedingConstraints.size() > 0 || uniqueFieldsList.size() > 0;
+        boolean hasCompositePK = statement.table.physicalType.getPrimaryKey().isMultiple();
+        boolean isMoreAfterFields = fieldsNeedingConstraints.size() > 0 || uniqueFieldsList.size() > 0 || hasCompositePK;
 
         ListWalker<LLD.LLField> walker = new ListWalker<>(buildFieldList(statement));
         while (walker.hasNext()) {
@@ -69,7 +70,7 @@ public class CreateTableSqlGenerator extends ServiceBase {
         }
 
         //constraints
-        isMoreAfterFields = uniqueFieldsList.size() > 0;
+        isMoreAfterFields = uniqueFieldsList.size() > 0 || hasCompositePK;
         walker = new ListWalker<>(fieldsNeedingConstraints);
         while (walker.hasNext()) {
             LLD.LLField field = walker.next();
@@ -89,6 +90,9 @@ public class CreateTableSqlGenerator extends ServiceBase {
 
         //constraints
         fieldGen.doUniqueFields(sc, uniqueFieldsList);
+        if (hasCompositePK) {
+            fieldGen.generateCompositePrimaryKey(sc, statement.table.physicalType);
+        }
 
         sc.o(");");
 
