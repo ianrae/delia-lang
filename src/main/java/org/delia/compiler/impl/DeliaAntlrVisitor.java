@@ -363,7 +363,7 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
         Exp.ListExp listExp = new Exp.ListExp();
         fieldAST.listExp = listExp;
 
-        for (int i = 0; i < ctx.elemList().getChildCount(); i++) {
+        for (int i = 0; i < ctx.valueElemList().getChildCount(); i++) {
             child = ctx.getChild(i);
             CompilerResults zoo1 = visitElem(null);
             listExp.listL.add(zoo1.elem);
@@ -478,22 +478,33 @@ public class DeliaAntlrVisitor extends deliaBaseVisitor<CompilerResults> {
             Exp.ListExp listExp = new Exp.ListExp();
             fieldAST.listExp = listExp;
 
-            deliaParser.ElemListContext elemListContext = (deliaParser.ElemListContext) child;
+            deliaParser.ValueElemListContext elemListContext = (deliaParser.ValueElemListContext) child;
             for (int i = 0; i < elemListContext.getChildCount(); i += 2) { //count by 2 to skip ','
                 child = elemListContext.getChild(i);
+                if (child instanceof deliaParser.ValueElemContext) {
+                    deliaParser.ValueElemContext vvexp = (deliaParser.ValueElemContext) child;
+                    child = vvexp.getChild(0); //cexpr
+                    child = child.getChild(0);
+                    //TODO handle '{' elem ( SEP elem )* '}' later
+                }
                 CompilerResults zoo1 = visitElem((deliaParser.ElemContext) child);
                 listExp.listL.add(zoo1.elem);
             }
 
         } else {
-            CompilerResults zooElem = myVisitScalar(child.getChild(0));
-            if (zooElem.elem instanceof Exp.NullExp) {
-                fieldAST.valueExp = new Exp.ValueExp();
-                fieldAST.valueExp.value = null;
-            } else if (zooElem.elem instanceof Exp.FieldExp) {
-                fieldAST.varExp = (Exp.FieldExp) zooElem.elem;
+            ParseTree tmp2 = child.getChild(0);
+            if (tmp2 instanceof deliaParser.CexprContext) {
+                CompilerResults zooElem = myVisitScalar(tmp2.getChild(0));
+                if (zooElem.elem instanceof Exp.NullExp) {
+                    fieldAST.valueExp = new Exp.ValueExp();
+                    fieldAST.valueExp.value = null;
+                } else if (zooElem.elem instanceof Exp.FieldExp) {
+                    fieldAST.varExp = (Exp.FieldExp) zooElem.elem;
+                } else {
+                    fieldAST.valueExp = (Exp.ValueExp) zooElem.elem;
+                }
             } else {
-                fieldAST.valueExp = (Exp.ValueExp) zooElem.elem;
+                System.out.println("DDDDDDDDDDDDDDDDDD");
             }
         }
 

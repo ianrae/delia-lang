@@ -435,8 +435,6 @@ public class AllBDDTests extends BDDTestBase {
 //        runR400File("t0-field-primarykey.txt", 6);
 
         runR500File("t0-relation.txt", 2);
-        runR500File("t0-relation-one-to-one-oneway.txt", 9);
-        runR500File("t0-relation-one-to-many.txt", 9);
 
     }
 

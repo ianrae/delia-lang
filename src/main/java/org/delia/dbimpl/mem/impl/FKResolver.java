@@ -50,46 +50,46 @@ public class FKResolver extends ServiceBase {
         return relationsNeedingFK;
     }
 
-    public List<DValue> findFKs(DValue sourceVal, RelationInfo relinfo) {
-        String targetFieldName = relinfo.otherSide.fieldName;
-        DStructType targetType = relinfo.farType;
-        MemDBTable tbl = tableMap.getTable(targetType);
-
-        RowSelector selector = new AllRowsSelector();
-        selector.init(null, null, null, null); //null is ok
-
-        List<DValue> matches = new ArrayList<>();
-        DValue pkval = DValueHelper.findPrimaryKeyValue(sourceVal);
-        List<DValue> dvalList = selector.match(tbl);
-        for (DValue dval : dvalList) {
-            DValue inner = dval.asStruct().getField(targetFieldName);
-            if (inner != null) {
-                DRelation drel = inner.asRelation();
-                for (DValue fkval : drel.getMultipleKeys()) {
-                    if (compareSvc.compare(fkval, pkval) == 0) {
-                        DValue foreignPKVal = DValueHelper.findPrimaryKeyValue(dval);
-                        matches.add(foreignPKVal);
-                    }
-                }
-            }
-        }
-
-        return matches;
-    }
-
-    public void addRelations(DValue sourceVal, LLD.LLSelect stmt, RelationInfo relinfo, List<DValue> pkvals, DTypeRegistry registry) {
-        DStructType structType = stmt.table.physicalType;
-
-        //build relation value sourceVal.relation.fieldName = matches
-        if (!pkvals.isEmpty()) {
-            DValue tmp = DValueHelper.getFieldValue(sourceVal, relinfo.fieldName);
-            if (tmp == null) {
-                DValue dvalRelation = DRelationHelper.createEmptyRelation(structType, relinfo.fieldName, registry);
-                dvalRelation.asRelation().getMultipleKeys().addAll(pkvals);
-                sourceVal.asMap().put(relinfo.fieldName, dvalRelation);
-            }
-        }
-    }
+//    public List<DValue> findFKs(DValue sourceVal, RelationInfo relinfo) {
+//        String targetFieldName = relinfo.otherSide.fieldName;
+//        DStructType targetType = relinfo.farType;
+//        MemDBTable tbl = tableMap.getTable(targetType);
+//
+//        RowSelector selector = new AllRowsSelector();
+//        selector.init(null, null, null, null); //null is ok
+//
+//        List<DValue> matches = new ArrayList<>();
+//        DValue pkval = DValueHelper.findPrimaryKeyValue(sourceVal);
+//        List<DValue> dvalList = selector.match(tbl);
+//        for (DValue dval : dvalList) {
+//            DValue inner = dval.asStruct().getField(targetFieldName);
+//            if (inner != null) {
+//                DRelation drel = inner.asRelation();
+//                for (DValue fkval : drel.getMultipleKeys()) {
+//                    if (compareSvc.compare(fkval, pkval) == 0) {
+//                        DValue foreignPKVal = DValueHelper.findPrimaryKeyValue(dval);
+//                        matches.add(foreignPKVal);
+//                    }
+//                }
+//            }
+//        }
+//
+//        return matches;
+//    }
+//
+//    public void addRelations(DValue sourceVal, LLD.LLSelect stmt, RelationInfo relinfo, List<DValue> pkvals, DTypeRegistry registry) {
+//        DStructType structType = stmt.table.physicalType;
+//
+//        //build relation value sourceVal.relation.fieldName = matches
+//        if (!pkvals.isEmpty()) {
+//            DValue tmp = DValueHelper.getFieldValue(sourceVal, relinfo.fieldName);
+//            if (tmp == null) {
+//                DValue dvalRelation = DRelationHelper.createEmptyRelation(structType, relinfo.fieldName, registry);
+//                dvalRelation.asRelation().getMultipleKeys().addAll(pkvals);
+//                sourceVal.asMap().put(relinfo.fieldName, dvalRelation);
+//            }
+//        }
+//    }
 
     public boolean validateFKs(DRelation drel, DStructType structType, String fieldName, ErrorTracker localET) {
         RelationInfo info = DRuleHelper.findMatchingRuleInfo(structType, fieldName);

@@ -270,15 +270,25 @@ public interface deliaListener extends ParseTreeListener {
 	 */
 	void exitCrudAction(deliaParser.CrudActionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link deliaParser#elemList}.
+	 * Enter a parse tree produced by {@link deliaParser#valueElem}.
 	 * @param ctx the parse tree
 	 */
-	void enterElemList(deliaParser.ElemListContext ctx);
+	void enterValueElem(deliaParser.ValueElemContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link deliaParser#elemList}.
+	 * Exit a parse tree produced by {@link deliaParser#valueElem}.
 	 * @param ctx the parse tree
 	 */
-	void exitElemList(deliaParser.ElemListContext ctx);
+	void exitValueElem(deliaParser.ValueElemContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link deliaParser#valueElemList}.
+	 * @param ctx the parse tree
+	 */
+	void enterValueElemList(deliaParser.ValueElemListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link deliaParser#valueElemList}.
+	 * @param ctx the parse tree
+	 */
+	void exitValueElemList(deliaParser.ValueElemListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link deliaParser#deleteStatement}.
 	 * @param ctx the parse tree

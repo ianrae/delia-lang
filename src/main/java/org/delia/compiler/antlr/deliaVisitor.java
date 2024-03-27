@@ -166,11 +166,17 @@ public interface deliaVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCrudAction(deliaParser.CrudActionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link deliaParser#elemList}.
+	 * Visit a parse tree produced by {@link deliaParser#valueElem}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitElemList(deliaParser.ElemListContext ctx);
+	T visitValueElem(deliaParser.ValueElemContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link deliaParser#valueElemList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValueElemList(deliaParser.ValueElemListContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link deliaParser#deleteStatement}.
 	 * @param ctx the parse tree

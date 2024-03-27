@@ -93,16 +93,21 @@ valuePairs
  ;
 
 valuePairArg
- : crudAction? SYMBOL ':' elem               # vpElem
- | crudAction? SYMBOL ':' '[' elemList ']'   # vpList
+ : crudAction? SYMBOL ':' valueElem               # vpElem
+ | crudAction? SYMBOL ':' '[' valueElemList ']'   # vpList
  ;
 
 crudAction
  : ('update'|'insert'|'delete')
  ;
 
-elemList
- : elem (',' elem)*
+valueElem
+ : cexpr
+ | '{' elem ( SEP elem )* '}'
+ ;
+
+valueElemList
+ : valueElem (',' valueElem)*
  ;
 
 deleteStatement
