@@ -26,6 +26,7 @@ public class DValueHelper {
 		}
 	}
 
+	//TODO only works for single PK. doesn't work for composite keys
 	public static DValue findPrimaryKeyValue(DValue dval) {
 		if (! dval.getType().isStructShape()) {
 			return null;

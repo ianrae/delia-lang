@@ -406,16 +406,16 @@ public class PostgresBDDTests extends BDDTestBase {
 
 	@Test
 	public void testDebug() {
-		singleTestToRunIndex = 0;
+//		singleTestToRunIndex = 0;
 		enableAllFileCheck = false;
 		enableSQLLogging = true;
 		UnitTestLog.defaultLogLevel = LogLevel.DEBUG;
 		log.setLevel(LogLevel.DEBUG);
 //        runR420File("t0-default.txt", 2);
 
-//		runR800File("t0-delete-composite-key.txt", 2);
-//		runR900File("t0-update-composite-key.txt", 2);
-		runR1320File("t0-let-composite-key.txt", 4);
+		runR800File("t0-delete-composite-key.txt", 2);
+		runR900File("t0-update-composite-key.txt", 2);
+//		runR1320File("t0-let-composite-key.txt", 4);
 	}
 
 	//---
